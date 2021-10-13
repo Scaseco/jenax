@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.constraint.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.commons.collections.PolaritySet;
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jena_sparql_api.constraint.api.Contradictable;
 import org.aksw.jena_sparql_api.constraint.api.NodeWrapper;
@@ -38,7 +40,7 @@ import com.google.common.collect.TreeRangeSet;
 public class NodeRanges
     implements Contradictable, Cloneable
 {
-    // Additional (pseudo) value space classifications for unform handingl of IRIs and bnodes
+    // Additional (pseudo) value space classifications for unform handing of IRIs and bnodes
     public static final String VSC_IRI = "xVSPACE_IRI";
     public static final String VSC_BNODE = "xVSPACE_BNODE";
     public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
@@ -48,6 +50,20 @@ public class NodeRanges
      * Object in order to allow for future custom value spaces.
      */
     protected Map<Object, RangeSet<NodeWrapper>> vscToRangeSets = null; // = new HashMap<>();
+
+    /**
+     * TODO Interpretation of this attribute is not yet implemented
+     *
+     * A polarity set of which value spaces are unconstrained.
+     * An empty set with negative polarity means 'no exclusions' and thus everything is unconstrained.
+     *
+     * On an unconstrained node range, stating a constraint such as NOT(5) constrains the numeric
+     * value space to everything but 5, but also leaves all other values spaces unconstrained.
+     *
+     * Conversely, stating 5 constrains the numeric value space and removes all unconstrained
+     * value spaces (as every value space other than numeric is constrained to the empty set).
+     */
+    protected PolaritySet<Object> unconstrainedValueSpaces = new PolaritySet<>(new HashSet<>());
 
     protected NodeRanges() {
         super();

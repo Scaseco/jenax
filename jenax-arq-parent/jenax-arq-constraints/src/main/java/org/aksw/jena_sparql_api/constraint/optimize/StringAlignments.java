@@ -16,6 +16,7 @@ import org.apache.jena.sparql.expr.NodeValue;
  *
  * "CONCAT(a1...an) = CONCAT(b1...bm)" where ai and bi may be variables and (string) constants.
  *
+ * The code tries to generate multiple matches on a best effort basis.
  *
  * @author raven
  *
