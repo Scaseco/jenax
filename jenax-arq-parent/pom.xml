@@ -18,5 +18,6 @@
 		<module>jenax-arq-rdfterm</module>
 		<module>jenax-arq-dataset-one-ng</module>
 		<module>jenax-arq-rdfnode-in-dataset</module>
+		<module>jenax-arq-constraints</module>
 	</modules>
 </project>
