@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.anyresource;
+package org.aksw.jenax.rdf.model;
 
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.sys.JenaSubsystemLifecycle;

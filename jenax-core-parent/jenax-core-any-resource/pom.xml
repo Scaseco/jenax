@@ -33,13 +33,5 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--
-		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jenax-resources-test-common</artifactId>
-			<scope>test</scope>
-		</dependency>
--->
-
 	</dependencies>
 </project>

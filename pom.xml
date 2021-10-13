@@ -9,9 +9,9 @@
 
 	<packaging>pom</packaging>
 	<version>4.2.0-1-SNAPSHOT</version>
-	<name>Jena SPARQL API - Parent</name>
+	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
-	<url>https://github.com/SmartDataAnalytics/jena-sparql-api</url>
+	<url>https://github.com/Scaseco/jenax</url>
 
 	<modules>
 		<module>jenax-resources-parent</module>
@@ -33,9 +33,9 @@
 	</licenses>
 
 	<scm>
-		<url>https://github.com/SmartDataAnalytics/jena-sparql-api</url>
-		<connection>scm:git:git://github.com/SmartDataAnalytics/jena-sparql-api.git</connection>
-		<developerConnection>scm:git:git@github.com:SmartDataAnalytics/jena-sparql-api.git</developerConnection>
+		<url>https://github.com/Scaseco/jenax</url>
+		<connection>scm:git:git://github.com/Scaseco/jenax.git</connection>
+		<developerConnection>scm:git:git@github.com:Scaseco/jenax.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -287,6 +287,12 @@
 		<dependencies>
 
 			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>shacl</artifactId>
 				<version>1.3.2</version>
@@ -372,18 +378,6 @@
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
-
-			<!-- <dependency> -->
-			<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
-			<!-- <artifactId>jena-sparql-api-parent</artifactId> -->
-			<!-- <version>${project.version}</version> -->
-			<!-- <exclusions> -->
-			<!-- <exclusion> -->
-			<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
-			<!-- <artifactId>jena-sparql-api-resources-test-config</artifactId> -->
-			<!-- </exclusion> -->
-			<!-- </exclusions> -->
-			<!-- </dependency> -->
 
 
 			<!-- Declared because of hdt from wdaqua -->

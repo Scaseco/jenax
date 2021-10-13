@@ -4,8 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-rdf-term</artifactId>
+	<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 	<packaging>jar</packaging>
+
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
@@ -15,6 +16,12 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
+		<!-- Jena -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
@@ -32,14 +39,6 @@
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-<!--
-		<dependency>
-			<groupId>org.aksw.jena</groupId>
-			<artifactId>jena-sparql-api-resources</artifactId>
-			<scope>test</scope>
-		</dependency>
--->
 
 	</dependencies>
 </project>

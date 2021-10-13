@@ -14,7 +14,9 @@
 	</parent>
 
 	<modules>
-		<module>jenax-arq-rdf-term</module>
+		<module>jenax-arq-utils</module>
+		<module>jenax-arq-rdfterm</module>
 		<module>jenax-arq-dataset-one-ng</module>
+		<module>jenax-arq-rdfnode-in-dataset</module>
 	</modules>
 </project>
