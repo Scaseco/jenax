@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-constraints</artifactId>
+	<artifactId>jenax-arq-functions</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -14,36 +14,6 @@
 	</parent>
 
 	<dependencies>
-
-		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-util</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-rdfterm</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-functions</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-utils</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -62,6 +32,7 @@
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		
 	</dependencies>
 </project>
+

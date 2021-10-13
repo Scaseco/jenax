@@ -7,9 +7,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BinaryOperator;
 
-import org.aksw.jena_sparql_api.exprs_ext.E_StrConcatPermissive;
-import org.aksw.jena_sparql_api.utils.DnfUtils;
+import org.aksw.jenax.arq.expr.E_StrConcatPermissive;
 import org.aksw.jenax.arq.rdfterm.E_RdfTerm;
+import org.aksw.jenax.arq.util.expr.DnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.datatypes.xsd.impl.RDFLangString;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.E_Equals;
@@ -25,9 +26,7 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.FunctionLabel;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.sse.Tags;
-import org.apache.jena.sparql.util.ExprUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +40,9 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  */
 
-public class SqlTranslationUtils {
+public class ConcatAssignments {
 
-    public static final Logger logger = LoggerFactory.getLogger(SqlTranslationUtils.class);
+    public static final Logger logger = LoggerFactory.getLogger(ConcatAssignments.class);
 
 
     public static final NodeValue TYPE_BLANK = NodeValue.makeInteger(0);
@@ -238,58 +237,6 @@ public class SqlTranslationUtils {
     }
 
 
-    /**
-     * Expands blankNode, uri, plainLiteral and typedLiteral to E_RdfTerm.
-     * Returns the expr if it already is of type E_RdfTerm.
-     *
-     * Return null for any other function, variable or constant.
-     *
-     * @param expr
-     * @return
-     */
-//    @Deprecated // Use E_RdfTerm.expand() - it makes use of standard sparql functions
-//    public static E_RdfTerm expandRdfTerm(ExprFunction expr) {
-//
-//        if(expr instanceof E_RdfTerm) {
-//            return (E_RdfTerm)expr;
-//        } else if(SparqlifyConstants.rdfTermLabel.equals(expr.getFunctionIRI())) {
-//            if(expr.getArgs().size() != 4) {
-//                throw new RuntimeException("RdfTerm requires 4 arguments, instead got: " + expr);
-//            }
-//
-//            return new E_RdfTerm(
-//                    expr.getArg(1), expr.getArg(2), expr.getArg(3), expr.getArg(4));
-//        } else if (SparqlifyConstants.uriLabel.equals(expr.getFunctionIRI())) {
-//            return new E_RdfTerm(
-//                    NodeValue.makeDecimal(1), expr.getArgs().get(0),
-//                    NodeValue.makeString(""), NodeValue.makeString(""));
-//        } else if (SparqlifyConstants.plainLiteralLabel.equals(expr.getFunctionIRI())) {
-//            // The second argument is optional
-//            // If it is null, "", or not present, it will be treated as ""
-//            Expr lang = NodeValue.makeString("");
-//
-//            if (expr.getArgs().size() == 2) {
-//                Expr tmp = expr.getArgs().get(1);
-//                if (tmp != null) {
-//                    lang = tmp;
-//                }
-//            }
-//
-//            return new E_RdfTerm(
-//                    NodeValue.makeDecimal(2), expr.getArgs().get(0), lang,
-//                    NodeValue.makeString(""));
-//        } else if (SparqlifyConstants.typedLiteralLabel.equals(expr.getFunctionIRI())) {
-//            return new E_RdfTerm(
-//                    NodeValue.makeDecimal(3), expr.getArgs().get(0),
-//                    NodeValue.makeString(""), expr.getArgs().get(1));
-//        } else if (SparqlifyConstants.blankNodeLabel.equals(expr.getFunctionIRI())) {
-//            return new E_RdfTerm(
-//                    NodeValue.makeDecimal(0), expr.getArgs().get(0),
-//                    NodeValue.makeString(""), NodeValue.makeString(""));
-//        }
-//
-//        return null;
-//    }
 
     public static E_RdfTerm expandConstant(Expr expr) {
 
@@ -444,7 +391,7 @@ public class SqlTranslationUtils {
 
 
     public static boolean isConcatExpr(Expr expr) {
-        return expr instanceof E_StrConcat; // legacy: || expr instanceof E_StrConcatPermissive;
+        return expr instanceof E_StrConcat || expr instanceof E_StrConcatPermissive;
     }
 
 
@@ -508,7 +455,7 @@ public class SqlTranslationUtils {
                 result = optimizeEqualsConcat(ta, tb);
             } else {
 
-                BinaryOperator<Expr> exprFactory = ExprFactoryUtils.getFactory2(fnId);
+                BinaryOperator<Expr> exprFactory = fn::copy; // ExprFactoryUtils.getFactory2(fnId);
                 assert exprFactory != null : "No expr factory for " + fnId;
 
                 result = optimizeOpConcat(ta, tb, exprFactory);
@@ -595,7 +542,7 @@ public class SqlTranslationUtils {
         List<Expr> la = getOptimizedConcatArgs(ta);
         List<Expr> lb = getOptimizedConcatArgs(tb);
 
-        List<List<Expr>> result = SqlTranslationUtils.splitEqualsConcat(la, lb); //optimizeEqualsConcatAlign(la, lb);
+        List<List<Expr>> result = ConcatAssignments.splitEqualsConcat(la, lb); //optimizeEqualsConcatAlign(la, lb);
 
         return result;
     }
@@ -607,7 +554,7 @@ public class SqlTranslationUtils {
         List<Expr> la = getOptimizedConcatArgs(ta);
         List<Expr> lb = getOptimizedConcatArgs(tb);
 
-        List<Expr> result = SqlTranslationUtils.splitOpConcat(la, lb, exprFactory); //optimizeEqualsConcatAlign(la, lb);
+        List<Expr> result = ConcatAssignments.splitOpConcat(la, lb, exprFactory); //optimizeEqualsConcatAlign(la, lb);
 
         return result;
     }
@@ -622,7 +569,7 @@ public class SqlTranslationUtils {
      * @return
      */
     public static List<Expr> splitOpConcat(List<Expr> la, List<Expr> lb, BinaryOperator<Expr> exprFactory) {
-        List<Alignment> cs = SqlExprOptimizer.align(la, lb);
+        List<Alignment> cs = StringAlignments.align(la, lb);
 
         List<Expr> ors = new ArrayList<Expr>();
         for(Alignment c : cs) {
@@ -683,7 +630,7 @@ public class SqlTranslationUtils {
      * @return
      */
     public static List<List<Expr>> splitEqualsConcat(List<Expr> la, List<Expr> lb) {
-        List<Alignment> cs = SqlExprOptimizer.align(la, lb);
+        List<Alignment> cs = StringAlignments.align(la, lb);
 
         List<List<Expr>> ors = new ArrayList<List<Expr>>();
         for(Alignment c : cs) {
@@ -724,225 +671,5 @@ public class SqlTranslationUtils {
         return ors;
     }
 
-    @Deprecated
-    public static Expr optimizeEqualsConcatAlign(List<Expr> la, List<Expr> lb)
-    {
-        List<List<Expr>> ors = splitEqualsConcat(la, lb);
 
-        List<Expr> tmpOrs = new ArrayList<Expr>();
-        for(List<Expr> ands : ors) {
-            Expr and = ExprUtils.andifyBalanced(ands);
-
-            tmpOrs.add(and);
-        }
-
-        if(ors.size() == 0) {
-            return NodeValue.FALSE;
-        }
-
-        Expr result = ExprUtils.orifyBalanced(tmpOrs);
-
-        return result;
-
-//		List<Alignment> cs = SqlExprOptimizer.align(la, lb);
-//
-//		List<Expr> ors = new ArrayList<Expr>();
-//		for(Alignment c : cs) {
-//
-//			List<Expr> ands = new ArrayList<Expr>();
-//
-//			if(c.isSameSize()) {
-//
-//				for(int i = 0; i < c.getKey().size(); ++i) {
-//					Expr ea = c.getKey().get(i);
-//
-//					/*
-//					if(i >= c.getValue().size()) {
-//						System.out.println("OOpps");
-//					}
-//					*/
-//
-//					Expr eb = c.getValue().get(i);
-//
-//					if(ea.isConstant() && ea.equals(eb)) {
-//						continue;
-//					}
-//
-//					E_Equals eq = new E_Equals(ea, eb);
-//					ands.add(eq);
-//				}
-//			} else {
-//				ands.add(
-//					new E_Equals(
-//						new E_StrConcatPermissive(new ExprList(c.getKey())),
-//						new E_StrConcatPermissive(new ExprList(c.getValue()))
-//					));
-//			}
-//
-//			Expr and = ExprUtils.andifyBalanced(ands);
-//			ors.add(and);
-//		}
-//
-//		if(ors.size() == 0) {
-//			return NodeValue.FALSE;
-//		}
-//
-//		Expr result = ExprUtils.orifyBalanced(ors);
-//
-//		return result;
-    }
-
-
-    /**
-     * The expression (a < b), where a and b are
-     * RdfTerm(type, obj, lang, datatype),
-     * could become:
-     *
-     *
-     * Worst case:
-     *
-     * a.type < b.type ||
-     * a.type = b.type && a.obj < b.obj ||
-     * a.type = b.type && a.type = 2 && a.obj = b.obj && a.lang < b.lang ||
-     * a.type = b.type && a.type = 3 && a.obj = b.obj && a.datatype < b.datatype ||
-     *
-     * Optimization: Skip datatype and language in comparisions.
-     *
-     *
-     * TODO We have to consider datatypes to rule out invalid
-     * comparisions (in regard to the datatypes).
-     * However, this should be done on the SQL level.
-     *
-     */
-    public static Expr translate(E_LessThan expr) {
-        return translateCompare(expr);
-    }
-
-    public static Expr translate(E_LessThanOrEqual expr) {
-        return translateCompare(expr);
-    }
-
-    public static Expr translate(E_GreaterThan expr) {
-        return translateCompare(expr);
-    }
-
-    public static Expr translate(E_GreaterThanOrEqual expr) {
-        return translateCompare(expr);
-    }
-
-
-    /*
-    public static Expr optimize(E_LogicalAnd expr) {
-        Expr a = optimizeMM(expr.getArg1());
-        Expr b = optimizeMM(expr.getArg1());
-
-        logger.debug("TODO Handle type error correctly");
-        if(a.equals(NodeValue.FALSE) || b.equals(NodeValue.FALSE)) {
-            return NodeValue.FALSE;
-        }
-        if(a.equals(NodeValue.TRUE) && b.equals(NodeValue.TRUE)) {
-            return NodeValue.TRUE;
-        } else {
-            return new E_LogicalAnd(a, b);
-        }
-
-
-    }*/
-
-    /*
-    class Factory2Ctor<T>
-        implements IFactory2<T>
-    {
-        private Class clazz;
-
-        public Factory2Ctor(Class clazz) {
-            this.clazz = clazz;
-        }
-
-        @Override
-        public T create(T a, T b) {
-            Constructor<T> ctor = clazz.getConstructor(a, b);
-            return ctor.newInstance(a, b);
-        }
-    }*/
-
-    public static Expr translateCompare(ExprFunction2 expr) {
-        return translateCompare(expr.getArg1(), expr.getArg2(), expr.getClass());
-    }
-
-    public static Expr translateCompare(Expr a, Expr b, final Class<?> clazz) {
-        BinaryOperator<Expr> factory = (x, y) -> {
-                try {
-                    // FIXME We assume that jena's first constructor for
-                    // E_LessThan, E_LessThanOrEqual, etc. classes is
-                    // the one that takes two arguments of type Expr
-                    Constructor<?> ctor = clazz.getConstructors()[0]; //getConstructor(a.getClass(), b.getClass());
-                    return (Expr)ctor.newInstance(x, y);
-                } catch(Exception e) {
-                    throw new RuntimeException(e);
-                }
-            };
-
-        return translateCompare(a, b, factory);
-    }
-
-
-    /**
-     *
-     *
-     *
-     * FIXME The following expression is crap. I must have written it before I was clear about type errors...
-     * a.type < b.type ||
-     * a.type = b.type && a.obj < b.obj ||
-     * a.type = b.type && a.type = 2 && a.obj = b.obj && a.lang < b.lang ||
-     * a.type = b.type && a.type = 3 && a.obj = b.obj && a.datatype < b.datatype ||
-     *
-     *
-     *
-     * @param a
-     * @param b
-     * @param exprFactory Factory for creating a comparision expression
-     * @return
-     */
-
-    public static Expr translateCompare(Expr ea, Expr eb, BinaryOperator<Expr> factory) {
-
-        E_RdfTerm a = SqlPrePusher.asRdfTerm(ea);
-        E_RdfTerm b = SqlPrePusher.asRdfTerm(eb);
-
-        if(a == null || b == null) {
-            //throw new RuntimeException("Arguments are no ExprRdfTerms");
-            logger.warn("Arguments are no ExprRdfTerms");
-            return factory.apply(ea, eb);
-        }
-
-        NodeValue zero = NodeValue.makeInteger(0);
-        NodeValue one = NodeValue.makeInteger(1);
-        NodeValue two = NodeValue.makeInteger(2);
-        NodeValue three = NodeValue.makeInteger(3);
-
-        // This is the simple version that does not compare language and datatype
-        /*
-        Expr result =
-            ExprUtils.orifyBalanced(
-                    factory.create(a.getType(), b.getType()),
-                    ExprUtils.andifyBalanced(new E_Equals(a.getType(), b.getType()), factory.create(a.getLexicalValue(), b.getLexicalValue()))
-                    );
-         */
-
-        /*
-        Expr result =
-                    ExprUtils.andifyBalanced(new E_Equals(a.getType(), b.getType()), factory.create(a.getLexicalValue(), b.getLexicalValue()));
-        */
-        Expr result =
-            ExprUtils.andifyBalanced(factory.apply(a.getLexicalValue(), b.getLexicalValue()));
-
-        return result;
-    }
-
-    public static ExprEvaluator createDefaultEvaluator() {
-        ExprEvaluatorPartial evaluator = new ExprEvaluatorPartial(FunctionRegistry.get());
-
-        return evaluator;
-    }
 }

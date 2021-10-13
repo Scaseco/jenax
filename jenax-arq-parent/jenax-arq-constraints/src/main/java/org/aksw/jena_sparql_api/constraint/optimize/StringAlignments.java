@@ -11,8 +11,10 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 
 /**
- * Methods for rewrite expressions of type "CONCAT(a1...an) = CONCAT(b1...bm)"
- * where ai and bi may be variables and (string) constants.
+ * Methods for rewriting two sequences of expressions as they occurr in
+ * equality of concat expressions, i.e.
+ *
+ * "CONCAT(a1...an) = CONCAT(b1...bm)" where ai and bi may be variables and (string) constants.
  *
  *
  * @author raven

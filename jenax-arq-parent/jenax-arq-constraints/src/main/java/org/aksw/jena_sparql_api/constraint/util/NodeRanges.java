@@ -39,9 +39,9 @@ public class NodeRanges
     implements Contradictable, Cloneable
 {
     // Additional (pseudo) value space classifications for unform handingl of IRIs and bnodes
-    public static final String VSC_IRI = "ValueSpaceClassification.IRI";
-    public static final String VSC_BNODE = "ValueSpaceClassification.BNODE";
-    public static final String VSC_TRIPLE = "ValueSpaceClassification.TRIPLE";
+    public static final String VSC_IRI = "xVSPACE_IRI";
+    public static final String VSC_BNODE = "xVSPACE_BNODE";
+    public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
 
     /**
      * A value of null means unconstrained.
@@ -162,6 +162,32 @@ public class NodeRanges
                 ensureConstrainedMode();
                 RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
                 rangeSet.add(range);
+            }
+        }
+    }
+
+
+    public void substract(Range<NodeWrapper> range) {
+
+
+        if (!isContradicting()) {
+            Object vsc = classifyValueSpace(range);
+
+            if (vsc == null) {
+                // null means substracting all possible ranges
+                vscToRangeSets.clear();
+            } else if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
+                // substracting a contradicting range does nothing
+                // raise exception?
+            } else {
+                ensureConstrainedMode();
+                RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
+
+//                RangeSet<NodeWrapper> tmp = TreeRangeSet.create();
+//                tmp.add(range);
+//                RangeSet<NodeWrapper> substraction = tmp.complement();
+
+                rangeSet.remove(range);
             }
         }
     }
@@ -320,6 +346,12 @@ public class NodeRanges
     }
 
 
+
+
+    @Override
+    public String toString() {
+        return "NodeRanges [vscToRangeSets=" + vscToRangeSets + "]";
+    }
 
     public static void main(String[] args) {
         Node iri = NodeFactory.createURI("http://example.org/foo");
