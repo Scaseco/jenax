@@ -17,6 +17,22 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
 
     protected abstract D classifyValueSpace(Range<T> range);
 
+
+    /** Add a new empty dimension. Do nothing if it already exists or if the dimensions are exhaustive */
+    public void addEmptyDimension(D dimension) {
+        if (!isVscExhaustive) {
+            vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.create());
+        }
+    }
+
+    /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive*/
+    public void addOpenDimension(D dimension) {
+        if (isVscExhaustive) {
+            vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.<T>create().complement());
+        }
+    }
+
+
     /** Unconstrained mode means that any valid srange is considered enclosed by this one */
     public boolean isUnconstrained() {
         return !isVscExhaustive && vscToRangeSets.isEmpty();

@@ -10,7 +10,11 @@ import org.apache.jena.sparql.engine.binding.Binding;
  * this object represents a mapping of variables to their possible values.
  */
 public interface ConstraintRow
+    extends Contradictable
 {
+    ConstraintRow stateIntersection(ConstraintRow that);
+    ConstraintRow stateUnion(ConstraintRow that);
+
     // Iterator<Var>
     Collection<Var> getVars();
     ValueSpace get(Var var);
