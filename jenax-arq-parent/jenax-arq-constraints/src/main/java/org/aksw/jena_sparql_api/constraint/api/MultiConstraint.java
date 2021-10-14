@@ -33,7 +33,7 @@ public class MultiConstraint {
 
     public void union(MultiConstraint other) {
         for (Entry<String, NodeRanges> e : other.dimensionToConstraint.entrySet()) {
-            NodeRanges nr = dimensionToConstraint.computeIfAbsent(e.getKey(), x -> NodeRanges.create());
+            NodeRanges nr = dimensionToConstraint.computeIfAbsent(e.getKey(), x -> NodeRanges.createOpen());
 
             nr.stateUnion(e.getValue());
         }

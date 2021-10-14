@@ -1,11 +1,13 @@
 package org.aksw.jena_sparql_api.constraint.api;
 
-import java.util.EnumSet;
+import org.apache.jena.sparql.core.mem.TupleSlot;
 
-import org.aksw.jenax.arq.rdfterm.RdfTermType;
-import org.apache.jena.graph.Node;
+public class RdfTermConstraints {
 
-//public class RdfTermConstraints {
+    public static boolean stateSlot(ConstraintRow row, TupleSlot slot) {
+        return true;
+    }
+
 //
 //    /** Create a restriction for the graph component; only allows for iris */
 //    public static ConstraintImpl forGraph() {
@@ -36,4 +38,4 @@ import org.apache.jena.graph.Node;
 //    }
 //
 //
-//}
+}

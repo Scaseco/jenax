@@ -1,8 +1,9 @@
 package org.aksw.jena_sparql_api.constraint.api;
 
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.expr.ExprNotComparableException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.util.NodeUtils;
 
 /**
  * Wrap a Node and its corresponding NodeValue as a comparable object.
@@ -40,9 +41,25 @@ public class NodeWrapper
     }
 
 
+    /**
+     * Compare strictly by value if possible.
+     * Comparing 5 (int) to to 5.0 (double) can thus yield 0.
+     *
+     * In contrast, {@link NodeValue#compareAlways(NodeValue, NodeValue)}
+     * discriminates equal values further by the rdf term.
+     *
+     * fallback to lexical comparison
+     */
     @Override
-    public int compareTo(NodeWrapper other) {
-        return NodeUtils.compareAlways(node, other.node);
+    public int compareTo(NodeWrapper that) {
+        int result;
+        try {
+            result = NodeValue.compare(nodeValue, that.nodeValue);
+        } catch (ExprNotComparableException e) {
+            result = NodeUtils.compareRDFTerms(this.node, that.node);
+        }
+
+        return result;
     }
 
     @Override

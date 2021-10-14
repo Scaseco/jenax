@@ -10,12 +10,12 @@ import org.junit.Test;
 import com.google.common.collect.Range;
 
 
-public class TestNodeRanges {
+public class TestNodeRange {
 
     /** Application of of node ranges for prefix matching */
     @Test
     public void testPrefixMatching() {
-        NodeRanges nr = NodeRanges.create();
+        NodeRanges nr = NodeRanges.createClosed();
 
         nr.add(Range.closedOpen(
                 NodeWrapper.wrap(NodeFactory.createLiteral("a")),
@@ -30,7 +30,7 @@ public class TestNodeRanges {
 
     @Test
     public void testPrefixRanges2() {
-        NodeRanges nr = NodeRanges.create();
+        NodeRanges nr = NodeRanges.createClosed();
         nr.add(Range.closedOpen(
                 NodeWrapper.wrap(NodeFactory.createLiteral(RDF.uri)),
                 NodeWrapper.wrap(NodeFactory.createLiteral(incrementLastCharacter(RDF.uri)))));
@@ -63,6 +63,24 @@ public class TestNodeRanges {
         }
 
         return result;
+    }
+
+
+    @Test
+    public void testNegation() {
+        NodeRanges notFive = NodeRanges.createOpen();
+        notFive.substractValue(NodeValue.makeInteger(5).asNode());
+
+        Assert.assertTrue(notFive.contains(NodeFactory.createLiteral("a")));
+        Assert.assertTrue(notFive.contains(NodeFactory.createLiteral("ab")));
+        Assert.assertFalse(notFive.contains(NodeValue.makeInteger(5).asNode()));
+
+
+        NodeRanges five = NodeRanges.createOpen();
+        five.stateValue(NodeValue.makeDouble(5).asNode());
+
+        Assert.assertTrue(notFive.stateIntersection(five).isContradicting());
+
     }
 
 }

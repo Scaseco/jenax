@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.constraint.util;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.aksw.commons.collections.PolaritySet;
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jena_sparql_api.constraint.api.Contradictable;
 import org.aksw.jena_sparql_api.constraint.api.NodeWrapper;
@@ -33,6 +32,13 @@ import com.google.common.collect.TreeRangeSet;
  * FIXME Use of non-singletons in the 'unknown' value space must be handled as effectively
  * unconstrained
  *
+ *      | zzz    999
+ *      |
+ *      | ...    ..
+ *      | a      1
+ *      |______________ -> value spaces
+ *        |       |
+ *      string   int   ...
  *
  * @author raven
  *
@@ -49,24 +55,16 @@ public class NodeRanges
      * A value of null means unconstrained.
      * Object in order to allow for future custom value spaces.
      */
-    protected Map<Object, RangeSet<NodeWrapper>> vscToRangeSets = null; // = new HashMap<>();
+    protected Map<Object, RangeSet<NodeWrapper>> vscToRangeSets = new HashMap<>();
 
-    /**
-     * TODO Interpretation of this attribute is not yet implemented
-     *
-     * A polarity set of which value spaces are unconstrained.
-     * An empty set with negative polarity means 'no exclusions' and thus everything is unconstrained.
-     *
-     * On an unconstrained node range, stating a constraint such as NOT(5) constrains the numeric
-     * value space to everything but 5, but also leaves all other values spaces unconstrained.
-     *
-     * Conversely, stating 5 constrains the numeric value space and removes all unconstrained
-     * value spaces (as every value space other than numeric is constrained to the empty set).
-     */
-    protected PolaritySet<Object> unconstrainedValueSpaces = new PolaritySet<>(new HashSet<>());
 
-    protected NodeRanges() {
+    /** If true then only the value spaces in vsc can exist. Otherwise there may exist other value spaces. */
+    protected boolean isVscExhaustive;
+
+
+    protected NodeRanges(boolean isVscExhaustive) {
         super();
+        this.isVscExhaustive = isVscExhaustive;
     }
 
     public RangeSet<NodeWrapper> getIriRanges() {
@@ -94,97 +92,47 @@ public class NodeRanges
         return new NodeRanges(clone);
     }
 
-    public static NodeRanges create() {
-        return new NodeRanges();
+    /** Create a NodeRange that contains everything */
+    public static NodeRanges createOpen() {
+        return new NodeRanges(false);
+    }
+
+    /** Create a NodeRange that contains nothing */
+    public static NodeRanges createClosed() {
+        return new NodeRanges(true);
     }
 
     /** Unconstrained mode means that any valid srange is considered enclosed by this one */
     public boolean isUnconstrained() {
-        return vscToRangeSets == null;
+        return !isVscExhaustive && vscToRangeSets.isEmpty();
     }
 
     @Override
     public boolean isContradicting() {
-        return vscToRangeSets != null && vscToRangeSets.isEmpty();
+        return isVscExhaustive && vscToRangeSets.isEmpty();
     }
 
-    protected void ensureConstrainedMode() {
-        if (vscToRangeSets == null) {
-            vscToRangeSets = new HashMap<>();
-        }
-    }
-
-    public static Object classifyNodeValueSubSpace(Node node) {
-        Object result;
-        if (node.isURI()) {
-            result = VSC_IRI;
-        } else if (node.isBlank()) {
-            result = VSC_BNODE;
-        } else if (node.isNodeTriple()) {
-            result = VSC_TRIPLE;
-        } else {
-            throw new RuntimeException("Unknown term type: " + node);
-        }
-
-        return result;
-    }
-
-    /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
-    public static Object classifyValueSpace(Range<NodeWrapper> range) {
-        Object result = null;
-        NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
-        NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
-
-        if (lb != null && ub != null) {
-            result = NodeValue.classifyValueOp(lb, ub);
-
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                Object a = classifyNodeValueSubSpace(lb.asNode());
-                Object b = classifyNodeValueSubSpace(ub.asNode());
-
-                if (!Objects.equals(a, b)) {
-                    result = ValueSpaceClassification.VSPACE_DIFFERENT;
-                } else {
-                    result = a;
-                }
-            }
-
-        } else if (lb != null) {
-            result = lb.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(lb.asNode());
-            }
-        } else if (ub != null) {
-            result = ub.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(ub.asNode());
-            }
-        }
-
-        return result;
-    }
-
+//    protected void ensureConstrainedMode() {
+//        if (vscToRangeSets == null) {
+//            vscToRangeSets = new HashMap<>();
+//        }
+//    }
 
     public void add(Range<NodeWrapper> range) {
+        Object vsc = classifyValueSpace(range);
 
-        if (!isContradicting()) {
-            Object vsc = classifyValueSpace(range);
-
-            if (vsc == null) {
-                // unconstraint range - treat as noop
-            } else if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
-                vscToRangeSets.clear();
-            } else {
-                ensureConstrainedMode();
-                RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
-                rangeSet.add(range);
-            }
+        if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
+            // Inconsistent range - go into conflicting state
+            vscToRangeSets.clear();
+            this.isVscExhaustive = true;
+        } else {
+            RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
+            rangeSet.add(range);
         }
     }
 
 
     public void substract(Range<NodeWrapper> range) {
-
 
         if (!isContradicting()) {
             Object vsc = classifyValueSpace(range);
@@ -196,7 +144,6 @@ public class NodeRanges
                 // substracting a contradicting range does nothing
                 // raise exception?
             } else {
-                ensureConstrainedMode();
                 RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
 
 //                RangeSet<NodeWrapper> tmp = TreeRangeSet.create();
@@ -211,70 +158,156 @@ public class NodeRanges
     /**
      * Mutate the ranges of this to create the intersection with other
      *
-     * @param other
+     * @param that
      * @return
      */
-    public boolean stateIntersection(NodeRanges other) {
-        if (other.isContradicting()) {
-            ensureConstrainedMode();
-            this.vscToRangeSets.clear();
-        }
+    public NodeRanges stateIntersection(NodeRanges that) {
 
-        // If other is unconstrained then there is nothing to do
-        if (!this.isContradicting() && !other.isUnconstrained()) {
-            ensureConstrainedMode();
-            //for (Entry<Object, RangeSet<ComparableNodeWrapper>> e: vscToRangeSets.entrySet()) {
-            for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
+        if (!this.isVscExhaustive) {
+            for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
                 Entry<Object, RangeSet<NodeWrapper>> e = it.next();
                 Object vsc = e.getKey();
-                RangeSet<NodeWrapper> thisRangeSet = e.getValue();
+                RangeSet<NodeWrapper> thatRangeSet = e.getValue();
 
-                RangeSet<NodeWrapper> otherRangeSet = other.vscToRangeSets.get(vsc);
-
-                // If there are no other ranges in the value space than the intersection is empty
-                if (otherRangeSet == null) {
-                    it.remove();
-                } else {
-                    // Intersection by means of removing the other's complement
-                    // https://github.com/google/guava/issues/1825
-                    thisRangeSet.removeAll(otherRangeSet.complement());
-
-                    if (thisRangeSet.isEmpty()) {
-                        it.remove();
-                    }
+                if (!this.vscToRangeSets.containsKey(vsc)) {
+                    this.vscToRangeSets.put(vsc, thatRangeSet);
                 }
             }
         }
 
-        return isContradicting();
+        //for (Entry<Object, RangeSet<ComparableNodeWrapper>> e: vscToRangeSets.entrySet()) {
+        for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = this.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
+            Entry<Object, RangeSet<NodeWrapper>> e = it.next();
+            Object vsc = e.getKey();
+            RangeSet<NodeWrapper> thisRangeSet = e.getValue();
+
+            RangeSet<NodeWrapper> thatRangeSet = that.vscToRangeSets.get(vsc);
+
+            // If there are no other ranges in the value space than the intersection is empty
+            if (thatRangeSet == null) {
+                if (that.isVscExhaustive) {
+                    it.remove();
+                } else {
+                    // noop
+                }
+            } else {
+                // Intersection by means of removing the other's complement
+                // https://github.com/google/guava/issues/1825
+                RangeSet<NodeWrapper> thatComplement = thatRangeSet.complement();
+                thisRangeSet.removeAll(thatComplement);
+
+                if (thisRangeSet.isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+
+        this.isVscExhaustive = this.isVscExhaustive || that.isVscExhaustive;
+
+        return this;
     }
 
 
     /**
      * Add all other ranges to this one
      *
-     * @param other
+     * @param that
      * @return
      */
-    public boolean stateUnion(NodeRanges other) {
-        if (this.isUnconstrained() || other.isUnconstrained()) {
-            this.vscToRangeSets = null;
-        } else {
-            ensureConstrainedMode();
+    public NodeRanges stateUnion(NodeRanges that) {
+        this.isVscExhaustive = this.isVscExhaustive && that.isVscExhaustive;
 
-            //for (Entry<Object, RangeSet<ComparableNodeWrapper>> e: vscToRangeSets.entrySet()) {
-            for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = other.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
-                Entry<Object, RangeSet<NodeWrapper>> e = it.next();
-                Object vsc = e.getKey();
+        for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
+            Entry<Object, RangeSet<NodeWrapper>> e = it.next();
+            Object vsc = e.getKey();
 
-                RangeSet<NodeWrapper> otherRangeSet = e.getValue();
-                RangeSet<NodeWrapper> thisRangeSet = this.vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
+            RangeSet<NodeWrapper> thatRangeSet = e.getValue();
+            RangeSet<NodeWrapper> thisRangeSet = this.vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
 
-                thisRangeSet.addAll(otherRangeSet);
+            thisRangeSet.addAll(thatRangeSet);
+
+            // In open mode (= not exhaustive) remove all unconstrained ranges
+            if (!this.isVscExhaustive && thisRangeSet.complement().isEmpty()) {
+                it.remove();
             }
         }
 
+        return this;
+    }
+
+
+    /** Constrain the value space to only the given node - this is an intersection operation */
+    public NodeRanges stateValue(Node value) {
+        NodeWrapper nw = NodeWrapper.wrap(value);
+        Range<NodeWrapper> range = Range.singleton(nw);
+        Object vsc = classifyValueSpace(range);
+
+        vscToRangeSets.keySet().retainAll(Collections.singleton(vsc));
+
+        RangeSet<NodeWrapper> ranges = vscToRangeSets.get(vsc);
+        // If there is no range we can create one if we are not exhaustive
+        // otherwise we are conflicting
+        if (ranges == null) {
+            if (!isVscExhaustive) {
+                ranges = TreeRangeSet.create();
+                vscToRangeSets.put(vsc, ranges);
+                ranges.add(range);
+            } //  else { noop } - exhaustive is true and we already cleared all other value spaces
+        } else if (ranges.contains(nw)) {
+            ranges.clear();
+            ranges.add(range);
+        } else {
+            vscToRangeSets.clear();
+        }
+
+        this.isVscExhaustive = true;
+        return this;
+    }
+
+    /** Add a constant to its respective value space
+     * This is a union-like operation - its does not constrain the space to the given value */
+    public NodeRanges addValue(Node value) {
+        Range<NodeWrapper> range = Range.singleton(NodeWrapper.wrap(value));
+        add(range);
+        return this;
+    }
+
+
+    /**
+     * Add the negation of a value; e.g. ?x != 5
+     * This only excludes the value from its respective value space.
+     * Any other value space or whether their enumeration is exhaustive is unaffected.
+     *
+     * @param value
+     * @return True if this is in conflicting state
+     */
+    public boolean substractValue(Node value) {
+        Range<NodeWrapper> range = Range.singleton(NodeWrapper.wrap(value));
+        Object vsc = classifyValueSpace(range);
+
+        RangeSet<NodeWrapper> ranges = vscToRangeSets.get(vsc);
+        if (ranges == null) {
+            if (!isVscExhaustive) {
+                ranges = TreeRangeSet.create();
+                RangeSet<NodeWrapper> tmp = ranges.complement();
+                tmp.remove(range);
+                vscToRangeSets.put(vsc, tmp);
+            } // else { noop }
+        } else {
+            ranges.remove(range);
+
+            if (isVscExhaustive && ranges.isEmpty()) {
+                vscToRangeSets.remove(vsc);
+            }
+        }
+
+
         return isContradicting();
+    }
+
+
+    public boolean isVscExhaustive() {
+        return isVscExhaustive;
     }
 
     public Set<?> getValueSpaces() {
@@ -288,7 +321,7 @@ public class NodeRanges
     public boolean contains(NodeValue nodeValue) {
         Object vsc = nodeValue.getValueSpace();
         NodeWrapper tmp = NodeWrapper.wrap(nodeValue);
-        boolean result = Optional.ofNullable(vscToRangeSets.get(vsc)).map(rangeSet -> rangeSet.contains(tmp)).orElse(false);
+        boolean result = Optional.ofNullable(vscToRangeSets.get(vsc)).map(rangeSet -> rangeSet.contains(tmp)).orElse(!isVscExhaustive);
         return result;
     }
 
@@ -362,12 +395,61 @@ public class NodeRanges
     }
 
 
-
-
     @Override
     public String toString() {
-        return "NodeRanges [vscToRangeSets=" + vscToRangeSets + "]";
+        return "NodeRanges [isVscExhaustive=" + isVscExhaustive + ", vscToRangeSets=" + vscToRangeSets + "]";
     }
+
+    public static Object classifyNodeValueSubSpace(Node node) {
+        Object result;
+        if (node.isURI()) {
+            result = VSC_IRI;
+        } else if (node.isBlank()) {
+            result = VSC_BNODE;
+        } else if (node.isNodeTriple()) {
+            result = VSC_TRIPLE;
+        } else {
+            throw new RuntimeException("Unknown term type: " + node);
+        }
+
+        return result;
+    }
+
+    /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
+    public static Object classifyValueSpace(Range<NodeWrapper> range) {
+        Object result = null;
+        NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
+        NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
+
+        if (lb != null && ub != null) {
+            result = NodeValue.classifyValueOp(lb, ub);
+
+            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
+                Object a = classifyNodeValueSubSpace(lb.asNode());
+                Object b = classifyNodeValueSubSpace(ub.asNode());
+
+                if (!Objects.equals(a, b)) {
+                    result = ValueSpaceClassification.VSPACE_DIFFERENT;
+                } else {
+                    result = a;
+                }
+            }
+
+        } else if (lb != null) {
+            result = lb.getValueSpace();
+            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
+                result = classifyNodeValueSubSpace(lb.asNode());
+            }
+        } else if (ub != null) {
+            result = ub.getValueSpace();
+            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
+                result = classifyNodeValueSubSpace(ub.asNode());
+            }
+        }
+
+        return result;
+    }
+
 
     public static void main(String[] args) {
         Node iri = NodeFactory.createURI("http://example.org/foo");
@@ -378,7 +460,7 @@ public class NodeRanges
         NodeValue d = NodeValue.makeDouble(123.4);
         NodeValue e = NodeValue.makeNode(iri);
 
-        NodeRanges nr = NodeRanges.create();
+        NodeRanges nr = NodeRanges.createOpen();
         System.out.println(nr.isUnconstrained());
 
         nr.add(Range.singleton(NodeWrapper.wrap(iri)));
@@ -394,6 +476,5 @@ public class NodeRanges
         System.out.println("isDiscrete: " + nr.isDiscrete());
         System.out.println("isConstant: " + nr.isConstant());
     }
-
 
 }

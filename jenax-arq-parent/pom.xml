@@ -20,5 +20,6 @@
 		<module>jenax-arq-dataset-one-ng</module>
 		<module>jenax-arq-rdfnode-in-dataset</module>
 		<module>jenax-arq-constraints</module>
+		<module>jenax-arq-tracking-walker</module>
 	</modules>
 </project>
