@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.api;
 
 
 import java.util.EnumSet;
@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.aksw.commons.util.range.RangeUtils;
-import org.aksw.jena_sparql_api.constraint.util.NodeRanges;
-import org.aksw.jena_sparql_api.constraint.util.PrefixSet;
 import org.aksw.jenax.arq.rdfterm.RdfTermType;
+import org.aksw.jenax.constraint.util.NodeRanges;
+import org.aksw.jenax.constraint.util.PrefixSet;
 import org.apache.jena.graph.Node;
 
 import com.google.common.collect.Range;

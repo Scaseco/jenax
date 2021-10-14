@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.util;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.ExprNotComparableException;
@@ -6,7 +6,11 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.NodeUtils;
 
 /**
- * Wrap a Node and its corresponding NodeValue as a comparable object.
+ * A wrapper to compare nodes by their value.
+ * For example, "5"^^xsd:int equals "5"^^xsd:double.
+ * Although the wrapper is primarily based on the NodeValue functionality,
+ * it is called NodeWrapper for brevity.
+ *
  * Allows for use in guava's RangeSet.
  *
  * @author raven

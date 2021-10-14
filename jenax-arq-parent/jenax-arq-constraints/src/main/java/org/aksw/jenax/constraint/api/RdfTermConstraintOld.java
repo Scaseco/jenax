@@ -1,10 +1,10 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.api;
 
 
 import java.util.EnumSet;
 
-import org.aksw.jena_sparql_api.constraint.util.PrefixSet;
 import org.aksw.jenax.arq.rdfterm.RdfTermType;
+import org.aksw.jenax.constraint.util.PrefixSet;
 import org.apache.jena.graph.Node;
 
 

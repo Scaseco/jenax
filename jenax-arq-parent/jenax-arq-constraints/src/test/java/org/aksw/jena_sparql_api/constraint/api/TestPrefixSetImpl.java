@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.constraint.api;
 
-import org.aksw.jena_sparql_api.constraint.util.PrefixSet;
-import org.aksw.jena_sparql_api.constraint.util.PrefixSetImpl;
+import org.aksw.jenax.constraint.util.PrefixSet;
+import org.aksw.jenax.constraint.util.PrefixSetImpl;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,6 +1,7 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.util;
 
 import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.jenax.constraint.api.ConstraintRow;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -21,7 +22,7 @@ public class ConstraintUtils {
                 TupleSlot slot = QuadUtils.idxToSlot(i);
 
 
-                RdfTermConstraints.stateSlot(row, var, slot);
+                // RdfTermConstraints.stateSlot(row, var, slot);
             }
         }
     }

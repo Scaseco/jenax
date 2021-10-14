@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.constraint.api;
 import java.util.Arrays;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.constraint.optimize.Alignment;
-import org.aksw.jena_sparql_api.constraint.optimize.StringAlignments;
+import org.aksw.jenax.sparql.expr.optimize.util.Alignment;
+import org.aksw.jenax.sparql.expr.optimize.util.StringAlignments;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;

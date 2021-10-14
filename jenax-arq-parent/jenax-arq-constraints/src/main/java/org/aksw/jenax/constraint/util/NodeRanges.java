@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.util;
+package org.aksw.jenax.constraint.util;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.util.range.RangeUtils;
-import org.aksw.jena_sparql_api.constraint.api.Contradictable;
-import org.aksw.jena_sparql_api.constraint.api.NodeWrapper;
+import org.aksw.jenax.constraint.api.Contradictable;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -108,7 +107,7 @@ public class NodeRanges
     }
 
     @Override
-    public boolean isContradicting() {
+    public boolean isConflicting() {
         return isVscExhaustive && vscToRangeSets.isEmpty();
     }
 
@@ -134,7 +133,7 @@ public class NodeRanges
 
     public void substract(Range<NodeWrapper> range) {
 
-        if (!isContradicting()) {
+        if (!isConflicting()) {
             Object vsc = classifyValueSpace(range);
 
             if (vsc == null) {
@@ -302,7 +301,7 @@ public class NodeRanges
         }
 
 
-        return isContradicting();
+        return isConflicting();
     }
 
 

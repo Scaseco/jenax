@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.optimize;
+package org.aksw.jenax.sparql.expr.optimize.util;
 
 
 import java.lang.reflect.Constructor;

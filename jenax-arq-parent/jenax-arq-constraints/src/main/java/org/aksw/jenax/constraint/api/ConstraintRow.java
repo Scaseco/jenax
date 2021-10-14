@@ -1,4 +1,6 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.api;
+
+import java.util.Collection;
 
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -7,7 +9,9 @@ import org.apache.jena.sparql.engine.binding.Binding;
  * Whereas a {@link Binding} is a mapping of variables to concrete nodes,
  * this object represents a mapping of variables to their possible values.
  */
-public class ConstraintRow
-    extends ConjunctiveConstraintMap<Var>
+public interface ConstraintRow
 {
+    // Iterator<Var>
+    Collection<Var> getVars();
+    ValueSpace get(Var var);
 }

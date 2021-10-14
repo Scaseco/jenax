@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.util;
+package org.aksw.jenax.constraint.util;
 
 import java.util.Set;
 

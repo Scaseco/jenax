@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.constraint.api;
 
-import org.aksw.jena_sparql_api.constraint.util.NodeRanges;
+import org.aksw.jenax.constraint.util.NodeRanges;
+import org.aksw.jenax.constraint.util.NodeWrapper;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.vocabulary.RDF;
@@ -79,7 +80,7 @@ public class TestNodeRange {
         NodeRanges five = NodeRanges.createOpen();
         five.stateValue(NodeValue.makeDouble(5).asNode());
 
-        Assert.assertTrue(notFive.stateIntersection(five).isContradicting());
+        Assert.assertTrue(notFive.stateIntersection(five).isConflicting());
 
     }
 
