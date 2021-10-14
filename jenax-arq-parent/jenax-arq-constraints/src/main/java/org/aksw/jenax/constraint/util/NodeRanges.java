@@ -2,7 +2,6 @@ package org.aksw.jenax.constraint.util;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -43,22 +42,13 @@ import com.google.common.collect.TreeRangeSet;
  *
  */
 public class NodeRanges
+    extends ValueSpaceBase<NodeWrapper, Object>
     implements Contradictable, Cloneable
 {
     // Additional (pseudo) value space classifications for unform handing of IRIs and bnodes
     public static final String VSC_IRI = "xVSPACE_IRI";
     public static final String VSC_BNODE = "xVSPACE_BNODE";
     public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
-
-    /**
-     * A value of null means unconstrained.
-     * Object in order to allow for future custom value spaces.
-     */
-    protected Map<Object, RangeSet<NodeWrapper>> vscToRangeSets = new HashMap<>();
-
-
-    /** If true then only the value spaces in vsc can exist. Otherwise there may exist other value spaces. */
-    protected boolean isVscExhaustive;
 
 
     protected NodeRanges(boolean isVscExhaustive) {
@@ -101,138 +91,11 @@ public class NodeRanges
         return new NodeRanges(true);
     }
 
-    /** Unconstrained mode means that any valid srange is considered enclosed by this one */
-    public boolean isUnconstrained() {
-        return !isVscExhaustive && vscToRangeSets.isEmpty();
-    }
-
-    @Override
-    public boolean isConflicting() {
-        return isVscExhaustive && vscToRangeSets.isEmpty();
-    }
-
 //    protected void ensureConstrainedMode() {
 //        if (vscToRangeSets == null) {
 //            vscToRangeSets = new HashMap<>();
 //        }
 //    }
-
-    public void add(Range<NodeWrapper> range) {
-        Object vsc = classifyValueSpace(range);
-
-        if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
-            // Inconsistent range - go into conflicting state
-            vscToRangeSets.clear();
-            this.isVscExhaustive = true;
-        } else {
-            RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
-            rangeSet.add(range);
-        }
-    }
-
-
-    public void substract(Range<NodeWrapper> range) {
-
-        if (!isConflicting()) {
-            Object vsc = classifyValueSpace(range);
-
-            if (vsc == null) {
-                // null means substracting all possible ranges
-                vscToRangeSets.clear();
-            } else if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
-                // substracting a contradicting range does nothing
-                // raise exception?
-            } else {
-                RangeSet<NodeWrapper> rangeSet = vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
-
-//                RangeSet<NodeWrapper> tmp = TreeRangeSet.create();
-//                tmp.add(range);
-//                RangeSet<NodeWrapper> substraction = tmp.complement();
-
-                rangeSet.remove(range);
-            }
-        }
-    }
-
-    /**
-     * Mutate the ranges of this to create the intersection with other
-     *
-     * @param that
-     * @return
-     */
-    public NodeRanges stateIntersection(NodeRanges that) {
-
-        if (!this.isVscExhaustive) {
-            for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
-                Entry<Object, RangeSet<NodeWrapper>> e = it.next();
-                Object vsc = e.getKey();
-                RangeSet<NodeWrapper> thatRangeSet = e.getValue();
-
-                if (!this.vscToRangeSets.containsKey(vsc)) {
-                    this.vscToRangeSets.put(vsc, thatRangeSet);
-                }
-            }
-        }
-
-        //for (Entry<Object, RangeSet<ComparableNodeWrapper>> e: vscToRangeSets.entrySet()) {
-        for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = this.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
-            Entry<Object, RangeSet<NodeWrapper>> e = it.next();
-            Object vsc = e.getKey();
-            RangeSet<NodeWrapper> thisRangeSet = e.getValue();
-
-            RangeSet<NodeWrapper> thatRangeSet = that.vscToRangeSets.get(vsc);
-
-            // If there are no other ranges in the value space than the intersection is empty
-            if (thatRangeSet == null) {
-                if (that.isVscExhaustive) {
-                    it.remove();
-                } else {
-                    // noop
-                }
-            } else {
-                // Intersection by means of removing the other's complement
-                // https://github.com/google/guava/issues/1825
-                RangeSet<NodeWrapper> thatComplement = thatRangeSet.complement();
-                thisRangeSet.removeAll(thatComplement);
-
-                if (thisRangeSet.isEmpty()) {
-                    it.remove();
-                }
-            }
-        }
-
-        this.isVscExhaustive = this.isVscExhaustive || that.isVscExhaustive;
-
-        return this;
-    }
-
-
-    /**
-     * Add all other ranges to this one
-     *
-     * @param that
-     * @return
-     */
-    public NodeRanges stateUnion(NodeRanges that) {
-        this.isVscExhaustive = this.isVscExhaustive && that.isVscExhaustive;
-
-        for (Iterator<Entry<Object, RangeSet<NodeWrapper>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
-            Entry<Object, RangeSet<NodeWrapper>> e = it.next();
-            Object vsc = e.getKey();
-
-            RangeSet<NodeWrapper> thatRangeSet = e.getValue();
-            RangeSet<NodeWrapper> thisRangeSet = this.vscToRangeSets.computeIfAbsent(vsc, x -> TreeRangeSet.create());
-
-            thisRangeSet.addAll(thatRangeSet);
-
-            // In open mode (= not exhaustive) remove all unconstrained ranges
-            if (!this.isVscExhaustive && thisRangeSet.complement().isEmpty()) {
-                it.remove();
-            }
-        }
-
-        return this;
-    }
 
 
     /** Constrain the value space to only the given node - this is an intersection operation */
@@ -414,8 +277,13 @@ public class NodeRanges
         return result;
     }
 
+    @Override
+    protected Object classifyValueSpace(Range<NodeWrapper> range) {
+        return classifyValueSpaceCore(range);
+    }
+
     /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
-    public static Object classifyValueSpace(Range<NodeWrapper> range) {
+    public static Object classifyValueSpaceCore(Range<NodeWrapper> range) {
         Object result = null;
         NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
         NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
