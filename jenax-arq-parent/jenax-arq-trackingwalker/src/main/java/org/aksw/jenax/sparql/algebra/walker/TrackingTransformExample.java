@@ -6,7 +6,7 @@ import java.util.Map;
 import org.aksw.commons.path.core.Path;
 import org.aksw.jenax.constraint.api.ConstraintRow;
 import org.aksw.jenax.constraint.impl.ConstraintRowMap;
-import org.aksw.jenax.constraint.util.ConstraintUtils;
+import org.aksw.jenax.constraint.util.ConstraintDerivations;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitor;
@@ -69,7 +69,7 @@ public class TrackingTransformExample
         ConstraintRow crow = tracker.computeIfAbsent(p -> ConstraintRowMap.create());
 
         for (Triple triple : opBGP.getPattern()) {
-            ConstraintUtils.deriveConstraints(crow, triple);
+            ConstraintDerivations.deriveConstraints(crow, triple);
         }
 
         Path<String> path = tracker.getPath();

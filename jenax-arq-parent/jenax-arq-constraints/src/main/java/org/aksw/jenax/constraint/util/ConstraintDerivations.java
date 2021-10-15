@@ -10,8 +10,9 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.mem.TupleSlot;
+import org.apache.jena.sparql.expr.Expr;
 
-public class ConstraintUtils {
+public class ConstraintDerivations {
 
     /** Derive constraints from a quad; merges them into the RowConstraints instance */
     public static void deriveConstraints(ConstraintRow row, Quad quad) {
@@ -46,6 +47,10 @@ public class ConstraintUtils {
                 row.stateIntersection(var, vs);
             }
         }
+    }
+
+    public static void derive(ConstraintRow row, Expr expr) {
+        // TODO We need expr utils to extract op(var, constant) expressions
     }
 
 }
