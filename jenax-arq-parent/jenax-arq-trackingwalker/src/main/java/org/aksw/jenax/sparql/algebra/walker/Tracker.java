@@ -1,7 +1,9 @@
 package org.aksw.jenax.sparql.algebra.walker;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathOpsStr;
@@ -11,9 +13,12 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 
-public class Tracker {
+public class Tracker<T> {
     protected Path<String> path;
     protected Map<Path<String>, Op> pathToOp;
+
+    /** Map for user data */
+    protected Map<Path<String>, T> pathToData;
 
     // Parent to child map can actually be computed on demand
     protected Multimap<Path<String>, Path<String>> parentToChildren;
@@ -23,10 +28,11 @@ public class Tracker {
         this.path = PathOpsStr.newAbsolutePath();
         this.pathToOp = new LinkedHashMap<>();
         this.parentToChildren = LinkedHashMultimap.create();
+        this.pathToData = new HashMap<>();
     }
 
-    public static Tracker create(Op rootOp) {
-        Tracker result = new Tracker();
+    public static <T> Tracker<T> create(Op rootOp) {
+        Tracker<T> result = new Tracker<>();
         result.getPathToOp().put(result.getPath(), rootOp);
         return result;
     }
@@ -53,6 +59,34 @@ public class Tracker {
 
     public void setParentToChildren(Multimap<Path<String>, Path<String>> parentToChildren) {
         this.parentToChildren = parentToChildren;
+    }
+
+    public Map<Path<String>, T> getData() {
+        return pathToData;
+    }
+
+    /** Attach a value to this tracker's current path */
+    public void put(T value) {
+        put(path, value);
+    }
+
+    /** Get this tracker's value for its current path */
+    public T get() {
+        return get(path);
+    }
+
+    public T computeIfAbsent(Function<? super Path<String>, ? extends T> fn) {
+        return pathToData.computeIfAbsent(path, fn);
+    }
+
+    /** Attach a value to a path */
+    public void put(Path<String> path, T value) {
+        pathToData.put(path, value);
+    }
+
+    /** Get this tracker's value for a given path */
+    public T get(Object path) {
+        return pathToData.get(path);
     }
 
 }

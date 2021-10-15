@@ -9,18 +9,18 @@ import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 
 public class TrackingTransformer {
-    public static Op transform(Tracker pathState, Function<? super Tracker, ? extends TrackingTransformCopy> transformCtor) {
-        TrackingTransformCopy transform = transformCtor.apply(pathState);
+    public static Op transform(Tracker<?> pathState, Function<? super Tracker<?>, ? extends TrackingTransformCopy<?>> transformCtor) {
+        TrackingTransformCopy<?> transform = transformCtor.apply(pathState);
         OpVisitor beforeVisitor = transform.getBeforeVisitor();
         return transform(pathState, transform, new ExprTransformCopy(), beforeVisitor);
     }
 
-    public static Op transform(Tracker pathState, Transform opTransform, ExprTransform exprTransform, OpVisitor beforeVisitor) {
-        TrackingApplyTransformVisitor applyTransformVisitor = new TrackingApplyTransformVisitor(pathState, opTransform, exprTransform, false, beforeVisitor, null);
+    public static Op transform(Tracker<?> tracker, Transform opTransform, ExprTransform exprTransform, OpVisitor beforeVisitor) {
+        TrackingApplyTransformVisitor applyTransformVisitor = new TrackingApplyTransformVisitor(tracker, opTransform, exprTransform, false, beforeVisitor, null);
 
 
-        TrackingWalkerVisitor walker = new TrackingWalkerVisitor(pathState, applyTransformVisitor, applyTransformVisitor, beforeVisitor, null);
-        Op inputOp = pathState.getPathToOp().get(pathState.getPath());
+        TrackingWalkerVisitor walker = new TrackingWalkerVisitor(tracker, applyTransformVisitor, applyTransformVisitor, beforeVisitor, null);
+        Op inputOp = tracker.getPathToOp().get(tracker.getPath());
         walker.walk(inputOp);
 
         Op result = applyTransformVisitor.opResult();

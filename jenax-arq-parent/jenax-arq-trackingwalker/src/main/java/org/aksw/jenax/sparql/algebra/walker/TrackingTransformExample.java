@@ -4,6 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.aksw.commons.path.core.Path;
+import org.aksw.jenax.constraint.api.ConstraintRow;
+import org.aksw.jenax.constraint.impl.ConstraintRowMap;
+import org.aksw.jenax.constraint.util.ConstraintUtils;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitor;
 import org.apache.jena.sparql.algebra.OpVisitorByTypeBase;
@@ -13,7 +17,7 @@ import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 public class TrackingTransformExample
-    extends TrackingTransformCopy
+    extends TrackingTransformCopy<ConstraintRow>
 {
     public class BeforeVisitor
         extends OpVisitorByTypeBase
@@ -55,15 +59,23 @@ public class TrackingTransformExample
 
     @Override
     public Op transform(OpProject opProject, Op subOp) {
-        Path<String> path = pathState.getPath();
+        Path<String> path = tracker.getPath();
         System.out.println("Path at project: " + path);
         return super.transform(opProject, subOp);
     }
 
     @Override
     public Op transform(OpBGP opBGP) {
-        Path<String> path = pathState.getPath();
+        ConstraintRow crow = tracker.computeIfAbsent(p -> ConstraintRowMap.create());
+
+        for (Triple triple : opBGP.getPattern()) {
+            ConstraintUtils.deriveConstraints(crow, triple);
+        }
+
+        Path<String> path = tracker.getPath();
         System.out.println("Path at bgp: " + path);
+
+        System.out.println("Constraints: " + crow);
         return super.transform(opBGP);
     }
 

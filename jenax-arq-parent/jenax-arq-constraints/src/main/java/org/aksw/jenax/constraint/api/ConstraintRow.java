@@ -15,6 +15,9 @@ public interface ConstraintRow
     ConstraintRow stateIntersection(ConstraintRow that);
     ConstraintRow stateUnion(ConstraintRow that);
 
+    ConstraintRow stateIntersection(Var var, ValueSpace space);
+    ConstraintRow stateUnion(Var var, ValueSpace space);
+
     // Iterator<Var>
     Collection<Var> getVars();
     ValueSpace get(Var var);

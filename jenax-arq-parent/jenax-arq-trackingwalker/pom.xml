@@ -15,6 +15,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-constraints</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-paths</artifactId>
 		</dependency>

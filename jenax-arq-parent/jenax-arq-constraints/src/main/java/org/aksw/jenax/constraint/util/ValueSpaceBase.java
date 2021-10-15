@@ -12,10 +12,20 @@ import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 
 public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
-    protected Map<D, RangeSet<T>> vscToRangeSets = new HashMap<>();
+    protected Map<D, RangeSet<T>> vscToRangeSets;
     protected boolean isVscExhaustive;
 
     protected abstract D classifyValueSpace(Range<T> range);
+
+    protected ValueSpaceBase(boolean isVscExhaustive) {
+        this(isVscExhaustive, new HashMap<>());
+    }
+
+    protected ValueSpaceBase(boolean isVscExhaustive, Map<D, RangeSet<T>> vscToRangeSets) {
+        super();
+        this.isVscExhaustive = isVscExhaustive;
+        this.vscToRangeSets = vscToRangeSets;
+    }
 
 
     /** Add a new empty dimension. Do nothing if it already exists or if the dimensions are exhaustive */

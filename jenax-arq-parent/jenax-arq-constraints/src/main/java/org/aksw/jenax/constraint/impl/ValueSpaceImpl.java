@@ -50,4 +50,10 @@ public class ValueSpaceImpl
         return nodeRanges.isConflicting();
     }
 
+    @Override
+    public String toString() {
+        return nodeRanges.toString();
+    }
+
+
 }

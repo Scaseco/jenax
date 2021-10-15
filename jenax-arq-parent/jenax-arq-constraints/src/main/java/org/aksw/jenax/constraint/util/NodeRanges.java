@@ -1,7 +1,6 @@
 package org.aksw.jenax.constraint.util;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -51,23 +50,20 @@ public class NodeRanges
     public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
 
 
-    protected NodeRanges(boolean isVscExhaustive) {
-        super();
-        this.isVscExhaustive = isVscExhaustive;
+    public NodeRanges(boolean isVscExhaustive) {
+        super(isVscExhaustive);
     }
+
+    public NodeRanges(boolean isVscExhaustive, Map<Object, RangeSet<NodeWrapper>> vscToRangeSets) {
+        super(isVscExhaustive, vscToRangeSets);
+    }
+
 
     public RangeSet<NodeWrapper> getIriRanges() {
         return vscToRangeSets == null
                 ? ImmutableRangeSet.of()
                 : vscToRangeSets.getOrDefault(VSC_IRI, ImmutableRangeSet.of());
     }
-
-
-    public NodeRanges(Map<Object, RangeSet<NodeWrapper>> vscToRangeSets) {
-        super();
-        this.vscToRangeSets = vscToRangeSets;
-    }
-
 
     /**
      * Create an independent copy of this object
@@ -78,7 +74,7 @@ public class NodeRanges
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         e -> TreeRangeSet.create(e.getValue())));
-        return new NodeRanges(clone);
+        return new NodeRanges(isVscExhaustive, clone);
     }
 
     /** Create a NodeRange that contains everything */
@@ -259,7 +255,7 @@ public class NodeRanges
 
     @Override
     public String toString() {
-        return "NodeRanges [isVscExhaustive=" + isVscExhaustive + ", vscToRangeSets=" + vscToRangeSets + "]";
+        return (isVscExhaustive ? "closed" : "open") + vscToRangeSets;
     }
 
     public static Object classifyNodeValueSubSpace(Node node) {

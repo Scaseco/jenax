@@ -1,8 +1,12 @@
 package org.aksw.jenax.constraint.util;
 
 import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.constraint.api.ConstraintRow;
+import org.aksw.jenax.constraint.api.RdfTermProfiles;
+import org.aksw.jenax.constraint.api.ValueSpace;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.mem.TupleSlot;
@@ -10,7 +14,7 @@ import org.apache.jena.sparql.core.mem.TupleSlot;
 public class ConstraintUtils {
 
     /** Derive constraints from a quad; merges them into the RowConstraints instance */
-    private void deriveConstraints(ConstraintRow row, Quad quad) {
+    public static void deriveConstraints(ConstraintRow row, Quad quad) {
 
         for (int i = 0; i < 3; ++i) {
             Node node = QuadUtils.getNode(quad, i);
@@ -21,8 +25,25 @@ public class ConstraintUtils {
                 // Get the appropriate constraints for the slot
                 TupleSlot slot = QuadUtils.idxToSlot(i);
 
+                ValueSpace vs = RdfTermProfiles.forSlot(slot);
+                row.stateIntersection(var, vs);
+            }
+        }
+    }
 
-                // RdfTermConstraints.stateSlot(row, var, slot);
+    public static void deriveConstraints(ConstraintRow row, Triple triple) {
+
+        for (int i = 0; i < 3; ++i) {
+            Node node = TripleUtils.getNode(triple, i);
+
+            // For variables we can derive the term type from the slot
+            if (node.isVariable()) {
+                Var var = (Var)node;
+                // Get the appropriate constraints for the slot
+                TupleSlot slot = TripleUtils.idxToSlot(i);
+
+                ValueSpace vs = RdfTermProfiles.forSlot(slot);
+                row.stateIntersection(var, vs);
             }
         }
     }

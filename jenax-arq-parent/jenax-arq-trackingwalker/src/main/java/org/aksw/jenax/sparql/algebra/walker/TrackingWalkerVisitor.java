@@ -50,7 +50,7 @@ public class TrackingWalkerVisitor implements OpVisitorByTypeAndExpr, ExprVisito
     private final OpVisitor     beforeVisitor ;
     private final OpVisitor     afterVisitor ;
 
-    protected Tracker         pathState;
+    protected Tracker<?>        tracker;
 
     public static String getLabel(Op op) {
         return op.getName();
@@ -58,16 +58,16 @@ public class TrackingWalkerVisitor implements OpVisitorByTypeAndExpr, ExprVisito
 
 
     public void pushPath(String parentLabel, Op op) {
-        Path<String> parent = pathState.getPath();
+        Path<String> parent = tracker.getPath();
         Path<String> path = parent.resolve(parentLabel);
 
-        pathState.setPath(path);
-        pathState.getPathToOp().put(path, op);
-        pathState.getParentToChildren().put(parent, path);
+        tracker.setPath(path);
+        tracker.getPathToOp().put(path, op);
+        tracker.getParentToChildren().put(parent, path);
     }
 
     public void popPath() {
-        pathState.setPath(pathState.getPath().getParent());
+        tracker.setPath(tracker.getPath().getParent());
     }
 
     /**
@@ -79,7 +79,7 @@ public class TrackingWalkerVisitor implements OpVisitorByTypeAndExpr, ExprVisito
      * @see ExprVisitorBase
      */
     public TrackingWalkerVisitor(
-            Tracker pathState,
+            Tracker<?> tracker,
             OpVisitor opVisitor,
             ExprVisitor exprVisitor,
             OpVisitor before,
@@ -95,7 +95,7 @@ public class TrackingWalkerVisitor implements OpVisitorByTypeAndExpr, ExprVisito
         beforeVisitor = before ;
         afterVisitor = after ;
 
-        this.pathState = pathState;
+        this.tracker = tracker;
     }
 
 

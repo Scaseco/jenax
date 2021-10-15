@@ -13,7 +13,16 @@ import org.apache.jena.sparql.core.Var;
 public class ConstraintRowMap
     implements ConstraintRow
 {
-    protected Map<Var, ValueSpace> varToProfile = new HashMap<>();
+    protected Map<Var, ValueSpace> varToProfile;
+
+    protected ConstraintRowMap(Map<Var, ValueSpace> varToProfile) {
+        super();
+        this.varToProfile = varToProfile;
+    }
+
+    public static ConstraintRow create() {
+        return new ConstraintRowMap(new HashMap<>());
+    }
 
     @Override
     public Collection<Var> getVars() {
@@ -25,14 +34,9 @@ public class ConstraintRowMap
         return varToProfile.get(var);
     }
 
-    public ConstraintRowMap(Map<Var, ValueSpace> varToProfile) {
-        super();
-        this.varToProfile = varToProfile;
-    }
-
     @Override
     public String toString() {
-        return "ConstraintRowMap [varToProfile=" + varToProfile + "]";
+        return varToProfile.toString();
     }
 
     @Override
@@ -48,14 +52,8 @@ public class ConstraintRowMap
         vars.addAll(that.getVars());
 
         for (Var var : vars) {
-            ValueSpace thisSpace = varToProfile.get(var);
             ValueSpace thatSpace = that.get(var);
-
-            if (thisSpace == null) {
-                varToProfile.put(var, thatSpace.clone());
-            } else if (thatSpace != null) {
-                thisSpace.stateIntersection(thatSpace);
-            } // else if thatSpace is null then nothing to do
+            stateIntersection(var, thatSpace);
         }
 
         return this;
@@ -64,17 +62,37 @@ public class ConstraintRowMap
     @Override
     public ConstraintRow stateUnion(ConstraintRow that) {
         for (Var var : that.getVars()) {
-            ValueSpace thisSpace = varToProfile.get(var);
             ValueSpace thatSpace = that.get(var);
-
-            if (thisSpace == null) {
-                varToProfile.put(var, thatSpace.clone());
-            } else if (thatSpace != null) {
-                thisSpace.stateUnion(thatSpace);
-            } // else if thatSpace is null then nothing to do
-
+            stateUnion(var, thatSpace);
         }
 
         return this;
     }
+
+    @Override
+    public ConstraintRow stateIntersection(Var var, ValueSpace thatSpace) {
+        ValueSpace thisSpace = varToProfile.get(var);
+
+        if (thisSpace == null) {
+            varToProfile.put(var, thatSpace.clone());
+        } else if (thatSpace != null) {
+            thisSpace.stateIntersection(thatSpace);
+        } // else if thatSpace is null then nothing to do
+
+        return this;
+    }
+
+    @Override
+    public ConstraintRow stateUnion(Var var, ValueSpace thatSpace) {
+        ValueSpace thisSpace = varToProfile.get(var);
+
+        if (thisSpace == null) {
+            varToProfile.put(var, thatSpace.clone());
+        } else if (thatSpace != null) {
+            thisSpace.stateUnion(thatSpace);
+        } // else if thatSpace is null then nothing to do
+
+        return this;
+    }
+
 }

@@ -66,9 +66,9 @@ public class TrackingApplyTransformVisitor implements OpVisitorByTypeAndExpr, Ex
     private final OpVisitor     beforeVisitor ;
     private final OpVisitor     afterVisitor ;
 
-    protected Tracker         pathState;
+    protected Tracker<?>        tracker;
 
-    public TrackingApplyTransformVisitor(Tracker pathState, Transform opTransform, ExprTransform exprTransform,
+    public TrackingApplyTransformVisitor(Tracker<?> tracker, Transform opTransform, ExprTransform exprTransform,
                                  boolean visitService,
                                  OpVisitor before, OpVisitor after) {
         this.opTransform = opTransform ;
@@ -76,7 +76,7 @@ public class TrackingApplyTransformVisitor implements OpVisitorByTypeAndExpr, Ex
         this.beforeVisitor = before ;
         this.afterVisitor = after ;
         this.visitService = visitService ;
-        this.pathState = pathState;
+        this.tracker = tracker;
     }
 
     public /*package*/ final Op opResult() {
@@ -92,7 +92,7 @@ public class TrackingApplyTransformVisitor implements OpVisitorByTypeAndExpr, Ex
         int x1 = opStack.size() ;
         int x2 = exprStack.size() ;
         try {
-            TrackingWalkerVisitor v = new TrackingWalkerVisitor(pathState, this, null, beforeVisitor, afterVisitor);
+            TrackingWalkerVisitor v = new TrackingWalkerVisitor(tracker, this, null, beforeVisitor, afterVisitor);
             v.walk(expr);
             return this.exprResult();
             // return Walker.transform(expr, this, beforeVisitor, afterVisitor) ;
