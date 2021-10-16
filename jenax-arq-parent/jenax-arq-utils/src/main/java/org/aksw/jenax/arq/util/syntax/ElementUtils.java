@@ -333,7 +333,7 @@ public class ElementUtils {
         ElementTransform elementTransform = new ElementTransformSubst2(nodeTransform);//new ElementTransformSubst2(nodeTransform);
         ExprTransform exprTransform = new ExprTransformNodeElement(nodeTransform, elementTransform);
 
-        Element result = org.aksw.jena_sparql_api.backports.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
+        Element result = org.aksw.jenax.util.backport.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
 
         return result;
     }

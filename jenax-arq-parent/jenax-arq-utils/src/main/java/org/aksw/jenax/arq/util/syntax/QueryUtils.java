@@ -398,7 +398,7 @@ public class QueryUtils {
 
 
         //Query result = org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps.transform(query, eltrans, exprTrans) ;
-        Query result = org.aksw.jena_sparql_api.backports.syntaxtransform.QueryTransformOps.transform(query, eltrans, exprTrans) ;
+        Query result = org.aksw.jenax.util.backport.syntaxtransform.QueryTransformOps.transform(query, eltrans, exprTrans) ;
 
         // QueryTransformOps creates a shallow copy of the query which causes problems
         // if a PrefixMapping2 is used; the PM2 is materialized into a PM
@@ -530,7 +530,7 @@ public class QueryUtils {
 
     public static Query randomizeVars(Query query) {
         Map<Var, Var> varMap = createRandomVarMap(query, "rv");
-        Query result = org.aksw.jena_sparql_api.backports.syntaxtransform.QueryTransformOps.transform(query, varMap);
+        Query result = org.aksw.jenax.util.backport.syntaxtransform.QueryTransformOps.transform(query, varMap);
         //System.out.println(query + "now:\n" + result);
         return result;
     }
