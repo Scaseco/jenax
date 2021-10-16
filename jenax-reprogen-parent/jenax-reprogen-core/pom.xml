@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-reprogen-core</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-reprogen-parent</artifactId>
+		<!--< <artifactId>jena-sparql-api-mapper-parent</artifactId> -->
+		<version>4.2.0-1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+	
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-beans</artifactId>
+		</dependency>
+	
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-collections</artifactId>
+		</dependency>
+
+		<!-- There are is one or two used collection implementations (one is MapFromResource) 
+			that make use of SparqlRx -->
+		<!-- Can we get rid of all the rx stuff at this point? -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+		</dependency>
+
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+		<!-- <dependency> -->
+		<!-- <groupId>net.bytebuddy</groupId> -->
+		<!-- <artifactId>byte-buddy</artifactId> -->
+		<!-- <version>1.9.10</version> -->
+		<!-- </dependency> -->
+	</dependencies>
+</project>

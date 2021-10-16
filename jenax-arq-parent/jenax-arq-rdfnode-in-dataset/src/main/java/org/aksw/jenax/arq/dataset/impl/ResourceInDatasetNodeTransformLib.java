@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.dataset.impl;
 import java.util.Optional;
 
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
-import org.aksw.jenax.arq.util.transform.NodeTransformLib2;
+import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;

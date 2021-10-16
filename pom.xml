@@ -15,8 +15,10 @@
 
 	<modules>
 		<module>jenax-resources-parent</module>
+		<module>jenax-annotations-parent</module>
 		<module>jenax-core-parent</module>
 		<module>jenax-arq-parent</module>
+		<module>jenax-reprogen-parent</module>
 	</modules>
 
 	<issueManagement>
@@ -264,31 +266,48 @@
 		</pluginManagement>
 	</build>
 
-	<!-- <dependencies> -->
-	<!-- <dependency> -->
-	<!-- <groupId>junit</groupId> -->
-	<!-- <artifactId>junit</artifactId> -->
-	<!-- </dependency> -->
-
-	<!-- <dependency> -->
-	<!-- <groupId>log4j</groupId> -->
-	<!-- <artifactId>log4j</artifactId> -->
-	<!-- </dependency> -->
-
-	<!-- <dependency> -->
-	<!-- <groupId>org.slf4j</groupId> -->
-	<!-- <artifactId>slf4j-log4j12</artifactId> -->
-	<!-- </dependency> -->
-
-	<!-- </dependencies> -->
-
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-annotations-reprogen</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-resources-prefixes</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-stmt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-relations</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-collections</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-rx</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -709,6 +728,7 @@
 				<artifactId>commons-collections4</artifactId>
 				<version>4.4</version>
 			</dependency>
+
 
 			<!-- Java Topology Suite -->
 			<dependency>

@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.jena.sparql.core.Var;
 
 public class Vars {
-    public static final Var signaturePlaceholder = Var.alloc("_?"); //Var.alloc("__signature_placeholder__");
 
     public static final Var a = Var.alloc("a");
     public static final Var b = Var.alloc("b");
@@ -43,4 +42,8 @@ public class Vars {
     public static final List<Var> spo = Arrays.asList(s, p, o);
     public static final List<Var> gspo = Arrays.asList(g, s, p, o);
     public static final Var[] gspoArr = {g, s, p, o};
+
+    /** A placeholder used for signaturization (= substituting any var with the same unique var symbol */
+    public static final Var signaturePlaceholder = Var.alloc("_?"); //Var.alloc("__signature_placeholder__");
+
 }

@@ -20,6 +20,19 @@
 			<artifactId>jena-arq</artifactId>
 		</dependency>
 
+		<!-- Used for ClassUtils.setField - can be removed once jena opens up certain parts of the AP -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-util</artifactId>
+		</dependency>
+
+
+		<!-- Used for the Generator interface which improves over VarAlloc -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collections</artifactId>
+		</dependency>
+
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>

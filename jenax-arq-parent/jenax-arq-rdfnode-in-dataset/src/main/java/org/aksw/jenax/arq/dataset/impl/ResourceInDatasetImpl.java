@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.aksw.jenax.arq.dataset.api.LiteralInDataset;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.util.dataset.DatasetUtils;
-import org.aksw.jenax.arq.util.transform.NodeTransformLib2;
+import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Node;

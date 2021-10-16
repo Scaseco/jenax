@@ -14,6 +14,7 @@
 	</parent>
 
 	<modules>
+		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>
 		<module>jenax-arq-utils</module>
 		<module>jenax-arq-rdfterm</module>
@@ -21,5 +22,8 @@
 		<module>jenax-arq-rdfnode-in-dataset</module>
 		<module>jenax-arq-constraints</module>
 		<module>jenax-arq-trackingwalker</module>
+		<module>jenax-arq-relations</module>
+		<module>jenax-arq-collections</module>
+		<module>jenax-arq-rx</module>
 	</modules>
 </project>

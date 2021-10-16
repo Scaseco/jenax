@@ -15,5 +15,6 @@
 
 	<modules>
 		<module>jenax-resources-test-config</module>
+		<module>jenax-resources-prefixes</module>
 	</modules>
 </project>
