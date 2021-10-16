@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.rx;
+package org.aksw.jenax.sparql.query.rx;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 
-import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.RiotParseException;
 
@@ -19,12 +18,12 @@ import org.apache.jena.riot.RiotParseException;
  * @param <I> InputStream type
  * @param <T> Item type of the resulting flow, typically Triples or Quads
  */
-class FlowState<T> {
-    InputStream in;
-    Thread producerThread;
-    Throwable raisedException;
-    Iterator<T> iterator;
-    volatile boolean closeInvoked;
+public class FlowState<T> {
+    protected InputStream in;
+    protected Thread producerThread;
+    protected Throwable raisedException;
+    protected Iterator<T> iterator;
+    protected volatile boolean closeInvoked;
     // protected Thread consumerThread;
 
 
@@ -46,10 +45,6 @@ class FlowState<T> {
 
     public void setIterator(Iterator<T> iterator) {
         this.iterator = iterator;
-    }
-
-    public Iterator<T> getIterator() {
-        return iterator;
     }
 
     public static boolean isRiotBrokenPipeException(Throwable t) {

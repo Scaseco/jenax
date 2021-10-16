@@ -1,11 +1,18 @@
 package org.aksw.jenax.arq.util.quad;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.mem.TupleSlot;
@@ -101,6 +108,48 @@ public class QuadUtils {
 
     public static Set<Var> getVarsMentioned(Quad quad) {
         return NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
+    }
+
+
+    public static Map<Node, Set<Quad>> partitionByGraph(Iterable<Quad> quads) {
+        Map<Node, Set<Quad>> result = new HashMap<>();
+
+        partitionByGraph(quads.iterator(), result, HashSet::new);
+
+        return result;
+    }
+
+    public static <C extends Collection<Quad>, M extends Map<Node, C>> M partitionByGraph(
+            Iterator<Quad> it,
+            M result,
+            Supplier<? extends C> supplier) {
+        //Map<Node, Set<Quad>> result = new HashMap<Node, Set<Quad>>();
+        while(it.hasNext()) {
+            Quad quad = it.next();
+            Node g = quad.getGraph();
+            C qs = result.get(g);
+            if (qs == null) {
+                qs = supplier.get();
+                result.put(g, qs);
+            }
+            qs.add(quad);
+        }
+        return result;
+    }
+
+    public static Map<Node, Set<Triple>> partitionByGraphTriples(Iterable<Quad> quads) {
+        Map<Node, Set<Triple>> result = new HashMap<Node, Set<Triple>>();
+        for (Quad quad : quads) {
+            Node g = quad.getGraph();
+            Set<Triple> ts = result.get(g);
+            if (ts == null) {
+                ts = new HashSet<Triple>();
+                result.put(g, ts);
+            }
+            Triple t = quad.asTriple();
+            ts.add(t);
+        }
+        return result;
     }
 
 

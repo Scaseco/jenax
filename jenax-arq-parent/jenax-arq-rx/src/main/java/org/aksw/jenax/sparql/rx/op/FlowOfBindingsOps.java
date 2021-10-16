@@ -1,10 +1,7 @@
 package org.aksw.jenax.sparql.rx.op;
 
 import org.aksw.commons.rx.function.RxFunction;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.DatasetOneNgImpl;
-import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -15,8 +12,6 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.syntax.Template;
 
 import com.google.common.base.Preconditions;
-
-import io.reactivex.rxjava3.core.Flowable;
 
 
 public class FlowOfBindingsOps {

@@ -7,7 +7,7 @@ import org.aksw.commons.collector.core.AggBuilder;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
-import org.aksw.jena_sparql_api.utils.DatasetGraphUtils;
+import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetGraph;

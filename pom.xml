@@ -18,6 +18,7 @@
 		<module>jenax-annotations-parent</module>
 		<module>jenax-core-parent</module>
 		<module>jenax-arq-parent</module>
+		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
 	</modules>
 
@@ -269,6 +270,25 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-dataset-one-ng</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-reprogen-shared</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-reprogen-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-annotations-reprogen</artifactId>
@@ -656,7 +676,7 @@
 			<!-- AKSW Commons -->
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
-				<artifactId>aksw-commons-util</artifactId>
+				<artifactId>aksw-commons-utils</artifactId>
 				<version>${aksw.commons.version}</version>
 
 				<!-- Jena pulls in jcl-over-slf4j, so we don't need to add it ourselves -->

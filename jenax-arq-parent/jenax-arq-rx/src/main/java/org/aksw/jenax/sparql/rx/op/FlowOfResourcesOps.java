@@ -1,7 +1,7 @@
 package org.aksw.jenax.sparql.rx.op;
 
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.DatasetOneNgImpl;
+import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
+import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
 import org.apache.jena.rdf.model.Resource;
 
 import io.reactivex.rxjava3.core.Flowable;

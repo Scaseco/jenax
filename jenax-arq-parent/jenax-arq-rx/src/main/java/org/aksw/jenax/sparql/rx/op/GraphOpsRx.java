@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.rx;
+package org.aksw.jenax.sparql.rx.op;
 
 import java.util.Map.Entry;
 import java.util.function.Function;

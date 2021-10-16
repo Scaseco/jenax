@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
-import org.aksw.jenax.reprogen.core.MapperProxyUtils;
+import org.aksw.jenax.reprogen.shared.AnnotationUtils;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionFactory;
 import org.apache.jena.sparql.function.FunctionRegistry;
@@ -64,7 +64,7 @@ public class FunctionBinder {
 
     /** Convenience method to register a function at Jena's default registry */
     public void register(Method method, Object invocationTarget) {
-        String iri = MapperProxyUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
+        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
 
         if (iri == null) {
             throw new RuntimeException("No @Iri or @IriNs annotation present on method");
@@ -91,7 +91,7 @@ public class FunctionBinder {
      */
     public void registerAll(Class<?> clz, Object invocationTarget) {
         for (Method method : clz.getMethods()) {
-            String iri = MapperProxyUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
+            String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
 
             if (iri != null) {
                 boolean isStatic = Modifier.isStatic(method.getModifiers());
