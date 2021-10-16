@@ -2,8 +2,7 @@ package org.aksw.jena_sparql_api.mapper;
 
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.utils.QuadPatternUtils;
-
+import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.core.Var;

@@ -14,6 +14,7 @@
 	</parent>
 
 	<modules>
+		<module>jenax-arq-connection</module>
 		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>
 		<module>jenax-arq-utils</module>
@@ -25,5 +26,6 @@
 		<module>jenax-arq-relations</module>
 		<module>jenax-arq-collections</module>
 		<module>jenax-arq-rx</module>
+		<module>jenax-arq-quadengine</module>
 	</modules>
 </project>

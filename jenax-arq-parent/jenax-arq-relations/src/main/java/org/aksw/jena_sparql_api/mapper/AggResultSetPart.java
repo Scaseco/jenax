@@ -19,7 +19,7 @@ public class AggResultSetPart
 
     @Override
     public Acc<ResultSetPart> createAccumulator() {
-        Acc<ResultSetPart> result = new AccResultSetPart(varNames);
+        Acc<ResultSetPart> result = new AccTable(varNames);
         return result;
     }
 

@@ -67,5 +67,33 @@ public class NodeUtils {
         return n == null ? Node.ANY : n;
     }
 
+    /**
+     * Create a logical conjunction of two nodes:
+     * - Node.ANY, null or a variable matches everything
+     * - If any argument matches everything return the other argument (convert null to ANY)
+     * - if both arguments are concrete nodes then return one if them if they are equal
+     * - otherwise return null
+     *
+     */
+    public static Node logicalAnd(Node pattern, Node b) {
+        Node result = NodeUtils.isNullOrAny(pattern) || pattern.isVariable()
+                ? nullToAny(b)
+                : NodeUtils.isNullOrAny(b) || Objects.equals(pattern, b)
+                    ? nullToAny(pattern)
+                    : null;
+
+        return result;
+    }
+
+    /**
+     * Return the language of a node or null if the argument is not applicable
+     *
+     * @param node
+     * @return
+     */
+    public static String getLang(Node node) {
+        String result = node != null && node.isLiteral() ? node.getLiteralLanguage() : null;
+        return result;
+    }
 
 }
