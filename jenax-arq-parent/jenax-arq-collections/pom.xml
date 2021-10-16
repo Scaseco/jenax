@@ -20,8 +20,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-prefixes</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-util</artifactId>
+			<artifactId>aksw-commons-utils</artifactId>
 		</dependency>
 
 		<dependency>
