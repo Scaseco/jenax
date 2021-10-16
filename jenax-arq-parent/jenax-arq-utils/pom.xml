@@ -23,7 +23,7 @@
 		<!-- Used for ClassUtils.setField - can be removed once jena opens up certain parts of the AP -->
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-util</artifactId>
+			<artifactId>aksw-commons-utils</artifactId>
 		</dependency>
 
 

@@ -18,6 +18,7 @@ import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.stmt.resultset.SPARQLResultSinkQuads;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
+import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -34,8 +35,6 @@ import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Streams;
 
 public class SparqlStmtMgr {
     private static final Logger logger = LoggerFactory.getLogger(SparqlStmtMgr.class);

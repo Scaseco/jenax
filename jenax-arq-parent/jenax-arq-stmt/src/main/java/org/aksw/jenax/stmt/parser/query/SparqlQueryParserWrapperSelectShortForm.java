@@ -2,7 +2,7 @@ package org.aksw.jenax.stmt.parser.query;
 
 import java.util.function.Function;
 
-import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.stmt.util.QueryParseExceptionUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryParseException;
