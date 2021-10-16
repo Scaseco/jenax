@@ -19,6 +19,15 @@ public class NodeUtils {
     public static final Node nullUriNode = NodeFactory.createURI(nullUri);
 
 
+    /** Constants for use with {@link #getDatatypeIri(Node)}
+        Conflates the term type into a datatype: Under this perspective, IRIs and
+        blank nodes are simply literals with the rr:IRI or rr:BlankNode datatype.
+        This approach simplifies analytics for e.g. application in schema mapping */
+    public static final String R2RML_NS 					= "http://www.w3.org/ns/r2rml#";
+    public static final String R2RML_IRI 					= R2RML_NS + "IRI";
+    public static final String R2RML_BlankNode 				= R2RML_NS + "BlankNode";
+
+
     /** Compare nodes via {@link NodeValue#compareAlways(NodeValue, NodeValue)} */
     public static int compareAlways(Node o1, Node o2) {
         int result;
@@ -93,6 +102,31 @@ public class NodeUtils {
      */
     public static String getLang(Node node) {
         String result = node != null && node.isLiteral() ? node.getLiteralLanguage() : null;
+        return result;
+    }
+
+
+    /**
+     * Return a Node's datatype. Thereby, IRIs are returned as rr:IRI and BlankNodes as rr:BlankNode
+     * Returns null for variables and unknown node types
+     *
+     * @param node
+     */
+    public static String getDatatypeIri(Node node) {
+        String result;
+        if (node == null) {
+            result = null;
+        } else if (node.isURI()) {
+            result = R2RML_IRI;
+        } else if (node.isBlank()) {
+            result = R2RML_BlankNode;
+        } else if (node.isLiteral()) {
+            result = node.getLiteralDatatypeURI();
+        } else {
+            // Should not happen
+            result = null;
+        }
+
         return result;
     }
 
