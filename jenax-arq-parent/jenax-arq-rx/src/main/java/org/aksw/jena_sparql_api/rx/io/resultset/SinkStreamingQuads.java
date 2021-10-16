@@ -45,11 +45,11 @@ public class SinkStreamingQuads
      * @return
      */
     public static SinkStreaming<Quad> createSinkQuads(
-    		RDFFormat format,
-    		OutputStream out,
-    		PrefixMapping pm,
-    		long prefixAnalysis,
-    		Supplier<Dataset> datasetSupp) {
+            RDFFormat format,
+            OutputStream out,
+            PrefixMapping pm,
+            long prefixAnalysis,
+            Supplier<Dataset> datasetSupp) {
 //        boolean useStreaming = format == null ||
 //                Arrays.asList(Lang.NTRIPLES, Lang.NQUADS).contains(format.getLang());
         SinkStreaming<Quad> result;

@@ -1307,7 +1307,7 @@ public class MapperProxyUtils {
 
 
         // Find all methods with a @Iri annotation
-        Map<String, P_Path0> paths = indexPathsByBeanPropertyName(clazz, pm);
+        Map<String, P_Path0> paths = AnnotationUtils.indexPathsByBeanPropertyName(clazz, pm);
 
 //        Set<String> toStringBeanPropertyNames = indexToStringByBeanPropertyName(clazz);
 //        if(toStringBeanPropertyNames.isEmpty()) {
@@ -1367,7 +1367,7 @@ public class MapperProxyUtils {
             }
 
 
-            String beanPropertyName = deriveBeanPropertyName(method.getName());
+            String beanPropertyName = AnnotationUtils.deriveBeanPropertyName(method.getName());
 
             // Skip methods not associated with a path
 //            if(!paths.containsKey(beanPropertyName)) {
@@ -1384,7 +1384,7 @@ public class MapperProxyUtils {
                 writeMethods.put(beanPropertyName, method);
             }
 
-            P_Path0 path = derivePathFromMethod(method, pm);
+            P_Path0 path = AnnotationUtils.derivePathFromMethod(method, pm);
             if(path != null) {
                 paths.put(beanPropertyName, path);
             }

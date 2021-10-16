@@ -14,6 +14,7 @@
 	</parent>
 
 	<modules>
+		<module>jenax-arq-paths</module>
 		<module>jenax-arq-connection</module>
 		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>

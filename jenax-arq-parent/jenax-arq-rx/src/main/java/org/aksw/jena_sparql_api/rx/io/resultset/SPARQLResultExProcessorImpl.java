@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.aksw.jena_sparql_api.stmt.SPARQLResultEx;
+import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.graph.Triple;
@@ -17,9 +17,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 /**
- * This class bundles streaming sinks for the different result types of the SPARQL query forms. 
- * 
- * 
+ * This class bundles streaming sinks for the different result types of the SPARQL query forms.
+ *
+ *
  * @author raven
  *
  */

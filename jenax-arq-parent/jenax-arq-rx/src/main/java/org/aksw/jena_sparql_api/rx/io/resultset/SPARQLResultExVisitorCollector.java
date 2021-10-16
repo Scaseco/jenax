@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.stmt.SPARQLResultEx;
+import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.graph.Triple;

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.mapper.proxy.function;
+package org.aksw.jenax.arq.functionbinder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
