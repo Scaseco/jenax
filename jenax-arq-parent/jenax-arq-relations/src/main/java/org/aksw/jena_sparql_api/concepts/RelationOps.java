@@ -3,8 +3,9 @@ package org.aksw.jena_sparql_api.concepts;
 import java.util.Set;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
@@ -22,8 +23,8 @@ import org.apache.jena.sparql.syntax.ElementSubQuery;
 
 public class RelationOps {
 
-	
-	
+
+
     public static BinaryRelation from(org.apache.jena.sparql.path.Path path) {
         TriplePath tp = new TriplePath(Vars.s, path, Vars.o);
         ElementPathBlock e = new ElementPathBlock();

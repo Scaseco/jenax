@@ -28,6 +28,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlUpdateParser;
 import org.aksw.jena_sparql_api.stmt.SparqlUpdateParserImpl;
 import org.aksw.jena_sparql_api.syntax.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.utils.NodeUtils;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
 import org.apache.jena.irix.IRIxResolver;

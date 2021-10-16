@@ -6,9 +6,10 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.VarUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.var.VarUtils;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParser;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParserImpl;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParser;

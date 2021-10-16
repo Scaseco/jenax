@@ -6,6 +6,8 @@ import java.util.Set;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;

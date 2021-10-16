@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
-import org.aksw.jenax.arq.util.dataset.DatasetUtils;
+import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.query.Dataset;

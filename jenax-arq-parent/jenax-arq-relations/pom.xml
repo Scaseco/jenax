@@ -22,6 +22,11 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>

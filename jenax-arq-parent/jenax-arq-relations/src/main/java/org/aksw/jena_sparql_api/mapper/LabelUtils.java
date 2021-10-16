@@ -3,10 +3,10 @@ package org.aksw.jena_sparql_api.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.concepts.TernaryRelation;
 import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;

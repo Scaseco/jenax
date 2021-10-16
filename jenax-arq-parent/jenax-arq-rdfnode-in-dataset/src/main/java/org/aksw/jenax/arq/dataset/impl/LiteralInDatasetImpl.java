@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.dataset.impl;
 
 import org.aksw.jenax.arq.dataset.api.LiteralInDataset;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
-import org.aksw.jenax.arq.util.dataset.DatasetUtils;
+import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;

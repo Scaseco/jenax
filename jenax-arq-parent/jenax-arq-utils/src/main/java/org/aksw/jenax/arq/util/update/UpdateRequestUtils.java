@@ -7,12 +7,12 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.aksw.commons.collections.diff.Diff;
-import org.aksw.jenax.arq.util.dataset.SetFromDatasetGraph;
-import org.aksw.jenax.arq.util.model.SetFromGraph;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
+import org.aksw.jenax.arq.util.quad.SetFromDatasetGraph;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.graph.Node;

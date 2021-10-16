@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Assert;

@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.concepts;
 
 import java.util.Set;
 
+import org.aksw.jenax.sparql.relation.api.Relation;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 

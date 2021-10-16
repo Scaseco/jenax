@@ -6,8 +6,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelation;
 import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
+import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParser;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParserImpl;
 import org.apache.jena.query.Syntax;

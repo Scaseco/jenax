@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.jena.riot.RiotException;
 import org.apache.jena.riot.RiotParseException;
 

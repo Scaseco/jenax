@@ -16,13 +16,25 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-dboe-storage</artifactId>
+			<artifactId>jena-rdfconnection</artifactId>
 		</dependency>
+	
+	
+			<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+	
+	
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.jena</groupId> -->
+<!-- 			<artifactId>jena-dboe-storage</artifactId> -->
+<!-- 		</dependency> -->
 
-		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-collectors</artifactId>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.aksw.commons</groupId> -->
+<!-- 			<artifactId>aksw-commons-collectors</artifactId> -->
+<!-- 		</dependency> -->
 
 
 <!--

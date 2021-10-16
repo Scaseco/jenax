@@ -17,6 +17,7 @@ import org.aksw.jena_sparql_api.rdf.collections.RDFNodeMapper;
 import org.aksw.jena_sparql_api.rdf.collections.RDFNodeMappers;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;

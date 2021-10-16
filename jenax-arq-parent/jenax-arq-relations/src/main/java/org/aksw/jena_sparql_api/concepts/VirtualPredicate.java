@@ -1,5 +1,8 @@
 package org.aksw.jena_sparql_api.concepts;
 
+import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+
 /**
  * A triple-based virtual predicate.
  * 

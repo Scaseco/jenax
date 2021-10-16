@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
-import org.aksw.jenax.arq.util.query.QueryUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.stmt.resultset.SPARQLResultSinkQuads;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.query.Dataset;

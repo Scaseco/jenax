@@ -27,6 +27,11 @@
 			<artifactId>jenax-arq-collections</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-prefixes</artifactId>
+		</dependency>
+
 		<!-- There are is one or two used collection implementations (one is MapFromResource) 
 			that make use of SparqlRx -->
 		<!-- Can we get rid of all the rx stuff at this point? -->

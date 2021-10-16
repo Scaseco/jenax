@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
-import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionFactory;
 import org.apache.jena.sparql.function.FunctionRegistry;

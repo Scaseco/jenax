@@ -15,9 +15,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
-import org.aksw.jena_sparql_api.utils.VarUtils;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.VarUtils;
+import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;

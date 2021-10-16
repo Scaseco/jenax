@@ -2,11 +2,8 @@ package org.aksw.jenax.arq.util.node;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -16,6 +13,11 @@ import org.apache.jena.sparql.expr.NodeValue;
 import com.google.common.collect.Streams;
 
 public class NodeUtils {
+
+    /** Placeholder constants to denote a 'null' node */
+    public static final String nullUri = "http://null.null/null";
+    public static final Node nullUriNode = NodeFactory.createURI(nullUri);
+
 
     /** Compare nodes via {@link NodeValue#compareAlways(NodeValue, NodeValue)} */
     public static int compareAlways(Node o1, Node o2) {

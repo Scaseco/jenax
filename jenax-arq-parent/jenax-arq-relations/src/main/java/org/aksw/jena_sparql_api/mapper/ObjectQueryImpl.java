@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.mapper;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.concepts.Relation;
+import org.aksw.jenax.sparql.relation.api.Relation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.syntax.Template;

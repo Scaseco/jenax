@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.concepts;
 import java.util.Arrays;
 import java.util.List;
 
+import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 

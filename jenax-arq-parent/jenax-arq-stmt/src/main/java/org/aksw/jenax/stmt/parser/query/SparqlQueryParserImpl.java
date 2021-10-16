@@ -3,7 +3,7 @@ package org.aksw.jenax.stmt.parser.query;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.aksw.jenax.arq.util.query.QueryUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;

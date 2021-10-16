@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.concepts;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.aksw.jena_sparql_api.utils.ExprUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;

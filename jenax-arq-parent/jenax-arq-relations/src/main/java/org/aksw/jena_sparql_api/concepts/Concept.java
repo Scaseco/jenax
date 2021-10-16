@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParser;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParserImpl;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;

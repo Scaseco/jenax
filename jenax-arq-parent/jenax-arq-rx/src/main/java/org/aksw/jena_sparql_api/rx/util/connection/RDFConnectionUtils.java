@@ -3,7 +3,6 @@ package org.aksw.jena_sparql_api.rx.util.connection;
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
 
-import org.aksw.jena_sparql_api.utils.Symbols;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -14,11 +13,16 @@ import org.apache.jena.rdfconnection.RDFDatasetConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
 public class RDFConnectionUtils {
+
+    /** Symbol for placing a connection (TODO supplier?) into an arq context */
+    public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
+
 
     public static SparqlQueryConnection unwrapQueryConnection(SparqlQueryConnection conn) {
         SparqlQueryConnection result;
@@ -168,7 +172,7 @@ public class RDFConnectionUtils {
                 public UpdateProcessor postProcess(UpdateProcessor qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
-                        cxt.set(Symbols.symConnection, result[0]);
+                        cxt.set(CONNECTION_SYMBOL, result[0]);
                         contextMutator.accept(cxt);
                     }
 
@@ -178,7 +182,7 @@ public class RDFConnectionUtils {
                 public QueryExecution postProcess(QueryExecution qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
-                        cxt.set(Symbols.symConnection, result[0]);
+                        cxt.set(CONNECTION_SYMBOL, result[0]);
                         contextMutator.accept(cxt);
                     }
 
