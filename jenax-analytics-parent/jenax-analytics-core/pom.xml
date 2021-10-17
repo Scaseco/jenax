@@ -30,6 +30,10 @@
 			<artifactId>jenax-arq-relations</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-aggregators</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>

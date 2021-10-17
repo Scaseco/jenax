@@ -3,7 +3,6 @@ package org.aksw.jenax.arq.aggregation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.triple.TripleUtils;
@@ -14,48 +13,66 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.GraphFactory;
-import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.Template;
 
-/**
- * Graph accumulation of bindings via a template.
- * Template blank nodes are remapped and the mapping is kept in the bnodeMap.
- *
- * @author raven
- *
- */
-public class AccGraph// implements Acc<Graph> {
+public class AccGraph
+    implements Acc<Graph>
 {
     protected Graph graph;
     protected Template template;
-    protected Map<Node, Node> bnodeMap;
+    protected Node reverse;
 
     public AccGraph(Template template) {
-        this(template, GraphFactory.createDefaultGraph(), new HashMap<>());
+       this(template, NodeValue.FALSE.asNode());
     }
 
-    public AccGraph(Template template, Graph graph, Map<Node,Node> bnodeMap) {
+    public AccGraph(Template template, Node reverse) {
+        this(GraphFactory.createDefaultGraph(), template, reverse);
+    }
+
+    public AccGraph(Graph graph, Template template, Node reverse) {
         super();
-        this.template = Objects.requireNonNull(template);
-        this.graph = Objects.requireNonNull(graph);
-        this.bnodeMap = bnodeMap;
+        this.graph = graph;
+        this.template = template;
+        this.reverse = reverse;
     }
 
+    public static boolean isTrue(Object o) {
+        boolean result = Boolean.TRUE.equals(o) || (o instanceof Number && ((Number)o).intValue() == 1);
+        return result;
+    }
+
+    @Override
     public void accumulate(Binding binding) {
-        for(Triple t : template.getTriples()) {
-            Triple newT = TemplateLib.subst(t, binding, bnodeMap);
-            if(newT.isConcrete()) {
-                graph.add(newT);
+        Set<Triple> triples = new HashSet<Triple>();
+        Map<Node, Node> bNodeMap = new HashMap<Node, Node>();
+        template.subst(triples, bNodeMap, binding);
+
+        //Node TRUE = NodeValue.TRUE.asNode();
+
+        Node node = reverse.isVariable()
+                ? binding.get((Var)reverse)
+                : reverse
+                ;
+
+        boolean doReverse = node.isLiteral()
+                ? isTrue(node.getLiteralValue())
+                : false
+                ;
+
+
+        for(Triple triple : triples) {
+            if(doReverse) {
+                triple = TripleUtils.swap(triple);
             }
+
+            graph.add(triple);
         }
     }
 
-    public Map<Node, Node> getBnodeMap() {
-        return bnodeMap;
-    }
-
-    // @Override
+    @Override
     public Graph getValue() {
         return graph;
     }
+
 }

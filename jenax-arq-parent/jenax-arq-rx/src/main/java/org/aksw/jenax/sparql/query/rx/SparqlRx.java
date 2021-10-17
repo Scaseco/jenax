@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.jenax.arq.aggregation.AccGraph;
+import org.aksw.jenax.arq.aggregation.AccGraph2;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
@@ -610,13 +610,13 @@ public class SparqlRx {
             // For future reference: If we get an empty results by using the query object, we probably have wrapped a variable with NodeValue.makeNode.
             .execSelectRaw(() -> qeSupp.apply(clone))
             //.groupBy(createGrouper(primaryKeyVars, false)::apply)
-            .lift(FlowableOperatorSequentialGroupBy.<Binding, Binding, AccGraph>create(
+            .lift(FlowableOperatorSequentialGroupBy.<Binding, Binding, AccGraph2>create(
                     grouper::apply,
-                    groupKey -> new AccGraph(template),
-                    AccGraph::accumulate))
+                    groupKey -> new AccGraph2(template),
+                    AccGraph2::accumulate))
             .map(keyAndAcc -> {
                 Binding groupKey = keyAndAcc.getKey();
-                AccGraph accGraph = keyAndAcc.getValue();
+                AccGraph2 accGraph = keyAndAcc.getValue();
                 Map<Node, Node> bnodeMap = accGraph.getBnodeMap();
 
                 // TODO The accumulator should manage a blank node label map which we re-use to map the rootNode

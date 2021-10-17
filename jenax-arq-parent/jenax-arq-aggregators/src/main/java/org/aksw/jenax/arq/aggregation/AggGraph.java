@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.aksw.commons.collections.SetUtils;
-import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.BasicPattern;
@@ -13,6 +12,8 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
+
+import com.google.common.collect.Sets;
 
 public class AggGraph
     implements Agg<Graph>
