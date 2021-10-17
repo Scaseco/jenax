@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.io.NTripleUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.tuple.TupleAccessorTriple;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingHashMap;
@@ -212,4 +214,18 @@ public class TripleUtils {
 
         return result;
     }
+
+    /** Returns true if the triple survives a serialization/deserialization round trip */
+    public static boolean isValid(Triple t) {
+        boolean result;
+        try {
+            String str = NodeFmtLib.str(t) + " .";
+            NTripleUtils.parseNTriplesString(str);
+            result = true;
+        } catch(Exception e) {
+            result = false;
+        }
+        return result;
+    }
+
 }

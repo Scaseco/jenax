@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.aksw.jena_sparql_api.rx.ResultSetRx;
-import org.aksw.jena_sparql_api.rx.ResultSetRxImpl;
+import org.aksw.jenax.sparql.query.rx.ResultSetRx;
+import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
 import org.apache.jena.query.Query;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;

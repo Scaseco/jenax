@@ -17,13 +17,11 @@ import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.UnaryRelation;
 import org.aksw.jena_sparql_api.rx.AccGraph;
-import org.aksw.jena_sparql_api.utils.IteratorResultSetBinding;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -44,11 +42,11 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingHashMap;
+import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
-import org.apache.jena.sparql.util.VarUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,7 +297,7 @@ public class SparqlRx {
 //    }
 
     public static Entry<List<Var>, Flowable<Binding>> mapToFlowable(ResultSet rs) {
-        Iterator<Binding> it = new IteratorResultSetBinding(rs);
+        Iterator<Binding> it = new QueryIteratorResultSet(rs);
         Iterable<Binding> i = () -> it;
 
         List<Var> vars = VarUtils.toList(rs.getResultVars());
@@ -467,23 +465,6 @@ public class SparqlRx {
     }
 
 
-    public static Single<Range<Long>> fetchCountConcept(SparqlQueryConnection conn, UnaryRelation concept, Long itemLimit, Long rowLimit) {
-        return fetchCountConcept(conn::query, concept, itemLimit, rowLimit);
-    }
-
-
-    public static Single<Range<Long>> fetchCountConcept(Function<? super Query, ? extends QueryExecution> qef, UnaryRelation concept, Long itemLimit, Long rowLimit) {
-
-        Var outputVar = ConceptUtils.freshVar(concept);
-
-        Long xitemLimit = itemLimit == null ? null : itemLimit + 1;
-        Long xrowLimit = rowLimit == null ? null : rowLimit + 1;
-
-        Query countQuery = ConceptUtils.createQueryCount(concept, outputVar, xitemLimit, xrowLimit);
-
-        return SparqlRx.fetchNumber(qef, countQuery, outputVar)
-                .map(count -> SparqlRx.toRange(count.longValue(), xitemLimit, xrowLimit));
-    }
 //	return ReactiveSparqlUtils.execSelect(() -> qef.createQueryExecution(countQuery))
 //        	.map(b -> b.get(outputVar))
 //        	.map(countNode -> ((Number)countNode.getLiteralValue()).longValue())

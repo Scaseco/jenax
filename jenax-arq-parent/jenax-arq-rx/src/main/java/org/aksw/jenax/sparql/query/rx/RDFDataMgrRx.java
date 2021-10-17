@@ -17,11 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.AllocScopePolicy;
-import org.aksw.jena_sparql_api.rx.BlankNodeAllocatorAsGivenOrRandom;
 import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromPipedRDFIterator;
+import org.aksw.jenax.arq.util.node.BlankNodeAllocatorAsGivenOrRandom;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.sparql.query.rx.StreamUtils.QuadEncoderDistinguish;
@@ -30,8 +30,6 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.ext.com.google.common.base.Predicate;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
@@ -516,7 +514,7 @@ public class RDFDataMgrRx {
 //                                 || list.get(0).getGraph().equals(t.getGraph())))
             .compose(FlowOfQuadsOps.groupToList())
             .map(Entry::getValue)
-            .map(list -> list.stream().map(RDFDataMgrRx::decodeDistinguished)
+            .map(list -> list.stream().map(StreamUtils::decodeDistinguished)
             .collect(Collectors.toList()))
             .map(QuadPatternUtils::createResourceFromQuads);
 

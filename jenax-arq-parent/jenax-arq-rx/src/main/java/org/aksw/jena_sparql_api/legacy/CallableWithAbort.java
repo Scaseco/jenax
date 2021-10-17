@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.rx;
+package org.aksw.jena_sparql_api.legacy;
 
 import java.util.concurrent.Callable;
 

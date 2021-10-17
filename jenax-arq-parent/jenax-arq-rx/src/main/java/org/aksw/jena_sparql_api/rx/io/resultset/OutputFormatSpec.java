@@ -3,14 +3,14 @@ package org.aksw.jena_sparql_api.rx.io.resultset;
 import java.util.Collection;
 
 import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.resultset.ResultSetLang;
 
 public class OutputFormatSpec {
-	/* The output mode - triples, quads, bindings or json */
+    /* The output mode - triples, quads, bindings or json */
     protected OutputMode outputMode;
 
     /* The output language for rdf - may be described in more detail by the out*Format */
@@ -22,7 +22,7 @@ public class OutputFormatSpec {
     /* TODO Add support for result set langs */
     // protected ResultSetLang outResultSetLang = null;
 
-    
+
     public OutputFormatSpec(OutputMode outputMode, RDFFormat outRdfFormat, Lang outLang) {
         super();
         this.outputMode = outputMode;
@@ -46,7 +46,7 @@ public class OutputFormatSpec {
      * Determine the output format.
      * The 'outFormat' parameter forces a specific output format.
      * As a falback Analyze a given collection of statements and
-     * 
+     *
      * @param outFormat
      * @param tripleFormat
      * @param quadFormat

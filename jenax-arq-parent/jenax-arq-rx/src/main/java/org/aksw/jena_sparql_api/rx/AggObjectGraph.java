@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.aksw.jena_sparql_api.mapper.Accumulator;
-import org.aksw.jena_sparql_api.mapper.Aggregator;
+import org.aksw.commons.collector.domain.Accumulator;
+import org.aksw.commons.collector.domain.Aggregator;
 import org.apache.jena.ext.com.google.common.collect.HashMultimap;
 import org.apache.jena.ext.com.google.common.collect.SetMultimap;
 import org.apache.jena.graph.Graph;

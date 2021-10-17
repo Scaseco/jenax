@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.utils.graph.GraphWrapperTransform;
-import org.aksw.jena_sparql_api.utils.io.NTripleUtils;
+import org.aksw.jenax.arq.util.io.NTripleUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Graph;
@@ -112,18 +111,6 @@ public class GraphUtils {
         return result;
     }
 
-    public static boolean isValid(Triple t) {
-        boolean result;
-        try {
-            String str = NodeFmtLib.str(t) + " .";
-            NTripleUtils.parseNTriplesString(str);
-            result = true;
-        } catch(Exception e) {
-            result = false;
-        }
-        return result;
-    }
-
     /**
      * Fix for an issue we observed in some HDT files:
      * This method fixes triples that have a graph component in the object position by discarding
@@ -178,6 +165,6 @@ public class GraphUtils {
 
     public static Graph wrapWithValidation(Graph base) {
         return new GraphWrapperTransform(base, it -> it
-                .filterKeep(GraphUtils::isValid));
+                .filterKeep(TripleUtils::isValid));
     }
 }

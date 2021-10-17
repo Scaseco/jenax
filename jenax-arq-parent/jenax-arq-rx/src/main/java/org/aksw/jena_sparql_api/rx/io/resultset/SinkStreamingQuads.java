@@ -7,14 +7,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.util.iri.PrefixUtils;
-import org.aksw.jena_sparql_api.utils.GraphUtils;
-import org.aksw.jena_sparql_api.utils.io.StreamRDFDeferred;
+import org.aksw.jenax.arq.util.prefix.PrefixUtils;
+import org.aksw.jenax.arq.util.streamrdf.StreamRDFDeferred;
+import org.aksw.jenax.arq.util.triple.GraphUtils;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;

@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.utils.CollectionFromTable;
+import org.aksw.jenax.arq.util.binding.CollectionFromTable;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.ext.com.google.common.collect.Iterables;

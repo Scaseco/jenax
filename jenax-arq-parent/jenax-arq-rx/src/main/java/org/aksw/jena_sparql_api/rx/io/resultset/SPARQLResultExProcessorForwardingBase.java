@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.rx.io.resultset;
 
 import java.util.Iterator;
 
-import org.aksw.jena_sparql_api.stmt.SPARQLResultEx;
+import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ResultSet;

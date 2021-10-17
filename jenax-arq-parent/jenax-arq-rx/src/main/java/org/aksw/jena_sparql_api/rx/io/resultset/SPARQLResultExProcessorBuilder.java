@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import org.aksw.commons.io.util.StdIo;
 import org.aksw.jena_sparql_api.json.RdfJsonUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
@@ -26,7 +26,7 @@ import org.apache.jena.sparql.core.Var;
 import com.google.gson.JsonElement;
 
 public class SPARQLResultExProcessorBuilder {
-	protected OutputMode outputMode;
+    protected OutputMode outputMode;
 
     protected Supplier<? extends OutputStream> out;
     protected Supplier<? extends OutputStream> err;
@@ -43,135 +43,135 @@ public class SPARQLResultExProcessorBuilder {
     /* The collection of statements can be used for auto-configuration of the output mode -
      * it is NOT used for processing! */
     protected Collection<? extends SparqlStmt> stmts;
-    
+
     public Supplier<? extends OutputStream> getOut() {
-		return out;
-	}
-	
-	public OutputMode getOutputMode() {
-		return outputMode;
-	}
-
-	public SPARQLResultExProcessorBuilder setOutputMode(OutputMode outputMode) {
-		this.outputMode = outputMode;
-		return this;
-	}
-
-	public SPARQLResultExProcessorBuilder setOut(Supplier<? extends OutputStream> out) {
-		this.out = out;
-		return this;
-	}
-	
-	public Supplier<? extends OutputStream> getErr() {
-		return err;
-	}
-
-	public SPARQLResultExProcessorBuilder setErr(Supplier<? extends OutputStream> err) {
-		this.err = err;
-		return this;
-	}
-
-	public String getOutFormat() {
-		return outFormat;
-	}
-	
-	public SPARQLResultExProcessorBuilder setOutFormat(String outFormat) {
-		this.outFormat = outFormat;
-		return this;
-	}
-	
-	public PrefixMapping getPrefixMapping() {
-		return prefixMapping;
-	}
-
-	public SPARQLResultExProcessorBuilder setPrefixMapping(PrefixMapping prefixMapping) {
-		this.prefixMapping = prefixMapping;
-		return this;
-	}
-	
-	public RDFFormat getTripleFormat() {
-		return tripleFormat;
-	}
-
-	public SPARQLResultExProcessorBuilder setTripleFormat(RDFFormat tripleFormat) {
-		this.tripleFormat = tripleFormat;
-		return this;
-	}
-	
-	public RDFFormat getQuadFormat() {
-		return quadFormat;
-	}
-	
-	public SPARQLResultExProcessorBuilder setQuadFormat(RDFFormat quadFormat) {
-		this.quadFormat = quadFormat;
-		return this;
-	}
-	
-	public long getDeferCount() {
-		return deferCount;
-	}
-
-	public SPARQLResultExProcessorBuilder setDeferCount(long deferCount) {
-		this.deferCount = deferCount;
-		return this;
-	}
-
-	public boolean isJqMode() {
-		return jqMode;
-	}
-	
-	public SPARQLResultExProcessorBuilder setJqMode(boolean jqMode) {
-		this.jqMode = jqMode;
-		return this;
-	}
-	
-	public int getJqDepth() {
-		return jqDepth;
-	}
-
-	public SPARQLResultExProcessorBuilder setJqDepth(int jqDepth) {
-		this.jqDepth = jqDepth;
-		return this;
-	}
-	
-	public boolean isJqFlatMode() {
-		return jqFlatMode;
-	}
-
-	public SPARQLResultExProcessorBuilder setJqFlatMode(boolean jqFlatMode) {
-		this.jqFlatMode = jqFlatMode;
-		return this;
-	}
-	
-	public Closeable getCloseAction() {
-		return closeAction;
-	}
-
-	public SPARQLResultExProcessorBuilder setCloseAction(Closeable closeAction) {
-		this.closeAction = closeAction;
-		return this;
-	}
-	
-    public Collection<? extends SparqlStmt> getStmts() {
-		return stmts;
-	}
-
-	public SPARQLResultExProcessorBuilder setStmts(Collection<? extends SparqlStmt> stmts) {
-		this.stmts = stmts;
-		return this;
-	}
-
-	public SPARQLResultExProcessor build() {
-    	return configureProcessor(
-    			out.get(), err.get(),
-    			outFormat, stmts == null ? Collections.emptyList(): stmts, prefixMapping,
-    			tripleFormat, quadFormat, deferCount,
-    			jqMode, jqDepth, jqFlatMode, closeAction);
+        return out;
     }
-    
-    
-	
-	
+
+    public OutputMode getOutputMode() {
+        return outputMode;
+    }
+
+    public SPARQLResultExProcessorBuilder setOutputMode(OutputMode outputMode) {
+        this.outputMode = outputMode;
+        return this;
+    }
+
+    public SPARQLResultExProcessorBuilder setOut(Supplier<? extends OutputStream> out) {
+        this.out = out;
+        return this;
+    }
+
+    public Supplier<? extends OutputStream> getErr() {
+        return err;
+    }
+
+    public SPARQLResultExProcessorBuilder setErr(Supplier<? extends OutputStream> err) {
+        this.err = err;
+        return this;
+    }
+
+    public String getOutFormat() {
+        return outFormat;
+    }
+
+    public SPARQLResultExProcessorBuilder setOutFormat(String outFormat) {
+        this.outFormat = outFormat;
+        return this;
+    }
+
+    public PrefixMapping getPrefixMapping() {
+        return prefixMapping;
+    }
+
+    public SPARQLResultExProcessorBuilder setPrefixMapping(PrefixMapping prefixMapping) {
+        this.prefixMapping = prefixMapping;
+        return this;
+    }
+
+    public RDFFormat getTripleFormat() {
+        return tripleFormat;
+    }
+
+    public SPARQLResultExProcessorBuilder setTripleFormat(RDFFormat tripleFormat) {
+        this.tripleFormat = tripleFormat;
+        return this;
+    }
+
+    public RDFFormat getQuadFormat() {
+        return quadFormat;
+    }
+
+    public SPARQLResultExProcessorBuilder setQuadFormat(RDFFormat quadFormat) {
+        this.quadFormat = quadFormat;
+        return this;
+    }
+
+    public long getDeferCount() {
+        return deferCount;
+    }
+
+    public SPARQLResultExProcessorBuilder setDeferCount(long deferCount) {
+        this.deferCount = deferCount;
+        return this;
+    }
+
+    public boolean isJqMode() {
+        return jqMode;
+    }
+
+    public SPARQLResultExProcessorBuilder setJqMode(boolean jqMode) {
+        this.jqMode = jqMode;
+        return this;
+    }
+
+    public int getJqDepth() {
+        return jqDepth;
+    }
+
+    public SPARQLResultExProcessorBuilder setJqDepth(int jqDepth) {
+        this.jqDepth = jqDepth;
+        return this;
+    }
+
+    public boolean isJqFlatMode() {
+        return jqFlatMode;
+    }
+
+    public SPARQLResultExProcessorBuilder setJqFlatMode(boolean jqFlatMode) {
+        this.jqFlatMode = jqFlatMode;
+        return this;
+    }
+
+    public Closeable getCloseAction() {
+        return closeAction;
+    }
+
+    public SPARQLResultExProcessorBuilder setCloseAction(Closeable closeAction) {
+        this.closeAction = closeAction;
+        return this;
+    }
+
+    public Collection<? extends SparqlStmt> getStmts() {
+        return stmts;
+    }
+
+    public SPARQLResultExProcessorBuilder setStmts(Collection<? extends SparqlStmt> stmts) {
+        this.stmts = stmts;
+        return this;
+    }
+
+    public SPARQLResultExProcessor build() {
+        return configureProcessor(
+                out.get(), err.get(),
+                outFormat, stmts == null ? Collections.emptyList(): stmts, prefixMapping,
+                tripleFormat, quadFormat, deferCount,
+                jqMode, jqDepth, jqFlatMode, closeAction);
+    }
+
+
+
+
 //	public static SPARQLResultExProcessor outputQuads(RDFFormat outFormat) {
 //	    SPARQLResultExProcessor resultProcessor = SparqlIntegrateCmdImpls.configureProcessor(
 //	            MainCliNamedGraphStream.out, System.err,
@@ -185,25 +185,25 @@ public class SPARQLResultExProcessorBuilder {
 //	}
 
     public static SPARQLResultExProcessorBuilder create() {
-    	SPARQLResultExProcessorBuilder result = new SPARQLResultExProcessorBuilder();
-    	result
-    		.setOut(() -> StdIo.openStdOutWithCloseShield())
-    		.setErr(() -> StdIo.openStdErrWithCloseShield())
-    		.setDeferCount(20)
-    		.setTripleFormat(RDFFormat.TURTLE_BLOCKS)
-    		.setQuadFormat(RDFFormat.TRIG_BLOCKS)
-    		.setJqMode(false)
-    		.setJqDepth(3)
-    		.setJqFlatMode(false);
+        SPARQLResultExProcessorBuilder result = new SPARQLResultExProcessorBuilder();
+        result
+            .setOut(() -> StdIo.openStdOutWithCloseShield())
+            .setErr(() -> StdIo.openStdErrWithCloseShield())
+            .setDeferCount(20)
+            .setTripleFormat(RDFFormat.TURTLE_BLOCKS)
+            .setQuadFormat(RDFFormat.TRIG_BLOCKS)
+            .setJqMode(false)
+            .setJqDepth(3)
+            .setJqFlatMode(false);
 
-    	return result;
+        return result;
     }
 
     public static SPARQLResultExProcessorBuilder createForQuadOutput() {
-    	return create().setOutputMode(OutputMode.QUAD);
+        return create().setOutputMode(OutputMode.QUAD);
     }
 
-	
+
     /**
      *
      * @param outFormat
@@ -265,13 +265,13 @@ public class SPARQLResultExProcessorBuilder {
        }
        return effectiveProcessor;
    }
-   
-   
+
+
 
    /**
     * Configure a SPARQLResultExProcessor to delegate
     * JSON, triples/quads and bindings to the appropriate target.
-    * 
+    *
     * TODO Wrap as a builder
     * @param outputMode
     * @param out

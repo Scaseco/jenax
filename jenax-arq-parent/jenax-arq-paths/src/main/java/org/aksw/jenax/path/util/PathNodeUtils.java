@@ -11,7 +11,7 @@ import org.apache.jena.graph.Node;
 public class PathNodeUtils {
     /**
      * Collects all nodes in a {@code Path<Node>} object.
-     * Descends into literals that represent property paths.
+     * Descends into literals that represenot property paths.
      * TODO Descend into literals representing queries
      *
      */

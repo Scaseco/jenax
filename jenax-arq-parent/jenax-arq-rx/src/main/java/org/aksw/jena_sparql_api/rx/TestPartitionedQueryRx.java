@@ -1,19 +1,5 @@
 package org.aksw.jena_sparql_api.rx;
 
-import java.util.List;
-
-import org.aksw.jena_sparql_api.common.DefaultPrefixes;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.Query;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sys.JenaSystem;
-
 //public class TestPartitionedQueryRx {
 //    public static void main(String[] args) {
 //        JenaSystem.init();

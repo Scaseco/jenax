@@ -30,7 +30,7 @@ public interface ResultSetRx {
 
     default QueryIterator asQueryIterator() {
         Flowable<Binding> bindingFlow = getBindings();
-        return QueryIteratorUtils.createFromFlowable(bindingFlow);
+        return QueryIteratorUtils.toQueryIterator(bindingFlow);
     }
 
     /**

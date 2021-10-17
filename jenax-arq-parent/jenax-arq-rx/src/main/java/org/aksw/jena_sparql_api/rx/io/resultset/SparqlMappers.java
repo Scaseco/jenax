@@ -12,14 +12,14 @@ import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.rx.op.RxOps;
 import org.aksw.jena_sparql_api.json.RdfJsonUtils;
 import org.aksw.jena_sparql_api.rx.util.connection.RDFConnectionUtils;
-import org.aksw.jena_sparql_api.stmt.SPARQLResultEx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
-import org.aksw.jena_sparql_api.utils.ResultSetUtils;
+import org.aksw.jenax.arq.util.execution.ResultSetUtils;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.AggBuilderDataset;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
@@ -296,7 +296,7 @@ public class SparqlMappers {
             result = createMapperBinding(stmts, sparqlResultVisitor)
                 .andThen(bindings -> bindings
                         .reduceWith(collectorSupp::get, (supp, binding) -> { supp.onResultSet(
-                                ResultSetUtils.create2(unionProjectVars,
+                                ResultSetUtils.createUsingVars(unionProjectVars,
                                         Collections.singleton(binding).iterator())); return supp; })
                         .map(collector -> collector.getResult(outputMode))
                         .blockingGet());
