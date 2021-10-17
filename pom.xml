@@ -20,6 +20,7 @@
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
+		<module>jenax-io-core</module>
 	</modules>
 
 	<issueManagement>
