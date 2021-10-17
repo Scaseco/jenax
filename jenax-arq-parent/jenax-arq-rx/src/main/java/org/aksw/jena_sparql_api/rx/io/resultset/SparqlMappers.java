@@ -10,8 +10,8 @@ import java.util.function.Supplier;
 
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.rx.op.RxOps;
-import org.aksw.jena_sparql_api.json.RdfJsonUtils;
 import org.aksw.jena_sparql_api.rx.util.connection.RDFConnectionUtils;
+import org.aksw.jenax.arq.json.RdfJsonUtils;
 import org.aksw.jenax.arq.util.execution.ResultSetUtils;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;

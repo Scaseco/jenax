@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.aksw.commons.io.util.StdIo;
-import org.aksw.jena_sparql_api.json.RdfJsonUtils;
-import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
+import org.aksw.jenax.arq.json.RdfJsonUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.query.Dataset;

@@ -17,10 +17,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.AllocScopePolicy;
-import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromPipedRDFIterator;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
 import org.aksw.jenax.arq.util.node.BlankNodeAllocatorAsGivenOrRandom;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;

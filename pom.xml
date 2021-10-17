@@ -18,6 +18,7 @@
 		<module>jenax-annotations-parent</module>
 		<module>jenax-core-parent</module>
 		<module>jenax-arq-parent</module>
+		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
 	</modules>
@@ -298,6 +299,12 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datasets-orderaware</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-aggregators</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.rx.io.resultset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;

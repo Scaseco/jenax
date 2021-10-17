@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-analytics</artifactId>
+	<artifactId>jenax-arq-aggregators</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -17,19 +17,24 @@
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-collectors</artifactId>
+			<artifactId>aksw-commons-utils</artifactId>
+		</dependency>
+
+		<!-- For PolaritySet -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collections</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-collections</artifactId>
+			<artifactId>jenax-arq-rdfterm</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-relations</artifactId>
+			<artifactId>jenax-arq-functions</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
@@ -37,10 +42,19 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+		</dependency>
 
 		<!-- Unit Testing -->
 		<dependency>
@@ -49,19 +63,11 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--
 		<dependency>
-			<groupId>org.aksw.jenax-api</groupId>
+			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-resources-prefixes</artifactId>
-			<scope>test</scope>
-		</dependency>
--->
 
 	</dependencies>
 </project>

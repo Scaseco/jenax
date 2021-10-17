@@ -16,10 +16,10 @@ import java.util.Objects;
 
 import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.commons.util.entity.EntityInfoImpl;
-import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
 import org.aksw.jenax.arq.util.streamrdf.WriterStreamRDFBaseUtils;

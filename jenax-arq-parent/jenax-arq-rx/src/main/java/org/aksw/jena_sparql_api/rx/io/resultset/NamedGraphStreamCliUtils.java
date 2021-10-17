@@ -20,6 +20,7 @@ import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor.Provenance;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
+import org.aksw.jenax.sparql.query.rx.StreamUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
@@ -147,9 +148,9 @@ public class NamedGraphStreamCliUtils {
                     Callable<TypedInputStream> inSupp = arg.getValue();
                     Flowable<Dataset> r = RDFDataMgrRx.createFlowableDatasets(inSupp)
                     // TODO Decoding of distinguished names should go into the util method
-                        .map(ds -> NodeTransformLib2.applyNodeTransform(RDFDataMgrRx::decodeDistinguished, ds));
+                        .map(ds -> NodeTransformLib2.applyNodeTransform(StreamUtils::decodeDistinguished, ds));
                     return r;
-                });O
+                });
 
         return result;
     }

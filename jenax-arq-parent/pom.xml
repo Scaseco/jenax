@@ -28,6 +28,7 @@
 		<module>jenax-arq-trackingwalker</module>
 		<module>jenax-arq-relations</module>
 		<module>jenax-arq-collections</module>
+		<module>jenax-arq-aggregators</module>
 		<module>jenax-arq-rx</module>
 		<module>jenax-arq-quadengine</module>
 

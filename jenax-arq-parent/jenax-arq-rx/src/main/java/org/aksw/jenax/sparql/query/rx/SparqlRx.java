@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.jena_sparql_api.rx.AccGraph;
+import org.aksw.jenax.arq.aggregation.AccGraph;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;

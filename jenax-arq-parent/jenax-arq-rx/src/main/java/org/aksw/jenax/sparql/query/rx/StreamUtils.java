@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.ext.com.google.common.collect.Sets;
