@@ -20,9 +20,9 @@ import org.aksw.jena_sparql_api.io.binseach.CharSequenceFromSeekable;
 import org.aksw.jena_sparql_api.io.binseach.DecodedDataBlock;
 import org.aksw.jena_sparql_api.io.binseach.ReverseCharSequenceFromSeekable;
 import org.aksw.jena_sparql_api.io.deprecated.MatcherFactory;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.SplittableCompressionCodec.READ_MODE;
+import org.apache.hadoop.io.compress.bzip2.CBZip2InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,21 +37,17 @@ public class BlockSourceBzip2
 {
     private static final Logger logger = LoggerFactory.getLogger(BlockSourceBzip2.class);
 
-
-//	public static final byte[] magic = new BigInteger("425a6839", 16).toByteArray();
-    // The magic number in characters is: BZh91AY&SY
-    // TODO Block size is a parameter - we should parse it out
-
     public static final String COMPRESSED_MAGIC_STR = "1AY&SY";
 
-//    public static final String magicStr = "BZh91AY&SY";
-//    public static final byte[] magic = new BigInteger("425a6839314159265359", 16).toByteArray();
-//    public static final Pattern fwdMagicPattern = Pattern.compile("(BZh9)?" + COMPRESSED_MAGIC_STR.replaceAll("&", "\\&")); //, Pattern.LITERAL);
-//    public static final Pattern bwdMagicPattern = Pattern.compile(
-//            new StringBuilder(COMPRESSED_MAGIC_STR).reverse().toString().replaceAll("&", "\\&") + "(9hZB)?");//, Pattern.LITERAL);
+    public static final Pattern fwdMagicPattern = Pattern.compile("1AY&SY", Pattern.LITERAL);
+    public static final Pattern bwdMagicPattern = Pattern.compile("YS&YA1", Pattern.LITERAL);
 
-    public static final Pattern fwdMagicPattern = Pattern.compile("1AY\\&SY");
-    public static final Pattern bwdMagicPattern = Pattern.compile("YS\\&YA1");
+    /**
+     * The maximum number of bytes that may be scanned in order to find a block start
+     * Bzip blocks are typically 900K uncompressed; unfortunately the
+     * CBZip2InputStream API does not give access to the actual block size used.
+     */
+    public static final int MAX_SEARCH_RANGE = 1000000;
 
     protected SeekableSource seekableSource;
 //    protected MatcherFactory fwdBlockStartMatcherFactory;
@@ -103,11 +99,28 @@ public class BlockSourceBzip2
 
 
         InputStream effectiveIn;
-        boolean useHadoop = true;
+        boolean useHadoop = false;
         if (!useHadoop) {
             // The input stream now owns the seekable - closing it closes the seekable!
             InputStream rawIn = Channels.newInputStream(seekable);
-            effectiveIn = new BZip2CompressorInputStream(rawIn, false);
+
+            // Anonymous class which turns end-of-block marker into end of data
+            // Because some none-hadoop components - such as BufferFromInputStream - don't
+            // understand that -2 protocol
+            effectiveIn = new CBZip2InputStream(rawIn, READ_MODE.BYBLOCK) {
+                @Override
+                public int read(byte[] dest, int offs, int len) throws IOException {
+                    int r = super.read(dest, offs, len);
+                    if (r == -2) {
+                        r = -1;
+                    }
+                    return r;
+                }
+            };
+            CBZip2InputStream x;
+
+
+//            effectiveIn = new BZip2CompressorInputStream(rawIn, false);
         } else {
 
 
@@ -155,6 +168,8 @@ public class BlockSourceBzip2
         long internalRequestPos = requestPos - (inclusive ? 0 : 1) + (COMPRESSED_MAGIC_STR.length() - 1);
         Ref<Block> result = blockCache.getIfPresent(internalRequestPos);
 
+        int searchRangeLimit = Math.min(Ints.saturatedCast(internalRequestPos + 1), MAX_SEARCH_RANGE);
+
         if(result == null) {
             Seekable seekable = seekableSource.get(internalRequestPos);
 //            System.out.println("Size: " + seekableSource.size());
@@ -162,7 +177,7 @@ public class BlockSourceBzip2
 
 //            SeekableMatcher matcher = bwdBlockStartMatcherFactory.newMatcher();
 //            boolean didFind = matcher.find(seekable);
-            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, Ints.saturatedCast(internalRequestPos + 1));
+            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, searchRangeLimit);
             Matcher matcher = bwdMagicPattern.matcher(charSequence);
             boolean didFind = matcher.find();
 
@@ -214,12 +229,14 @@ public class BlockSourceBzip2
         long internalRequestPos = requestPos + (inclusive ? 0 : 1);
         Ref<Block> result = blockCache.getIfPresent(internalRequestPos);
 
+        int searchRangeLimit = Math.min(Ints.saturatedCast(seekableSource.size() - internalRequestPos), MAX_SEARCH_RANGE);
+
         if(result == null) {
             Seekable seekable = seekableSource.get(internalRequestPos);
 //            SeekableMatcher matcher = fwdBlockStartMatcherFactory.newMatcher();
 //            boolean didFind = matcher.find(seekable);
 
-            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, Ints.saturatedCast(seekableSource.size() - internalRequestPos));
+            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, searchRangeLimit);
             Matcher matcher = fwdMagicPattern.matcher(charSequence);
             boolean didFind = matcher.find();
 
@@ -263,9 +280,11 @@ public class BlockSourceBzip2
     public boolean hasBlockAfter(long pos) throws IOException {
         boolean result;
         try(Seekable seekable = seekableSource.get(pos + 1)) {
+            int searchRangeLimit = Math.min(Ints.saturatedCast(seekableSource.size() - (pos + 1)), MAX_SEARCH_RANGE);
+
 //            SeekableMatcher matcher = fwdBlockStartMatcherFactory.newMatcher();
 //            result = matcher.find(seekable);
-            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, Ints.saturatedCast(seekableSource.size() - (pos + 1)));
+            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, searchRangeLimit);
             Matcher matcher = fwdMagicPattern.matcher(charSequence);
             result = matcher.find();
         }
@@ -276,11 +295,14 @@ public class BlockSourceBzip2
     public boolean hasBlockBefore(long pos) throws IOException {
         boolean result;
         long internalRequestPos = pos - 1 + (COMPRESSED_MAGIC_STR.length() - 1);
+
+        int searchRangeLimit = Math.min(Ints.saturatedCast(internalRequestPos + 1), MAX_SEARCH_RANGE);
+
         try(Seekable seekable = seekableSource.get(internalRequestPos)) {
 //            SeekableMatcher matcher = bwdBlockStartMatcherFactory.newMatcher();
 //            result = matcher.find(seekable);
 //            try(Seekable clone = seekable.clone()) {
-            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, Ints.saturatedCast(internalRequestPos + 1));
+            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, searchRangeLimit);
             Matcher matcher = bwdMagicPattern.matcher(charSequence);
             result = matcher.find();
 //            }
