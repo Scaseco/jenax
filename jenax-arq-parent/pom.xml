@@ -14,13 +14,15 @@
 	</parent>
 
 	<modules>
+		<module>jenax-arq-anyresource</module>
+		<module>jenax-arq-json</module>
+		<module>jenax-arq-propertypaths</module>
 		<module>jenax-arq-paths</module>
 		<module>jenax-arq-connection</module>
 		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>
 		<module>jenax-arq-utils</module>
 		<module>jenax-arq-rdfterm</module>
-		<module>jenax-arq-dataset-one-ng</module>
 		<module>jenax-arq-rdfnode-in-dataset</module>
 		<module>jenax-arq-constraints</module>
 		<module>jenax-arq-trackingwalker</module>
@@ -28,5 +30,7 @@
 		<module>jenax-arq-collections</module>
 		<module>jenax-arq-rx</module>
 		<module>jenax-arq-quadengine</module>
+
+		<module>jenax-arq-datasets-parent</module>
 	</modules>
 </project>

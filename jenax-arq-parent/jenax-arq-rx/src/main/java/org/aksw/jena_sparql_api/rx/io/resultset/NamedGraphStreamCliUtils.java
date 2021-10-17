@@ -149,7 +149,7 @@ public class NamedGraphStreamCliUtils {
                     // TODO Decoding of distinguished names should go into the util method
                         .map(ds -> NodeTransformLib2.applyNodeTransform(RDFDataMgrRx::decodeDistinguished, ds));
                     return r;
-                });
+                });O
 
         return result;
     }

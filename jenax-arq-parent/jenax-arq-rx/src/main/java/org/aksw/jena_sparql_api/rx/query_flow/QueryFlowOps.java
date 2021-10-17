@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.rx.op;
+package org.aksw.jena_sparql_api.rx.query_flow;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -10,8 +10,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.rx.util.FlowableEx;
-import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowAssign;
-import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowGroupBy;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;

@@ -273,6 +273,12 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-json</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -285,7 +291,13 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-dataset-one-ng</artifactId>
+				<artifactId>jenax-arq-datasets-oneng</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-datasets-orderaware</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

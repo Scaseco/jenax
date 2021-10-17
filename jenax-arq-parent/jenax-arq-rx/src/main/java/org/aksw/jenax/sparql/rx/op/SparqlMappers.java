@@ -298,7 +298,7 @@ public class SparqlMappers {
             result = createMapperBinding(stmts, sparqlResultVisitor)
                 .andThen(bindings -> bindings
                         .reduceWith(collectorSupp::get, (supp, binding) -> { supp.onResultSet(
-                                ResultSetUtils.create2(unionProjectVars,
+                                ResultSetUtils.createUsingVars(unionProjectVars,
                                         Collections.singleton(binding).iterator())); return supp; })
                         .map(collector -> collector.getResult(outputMode))
                         .blockingGet());

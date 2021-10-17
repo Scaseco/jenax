@@ -4,13 +4,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-dataset-one-ng</artifactId>
+	<artifactId>jenax-arq-datasets-orderaware</artifactId>
 	<packaging>jar</packaging>
 
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
-		<artifactId>jenax-arq-parent</artifactId>
+		<artifactId>jenax-arq-datasets-parent</artifactId>
 		<version>4.2.0-1-SNAPSHOT</version>
 	</parent>
 
@@ -24,6 +24,11 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-dboe-storage</artifactId>
 		</dependency>
 
 		<!-- Unit Testing -->
