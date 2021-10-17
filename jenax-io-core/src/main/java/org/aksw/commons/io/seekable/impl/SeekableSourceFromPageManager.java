@@ -15,6 +15,10 @@ public class SeekableSourceFromPageManager
         this.pageManager = pageManager;
     }
 
+    public static SeekableSource create(PageManager pageManager) {
+        return new SeekableSourceFromPageManager(pageManager);
+    }
+
     @Override
     public boolean supportsAbsolutePosition() {
         return true;

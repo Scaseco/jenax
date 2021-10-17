@@ -21,6 +21,7 @@
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
 		<module>jenax-io-core</module>
+		<module>jenax-server-parent</module>
 	</modules>
 
 	<issueManagement>
@@ -277,6 +278,25 @@
 				<artifactId>jenax-arq-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-server-core</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-server-frontends</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-server-standalone</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
