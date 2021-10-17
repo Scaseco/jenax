@@ -8,12 +8,13 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.arq.util.prefix.PrefixMappingTrie;
 import org.apache.jena.ext.com.google.common.io.Resources;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,25 @@ import org.slf4j.LoggerFactory;
 public class DefaultPrefixes {
     private static final Logger logger = LoggerFactory.getLogger(DefaultPrefixes.class);
 
-    public static final PrefixMapping prefixes = new PrefixMappingImpl();
+    static { JenaSystem.init(); }
 
-    static {
+    private static PrefixMapping prefixes;
+
+
+    public static PrefixMapping get() {
+        if (prefixes == null) {
+            synchronized (DefaultPrefixes.class) {
+                if (prefixes == null) {
+                    prefixes = new PrefixMappingTrie();
+                    load(prefixes);
+                }
+            }
+        }
+        return prefixes;
+    }
+
+
+    public static void load(PrefixMapping target) {
         prefixes
             .setNsPrefixes(RDFDataMgr.loadModel("rdf-prefixes/jena-extended.jsonld"))
             .setNsPrefixes(RDFDataMgr.loadModel("rdf-prefixes/arq.jsonld"))

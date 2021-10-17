@@ -152,7 +152,7 @@ public class JenaPluginUtils {
     }
 
     public static void scan(String basePackage, Personality<RDFNode> p) {
-        scan(basePackage, p, DefaultPrefixes.prefixes);
+        scan(basePackage, p, DefaultPrefixes.get());
     }
 
     public static void scan(String basePackage, Personality<RDFNode> p, PrefixMapping pm) {
@@ -178,7 +178,7 @@ public class JenaPluginUtils {
 
     public static void registerResourceClasses(Iterable<Class<?>> classes) {
         for(Class<?> clazz : classes) {
-            registerResourceClass(clazz, BuiltinPersonalities.model, DefaultPrefixes.prefixes);
+            registerResourceClass(clazz, BuiltinPersonalities.model, DefaultPrefixes.get());
         }
     }
 
@@ -190,7 +190,7 @@ public class JenaPluginUtils {
             if(supportsProxying) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Resource> cls = (Class<? extends Resource>)impl;
-                p.add(inter, createImplementation(cls, DefaultPrefixes.prefixes));
+                p.add(inter, createImplementation(cls, DefaultPrefixes.get()));
             }
         }
     }

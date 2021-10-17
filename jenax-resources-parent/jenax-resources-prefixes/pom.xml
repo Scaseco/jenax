@@ -15,27 +15,15 @@
 
 	<build>
 	</build>
-<!-- 		<plugins> -->
-<!-- 			<plugin> -->
-<!-- 				<artifactId>maven-remote-resources-plugin</artifactId> -->
-<!-- 				<version>1.5</version> -->
-<!-- 				<executions> -->
-<!-- 					<execution> -->
-<!-- 						<goals> -->
-<!-- 							<goal>bundle</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
-<!-- 				<configuration> -->
-<!-- 					<includes> -->
-<!-- 						<include>**/*.ddl</include> -->
-<!-- 						<include>**/*.sql</include> -->
-<!-- 					</includes> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
-<!-- 		</plugins> -->
-
 	<dependencies>
+		<!-- Included because of PrefixMappingTrie which for large number of
+		     prefix declarations performs significantly better
+		     than jena's default one -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId> <!-- for prefixes we need riot and models -->
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId> <!-- for prefixes we need riot and models -->

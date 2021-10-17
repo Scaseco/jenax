@@ -40,21 +40,21 @@ public class TypeDeciderImpl
 
     @Override
     public String toString() {
-    	return "TypeDeciderImpl ["
-    			+ "typeProperty= " + typeProperty + ", "
-    			+ "nodeToClass.size=" + nodeToClass.size() + ", "
-    			+ "classToNode.size=" + classToNode.size() + "]";
+        return "TypeDeciderImpl ["
+                + "typeProperty= " + typeProperty + ", "
+                + "nodeToClass.size=" + nodeToClass.size() + ", "
+                + "classToNode.size=" + classToNode.size() + "]";
     }
-    
+
     public TypeDeciderImpl() {
-        this(RDF.type, new HashMap<>(), new HashMap<>(), DefaultPrefixes.prefixes);
+        this(RDF.type, new HashMap<>(), new HashMap<>(), DefaultPrefixes.get());
     }
 
     public TypeDeciderImpl(
-    		Property typeProperty,
-    		Map<Node, Class<?>> nodeToClass,
-    		Map<Class<?>, Node> classToNode,
-    		PrefixMapping prefixMapping) {
+            Property typeProperty,
+            Map<Node, Class<?>> nodeToClass,
+            Map<Class<?>, Node> classToNode,
+            PrefixMapping prefixMapping) {
         super();
         this.typeProperty = typeProperty;
         this.nodeToClass = nodeToClass;
@@ -72,14 +72,14 @@ public class TypeDeciderImpl
     }
 
     public TypeDeciderImpl scan(Class<?> protoClass) {
-		String basePackage = protoClass.getPackage().getName();
-		
-		Map<Class<?>, Node> map = scan(basePackage);
-		putAll(map);
-    	
-    	return this;
+        String basePackage = protoClass.getPackage().getName();
+
+        Map<Class<?>, Node> map = scan(basePackage);
+        putAll(map);
+
+        return this;
     }
-    
+
     // TODO We may want to take the type hierarchy on the RDF level into account
     // However, we should not require to rely on it
 
@@ -122,90 +122,90 @@ public class TypeDeciderImpl
                 .addProperty(typeProperty, rdfNode);
         }
     }
-    
-	public TypeDeciderImpl registerClasses(Class<?> ... classes) {
-		return registerClasses(Arrays.asList(classes));
-	}
-  
+
+    public TypeDeciderImpl registerClasses(Class<?> ... classes) {
+        return registerClasses(Arrays.asList(classes));
+    }
+
     public TypeDeciderImpl registerClasses(Iterable<Class<?>> classes) {
-	    for(Class<?> clazz : classes) {
-		    Map<Class<?>, Node> map = processClass(clazz, prefixMapping);
-		    putAll(map);
-	    }
-	    return this;
+        for(Class<?> clazz : classes) {
+            Map<Class<?>, Node> map = processClass(clazz, prefixMapping);
+            putAll(map);
+        }
+        return this;
     }
 
 
     public static Map<Class<?>, Node> scan(String basePackage) {
-        Map<Class<?>, Node> result = scan(basePackage, DefaultPrefixes.prefixes);
+        Map<Class<?>, Node> result = scan(basePackage, DefaultPrefixes.get());
         return result;
     }
-    
+
 //    public static Map<Class<?>, Node> scan(Class<?> clazz, PrefixMapping prefixMapping) {
 //    }
-    
-    
+
+
     public static Map<Class<?>, Node> processClass(Class<?> clazz, PrefixMapping prefixMapping) {
-    	Map<Class<?>, Node> result;
-    	
-    	RdfType rdfType = clazz.getAnnotation(RdfType.class);
-    	RdfTypeNs rdfTypeNs = clazz.getAnnotation(RdfTypeNs.class);
-		
-    	// TODO It is an error to have both annotations set
-    	
-    	if(rdfTypeNs != null) {
+        Map<Class<?>, Node> result;
+
+        RdfType rdfType = clazz.getAnnotation(RdfType.class);
+        RdfTypeNs rdfTypeNs = clazz.getAnnotation(RdfTypeNs.class);
+
+        // TODO It is an error to have both annotations set
+
+        if(rdfTypeNs != null) {
             String ns = rdfTypeNs.value();
-			String uri = prefixMapping.getNsPrefixURI(ns);
-			if(uri == null) {
-				throw new RuntimeException("Undefined prefix: " + ns + " on class " + clazz);
-			}
+            String uri = prefixMapping.getNsPrefixURI(ns);
+            if(uri == null) {
+                throw new RuntimeException("Undefined prefix: " + ns + " on class " + clazz);
+            }
 //          if(Strings.isNullOrEmpty(iri)) {
 //        	iri = "java://" + clazz.getCanonicalName();
 //        }
-            
-			String localName = clazz.getSimpleName();
-			String expanded = uri + localName;
-            
-            Node node = NodeFactory.createURI(expanded);
-			result = Collections.singletonMap(clazz, node);
 
-    	} else if(rdfType != null ) {
-			
+            String localName = clazz.getSimpleName();
+            String expanded = uri + localName;
+
+            Node node = NodeFactory.createURI(expanded);
+            result = Collections.singletonMap(clazz, node);
+
+        } else if(rdfType != null ) {
+
 //      RdfType rdfType = AnnotationUtils.findAnnotation(beanClass, RdfType.class);
             String iri = rdfType.value();
             if(Strings.isNullOrEmpty(iri)) {
-            	iri = "java://" + clazz.getCanonicalName();
+                iri = "java://" + clazz.getCanonicalName();
             }
-            
+
             String expanded = prefixMapping.expandPrefix(iri);
             Node node = NodeFactory.createURI(expanded);
-			result = Collections.singletonMap(clazz, node);
-		} else {
-			result = Collections.emptyMap();
-		}
+            result = Collections.singletonMap(clazz, node);
+        } else {
+            result = Collections.emptyMap();
+        }
 
-		return result;
+        return result;
     }
 
     public static Map<Class<?>, Node> scan(String basePackage, PrefixMapping prefixMapping) {
       Map<Class<?>, Node> result = new HashMap<>();
 
-    	Set<ClassInfo> classInfos;
-		try {
-			classInfos = ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClassesRecursive(basePackage);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+        Set<ClassInfo> classInfos;
+        try {
+            classInfos = ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClassesRecursive(basePackage);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-		for(ClassInfo classInfo : classInfos) {
-			Class<?> clazz = classInfo.load();
-			
-			processClass(clazz, prefixMapping);
-		}
-		
-		return result;
-		
-    	
+        for(ClassInfo classInfo : classInfos) {
+            Class<?> clazz = classInfo.load();
+
+            processClass(clazz, prefixMapping);
+        }
+
+        return result;
+
+
 
 //        ClassPathScanningCandidateComponentProvider provider
 //            = new ClassPathScanningCandidateComponentProvider(false);

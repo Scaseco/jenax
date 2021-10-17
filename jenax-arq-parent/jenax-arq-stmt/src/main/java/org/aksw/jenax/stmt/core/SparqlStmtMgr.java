@@ -33,11 +33,9 @@ import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SparqlStmtMgr {
-    private static final Logger logger = LoggerFactory.getLogger(SparqlStmtMgr.class);
+    // private static final Logger logger = LoggerFactory.getLogger(SparqlStmtMgr.class);
 
     public static void readDataset(Dataset dataset, String filenameOrURI, Consumer<Quad> quadConsumer) {
         RDFConnection conn = RDFConnectionFactory.connect(dataset);
@@ -95,7 +93,7 @@ public class SparqlStmtMgr {
      * @throws ParseException
      */
     public static Query loadQuery(String filenameOrURI) {
-        return loadQuery(filenameOrURI, DefaultPrefixes.prefixes);
+        return loadQuery(filenameOrURI, DefaultPrefixes.get());
     }
 
 //	public static List<Query> loadQueries(String filenameOrURI, PrefixMapping pm) throws FileNotFoundException, IOException, ParseException {
@@ -181,7 +179,7 @@ public class SparqlStmtMgr {
 //
 //		// Extended SERVICE <> keyword implementation
 //		JenaExtensionFs.registerFileServiceHandler();
-        pm.setNsPrefixes(DefaultPrefixes.prefixes);
+        pm.setNsPrefixes(DefaultPrefixes.get());
 
         try {
             List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(pm, filenameOrURI))

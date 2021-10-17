@@ -64,7 +64,7 @@ public class FunctionBinder {
 
     /** Convenience method to register a function at Jena's default registry */
     public void register(Method method, Object invocationTarget) {
-        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
+        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
 
         if (iri == null) {
             throw new RuntimeException("No @Iri or @IriNs annotation present on method");
@@ -91,7 +91,7 @@ public class FunctionBinder {
      */
     public void registerAll(Class<?> clz, Object invocationTarget) {
         for (Method method : clz.getMethods()) {
-            String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.prefixes);
+            String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
 
             if (iri != null) {
                 boolean isStatic = Modifier.isStatic(method.getModifiers());
