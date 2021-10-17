@@ -16,7 +16,6 @@
 	<modules>
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
-		<module>jenax-core-parent</module>
 		<module>jenax-arq-parent</module>
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
