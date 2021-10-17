@@ -14,6 +14,8 @@ import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDecider;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDeciderImpl;
 import org.aksw.jena_sparql_api.rdf.collections.RDFNodeMapperImpl;
+import org.aksw.jenax.reprogen.util.ImplementationLazy;
+import org.aksw.jenax.reprogen.util.ImplementationProxy;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.enhanced.Implementation;
@@ -231,7 +233,7 @@ public class JenaPluginUtils {
             return r;
         };
 
-        Implementation result = new ProxyImplementation(proxyFactory2);
+        Implementation result = new ImplementationProxy(proxyFactory2);
         return result;
     }
 

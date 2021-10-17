@@ -1,4 +1,4 @@
-package org.aksw.jenax.reprogen.core;
+package org.aksw.jenax.reprogen.util;
 
 import java.util.function.BiFunction;
 
@@ -7,12 +7,12 @@ import org.apache.jena.enhanced.EnhNode;
 import org.apache.jena.enhanced.Implementation;
 import org.apache.jena.graph.Node;
 
-public class ProxyImplementation
+public class ImplementationProxy
 	extends Implementation
 {
 	protected BiFunction<? super Node, ? super EnhGraph, ?> ctor;
 	
-	public ProxyImplementation(BiFunction<? super Node, ? super EnhGraph, ?> ctor) {
+	public ImplementationProxy(BiFunction<? super Node, ? super EnhGraph, ?> ctor) {
 		super();
 		this.ctor = ctor;
 	}

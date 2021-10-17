@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.utils.views.map;
 
 import java.util.AbstractMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -16,7 +17,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 
 import com.google.common.base.Converter;
 
@@ -100,11 +100,13 @@ public class MapFromResource
 
     public Resource getEntryViaModel(RDFNode key) {
         Model model = subject.getModel();
-        Resource result = model.listStatements(null, keyProperty, key)
-            .mapWith(Statement::getSubject)
+        List<Resource> tmp = model.listSubjectsWithProperty(keyProperty, key)
             .filterKeep(e -> model.contains(subject, entryProperty, e))
-            .nextOptional()
-            .orElse(null);
+            .toList(); // ensure that the iterator is closed
+            // .nextOptional()
+            // .orElse(null);
+
+        Resource result = tmp.isEmpty() ? null : tmp.get(0);
 
         return result;
     }
