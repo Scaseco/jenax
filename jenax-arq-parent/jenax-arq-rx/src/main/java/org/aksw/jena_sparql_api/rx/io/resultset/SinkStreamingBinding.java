@@ -15,7 +15,6 @@ import org.apache.jena.riot.ResultSetMgr;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
@@ -46,7 +45,7 @@ public class SinkStreamingBinding
     protected Throwable threadException = null;
     protected boolean closed = false;
 
-    public static final Binding POISON = BindingFactory.create();
+    public static final Binding POISON = BindingFactory.binding();
 
     public SinkStreamingBinding(OutputStream out, List<Var> resultVars, Lang lang) {
         super();
@@ -122,8 +121,8 @@ public class SinkStreamingBinding
         // For instance, accessing TDB2 bindings after
         // the underlying query execution has been concurrently closed
         // raises an exception
-        BindingMap copy = BindingFactory.create();
-        copy.addAll(item);
+        Binding copy = BindingFactory.copy(item);
+        // copy.addAll(item);
 
         checkThread();
         try {

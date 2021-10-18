@@ -229,4 +229,9 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
         }
     }
 
+    @Override
+    public String getQueryString() {
+        return decoratee.getQueryString();
+    }
+
 }

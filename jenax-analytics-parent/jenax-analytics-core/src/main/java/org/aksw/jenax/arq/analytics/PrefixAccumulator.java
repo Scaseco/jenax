@@ -18,12 +18,12 @@ import org.aksw.commons.collector.domain.Accumulator;
 import org.apache.commons.collections4.OrderedMapIterator;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 
 
 /**
@@ -250,7 +250,7 @@ public class PrefixAccumulator
 
         // QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://dbpedia.org/sparql", "http://dbpedia.org").create();
 
-        try (QueryExecution qe = QueryExecutionFactory.createServiceRequest("http://dbpedia.org/sparql", QueryFactory.create("Select * { ?s a <http://dbpedia.org/ontology/Airport> } Limit 100"))) {
+        try (QueryExecution qe = QueryExecutionHTTP.create().endpoint("http://dbpedia.org/sparql").query(QueryFactory.create("Select * { ?s a <http://dbpedia.org/ontology/Airport> } Limit 100")).build()) {
             ResultSet rs = qe.execSelect();
 
             Accumulator<Binding, Map<Var, Set<String>>> acc = ResultSetAnalytics.usedPrefixes(50).createAccumulator();

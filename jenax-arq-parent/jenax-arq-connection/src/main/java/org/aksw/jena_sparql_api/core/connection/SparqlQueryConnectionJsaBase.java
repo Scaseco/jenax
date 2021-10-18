@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.core.connection;
 import org.aksw.jena_sparql_api.arq.core.query.QueryExecutionFactoryQuery;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.sparql.core.Transactional;
 
 public class SparqlQueryConnectionJsaBase<T extends QueryExecutionFactoryQuery>
@@ -39,5 +40,11 @@ public class SparqlQueryConnectionJsaBase<T extends QueryExecutionFactoryQuery>
 
     @Override
     public void close() {
+    }
+
+    @Override
+    public QueryExecutionBuilder newQuery() {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 }

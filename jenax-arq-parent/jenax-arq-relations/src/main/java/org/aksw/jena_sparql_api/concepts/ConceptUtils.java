@@ -41,7 +41,9 @@ import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Substitute;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.binding.BindingHashMap;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
@@ -159,13 +161,15 @@ public class ConceptUtils {
 
         Generator<Var> generator = GeneratorBlacklist.create(VarGeneratorImpl2.create("v"), combinedVarNames);
 
-        BindingHashMap binding = new BindingHashMap();
+        BindingBuilder builder = BindingBuilder.create();
         for(String varName : commonVarNames) {
             Var oldVar = Var.alloc(varName);
             Var newVar = Var.alloc(generator.next());
 
-            binding.add(oldVar, newVar);
+            builder.add(oldVar, newVar);
         }
+        Binding binding = builder.build();
+
 
         Op op = Algebra.compile(a.getElement());
         Op substOp = Substitute.substitute(op, binding);
@@ -222,8 +226,7 @@ public class ConceptUtils {
         ElementData data = new ElementData();
         data.add(Vars.s);
         for(Node node : nodes) {
-            BindingHashMap binding = new BindingHashMap();
-            binding.add(Vars.s, node);
+            Binding binding = BindingFactory.binding(Vars.s, node);
             data.add(binding);
         }
 

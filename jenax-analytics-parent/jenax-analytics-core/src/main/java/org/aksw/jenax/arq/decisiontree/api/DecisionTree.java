@@ -3,8 +3,8 @@ package org.aksw.jenax.arq.decisiontree.api;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
@@ -102,9 +102,10 @@ public class DecisionTree {// <I, C, T, N extends DtNode<C, T>> {
         System.out.println(result2);
 
 
-        BindingMap bm = BindingFactory.create();
-        bm.add(Vars.p, NodeFactory.createLiteral("test"));
-        bm.add(Vars.o, NodeFactory.createLiteral("hello"));
+        Binding bm = BindingFactory.builder()
+                .add(Vars.p, NodeFactory.createLiteral("test"))
+                .add(Vars.o, NodeFactory.createLiteral("hello"))
+                .build();
         Node result3 = dt.eval(bm);
         System.out.println(result3);
 

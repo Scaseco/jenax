@@ -11,6 +11,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
@@ -47,7 +48,7 @@ public class QueryIterQuadPattern extends QueryIterRepeatApply
     static int countMapper = 0 ;
     static class QuadMapper extends QueryIter
     {
-    	private Node g;
+        private Node g;
         private Node s ;
         private Node p ;
         private Node o ;
@@ -72,16 +73,16 @@ public class QueryIterQuadPattern extends QueryIterRepeatApply
             DatasetGraph dg = cxt.getDataset();
             this.graphIter = makeClosable( dg.find(g2, s2, p2, o2) ) ;
         }
-        
+
         private static <T> ClosableIterator<T> makeClosable(Iterator<T> it) {
-        	ClosableIterator<T> result;
-        	if (it instanceof ClosableIterator) {
-        		result = (ClosableIterator<T>) it;
-        	} else {
-        		// Output a warning because usually we expect closable iterators?
-        		result = WrappedIterator.create(it);
-        	} 
-        	return result;
+            ClosableIterator<T> result;
+            if (it instanceof ClosableIterator) {
+                result = (ClosableIterator<T>) it;
+            } else {
+                // Output a warning because usually we expect closable iterators?
+                result = WrappedIterator.create(it);
+            }
+            return result;
         }
 
         private static Node tripleNode(Node node)
@@ -104,7 +105,7 @@ public class QueryIterQuadPattern extends QueryIterRepeatApply
 
         private Binding mapper(Quad r)
         {
-            BindingMap results = BindingFactory.create(binding) ;
+            BindingBuilder results = BindingFactory.builder(binding) ;
 
             if ( ! insert(g, r.getGraph(), results) )
                 return null ;
@@ -114,10 +115,10 @@ public class QueryIterQuadPattern extends QueryIterRepeatApply
                 return null ;
             if ( ! insert(o, r.getObject(), results) )
                 return null ;
-            return results ;
+            return results.build() ;
         }
 
-        private static boolean insert(Node inputNode, Node outputNode, BindingMap results)
+        private static boolean insert(Node inputNode, Node outputNode, BindingBuilder results)
         {
             if ( ! Var.isVar(inputNode) )
                 return true ;

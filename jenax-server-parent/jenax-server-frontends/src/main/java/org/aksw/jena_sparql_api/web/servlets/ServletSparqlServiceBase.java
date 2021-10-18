@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.web.servlets;
 
+import javax.management.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
@@ -10,8 +11,6 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtUpdate;
 import org.aksw.jena_sparql_api.web.utils.AuthenticatorUtils;
 import org.aksw.jena_sparql_api.web.utils.DatasetDescriptionRequestUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
-import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.update.UpdateProcessor;
@@ -57,7 +56,7 @@ public abstract class ServletSparqlServiceBase
     }
 
     protected UsernamePasswordCredentials getCredentials() {
-    	UsernamePasswordCredentials result = AuthenticatorUtils.parseCredentials(req);
+        UsernamePasswordCredentials result = AuthenticatorUtils.parseCredentials(req);
         return result;
     }
 

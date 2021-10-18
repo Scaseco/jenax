@@ -10,7 +10,9 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.engine.QueryEngineFactory;
 import org.apache.jena.sparql.engine.QueryEngineRegistry;
-import org.apache.jena.sparql.engine.QueryExecutionBase;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.QueryExecDataset;
+import org.apache.jena.sparql.exec.QueryExecutionAdapter;
 import org.apache.jena.sparql.util.Context;
 
 public class QueryExecutionFactoryDataset
@@ -62,10 +64,10 @@ public class QueryExecutionFactoryDataset
             return null ;
         }
         //dataset.begin(ReadWrite.WRITE);
-        QueryExecutionBase tmp = new QueryExecutionBase(query, dataset, context, f) ;
-
+        QueryExec qExec = new QueryExecDataset(query, query.toString(), dsg, context, f, -1, null, -1, null, null) {};
+        QueryExecution result = QueryExecutionAdapter.adapt(qExec);
         // TODO We shouldn't wrap with txn here
-        QueryExecution result = new QueryExecutionDecoratorTxn<QueryExecution>(tmp, dsg);
+        //QueryExecution result = QueryExecution.a// new QueryExecutionDecoratorTxn<QueryExecution>(tmp, dsg);
         return result;
     }
 }

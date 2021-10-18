@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-        <artifactId>jenax-server-frontends</artifactId>
+	<artifactId>jenax-server-frontends</artifactId>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-server-parent</artifactId>
-		<version>4.2.0-1-SNAPSHOT</version>
+		<version>4.3.0-1-SNAPSHOT</version>
 	</parent>
 
 
@@ -65,18 +66,21 @@
 
 
 	<dependencies>
-<!--
+	
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-path-finding</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection</artifactId>
 		</dependency>
--->
-<!--
+
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-update</artifactId>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
 		</dependency>
--->
+
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-path-finding</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-update</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -149,10 +153,10 @@
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>javax.ws.rs</groupId> -->
-<!-- 			<artifactId>jsr311-api</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>javax.ws.rs</groupId> -->
+		<!-- <artifactId>jsr311-api</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>javax.ws.rs</groupId>

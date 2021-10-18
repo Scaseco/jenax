@@ -16,7 +16,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingHashMap;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.path.P_Path0;
 
 public class TripleUtils {
@@ -155,19 +155,20 @@ public class TripleUtils {
     }
 
     public static Binding tripleToBinding(Triple triple) {
-        BindingHashMap result = new BindingHashMap();
+        Binding result = BindingBuilder.create().build();
 
         tripleToBinding(triple, result);
 
         return result;
     }
 
-    public static Binding tripleToBinding(Triple triple, BindingHashMap result) {
+    public static Binding tripleToBinding(Triple triple, Binding parent) {
+        BindingBuilder result = BindingBuilder.create(parent);
         result.add(Vars.s, triple.getSubject());
         result.add(Vars.p, triple.getPredicate());
         result.add(Vars.o, triple.getObject());
 
-        return result;
+        return result.build();
     }
 
 

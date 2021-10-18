@@ -33,9 +33,9 @@ import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingComparator;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.engine.binding.BindingProject;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.expr.Expr;
@@ -212,7 +212,7 @@ public class QueryFlowOps
                 })
                 .flatMapMaybe(contrib -> {
 
-                    BindingMap map = BindingFactory.create(binding);
+                    BindingBuilder map = BindingFactory.builder(binding);
                     Binding r = mapper(map, substPattern, contrib);
 
                     return r == null ? Maybe.empty() : Maybe.just(r);
@@ -232,7 +232,7 @@ public class QueryFlowOps
                 })
                 .flatMapMaybe(contrib -> {
 
-                    BindingMap map = BindingFactory.create(binding);
+                    BindingBuilder map = BindingFactory.builder(binding);
                     Binding r = mapper(map, substPattern, contrib);
 
                     return r == null ? Maybe.empty() : Maybe.just(r);
@@ -264,7 +264,7 @@ public class QueryFlowOps
      * @param match
      * @return
      */
-    public static Binding mapper(BindingMap result, Triple pattern, Triple match)
+    public static Binding mapper(BindingBuilder result, Triple pattern, Triple match)
     {
         if (!insert(pattern.getMatchSubject(), match.getSubject(), result)) {
             return null;
@@ -278,10 +278,10 @@ public class QueryFlowOps
             return null;
         }
 
-        return result;
+        return result.build();
     }
 
-    public static boolean insert(Node inputNode, Node outputNode, BindingMap results)
+    public static boolean insert(Node inputNode, Node outputNode, BindingBuilder results)
     {
         if ( ! Var.isVar(inputNode) )
             return true ;

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 
-import org.aksw.commons.util.strings.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -13,25 +13,25 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 public class AuthenticatorUtils {
-	/**
-	 * Create a http client with username / password authentication.
-	 * If the argument is null, an http client without authentication is returned.
-	 *
-	 * @param credentials
-	 * @return
-	 */
-	public static HttpClientBuilder prepareHttpClientBuilder(UsernamePasswordCredentials credentials) {
+    /**
+     * Create a http client with username / password authentication.
+     * If the argument is null, an http client without authentication is returned.
+     *
+     * @param credentials
+     * @return
+     */
+    public static HttpClientBuilder prepareHttpClientBuilder(UsernamePasswordCredentials credentials) {
         HttpClientBuilder result = HttpClientBuilder.create();
         if(credentials != null) {
-        	CredentialsProvider provider = new BasicCredentialsProvider();
+            CredentialsProvider provider = new BasicCredentialsProvider();
             provider.setCredentials(AuthScope.ANY, credentials);
-        	result.setDefaultCredentialsProvider(provider);
+            result.setDefaultCredentialsProvider(provider);
         }
         return result;
-	}
+    }
 
     public static UsernamePasswordCredentials parseCredentials(HttpServletRequest req) {
-    	UsernamePasswordCredentials result = null;
+        UsernamePasswordCredentials result = null;
         /*
         Enumeration<String> e = req.getHeaderNames();
         while(e.hasMoreElements()) {
@@ -39,7 +39,7 @@ public class AuthenticatorUtils {
             System.out.println(name + ": " + req.getHeader(name));
         }*/
 
-        String authStr = StringUtils.coalesce(
+        String authStr = ObjectUtils.firstNonNull(
                 req.getHeader("Authorization"),
                 req.getHeader("WWW-Authenticate"));
 

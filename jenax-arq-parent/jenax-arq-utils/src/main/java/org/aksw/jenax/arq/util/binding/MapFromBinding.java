@@ -3,9 +3,10 @@ package org.aksw.jenax.arq.util.binding;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-import org.apache.jena.ext.com.google.common.base.Objects;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -16,6 +17,19 @@ public class MapFromBinding
     extends AbstractMap<Var, Node>
 {
     protected Binding binding;
+
+    protected MapFromBinding(Binding binding) {
+        super();
+        this.binding = binding;
+    }
+
+    public static Map<Var, Node> create(Binding binding) {
+        return new MapFromBinding(binding);
+    }
+
+    public Binding getBinding() {
+        return binding;
+    }
 
     @Override
     public Node get(Object key) {
@@ -49,7 +63,7 @@ public class MapFromBinding
                     Object k = e.getKey();
                     if (MapFromBinding.this.containsKey(k)) {
                         Object mapV = MapFromBinding.this.get(k);
-                        result = Objects.equal(mapV, e.getValue());
+                        result = Objects.equals(mapV, e.getValue());
                     }
                 }
                 return result;

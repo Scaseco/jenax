@@ -6,37 +6,38 @@ import java.util.function.Function;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingHashMap;
 
 public class AccComputeBinding<B, T>
-	implements Accumulator<B, T>
+    implements Accumulator<B, T>
 {
-	//protected org.apache.jena.sparql.expr.aggregate.Accumulator delegate;
-	protected Map<Var, Function<B, Node>> varToNodeFn;
-	protected Accumulator<Binding, T> delegate;
+    //protected org.apache.jena.sparql.expr.aggregate.Accumulator delegate;
+    protected Map<Var, Function<B, Node>> varToNodeFn;
+    protected Accumulator<Binding, T> delegate;
 
-	public AccComputeBinding(Map<Var, Function<B, Node>> varToNodeFn, Accumulator<Binding, T> delegate) {
-		super();
-		this.varToNodeFn = varToNodeFn;
-		this.delegate = delegate;
-	}
+    public AccComputeBinding(Map<Var, Function<B, Node>> varToNodeFn, Accumulator<Binding, T> delegate) {
+        super();
+        this.varToNodeFn = varToNodeFn;
+        this.delegate = delegate;
+    }
 
-	@Override
-	public void accumulate(B input) {
-		BindingHashMap binding = new BindingHashMap();
+    @Override
+    public void accumulate(B input) {
+        BindingBuilder builder = BindingBuilder.create();
 
-		varToNodeFn.entrySet().forEach(e -> {
-			Node node = e.getValue().apply(input);
-			binding.add(e.getKey(), node);
-		});
+        varToNodeFn.forEach((key, value) -> {
+            Node node = value.apply(input);
+            builder.add(key, node);
+        });
 
-		delegate.accumulate(binding);
-	}
+        delegate.accumulate(builder.build());
+    }
 
-	@Override
-	public T getValue() {
-		T result = delegate.getValue();
-		return result;
-	}
+    @Override
+    public T getValue() {
+        T result = delegate.getValue();
+        return result;
+    }
 
 }

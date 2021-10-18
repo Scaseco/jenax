@@ -41,6 +41,7 @@ import org.apache.jena.ext.com.google.common.base.Charsets;
 import org.apache.jena.ext.com.google.common.io.CharStreams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.http.HttpOp;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -49,7 +50,6 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.riot.system.stream.StreamManager;
-import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
@@ -269,7 +269,7 @@ public class SparqlStmtUtils {
             HttpClient httpClient = null;
             String acceptHeader =
                 ( httpClient == null ) ? WebContent.defaultRDFAcceptHeader : null;
-            in = HttpOp.execHttpGet(urlStr, acceptHeader, httpClient, null);
+            in = HttpOp.httpGet(urlStr, acceptHeader);
         } else {
             in = streamManager.open(urlStr);
         }

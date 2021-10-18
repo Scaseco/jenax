@@ -11,14 +11,11 @@ import java.util.Set;
 
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
-import org.aksw.jenax.arq.analytics.NodeAnalytics;
-import org.aksw.jenax.arq.analytics.ResultSetAnalytics;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,9 +45,10 @@ public class ResultSetAnalyticsSerializationTests {
         ParallelAggregator<Binding, Map<Var, Entry<Multiset<String>, Long>>, ?> actualAgg =
                 (ParallelAggregator<Binding, Map<Var, Entry<Multiset<String>, Long>>, ?>)oin.readObject();
 
-        BindingMap b = BindingFactory.create();
-        b.add(Vars.s, NodeFactory.createURI("http://www.example.org/Foo"));
-        b.add(Vars.p, NodeFactory.createLiteral("bar"));
+        Binding b = BindingFactory.builder()
+                .add(Vars.s, NodeFactory.createURI("http://www.example.org/Foo"))
+                .add(Vars.p, NodeFactory.createLiteral("bar"))
+                .build();
 
         Accumulator<Binding, Map<Var, Entry<Multiset<String>, Long>>> actualAcc = actualAgg.createAccumulator();
         actualAcc.accumulate(b);

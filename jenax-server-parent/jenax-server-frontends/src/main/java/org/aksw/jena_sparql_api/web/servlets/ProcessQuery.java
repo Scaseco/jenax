@@ -19,6 +19,10 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 public class ProcessQuery {
 
+    public interface Writer<T> {
+        void write(OutputStream out, T obj);
+    }
+
     public static <T> StreamingOutput wrapWriter(final QueryExecution qe, final Writer<T> writer, final T obj) {
         return new StreamingOutput() {
 
@@ -153,11 +157,11 @@ public class ProcessQuery {
         }
         catch(Exception e) {
             if(qe != null) {
-            	try {
-            		qe.close();
-            	} catch (Exception e2) {
-            		e.addSuppressed(e2);
-            	}
+                try {
+                    qe.close();
+                } catch (Exception e2) {
+                    e.addSuppressed(e2);
+                }
             }
 
             throw new RuntimeException(e);

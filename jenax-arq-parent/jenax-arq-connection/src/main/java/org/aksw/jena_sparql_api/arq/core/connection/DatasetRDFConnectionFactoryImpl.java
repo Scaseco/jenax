@@ -9,7 +9,6 @@ import org.aksw.jena_sparql_api.core.connection.SparqlUpdateConnectionJsaBase;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.apache.jena.rdfconnection.RDFConnectionModular;
 import org.apache.jena.sparql.util.Context;
 
 /**
