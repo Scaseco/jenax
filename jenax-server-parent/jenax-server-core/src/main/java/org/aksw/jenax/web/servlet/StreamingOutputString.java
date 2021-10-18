@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.web.servlets;
+package org.aksw.jenax.web.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;

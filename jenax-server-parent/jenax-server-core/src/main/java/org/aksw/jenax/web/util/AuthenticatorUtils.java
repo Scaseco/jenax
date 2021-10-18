@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.web.utils;
+package org.aksw.jenax.web.util;
 
 import java.util.Arrays;
 

@@ -1,10 +1,10 @@
-package org.aksw.jena_sparql_api.web.utils;
+package org.aksw.jenax.web.util;
 
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 
-import org.aksw.jena_sparql_api.web.filters.CorsFilter;
-import org.aksw.jena_sparql_api.web.filters.FilterPost;
+import org.aksw.jenax.web.filter.CorsFilter;
+import org.aksw.jenax.web.filter.FilterPost;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextListener;

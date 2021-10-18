@@ -1,4 +1,6 @@
-package org.aksw.jena_sparql_api.web.servlets;
+package org.aksw.jenax.web.servlet;
+
+import java.io.PrintStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -11,25 +13,26 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.CompletionCallback;
 import javax.ws.rs.container.ConnectionCallback;
 import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.aksw.jena_sparql_api.core.utils.QueryExecutionAndType;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUpdate;
-import org.aksw.jena_sparql_api.utils.SparqlFormatterUtils;
-import org.aksw.jena_sparql_api.web.utils.ThreadUtils;
-import org.apache.jena.query.Query;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtQuery;
+import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
+import org.aksw.jenax.web.util.ThreadUtils;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.resultset.ResultsFormat;
+import org.apache.jena.sparql.util.QueryExecUtils;
 import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
@@ -46,109 +49,13 @@ public abstract class SparqlEndpointBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SparqlEndpointBase.class);
 
-    //private @Context HttpServletRequest req;
-
     protected SparqlStmtParser defaultSparqlStmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
     protected SparqlStmtParser getSparqlStmtParser() {
         return defaultSparqlStmtParser;
     }
 
-//    public SparqlEndpointBase() {
-//
-//    }
-
-    @Deprecated
-    public QueryExecution createQueryExecution(Query query, @Context HttpServletRequest req) {
-        QueryExecutionAndType tmp = createQueryExecutionAndType(query.toString());
-        QueryExecution result = tmp.getQueryExecution();
-        return result;
-    }
-
-    // IMPORTANT: You only need to override either this or the following method
-
-    public QueryExecution createQueryExecution(Query query) {
-        throw new RuntimeException("Not implemented");
-    }
-
-    /**
-     * Override this for special stuff, such as adding the EXPLAIN keyword
-     *
-     * @param queryString
-     * @return
-     */
-    public QueryExecutionAndType createQueryExecutionAndType(String queryString) {
-        //Query query = new Query();
-        //query.setPrefix("bif", "http://www.openlinksw.com/schemas/bif#");
-
-        //QueryFactory.parse(query, queryString, "http://example.org/base-uri/", Syntax.syntaxSPARQL_11);
-        // TODO We should not have to parse the query string here, as this is the parser's job
-        Query query = QueryFactory.create(queryString, Syntax.syntaxARQ);
-
-
-        QueryExecution qe = createQueryExecution(query);
-
-        QueryExecutionAndType result = new QueryExecutionAndType(qe, query.getQueryType());
-
-        return result;
-    }
-
-    public QueryExecutionAndType createQueryExecutionAndType(Query query) {
-        QueryExecution qe = createQueryExecution(query);
-        QueryExecutionAndType result = new QueryExecutionAndType(qe, query.getQueryType());
-        return result;
-    }
-
-//    public QueryExecutionAndType createQueryExecution(SparqlStmtQuery stmt) {
-//        QueryExecutionAndType result = stmt.isParsed()
-//                ? createQueryExecution(stmt.getQueryString())
-//                : createQueryExecution(stmt.getQuery())
-//                ;
-//
-//        return result;
-//    }
-
-    /**
-     * Override this method to provide your own classifier of whether a statement is a query or update request
-     * @param queryString
-     * @return
-     */
-    public SparqlStmt classifyStmt(String stmtStr) {
-        SparqlStmtParser sparqlStmtParser = getSparqlStmtParser();
-        SparqlStmt result = sparqlStmtParser.apply(stmtStr);
-        return result;
-    }
-
-    public Response processQuery(HttpServletRequest req, String queryString, String format) throws Exception {
-        StreamingOutput so = processQueryToStreaming(queryString, format);
-        Response response = Response.ok(so).build();
-        return response;
-    }
-
-    public StreamingOutput processQueryToStreaming(String queryString, String format)
-            throws Exception
-    {
-        QueryExecutionAndType qeAndType = createQueryExecutionAndType(queryString);
-
-        StreamingOutput result = ProcessQuery.processQuery(qeAndType, format);
-        return result;
-    }
-
-
-
-
-//    @GET
-//    @Produces(MediaType.APPLICATION_XML)
-//    public Response executeQueryXml(@Context HttpServletRequest req, @QueryParam("query") String queryString)
-//            throws Exception {
-//
-//        if(queryString == null) {
-//            StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-//            return Response.status(Status.BAD_REQUEST).entity(so).build(); // TODO: Return some error HTTP code
-//        }
-//
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
-//    }
+    protected abstract RDFConnection getConnection();
 
 
     @GET
@@ -157,31 +64,13 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-            //throws Exception {
-
         if(queryString == null && updateString == null) {
             StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
             asyncResponse.resume(Response.status(Status.BAD_REQUEST).entity(so).build()); // TODO: Return some error HTTP code
         } else {
-            processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_XML);
+            processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
         }
-
-        //return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
     }
-
-    //@Produces(MediaType.APPLICATION_XML)
-//    @POST
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    public Response executeQueryXmlPost(@Context HttpServletRequest req, @FormParam("query") String queryString)
-//            throws Exception {
-//
-//        if(queryString == null) {
-//            StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-//            return Response.ok(so).build(); // TODO: Return some error HTTP code
-//        }
-//
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
-//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -190,33 +79,18 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("update") String updateString) {
-            //throws Exception {
 
         if(queryString == null) {
             queryString = updateString;
         }
 
-
         if(queryString == null) {
             StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-            //.entity("Connection Callback").build());
-
             asyncResponse.resume(Response.ok(so).build()); // TODO: Return some error HTTP code
         } else {
-        //  return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
-            processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_XML);
+            processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
         }
     }
-
-
-
-//    @GET
-//    @Produces({MediaType.APPLICATION_JSON, "application/sparql-results+json"})
-//    public Response executeQueryJson(@Context HttpServletRequest req, @QueryParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_Json);
-//    }
-
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, "application/sparql-results+json"})
@@ -224,27 +98,8 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_Json);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_JSON);
     }
-
-
-
-
-
-
-
-
-//    @POST
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    @Produces({MediaType.APPLICATION_JSON, "application/sparql-results+json"})
-//    public Response executeQueryJsonPost(@Context HttpServletRequest req, @FormParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_Json);
-//    }
-
-
-
-
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -256,10 +111,10 @@ public abstract class SparqlEndpointBase {
         if(queryString == null) {
             queryString = updateStr;
         }
-        processStmtAsync(asyncResponse, queryString, updateStr, SparqlFormatterUtils.FORMAT_Json);
+        processStmtAsync(asyncResponse, queryString, updateStr, ResultsFormat.FMT_RS_JSON);
     }
 
-    public void processStmtAsync(final AsyncResponse response, String queryStr, String updateStr, final String format) {
+    public void processStmtAsync(final AsyncResponse response, String queryStr, String updateStr, final ResultsFormat format) {
         if(queryStr == null && updateStr == null) {
             throw new RuntimeException("No query/update statement provided");
         }
@@ -270,44 +125,45 @@ public abstract class SparqlEndpointBase {
 
         String stmtStr = queryStr != null ? queryStr : updateStr;
 
-        SparqlStmt stmt = classifyStmt(stmtStr);
+        SparqlStmtParser sparqlStmtParser = getSparqlStmtParser();
+        SparqlStmt stmt = sparqlStmtParser.apply(stmtStr);
 
         if(stmt.isQuery()) {
             processQueryAsync(response, stmt.getAsQueryStmt(), format);
         } else if(stmt.isUpdateRequest()) {
+            SparqlUpdateConnection conn = getConnection();
+
             processUpdateAsync(response, stmt.getAsUpdateStmt());
         } else {
             throw new RuntimeException("Unknown request type: " + queryStr);
         }
     }
 
-    public void processQueryAsync(final AsyncResponse response, SparqlStmtQuery stmt, final String format) {
+    public void processQueryAsync(
+            AsyncResponse response,
+            SparqlStmtQuery stmt,
+            ResultsFormat format) {
 
-//        QueryExecutionAndType tmp;
-//
-//        try {
-//            tmp = createQueryExecution(queryString);
-//        } catch(Exception e) {
-//
-////            response.resume(
-////                    Response.status(Response.Status.SERVICE_UNAVAILABLE)
-////                    .entity("Connection Callback").build());
-////
-////            return;
-//            throw new RuntimeException(e);
-//        }
+        RDFConnection conn = getConnection();
 
-        final QueryExecutionAndType qeAndType = stmt.isParsed()
-                ? createQueryExecutionAndType(stmt.getQuery())
-                : createQueryExecutionAndType(stmt.getOriginalString())
-                ;
-//        if(stmt.isParsed()) {
-//
-//        }
-//
-//      final QueryExecutionAndType qeAndType = createQueryExecution(stmt.getOriginalString());
+        QueryExecution tmp;
+        try {
+            tmp = stmt.isParsed()
+                ? conn.query(stmt.getQuery())
+                : conn.query(stmt.getOriginalString());
 
+        } catch (Exception e) {
+            try {
+                conn.close();
+            } catch (Exception e2) {
+                e.addSuppressed(e2);
+            }
+            response.resume(e);
 
+            throw new RuntimeException(e);
+        }
+
+        QueryExecution qe = tmp;
 
 //        asyncResponse
 //        .register(new CompletionCallback() {
@@ -324,7 +180,7 @@ public abstract class SparqlEndpointBase {
             public void onDisconnect(AsyncResponse disconnect) {
                 logger.debug("Client disconnected");
 
-                qeAndType.getQueryExecution().abort();
+                qe.abort();
 
 //                if(true) {
 //                disconnect.resume(
@@ -367,7 +223,7 @@ public abstract class SparqlEndpointBase {
             @Override
             public void run() {
                 try {
-                    StreamingOutput result = ProcessQuery.processQuery(qeAndType, format);
+                    StreamingOutput result = processQuery(qe, format);
                     response.resume(result);
                 } catch(Exception e) {
                     throw new RuntimeException(e);
@@ -377,25 +233,6 @@ public abstract class SparqlEndpointBase {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    //@Produces("application/rdf+xml")
-    //@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    @GET
-//    @Produces("application/rdf+xml") //HttpParams.contentTypeRDFXML)
-//    public Response executeQueryRdfXml(@Context HttpServletRequest req, @QueryParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_RdfXml);
-//    }
-
     @GET
     @Produces("application/rdf+xml") //HttpParams.contentTypeRDFXML)
     public void executeQueryRdfXml(
@@ -403,16 +240,8 @@ public abstract class SparqlEndpointBase {
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString
             ) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_RdfXml);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RDF_XML);
     }
-
-//    @POST
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    @Produces("application/rdf+xml")// HttpParams.contentTypeRDFXML)
-//    public Response executeQueryRdfXmlPost(@Context HttpServletRequest req, @FormParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_RdfXml);
-//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -421,18 +250,8 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("query") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_RdfXml);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RDF_XML);
     }
-
-
-
-
-//    @GET
-//    @Produces("application/sparql-results+xml")
-//    public Response executeQueryResultSetXml(@Context HttpServletRequest req, @QueryParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
-//    }
 
     @GET
     @Produces("application/sparql-results+xml")
@@ -440,18 +259,9 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_XML);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
     }
 
-
-
-//    @POST
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    @Produces("application/sparql-results+xml")
-//    public Response executeQueryResultSetXmlPost(@Context HttpServletRequest req, @FormParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_XML);
-//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -460,17 +270,9 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_Text);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
     }
 
-
-
-//    @GET
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public Response executeQueryText(@Context HttpServletRequest req, @QueryParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_Text);
-//    }
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -478,18 +280,8 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_Text);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_TEXT);
     }
-
-
-
-//    @POST
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public Response executeQueryTextPost(@Context HttpServletRequest req, @FormParam("query") String queryString)
-//            throws Exception {
-//        return processQuery(req, queryString, SparqlFormatterUtils.FORMAT_Text);
-//    }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -498,9 +290,19 @@ public abstract class SparqlEndpointBase {
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlFormatterUtils.FORMAT_Text);
+        processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_TEXT);
     }
 
+
+
+    public StreamingOutput processQuery(QueryExecution qe, ResultsFormat resultsFormat)
+            throws Exception
+    {
+        return outputStream -> {
+            PrintStream ps = new PrintStream(outputStream);
+            QueryExecUtils.exec(null, QueryExec.adapt(qe), resultsFormat, ps);
+        };
+    }
 
 
 

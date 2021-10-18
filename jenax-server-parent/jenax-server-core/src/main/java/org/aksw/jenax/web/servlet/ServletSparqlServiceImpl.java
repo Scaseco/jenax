@@ -1,37 +1,45 @@
-package org.aksw.jena_sparql_api.web.servlets;
+package org.aksw.jenax.web.servlet;
 
 import java.io.InputStream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
-// @Service
-// @Path("/sparql")
+
+/**
+ * This class relies on (spring's) dependency injection in order to
+ * get a sparql parser and a connection factory injected.
+ *
+ * @author raven
+ *
+ */
 @Path("/")
 public class ServletSparqlServiceImpl
-    extends ServletSparqlServiceBase
+    extends SparqlEndpointBase
 {
-    @Autowired
-    protected SparqlServiceFactory sparqlServiceFactory;
+    @Context
+    protected HttpServletRequest req;
 
+    /** The connection factory in mandatory */
+    @Autowired
+    protected RdfConnectionFactory sparqlConnectionFactory;
+
+    /** The parser defaults to jena's arq parser */
     @Autowired(required=false)
     protected SparqlStmtParser sparqlStmtParser;
 
-    public ServletSparqlServiceImpl() {
-        sparqlServiceFactory = null;
-    }
 
-    @Override
-    protected SparqlServiceFactory getSparqlServiceFactory() {
-        return sparqlServiceFactory;
+    public ServletSparqlServiceImpl() {
     }
 
     @Override
@@ -39,6 +47,14 @@ public class ServletSparqlServiceImpl
         SparqlStmtParser result = sparqlStmtParser != null ? sparqlStmtParser : super.getSparqlStmtParser();
         return result;
     };
+
+    @Override
+    protected RDFConnection getConnection() {
+        RDFConnection result = sparqlConnectionFactory.getConnection(req);
+        return result;
+    }
+
+
 
     @GET
     @Produces(MediaType.TEXT_HTML)

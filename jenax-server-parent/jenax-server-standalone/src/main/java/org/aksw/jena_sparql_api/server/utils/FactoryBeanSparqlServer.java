@@ -2,23 +2,23 @@ package org.aksw.jena_sparql_api.server.utils;
 
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
-import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.web.server.ServerUtils;
-import org.apache.http.client.HttpClient;
+import org.aksw.jenax.arq.datasource.RdfDataSource;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.web.servlet.RdfConnectionFactory;
 import org.apache.jena.query.Syntax;
-import org.apache.jena.sparql.core.DatasetDescription;
 import org.eclipse.jetty.server.Server;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 public class FactoryBeanSparqlServer {
     protected Integer port;
-    protected SparqlServiceFactory sparqlServiceFactory;
-    protected Function<String, SparqlStmt> sparqlStmtParser;
+
+    /** Resolver of an arbitrary request to a connection. The returned connection should be a fresh one
+     * and it will be closed once the request processing is done */
+    protected RdfConnectionFactory connectionFactory;
+    protected SparqlStmtParser sparqlStmtParser;
 
     public int getPort() {
         return port;
@@ -30,25 +30,18 @@ public class FactoryBeanSparqlServer {
         return this;
     }
 
-    public SparqlServiceFactory getSparqlServiceFactory() {
-        return sparqlServiceFactory;
+    public RdfConnectionFactory getSparqlServiceFactory() {
+        return connectionFactory;
     }
 
-    public FactoryBeanSparqlServer setSparqlServiceFactory(SparqlServiceFactory sparqlServiceFactory) {
-        this.sparqlServiceFactory = sparqlServiceFactory;
+    public FactoryBeanSparqlServer setSparqlServiceFactory(RdfConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
 
         return this;
     }
 
-    public FactoryBeanSparqlServer setSparqlServiceFactory(QueryExecutionFactory qef) {
-        SparqlServiceFactory ssf = new SparqlServiceFactory() {
-            @Override
-            public SparqlService createSparqlService(String serviecUri, DatasetDescription datasetDescription, HttpClient httpClient) {
-                 return new SparqlServiceImpl(qef, null);
-            }
-        };
-
-        this.setSparqlServiceFactory(ssf);
+    public FactoryBeanSparqlServer setSparqlServiceFactory(RdfDataSource dataSource) {
+        this.setSparqlServiceFactory(request -> dataSource.getConnection());
 
         return this;
     }
@@ -57,7 +50,7 @@ public class FactoryBeanSparqlServer {
         return sparqlStmtParser;
     }
 
-    public FactoryBeanSparqlServer setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
+    public FactoryBeanSparqlServer setSparqlStmtParser(SparqlStmtParser sparqlStmtParser) {
         this.sparqlStmtParser = sparqlStmtParser;
 
         return this;
@@ -65,21 +58,21 @@ public class FactoryBeanSparqlServer {
 
 
     public Server create() {
-        if(port == null) {
+        if (port == null) {
             port = 7531;
         }
 
-        if(sparqlStmtParser == null) {
+        if (sparqlStmtParser == null) {
             sparqlStmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
         }
 
-        if(sparqlServiceFactory == null) {
+        if (connectionFactory == null) {
             throw new RuntimeException("SparqlServiceFactory must not be null");
         }
 
         GenericWebApplicationContext rootContext = new GenericWebApplicationContext();
-        
-        rootContext.getBeanFactory().registerSingleton("sparqlServiceFactory", sparqlServiceFactory);
+
+        rootContext.getBeanFactory().registerSingleton("sparqlConnectionFactory", connectionFactory);
         rootContext.getBeanFactory().registerSingleton("sparqlStmtParser", sparqlStmtParser);
 
         Server result = ServerUtils.startServer(port, new WebAppInitializerSparqlService(rootContext));

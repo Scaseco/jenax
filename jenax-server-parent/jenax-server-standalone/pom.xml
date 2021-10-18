@@ -17,7 +17,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-server-core</artifactId>
+			<artifactId>jenax-server-frontends</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-stmt</artifactId>
 		</dependency>
 
 

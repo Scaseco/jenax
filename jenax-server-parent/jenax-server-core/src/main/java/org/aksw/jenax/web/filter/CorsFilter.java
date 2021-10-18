@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.web.filters;
+package org.aksw.jenax.web.filter;
 
 import java.io.IOException;
 
@@ -12,7 +12,8 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.org.slf4j.internal.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
