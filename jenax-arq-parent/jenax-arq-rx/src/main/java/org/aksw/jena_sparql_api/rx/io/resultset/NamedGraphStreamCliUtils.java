@@ -36,7 +36,7 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.TransformUnionQuery;
 import org.apache.jena.sparql.algebra.Transformer;
-import org.apache.jena.sparql.engine.http.Service;
+import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,7 +202,7 @@ public class NamedGraphStreamCliUtils {
 
         Consumer<Context> contextMutator = cxt -> {
             if (!Strings.isNullOrEmpty(timeoutSpec)) {
-                cxt.set(Service.queryTimeout, timeoutSpec);
+                cxt.set(Service.httpQueryTimeout, timeoutSpec);
             }
         };
 

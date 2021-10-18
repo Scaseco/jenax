@@ -11,6 +11,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.expr.ExprAggregator;
@@ -107,21 +108,22 @@ public class QueryFlowGroupBy
                     emitter.onNext(BindingFactory.binding());
                 }
             // No GROUP BY, has aggregators. Insert default values.
-            BindingMap binding = BindingFactory.create();
+            BindingBuilder builder = BindingFactory.builder();
             for (ExprAggregator agg : aggregators) {
                 Node value = agg.getAggregator().getValueEmpty();
                 if (value == null)
                     continue;
                 Var v = agg.getVar();
-                binding.add(v, value);
+                builder.add(v, value);
             }
+            Binding binding = builder.build();
             // return Iter.singleton(binding);
             emitter.onNext(binding);
         }
 
         for (Binding k : accumulators.keySet()) {
             Collection<Pair<Var, Accumulator>> accs = accumulators.get(k);
-            BindingMap b = BindingFactory.create(k);
+            BindingBuilder b = BindingFactory.builder(k);
 
             for (Pair<Var, Accumulator> pair : accs) {
                 NodeValue value = pair.getRight().getValue();
@@ -131,7 +133,7 @@ public class QueryFlowGroupBy
                 b.add(v, value.asNode());
             }
             // results.add(b);
-            emitter.onNext(b);
+            emitter.onNext(b.build());
         }
 
         emitter.onComplete();
@@ -146,7 +148,7 @@ public class QueryFlowGroupBy
     static private Binding copyProject(VarExprList vars, Binding binding, FunctionEnv execCxt) {
         // No group vars (implicit or explicit) => working on whole result set.
         // Still need a BindingMap to assign to later.
-        BindingMap x = BindingFactory.create();
+        BindingBuilder x = BindingBuilder.create();
         for (Var var : vars.getVars()) {
             Node node = vars.get(var, binding, execCxt);
             // Null returned for unbound and error.
@@ -154,7 +156,7 @@ public class QueryFlowGroupBy
                 x.add(var, node);
             }
         }
-        return x;
+        return x.build();
     }
 
 

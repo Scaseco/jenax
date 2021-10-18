@@ -41,8 +41,10 @@ import org.apache.jena.sparql.algebra.table.TableData;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingHashMap;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
@@ -332,14 +334,14 @@ public class SparqlRx {
      */
     public static Function<Binding, Binding> createGrouper(Collection<Var> vars, boolean retainNulls) {
         return b -> {
-            BindingHashMap groupKey = new BindingHashMap();
+            BindingBuilder groupKey = BindingFactory.builder();
             for(Var k : vars) {
                 Node v = b.get(k);
                 if(v != null || retainNulls) {
                     groupKey.add(k, v);
                 }
             }
-            return groupKey;
+            return groupKey.build();
         };
     }
 
@@ -520,7 +522,7 @@ public class SparqlRx {
     public static Single<Long> fetchBindingCount(String serviceUrl, Query query) {
         Entry<Var, Query> countQuery = QueryGenerationUtils.createQueryCount(query);
         return SparqlRx.fetchNumber(() ->
-            QueryExecutionFactory.createServiceRequest(serviceUrl, countQuery.getValue()),
+            QueryExecutionHTTP.newBuilder().endpoint(serviceUrl).query(countQuery.getValue()).build(),
                 countQuery.getKey())
                 .map(Number::longValue);
     }

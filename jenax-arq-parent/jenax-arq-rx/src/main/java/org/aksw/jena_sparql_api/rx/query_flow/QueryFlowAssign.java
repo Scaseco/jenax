@@ -6,11 +6,9 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.function.FunctionEnv;
-
-import io.reactivex.rxjava3.core.FlowableTransformer;
 
 /**
  * Execution of assignment
@@ -37,9 +35,9 @@ public class QueryFlowAssign
 //
 
     public static Binding assign(Binding binding, VarExprList exprs, FunctionEnv execCxt) {
-        BindingMap b = BindingFactory.create(binding);
+        BindingBuilder b = BindingFactory.builder(binding);
         for (Var v : exprs.getVars()) {
-            Node n = exprs.get(v, b, execCxt);
+            Node n = exprs.get(v, b.build(), execCxt);
             if (n != null) {
                 Node m = binding.get(v);
                 if(m != null) {
@@ -52,7 +50,7 @@ public class QueryFlowAssign
                 }
             }
         }
-        return b;
+        return b.build();
     }
 
     public static Function<Binding, Binding> createMapper(VarExprList exprs, FunctionEnv execCxt) {
