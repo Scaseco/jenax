@@ -2,7 +2,6 @@ package org.aksw.jenax.web.servlet;
 
 import java.io.PrintStream;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -18,22 +17,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
-import org.aksw.jenax.web.util.ThreadUtils;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.rdfconnection.SparqlUpdateConnection;
-import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.riot.WebContent;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.resultset.ResultsFormat;
 import org.apache.jena.sparql.util.QueryExecUtils;
-import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,8 +127,6 @@ public abstract class SparqlEndpointBase {
         if(stmt.isQuery()) {
             processQueryAsync(response, stmt.getAsQueryStmt(), format);
         } else if(stmt.isUpdateRequest()) {
-            SparqlUpdateConnection conn = getConnection();
-
             processUpdateAsync(response, stmt.getAsUpdateStmt());
         } else {
             throw new RuntimeException("Unknown request type: " + queryStr);
@@ -145,6 +139,7 @@ public abstract class SparqlEndpointBase {
             ResultsFormat format) {
 
         RDFConnection conn = getConnection();
+        logger.debug("Opened connection: " + System.identityHashCode(conn));
 
         QueryExecution tmp;
         try {
@@ -160,10 +155,19 @@ public abstract class SparqlEndpointBase {
             }
             response.resume(e);
 
-            throw new RuntimeException(e);
+            return ;
+            // throw new RuntimeException(e);
         }
 
-        QueryExecution qe = tmp;
+        // Wrap the query execution such that close() also closes the connection
+        QueryExecution qe = new QueryExecutionDecoratorBase<QueryExecution>(tmp) {
+            @Override
+            public void close() {
+                super.close();
+                conn.close();
+                logger.debug("Closed connection: " + System.identityHashCode(conn));
+            }
+        };
 
 //        asyncResponse
 //        .register(new CompletionCallback() {
@@ -219,6 +223,10 @@ public abstract class SparqlEndpointBase {
 //
 //        response.setTimeout(600, TimeUnit.SECONDS);
 
+        StreamingOutput result = processQuery(qe, format);
+        response.resume(result);
+
+        /*
         ThreadUtils.start(response, new Runnable() {
             @Override
             public void run() {
@@ -230,6 +238,7 @@ public abstract class SparqlEndpointBase {
                 }
             }
         });
+        */
     }
 
 
@@ -296,11 +305,12 @@ public abstract class SparqlEndpointBase {
 
 
     public StreamingOutput processQuery(QueryExecution qe, ResultsFormat resultsFormat)
-            throws Exception
     {
         return outputStream -> {
             PrintStream ps = new PrintStream(outputStream);
-            QueryExecUtils.exec(null, QueryExec.adapt(qe), resultsFormat, ps);
+            try (QueryExecution myQe = qe) {
+                QueryExecUtils.exec(null, QueryExec.adapt(myQe), resultsFormat, ps);
+            }
         };
     }
 
@@ -311,6 +321,25 @@ public abstract class SparqlEndpointBase {
      */
 
 
+    @GET
+    @Consumes(WebContent.contentTypeSPARQLUpdate)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void executeUpdateGet(
+            @Suspended AsyncResponse asyncResponse,
+            @QueryParam("update") String updateString) {
+        processStmtAsync(asyncResponse, null, updateString, ResultsFormat.FMT_NONE);
+    }
+
+
+
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLUpdate)
+    @Produces(MediaType.APPLICATION_JSON)
+    public void executeUpdatePost(
+            @Suspended AsyncResponse asyncResponse,
+            String updateString) {
+        processStmtAsync(asyncResponse, null, updateString, ResultsFormat.FMT_NONE);
+    }
 
 
 
@@ -383,43 +412,7 @@ public abstract class SparqlEndpointBase {
     }
 
     public void processUpdateAsync(final AsyncResponse response, SparqlStmtUpdate stmt) { //String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris) {
-        UpdateProcessor updateProcessor = createUpdateProcessor(stmt.getAsUpdateStmt()); //serviceUri, requestStr, usingGraphUris, usingNamedGraphUris);
 
-        DatasetGraph dg = updateProcessor.getDatasetGraph();
-        if (dg != null) {
-            Txn.executeWrite(dg, () -> {
-                updateProcessor.execute();
-            });
-        } else {
-            updateProcessor.execute();
-        }
-
-
-//      QueryExecutionAndType tmp;
-//
-//      try {
-//          tmp = createQueryExecution(queryString);
-//      } catch(Exception e) {
-//
-////          response.resume(
-////                  Response.status(Response.Status.SERVICE_UNAVAILABLE)
-////                  .entity("Connection Callback").build());
-////
-////          return;
-//          throw new RuntimeException(e);
-//      }
-
-//      final QueryExecutionAndType qeAndType = tmp;
-
-
-//      asyncResponse
-//      .register(new CompletionCallback() {
-//
-//          @Override
-//          public void onComplete(Throwable arg0) {
-//              System.out.println("COMPLETE");
-//          }
-//      });
 
       response
       .register(new ConnectionCallback() {
@@ -467,18 +460,21 @@ public abstract class SparqlEndpointBase {
 //
 //      response.setTimeout(600, TimeUnit.SECONDS);
 
-      ThreadUtils.start(response, new Runnable() {
-          @Override
-          public void run() {
-              try {
-                  String result = "{\"success\": true}";
-                  //StreamingOutput result = ProcessQuery.processQuery(qeAndType, format);
-                  response.resume(result);
-              } catch(Exception e) {
-                  throw new RuntimeException(e);
-              }
+      try (RDFConnection conn = getConnection()) {
+          logger.debug("Opened connection: " + System.identityHashCode(conn));
+
+          if (stmt.isParsed()) {
+              conn.update(stmt.getUpdateRequest());
+          } else {
+              conn.update(stmt.getOriginalString());
           }
-      });
+
+          String result = "{\"success\": true}";
+          response.resume(result);
+      } catch (Exception e) {
+          response.resume(e);
+      }
+
   }
 
 

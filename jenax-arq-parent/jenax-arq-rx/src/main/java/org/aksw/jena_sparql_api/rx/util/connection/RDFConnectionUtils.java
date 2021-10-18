@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.rx.util.connection;
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
 
-import org.aksw.jena_sparql_api.arq.core.connection.RDFConnectionModular;
+import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;

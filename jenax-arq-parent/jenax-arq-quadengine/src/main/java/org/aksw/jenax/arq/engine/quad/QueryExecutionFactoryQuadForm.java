@@ -1,6 +1,6 @@
 package org.aksw.jenax.arq.engine.quad;
 
-import org.aksw.jena_sparql_api.arq.core.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;

@@ -3,6 +3,9 @@ package org.aksw.jena_sparql_api.web.server;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
+import org.aksw.jenax.web.provider.QueryExceptionProvider;
+import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
+import org.aksw.jenax.web.servlet.ServletSparqlServiceImpl;
 import org.aksw.jenax.web.util.WebAppInitUtils;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -33,7 +36,11 @@ public class WebAppInitializerSparqlServiceUtils {
         {
             ServletRegistration.Dynamic servlet = servletContext.addServlet("sparqlServiceServlet", new ServletContainer());
             //servlet.setInitParameter("contextConfigLocation", "workaround-for-JERSEY-2038");
-            servlet.setInitParameter(ServerProperties.PROVIDER_CLASSNAMES, org.aksw.jenax.web.servlet.ServletSparqlServiceImpl.class.getCanonicalName());
+            servlet.setInitParameter(ServerProperties.PROVIDER_CLASSNAMES, String.join(",",
+                    ServletSparqlServiceImpl.class.getCanonicalName(),
+                    QueryExceptionProvider.class.getCanonicalName(),
+                    UncaughtExceptionProvider.class.getCanonicalName()
+                    ));
 //            servlet.setInitParameter(ServletProperties.FILTER_FORWARD_ON_404, "true");
 //            servlet.setInitParameter(ServletProperties.FILTER_STATIC_CONTENT_REGEX, ".*(html|css|js)");
             servlet.addMapping("/sparql/*");
