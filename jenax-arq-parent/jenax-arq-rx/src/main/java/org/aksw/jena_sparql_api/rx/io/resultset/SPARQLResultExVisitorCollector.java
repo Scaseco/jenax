@@ -63,7 +63,7 @@ public class SPARQLResultExVisitorCollector
         SPARQLResultEx result;
         switch(outputMode) {
         case BINDING:
-            result = new SPARQLResultEx(table.toRowSet(), () -> {});
+            result = new SPARQLResultEx(ResultSet.adapt(table.toRowSet()), () -> {});
             break;
         case QUAD:
             result = SPARQLResultEx.createQuads(quads.iterator(), () -> {});
@@ -79,7 +79,7 @@ public class SPARQLResultExVisitorCollector
     }
 
     public ResultSet getResultSet() {
-        return table.toResultSet();
+        return ResultSet.adapt(table.toRowSet());
     }
 
     @Override

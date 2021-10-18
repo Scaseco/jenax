@@ -7,7 +7,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
-import org.apache.jena.sparql.engine.binding.BindingHashMap;
 
 public class AccComputeBinding<B, T>
     implements Accumulator<B, T>
