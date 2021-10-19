@@ -32,6 +32,13 @@
 		<module>jenax-arq-rx</module>
 		<module>jenax-arq-quadengine</module>
 
+		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
+		<!-- maybe its better to have udf build on the top level functionbinder module -->
+		<module>jenax-arq-udf</module>
+
+		<!-- some parts of algebra depend on udf rather than plain arq -->
+		<module>jenax-arq-algebra</module>
+
 		<module>jenax-arq-datasets-parent</module>
 	</modules>
 </project>

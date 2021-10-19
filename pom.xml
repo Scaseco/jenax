@@ -279,6 +279,18 @@
 				<version>${project.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-algebra</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-udf</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-server-core</artifactId>
