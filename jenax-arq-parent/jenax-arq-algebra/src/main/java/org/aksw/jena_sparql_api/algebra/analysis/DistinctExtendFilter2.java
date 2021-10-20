@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.algebra.utils.ExprHolder;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpDistinct;

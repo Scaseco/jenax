@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -18,7 +18,6 @@ import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpJoin;
 import org.apache.jena.sparql.algebra.walker.Walker;

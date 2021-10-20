@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
@@ -57,7 +58,7 @@ public class TransformFactorizeTableColumnsToExtend
     @Override
     public Op transform(OpTable opTable) {
         Table table = opTable.getTable();
-        Map<Var, Node> constants = extractConstants(table.toResultSet());
+        Map<Var, Node> constants = extractConstants(TableUtils.toResultSet(table));
 
         Set<Var> tableVars = new LinkedHashSet<>(table.getVars());
         Set<Var> constantVars = constants.keySet();

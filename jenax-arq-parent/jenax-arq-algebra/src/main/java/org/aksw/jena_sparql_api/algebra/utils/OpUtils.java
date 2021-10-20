@@ -22,12 +22,12 @@ import org.aksw.commons.collections.trees.TreeImpl;
 import org.aksw.commons.collections.trees.TreeUtils;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsageAnalyzerVisitor;
-import org.aksw.jena_sparql_api.utils.CnfUtils;
-import org.aksw.jena_sparql_api.utils.ExprUtils;
-import org.aksw.jena_sparql_api.utils.QuadPatternUtils;
-import org.aksw.jena_sparql_api.utils.VarExprListUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
-import org.aksw.jena_sparql_api.utils.VarGeneratorImpl2;
+import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
+import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.apache.jena.ext.com.google.common.base.Objects;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.algebra.Op;
@@ -64,16 +64,16 @@ import com.google.common.collect.Sets;
 
 public class OpUtils {
     public static OpTable createEmptyTableUnionVars(Op ... subOps) {
-    	List<Var> vars = Arrays.asList(subOps).stream()
-    			.flatMap(op -> OpVars.visibleVars(op).stream())
-    			// Exclude special purpose vars 
-    			.filter(v -> !Var.isBlankNodeVar(v))
-    			.distinct()
-    			.collect(Collectors.toList());
-    	
-		TableData table = new TableData(vars, Collections.emptyList());
-		OpTable result = OpTable.create(table);
-		return result;
+        List<Var> vars = Arrays.asList(subOps).stream()
+                .flatMap(op -> OpVars.visibleVars(op).stream())
+                // Exclude special purpose vars
+                .filter(v -> !Var.isBlankNodeVar(v))
+                .distinct()
+                .collect(Collectors.toList());
+
+        TableData table = new TableData(vars, Collections.emptyList());
+        OpTable result = OpTable.create(table);
+        return result;
     }
 
     /**
@@ -115,16 +115,16 @@ public class OpUtils {
      * @return
      */
     public static Op extendWithVarMap(Op subOp, Map<Var, Var> oldToNew) {
-    	// Remove identity mappings because they'd result in algebra expressions such as BIND(?x AS ?x)
-    	// which breaks with Jena
-    	Map<Var, Var> oldToNewWithoutIdentity = oldToNew.entrySet().stream()
-    			.filter(e -> !Objects.equal(e.getKey(), e.getValue()))
-    			.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        // Remove identity mappings because they'd result in algebra expressions such as BIND(?x AS ?x)
+        // which breaks with Jena
+        Map<Var, Var> oldToNewWithoutIdentity = oldToNew.entrySet().stream()
+                .filter(e -> !Objects.equal(e.getKey(), e.getValue()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-    	List<Var> projVars = oldToNew.values()
-    			.stream()
-    			.distinct()
-    			.collect(Collectors.toList());
+        List<Var> projVars = oldToNew.values()
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
 
         VarExprList vel = VarExprListUtils.createFromVarMap(oldToNewWithoutIdentity);
         OpExtend opExtend = OpExtend.create(subOp, vel);

@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.algebra.transform.ExprTransformVariableOrder;
-import org.aksw.jena_sparql_api.utils.DnfUtils;
-import org.aksw.jena_sparql_api.utils.ExprUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.expr.DnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -66,23 +66,23 @@ public class QueryToJenaGraph {
     }
 
     public static Node addQuad(Graph graph, Quad quad, Map<Quad, Node> quadToNode, Supplier<Node> nodeSupplier) {
-    	Node quadNode = quadToNode.get(quad);
-    	if(quadNode == null) {
-    		
-	    	
-	    	// Allocate a fresh node for the quad
-	        quadNode = nodeSupplier.get();
-	
-	        quadToNode.put(quad, quadNode);
-	        
-	        Node gg = quad.getGraph();
-	        if(!Quad.defaultGraphIRI.equals(gg) && !Quad.defaultGraphNodeGenerated.equals(gg)) {
-	            addEdge(graph, quadNode, g, quad.getGraph());
-	        }
-	        addEdge(graph, quadNode, s, quad.getSubject());
-	        addEdge(graph, quadNode, p, quad.getPredicate());
-	        addEdge(graph, quadNode, o, quad.getObject());
-    	}
+        Node quadNode = quadToNode.get(quad);
+        if(quadNode == null) {
+
+
+            // Allocate a fresh node for the quad
+            quadNode = nodeSupplier.get();
+
+            quadToNode.put(quad, quadNode);
+
+            Node gg = quad.getGraph();
+            if(!Quad.defaultGraphIRI.equals(gg) && !Quad.defaultGraphNodeGenerated.equals(gg)) {
+                addEdge(graph, quadNode, g, quad.getGraph());
+            }
+            addEdge(graph, quadNode, s, quad.getSubject());
+            addEdge(graph, quadNode, p, quad.getPredicate());
+            addEdge(graph, quadNode, o, quad.getObject());
+        }
 
         return quadNode;
     }
@@ -123,35 +123,35 @@ public class QueryToJenaGraph {
             result = nodeSupplier.get();
 
             nodeToExpr.put(result, expr);
-            
+
             // TODO Why did i disable commutative checks???? Was it due to performance issues?
 
             // We use normalization on expressions instead
             // boolean isCommutative = false; //expr instanceof E_Equals;
 
             boolean isCommutative = ExprTransformVariableOrder.isCommutative(expr);
-            
-            
-            
+
+
+
             ExprFunction ef = expr.getFunction();
             String fnId = ExprUtils.getFunctionId(ef);
 
             graph.add(new Triple(result, RDFS.label.asNode(), NodeFactory.createLiteral(fnId)));
 
-	            
+
             List<Expr> args = ef.getArgs();
             int n = args.size();
-            
+
             // HACK Do this handling properly
             // Constants as the second arg on E_StrContains are omitted
             // and are checked in postprocessing
             if(isRootExpr && expr instanceof E_StrContains) {
-            	E_StrContains e = (E_StrContains)expr;
-            	if(e.getArg2().isConstant()) {
-            		n = 1;
-            	}
+                E_StrContains e = (E_StrContains)expr;
+                if(e.getArg2().isConstant()) {
+                    n = 1;
+                }
             }
-            
+
             for(int i = 0; i < n; ++i) {
                 Expr arg = args.get(i);
                 Node argNode = exprToGraph(graph, nodeToExpr, arg, false, nodeSupplier);
@@ -183,27 +183,27 @@ public class QueryToJenaGraph {
         }
     }
 
-    
+
     public static void clauseToGraph(Node andNode, Graph graph, BiMap<Node, Expr> nodeToExpr, Collection<? extends Expr> clause, Supplier<Node> nodeSupplier) {
         for(Expr e : clause) {
-        	// The same expression may be present in multiple clauses
-        	Node eNode = nodeToExpr.inverse().get(e);
-        	
-        	if(eNode == null) {
-        		eNode = exprToGraph(graph, nodeToExpr, e, true, nodeSupplier);            		
-        	}
-        	
+            // The same expression may be present in multiple clauses
+            Node eNode = nodeToExpr.inverse().get(e);
+
+            if(eNode == null) {
+                eNode = exprToGraph(graph, nodeToExpr, e, true, nodeSupplier);
+            }
+
             // Create another blank node for each equality instance
             // TODO This would be another type of construction: Actually the edge labels are already sufficient for discrimination of equals expressions
             //Node equalsNode = nodeSupplier.get();
-        	
-        	if(andNode != null) {
-        		addEdge(graph, andNode, cm, eNode);
-        	}
+
+            if(andNode != null) {
+                addEdge(graph, andNode, cm, eNode);
+            }
         }
 
     }
-    
+
     // Filters: Extract all equality filters
     public static void equalExprsToGraphOld(Graph graph, Collection<? extends Collection<? extends Expr>> dnf, Supplier<Node> nodeSupplier, Map<Var, Node> varToNode) {
         Set<Map<Var, NodeValue>> maps = DnfUtils.extractConstantConstraints(dnf);

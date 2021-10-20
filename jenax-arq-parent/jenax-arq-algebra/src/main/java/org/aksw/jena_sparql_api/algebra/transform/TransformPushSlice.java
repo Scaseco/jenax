@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.op.OpExtend;

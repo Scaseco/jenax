@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-conjure-core</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-conjure-parent</artifactId>
+		<version>4.3.0-1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>5.6.0.201912101111-r</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.jsch</artifactId>
+			<version>0.0.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.usocket-jna</artifactId>
+			<version>0.0.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.sshagent</artifactId>
+			<version>0.0.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-base</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-hdt</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-algebra</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-plugins-bundle</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection-virtuoso</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-dcat-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- <artifactId>slf4j-log4j12</artifactId> -->
+		<!-- </dependency> -->
+
+
+	</dependencies>
+</project>
+

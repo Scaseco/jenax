@@ -20,7 +20,8 @@
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
-		<module>jenax-io-core</module>
+		<module>jenax-io-parent</module>
+		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
 	</modules>
 
@@ -274,22 +275,73 @@
 		<dependencies>
 
 			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>subgraph-isomorphism-index-jena</artifactId>
+				<version>1.5.1-1-SNAPSHOT</version>
+			</dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-models-dcat-api</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-conjure-core</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-io-core</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-io-hdt</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+
+			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
+
                         <dependency>
                                 <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-algebra</artifactId>
+                                <artifactId>jenax-arq-connection-core</artifactId>
                                 <version>${project.version}</version>
                         </dependency>
 
                         <dependency>
                                 <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-udf</artifactId>
+                                <artifactId>jenax-arq-connection-virtuoso</artifactId>
                                 <version>${project.version}</version>
                         </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-connection-mods</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-algebra</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-udf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -380,6 +432,20 @@
 				<artifactId>jenax-arq-relations</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-algebra</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-plugins-bundle</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>

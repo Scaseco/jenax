@@ -14,11 +14,12 @@
 	</parent>
 
 	<modules>
+		<module>jenax-arq-langtagvalidator</module>
 		<module>jenax-arq-anyresource</module>
 		<module>jenax-arq-json</module>
 		<module>jenax-arq-propertypaths</module>
 		<module>jenax-arq-paths</module>
-		<module>jenax-arq-connection</module>
+		<module>jenax-arq-connection-parent</module>
 		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>
 		<module>jenax-arq-utils</module>
@@ -31,6 +32,7 @@
 		<module>jenax-arq-aggregators</module>
 		<module>jenax-arq-rx</module>
 		<module>jenax-arq-quadengine</module>
+		<module>jenax-arq-hdt</module>
 
 		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
 		<!-- maybe its better to have udf build on the top level functionbinder module -->

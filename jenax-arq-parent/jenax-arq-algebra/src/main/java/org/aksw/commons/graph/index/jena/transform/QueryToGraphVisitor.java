@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 import org.aksw.commons.jena.graph.GraphVar;
 import org.aksw.commons.jena.graph.GraphVarImpl;
-import org.aksw.jena_sparql_api.utils.DnfUtils;
-import org.aksw.jena_sparql_api.utils.QuadPatternUtils;
+import org.aksw.jenax.arq.util.expr.DnfUtils;
+import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.algebra.Op;
@@ -35,13 +35,13 @@ public class QueryToGraphVisitor
     protected Supplier<Node> nodeSupplier;
     protected BiMap<Var, Node> varToNode;
     protected BiMap<Quad, Node> quadToNode;
-    
-    
+
+
     protected GraphVar graph;
-    
+
     // During the graph conversion we keep track of the original expression of each node
     protected BiMap<Node, Expr> nodeToExpr;
-    
+
 
     protected Stack<Node> stack = new Stack<>();
 
@@ -72,18 +72,18 @@ public class QueryToGraphVisitor
     }
 
     public BiMap<Quad, Node> getQuadToNode() {
-    	return quadToNode;
+        return quadToNode;
     }
 
     public BiMap<Node, Quad> getNodeToQuad() {
-    	return quadToNode.inverse();
+        return quadToNode.inverse();
     }
-    
-    public BiMap<Node, Expr> getNodeToExpr() {
-		return nodeToExpr;
-	}
 
-	public GraphVar getGraph() {
+    public BiMap<Node, Expr> getNodeToExpr() {
+        return nodeToExpr;
+    }
+
+    public GraphVar getGraph() {
         return graph;
     }
 

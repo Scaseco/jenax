@@ -66,14 +66,14 @@ public class ClauseUtils
         return result;
     }*/
 
-    //Iterable<? extends Iterable<? extends Expr>
-//    public static Set<Expr> signaturize(Iterable<? extends Expr> clause) {
-//        Set<Expr> result = StreamSupport.stream(clause.spliterator(), false)
-//            .map(e -> ExprUtils.signaturize(e))
-//            .collect(Collectors.toSet());
-//
-//        return result;
-//    }
+
+    public static Set<Expr> signaturize(Iterable<? extends Expr> clause) {
+        Set<Expr> result = StreamSupport.stream(clause.spliterator(), false)
+            .map(e -> ExprUtils.signaturize(e))
+            .collect(Collectors.toSet());
+
+        return result;
+    }
 
 
     public static Set<Set<Expr>> filterByVars(Set<Set<Expr>> clauses, Set<Var> requiredVars) {

@@ -153,4 +153,23 @@ public class QuadUtils {
     }
 
 
+
+    /** Apply a node transform to a given collection of quads
+     *
+     * @param <C> The result collection type
+     * @param result The result collection; transform items will be added to it
+     * @param quads The collection to transform
+     * @param nodeTransform
+     * @return The result collection
+     */
+    public static <C extends Collection<Quad>> C applyNodeTransform(C result, Collection<Quad> quads,
+            NodeTransform nodeTransform) {
+        for (Quad quad : quads) {
+            Quad newQuad = applyNodeTransform(quad, nodeTransform);
+            result.add(newQuad);
+        }
+
+        return result;
+    }
+
 }

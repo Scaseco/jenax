@@ -3,14 +3,9 @@ package org.aksw.jena_sparql_api.algebra.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.utils.ExprUtils;
-import org.aksw.jena_sparql_api.utils.QuadUtils;
-
-import org.apache.jena.sparql.algebra.op.OpQuadPattern;
+import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 

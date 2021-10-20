@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-arq-plugins-bundle</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-arq-plugins-parent</artifactId>
+		<version>4.2.0-1-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- <geotools.version>21.0</geotools.version> -->
+		<jts.version>1.16.1</jts.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>OSGeo</id>
+			<name>OSGeo Repository</name>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+
+		<repository>
+			<id>locationtech-releases</id>
+			<url>
+            https://repo.locationtech.org/content/groups/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>jts-snapshots</id>
+			<url>
+            https://repo.locationtech.org/content/repositories/jts-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- Google polyline encoder/decoder for sparql extension functions -->
+		<dependency>
+			<groupId>com.google.maps</groupId>
+			<artifactId>google-maps-services</artifactId>
+		</dependency>
+
+		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
+			rid of this dep -->
+		<!-- Possibly also used for result set comparison -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-collections</artifactId>
+		</dependency>
+
+		<!-- Used for cutsom Aggregators (should probably go to jsa utls) -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collectors</artifactId>
+		</dependency>
+
+		<!-- Used for ResultSet comparison -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-utils</artifactId>
+		</dependency>
+
+		<!-- Query federation to files in virtual file systems with binary search support -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-service-vfs</artifactId>
+		</dependency>
+
+		<!-- Used for binary search via the service clause -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-core</artifactId>
+		</dependency>
+
+		<!-- Auto-binding of SPARQL and Java functions -->
+		<!-- May separate this functionality from resource proxy generation in the future -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-mapper-proxy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
+		</dependency>
+
+		<!-- Used for parsing the CSV options -->
+		<dependency>
+			<groupId>net.sf.jopt-simple</groupId>
+			<artifactId>jopt-simple</artifactId>
+		</dependency>
+
+		<!-- Jena -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+		</dependency>
+
+		<!-- Content type detection -->
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-java7</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-hdt</artifactId>
+		</dependency>
+
+		<!-- Geo extensions -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-geosparql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.sis.non-free</groupId>
+			<artifactId>sis-embedded-data</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.sis.core</groupId>
+			<artifactId>sis-referencing</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.locationtech.jts</groupId> -->
+		<!-- <artifactId>jts-core</artifactId> -->
+		<!-- <version>${jts.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>com.vividsolutions</groupId> -->
+		<!-- <artifactId>jts-core</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>com.vividsolutions</groupId> -->
+		<!-- <artifactId>jts-io</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.geotools</groupId> -->
+		<!-- <artifactId>gt-epsg-hsql</artifactId> -->
+		<!-- <version>${geotools.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.geotools</groupId> -->
+		<!-- <artifactId>gt-geometry</artifactId> -->
+		<!-- <version>${geotools.version}</version> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.geotools</groupId> -->
+		<!-- <artifactId>gt-referencing</artifactId> -->
+		<!-- <version>${geotools.version}</version> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework</groupId> -->
+		<!-- <artifactId>spring-core</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>

@@ -13,19 +13,19 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
-import org.aksw.jena_sparql_api.concepts.Relation;
 import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelation;
 import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.UnaryRelation;
 import org.aksw.jena_sparql_api.concepts.XExpr;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.NodeTransformRenameMap;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -424,7 +424,7 @@ public class VirtualPartitionedQuery {
             Map<Node, Var> nodeToVar = new HashMap<>();
             Map<Node, Var> substs = TransformReplaceConstants.transform(nodeToVar, nodes, gen);
 
-            Triple newT = NodeTransformLib.transform(new NodeTransformRenameMap(substs), t);
+            Triple newT = NodeTransformLib.transform(NodeTransformRenameMap.create(substs), t);
 
             Element newE;
             if(substs.isEmpty()) {

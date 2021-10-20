@@ -39,4 +39,17 @@ public class ExprListUtils {
     }
 
 
+    public static boolean contains(ExprList exprList, Expr expr) {
+        boolean result = false;
+
+        for(Expr item : exprList) {
+            result = item.equals(expr);
+            if(result) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
 }

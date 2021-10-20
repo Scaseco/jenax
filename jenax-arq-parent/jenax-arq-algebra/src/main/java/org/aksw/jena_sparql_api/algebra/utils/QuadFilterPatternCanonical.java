@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.utils.ClauseUtils;
-import org.aksw.jena_sparql_api.utils.CnfUtils;
-import org.aksw.jena_sparql_api.utils.DnfUtils;
-import org.aksw.jena_sparql_api.utils.NfUtils;
-import org.aksw.jena_sparql_api.utils.NodeTransformRenameMap;
-import org.aksw.jena_sparql_api.utils.QuadPatternUtils;
-import org.aksw.jena_sparql_api.utils.QuadUtils;
+import org.aksw.jenax.arq.util.expr.ClauseUtils;
+import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.expr.DnfUtils;
+import org.aksw.jenax.arq.util.expr.NfUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
+import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
@@ -94,14 +94,14 @@ public class QuadFilterPatternCanonical {
     }
 
     public static QuadFilterPatternCanonical applyVarMapping(QuadFilterPatternCanonical qfpc, Map<Var, Var> varMap) {
-        NodeTransform nodeTransform = new NodeTransformRenameMap(varMap);
+        NodeTransform nodeTransform = NodeTransformRenameMap.create(varMap);
         QuadFilterPatternCanonical result = qfpc.applyNodeTransform(nodeTransform);
         return result;
     }
 
 
     public QuadFilterPatternCanonical applyNodeTransform(NodeTransform nodeTransform) {
-        Set<Quad> newQuads = QuadUtils.applyNodeTransform(quads, nodeTransform);
+        Set<Quad> newQuads = QuadUtils.applyNodeTransform(new HashSet<>(), quads, nodeTransform);
         Set<Set<Expr>> newExprs = ClauseUtils.applyNodeTransformSet(exprHolder.getCnf(), nodeTransform);
 
         QuadFilterPatternCanonical result = new QuadFilterPatternCanonical(newQuads, ExprHolder.fromCnf(newExprs));

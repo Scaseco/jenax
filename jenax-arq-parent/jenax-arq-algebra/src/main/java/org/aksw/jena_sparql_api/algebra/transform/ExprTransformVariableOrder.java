@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.aksw.jena_sparql_api.utils.ExprUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.sparql.expr.E_Add;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_Multiply;
@@ -16,37 +16,37 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 
 public class ExprTransformVariableOrder
-	extends ExprTransformCopy
+    extends ExprTransformCopy
 {
-	protected Predicate<Expr> isCommutative;
+    protected Predicate<Expr> isCommutative;
 
-	public ExprTransformVariableOrder() {
-		this(ExprTransformVariableOrder::isCommutative);
-	}
+    public ExprTransformVariableOrder() {
+        this(ExprTransformVariableOrder::isCommutative);
+    }
 
-	public ExprTransformVariableOrder(Predicate<Expr> isCommutative) {
-		super();
-		this.isCommutative = isCommutative;
-	}
+    public ExprTransformVariableOrder(Predicate<Expr> isCommutative) {
+        super();
+        this.isCommutative = isCommutative;
+    }
 
-	@Override
-	public Expr transform(ExprFunction2 func, Expr a, Expr b) {
-		List<Expr> args = Arrays.asList(a, b);
-		if(isCommutative.test(func)) {
-			Collections.sort(args, ExprUtils::compare);
-		}
+    @Override
+    public Expr transform(ExprFunction2 func, Expr a, Expr b) {
+        List<Expr> args = Arrays.asList(a, b);
+        if(isCommutative.test(func)) {
+            Collections.sort(args, ExprUtils::compare);
+        }
 
-		return super.transform(func, args.get(0), args.get(1));
-	}
+        return super.transform(func, args.get(0), args.get(1));
+    }
 
-	public static final Set<Class<?>> symmetricExprClasses = new HashSet<>(Arrays.asList(
-			E_Equals.class,
-			E_Add.class,
-			E_Multiply.class
-			));
+    public static final Set<Class<?>> symmetricExprClasses = new HashSet<>(Arrays.asList(
+            E_Equals.class,
+            E_Add.class,
+            E_Multiply.class
+            ));
 
-	public static boolean isCommutative(Expr e) {
-		boolean result = symmetricExprClasses.contains(e.getClass());
-		return result;
-	}
+    public static boolean isCommutative(Expr e) {
+        boolean result = symmetricExprClasses.contains(e.getClass());
+        return result;
+    }
 }

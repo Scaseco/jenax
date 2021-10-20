@@ -14,21 +14,32 @@
 	</parent>
 
 	<dependencies>
-<!--
+		<!-- <dependency> <groupId>org.aksw.commons</groupId> <artifactId>subgraph-isomorphism-index-jena</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>subgraph-isomorphism-index-jena</artifactId>
 		</dependency>
--->
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-propertypaths</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
-		
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.aksw.jena-sparql-api</groupId> -->
-<!-- 			<artifactId>jena-sparql-api-concepts</artifactId> -->
-<!-- 		</dependency> -->
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
+		<!-- <artifactId>jena-sparql-api-concepts</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
@@ -42,13 +53,8 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-resources-test-config</artifactId>
-			<scope>test</scope>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-resources-test-config</artifactId> 
+			<scope>test</scope> </dependency> -->
 		<!-- <dependency> -->
 		<!-- <groupId>org.slf4j</groupId> -->
 		<!-- <artifactId>slf4j-log4j12</artifactId> -->

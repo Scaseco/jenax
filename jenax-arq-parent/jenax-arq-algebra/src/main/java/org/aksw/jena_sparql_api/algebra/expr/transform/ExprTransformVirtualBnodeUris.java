@@ -15,11 +15,11 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformExprToBasicPattern;
 import org.aksw.jena_sparql_api.algebra.transform.TransformPullFiltersIfCanMergeBGPs;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
 import org.aksw.jena_sparql_api.algebra.utils.FixpointIteration;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtMgr;
 import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctions;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -354,7 +354,7 @@ public class ExprTransformVirtualBnodeUris
             Op c = forceBnodeUris(b);//ExprTransformVirtualBnodeUris.forceBnodeUris(b);
 
             Op d = TransformExprToBasicPattern.transform(c, fn -> {
-                String id = org.aksw.jena_sparql_api.utils.ExprUtils.getFunctionId(fn.getFunction());
+                String id = org.aksw.jenax.arq.util.expr.ExprUtils.getFunctionId(fn.getFunction());
                 Boolean subjectAsOutput = propertyFunctions.get(id);
                 Entry<String, Boolean> r = subjectAsOutput == null ? null : Maps.immutableEntry(id, subjectAsOutput);
 //                //System.out.println(id);

@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.rdf.model.Model;

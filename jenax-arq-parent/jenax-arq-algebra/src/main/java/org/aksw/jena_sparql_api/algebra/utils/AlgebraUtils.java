@@ -33,15 +33,15 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformPullFiltersIfCanMerge
 import org.aksw.jena_sparql_api.algebra.transform.TransformPushFiltersIntoBGP;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
-import org.aksw.jena_sparql_api.utils.ClauseUtils;
-import org.aksw.jena_sparql_api.utils.CnfUtils;
-import org.aksw.jena_sparql_api.utils.DnfUtils;
-import org.aksw.jena_sparql_api.utils.ExprUtils;
-import org.aksw.jena_sparql_api.utils.NfUtils;
-import org.aksw.jena_sparql_api.utils.NodeTransformRenameMap;
-import org.aksw.jena_sparql_api.utils.QuadUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorImpl2;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.expr.ClauseUtils;
+import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.expr.DnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.expr.NfUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
@@ -368,7 +368,7 @@ public class AlgebraUtils {
                 nodes[i] = subst == null ? node : subst;
             }
 
-            Quad newQuad = QuadUtils.arrayToQuad(nodes);
+            Quad newQuad = QuadUtils.create(nodes);
             newQuads.add(newQuad);
         }
 
@@ -469,7 +469,7 @@ public class AlgebraUtils {
             }
         }
 
-        NodeTransformRenameMap transform = new NodeTransformRenameMap(renameMap);
+        NodeTransformRenameMap transform = NodeTransformRenameMap.create(renameMap);
         Set<Set<Expr>> result = ClauseUtils.applyNodeTransformSet(nf, transform);
         result.addAll(extra);
 
@@ -880,7 +880,7 @@ public class AlgebraUtils {
                 // If it is a variable, just retain it
             }
 
-            Quad newQuad = QuadUtils.arrayToQuad(nodes);
+            Quad newQuad = QuadUtils.create(nodes);
             newQuads.add(newQuad);
         }
 
@@ -1164,7 +1164,7 @@ public class AlgebraUtils {
             Multimap<Expr, Expr> exprSigToExpr = HashMultimap.create();
             Set<Expr> clauseSig = new HashSet<>();
             for(Expr expr : clause) {
-                Expr exprSig = org.aksw.jena_sparql_api.utils.ExprUtils.signaturize(expr);
+                Expr exprSig = org.aksw.jenax.arq.util.expr.ExprUtils.signaturize(expr);
                 exprSigToExpr.put(exprSig, expr);
                 clauseSig.add(exprSig);
             }

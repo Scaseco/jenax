@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import org.aksw.commons.collections.trees.Tree;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
-import org.aksw.jena_sparql_api.utils.CnfUtils;
-import org.aksw.jena_sparql_api.utils.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Transform;
@@ -149,11 +149,11 @@ public class TransformPushFiltersIntoBGP
 
 
 
-            Op newSubOp = map.isEmpty() ? subOp : NodeTransformLib.transform(new NodeTransformRenameMap(map), subOp);
+            Op newSubOp = map.isEmpty() ? subOp : NodeTransformLib.transform(NodeTransformRenameMap.create(map), subOp);
 
 //            System.out.println("OLD SUBOP: " + subOp);
 //            System.out.println("NEW SUBOP: " + newSubOp);
-            
+
             ExprList exprList = CnfUtils.toExprList(residualClauses);
             result = OpFilter.filterBy(exprList, newSubOp);
 

@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.utils.FixpointIteration;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtMgr;
 import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctionResource;
 import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctions;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;

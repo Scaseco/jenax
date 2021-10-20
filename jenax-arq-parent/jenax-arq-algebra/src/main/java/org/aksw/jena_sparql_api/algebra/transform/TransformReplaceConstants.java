@@ -11,8 +11,8 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.jena_sparql_api.utils.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.algebra.Op;

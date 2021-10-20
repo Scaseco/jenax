@@ -2,12 +2,11 @@ package org.aksw.jena_sparql_api.core.utils;
 
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
+import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.core.Var;

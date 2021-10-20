@@ -12,9 +12,13 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
@@ -472,5 +476,88 @@ public class ExprUtils {
     }
 
 
+
+    /**
+     * Replace all variable names with the same variable (?a in this case).
+     * Useful for checking whether two expressions are structurally equivalent.
+     *
+     * @param expr
+     */
+    public static Expr signaturize(Expr expr) {
+        NodeTransform nodeTransform = NodeTransformSignaturize.create();
+        Expr result = NodeTransformLib.transform(nodeTransform, expr);
+        return result;
+    }
+
+    public static Expr signaturize(Expr expr, Map<?, ? extends Node> nodeMap) {
+        NodeTransform baseTransform = NodeTransformRenameMap.create(nodeMap);
+        NodeTransform nodeTransform = NodeTransformSignaturize.create(baseTransform);
+        Expr result = NodeTransformLib.transform(nodeTransform, expr);
+        return result;
+    }
+
+
+    /**
+     * linearize any structure into a flat list
+     *
+     * TODO Provide an example
+     *
+     * @param op
+     * @param stopMarker
+     * @param getChildren
+     * @return
+     */
+    public static <T> Stream<T> linearizePrefix(T op, Collection<T> stopMarker, Function<? super T, Iterable<? extends T>> getChildren) {
+
+//        boolean isIdentity = op == stopMarker || (stopMarker != null && stopMarker.equals(op));
+        Stream<T> result;
+        if(op == null) {
+            result = Stream.empty();
+        } else {
+            Iterable<?extends T> children = getChildren.apply(op);
+            Stream<? extends T> x = StreamSupport.stream(children.spliterator(), false);
+            //tmp = Stream.concat(x, stopMarker.stream()); // Stream.of(stopMarker)
+//            tmp = Stream.concat(tmp, Stream.of(op));
+
+            result =
+                Stream.concat(
+                    Stream.concat(
+                        StreamSupport.stream(children.spliterator(), false).flatMap(e -> linearizePrefix(e, stopMarker, getChildren)),
+                        stopMarker.stream()
+                    ),
+                    Stream.of(op) // Emit parent
+                );
+        }
+
+
+        return result;
+    }
+
+
+    /**
+     * Traverse the expr
+     *
+     * @param expr
+     * @return
+     */
+    public static Stream<Expr> linearizePrefix(Expr expr, Collection<Expr> stopMarkers) {
+        Stream<Expr> result = linearizePrefix(expr, stopMarkers, ExprUtils::getSubExprs);
+        return result;
+
+//        boolean isIdentity = expr == identity || (identity != null && identity.equals(expr));
+//        Stream<Expr> tmp;
+//        if(isIdentity) {
+//            tmp = Stream.empty();
+//        } else {
+//            List<Expr> children = getSubExprs(expr);
+//            tmp = Stream.concat(children.stream(), Stream.of(identity));
+//        }
+//
+//        Stream<Expr> result = Stream.concat(
+//                tmp.flatMap(e -> linearizePrefix(e, identity)),
+//                Stream.of(expr)); // Emit parent);
+//
+//        return result;
+    }
 
 }
