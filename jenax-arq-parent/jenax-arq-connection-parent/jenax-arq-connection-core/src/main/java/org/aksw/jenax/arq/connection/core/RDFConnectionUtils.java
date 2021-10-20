@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
+import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryQueryTransform;
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -198,12 +198,13 @@ public class RDFConnectionUtils {
     public static RDFConnection wrapWithQueryTransform(RDFConnection conn, Function<? super Query, ? extends Query> fn) {
         RDFConnection result =
                 new RDFConnectionModular(new SparqlQueryConnectionJsa(
-                        FluentQueryExecutionFactory
-                            .from(new QueryExecutionFactorySparqlQueryConnection(conn))
-                            .config()
-                                .withQueryTransform(fn)
-                                .end()
-                            .create()
+                        new QueryExecutionFactoryQueryTransform(conn::query, fn)
+//                        FluentQueryExecutionFactory
+//                            .from(new QueryExecutionFactorySparqlQueryConnection(conn))
+//                            .config()
+//                                .withQueryTransform(fn)
+//                                .end()
+//                            .create()
                             ), conn, conn);
 
         return result;

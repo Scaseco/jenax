@@ -5,6 +5,7 @@ import org.aksw.jenax.arq.connection.TransactionalTmp;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.Transactional;
 
+
 public class SparqlQueryConnectionJsa
     extends SparqlQueryConnectionJsaBase<QueryExecutionFactory>
 {
