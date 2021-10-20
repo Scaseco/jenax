@@ -1,4 +1,4 @@
-package org.aksw.jenax.reprogen.util;
+package org.aksw.jenax.arq.util.implementation;
 
 import java.util.Objects;
 import java.util.function.Supplier;

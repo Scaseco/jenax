@@ -12,8 +12,8 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
@@ -26,71 +26,71 @@ import com.google.gson.JsonObject;
 
 /**
  * "SELECT ... { }" sys:benchmark(?time ?size)
- * 
+ *
  * @author raven
  *
  */
 public class PropertyFunctionFactoryBenchmark
-	implements PropertyFunctionFactory
+    implements PropertyFunctionFactory
 {
 //	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryBenchmark.class);
 
-	protected Function<? super Path, ? extends Stream<? extends Path>> fn;
+    protected Function<? super Path, ? extends Stream<? extends Path>> fn;
 
     @Override
     public PropertyFunction create(final String uri)
     {
-    	return new PropertyFunctionBenchmark();
+        return new PropertyFunctionBenchmark();
     }
 
 
     public static class PropertyFunctionBenchmark
-    	extends PFuncSimpleAndList
+        extends PFuncSimpleAndList
     {
 
-		@Override
-		public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object,
-				ExecutionContext execCxt) {
+        @Override
+        public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object,
+                ExecutionContext execCxt) {
 
-			RDFConnection conn = E_Benchmark.getConnection(execCxt);
-			boolean includeResultSet = object.getArgListSize() >= 3;
-			JsonObject json = E_Benchmark.benchmark(conn, subject, includeResultSet);
-			
-			QueryIterator result;
-			if(json == null) {
-				//throw new ExprTypeException("no node value obtained");
-				result = IterLib.noResults(execCxt);
-			} else {
-	
-				Node timeNode = object.getArg(0);
-				Node sizeNode = object.getArg(1);
-				Node resultSetNode = includeResultSet ? object.getArg(2) : null;
-	
-	            BindingMap b = BindingFactory.create(binding) ;
-	
+            RDFConnection conn = E_Benchmark.getConnection(execCxt);
+            boolean includeResultSet = object.getArgListSize() >= 3;
+            JsonObject json = E_Benchmark.benchmark(conn, subject, includeResultSet);
+
+            QueryIterator result;
+            if(json == null) {
+                //throw new ExprTypeException("no node value obtained");
+                result = IterLib.noResults(execCxt);
+            } else {
+
+                Node timeNode = object.getArg(0);
+                Node sizeNode = object.getArg(1);
+                Node resultSetNode = includeResultSet ? object.getArg(2) : null;
+
+                BindingBuilder b = BindingFactory.builder(binding) ;
+
 // TODO Raise an exception if output arguments are non-variables
-	            
+
 //	            if(timeNode.isVariable()) {
-		            b.add((Var)timeNode,
-							NodeValue.makeDecimal(json.get("time").getAsBigDecimal()).asNode());
+                    b.add((Var)timeNode,
+                            NodeValue.makeDecimal(json.get("time").getAsBigDecimal()).asNode());
 //	            }
-	            
+
 //	            if(sizeNode.isVariable()) {
-		            b.add((Var)sizeNode,
-							NodeValue.makeInteger(json.get("size").getAsBigInteger()).asNode());
+                    b.add((Var)sizeNode,
+                            NodeValue.makeInteger(json.get("size").getAsBigInteger()).asNode());
 //	            }
-	            
+
 //		            && resultSetNode.isVariable()
-	            if(resultSetNode != null) {
-		            b.add((Var)resultSetNode,
-							E_JsonPath.jsonToNode(json.get("result")));
-	            }
-	            
-	            result = QueryIterPlainWrapper.create(Iterators.singletonIterator(b), execCxt) ;
-			}
-			return result;
-		}
-    	
+                if(resultSetNode != null) {
+                    b.add((Var)resultSetNode,
+                            E_JsonPath.jsonToNode(json.get("result")));
+                }
+
+                result = QueryIterPlainWrapper.create(Iterators.singletonIterator(b.build()), execCxt) ;
+            }
+            return result;
+        }
+
 //		@Override
 //        public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object,
 //                org.apache.jena.sparql.engine.ExecutionContext execCtx) {
@@ -103,7 +103,7 @@ public class PropertyFunctionFactoryBenchmark
 //                throw new RuntimeException("Object of json array splitting must be a variable");
 //            }
 //            Var outputVar = (Var)object;
-//            
+//
 //            Iterator<Binding> bindings = Collections.emptyIterator();
 //            try {
 //            	if(node.isURI()) {
@@ -115,7 +115,7 @@ public class PropertyFunctionFactoryBenchmark
 //    							outputVar,
 //    							NodeFactory.createURI(path.toUri().toString())))
 //    					.iterator();
-//            		
+//
 ////            		while(bindings.hasNext()) {
 ////            			System.out.println(bindings.next());
 ////            		}
@@ -123,7 +123,7 @@ public class PropertyFunctionFactoryBenchmark
 //            } catch(Exception e) {
 //            	logger.warn("Error resolving node as URI: " + node, e);
 //            }
-//            
+//
 //            QueryIterator result = new QueryIterPlainWrapper(bindings);
 //            return result;
 //        }

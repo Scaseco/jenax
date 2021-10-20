@@ -2,14 +2,14 @@ package org.aksw.jena_sparql_api.sparql.ext.util;
 
 import java.math.BigDecimal;
 
-import org.aksw.jena_sparql_api.mapper.proxy.function.FunctionBinder;
-import org.aksw.jena_sparql_api.mapper.proxy.function.FunctionGenerator;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
+import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 

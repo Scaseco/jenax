@@ -20,6 +20,9 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.expr.NodeValue;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
 
 public class ResultSetUtils {
 
@@ -126,4 +129,32 @@ public class ResultSetUtils {
         return result;
     }
 
+    public static Multiset<QuerySolution> toMultisetQs(ResultSet rs) {
+        Multiset<QuerySolution> result = HashMultiset.create();
+        while(rs.hasNext()) {
+            QuerySolution original = rs.next();
+
+            QuerySolution wrapped = new QuerySolutionWithEquals(original);
+
+            result.add(wrapped);
+        }
+
+        return result;
+    }
+
+    public static Multiset<Binding> toMultiset(ResultSet rs) {
+        Multiset<Binding> result = HashMultiset.create();
+        while(rs.hasNext()) {
+            Binding original = rs.nextBinding();
+
+            Binding wrapped = original;
+            //QuerySolution wrapped = new QuerySolutionWithEquals(original);
+
+            result.add(wrapped);
+        }
+
+        return result;
+    }
+
 }
+

@@ -2,7 +2,6 @@ package org.aksw.jena_sparql_api.sparql.ext.fs;
 
 import java.nio.file.Files;
 
-import org.aksw.jena_sparql_api.arq.core.service.OpExecutorWithCustomServiceExecutors;
 import org.aksw.jena_sparql_api.arq.service.vfs.ServiceExecutorFactoryRegistratorVfs;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.ARQ;
@@ -52,15 +51,19 @@ public class JenaExtensionFs {
 
     // Better not register the handler automatically; it is a quite intrusive deed
     public static void registerFileServiceHandler() {
+
+        throw new RuntimeException("Global registration of file service handler was removed");
+        /*
         QC.setFactory(ARQ.getContext(), execCxt -> {
             execCxt.getContext().set(ARQ.stageGenerator, StageBuilder.executeInline);
 
-            OpExecutorWithCustomServiceExecutors result = new OpExecutorWithCustomServiceExecutors(execCxt);
+            // OpExecutorWithCustomServiceExecutors result = new OpExecutorWithCustomServiceExecutors(execCxt);
             ServiceExecutorFactoryRegistratorVfs.register(execCxt.getContext());
 
             return result;
             // ServiceExecutorFactoryRegistratorVfs.
             // return new OpExecutorServiceOrFile(execCxt);
         });
+        */
     }
 }

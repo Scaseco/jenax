@@ -1,10 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import java.math.BigDecimal;
-
-import org.aksw.jena_sparql_api.mapper.proxy.function.FunctionBinder;
-import org.aksw.jena_sparql_api.mapper.proxy.function.FunctionGenerator;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
+import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;

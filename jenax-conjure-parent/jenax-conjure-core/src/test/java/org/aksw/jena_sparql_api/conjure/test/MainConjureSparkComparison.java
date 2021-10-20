@@ -20,10 +20,10 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVar;
 import org.aksw.jena_sparql_api.conjure.dataset.engine.OpExecutorDefault;
 import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFileSystem;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.Syntax;
@@ -49,7 +49,7 @@ public class MainConjureSparkComparison {
         // TODO Circular init issue with DefaultPrefixes
         // We could use ARQConstants.getGlobalPrefixMap()
         JenaSystem.init();
-        Function<String, SparqlStmt> parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, DefaultPrefixes.prefixes, false);
+        Function<String, SparqlStmt> parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, DefaultPrefixes.get(), false);
 
         Query dcatQuery = parser.apply(
                 "	    	       CONSTRUCT {\n" +

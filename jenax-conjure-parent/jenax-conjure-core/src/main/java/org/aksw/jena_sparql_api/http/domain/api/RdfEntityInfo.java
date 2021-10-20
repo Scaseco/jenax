@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.http.domain.api;
 import java.util.Collection;
 import java.util.List;
 
+import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.dcat.ap.domain.api.Checksum;
-import org.aksw.jena_sparql_api.rx.entity.EntityInfo;
 import org.apache.jena.rdf.model.Resource;
 
 public interface RdfEntityInfo

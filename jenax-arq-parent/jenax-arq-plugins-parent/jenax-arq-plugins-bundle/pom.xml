@@ -89,9 +89,13 @@
 
 		<!-- Auto-binding of SPARQL and Java functions -->
 		<!-- May separate this functionality from resource proxy generation in the future -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.aksw.jenax</groupId> -->
+<!-- 			<artifactId>jenax-reprogen-core</artifactId> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-reprogen-core</artifactId>
+			<artifactId>jenax-functionbinder-core</artifactId>
 		</dependency>
 
 		<dependency>

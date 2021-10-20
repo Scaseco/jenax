@@ -26,8 +26,8 @@ import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversal2;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfoDefault;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
-import org.aksw.jena_sparql_api.mapper.proxy.JenaPluginUtils;
 import org.aksw.jena_sparql_api.utils.turtle.TurtleWriterNoBase;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 
 public class JenaPluginConjure

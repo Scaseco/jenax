@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.algebra.utils.VirtualPartitionedQuery;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
-import org.aksw.jena_sparql_api.concepts.TernaryRelation;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
@@ -47,22 +46,23 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
 import org.aksw.jena_sparql_api.conjure.traversal.engine.FunctionAssembler;
-import org.aksw.jena_sparql_api.core.connection.RDFConnectionBuilder;
 import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFileSystem;
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.http.repository.impl.ResourceStoreImpl;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.stmt.SPARQLResultSinkQuads;
-import org.aksw.jena_sparql_api.stmt.SPARQLResultVisitor;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtMgr;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
-import org.aksw.jena_sparql_api.utils.NodeUtils;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
+import org.aksw.jenax.arq.connection.core.RDFConnectionBuilder;
+import org.aksw.jenax.arq.util.node.NodeEnvsubst;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.resultset.SPARQLResultSinkQuads;
+import org.aksw.jenax.stmt.resultset.SPARQLResultVisitor;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -85,7 +85,8 @@ import org.apache.jena.riot.lang.SinkQuadsToDataset;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.binding.BindingHashMap;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.lang.arq.ParseException;
@@ -177,7 +178,7 @@ public class OpExecutorDefault
 
 
     public Node substNode(Node node) {
-        Node r = NodeUtils.substWithLookup2(node, execCtx::get);
+        Node r = NodeEnvsubst.substWithNode(node, execCtx::get);
         r = r.isVariable() ? execCtx.getOrDefault(r.getName(), r) : r;
         return r;
     }
@@ -527,7 +528,7 @@ public class OpExecutorDefault
         Expr expr = ExprUtils.parse(conditionStr);
 
         // Context to binding
-        BindingHashMap binding = new BindingHashMap();
+        BindingBuilder binding = BindingFactory.builder();
         for(Entry<String, Node> e : execCtx.entrySet()) {
             String k = e.getKey();
             Node v = e.getValue();
@@ -582,7 +583,7 @@ public class OpExecutorDefault
                 // TODO Actually preprocessing should have already taken care of the prefixes
                 List<Query> queries;
                 try {
-                    queries = SparqlStmtMgr.loadQueries(in, DefaultPrefixes.prefixes);
+                    queries = SparqlStmtMgr.loadQueries(in, DefaultPrefixes.get());
                 } catch (IOException | ParseException e) {
                     throw new RuntimeException(e);
                 }
@@ -640,7 +641,7 @@ public class OpExecutorDefault
         Sink<Quad> tmp = new SinkQuadsToDataset(true, resultDataset.asDatasetGraph());
         SPARQLResultVisitor sink = new SPARQLResultSinkQuads(tmp);
         SparqlStmtParser parser = SparqlStmtParser.wrapWithOptimizePrefixes(
-                SparqlStmtParserImpl.create(DefaultPrefixes.prefixes));
+                SparqlStmtParserImpl.create(DefaultPrefixes.get()));
 
         try(RDFConnection conn = result.openConnection()) {
             List<String> stmts = op.getStmts();

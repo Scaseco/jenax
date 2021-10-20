@@ -1,4 +1,4 @@
-package org.aksw.jenax.reprogen.util;
+package org.aksw.jenax.arq.util.implementation;
 
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.enhanced.EnhNode;

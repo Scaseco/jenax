@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystemNotFoundException;
@@ -24,16 +25,18 @@ import java.util.stream.Stream;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.io.block.impl.BlockSources;
+import org.aksw.commons.io.util.UriUtils;
+import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
-import org.aksw.jena_sparql_api.rx.GraphOpsRx;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrEx;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.rx.entity.EntityInfo;
-import org.aksw.jena_sparql_api.utils.UriUtils;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.atlas.data.BagFactory;
 import org.apache.jena.atlas.data.DataBag;
 import org.apache.jena.atlas.data.ThresholdPolicy;
@@ -158,7 +161,7 @@ public class ServiceExecutorFactoryVfsUtils {
 
         if (tmp != null) {
             URI uri = new URI(tmp);
-            params = UriUtils.createMapFromUriQueryString(uri);
+            params = createMapFromUriQueryString(uri);
 
             // Cut off any query string
             URI effectiveUri = new URI(tmp.replaceAll("\\?.*", ""));
@@ -194,6 +197,28 @@ public class ServiceExecutorFactoryVfsUtils {
 
         Entry<Path, Map<String, String>> result =
                 path == null ? null : Maps.immutableEntry(path, params);
+
+        return result;
+    }
+
+
+    /**
+     * Only retains first value
+     * @return
+     */
+    public static Map<String, String> createMapFromUriQueryString(URI uri) {
+        return createMapFromUriQueryString(uri, new LinkedHashMap<>());
+    }
+
+    /**
+     * Only retains first value
+     * @return
+     */
+    public static Map<String, String> createMapFromUriQueryString(URI uri, Map<String, String> result) {
+        List<NameValuePair> pairs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+        for (NameValuePair pair : pairs) {
+            result.putIfAbsent(pair.getName(), pair.getValue());
+        }
 
         return result;
     }

@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.aksw.jena_sparql_api.rx.util.connection.RDFConnectionUtils;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
-import org.aksw.jena_sparql_api.utils.Symbols;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -33,139 +33,139 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class E_Benchmark
-	extends FunctionBase1
+    extends FunctionBase1
 {
-	private static final Logger logger = LoggerFactory.getLogger(E_Benchmark.class);
-	
-	
-	@Override
-	protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
-		Node node = args.get(0).asNode();
-		RDFConnection conn = getConnection(env);
-		JsonObject json = benchmark(conn, node, false);
-		if(json == null) {
-			throw new ExprTypeException("no node value obtained");
-		}
-		NodeValue result = RDFDatatypeJson.jsonToNodeValue(json);
-
-	    return result;
-	}
-
-	public static JsonObject benchmark(RDFConnection conn, Node node, boolean includeResultSet) {
-		JsonObject result;
-		if(node.isVariable()) {
-			result = null;
-		} else {
-			NodeValue nv = NodeValue.makeNode(node);
-	
-			if(nv.isString()) {
-	    		String queryStr = nv.getString();
-	    		result = benchmark(conn, queryStr, includeResultSet);
-	    	} else { 	
-		    	throw new ExprTypeException("Incorrect node value type " + nv);//": " + node)) ;
-		    }
-		}		
-	    return result;
-	}
-	
-	public static RDFConnection getConnection(ExecutionContext env) {
-		RDFConnection conn = null;
-		Context cxt = env.getContext();
-		if(cxt != null) {
-			conn = cxt.get(Symbols.symConnection);
-		}
-		
-		if(conn == null) {
-			logger.info("No connection in context, falling back to dataset");
-			DatasetGraph dsg = env.getDataset();
-			if(dsg != null) {
-				Dataset ds = DatasetFactory.wrap(dsg);
-				conn = RDFConnectionFactory.connect(ds);
-			}
-		}
-		
-		return conn;
-	}
+    private static final Logger logger = LoggerFactory.getLogger(E_Benchmark.class);
 
 
-	public static RDFConnection getConnection(FunctionEnv env) {
-		RDFConnection conn = null;
-		Context cxt = env.getContext();
-		if(cxt != null) {
-			conn = cxt.get(Symbols.symConnection);
-		}
-		
-		if(conn == null) {
-			logger.info("No connection in context, falling back to dataset");
-			DatasetGraph dsg = env.getDataset();
-			if(dsg != null) {
-				Dataset ds = DatasetFactory.wrap(dsg);
-				conn = RDFConnectionFactory.connect(ds);
-			}
-		}
-		
-		return conn;
-	}
+    @Override
+    protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
+        Node node = args.get(0).asNode();
+        RDFConnection conn = getConnection(env);
+        JsonObject json = benchmark(conn, node, false);
+        if(json == null) {
+            throw new ExprTypeException("no node value obtained");
+        }
+        NodeValue result = RDFDatatypeJson.jsonToNodeValue(json);
 
-	public static JsonObject benchmark(RDFConnection conn, String queryStr, boolean includeResultSet) {
-		
-		if(conn == null) {
-			throw new RuntimeException("No connection or dataset specified in context");
-		}
+        return result;
+    }
 
-		logger.info("Benchmarking query: " + queryStr);
-		
-		Stopwatch sw = Stopwatch.createStarted();
-		Long resultSetSize = null;
-		ResultSetRewindable rsw = null;
-		try(QueryExecution qe = conn.query(queryStr)) {
-			ResultSet rs = qe.execSelect();
-			
-			if(includeResultSet) {
-				rsw = ResultSetFactory.copyResults(rs);
-			} else {				
-				resultSetSize = (long)ResultSetFormatter.consume(rs);
-			}
-			
-		} catch(Exception e) {
-    		logger.warn("Failure executing benchmark request", e);
-			throw new ExprTypeException("Failure executing benchmark request", e);
-		}
+    public static JsonObject benchmark(RDFConnection conn, Node node, boolean includeResultSet) {
+        JsonObject result;
+        if(node.isVariable()) {
+            result = null;
+        } else {
+            NodeValue nv = NodeValue.makeNode(node);
 
-		
-		long ms = sw.stop().elapsed(TimeUnit.NANOSECONDS);
-		BigDecimal s = new BigDecimal(ms).divide(new BigDecimal(1000000000l));
+            if(nv.isString()) {
+                String queryStr = nv.getString();
+                result = benchmark(conn, queryStr, includeResultSet);
+            } else {
+                throw new ExprTypeException("Incorrect node value type " + nv);//": " + node)) ;
+            }
+        }
+        return result;
+    }
 
-		JsonObject json = new JsonObject();
-		json.addProperty("time", s);
+    public static RDFConnection getConnection(ExecutionContext env) {
+        RDFConnection conn = null;
+        Context cxt = env.getContext();
+        if(cxt != null) {
+            conn = cxt.get(RDFConnectionUtils.CONNECTION_SYMBOL);
+        }
 
-		if(rsw != null) {
-			rsw.reset();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ResultSetFormatter.outputAsJSON(baos, rsw);
+        if(conn == null) {
+            logger.info("No connection in context, falling back to dataset");
+            DatasetGraph dsg = env.getDataset();
+            if(dsg != null) {
+                Dataset ds = DatasetFactory.wrap(dsg);
+                conn = RDFConnectionFactory.connect(ds);
+            }
+        }
 
-			String resultSetStr = baos.toString();
+        return conn;
+    }
 
-			resultSetSize = (long)rsw.size();
-			Gson gson = new Gson();
-			JsonElement el = gson.fromJson(resultSetStr, JsonElement.class);
-			json.add("result", el);
-		}
 
-		json.addProperty("size", resultSetSize);
+    public static RDFConnection getConnection(FunctionEnv env) {
+        RDFConnection conn = null;
+        Context cxt = env.getContext();
+        if(cxt != null) {
+            conn = cxt.get(RDFConnectionUtils.CONNECTION_SYMBOL);
+        }
 
-		return json;
-	}
+        if(conn == null) {
+            logger.info("No connection in context, falling back to dataset");
+            DatasetGraph dsg = env.getDataset();
+            if(dsg != null) {
+                Dataset ds = DatasetFactory.wrap(dsg);
+                conn = RDFConnectionFactory.connect(ds);
+            }
+        }
 
-	@Override
-	public NodeValue exec(NodeValue v) {
-		throw new RuntimeException("Should not be invoked directly");
-	}
+        return conn;
+    }
+
+    public static JsonObject benchmark(RDFConnection conn, String queryStr, boolean includeResultSet) {
+
+        if(conn == null) {
+            throw new RuntimeException("No connection or dataset specified in context");
+        }
+
+        logger.info("Benchmarking query: " + queryStr);
+
+        Stopwatch sw = Stopwatch.createStarted();
+        Long resultSetSize = null;
+        ResultSetRewindable rsw = null;
+        try(QueryExecution qe = conn.query(queryStr)) {
+            ResultSet rs = qe.execSelect();
+
+            if(includeResultSet) {
+                rsw = ResultSetFactory.copyResults(rs);
+            } else {
+                resultSetSize = (long)ResultSetFormatter.consume(rs);
+            }
+
+        } catch(Exception e) {
+            logger.warn("Failure executing benchmark request", e);
+            throw new ExprTypeException("Failure executing benchmark request", e);
+        }
+
+
+        long ms = sw.stop().elapsed(TimeUnit.NANOSECONDS);
+        BigDecimal s = new BigDecimal(ms).divide(new BigDecimal(1000000000l));
+
+        JsonObject json = new JsonObject();
+        json.addProperty("time", s);
+
+        if(rsw != null) {
+            rsw.reset();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ResultSetFormatter.outputAsJSON(baos, rsw);
+
+            String resultSetStr = baos.toString();
+
+            resultSetSize = (long)rsw.size();
+            Gson gson = new Gson();
+            JsonElement el = gson.fromJson(resultSetStr, JsonElement.class);
+            json.add("result", el);
+        }
+
+        json.addProperty("size", resultSetSize);
+
+        return json;
+    }
+
+    @Override
+    public NodeValue exec(NodeValue v) {
+        throw new RuntimeException("Should not be invoked directly");
+    }
 }
 
 //public class E_Benchmark
 //	extends ExprFunctionOp
-//{	
+//{
 //    private static final String symbol = "benchmark";
 //
 //    public E_Benchmark(Op op) {
@@ -185,7 +185,7 @@ public class E_Benchmark
 //		return NodeValue.makeInteger(666);
 //	}
 //
-//	
+//
 //
 //    @Override
 //    public Expr copySubstitute(Binding binding) {
@@ -216,17 +216,17 @@ public class E_Benchmark
 //        if ( this == other ) return true ;
 //        if ( ! ( other instanceof E_Benchmark ) )
 //            return false ;
-//        
+//
 //        E_Exists ex = (E_Exists)other ;
 //        if ( bySyntax )
 //            return this.getElement().equals(ex.getElement()) ;
 //        else
 //            return this.getGraphPattern().equals(ex.getGraphPattern()) ;
 //    }
-//    
+//
 //    @Override
 //    public ExprFunctionOp copy(ExprList args, Op x) { return new E_Benchmark(x) ; }
-//    
+//
 //    @Override
 //    public ExprFunctionOp copy(ExprList args, Element elPattern) { return new E_Benchmark(elPattern) ; }
 //}

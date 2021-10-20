@@ -45,11 +45,11 @@ import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
-import org.aksw.jena_sparql_api.mapper.proxy.JenaPluginUtils;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -179,7 +179,7 @@ public class MainConjurePlayground {
 
         // Create a SPARQL parser with preconfigured prefixes
         // Pure luxury!
-        Function<String, SparqlStmt> parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, DefaultPrefixes.prefixes, false);
+        Function<String, SparqlStmt> parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, DefaultPrefixes.get(), false);
 
         Model model = ModelFactory.createDefaultModel();
 
@@ -263,7 +263,7 @@ public class MainConjurePlayground {
 
         ConjureContext ctx = new ConjureContext();
         Model xmodel = ctx.getModel();
-        xmodel.setNsPrefix("rpif", DefaultPrefixes.prefixes.getNsPrefixURI("rpif"));
+        xmodel.setNsPrefix("rpif", DefaultPrefixes.get().getNsPrefixURI("rpif"));
 
         ConjureBuilder cj = new ConjureBuilderImpl(ctx);
 

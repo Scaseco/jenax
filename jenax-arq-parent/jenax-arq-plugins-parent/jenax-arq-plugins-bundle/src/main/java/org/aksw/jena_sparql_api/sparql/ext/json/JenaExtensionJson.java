@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.aksw.jena_sparql_api.mapper.proxy.function.FunctionBinder;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
+import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
-import org.aksw.jena_sparql_api.utils.IteratorClosable;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
@@ -34,9 +34,9 @@ import com.google.gson.JsonElement;
 
 /**
  * Function for parsing a given CSV resource as a stream of JSON objects
- * 
+ *
  * By default, the resource will be attempted to parse as EXCEL csv.
- * 
+ *
  * {
  *    <schema://url/to/data> csv:parse ?rowAsJson .
  *    <schema://url/to/data> csv:parse (?rowAsJson ["options"])
@@ -48,88 +48,88 @@ import com.google.gson.JsonElement;
 public class PropertyFunctionFactoryCsvParse
     implements PropertyFunctionFactory
 {
-	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryCsvParse.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryCsvParse.class);
 
-	@Override
+    @Override
     public PropertyFunction create(final String uri)
     {
         return new PropertyFunctionEval(PropFuncArgType.PF_ARG_SINGLE, PropFuncArgType.PF_ARG_EITHER) {
-        	
-			@Override
-		    public QueryIterator execEvaluated(Binding binding, PropFuncArg argSubject,
-		            Node predicate, PropFuncArg argObject, ExecutionContext execCtx) {
-				
-				Node subject = argSubject.getArg();
-				
+
+            @Override
+            public QueryIterator execEvaluated(Binding binding, PropFuncArg argSubject,
+                    Node predicate, PropFuncArg argObject, ExecutionContext execCtx) {
+
+                Node subject = argSubject.getArg();
+
                 Node node = subject.isVariable()
                         ? binding.get((Var)subject)
                         : subject;
 
                 Node object;
                 Node options = NodeFactory.createLiteral("");
-                        
-                if(argObject.isList()) {
-                	List<Node> argList = argObject.getArgList();
-                	int l = argList.size();
-                	if(l == 0 || l > 2) {
-                		throw new RuntimeException("One or two arguments expected");
-                	}
 
-                	object = argList.get(0);
-                	options = l == 2 ? argList.get(1) : options;	                        
+                if(argObject.isList()) {
+                    List<Node> argList = argObject.getArgList();
+                    int l = argList.size();
+                    if(l == 0 || l > 2) {
+                        throw new RuntimeException("One or two arguments expected");
+                    }
+
+                    object = argList.get(0);
+                    options = l == 2 ? argList.get(1) : options;
                 } else {
-	                object = argObject.getArg();
+                    object = argObject.getArg();
                 }
-                
+
                 if(!object.isVariable()) {
                     throw new RuntimeException("Object of csv parsing must be a variable");
                 }
 
-                
+
                 Var outputVar = (Var)object;
 
                 Reader reader = null;
                 //Runnable closeAction = null;
                 InputStream in = null;
                 if(subject.isLiteral()) {
-                	// Create a reader for the string literal
-                	boolean isString = subject.getLiteralDatatype().getURI().equals(XSD.xstring.getURI());
-                	if(isString) {
-                		String str = subject.getLiteralValue().toString();
-                		reader = new StringReader(str);
-                	}
+                    // Create a reader for the string literal
+                    boolean isString = subject.getLiteralDatatype().getURI().equals(XSD.xstring.getURI());
+                    if(isString) {
+                        String str = subject.getLiteralValue().toString();
+                        reader = new StringReader(str);
+                    }
                 } else if(subject.isURI()) {
-                	try {
-	                	String str = subject.getURI();
-	                	URI uri = new URI(str);
-	                	URL url = uri.toURL();
-	                	in = url.openStream();
-	                	//closeAction = () -> { try { in.close(); } catch(Exception e) { throw new RuntimeException(e); } };
-                	} catch(Exception e) {
-                		throw new RuntimeException(e);
-                	}
-                	// TODO Maybe we need to add encoding support
-                	reader = new InputStreamReader(in);
+                    try {
+                        String str = subject.getURI();
+                        URI uri = new URI(str);
+                        URL url = uri.toURL();
+                        in = url.openStream();
+                        //closeAction = () -> { try { in.close(); } catch(Exception e) { throw new RuntimeException(e); } };
+                    } catch(Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    // TODO Maybe we need to add encoding support
+                    reader = new InputStreamReader(in);
                 }
-                
+
                 String optionStr = options.getLiteralValue().toString();
 
                 Stream<JsonElement> jsonObjStream;
-				try {
-					jsonObjStream = E_CsvParse.parseCsv(reader, optionStr);
-				} catch (IOException e) {
-					logger.warn("Failed to process csv input", e);
-					jsonObjStream = Collections.<JsonElement>emptySet().stream();
-				}
-                
+                try {
+                    jsonObjStream = E_CsvParse.parseCsv(reader, optionStr);
+                } catch (IOException e) {
+                    logger.warn("Failed to process csv input", e);
+                    jsonObjStream = Collections.<JsonElement>emptySet().stream();
+                }
+
                 QueryIterator result = QueryIterPlainWrapper.create(
-            		new IteratorClosable<>(
-            				jsonObjStream
-		            		.map(RDFDatatypeJson::jsonToNode)
-		            		.map(n -> BindingFactory.binding(outputVar, n))
-		            		.iterator(),
-		            in));
-                        		                
+                    Iter.onCloseIO(
+                            jsonObjStream
+                            .map(RDFDatatypeJson::jsonToNode)
+                            .map(n -> BindingFactory.binding(outputVar, n))
+                            .iterator(),
+                    in));
+
 
 //                if(result == null) {
 //                    result = QueryIterNullIterator.create(execCtx);

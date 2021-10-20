@@ -15,11 +15,11 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUtils;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
-import org.aksw.jena_sparql_api.mapper.proxy.JenaPluginUtils;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
-import org.aksw.jena_sparql_api.utils.NodeUtils;
+import org.aksw.jenax.arq.util.node.NodeEnvsubst;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
@@ -31,7 +31,7 @@ public class JobUtils {
 
     public static Job fromSparqlFile(String path) throws FileNotFoundException, IOException, ParseException {
         // TODO Add API for Query objects to fluent
-        List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(DefaultPrefixes.prefixes, path))
+        List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(DefaultPrefixes.get(), path))
                 .collect(Collectors.toList());
 
         List<String> stmtStrs = stmts.stream()
@@ -145,9 +145,9 @@ public class JobUtils {
         Op tmp = job.getOp();
         Op op = JenaPluginUtils.reachableClosure(tmp, Op.class);
 
-        NodeTransform nodeTransform = x -> NodeUtils.substWithLookup2(x, envMap::get);
+        NodeTransform nodeTransform = x -> NodeEnvsubst.substWithNode(x, envMap::get);
         //NodeTransform nodeTransform = new NodeTransformRenameMap(envMap);
-        OpUtils.applyNodeTransform(op, nodeTransform, stmt -> SparqlStmtUtils.optimizePrefixes(SparqlStmtParserImpl.create(DefaultPrefixes.prefixes).apply(stmt)));
+        OpUtils.applyNodeTransform(op, nodeTransform, stmt -> SparqlStmtUtils.optimizePrefixes(SparqlStmtParserImpl.create(DefaultPrefixes.get()).apply(stmt)));
 
         // OpUtils.applyNodeTransform();
 

@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParser;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;

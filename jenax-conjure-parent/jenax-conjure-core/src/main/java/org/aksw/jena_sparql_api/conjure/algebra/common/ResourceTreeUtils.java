@@ -14,7 +14,7 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.ext.com.google.common.graph.SuccessorsFunction;
