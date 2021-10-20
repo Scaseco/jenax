@@ -27,7 +27,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-connection</artifactId>
+			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
 		<dependency>

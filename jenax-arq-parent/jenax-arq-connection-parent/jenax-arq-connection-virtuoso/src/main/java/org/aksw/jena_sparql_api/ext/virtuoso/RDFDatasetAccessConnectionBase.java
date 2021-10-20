@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.ext.virtuoso;
 
-import org.aksw.jena_sparql_api.core.connection.TransactionalTmp;
+import org.aksw.jenax.arq.connection.TransactionalTmp;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.Model;
@@ -9,9 +9,9 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public abstract class RDFDatasetAccessConnectionBase
     implements RDFDatasetAccessConnection, TransactionalTmp
-{    
+{
     protected abstract SparqlQueryConnection getQueryConnection();
-    
+
     @Override
     public void begin(ReadWrite readWrite) {
         getQueryConnection().begin(readWrite);

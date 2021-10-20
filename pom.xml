@@ -282,27 +282,33 @@
 
                         <dependency>
                                 <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-models-dcat-api</artifactId>
+                                <artifactId>jenax-arq-plugins-service-vfs</artifactId>
                                 <version>${project.version}</version>
                         </dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-conjure-core</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-dcat-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-io-core</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-conjure-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-io-hdt</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-hdt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 
 			<dependency>
@@ -312,30 +318,24 @@
 			</dependency>
 
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-connection-core</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
-
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-connection-virtuoso</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
-
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-connection-mods</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
-
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-algebra</artifactId>
+				<artifactId>jenax-arq-connection-virtuoso</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection-mods</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -361,15 +361,16 @@
 				<version>${project.version}</version>
 			</dependency>
 
+
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-connection</artifactId>
+				<artifactId>jenax-arq-propertypaths</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-propertypaths</artifactId>
+				<artifactId>jenax-arq-datapaths</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -433,17 +434,17 @@
 				<version>${project.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-algebra</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-algebra</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-plugins-bundle</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-plugins-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 
 

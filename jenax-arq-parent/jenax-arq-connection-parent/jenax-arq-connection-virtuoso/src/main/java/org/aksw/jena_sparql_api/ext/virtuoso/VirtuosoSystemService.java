@@ -11,17 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionJsa;
-import org.aksw.jena_sparql_api.core.connection.SparqlUpdateConnectionJsa;
 import org.aksw.jena_sparql_api.core.service.SparqlBasedSystemService;
 import org.aksw.jena_sparql_api.io.utils.AbstractSystemService;
-import org.aksw.jena_sparql_api.update.FluentSparqlService;
+import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionModular;
+import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
 import org.ini4j.InvalidFileFormatException;
@@ -127,9 +122,9 @@ public class VirtuosoSystemService
     public static RDFConnection connectVirtuoso(String host, int httpPort, int odbcPort) {
         String endpointUrl = "http://" + host + ":" + httpPort + "/sparql";
 
-        SparqlService httpSparqlService = FluentSparqlService.http(endpointUrl).create();
+        // SparqlService httpSparqlService = FluentSparqlService.http(endpointUrl).create();
 
-        
+
         Connection sqlConn;
         String jdbcUrl = "jdbc:virtuoso://" + host + ":" + odbcPort;
         try {
@@ -137,16 +132,18 @@ public class VirtuosoSystemService
         } catch (SQLException e) {
             throw new RuntimeException("Failed to connect to " + jdbcUrl, e);
         }
-        
-        SparqlQueryConnection queryConn = new SparqlQueryConnectionJsa(httpSparqlService.getQueryExecutionFactory());
-        SparqlUpdateConnection updateConn = new SparqlUpdateConnectionJsa(httpSparqlService.getUpdateExecutionFactory());
-        RDFDatasetConnection datasetConn = new RDFDatasetConnectionVirtuoso(queryConn, sqlConn);
-        
-        RDFConnection result = new RDFConnectionModular(queryConn, updateConn, datasetConn);
+
+//        SparqlQueryConnection queryConn = new SparqlQueryConnectionJsa(httpSparqlService.getQueryExecutionFactory());
+//        SparqlUpdateConnection updateConn = new SparqlUpdateConnectionJsa(httpSparqlService.getUpdateExecutionFactory());
+        RDFConnection httpConn = RDFConnectionFactory.connect(endpointUrl);
+
+        RDFDatasetConnection datasetConn = new RDFDatasetConnectionVirtuoso(httpConn, sqlConn);
+
+        RDFConnection result = new RDFConnectionModular(httpConn, httpConn, datasetConn);
 
         return result;
     }
-    
+
     /**
      * The default connection is some application specific connection. At
      * minimum it should enable health check queries.
@@ -168,7 +165,7 @@ public class VirtuosoSystemService
 //
 //        SparqlService httpSparqlService = FluentSparqlService.http(endpointUrl).create();
 //
-//        
+//
 //        Connection sqlConn;
 //        String jdbcUrl = "jdbc:virtuoso://localhost:" + odbcPort;
 //        try {
@@ -176,11 +173,11 @@ public class VirtuosoSystemService
 //        } catch (SQLException e) {
 //            throw new RuntimeException("Failed to connect to " + jdbcUrl, e);
 //        }
-//        
+//
 //        SparqlQueryConnection queryConn = new SparqlQueryConnectionJsa(httpSparqlService.getQueryExecutionFactory());
 //        SparqlUpdateConnection updateConn = new SparqlUpdateConnectionJsa(httpSparqlService.getUpdateExecutionFactory());
 //        RDFDatasetConnection datasetConn = new RDFDatasetConnectionVirtuoso(queryConn, sqlConn);
-        
+
 //        RDFConnection result = new RDFConnectionModular(queryConn, updateConn, datasetConn);
 
         RDFConnection result = connectVirtuoso(host, httpPort, odbcPort);

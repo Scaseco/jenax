@@ -15,5 +15,6 @@
 
 	<modules>
 		<module>jenax-arq-plugins-bundle</module>
+		<module>jenax-arq-plugins-service-vfs</module>
 	</modules>
 </project>

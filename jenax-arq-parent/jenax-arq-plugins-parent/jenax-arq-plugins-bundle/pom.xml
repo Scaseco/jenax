@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>4.2.0-1-SNAPSHOT</version>
+		<version>4.3.0-1-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -60,7 +60,7 @@
 		<!-- Possibly also used for result set comparison -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-collections</artifactId>
+			<artifactId>jenax-arq-collections</artifactId>
 		</dependency>
 
 		<!-- Used for cutsom Aggregators (should probably go to jsa utls) -->
@@ -72,13 +72,13 @@
 		<!-- Used for ResultSet comparison -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-utils</artifactId>
+			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
 
 		<!-- Query federation to files in virtual file systems with binary search support -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-service-vfs</artifactId>
+			<artifactId>jenax-arq-plugins-service-vfs</artifactId>
 		</dependency>
 
 		<!-- Used for binary search via the service clause -->
@@ -91,7 +91,7 @@
 		<!-- May separate this functionality from resource proxy generation in the future -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-mapper-proxy</artifactId>
+			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -144,7 +144,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-io-hdt</artifactId>
+			<artifactId>jenax-arq-hdt</artifactId>
 		</dependency>
 
 		<!-- Geo extensions -->

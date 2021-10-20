@@ -4,43 +4,34 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-hdt</artifactId>
+	<artifactId>jenax-arq-plugins-service-vfs</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
-		<artifactId>jenax-arq-parent</artifactId>
+		<artifactId>jenax-arq-plugins-parent</artifactId>
 		<version>4.3.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-utils</artifactId>
+			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-base</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.rdfhdt</groupId>
-			<artifactId>hdt-jena</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>eu.wdaqua</groupId> -->
-		<!-- <artifactId>hdt-jena</artifactId> -->
-		<!-- <exclusions> -->
-		<!-- <exclusion> -->
-		<!-- <groupId>org.apache.jena</groupId> -->
-		<!-- <artifactId>jena-base</artifactId> -->
-		<!-- </exclusion> -->
-		<!-- </exclusions> -->
-		<!-- </dependency> -->
 
 		<!-- Unit Testing -->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -52,6 +43,7 @@
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 
 	</dependencies>
 </project>

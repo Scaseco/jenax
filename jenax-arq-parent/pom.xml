@@ -18,7 +18,7 @@
 		<module>jenax-arq-anyresource</module>
 		<module>jenax-arq-json</module>
 		<module>jenax-arq-propertypaths</module>
-		<module>jenax-arq-paths</module>
+		<module>jenax-arq-datapaths</module>
 		<module>jenax-arq-connection-parent</module>
 		<module>jenax-arq-stmt</module>
 		<module>jenax-arq-functions</module>
@@ -42,5 +42,6 @@
 		<module>jenax-arq-algebra</module>
 
 		<module>jenax-arq-datasets-parent</module>
+		<module>jenax-arq-plugins-parent</module>
 	</modules>
 </project>

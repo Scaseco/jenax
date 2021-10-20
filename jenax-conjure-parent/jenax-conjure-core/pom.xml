@@ -61,7 +61,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-io-hdt</artifactId>
+			<artifactId>jenax-arq-hdt</artifactId>
 		</dependency>
 
 		<dependency>
@@ -86,7 +86,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-connection</artifactId>
+			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
 		<dependency>
