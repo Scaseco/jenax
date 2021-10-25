@@ -17,6 +17,7 @@
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
 		<module>jenax-arq-parent</module>
+		<module>jenax-rx-parent</module>
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
@@ -284,6 +285,12 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-service-vfs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1324,7 +1331,7 @@
 		<snapshotRepository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -1332,7 +1339,7 @@
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>

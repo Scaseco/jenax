@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-rx-ops-syscall</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-rx-parent</artifactId>
+		<version>4.3.0-1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-json</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-syscalls</artifactId>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.code.gson</groupId> -->
+		<!-- <artifactId>gson</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collectors</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-process-pipes</artifactId>
+		</dependency>
+
+
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>

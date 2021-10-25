@@ -19,6 +19,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.Context;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -33,6 +34,9 @@ public class FlowOfDatasetOps {
         return mapWithSparql(stmts, DatasetGraphFactory::create, cxt -> {});
     }
 
+    public static Flowable<Quad> flatMapToQuads(Flowable<Dataset> in) {
+        return in.flatMap(ds -> Flowable.fromIterable(() -> ds.asDatasetGraph().find()));
+    }
 
 
     /**

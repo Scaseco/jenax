@@ -42,7 +42,7 @@ import org.apache.jena.util.iterator.WrappedIterator;
 public class NodeTransformLib2 {
 
     /** Wrap a node transform such the input node is returned whenever otherwise null would be returned */
-    public static NodeTransform nullAsIdentity(NodeTransform xform) {
+    public static NodeTransform wrapWithNullAsIdentity(NodeTransform xform) {
         return x -> {
             Node tmp = xform.apply(x);
             Node r = tmp == null ? x : tmp;

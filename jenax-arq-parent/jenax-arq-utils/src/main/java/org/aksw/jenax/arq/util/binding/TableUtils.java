@@ -11,6 +11,7 @@ import org.apache.jena.sparql.algebra.TableFactory;
 import org.apache.jena.sparql.algebra.table.TableN;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 public class TableUtils {
@@ -20,17 +21,23 @@ public class TableUtils {
         return ResultSet.adapt(table.toRowSet());
     }
 
+    public static Table createTable(RowSet rs) {
+        List<Var> vars = rs.getResultVars();
+        Table result = TableFactory.create(vars);
+        while (rs.hasNext()) {
+            result.addBinding(rs.next());
+        }
+        return result;
+    }
+
     public static Table createTable(ResultSet rs) {
-
         List<Var> vars = VarUtils.toList(rs.getResultVars());
-
         Table result = TableFactory.create(vars);
 
         while(rs.hasNext()) {
             Binding binding = rs.nextBinding();
             result.addBinding(binding);
         }
-
         return result;
     }
 

@@ -8,6 +8,7 @@ import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryQueryTransform;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
+import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
@@ -19,6 +20,8 @@ import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+
+import com.apicatalog.jsonld.http.link.Link;
 
 public class RDFLinkUtils {
 
@@ -50,10 +53,10 @@ public class RDFLinkUtils {
         return result;
     }
 
-    public static RDFDatasetConnection unwrapDatasetConnection(RDFDatasetConnection conn) {
-        RDFDatasetConnection result;
+    public static LinkDatasetGraph unwrapDatasetConnection(LinkDatasetGraph conn) {
+        LinkDatasetGraph result;
         if(conn instanceof RDFLinkModular) {
-            RDFDatasetConnection tmp = getDatasetConnection((RDFLinkModular)conn);
+            LinkDatasetGraph tmp = getDatasetConnection((RDFLinkModular)conn);
             result = unwrapDatasetConnection(tmp);
         } else {
             result = conn;
@@ -92,12 +95,12 @@ public class RDFLinkUtils {
     }
 
     /** Reflective access to an {@link RDFLinkModular}'s datasetConnection. */
-    public static RDFDatasetConnection getDatasetConnection(RDFLinkModular conn) {
-        RDFDatasetConnection result;
+    public static LinkDatasetGraph getDatasetConnection(RDFLinkModular conn) {
+        LinkDatasetGraph result;
         try {
             Field f = RDFLinkModular.class.getDeclaredField("datasetConnection");
             f.setAccessible(true);
-            result = (RDFDatasetConnection)f.get(conn);
+            result = (LinkDatasetGraph)f.get(conn);
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
@@ -106,17 +109,17 @@ public class RDFLinkUtils {
     }
 
     /** Reflective access to an {@link RDFLinkModular}'s dataset. */
-    public static Dataset getDataset(RDFLinkDataset conn) {
-        Dataset result;
-        try {
-            Field f = RDFLinkDataset.class.getDeclaredField("dataset");
-            f.setAccessible(true);
-            result = (Dataset)f.get(conn);
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
-    }
+//    public static Dataset getDataset(RDFLinkDataset conn) {
+//        Dataset result;
+//        try {
+//            Field f = RDFLinkDataset.class.getDeclaredField("dataset");
+//            f.setAccessible(true);
+//            result = (Dataset)f.get(conn);
+//        } catch(Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        return result;
+//    }
 
 
 
@@ -144,9 +147,9 @@ public class RDFLinkUtils {
         RDFLink[] result = {null};
 
         LinkSparqlUpdate tmp = unwrapUpdateConnection(rawConn);
-        Dataset dataset = tmp instanceof RDFLinkDataset
-                ? getDataset((RDFLinkDataset)tmp)
-                : null;
+//        Dataset dataset = tmp instanceof RDFLinkDataset
+//                ? getDataset((RDFLinkDataset)tmp)
+//                : null;
 
         result[0] =
             new RDFLinkModular(rawConn, rawConn, rawConn) {
@@ -162,11 +165,12 @@ public class RDFLinkUtils {
 
                 @Override
                 public void update(UpdateRequest update) {
+                    rawConn.update(update);
 //			        checkOpen();
 //			        Txn.executeWrite(dataset, () -> {
-                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
-                        UpdateProcessor up = postProcess(tmp);
-                        up.execute();
+//                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
+//                        UpdateProcessor up = postProcess(tmp);
+//                        up.execute();
 //			        });
                 }
 
@@ -196,8 +200,12 @@ public class RDFLinkUtils {
     }
 
     public static RDFLink wrapWithQueryTransform(RDFLink conn, Function<? super Query, ? extends Query> fn) {
-        RDFLink result =
-                new RDFLinkModular(new LinkSparqlQueryTransform(conn, fn), conn, conn);
+        LinkSparqlQuery queryLink = unwrapQueryConnection(conn);
+        LinkSparqlUpdate updateLink = unwrapUpdateConnection(conn);
+        LinkDatasetGraph dgLink = unwrapDatasetConnection(conn);
+
+        RDFLink result = new RDFLinkModular(
+                new LinkSparqlQueryTransform(queryLink, fn), updateLink, dgLink);
 
         return result;
     }

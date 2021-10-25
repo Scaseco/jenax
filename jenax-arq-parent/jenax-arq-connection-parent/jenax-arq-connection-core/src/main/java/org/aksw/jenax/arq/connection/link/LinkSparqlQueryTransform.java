@@ -20,7 +20,8 @@ public class LinkSparqlQueryTransform
     @Override
     public QueryExec query(Query query) {
         Query effectiveQuery = transform.apply(query);
-        return getDelegate().query(effectiveQuery);
+        QueryExec result = getDelegate().query(effectiveQuery);
+        return result;
     }
 
     @Override

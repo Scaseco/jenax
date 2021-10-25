@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.dataset.impl;
+package org.aksw.jenax.sparql.relation.dataset;
 
 import java.util.Objects;
 
