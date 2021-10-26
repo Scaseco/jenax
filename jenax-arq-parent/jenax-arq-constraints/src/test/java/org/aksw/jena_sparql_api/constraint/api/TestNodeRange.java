@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.constraint.api;
 
+import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.constraint.util.NodeRanges;
-import org.aksw.jenax.constraint.util.NodeWrapper;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.vocabulary.RDF;
@@ -19,8 +19,8 @@ public class TestNodeRange {
         NodeRanges nr = NodeRanges.createClosed();
 
         nr.add(Range.closedOpen(
-                NodeWrapper.wrap(NodeFactory.createLiteral("a")),
-                NodeWrapper.wrap(NodeFactory.createLiteral("b"))));
+                ComparableNodeValue.wrap(NodeFactory.createLiteral("a")),
+                ComparableNodeValue.wrap(NodeFactory.createLiteral("b"))));
 
         Assert.assertTrue(nr.contains(NodeFactory.createLiteral("a")));
         Assert.assertTrue(nr.contains(NodeFactory.createLiteral("ab")));
@@ -33,14 +33,14 @@ public class TestNodeRange {
     public void testPrefixRanges2() {
         NodeRanges nr = NodeRanges.createClosed();
         nr.add(Range.closedOpen(
-                NodeWrapper.wrap(NodeFactory.createLiteral(RDF.uri)),
-                NodeWrapper.wrap(NodeFactory.createLiteral(incrementLastCharacter(RDF.uri)))));
+                ComparableNodeValue.wrap(NodeFactory.createLiteral(RDF.uri)),
+                ComparableNodeValue.wrap(NodeFactory.createLiteral(incrementLastCharacter(RDF.uri)))));
 
 //        NodeRanges nr2 = NodeRanges.create();
 //        nr2.add(Range.singleton(NodeWrapper.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
 //        System.out.println(nr2);
 //        nr.stateIntersection(nr2);
-        nr.substract(Range.singleton(NodeWrapper.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
+        nr.substract(Range.singleton(ComparableNodeValue.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
 
 
         System.out.println(nr);

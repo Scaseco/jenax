@@ -16,5 +16,6 @@
 	<modules>
 		<module>jenax-reprogen-shared</module>
 		<module>jenax-reprogen-core</module>
+		<module>jenax-reprogen-jpa</module>
 	</modules>
 </project>

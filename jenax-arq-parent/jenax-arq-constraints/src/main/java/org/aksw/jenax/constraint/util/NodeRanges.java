@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.util.range.RangeUtils;
+import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.constraint.api.Contradictable;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -41,7 +42,7 @@ import com.google.common.collect.TreeRangeSet;
  *
  */
 public class NodeRanges
-    extends ValueSpaceBase<NodeWrapper, Object>
+    extends ValueSpaceBase<ComparableNodeValue, Object>
     implements Contradictable, Cloneable
 {
     // Additional (pseudo) value space classifications for unform handing of IRIs and bnodes
@@ -54,12 +55,12 @@ public class NodeRanges
         super(isVscExhaustive);
     }
 
-    public NodeRanges(boolean isVscExhaustive, Map<Object, RangeSet<NodeWrapper>> vscToRangeSets) {
+    public NodeRanges(boolean isVscExhaustive, Map<Object, RangeSet<ComparableNodeValue>> vscToRangeSets) {
         super(isVscExhaustive, vscToRangeSets);
     }
 
 
-    public RangeSet<NodeWrapper> getIriRanges() {
+    public RangeSet<ComparableNodeValue> getIriRanges() {
         return vscToRangeSets == null
                 ? ImmutableRangeSet.of()
                 : vscToRangeSets.getOrDefault(VSC_IRI, ImmutableRangeSet.of());
@@ -70,7 +71,7 @@ public class NodeRanges
      */
     @Override
     public NodeRanges clone() {
-        Map<Object, RangeSet<NodeWrapper>> clone = vscToRangeSets.entrySet().stream()
+        Map<Object, RangeSet<ComparableNodeValue>> clone = vscToRangeSets.entrySet().stream()
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         e -> TreeRangeSet.create(e.getValue())));
@@ -96,13 +97,13 @@ public class NodeRanges
 
     /** Constrain the value space to only the given node - this is an intersection operation */
     public NodeRanges stateValue(Node value) {
-        NodeWrapper nw = NodeWrapper.wrap(value);
-        Range<NodeWrapper> range = Range.singleton(nw);
+        ComparableNodeValue nw = ComparableNodeValue.wrap(value);
+        Range<ComparableNodeValue> range = Range.singleton(nw);
         Object vsc = classifyValueSpace(range);
 
         vscToRangeSets.keySet().retainAll(Collections.singleton(vsc));
 
-        RangeSet<NodeWrapper> ranges = vscToRangeSets.get(vsc);
+        RangeSet<ComparableNodeValue> ranges = vscToRangeSets.get(vsc);
         // If there is no range we can create one if we are not exhaustive
         // otherwise we are conflicting
         if (ranges == null) {
@@ -125,7 +126,7 @@ public class NodeRanges
     /** Add a constant to its respective value space
      * This is a union-like operation - its does not constrain the space to the given value */
     public NodeRanges addValue(Node value) {
-        Range<NodeWrapper> range = Range.singleton(NodeWrapper.wrap(value));
+        Range<ComparableNodeValue> range = Range.singleton(ComparableNodeValue.wrap(value));
         add(range);
         return this;
     }
@@ -140,14 +141,14 @@ public class NodeRanges
      * @return True if this is in conflicting state
      */
     public boolean substractValue(Node value) {
-        Range<NodeWrapper> range = Range.singleton(NodeWrapper.wrap(value));
+        Range<ComparableNodeValue> range = Range.singleton(ComparableNodeValue.wrap(value));
         Object vsc = classifyValueSpace(range);
 
-        RangeSet<NodeWrapper> ranges = vscToRangeSets.get(vsc);
+        RangeSet<ComparableNodeValue> ranges = vscToRangeSets.get(vsc);
         if (ranges == null) {
             if (!isVscExhaustive) {
                 ranges = TreeRangeSet.create();
-                RangeSet<NodeWrapper> tmp = ranges.complement();
+                RangeSet<ComparableNodeValue> tmp = ranges.complement();
                 tmp.remove(range);
                 vscToRangeSets.put(vsc, tmp);
             } // else { noop }
@@ -178,7 +179,7 @@ public class NodeRanges
 
     public boolean contains(NodeValue nodeValue) {
         Object vsc = nodeValue.getValueSpace();
-        NodeWrapper tmp = NodeWrapper.wrap(nodeValue);
+        ComparableNodeValue tmp = ComparableNodeValue.wrap(nodeValue);
         boolean result = Optional.ofNullable(vscToRangeSets.get(vsc)).map(rangeSet -> rangeSet.contains(tmp)).orElse(!isVscExhaustive);
         return result;
     }
@@ -194,7 +195,7 @@ public class NodeRanges
     public Stream<Node> streamDiscrete() {
         return vscToRangeSets.values().stream().flatMap(rangeSet -> rangeSet.asRanges().stream()
                 .map(Range::lowerEndpoint)
-                .map(NodeWrapper::getNode));
+                .map(ComparableNodeValue::getNode));
     }
 
     /** Returns true if there is exactly one value space with exactly one singleton */
@@ -232,11 +233,11 @@ public class NodeRanges
                 result = this.getValueSpaces().containsAll(other.getValueSpaces());
 
                 if (result) {
-                    for (Entry<Object, RangeSet<NodeWrapper>> e : this.vscToRangeSets.entrySet()) {
+                    for (Entry<Object, RangeSet<ComparableNodeValue>> e : this.vscToRangeSets.entrySet()) {
                         Object vsc = e.getKey();
-                        RangeSet<NodeWrapper> thisRangeSet = e.getValue();
+                        RangeSet<ComparableNodeValue> thisRangeSet = e.getValue();
 
-                        RangeSet<NodeWrapper> otherRangeSet = other.vscToRangeSets.get(vsc);
+                        RangeSet<ComparableNodeValue> otherRangeSet = other.vscToRangeSets.get(vsc);
                         if (otherRangeSet == null) {
                             result = false;
                             break;
@@ -274,12 +275,12 @@ public class NodeRanges
     }
 
     @Override
-    protected Object classifyValueSpace(Range<NodeWrapper> range) {
+    protected Object classifyValueSpace(Range<ComparableNodeValue> range) {
         return classifyValueSpaceCore(range);
     }
 
     /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
-    public static Object classifyValueSpaceCore(Range<NodeWrapper> range) {
+    public static Object classifyValueSpaceCore(Range<ComparableNodeValue> range) {
         Object result = null;
         NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
         NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
@@ -326,8 +327,8 @@ public class NodeRanges
         NodeRanges nr = NodeRanges.createOpen();
         System.out.println(nr.isUnconstrained());
 
-        nr.add(Range.singleton(NodeWrapper.wrap(iri)));
-        nr.add(Range.singleton(NodeWrapper.wrap(a)));
+        nr.add(Range.singleton(ComparableNodeValue.wrap(iri)));
+        nr.add(Range.singleton(ComparableNodeValue.wrap(a)));
         System.out.println(nr.contains(b));
         System.out.println(nr.contains(c));
 

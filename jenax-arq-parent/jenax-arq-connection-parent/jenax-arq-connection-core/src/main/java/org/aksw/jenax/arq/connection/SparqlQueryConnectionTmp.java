@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
@@ -160,6 +161,11 @@ public interface SparqlQueryConnectionTmp
         return query(parse(queryString));
     }
 
+
+    @Override
+    default QueryExecutionBuilder newQuery() {
+        throw new UnsupportedOperationException();
+    }
 //
 //	@Override
 //	public default void querySelect(String query, Consumer<QuerySolution> rowAction) {

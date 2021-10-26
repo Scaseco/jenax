@@ -26,12 +26,6 @@ public class LinkSparqlQueryTransform
 
     @Override
     public QueryExecBuilder newQuery() {
-        return new QueryExecBuilderDelegateBaseQuery(delegate.newQuery())  {
-            @Override
-            public QueryExecBuilder query(Query query) {
-                Query effectiveQuery = transform.apply(query);
-                return super.query(effectiveQuery);
-            }
-        };
+        return QueryExecBuilderWrapperWithTransform.create(delegate.newQuery(), transform, null);
     }
 }

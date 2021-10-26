@@ -1,5 +1,6 @@
 package org.aksw.jenax.analytics.core;
 
+import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
 import org.apache.jena.graph.Node;
 
 /**

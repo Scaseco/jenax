@@ -5,6 +5,8 @@ import java.util.Set;
 import org.aksw.jenax.arq.aggregation.Agg;
 import org.aksw.jenax.arq.aggregation.AggDatasetGraph;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
+import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
+import org.aksw.jenax.sparql.relation.query.PartitionedQuery1Impl;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;

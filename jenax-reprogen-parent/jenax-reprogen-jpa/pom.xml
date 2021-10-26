@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jenax-reprogen-jpa</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.aksw.jenax</groupId>
+        <artifactId>jenax-reprogen-parent</artifactId>
+        <version>4.3.0-1-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+
+        <!-- Self Dependencies -->
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-arq-connection-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-arq-datashapes</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-arq-rx</artifactId>
+        </dependency>
+
+<!--
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-update</artifactId>
+        </dependency>
+-->
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-arq-relations</artifactId>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-resource-shape</artifactId>
+        </dependency>
+-->
+
+        <dependency>
+            <groupId>org.aksw.spring</groupId>
+            <artifactId>spring-json-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.commons</groupId>
+            <artifactId>aksw-commons-beans</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.commons</groupId>
+            <artifactId>subgraph-isomorphism-index-jena</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+        </dependency>
+
+		<!-- Unit Testing -->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-resources-test-config</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+</project>

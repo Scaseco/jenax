@@ -1,6 +1,8 @@
 package org.aksw.jenax.analytics.core;
 
 import org.aksw.jenax.arq.aggregation.Agg;
+import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
+import org.aksw.jenax.sparql.relation.query.PartitionedQuery1Impl;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 

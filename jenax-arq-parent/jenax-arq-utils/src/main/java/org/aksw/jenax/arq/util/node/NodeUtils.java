@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -127,6 +129,15 @@ public class NodeUtils {
             result = null;
         }
 
+        return result;
+    }
+
+    /** Create a typed literal for a java object by consulting jena's type mapper */
+    public static Node createTypedLiteral(TypeMapper typeMapper, Object o) {
+        Class<?> clazz = o.getClass();
+        RDFDatatype dtype = typeMapper.getTypeByClass(clazz);
+        String lex = dtype.unparse(o);
+        Node result = NodeFactory.createLiteral(lex, dtype);
         return result;
     }
 

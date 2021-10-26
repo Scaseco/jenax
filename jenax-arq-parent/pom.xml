@@ -33,6 +33,8 @@
 		<module>jenax-arq-rx</module>
 		<module>jenax-arq-quadengine</module>
 		<module>jenax-arq-hdt</module>
+		<module>jenax-arq-datashapes</module>
+		<module>jenax-arq-pathfinding</module>
 
 		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
 		<!-- maybe its better to have udf build on the top level functionbinder module -->
