@@ -290,6 +290,12 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-plugins-bundle</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 				<version>${project.version}</version>
 			</dependency>
