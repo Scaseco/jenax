@@ -128,8 +128,6 @@ public class QueryExecutionUtils {
         return result;
     }
 
-
-
     public static Iterator<Quad> findQuads(QueryExecutionFactory qef, Node g, Node s, Node p, Node o) {
         Quad quad = new Quad(g, s, p, o);
         Query query = QueryGenerationUtils.createQueryQuad(new Quad(g, s, p, o));

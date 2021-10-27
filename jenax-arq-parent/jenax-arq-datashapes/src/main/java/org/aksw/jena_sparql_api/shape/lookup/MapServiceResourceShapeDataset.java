@@ -1,10 +1,10 @@
 package org.aksw.jena_sparql_api.shape.lookup;
 
+import org.aksw.commons.rx.lookup.MapPaginator;
+import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.lookup.MapPaginator;
-import org.aksw.jena_sparql_api.lookup.MapService;
-import org.aksw.jena_sparql_api.mapper.MappedConcept;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
+import org.aksw.jenax.analytics.core.MappedConcept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetGraph;

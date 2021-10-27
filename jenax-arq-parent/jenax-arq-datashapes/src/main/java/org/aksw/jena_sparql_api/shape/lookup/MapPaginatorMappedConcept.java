@@ -39,8 +39,8 @@ public class MapPaginatorMappedConcept<G>
 
     @Override
     public Single<Range<Long>> fetchCount(Long itemLimit, Long rowLimit) {
-        Single<Range<Long>> result = SparqlRx.fetchCountConcept(qef, mappedConcept.getConcept(), itemLimit, rowLimit);
-        //Range<Long> result = ServiceUtils.fetchCountConcept(qef, mappedConcept.getConcept(), itemLimit, rowLimit);
+        Single<Range<Long>> result = SparqlRx.fetchCountQuery(qef, mappedConcept.getConcept().asQuery(), itemLimit, rowLimit);
+        // Single<Range<Long>> result = SparqlRx.fetchCountConcept(qef, mappedConcept.getConcept(), itemLimit, rowLimit);
         return result;
     }
 

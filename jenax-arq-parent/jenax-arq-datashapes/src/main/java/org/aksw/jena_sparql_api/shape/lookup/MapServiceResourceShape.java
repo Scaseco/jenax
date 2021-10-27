@@ -7,13 +7,13 @@ import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
+import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.util.ResourceUtils;
 
 public class MapServiceResourceShape
     implements MapService<Concept, Node, Graph>
