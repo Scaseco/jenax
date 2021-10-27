@@ -17,48 +17,33 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
 import org.aksw.commons.jena.jgrapht.LabeledEdgeImpl;
+import org.aksw.commons.rx.lookup.LookupService;
+import org.aksw.commons.rx.lookup.LookupServiceCacheMem;
+import org.aksw.commons.rx.lookup.LookupServicePartition;
+import org.aksw.commons.rx.lookup.MapService;
+import org.aksw.commons.util.Directed;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.core.GraphSparqlService;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
-import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionJsa;
-import org.aksw.jena_sparql_api.lookup.LookupService;
-import org.aksw.jena_sparql_api.lookup.LookupServiceCacheMem;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
-import org.aksw.jena_sparql_api.lookup.LookupServicePartition;
-import org.aksw.jena_sparql_api.lookup.MapService;
 import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
-import org.aksw.jena_sparql_api.mapper.Agg;
-import org.aksw.jena_sparql_api.mapper.AggLiteral;
-import org.aksw.jena_sparql_api.mapper.AggMap;
-import org.aksw.jena_sparql_api.mapper.AggTransform;
-import org.aksw.jena_sparql_api.mapper.BindingMapperProjectVar;
-import org.aksw.jena_sparql_api.mapper.MappedQuery;
 //import org.aksw.jena_sparql_api.server.utils.SparqlServerUtils;
 import org.aksw.jena_sparql_api.sparql_path2.EdgeFactoryLabeledEdge;
 import org.aksw.jena_sparql_api.sparql_path2.JGraphTUtils;
 import org.aksw.jena_sparql_api.sparql_path2.JoinSummaryUtils;
 import org.aksw.jena_sparql_api.sparql_path2.Nfa;
 import org.aksw.jena_sparql_api.sparql_path2.NfaImpl;
+import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.aksw.jena_sparql_api.sparql_path2.PathCompiler;
 import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionFactoryKShortestPaths;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionKShortestPaths;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
-import org.aksw.jena_sparql_api.stmt.SparqlParserConfig;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlServiceFactory;
-import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.Pair;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
-import org.aksw.jena_sparql_api.utils.model.Directed;
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletPath;
 import org.aksw.jena_sparql_api_sparql_path2.playground.EdgeReducer;
 import org.aksw.jena_sparql_api_sparql_path2.playground.JoinSummaryService;
 import org.aksw.jena_sparql_api_sparql_path2.playground.JoinSummaryService2;
@@ -66,6 +51,21 @@ import org.aksw.jena_sparql_api_sparql_path2.playground.JoinSummaryService2Impl;
 import org.aksw.jena_sparql_api_sparql_path2.playground.JoinSummaryServiceImpl;
 import org.aksw.jena_sparql_api_sparql_path2.playground.NfaAnalysisResult;
 import org.aksw.jena_sparql_api_sparql_path2.playground.YensKShortestPaths;
+import org.aksw.jenax.analytics.core.MappedQuery;
+import org.aksw.jenax.arq.aggregation.Agg;
+import org.aksw.jenax.arq.aggregation.AggLiteral;
+import org.aksw.jenax.arq.aggregation.AggMap;
+import org.aksw.jenax.arq.aggregation.AggTransform;
+import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
+import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.stmt.core.SparqlParserConfig;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.http.client.HttpClient;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -190,7 +190,7 @@ public class MainSparqlPath2 {
     public static <S> Nfa<S, LabeledEdge<S, PredicateClass>> reverseNfa(Nfa<S, LabeledEdge<S, PredicateClass>> nfa) {
         EdgeFactoryLabeledEdge<S, PredicateClass> edgeFactory = new EdgeFactoryLabeledEdge<S, PredicateClass>();
         Graph<S, LabeledEdge<S, PredicateClass>> bwdGraph = new DefaultDirectedGraph<S, LabeledEdge<S, PredicateClass>>(
-        		null, () -> edgeFactory.createEdge(null, null), false);
+                null, () -> edgeFactory.createEdge(null, null), false);
 
 
         //DirectedGraph<S, LabeledEdge<S, PredicateClass>> bwdGraph = new SimpleDirectedGraph<>(new LabeledEdgeFactoryImpl<S, PredicateClass>());
@@ -743,7 +743,7 @@ public class MainSparqlPath2 {
 
             boolean execQuery = true;
             if(execQuery) {
-            	Query query = QueryFactory.create(queryStr);
+                Query query = QueryFactory.create(queryStr);
                 QueryExecution qe = qef.query(query);
                 ResultSet rs = qe.execSelect();
                 ResultSetFormatter.outputAsJSON(System.out, rs);

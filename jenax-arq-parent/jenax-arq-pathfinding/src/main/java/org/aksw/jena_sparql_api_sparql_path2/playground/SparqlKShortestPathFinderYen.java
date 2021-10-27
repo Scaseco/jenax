@@ -14,6 +14,7 @@ import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletImpl;
 import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jena_sparql_api.sparql_path2.Nfa;
+import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.aksw.jena_sparql_api.sparql_path2.PathCompiler;
 import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
@@ -60,7 +61,7 @@ public class SparqlKShortestPathFinderYen
 
         List<TripletPath<Entry<Integer, Node>, Directed<Node>>> kPaths =
                 //.<Integer, LabeledEdge<Integer, PredicateClass>, Node, Node>
-        		YensKShortestPaths.findPaths(
+                YensKShortestPaths.findPaths(
                       nfa,
                       x -> x.getLabel() == null, //LabeledEdgeImpl::isEpsilon,
                       e -> e.getLabel(),

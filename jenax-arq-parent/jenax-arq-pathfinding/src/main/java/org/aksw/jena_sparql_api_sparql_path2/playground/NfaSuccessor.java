@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.jena_sparql_api.sparql_path2.Nfa;
+import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
 
 class NfaSuccessor<S, T, V, E>

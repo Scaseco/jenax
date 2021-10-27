@@ -5,8 +5,6 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.jena.atlas.lib.tuple.Tuple2;
-
 /**
  * The main reason this class extends pair is to have the list interface
  * which allows iterating the directions with get(0) and get(1)
@@ -15,16 +13,16 @@ import org.apache.jena.atlas.lib.tuple.Tuple2;
  *
  */
 public class VertexClass<V>
-    extends Tuple2<ValueSet<V>>
+    extends Pair<ValueSet<V>>
 {
     private static final long serialVersionUID = -3939204124201128789L;
 
-    public static <V> VertexClass<V> union(Tuple2<ValueSet<V>> a, Tuple2<ValueSet<V>> b) {
+    public static <V> VertexClass<V> union(Pair<ValueSet<V>> a, Pair<ValueSet<V>> b) {
         VertexClass<V> result = merge(a, b, (x, y) -> x.union(y));
         return result;
     }
 
-    public static <V> VertexClass<V> merge(Tuple2<ValueSet<V>> a, Tuple2<ValueSet<V>> b, BinaryOperator<ValueSet<V>> op) {
+    public static <V> VertexClass<V> merge(Pair<ValueSet<V>> a, Pair<ValueSet<V>> b, BinaryOperator<ValueSet<V>> op) {
         List<ValueSet<V>> tmp = Stream.of(0, 1).map(i -> {
             ValueSet<V> x = a.get(i);
             ValueSet<V> y = b.get(i);

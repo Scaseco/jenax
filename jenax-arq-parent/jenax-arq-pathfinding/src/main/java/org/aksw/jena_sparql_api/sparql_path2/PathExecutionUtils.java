@@ -16,7 +16,6 @@ import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.analytics.core.MappedConcept;
-import org.apache.jena.atlas.lib.tuple.Tuple2;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -30,7 +29,7 @@ public class PathExecutionUtils {
      * A function that creates a lookup service for a given qef and predicate class
      *
      */
-    public static <S, T> LookupService<Node, Set<Triplet<Node, Node>>> createLookupService(SparqlQueryConnection qef, Tuple2<ValueSet<Node>> predicateClass) {
+    public static <S, T> LookupService<Node, Set<Triplet<Node, Node>>> createLookupService(SparqlQueryConnection qef, Pair<ValueSet<Node>> predicateClass) {
         ResourceShapeBuilder rsb = new ResourceShapeBuilder();
         PathVisitorResourceShapeBuilder.apply(rsb, predicateClass, false);
 

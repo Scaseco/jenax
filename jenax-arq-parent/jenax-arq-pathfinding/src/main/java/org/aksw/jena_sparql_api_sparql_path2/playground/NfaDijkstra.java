@@ -21,6 +21,7 @@ import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jena_sparql_api.sparql_path2.JGraphTUtils;
 import org.aksw.jena_sparql_api.sparql_path2.Nfa;
 import org.aksw.jena_sparql_api.sparql_path2.NfaExecutionUtils;
+import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
 import org.aksw.jena_sparql_api.sparql_path2.VertexClass;
 import org.jgrapht.Graph;

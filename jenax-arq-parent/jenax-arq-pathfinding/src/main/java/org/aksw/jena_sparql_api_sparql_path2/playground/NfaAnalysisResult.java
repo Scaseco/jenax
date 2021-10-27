@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api_sparql_path2.playground;
 
 import java.util.Map;
 
+import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.apache.jena.graph.Node;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
