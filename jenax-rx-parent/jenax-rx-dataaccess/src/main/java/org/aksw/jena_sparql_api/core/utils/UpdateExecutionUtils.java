@@ -194,13 +194,13 @@ public class UpdateExecutionUtils {
     }
 
     public static UpdateProcessor executeInsertTriples(UpdateExecutionFactory uef, Iterable<Triple> triples) {
-        Iterable<Quad> quads = Iterables.transform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
+        Iterable<Quad> quads = Iterables.applyNodeTransform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
         UpdateProcessor result = executeInsertQuads(uef, quads);
         return result;
     }
 
     public static UpdateProcessor executeDeleteTriples(UpdateExecutionFactory uef, Iterable<Triple> triples) {
-        Iterable<Quad> quads = Iterables.transform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
+        Iterable<Quad> quads = Iterables.applyNodeTransform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
         UpdateProcessor result = executeDeleteQuads(uef, quads);
         return result;
     }

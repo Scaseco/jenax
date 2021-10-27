@@ -2,15 +2,14 @@ package org.aksw.jena_sparql_api.compare;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.commons.collections.diff.ListDiff;
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.core.utils.ResultSetUtils;
-import org.aksw.jena_sparql_api.utils.ModelDiff;
-import org.aksw.jena_sparql_api.utils.ResultSetPart;
+import org.aksw.jenax.arq.util.binding.TableUtils;
+import org.aksw.jenax.arq.util.execution.ResultSetCompareUtils;
+import org.aksw.jenax.arq.util.triple.ModelDiff;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Node;
@@ -27,7 +26,10 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.sparql.algebra.Table;
+import org.apache.jena.sparql.algebra.TableFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
@@ -69,14 +71,14 @@ public class QueryExecutionCompare
     private Query query = null;
     private String queryString;
 
-    private Diff<ResultSetPart> resultSetDiff = null; // The diff after the query execution
+    private Diff<Table> resultSetDiff = null; // The diff after the query execution
     private ModelDiff modelDiff = null;
     private Diff<Boolean> askDiff = null;
 
 
     public boolean isDifference() {
         if(resultSetDiff != null) {
-            return !(resultSetDiff.getAdded().getBindings().isEmpty() && resultSetDiff.getRemoved().getBindings().isEmpty());
+            return !(resultSetDiff.getAdded().isEmpty() && resultSetDiff.getRemoved().isEmpty());
         } else if(modelDiff != null) {
             return !(modelDiff.getAdded().isEmpty() && modelDiff.getRemoved().isEmpty());
         } else if(askDiff != null) {
@@ -172,19 +174,19 @@ public class QueryExecutionCompare
             timeB = bsw.stop().elapsed(TimeUnit.MILLISECONDS);
         } catch(RuntimeException e) {
             // Set diff in order to indicate that the execution was performed
-            resultSetDiff = Diff.<ResultSetPart>create(new ResultSetPart(), new ResultSetPart()); //new ListDiff<>();
+            resultSetDiff = Diff.<Table>create(TableFactory.createEmpty(), TableFactory.createEmpty()); //new ListDiff<>();
             throw new RuntimeException(e);
         }
 
 
 
         ListDiff<Binding> tmp = (isOrdered)
-                ? ResultSetUtils.compareOrdered(x, y)
-                : ResultSetUtils.compareUnordered(x, y);
+                ? ResultSetCompareUtils.compareOrdered(x, y)
+                : ResultSetCompareUtils.compareUnordered(x, y);
 
         resultSetDiff = Diff.create(
-                new ResultSetPart(x.getResultVars(), tmp.getAdded()),
-                new ResultSetPart(y.getResultVars(), tmp.getRemoved()));
+                TableUtils.createTable(Var.varList(x.getResultVars()), tmp.getAdded()),
+                TableUtils.createTable(Var.varList(y.getResultVars()), tmp.getRemoved()));
 
         // Reset x once more in order to return it
         x.reset();
@@ -208,16 +210,13 @@ public class QueryExecutionCompare
     }
 
 
-    public void log(ResultSetPart ra, ResultSetPart rb) {
-        List<Binding> a = ra.getBindings();
-        List<Binding> b = rb.getBindings();
-
-        log(a.size(), b.size());
-        boolean isEqual = a.isEmpty() && b.isEmpty();
+    public void log(Table ra, Table rb) {
+        log(ra.size(), rb.size());
+        boolean isEqual = ra.isEmpty() && rb.isEmpty();
 
         if(!isEqual) {
-            ResultSet rsa = ResultSetPart.toResultSet(ra);
-            ResultSet rsb = ResultSetPart.toResultSet(rb);
+            ResultSet rsa = TableUtils.toResultSet(ra);
+            ResultSet rsb = TableUtils.toResultSet(rb);
 
             logger.debug("Differences detected for query: \n" + queryString);
             logger.debug("Excessive:\n" + ResultSetFormatter.asText(rsa));
@@ -489,6 +488,11 @@ public class QueryExecutionCompare
     @Override
     public Iterator<JsonObject> execJsonItems() {
         throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public String getQueryString() {
+        return null;
     }
 
 

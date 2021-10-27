@@ -21,6 +21,14 @@ public class TableUtils {
         return ResultSet.adapt(table.toRowSet());
     }
 
+    public static Table createTable(List<Var> vars, Iterable<Binding> bindings) {
+        Table result = TableFactory.create(vars);
+        for (Binding b : bindings) {
+            result.addBinding(b);
+        }
+        return result;
+    }
+
     public static Table createTable(RowSet rs) {
         List<Var> vars = rs.getResultVars();
         Table result = TableFactory.create(vars);
@@ -42,7 +50,7 @@ public class TableUtils {
     }
 
 
-    public static Table transform(Table table, NodeTransform transform) {
+    public static Table applyNodeTransform(Table table, NodeTransform transform) {
         List<Var> oldVars = table.getVars();
 
         List<Var> newVars = new ArrayList<Var>(oldVars.size());
