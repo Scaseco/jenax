@@ -15,5 +15,6 @@
 
 	<modules>
 		<module>jenax-rx-ops-syscall</module>
+		<module>jenax-rx-dataaccess</module>
 	</modules>
 </project>

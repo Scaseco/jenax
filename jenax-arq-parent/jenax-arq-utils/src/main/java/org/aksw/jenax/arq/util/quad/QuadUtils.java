@@ -11,12 +11,17 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.tuple.TupleAccessorQuad;
+import org.aksw.jenax.arq.util.tuple.TupleUtils;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 public class QuadUtils {
@@ -171,5 +176,28 @@ public class QuadUtils {
 
         return result;
     }
+
+
+    public static Binding quadToBinding(Quad quad) {
+        Binding result = BindingBuilder.create().build();
+
+        quadToBinding(quad, result);
+
+        return result;
+    }
+
+    public static Binding quadToBinding(Quad quad, Binding parent) {
+        BindingBuilder result = BindingBuilder.create(parent);
+        result.add(Vars.g, quad.getGraph());
+        TripleUtils.tripleToBinding(quad.asTriple(), parent);
+
+        return result.build();
+    }
+
+
+    public static Binding quadToBinding(Quad pattern, Quad assignment) {
+        return TupleUtils.tupleToBinding(TupleAccessorQuad.INSTANCE, pattern, assignment);
+    }
+
 
 }

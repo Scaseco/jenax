@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
@@ -51,5 +52,12 @@ public class ExprListUtils {
 
         return result;
     }
+
+    public static ExprList fromUris(Iterable<String> uris) {
+        List<Node> nodes = NodeUtils.fromUris(uris);
+        ExprList result = nodesToExprs(nodes);
+        return result;
+    }
+
 
 }

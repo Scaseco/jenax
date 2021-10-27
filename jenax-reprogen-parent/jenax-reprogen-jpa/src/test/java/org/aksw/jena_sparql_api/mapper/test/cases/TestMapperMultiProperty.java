@@ -2,41 +2,32 @@ package org.aksw.jena_sparql_api.mapper.test.cases;
 
 import java.text.ParseException;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.mapper.context.RdfPersistenceContext;
-import org.aksw.jena_sparql_api.mapper.context.TypedNode;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerImpl;
 import org.aksw.jena_sparql_api.mapper.model.RdfType;
 import org.aksw.jena_sparql_api.mapper.test.domain.Country;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
-import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.jena_sparql_api.utils.transform.F_QueryTransformDatasetDescription;
-import org.aksw.jena_sparql_api.utils.transform.F_QueryTransformLimit;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
-
-import com.google.common.collect.Iterators;
+import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
+import org.aksw.jenax.arq.util.syntax.ElementTransformDatasetDescription;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
-import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.graph.GraphFactory;
+import org.springframework.core.io.ClassPathResource;
+
+import com.google.common.collect.Iterators;
 
 public class TestMapperMultiProperty {
 
@@ -62,8 +53,8 @@ public class TestMapperMultiProperty {
                     .end()
                     .withDatasetDescription(dd, graphName)
                     .configQuery()
-                        .withQueryTransform(F_QueryTransformDatasetDescription.fn)
-                        .withQueryTransform(F_QueryTransformLimit.create(1000))
+                        .withQueryTransform(ElementTransformDatasetDescription::rewrite)
+                        .withQueryTransform(query -> QueryUtils.applySlice(query, null, 1000l, true)) //F_QueryTransformLimit.create(1000))
                     .end()
                 .end()
                 .create();

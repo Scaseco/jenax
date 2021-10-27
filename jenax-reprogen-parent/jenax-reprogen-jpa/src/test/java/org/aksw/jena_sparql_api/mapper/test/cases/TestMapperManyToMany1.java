@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.aksw.jena_sparql_api.mapper.test.domain.Author;
 import org.aksw.jena_sparql_api.mapper.test.domain.Book;
-import org.junit.Test;
 
 public class TestMapperManyToMany1
     extends TestMapperBase

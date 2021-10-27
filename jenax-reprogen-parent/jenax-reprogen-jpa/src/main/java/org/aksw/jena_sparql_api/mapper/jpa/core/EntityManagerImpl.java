@@ -18,11 +18,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.metamodel.Metamodel;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineBatched;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.CriteriaBuilderImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.TypedQueryImpl;
 import org.aksw.jena_sparql_api.mapper.model.RdfTypeFactory;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 

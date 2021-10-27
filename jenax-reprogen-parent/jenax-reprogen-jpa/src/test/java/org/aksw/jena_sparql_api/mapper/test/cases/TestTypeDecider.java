@@ -33,19 +33,19 @@ class JobExecution {
 
 public class TestTypeDecider extends TestMapperBase {
 
-	@Before
-	public void init() {
-    	TypeMapper.getInstance().registerDatatype(new RDFDatatypeCalendar());		
-	}
-	
-	@After
-	public void reset() {
-		TypeMapper.reset();
-	}
-	
+    @Before
+    public void init() {
+        TypeMapper.getInstance().registerDatatype(new RDFDatatypeCalendar());
+    }
+
+    @After
+    public void reset() {
+        TypeMapper.reset();
+    }
+
     @Test
     public void test() {
-		
+
         Map<Class<?>, Node> map = TypeDeciderImpl.scan("org.aksw.jena_sparql_api.mapper.test");
         Assert.assertNotEquals(0, map.size());
 
@@ -103,7 +103,7 @@ public class TestTypeDecider extends TestMapperBase {
         System.out.println("TRIPLES:");
         RDFDataMgr.write(System.out, rdf, RDFFormat.TURTLE);
 
-        
+
         //mapperEngine.fetch(typeDecider, Collections.singleton(id)).get(id);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();

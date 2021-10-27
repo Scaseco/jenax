@@ -1,5 +1,7 @@
 package org.aksw.jenax.arq.util.node;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,6 +14,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.NodeValue;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
 public class NodeUtils {
@@ -138,6 +141,20 @@ public class NodeUtils {
         RDFDatatype dtype = typeMapper.getTypeByClass(clazz);
         String lex = dtype.unparse(o);
         Node result = NodeFactory.createLiteral(lex, dtype);
+        return result;
+    }
+
+    public static Node createUriOrNull(String uri) {
+        Node result = uri == null ? null : NodeFactory.createURI(uri);
+        return result;
+    }
+
+    public static List<Node> fromUris(Iterable<String> uris) {
+        List<Node> result = new ArrayList<Node>(Iterables.size(uris));
+        for(String uri : uris) {
+            Node node = NodeFactory.createURI(uri);
+            result.add(node);
+        }
         return result;
     }
 

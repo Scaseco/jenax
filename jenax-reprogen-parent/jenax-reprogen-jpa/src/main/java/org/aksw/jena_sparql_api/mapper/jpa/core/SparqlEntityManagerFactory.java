@@ -6,13 +6,13 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineImpl;
 import org.aksw.jena_sparql_api.mapper.impl.type.RdfTypeFactoryImpl;
 import org.aksw.jena_sparql_api.mapper.model.RdfTypeFactory;
 import org.aksw.jena_sparql_api.mapper.model.TypeConversionServiceImpl;
 import org.aksw.jena_sparql_api.mapper.model.TypeConverterBase;
 import org.aksw.jena_sparql_api.mapper.model.TypeDeciderImpl;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -59,20 +59,20 @@ public class SparqlEntityManagerFactory
     }
 
     public SparqlEntityManagerFactory setNsPrefixes(PrefixMapping other) {
-    	getPrologue().getPrefixMapping().setNsPrefixes(other);
-    	return this;
+        getPrologue().getPrefixMapping().setNsPrefixes(other);
+        return this;
     }
 
     public SparqlEntityManagerFactory setNsPrefix(String prefix, String uri) {
-    	getPrologue().getPrefixMapping().setNsPrefix(prefix, uri);
-    	return this;
+        getPrologue().getPrefixMapping().setNsPrefix(prefix, uri);
+        return this;
     }
 
     public SparqlEntityManagerFactory setNsPrefixes(Map<String, String> map) {
-    	getPrologue().getPrefixMapping().setNsPrefixes(map);
-    	return this;
+        getPrologue().getPrefixMapping().setNsPrefixes(map);
+        return this;
     }
-    
+
     public Set<String> getScanPackageNames() {
         return scanPackageNames;
     }

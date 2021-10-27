@@ -25,13 +25,13 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-rx</artifactId>
+			<artifactId>jenax-rx-dataaccess</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-relations</artifactId>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.aksw.jenax</groupId> -->
+<!-- 			<artifactId>jenax-arq-relations</artifactId> -->
+<!-- 		</dependency> -->
 
 <!-- 		<dependency> -->
 <!-- 			<groupId>org.aksw.jena-sparql-api</groupId> -->
@@ -43,10 +43,16 @@
 			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
+
 		<dependency>
 			<groupId>org.aksw.gson</groupId>
 			<artifactId>gson-utils-core</artifactId>
 		</dependency>
+
+<!--         <dependency> -->
+<!--             <groupId>org.aksw.jenax</groupId> -->
+<!--             <artifactId>jenax-arq-analytics-core</artifactId> -->
+<!--         </dependency> -->
 
 		<!-- <dependency> -->
 		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->

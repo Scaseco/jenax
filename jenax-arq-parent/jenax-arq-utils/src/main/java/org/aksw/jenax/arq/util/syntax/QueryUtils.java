@@ -664,18 +664,6 @@ public class QueryUtils {
         query.setLimit(limit);
     }
 
-    public static Range<Long> createRange(Long limit, Long offset) {
-        long beginIndex = offset == null ? 0 : offset;
-        Long endIndex = limit == null ? null : beginIndex + limit;
-
-        Range<Long> result = endIndex == null
-                ? Range.atLeast(beginIndex)
-                : Range.closedOpen(beginIndex, endIndex)
-                ;
-
-        return result;
-    }
-
     //public static LimitAndOffset rangeToLimitAndOffset(Range<Long> range)
 
     public static <T extends Comparable<T>> T closedLowerEndpointOrNull(Range<T> range, DiscreteDomain<T> domain) {

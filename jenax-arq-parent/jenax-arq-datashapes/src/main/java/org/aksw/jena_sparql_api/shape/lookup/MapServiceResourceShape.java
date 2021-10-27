@@ -1,14 +1,13 @@
 package org.aksw.jena_sparql_api.shape.lookup;
 
+import org.aksw.commons.rx.lookup.ListService;
+import org.aksw.commons.rx.lookup.ListServiceMapWrapper;
+import org.aksw.commons.rx.lookup.LookupService;
+import org.aksw.commons.rx.lookup.MapPaginator;
+import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.lookup.ListService;
-import org.aksw.jena_sparql_api.lookup.ListServiceMapWrapper;
-import org.aksw.jena_sparql_api.lookup.LookupService;
-import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
-import org.aksw.jena_sparql_api.lookup.MapPaginator;
-import org.aksw.jena_sparql_api.lookup.MapService;
-import org.aksw.jena_sparql_api.mapper.MappedConcept;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
+import org.aksw.jenax.analytics.core.MappedConcept;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;

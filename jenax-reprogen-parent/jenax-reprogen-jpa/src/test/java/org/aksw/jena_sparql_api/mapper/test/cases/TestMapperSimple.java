@@ -4,12 +4,12 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerImpl;
 import org.aksw.jena_sparql_api.mapper.test.domain.Person;
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeCalendar;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.rdf.model.Model;

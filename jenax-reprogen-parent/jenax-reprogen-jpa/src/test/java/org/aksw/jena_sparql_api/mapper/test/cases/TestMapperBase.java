@@ -2,14 +2,14 @@ package org.aksw.jena_sparql_api.mapper.test.cases;
 
 import javax.persistence.EntityManager;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
-import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.jena_sparql_api.utils.transform.F_QueryTransformDatasetDescription;
-import org.aksw.jena_sparql_api.utils.transform.F_QueryTransformLimit;
+import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
+import org.aksw.jenax.arq.util.syntax.ElementTransformDatasetDescription;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -38,8 +38,8 @@ public class TestMapperBase {
                     .end()
                     .withDatasetDescription(dd, graphName)
                     .configQuery()
-                        .withQueryTransform(F_QueryTransformDatasetDescription.fn)
-                        .withQueryTransform(F_QueryTransformLimit.create(1000))
+                        .withQueryTransform(ElementTransformDatasetDescription::rewrite)
+                        .withQueryTransform(query -> QueryUtils.applySlice(query, null, 1000l, true)) //F_QueryTransformLimit.create(1000))
                     .end()
                 .end()
                 .create();

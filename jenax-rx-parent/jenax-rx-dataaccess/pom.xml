@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-rx-dataaccess</artifactId>
+	
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-rx-parent</artifactId>
+		<version>4.3.0-1-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<!-- Self Dependencies -->
+		<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-mapper-annotations</artifactId> 
+			</dependency> -->
+			<!--
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
+		</dependency>
+		-->
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-analytics-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-collections</artifactId>
+		</dependency>
+
+		<!-- Needed for QueryExecutionCompare -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
+
+		<!-- Needed for query transform in cache -->
+		<!--  removed? -->
+		
+		<!--
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-vocabs</artifactId>
+		</dependency>
+		-->
+
+		<!-- Needed for representing SPARQL Paths as json objects -->
+		<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-sparql-ext</artifactId> 
+			</dependency> -->
+
+		<!-- Used in the lookup interfaces -->
+		<!-- concepts draws in sparql-stmt because it uses the sparql parser framework -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>io.reactivex.rxjava3</groupId> -->
+<!-- 			<artifactId>rxjava</artifactId> -->
+<!-- 		</dependency> -->
+
+
+
+		<!-- Jena -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-iri</artifactId>
+		</dependency>
+
+		<!-- <dependency> required at least by Jena 2.9.0-incubating -->
+		<!-- <groupId>xerces</groupId> -->
+		<!-- <artifactId>xercesImpl</artifactId> -->
+		<!-- </dependency> -->
+
+
+		<!-- Database - used for SPARQL caching, Runtime dep, as the DB is started 
+			automatically on connection -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.h2database</groupId> -->
+		<!-- <artifactId>h2</artifactId> -->
+		<!-- <scope>runtime</scope> -->
+		<!-- </dependency> -->
+
+
+		<!-- <dependency> <groupId>org.quartz-scheduler</groupId> <artifactId>quartz</artifactId> 
+			</dependency> -->
+
+		<!-- Utils -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collections</artifactId>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.commons</groupId> -->
+		<!-- <artifactId>aksw-commons-util</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+
+		<!-- Collections -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
+
+		<!-- Compression -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
+
+		<!-- Logging -->
+		<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+			</dependency> -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+		<!-- Async-Retry API from https://github.com/nurkiewicz/async-retry -->
+		<dependency>
+			<groupId>com.nurkiewicz.asyncretry</groupId>
+			<artifactId>asyncretry-jdk7</artifactId>
+		</dependency>
+
+	</dependencies>
+</project>

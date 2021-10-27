@@ -1,11 +1,14 @@
 package org.aksw.jenax.arq.util.triple;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.arq.util.io.NTripleUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.tuple.TupleAccessorTriple;
@@ -14,6 +17,7 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.riot.writer.NTriplesWriter;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -226,6 +230,16 @@ public class TripleUtils {
         } catch(Exception e) {
             result = false;
         }
+        return result;
+    }
+
+
+    public static String md5sum(Triple triple) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        NTriplesWriter.write(baos, Collections.singleton(triple).iterator());
+        String raw = baos.toString();
+        String result = StringUtils.md5Hash(raw);
+
         return result;
     }
 

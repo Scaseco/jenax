@@ -16,6 +16,7 @@ import org.aksw.commons.beans.model.EntityOps;
 import org.aksw.commons.beans.model.PropertyOps;
 import org.aksw.commons.collections.frontier.Frontier;
 import org.aksw.commons.collections.frontier.FrontierImpl;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.concept.parser.SparqlRelationParser;
 import org.aksw.jena_sparql_api.concept.parser.SparqlRelationParserImpl;
 import org.aksw.jena_sparql_api.mapper.annotation.Datatype;
@@ -132,7 +133,7 @@ public class RdfTypeFactoryImpl
         }
 
         //System.out.println(clazz + " -> " + result);
-        
+
         return result;
     }
 
@@ -260,19 +261,19 @@ public class RdfTypeFactoryImpl
         rdfClass.setPopulated(true);
     }
 
-    
+
     public String getIri(EntityOps entityOps, PropertyOps pd) {
 
         String propertyName = pd.getName();
 
         Optional<Iri> iriOpt = Optional.ofNullable(pd.findAnnotation(Iri.class));
         String iriStr = iriOpt
-        		.map(Iri::value)
-        		.map(iriExprStr -> resolveIriExpr(iriExprStr, null))
-        		.orElse(null);
+                .map(Iri::value)
+                .map(iriExprStr -> resolveIriExpr(iriExprStr, null))
+                .orElse(null);
 
         Optional<IriNs> propertyIriNsOpt = Optional.ofNullable(pd.findAnnotation(IriNs.class));
-        
+
         Optional<IriNs> effectiveIriNsOpt = propertyIriNsOpt;
 
         // If an Iri annotation without value is present, require a IriNs on class level
@@ -281,14 +282,14 @@ public class RdfTypeFactoryImpl
 
             effectiveIriNsOpt = classIriNs;
         }
-        
-        String iriNsStr = effectiveIriNsOpt
-        		.map(IriNs::value)
-        		.map(iriNsExprStr -> iriNsExprStr + (iriNsExprStr.contains(":") ? "" : ":") + propertyName)
-        		.map(iriNsExprStr -> resolveIriExpr(iriNsExprStr, null))
-        		.orElse(null);
 
-        
+        String iriNsStr = effectiveIriNsOpt
+                .map(IriNs::value)
+                .map(iriNsExprStr -> iriNsExprStr + (iriNsExprStr.contains(":") ? "" : ":") + propertyName)
+                .map(iriNsExprStr -> resolveIriExpr(iriNsExprStr, null))
+                .orElse(null);
+
+
         if(iriNsStr != null) {
             if(!Strings.isNullOrEmpty(iriStr)) {
                 throw new RuntimeException("@Iri and @IriNs annotations on same element is invalid");
@@ -469,7 +470,7 @@ public class RdfTypeFactoryImpl
 
         ConversionService conversionService;
         if(_conversionService == null) {
-        	DefaultConversionService dcs = new DefaultConversionService();
+            DefaultConversionService dcs = new DefaultConversionService();
             conversionService =  ConversionServiceAdapter.wrap(dcs, dcs::canConvert, dcs::convert);
         } else {
             conversionService = _conversionService;
@@ -497,8 +498,8 @@ public class RdfTypeFactoryImpl
         RdfTypeFactoryImpl result = new RdfTypeFactoryImpl(parser, parserContext, evalContext, typeMapper, prologue, relationParser, entityOpsFactory, conversionService);
 
         result.getClassToRdfType().put(Map.class, new RdfTypeMap(x -> (Map)x));
-        
-        
+
+
         result.getClassToRdfType().put(Node.class, new RdfTypeNode());
         return result;
     }

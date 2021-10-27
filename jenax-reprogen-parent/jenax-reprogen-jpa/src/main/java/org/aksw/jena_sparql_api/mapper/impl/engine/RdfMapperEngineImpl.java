@@ -17,14 +17,13 @@ import java.util.stream.Collectors;
 import org.aksw.commons.beans.model.EntityOps;
 import org.aksw.commons.beans.model.PropertyOps;
 import org.aksw.commons.collections.diff.Diff;
+import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.util.reflect.ClassUtils;
 import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateDiffUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
-import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.aksw.jena_sparql_api.mapper.context.EntityId;
 import org.aksw.jena_sparql_api.mapper.context.RdfPersistenceContext;
 import org.aksw.jena_sparql_api.mapper.impl.type.EntityFragment;
@@ -45,7 +44,7 @@ import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jena_sparql_api.shape.lookup.MapServiceResourceShape;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -77,7 +76,7 @@ public class RdfMapperEngineImpl
 
     protected Prologue prologue;
     //protected QueryExecutionFactory qef;
-    protected RdfDataSource sparqlService;
+    protected SparqlService sparqlService;
 
     protected RdfTypeFactory typeFactory;
     //protected RdfPersistenceContext persistenceContext;
@@ -95,7 +94,7 @@ public class RdfMapperEngineImpl
 
 
     @Override
-    public RdfDataSource getSparqlService() {
+    public SparqlService getSparqlService() {
         return sparqlService;
     }
 
@@ -107,24 +106,24 @@ public class RdfMapperEngineImpl
     // TODO Place a configured type decider in here
     protected TypeDecider typeDecider = new TypeDeciderImpl();
 
-    public RdfMapperEngineImpl(RdfDataSource sparqlService) {
+    public RdfMapperEngineImpl(SparqlService sparqlService) {
         this(sparqlService, RdfTypeFactoryImpl.createDefault(), new Prologue(), null); //new RdfPopulationContextImpl());
     }
 
-    public RdfMapperEngineImpl(RdfDataSource sparqlService, Prologue prologue) {
+    public RdfMapperEngineImpl(SparqlService sparqlService, Prologue prologue) {
         this(sparqlService, RdfTypeFactoryImpl.createDefault(prologue), prologue, null); //new RdfPopulationContextImpl());
     }
 
-    public RdfMapperEngineImpl(RdfDataSource sparqlService, RdfTypeFactory typeFactory) {
+    public RdfMapperEngineImpl(SparqlService sparqlService, RdfTypeFactory typeFactory) {
         this(sparqlService, typeFactory, new Prologue(), null); //new RdfPopulationContextImpl());
     }
 
-    public RdfMapperEngineImpl(RdfDataSource sparqlService, RdfTypeFactory typeFactory, Prologue prologue) {
+    public RdfMapperEngineImpl(SparqlService sparqlService, RdfTypeFactory typeFactory, Prologue prologue) {
         this(sparqlService, typeFactory, prologue, null); //new RdfPopulationContextImpl());
     }
 
 //QueryExecutionFactory qef
-    public RdfMapperEngineImpl(RdfDataSource sparqlService, RdfTypeFactory typeFactory, Prologue prologue, RdfPersistenceContext persistenceContext) {
+    public RdfMapperEngineImpl(SparqlService sparqlService, RdfTypeFactory typeFactory, Prologue prologue, RdfPersistenceContext persistenceContext) {
         super();
         this.sparqlService = sparqlService;
         this.typeFactory = typeFactory;

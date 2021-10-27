@@ -28,13 +28,13 @@ import javax.persistence.criteria.Selection;
 
 import org.aksw.commons.collections.cache.StreamBackedList;
 import org.aksw.commons.collections.utils.StreamUtils;
+import org.aksw.commons.rx.lookup.ListPaginator;
+import org.aksw.commons.rx.lookup.ListService;
+import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptOps;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.OrderedConcept;
-import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.lookup.ListPaginator;
-import org.aksw.jena_sparql_api.lookup.ListService;
 import org.aksw.jena_sparql_api.lookup.ListServiceConcept;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineBatched;
 import org.aksw.jena_sparql_api.mapper.impl.type.PathResolver;
@@ -46,7 +46,7 @@ import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -187,7 +187,7 @@ public class TypedQueryImpl<X>
             Var rootVar = Var.alloc(rootName);
             firstRoot = firstRoot == null ? rootVar : firstRoot;
 
-            bp = NodeTransformLib.transform(new NodeTransformRenameMap(Collections.singletonMap(r.asNode(), rootVar)), bp);
+            bp = NodeTransformLib.transform(NodeTransformRenameMap.create(Collections.singletonMap(r.asNode(), rootVar)), bp);
 
             ElementTriplesBlock etb = new ElementTriplesBlock(bp);
 
@@ -422,7 +422,7 @@ public class TypedQueryImpl<X>
             //l = limit != null ? limit.longValue() : null;
             Long o = startPosition != null ? startPosition.longValue() : null;
 
-            requestRange = QueryUtils.createRange(l, o);
+            requestRange = RangeUtils.createRange(l, o);
         }
 
         SparqlService sparqlService = engine.getSparqlService();

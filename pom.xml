@@ -332,11 +332,18 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-rx-dataaccess</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-pathfinding</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
-
+			<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-arq-analytics-core</artifactId> 
+				<version>${project.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-json</artifactId>
@@ -346,6 +353,12 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-analytics-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -810,19 +823,14 @@
 			<!-- <scope>compile</scope> -->
 			<!-- </dependency> -->
 
-<!--
-			<dependency>
-				<groupId>org.hibernate.javax.persistence</groupId>
-				<artifactId>hibernate-jpa-2.0-api</artifactId>
-				<version>1.0.1.Final</version>
-			</dependency>
--->
+			<!-- <dependency> <groupId>org.hibernate.javax.persistence</groupId> <artifactId>hibernate-jpa-2.0-api</artifactId> 
+				<version>1.0.1.Final</version> </dependency> -->
 
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.2.0</version>
-        </dependency>
+			<dependency>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>javax.persistence</artifactId>
+				<version>2.2.0</version>
+			</dependency>
 
 
 			<!-- Logging -->
