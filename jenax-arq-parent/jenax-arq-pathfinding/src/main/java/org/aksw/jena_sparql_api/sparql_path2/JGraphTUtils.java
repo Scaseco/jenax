@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletImpl;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletImpl;
 import org.jgrapht.Graph;
 
 public class JGraphTUtils {

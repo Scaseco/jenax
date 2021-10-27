@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql_path2;
 
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 

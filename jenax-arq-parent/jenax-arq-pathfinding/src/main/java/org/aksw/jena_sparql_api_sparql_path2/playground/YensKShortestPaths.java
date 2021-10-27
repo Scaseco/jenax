@@ -13,12 +13,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.Directed;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jena_sparql_api.sparql_path2.Nfa;
 import org.aksw.jena_sparql_api.sparql_path2.NfaExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
-import org.aksw.jena_sparql_api.utils.model.Directed;
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletPath;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 
 public class YensKShortestPaths {

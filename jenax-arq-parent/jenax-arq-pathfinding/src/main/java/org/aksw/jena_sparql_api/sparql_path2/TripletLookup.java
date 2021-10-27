@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.sparql_path2;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.utils.model.Triplet;
+import org.aksw.commons.util.triplet.Triplet;
 
 import com.google.common.collect.Multimap;
 

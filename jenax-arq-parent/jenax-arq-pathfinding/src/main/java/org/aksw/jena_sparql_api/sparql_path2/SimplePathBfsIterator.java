@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.utils.model.Directed;
+import org.aksw.commons.util.Directed;
 import org.jgrapht.Graph;
 
 import com.google.common.collect.AbstractIterator;

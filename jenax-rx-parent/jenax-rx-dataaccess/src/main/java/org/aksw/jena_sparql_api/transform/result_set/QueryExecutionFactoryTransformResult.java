@@ -1,19 +1,20 @@
 package org.aksw.jena_sparql_api.transform.result_set;
 
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 public class QueryExecutionFactoryTransformResult
-	extends QueryExecutionFactoryDecorator
+    extends QueryExecutionFactoryDecorator
 {
-	protected NodeTransform nodeTransform;
-	
-	public QueryExecutionFactoryTransformResult(QueryExecutionFactory decoratee, NodeTransform nodeTransform) {
-		super(decoratee);
-		this.nodeTransform = nodeTransform;
-	}
+    protected NodeTransform nodeTransform;
+
+    public QueryExecutionFactoryTransformResult(QueryExecutionFactory decoratee, NodeTransform nodeTransform) {
+        super(decoratee);
+        this.nodeTransform = nodeTransform;
+    }
 
     @Override
     public QueryExecution createQueryExecution(String queryString) {

@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
-
+import org.aksw.jenax.connectionless.SparqlService;
 
 public class UpdateContext {
     // TODO Fill out this class
@@ -16,7 +16,7 @@ public class UpdateContext {
      * This attribute is used for containment checking of quads
      *
      */
-    //private Function<Diff<? extends Iterable<Quad>>, Diff<Set<Quad>>> filter;
+    //private Function<Diff<? extends Iterable<Quad>O>, Diff<Set<Quad>>> filter;
 
 //    public UpdateContext(UpdateExecutionFactory updateExecutionFactory, QueryExecutionFactory queryExecutionFactory, int batchSize, Function<Diff<? extends Iterable<Quad>>, Diff<Set<Quad>>> filter) {
 //        this.updateExecutionFactory = updateExecutionFactory;

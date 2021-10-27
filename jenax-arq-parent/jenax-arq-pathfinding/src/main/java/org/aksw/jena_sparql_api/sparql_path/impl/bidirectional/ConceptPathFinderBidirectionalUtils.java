@@ -24,10 +24,13 @@ import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraintBase;
 import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.path.PathUtils;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
@@ -166,7 +169,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("SELECT * { ?s ?p ?o }").execSelect()));
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("" + propertyQuery).execSelect()));
-        List<Node> types = QueryExecutionUtils.executeList(new QueryExecutionFactorySparqlQueryConnection(conn), typeQuery);
+        List<Node> types = QueryExecutionUtils.executeList(conn::query, typeQuery);
         logger.debug("Retrieved " + types.size() + " types"); // + " properties: " + types);
 
         org.apache.jena.graph.Graph ext = GraphFactory.createDefaultGraph();
@@ -227,7 +230,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
         //Query query = QueryFactory.create(test);
         logger.debug("TargetCandidateQuery: " + targetCandidateQuery);
-        List<Node> candidates = QueryExecutionUtils.executeList(qefMeta, targetCandidateQuery);
+        List<Node> candidates = QueryExecutionUtils.executeList(qefMeta::createQueryExecution, targetCandidateQuery);
         logger.debug("Got " + candidates.size() + " candidate target nodes"); // + " candidates: " + candidates);
 
         for(Node candidate : candidates) {

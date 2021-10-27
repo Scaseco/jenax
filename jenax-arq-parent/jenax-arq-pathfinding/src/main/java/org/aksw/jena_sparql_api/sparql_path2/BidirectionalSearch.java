@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletPath;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletPath;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;

@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.sparql_path2;
 
 import java.util.Iterator;
 
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletImpl;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletImpl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 

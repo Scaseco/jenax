@@ -5,9 +5,9 @@ import java.util.Set;
 
 import org.aksw.jena_sparql_api.core.DatasetListener;
 import org.aksw.jena_sparql_api.core.QuadContainmentChecker;
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.UpdateContext;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;

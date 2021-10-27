@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api_sparql_path2.playground;
 
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.lookup.LookupService;
+import org.aksw.commons.rx.lookup.LookupService;
 import org.apache.jena.graph.Node;
 
 public class JoinSummaryServiceImpl

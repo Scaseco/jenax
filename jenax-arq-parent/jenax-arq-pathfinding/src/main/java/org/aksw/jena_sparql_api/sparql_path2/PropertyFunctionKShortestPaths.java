@@ -7,10 +7,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.utils.model.Directed;
-import org.aksw.jena_sparql_api.utils.model.TripletPath;
+import org.aksw.commons.util.Directed;
+import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Prologue;

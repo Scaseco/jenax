@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.core.DatasetListener;
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
 import org.aksw.jena_sparql_api.core.UpdateContext;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 

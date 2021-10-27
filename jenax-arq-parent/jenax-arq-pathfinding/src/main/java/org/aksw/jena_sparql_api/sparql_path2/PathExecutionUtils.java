@@ -5,17 +5,18 @@ import java.util.function.Function;
 
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
 import org.aksw.commons.jena.jgrapht.LabeledEdgeImpl;
+import org.aksw.commons.rx.lookup.LookupService;
+import org.aksw.commons.rx.lookup.LookupServiceFilterKey;
+import org.aksw.commons.rx.lookup.MapService;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.lookup.LookupService;
-import org.aksw.jena_sparql_api.lookup.LookupServiceFilterKey;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
-import org.aksw.jena_sparql_api.lookup.MapService;
 import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
-import org.aksw.jena_sparql_api.mapper.MappedConcept;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletImpl;
+import org.aksw.jenax.analytics.core.MappedConcept;
+import org.apache.jena.atlas.lib.tuple.Tuple2;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -29,7 +30,7 @@ public class PathExecutionUtils {
      * A function that creates a lookup service for a given qef and predicate class
      *
      */
-    public static <S, T> LookupService<Node, Set<Triplet<Node, Node>>> createLookupService(SparqlQueryConnection qef, Pair<ValueSet<Node>> predicateClass) {
+    public static <S, T> LookupService<Node, Set<Triplet<Node, Node>>> createLookupService(SparqlQueryConnection qef, Tuple2<ValueSet<Node>> predicateClass) {
         ResourceShapeBuilder rsb = new ResourceShapeBuilder();
         PathVisitorResourceShapeBuilder.apply(rsb, predicateClass, false);
 
@@ -117,21 +118,21 @@ public class PathExecutionUtils {
 //            if(true) {
 //                throw new RuntimeException("Adjust the code");
 //            }
-            
+
             int resourceBatchSize = 100;
 //            Function<Pair<ValueSet<Node>>, Function<Iterable<Node>, Map<Node, Set<Triplet<Node, Node>>>>> createTripletLookupService =
 //                    pc -> f -> PathExecutionUtils.createLookupService(qef, pc).partition(resourceBatchSize).fetchMap(f);
 
                     //getMatchingTriplets.apply(trans, nestedPath))
             TripletLookup<LabeledEdge<Integer, PredicateClass>, Node, Node, Node> getMatchingTriplets =
-            		(trans, vToNestedPaths) -> PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize).fetchMap(vToNestedPaths.keySet());
+                    (trans, vToNestedPaths) -> PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize).fetchMap(vToNestedPaths.keySet());
                   //.collect(Collectors.toSet());
 //            BiFunction<
 //                LabeledEdge<Integer, PredicateClass>,
 //                Multimap<Node, NestedPath<Node, Triplet<Node, Node>>>,
 //                Map<Node, Set<Triplet<Node, Node>>>
 //             > getMatchingTriplets = null;
-            
+
             //NfaFrontier<Integer, Node, Node, Node> nextFrontier = null; //
             NfaFrontier<Integer, Node, Node, Node> nextFrontier = NfaExecutionUtils.advanceFrontier(
                     frontier,

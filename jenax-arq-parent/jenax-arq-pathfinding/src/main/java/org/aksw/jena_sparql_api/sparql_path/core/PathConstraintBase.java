@@ -14,9 +14,10 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.jena.graph.GraphVarImpl;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.utils.ElementTreeAnalyser;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -183,11 +184,11 @@ public abstract class PathConstraintBase {
 //        return result;
 //    }
 
-    
+
     /**
      * Return a query (concept) for the set of candidates types of the given concept
-     * 
-     * 
+     *
+     *
      * @param concept
      * @return
      */
@@ -233,7 +234,7 @@ public abstract class PathConstraintBase {
         //List<Quad> quads = collectQuads(concept.getElement());
 
         Graph model = new GraphVarImpl();
-        
+
         for(Quad quad : quads) {
             // Replace variables with fake uris
             //Quad q = createUriVars(quad);
@@ -251,52 +252,52 @@ public abstract class PathConstraintBase {
         //Resource start = model.asRDFNode(s).asResource();
 
         Set<Triple> result = new LinkedHashSet<Triple>();
-        
+
         Map<Node, Var> map = new LinkedHashMap<>();
         Generator<Var> generator = VarGeneratorBlacklist.create(concept.getVarsMentioned());
         Function<Node, Var> nodeToVar = n -> map.computeIfAbsent(n, k -> generator.next());
-        
+
         // Derive enumerations from rdf:type
         // If we had multiple types, such as ?s a Vehicle, Car
         // both Vehicle and Car in the schema graph were independent candidates
         // TODO is this really correct?
         Set<Node> types = model.find(concept.getVar(), RDF.type.asNode(), Node.ANY).mapWith(Triple::getObject)
-        		.filterDrop(Node::isVariable)
-        		.toSet();
+                .filterDrop(Node::isVariable)
+                .toSet();
         if(!types.isEmpty()) {
-        	Expr ex = ExprUtils.oneOf(concept.getVar(), types);
-        	predExpr = predExpr == null ? ex : new E_LogicalAnd(predExpr, ex);
+            Expr ex = ExprUtils.oneOf(concept.getVar(), types);
+            predExpr = predExpr == null ? ex : new E_LogicalAnd(predExpr, ex);
         }
-        
-        //        for(Node type : types) {                	
+
+        //        for(Node type : types) {
 //            Triple u = new Triple(p, VocabPath.isIngoingPredicateOf.asNode(), type);
 //            result.add(u);
 //        }
 
-        
-        
+
+
         createQueryForward(model, concept.getVar(), nodeToVar, result);
         //createQueryBackward(model, concept.getVar(), , result);
 
         if(result.isEmpty()) {
-        	// WRONG: Create a concept ?s | ?s ?p ?o - where ?s = concept.getVar() and the other variables properly renaming 
-        	// If we have no constraints, pick all nodes in the schema graph that have an outgoing property
-        	
-        	// p -> VocabPath.hasOutgoingPredicate.asNode(),
-        	Var s = concept.getVar();
-        	Collection<Triple> tps = createOutgoingPattern(s, Vars.p);
-        	//UnaryRelation tmp = new Concept(ElementUtils.createElementTriple(tps), s);
-        	
-        	//UnaryRelation tmp = new Concept(ElementUtils.createElementTriple(Vars.s, VocabPath.hasOutgoingPredicate.asNode(), Vars.o), Vars.s);//ConceptUtils.createSubjectConcept();
+            // WRONG: Create a concept ?s | ?s ?p ?o - where ?s = concept.getVar() and the other variables properly renaming
+            // If we have no constraints, pick all nodes in the schema graph that have an outgoing property
+
+            // p -> VocabPath.hasOutgoingPredicate.asNode(),
+            Var s = concept.getVar();
+            Collection<Triple> tps = createOutgoingPattern(s, Vars.p);
+            //UnaryRelation tmp = new Concept(ElementUtils.createElementTriple(tps), s);
+
+            //UnaryRelation tmp = new Concept(ElementUtils.createElementTriple(Vars.s, VocabPath.hasOutgoingPredicate.asNode(), Vars.o), Vars.s);//ConceptUtils.createSubjectConcept();
 //        	Triple tr = ElementUtils.extractTriple(
 //        			new Concept(new ElementGroup(), concept.getVar())
 //        			.prependOn(concept.getVar())
 //        			.with(tmp)
 //        			.getElement());
 //        	result.add(tr);
-        	result.addAll(tps);
+            result.addAll(tps);
         }
-        
+
         BasicPattern bgp = BasicPattern.wrap(new ArrayList<Triple>(result));
         ElementTriplesBlock triplesBlock = new ElementTriplesBlock(bgp);
 
@@ -327,42 +328,42 @@ public abstract class PathConstraintBase {
         return c;
     }
 
-    
+
     public static void createQuery(Graph graph, Node src, Set<Triple> result) {
-    	
+
     }
 
     public void createQueryForward(Graph graph, Node src, Function<Node, Var> nodeToVar, Set<Triple> result) {
         Set<Triple> succs = graph.find(src, Node.ANY, Node.ANY).toSet();
 
-        
+
         for(Triple stmt : succs) {
             Node p = stmt.getPredicate();
             Node o = stmt.getObject();
 //            if(o.isLiteral()) {
 //                continue;
 //            }
-            
+
             // TODO Make the forbidden list configurable
             if(RDF.type.asNode().equals(p)) {
-            	continue;
+                continue;
             }
 
 
             Node s = src.isVariable() || src.isBlank() ? src : nodeToVar.apply(src);
             //Triple t = new Triple(s, VocabPath.hasOutgoingPredicate.asNode(), p);
             Collection<Triple> ts = createOutgoingPattern(s, p);
-            
-            
+
+
             if(!result.containsAll(ts)) {
                 result.addAll(ts);
-                
+
                 // Check if we know something about the type constraint of src
                 Set<Node> types = graph.find(o, RDF.type.asNode(), Node.ANY).mapWith(Triple::getObject).toSet();
                 for(Node type : types) {
-                	
-                	Collection<Triple> us = createIngoingPattern(type, p);
-                	
+
+                    Collection<Triple> us = createIngoingPattern(type, p);
+
                     //Triple u = new Triple(p, VocabPath.isIngoingPredicateOf.asNode(), type);
                     result.addAll(us);
                 }
@@ -371,13 +372,13 @@ public abstract class PathConstraintBase {
             }
         }
     }
-    
+
 
     protected abstract Collection<Triple> createOutgoingPattern(Node type, Node p);
     protected abstract Collection<Triple> createIngoingPattern(Node type, Node p);
 
-    
-    
+
+
 //
 //    public static void createQueryBackward(Model model, Node node, Resource res, Set<Triple> result) {
 //        Node n;

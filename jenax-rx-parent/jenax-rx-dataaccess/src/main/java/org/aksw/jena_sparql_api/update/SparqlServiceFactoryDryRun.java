@@ -1,8 +1,10 @@
 package org.aksw.jena_sparql_api.update;
 
-import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
+import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 

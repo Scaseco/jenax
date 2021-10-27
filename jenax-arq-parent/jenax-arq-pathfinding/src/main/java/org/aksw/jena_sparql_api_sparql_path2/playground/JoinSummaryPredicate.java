@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api_sparql_path2.playground;
 
 import java.util.function.Predicate;
 
+import org.aksw.commons.util.Directed;
 import org.aksw.jena_sparql_api.sparql_path2.NestedPath;
-import org.aksw.jena_sparql_api.utils.model.Directed;
 import org.jgrapht.Graph;
 
 /**

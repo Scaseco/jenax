@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
+import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;

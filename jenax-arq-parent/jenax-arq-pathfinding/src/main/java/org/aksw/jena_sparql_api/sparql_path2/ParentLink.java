@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql_path2;
 
 import java.io.Serializable;
 
-import org.aksw.jena_sparql_api.utils.model.Directed;
+import org.aksw.commons.util.Directed;
 
 public class ParentLink<V, E>
     implements Serializable

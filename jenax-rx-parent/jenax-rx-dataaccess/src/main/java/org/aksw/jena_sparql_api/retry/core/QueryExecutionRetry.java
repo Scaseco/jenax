@@ -317,5 +317,10 @@ public class QueryExecutionRetry
         public void setOwner(QueryExecutionRetry owner) {
             this.owner = owner;
         }
+
+        @Override
+        public String getQueryString() {
+            return null;
+        }
     }
 }

@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.commons.collections.generator.Generator;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint;
 import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.sparql.path.PathUtils;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
@@ -180,7 +183,7 @@ public class ConceptPathFinder {
 
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("SELECT * { ?s ?p ?o }").execSelect()));
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("" + propertyQuery).execSelect()));
-        List<Node> nodes = QueryExecutionUtils.executeList(qef, propertyQuery);
+        List<Node> nodes = QueryExecutionUtils.executeList(qef::createQueryExecution, propertyQuery);
         logger.debug("Retrieved " + nodes.size() + " properties");// + nodes);
 
 
@@ -217,7 +220,7 @@ public class ConceptPathFinder {
 
         //Query query = QueryFactory.create(test);
         logger.debug("TargetCandidateQuery: " + targetCandidateQuery);
-        List<Node> candidates = QueryExecutionUtils.executeList(qefMeta, targetCandidateQuery);
+        List<Node> candidates = QueryExecutionUtils.executeList(qefMeta::createQueryExecution, targetCandidateQuery);
         logger.debug("Got " + candidates.size() + " candidates: " + candidates);
 
 

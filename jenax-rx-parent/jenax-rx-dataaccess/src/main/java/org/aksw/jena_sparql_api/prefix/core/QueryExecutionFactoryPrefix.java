@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.prefix.core;
 
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.shared.PrefixMapping;
@@ -14,29 +15,29 @@ import org.apache.jena.shared.PrefixMapping;
  */
 @Deprecated
 public class QueryExecutionFactoryPrefix
-	extends QueryExecutionFactoryDecorator
+    extends QueryExecutionFactoryDecorator
 {
-	private PrefixMapping prefixMapping;
-	boolean doClone;
+    private PrefixMapping prefixMapping;
+    boolean doClone;
 
-	public QueryExecutionFactoryPrefix(QueryExecutionFactory decoratee, PrefixMapping prefixMapping, boolean doClone) {
-		super(decoratee);
-		this.prefixMapping = prefixMapping;
-		this.doClone = doClone;
-	}
+    public QueryExecutionFactoryPrefix(QueryExecutionFactory decoratee, PrefixMapping prefixMapping, boolean doClone) {
+        super(decoratee);
+        this.prefixMapping = prefixMapping;
+        this.doClone = doClone;
+    }
 
-	@Override
-	public QueryExecution createQueryExecution(Query query) {
-		Query q = doClone ? query.cloneQuery() : query;
+    @Override
+    public QueryExecution createQueryExecution(Query query) {
+        Query q = doClone ? query.cloneQuery() : query;
 
-		q.getPrefixMapping().setNsPrefixes(prefixMapping);
+        q.getPrefixMapping().setNsPrefixes(prefixMapping);
 
-		QueryExecution result = super.createQueryExecution(q);
-		return result;
-	}
+        QueryExecution result = super.createQueryExecution(q);
+        return result;
+    }
 
-	@Override
-	public QueryExecution createQueryExecution(String queryString) {
-		throw new RuntimeException("query object required");
-	}
+    @Override
+    public QueryExecution createQueryExecution(String queryString) {
+        throw new RuntimeException("query object required");
+    }
 }

@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.post_process;
 import java.util.function.Function;
 
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 

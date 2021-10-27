@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.utils.ElementTreeAnalyser;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;

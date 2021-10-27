@@ -28,7 +28,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.SortCondition;
@@ -766,5 +765,28 @@ public class SparqlRx {
     public static Flowable<Node> execConceptRaw(SparqlQueryConnection conn, Query query, Var var) {
         return execConceptRaw(() -> conn.query(query), var);
     }
+
+    public static <T extends RDFNode> Flowable<T> execConcept(Function<? super Query, ? extends QueryExecution> qef, Query query, Var var, Class<T> clazz) {
+        return execConcept(() -> qef.apply(query), var)
+                .map(rdfNode -> rdfNode.as(clazz));
+    }
+
+    public static Flowable<Node> execConceptRaw(Function<? super Query, ? extends QueryExecution> qef, Query query, Var var) {
+        return execConceptRaw(() -> qef.apply(query), var);
+    }
+
+
+//    public static Single<Range<Long>> fetchCountConcept(SparqlQueryConnection conn, UnaryRelation concept, Long itemLimit, Long rowLimit) {
+//        return fetchCountConcept(conn::query, concept, itemLimit, rowLimit);
+//    }
+//
+//
+//    public static Single<Range<Long>> fetchCountConcept(Function<? super Query, ? extends QueryExecution> qef, Query concept, Long itemLimit, Long rowLimit) {
+//
+//    	fetchCountQueryPartition(qef, null, null, itemLimit, rowLimit);
+//
+//    	return SparqlRx.fetchNumber(qef, countQuery, outputVar)
+//                .map(count -> SparqlRx.toRange(count.longValue(), xitemLimit, xrowLimit));
+//    }
 
 }

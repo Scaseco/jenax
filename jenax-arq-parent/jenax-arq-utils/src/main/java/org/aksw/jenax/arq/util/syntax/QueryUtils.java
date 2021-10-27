@@ -875,4 +875,17 @@ public class QueryUtils {
         return result;
     }
 
+    /** Extract a single projection variable from the query.
+     * Illegal argument exception if there are zero or more than 1 candidates.*/
+    public static Var extractSoleProjectVar(Query query) {
+        List<Var> vars = query.getProjectVars();
+        if(vars.size() != 1) {
+            throw new IllegalArgumentException("Exactly 1 var expected");
+        }
+
+        Var result = vars.get(0);
+
+        return result;
+    }
+
 }

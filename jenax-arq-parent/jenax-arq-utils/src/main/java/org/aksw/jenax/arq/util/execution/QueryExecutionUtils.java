@@ -1,10 +1,18 @@
 package org.aksw.jenax.arq.util.execution;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.apache.jena.graph.Node;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.QueryExecUtils;
 
 public class QueryExecutionUtils {
@@ -42,6 +50,30 @@ public class QueryExecutionUtils {
             }
         } else {
             throw new RuntimeException("RDFNode " + tmp + " is not a literal");
+        }
+
+        return result;
+    }
+
+    public static List<Node> executeList(Function<? super Query, ? extends QueryExecution> qef, Query query) {
+        Var var = QueryUtils.extractSoleProjectVar(query);
+
+        List<Node> result = executeList(qef, query, var);
+        return result;
+    }
+
+
+    public static List<Node> executeList(Function<? super Query, ? extends QueryExecution> qef, Query query, Var var) {
+        List<Node> result = new ArrayList<Node>();
+
+        try (QueryExecution qe = qef.apply(query)) {
+            ResultSet rs = qe.execSelect();
+            while(rs.hasNext()) {
+                Binding binding = rs.nextBinding();
+                Node node = binding.get(var);
+
+                result.add(node);
+            }
         }
 
         return result;

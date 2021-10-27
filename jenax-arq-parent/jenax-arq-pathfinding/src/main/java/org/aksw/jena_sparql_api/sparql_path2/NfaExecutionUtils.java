@@ -15,9 +15,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
-import org.aksw.jena_sparql_api.utils.model.Directed;
-import org.aksw.jena_sparql_api.utils.model.Triplet;
-import org.aksw.jena_sparql_api.utils.model.TripletImpl;
+import org.aksw.commons.util.Directed;
+import org.aksw.commons.util.triplet.Triplet;
+import org.aksw.commons.util.triplet.TripletImpl;
+import org.apache.jena.atlas.lib.tuple.Tuple2;
+import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.jgrapht.Graph;
 
 import com.google.common.collect.Multimap;
@@ -60,7 +62,7 @@ public class NfaExecutionUtils {
     }
 
 
-    public static <S, D, T extends LabeledEdge<S, ? extends Directed<? extends ValueSet<D>>>> Pair<ValueSet<D>> extractNextPropertyClasses(Graph<S, T> nfaGraph, Predicate<T> isEpsilon, Set<S> states, boolean reverse) {
+    public static <S, D, T extends LabeledEdge<S, ? extends Directed<? extends ValueSet<D>>>> Tuple2<ValueSet<D>> extractNextPropertyClasses(Graph<S, T> nfaGraph, Predicate<T> isEpsilon, Set<S> states, boolean reverse) {
         Set<T> transitions = JGraphTUtils.resolveTransitions(nfaGraph, isEpsilon, states, false);
 
         ValueSet<D> fwd = ValueSet.createEmpty();
@@ -84,7 +86,7 @@ public class NfaExecutionUtils {
             }
         }
 
-        Pair<ValueSet<D>> result = new Pair<>(fwd, bwd);
+        Tuple2<ValueSet<D>> result = TupleFactory.create2(fwd, bwd);
         return result;
     }
 
@@ -242,7 +244,7 @@ public class NfaExecutionUtils {
      * BiFunction<Set<V>, Directed<T>, Map<V, Set<Triplet<V, E>>>> getMatchingTriplets
      */
 
-    public static <S, T, P, Q> boolean isTargetReachable(Nfa<S, T> nfa, Predicate<T> isEpsilon, Set<S> states, BiPredicate<Directed<T>, Q> matcher, Graph<P, Q> joinGraph, Directed<P> diPredicate, Pair<Set<P>> targetPreds) {
+    public static <S, T, P, Q> boolean isTargetReachable(Nfa<S, T> nfa, Predicate<T> isEpsilon, Set<S> states, BiPredicate<Directed<T>, Q> matcher, Graph<P, Q> joinGraph, Directed<P> diPredicate, Tuple2<Set<P>> targetPreds) {
         // Return true if there is at least 1 path
         return false;
     }

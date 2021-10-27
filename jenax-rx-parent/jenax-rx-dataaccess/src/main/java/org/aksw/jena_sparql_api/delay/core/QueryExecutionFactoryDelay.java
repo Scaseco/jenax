@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 
@@ -31,7 +32,7 @@ public class QueryExecutionFactoryDelay
     public QueryExecutionFactoryDelay(QueryExecutionFactory decoratee, long delay) {
         this(decoratee, new DelayerDefault(delay));
     }
-    
+
     public QueryExecutionFactoryDelay(QueryExecutionFactory decoratee, long delayDuration, TimeUnit delayTimeUnit) {
         this(decoratee, new DelayerDefault(delayTimeUnit.toMillis(delayDuration)));
     }
