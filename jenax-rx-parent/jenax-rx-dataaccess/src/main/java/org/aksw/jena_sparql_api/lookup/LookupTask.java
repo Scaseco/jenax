@@ -3,6 +3,8 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import org.aksw.commons.rx.lookup.LookupService;
+
 import io.reactivex.rxjava3.core.Flowable;
 
 public class LookupTask<K, V>

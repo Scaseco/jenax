@@ -61,7 +61,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.KShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
-import org.jgrapht.alg.shortestpath.KShortestSimplePaths;
+import org.jgrapht.alg.shortestpath.YenKShortestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -315,9 +315,16 @@ public class ConceptPathFinderBidirectionalUtils {
                 // Prevent illegal argument exception at jgrapht
                 candidateGraphPaths = Collections.emptyList();
             } else {
-                KShortestPathAlgorithm<RDFNode, Statement> kShortestPaths = _maxPathLength == null
-                        ? new KShortestSimplePaths<>(graph)
-                        : new KShortestSimplePaths<>(graph, _maxPathLength);
+//                KShortestPathAlgorithm<RDFNode, Statement> kShortestPaths = _maxPathLength == null
+//                        ? new YenKShortestPath<>(graph)
+//                        : new YenKShortestPath<>(graph, _maxPathLength);
+
+                KShortestPathAlgorithm<RDFNode, Statement> kShortestPaths;
+                if (_maxPathLength == null) {
+                    kShortestPaths = new YenKShortestPath<>(graph);
+                } else {
+                    throw new IllegalArgumentException("Limiting the maximum length of shortest paths was removed in jgraph; needs evaluation on how to proceed; raising this exception for now");
+                }
 
                 candidateGraphPaths = kShortestPaths.getPaths(startVertex, endVertex, n);
             }

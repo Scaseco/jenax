@@ -2,6 +2,8 @@ package org.aksw.jena_sparql_api.lookup;
 
 import java.util.Map.Entry;
 
+import org.aksw.commons.rx.lookup.LookupService;
+import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.apache.jena.graph.Node;

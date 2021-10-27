@@ -8,7 +8,9 @@ import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 import org.aksw.commons.util.Directed;
+import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.triplet.TripletPath;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
@@ -86,10 +88,10 @@ public class PropertyFunctionKShortestPaths
 
         List<Node> argList = argObject.getArgList();
 
-        Node pathNode = ListUtils.safeGet(argList, 0);
-        Node outNode = ListUtils.safeGet(argList, 1);
-        Node targetNode = ListUtils.safeGet(argList, 2);
-        Node kNode = ListUtils.safeGet(argList, 3);
+        Node pathNode = ListUtils.getOrNull(argList, 0);
+        Node outNode = ListUtils.getOrNull(argList, 1);
+        Node targetNode = ListUtils.getOrNull(argList, 2);
+        Node kNode = ListUtils.getOrNull(argList, 3);
 
         if(targetNode != null) {
             if(targetNode.isVariable()) {

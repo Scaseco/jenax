@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.core.connection.RDFConnectionFactoryEx;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinder;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderBase;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderFactorySummaryBase;
@@ -28,9 +27,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.WebContent;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetDescription;
 
@@ -150,8 +151,17 @@ public class ConceptPathFinderSystem3
     }
 
     public static RDFConnection wrapWithDatasetAndXmlContentType(String url, DatasetDescription datasetDescription) {
-        RDFConnection rawConn = RDFConnectionFactory.connect("http://localhost:8890/sparql");
-        RDFConnection result = RDFConnectionFactoryEx.wrapWithDatasetAndXmlContentType(rawConn, datasetDescription);
+//        qeh.setSelectContentType(WebContent.contentTypeResultsXML);
+//        qeh.setModelContentType(WebContent.contentTypeNTriples);
+//        qeh.setDatasetContentType(WebContent.contentTypeNQuads);
+
+        RDFConnection result = RDFConnectionRemote.newBuilder()
+            .destination(url)
+            .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML)
+            .acceptHeaderGraph(WebContent.contentTypeNTriples)
+            .acceptHeaderDataset(WebContent.contentTypeNQuads)
+            .build();
+
         return result;
     }
 

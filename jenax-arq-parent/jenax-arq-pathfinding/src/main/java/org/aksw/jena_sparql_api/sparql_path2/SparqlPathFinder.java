@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql_path2;
 
 import java.util.List;
 
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;
 

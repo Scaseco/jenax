@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.lookup;
 
 import java.util.Map.Entry;
 
+import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
