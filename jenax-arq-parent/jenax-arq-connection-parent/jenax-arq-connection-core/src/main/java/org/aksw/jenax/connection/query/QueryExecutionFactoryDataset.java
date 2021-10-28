@@ -16,7 +16,8 @@ import org.apache.jena.sparql.exec.QueryExecutionAdapter;
 import org.apache.jena.sparql.util.Context;
 
 public class QueryExecutionFactoryDataset
-    implements QueryExecutionFactoryQuery
+    // implements QueryExecutionFactoryQuery
+    extends QueryExecutionFactoryBackQuery
 {
     protected Dataset dataset;
     protected Context context;
@@ -69,5 +70,15 @@ public class QueryExecutionFactoryDataset
         // TODO We shouldn't wrap with txn here
         //QueryExecution result = QueryExecution.a// new QueryExecutionDecoratorTxn<QueryExecution>(tmp, dsg);
         return result;
+    }
+
+    @Override
+    public String getId() {
+        return "" + dataset.hashCode();
+    }
+
+    @Override
+    public String getState() {
+        return "" + dataset.hashCode();
     }
 }

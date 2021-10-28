@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api;
 
 import org.aksw.jena_sparql_api.core.GraphQueryExecutionFactory;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

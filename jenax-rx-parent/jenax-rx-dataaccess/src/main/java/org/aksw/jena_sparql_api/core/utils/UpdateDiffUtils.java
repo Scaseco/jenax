@@ -10,17 +10,19 @@ import java.util.Set;
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.jena_sparql_api.core.QuadContainmentChecker;
-import org.aksw.jena_sparql_api.utils.DatasetGraphDiffUtils;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.quad.DatasetGraphDiffUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.quad.SetFromDatasetGraph;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.UpdateDataDelete;
 import org.apache.jena.sparql.modify.request.UpdateDataInsert;
@@ -29,6 +31,7 @@ import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.update.Update;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.WrappedIterator;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
@@ -130,7 +133,7 @@ public class UpdateDiffUtils {
 
         // TODO Limit and offset...
         QueryExecution qe = qef.createQueryExecution(query);
-        ExtendedIterator<Binding> itBinding = ResultSetUtils.toIteratorBinding(qe);
+        ExtendedIterator<Binding> itBinding =  WrappedIterator.create(Iter.onClose(RowSet.adapt(qe.execSelect()), qe::close)); // ResultSetUtils.toIteratorBinding(qe);
 
         Iterator<List<Binding>> itBindingChunk = Iterators.partition(itBinding, batchSize);
 

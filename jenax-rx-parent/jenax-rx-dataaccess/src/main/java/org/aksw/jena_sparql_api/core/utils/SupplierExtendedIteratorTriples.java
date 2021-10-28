@@ -3,12 +3,13 @@ package org.aksw.jena_sparql_api.core.utils;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
-import org.aksw.jena_sparql_api.utils.ExtendedIteratorClosable;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.WrappedIterator;
 
 
 public class SupplierExtendedIteratorTriples
@@ -40,7 +41,7 @@ public class SupplierExtendedIteratorTriples
         String base = tis.getBaseURI();
 
         Iterator<Triple> itTriple = RDFDataMgr.createIteratorTriples(tis, lang, base);
-        ExtendedIterator<Triple> result = ExtendedIteratorClosable.create(itTriple, tis);
+        ExtendedIterator<Triple> result = WrappedIterator.create(Iter.onCloseIO(itTriple, tis)); // ExtendedIteratorClosable.create(itTriple, tis);
 
 
         return result;

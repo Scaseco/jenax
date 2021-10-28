@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.util.execution;
+package org.aksw.jenax.arq.util.binding;
 
 import org.aksw.commons.collections.diff.ListDiff;
 import org.apache.jena.query.ResultSet;

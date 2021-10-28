@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.benchmark;
 import java.io.ByteArrayInputStream;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.E_JsonPath;
-import org.aksw.jenax.arq.util.execution.ResultSetUtils;
+import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;

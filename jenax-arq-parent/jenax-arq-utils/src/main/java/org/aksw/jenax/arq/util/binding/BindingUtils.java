@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
@@ -86,24 +88,8 @@ public class BindingUtils {
         return result;
     }
 
-    public static Binding rename(Binding binding, Map<Var, Var> varMap) {
-        BindingBuilder builder = BindingBuilder.create();
-
-        Iterator<Var> itVars = binding.vars();
-        while(itVars.hasNext()) {
-            Var sourceVar = itVars.next();
-
-            Node node = binding.get(sourceVar);
-
-            Var targetVar = varMap.get(sourceVar);
-            if(targetVar == null) {
-                targetVar = sourceVar;
-            }
-
-            builder.add(targetVar, node);
-        }
-
-        return builder.build();
+    public static Binding renameKeys(Binding binding, Map<Var, Var> varMap) {
+        return NodeTransformLib.transform(binding, NodeTransformRenameMap.create(varMap));
     }
 
     public static NodeTransform asNodeTransform(Binding binding) {

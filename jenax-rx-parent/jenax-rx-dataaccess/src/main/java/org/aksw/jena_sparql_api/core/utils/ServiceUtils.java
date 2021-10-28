@@ -9,8 +9,8 @@ import org.aksw.commons.util.range.CountInfo;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.OrderedConcept;
-import org.aksw.jena_sparql_api.utils.CloseableQueryExecution;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
@@ -199,7 +199,7 @@ public class ServiceUtils {
 
         } else if(query.isConstructType()) {
             Iterator<Triple> it = qe.execConstructTriples();
-            result = org.aksw.jena_sparql_api.core.utils.ResultSetUtils.tripleIteratorToResultSet(it, new CloseableQueryExecution(qe));
+            result = org.aksw.jena_sparql_api.core.utils.ResultSetUtils.tripleIteratorToResultSet(it, qe::close);
         } else {
             throw new RuntimeException("Query type is not supported: " + query);
         }

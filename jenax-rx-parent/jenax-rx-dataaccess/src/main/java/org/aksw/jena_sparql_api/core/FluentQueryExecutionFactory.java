@@ -30,6 +30,10 @@ import org.apache.jena.sparql.util.Context;
 import com.google.common.base.Supplier;
 
 /**
+ * A fluent API for modifying query execution creation by several means such as
+ * query rewriting, setting context attributes, or rerouting requests (e.g. to a cache).
+ *
+ * @author Claus Stadler
  * @author Lorenz Buehmann
  *
  */

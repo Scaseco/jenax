@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -23,6 +24,11 @@ import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.graph.NodeTransformLib;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementNamedGraph;
+import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 
 public class QuadUtils {
 
@@ -200,4 +206,46 @@ public class QuadUtils {
     }
 
 
+    /** Partition the given quads by graph and create an appropriate element
+     *  Makes use of ElementGroup, ElementNodeGraph and ElementTriplesBlock as necessary */
+    public static Element toElement(Iterable<Quad> quads) {
+        Map<Node, Set<Quad>> map = partitionByGraph(quads);
+        Element result = toElement(map);
+        return result;
+    }
+
+
+    public static Element toElement(Map<Node, Set<Quad>> graphToQuads) {
+        ElementGroup es = new ElementGroup();
+        for(Entry<Node, Set<Quad>> entry : graphToQuads.entrySet()) {
+            ElementTriplesBlock e = new ElementTriplesBlock();
+            for(Quad quad : entry.getValue()) {
+                Triple triple = quad.asTriple();
+                e.addTriple(triple);
+            }
+
+            Node graph = entry.getKey();
+
+            Element f = graph == null || Quad.isDefaultGraph(graph)
+                    ? e
+                    : new ElementNamedGraph(graph, e);
+
+            es.addElement(f);
+        }
+
+        Element result = es.getElements().size() == 1
+                ? es.getElements().get(0)
+                : es;
+
+        return result;
+    }
+
+    /** Similar to NodeTransformLib.transformQuads but allows for use of an arbitrary collection type (other than list) */
+    public static <C extends Collection<Quad>> C transformAll(C targetAcc, NodeTransform transform, Iterable<? extends Quad> source) {
+        for (Quad quad : source) {
+            Quad tgt = NodeTransformLib.transform(transform, quad);
+            targetAcc.add(tgt);
+        }
+        return targetAcc;
+    }
 }

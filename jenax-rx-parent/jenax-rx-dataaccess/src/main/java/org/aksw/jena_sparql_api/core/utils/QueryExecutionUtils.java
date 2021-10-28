@@ -8,13 +8,13 @@ import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jena_sparql_api.mapper.BindingMapperUtils;
-import org.aksw.jena_sparql_api.utils.CloseableQueryExecution;
-import org.aksw.jena_sparql_api.utils.ExtendedIteratorClosable;
 import org.aksw.jenax.arq.aggregation.BindingMapper;
 import org.aksw.jenax.arq.aggregation.BindingMapperQuad;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.Closeable;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.graph.Node;
@@ -30,6 +30,7 @@ import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.expr.aggregate.AggCountDistinct;
@@ -37,6 +38,7 @@ import org.apache.jena.sparql.expr.aggregate.Aggregator;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.WrappedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,7 @@ public class QueryExecutionUtils {
         Table result;
         try (QueryExecution qe = qeSupp.get()) {
             ResultSet rs = qe.execSelect();
-            result = ResultSetUtils.resultSetToTable(rs);
+            result = TableUtils.createTable(rs);
         }
         return result;
     }
@@ -163,8 +165,7 @@ public class QueryExecutionUtils {
     public static ExtendedIterator<Triple> execConstruct(QueryExecution qe, Query query) {
         Iterator<Triple> it = qe.execConstructTriples();
 
-        ExtendedIteratorClosable<Triple> result = ExtendedIteratorClosable.create(it, () -> { tryClose(it); qe.close();});
-        //WrappedIterator<Triple> result = WrappedIterator.<Triple>createNoRemove(it);
+        ExtendedIterator<Triple> result = WrappedIterator.create(Iter.onClose(it, () -> { tryClose(it); qe.close(); }));
         return result;
     }
 
@@ -193,7 +194,7 @@ public class QueryExecutionUtils {
         final QueryExecution qe = qef.createQueryExecution(queryStr);
         ResultSet tmp = qe.execSelect();
 
-        ResultSetCloseable rs = new ResultSetCloseable(tmp, new CloseableQueryExecution(qe));
+        ResultSetCloseable rs = new ResultSetCloseable(tmp, qe::close);
 
         Iterator<Quad> result = new IteratorNQuads(rs);
         return result;
@@ -227,7 +228,7 @@ public class QueryExecutionUtils {
 
     public static long fetchBindingCount(String serviceUrl, Query query) {
         long result;
-        try (QueryExecution qe = org.apache.jena.query.QueryExecutionFactory.createServiceRequest(serviceUrl, query)) {
+        try (QueryExecution qe = QueryExecutionHTTP.newBuilder().endpoint(serviceUrl).query(query).build()) {
             result = ResultSetFormatter.consume(qe.execSelect());
         }
         return result;

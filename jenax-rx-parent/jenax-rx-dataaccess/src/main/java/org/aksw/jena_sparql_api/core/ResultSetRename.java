@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.core;
 import java.util.List;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.utils.QuerySolutionUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
+import org.aksw.jenax.arq.util.binding.QuerySolutionUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
@@ -30,21 +30,21 @@ public class ResultSetRename
     @Override
     public QuerySolution next() {
         QuerySolution qs = super.next();
-        QuerySolution result = QuerySolutionUtils.rename(qs, varMap);
+        QuerySolution result = QuerySolutionUtils.renameKeys(qs, varMap);
         return result;
     }
 
     @Override
     public QuerySolution nextSolution() {
         QuerySolution qs = super.nextSolution();
-        QuerySolution result = QuerySolutionUtils.rename(qs, varMap);
+        QuerySolution result = QuerySolutionUtils.renameKeys(qs, varMap);
         return result;
     }
 
     @Override
     public Binding nextBinding() {
         Binding binding = super.nextBinding();
-        Binding result = BindingUtils.rename(binding, varMap);
+        Binding result = BindingUtils.renameKeys(binding, varMap);
         return result;
     }
 

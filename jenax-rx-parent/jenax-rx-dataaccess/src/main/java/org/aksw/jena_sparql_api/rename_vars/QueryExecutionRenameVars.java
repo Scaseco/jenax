@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.jenax.arq.util.binding.BindingUtils;
-import org.aksw.jenax.arq.util.execution.ResultSetUtils;
+import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.query.QueryExecution;
@@ -30,7 +30,7 @@ public class QueryExecutionRenameVars
 
         List<String> varNames = rs.getResultVars();
         Iterator<Binding> it = RowSet.adapt(rs);
-        Iterator<Binding> iu = Iterators.transform(it, b -> BindingUtils.rename(b, varMap));
+        Iterator<Binding> iu = Iterators.transform(it, b -> BindingUtils.renameKeys(b, varMap));
 
         ResultSet result = ResultSetUtils.create(varNames, iu);
         return result;

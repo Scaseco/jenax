@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.core.utils;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,14 +12,14 @@ import org.aksw.commons.collections.diff.Diff;
 import org.aksw.jena_sparql_api.core.DatasetListener;
 import org.aksw.jena_sparql_api.core.QuadContainmentChecker;
 import org.aksw.jena_sparql_api.core.UpdateContext;
-import org.aksw.jena_sparql_api.syntax.FN_QuadFromTriple;
-import org.aksw.jena_sparql_api.utils.DatasetGraphDiffUtils;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.arq.util.quad.DatasetGraphDiffUtils;
+import org.aksw.jenax.arq.util.quad.FN_QuadFromTriple;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
@@ -166,8 +167,8 @@ public class UpdateExecutionUtils {
             @Override
             public Diff<Set<Quad>> apply(Diff<Set<Quad>> input) {
 
-                Set<Quad> added = QuadUtils.applyNodeTransform(input.getAdded(), nodeTransform);
-                Set<Quad> removed = QuadUtils.applyNodeTransform(input.getRemoved(), nodeTransform);
+                Set<Quad> added = QuadUtils.transformAll(new HashSet<>(), nodeTransform, input.getAdded());
+                Set<Quad> removed = QuadUtils.transformAll(new HashSet<>(), nodeTransform, input.getRemoved());
 
                 Diff<Set<Quad>> r = Diff.create(added, removed);
                 return r;
@@ -194,13 +195,13 @@ public class UpdateExecutionUtils {
     }
 
     public static UpdateProcessor executeInsertTriples(UpdateExecutionFactory uef, Iterable<Triple> triples) {
-        Iterable<Quad> quads = Iterables.applyNodeTransform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
+        Iterable<Quad> quads = Iterables.transform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
         UpdateProcessor result = executeInsertQuads(uef, quads);
         return result;
     }
 
     public static UpdateProcessor executeDeleteTriples(UpdateExecutionFactory uef, Iterable<Triple> triples) {
-        Iterable<Quad> quads = Iterables.applyNodeTransform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
+        Iterable<Quad> quads = Iterables.transform(triples, FN_QuadFromTriple.fnDefaultGraphNodeGenerated);
         UpdateProcessor result = executeDeleteQuads(uef, quads);
         return result;
     }
@@ -269,11 +270,11 @@ public class UpdateExecutionUtils {
     public static UpdateDeleteInsert createUpdateRename(Node before, Node after, int i) {
         Node[] deleteTerms = { Quad.defaultGraphIRI, Vars.s, Vars.p, Vars.o };
         deleteTerms[i] = before;
-        Quad deleteQuad = QuadUtils.arrayToQuad(deleteTerms);
+        Quad deleteQuad = QuadUtils.create(deleteTerms);
 
         Node[] insertTerms = { Quad.defaultGraphIRI, Vars.s, Vars.p, Vars.o };
         insertTerms[i] = after;
-        Quad insertQuad = QuadUtils.arrayToQuad(insertTerms);
+        Quad insertQuad = QuadUtils.create(insertTerms);
 
         UpdateDeleteInsert result = new UpdateDeleteInsert();
         result.getDeleteAcc().addQuad(deleteQuad);

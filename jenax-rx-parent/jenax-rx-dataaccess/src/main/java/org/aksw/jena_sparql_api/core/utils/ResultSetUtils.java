@@ -17,6 +17,7 @@ import com.google.common.collect.Iterators;
 
 
 public class ResultSetUtils {
+
     public static ResultSetCloseable tripleIteratorToResultSet(Iterator<Triple> tripleIt, Closeable closeable) {
         Iterator<Binding> bindingIt = Iterators.transform(tripleIt, F_TripleToBinding.fn);
         QueryIterator queryIter = QueryIterPlainWrapper.create(bindingIt);

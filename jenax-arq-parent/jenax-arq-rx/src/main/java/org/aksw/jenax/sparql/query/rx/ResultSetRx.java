@@ -3,8 +3,8 @@ package org.aksw.jenax.sparql.query.rx;
 import java.util.Iterator;
 import java.util.List;
 
+import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.execution.QueryExecutionAdapter;
-import org.aksw.jenax.arq.util.execution.ResultSetUtils;
 import org.aksw.jenax.sparql.rx.op.FlowOfBindingsOps;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
