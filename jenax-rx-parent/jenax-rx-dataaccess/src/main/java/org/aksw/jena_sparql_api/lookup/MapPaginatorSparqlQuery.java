@@ -68,7 +68,7 @@ public class MapPaginatorSparqlQuery
 //            console.log('ROW ' + rowLimit);
         }
 
-        Single<Range<Long>> result = SparqlRx.fetchCountConcept(qef, countConcept, itemLimit, null); //rowLimit
+        Single<Range<Long>> result = SparqlRx.fetchCountQuery(qef::query, countConcept.asQuery(), itemLimit, null); //rowLimit
         return result;
     }
 

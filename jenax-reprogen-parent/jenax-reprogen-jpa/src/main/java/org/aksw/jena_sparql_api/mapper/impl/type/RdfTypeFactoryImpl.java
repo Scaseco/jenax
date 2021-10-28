@@ -44,6 +44,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -57,7 +58,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
-import com.apicatalog.jsonld.uri.UriUtils;
 import com.google.common.base.Strings;
 
 public class RdfTypeFactoryImpl
@@ -485,8 +485,8 @@ public class RdfTypeFactoryImpl
 
         try {
             evalContext.registerFunction("md5", StringUtils.class.getDeclaredMethod("md5Hash", new Class[] { String.class }));
-            evalContext.registerFunction("localName", UriUtils.class.getDeclaredMethod("getLocalName", new Class[] { String.class }));
-            evalContext.registerFunction("nameSpace", UriUtils.class.getDeclaredMethod("getNameSpace", new Class[] { String.class }));
+            evalContext.registerFunction("localName", SplitIRI.class.getDeclaredMethod("localname", new Class[] { String.class }));
+            evalContext.registerFunction("nameSpace", SplitIRI.class.getDeclaredMethod("namespace", new Class[] { String.class }));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
