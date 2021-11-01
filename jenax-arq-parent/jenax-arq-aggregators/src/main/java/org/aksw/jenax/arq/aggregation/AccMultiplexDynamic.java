@@ -7,14 +7,17 @@ import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
+import org.aksw.commons.collector.domain.Aggregator;
+
 
 /**
  * A more general variant of AccMap2 which maps a binding to multiple keys
- * 
+ *
  * TODO Decide whether to keep only this general version even
  *      if it means having to wrap each key as a singleton collection
- * 
- * 
+ *
+ *
  * @author raven
  *
  * @param <B>
@@ -25,15 +28,15 @@ import java.util.function.Function;
 public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
     implements Accumulator<B, Map<K, W>>
 {
-	// Map a binding to a set of keys; only unique items are used from the iterable
+    // Map a binding to a set of keys; only unique items are used from the iterable
     protected Function<? super B, ? extends Iterator<? extends K>> keyMapper;
-    
+
     // Map (binding, key) to value
     protected BiFunction<? super B, ? super K, ? extends V> valueMapper;
-    
+
     // Note: Above functions are equivalent to the one below, but then a Map needs to be enforced
-	// protected Function<? super B, ? extends Map<? extends K, ? extends V>> bindingToMap;
-	
+    // protected Function<? super B, ? extends Map<? extends K, ? extends V>> bindingToMap;
+
     protected C subAgg;
 
     protected Map<K, Accumulator<V, W>> state = new HashMap<>();
@@ -43,9 +46,9 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
 //    }
 
     public AccMultiplexDynamic(
-    		Function<? super B, ? extends Iterator<? extends K>> keyMapper,
-    		BiFunction<? super B, ? super K, ? extends V> valueMapper,
-    		C subAgg) {
+            Function<? super B, ? extends Iterator<? extends K>> keyMapper,
+            BiFunction<? super B, ? super K, ? extends V> valueMapper,
+            C subAgg) {
         this.keyMapper = keyMapper;
         this.valueMapper = valueMapper;
         this.subAgg = subAgg;
@@ -55,17 +58,17 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
     public void accumulate(B binding) {
         // TODO Keep track of the relative binding index
         Iterator<? extends K> ks = keyMapper.apply(binding);
- 
-        while (ks.hasNext()) {
-        	K k = ks.next();
-        	V v = valueMapper.apply(binding, k);
 
- 	        Accumulator<V, W> subAcc = state.get(k);
-	        if(subAcc == null) {
-	            subAcc = subAgg.createAccumulator();
-	            state.put(k, subAcc);
-	        }
-	        subAcc.accumulate(v);
+        while (ks.hasNext()) {
+            K k = ks.next();
+            V v = valueMapper.apply(binding, k);
+
+             Accumulator<V, W> subAcc = state.get(k);
+            if(subAcc == null) {
+                subAcc = subAgg.createAccumulator();
+                state.put(k, subAcc);
+            }
+            subAcc.accumulate(v);
         }
     }
 
@@ -84,9 +87,9 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
     }
 
     public static <B, K, V, W, C extends Aggregator<V, W>> AccMultiplexDynamic<B, K, V, W, C> create(
-    		Function<? super B, ? extends Iterator<? extends K>> keyMapper,
-    		BiFunction<? super B, ? super K, ? extends V> valueMapper,
-    		C subAgg) {
+            Function<? super B, ? extends Iterator<? extends K>> keyMapper,
+            BiFunction<? super B, ? super K, ? extends V> valueMapper,
+            C subAgg) {
         AccMultiplexDynamic<B, K, V, W, C> result = new AccMultiplexDynamic<>(keyMapper, valueMapper, subAgg);
         return result;
     }

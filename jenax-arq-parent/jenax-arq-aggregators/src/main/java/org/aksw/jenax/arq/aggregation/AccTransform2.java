@@ -2,6 +2,8 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
+
 public class AccTransform2<B, I, O>
     implements Accumulator<B, O>
 {

@@ -2,6 +2,8 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.function.Predicate;
 
+import org.aksw.commons.collector.domain.Accumulator;
+
 public class AccCondition<B, V>
     implements Accumulator<B, V>
 {

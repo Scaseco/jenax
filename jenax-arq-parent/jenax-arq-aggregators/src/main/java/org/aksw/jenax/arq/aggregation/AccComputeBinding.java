@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.aggregation;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;

@@ -2,6 +2,9 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
+import org.aksw.commons.collector.domain.Aggregator;
+
 public class AggTransform2<B, I, O, C extends Aggregator<B, I>>
     implements Aggregator<B, O>
 {

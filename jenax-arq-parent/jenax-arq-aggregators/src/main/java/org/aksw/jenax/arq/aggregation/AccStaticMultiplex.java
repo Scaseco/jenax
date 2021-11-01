@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 
+import org.aksw.commons.collector.domain.Accumulator;
+
 /**
  * An ggregator that initialized with a static map<Key, Aggregator<...>
  *

@@ -6,10 +6,13 @@ import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
+import org.aksw.commons.collector.domain.Aggregator;
+
 
 /**
- * 
- * 
+ *
+ *
  * @author raven
  *
  * @param <B>

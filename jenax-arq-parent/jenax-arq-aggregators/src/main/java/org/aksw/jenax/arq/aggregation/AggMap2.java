@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.aksw.commons.collector.domain.Accumulator;
+import org.aksw.commons.collector.domain.Aggregator;
+
 /**
  * Aggregator that maps each input item to a single key and allocates
  * a sub aggregator for that key if none exists yet.
- * 
+ *
  * @author raven
  *
  * @param <B>

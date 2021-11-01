@@ -26,6 +26,12 @@
 			<artifactId>aksw-commons-collections</artifactId>
 		</dependency>
 
+		<!-- Collector / Aggregator API -->
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collectors</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-rdfterm</artifactId>

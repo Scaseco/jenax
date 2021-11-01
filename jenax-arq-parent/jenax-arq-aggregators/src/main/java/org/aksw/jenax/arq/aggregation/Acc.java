@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.aggregation;
 
+import org.aksw.commons.collector.domain.Accumulator;
 import org.apache.jena.sparql.engine.binding.Binding;
 
 /**

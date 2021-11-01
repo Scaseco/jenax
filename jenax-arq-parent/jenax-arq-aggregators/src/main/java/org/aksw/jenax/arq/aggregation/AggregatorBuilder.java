@@ -6,9 +6,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.aksw.commons.collector.domain.Aggregator;
+
 /**
  * A bottom up aggregator builder: Starting with a specific aggregator it is expanded upon.
- * 
+ *
  * @author raven
  *
  * @param <B>
@@ -33,15 +35,15 @@ public class AggregatorBuilder<B, T> {
         return new AggregatorBuilder<>(agg);
     }
 
-    
+
     /**
      * Wrap an inner aggregator from e.g. String -> Set<String>
      * so that given a jena Binding, each (var, node) pair is mapped to a (var, string) pair.
-     * the resulting aggregator yields for each binding's var the Set<String> of the inner aggregator 
+     * the resulting aggregator yields for each binding's var the Set<String> of the inner aggregator
      */
     public <X, K, V> AggregatorBuilder<X, Map<K, T>> wrapWithMultiplexDynamic(
-    		Function<? super X, ? extends Iterator<? extends K>> keyMapper,
-    		BiFunction<? super X, ? super K, ? extends B> valueMapper) {
+            Function<? super X, ? extends Iterator<? extends K>> keyMapper,
+            BiFunction<? super X, ? super K, ? extends B> valueMapper) {
         Aggregator<B, T> local = state;
         Aggregator<X, Map<K, T>> agg = () -> AccMultiplexDynamic.create(keyMapper, valueMapper, local);
 

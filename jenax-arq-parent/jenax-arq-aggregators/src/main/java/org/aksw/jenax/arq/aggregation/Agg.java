@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.Set;
 
+import org.aksw.commons.collector.domain.Aggregator;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 
