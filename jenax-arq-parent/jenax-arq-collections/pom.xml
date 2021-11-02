@@ -21,6 +21,11 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-prefixes</artifactId>
 		</dependency>
 

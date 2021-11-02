@@ -27,11 +27,13 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
@@ -462,4 +464,10 @@ public class ElementUtils {
         return result;
     }
 
+    public static ElementData createElementData(Collection<Var> vars, Collection<Binding> rows) {
+        ElementData result = new ElementData();
+        vars.forEach(result::add);
+        rows.forEach(result::add);
+        return result;
+    }
 }
