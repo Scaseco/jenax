@@ -23,6 +23,7 @@
 		<module>jenax-reprogen-parent</module>
 		<module>jenax-io-parent</module>
 		<module>jenax-models-parent</module>
+		<module>jenax-facete-parent</module>
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
 	</modules>
@@ -282,6 +283,13 @@
 				<version>1.5.1-1-SNAPSHOT</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.aksw.commons</groupId>
+                                <artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
+                                <version>1.5.1-1-SNAPSHOT</version>
+                        </dependency>
+
+
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-service-vfs</artifactId>
@@ -447,6 +455,14 @@
 				<version>${project.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-reprogen-jpa</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+
+
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-annotations-reprogen</artifactId>
@@ -520,6 +536,27 @@
 				<artifactId>jenax-arq-functions</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-facete-vocab</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-facete-api</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-facete-impl</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+
 
 
 			<dependency>

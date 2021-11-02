@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>jenax-arq-connection-core</module>
+		<module>jenax-arq-connection-extra</module>
 		<module>jenax-arq-connection-virtuoso</module>
 		<!-- <module>jenax-arq-connection-mods</module> -->
 	</modules>

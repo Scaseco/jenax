@@ -5,7 +5,7 @@ evaluations
 .project
 .settings
 target
-
+node_modules
 bin
 
 # Package Files #
@@ -33,3 +33,4 @@ results.tsv
 
 .vscode
 dependency-reduced-pom.xml
+
