@@ -226,7 +226,7 @@ public class RestrictionImpl
         if(node == null) {
             return RdfTermType.UNKNOWN;
         } else if(node.isURI()) {
-            return RdfTermType.URI;
+            return RdfTermType.IRI;
         } else if(node.isLiteral()) {
             return RdfTermType.LITERAL;
         } else if(node.isBlank()) {
@@ -287,7 +287,7 @@ public class RestrictionImpl
             throw new RuntimeException("Should not happen");
         }
 
-        boolean change = stateType(RdfTermType.URI);
+        boolean change = stateType(RdfTermType.IRI);
 
         if(satisfiability == Boolean.FALSE) {
             return change;

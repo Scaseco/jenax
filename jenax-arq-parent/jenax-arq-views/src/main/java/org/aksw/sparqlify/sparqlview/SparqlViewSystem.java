@@ -330,7 +330,7 @@ public class SparqlViewSystem
                     Number number = (Number)o;
                     switch(number.intValue()) {
                     case 1:
-                        result.put(var, RdfTermType.URI);
+                        result.put(var, RdfTermType.IRI);
                         break;
                     case 2:
                     case 3:
@@ -339,7 +339,7 @@ public class SparqlViewSystem
                     }
                 }
             } else if(functionIri.equals(SparqlifyConstants.uriLabel)) {
-                result.put(var, RdfTermType.URI);
+                result.put(var, RdfTermType.IRI);
             } else if(functionIri.equals(SparqlifyConstants.plainLiteralLabel) || functionIri.equals(SparqlifyConstants.typedLiteralLabel)) {
                 result.put(var, RdfTermType.LITERAL);
             }
@@ -406,7 +406,7 @@ public class SparqlViewSystem
                 return r.getType();
             }
         } else if(node.isURI()) {
-            return RdfTermType.URI;
+            return RdfTermType.IRI;
         } else if(node.isLiteral()) {
             return RdfTermType.LITERAL;
         }
@@ -454,7 +454,7 @@ public class SparqlViewSystem
                 if(i == 3) {
                     RdfTermType type = getType(node, restrictions);
                     switch(type) {
-                    case URI:
+                    case IRI:
                         collections.add(Collections.singleton(1));
                         break;
 
@@ -707,7 +707,7 @@ public class SparqlViewSystem
                     continue;
                 }
 
-                if(r.getType().equals(RdfTermType.URI) && r.hasConstant()) {
+                if(r.getType().equals(RdfTermType.IRI) && r.hasConstant()) {
                     String columnName = columnNames[i];
 
                     columnConstraints.put(columnName, new IsPrefixOfConstraint(r.getNode().getURI()));
@@ -718,7 +718,7 @@ public class SparqlViewSystem
             RestrictionImpl r = termRestriction[3];
             if(r != null) {
                 switch(r.getType()) {
-                case URI:
+                case IRI:
                     columnConstraints.put("o_type", new EqualsConstraint(1));
                     break;
                 case LITERAL:

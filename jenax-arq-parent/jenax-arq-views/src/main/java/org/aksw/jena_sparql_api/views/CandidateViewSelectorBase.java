@@ -276,7 +276,7 @@ public abstract class CandidateViewSelectorBase<T extends IViewDef, C>
                 return r.getType();
             }
         } else if(node.isURI()) {
-            return RdfTermType.URI;
+            return RdfTermType.IRI;
         } else if(node.isLiteral()) {
             return RdfTermType.LITERAL;
         }
@@ -349,7 +349,7 @@ public abstract class CandidateViewSelectorBase<T extends IViewDef, C>
                 if(i == 3) {
                     RdfTermType type = getType(node, varRestrictions);
                     switch(type) {
-                    case URI:
+                    case IRI:
                         collections.add(Collections.singleton(1));
                         break;
 
@@ -684,7 +684,7 @@ public abstract class CandidateViewSelectorBase<T extends IViewDef, C>
 
             termRestriction[i] = r;
 
-            if(r.getRdfTermTypes().contains(RdfTermType.URI) && r.hasConstant()) {
+            if(r.getRdfTermTypes().contains(RdfTermType.IRI) && r.hasConstant()) {
                 String columnName = columnNames[i];
 
                 result.put(columnName, new IsPrefixOfConstraint(r.getNode().getURI()));
@@ -699,7 +699,7 @@ public abstract class CandidateViewSelectorBase<T extends IViewDef, C>
         RestrictionImpl r = termRestriction[3];
         if(r != null) {
             switch(r.getType()) {
-            case URI:
+            case IRI:
                 result.put("o_type", new EqualsConstraint(1));
                 break;
             case LITERAL:
