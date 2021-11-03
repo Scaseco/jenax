@@ -1,10 +1,12 @@
 package org.aksw.jenax.arq.util.quad;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -92,8 +94,11 @@ public class QuadUtils {
 
     public static Node[] quadToArray(Quad quad) {
         return new Node[] { quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() };
-     }
+    }
 
+    public static List<Node> quadToList(Quad quad) {
+        return Arrays.asList(quadToArray(quad));
+    }
 
     public static Node substitute(Node node, Binding binding) {
         Node result = node;

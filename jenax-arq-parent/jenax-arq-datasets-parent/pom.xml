@@ -16,5 +16,6 @@
 	<modules>
 		<module>jenax-arq-datasets-oneng</module>
 		<module>jenax-arq-datasets-orderaware</module>
+		<module>jenax-arq-datasets-diff</module>
 	</modules>
 </project>

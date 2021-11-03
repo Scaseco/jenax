@@ -36,6 +36,7 @@
 		<module>jenax-arq-datashapes</module>
 		<module>jenax-arq-pathfinding</module>
 		<module>jenax-arq-entityquery</module>
+		<module>jenax-arq-views</module>
 
 		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
 		<!-- maybe its better to have udf build on the top level functionbinder module -->
