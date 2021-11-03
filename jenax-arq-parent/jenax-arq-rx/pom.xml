@@ -52,6 +52,16 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-utils</artifactId>
 		</dependency>

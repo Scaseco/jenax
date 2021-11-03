@@ -91,6 +91,7 @@ public class QuadPatternUtils {
     }
 
     // This method is implictely part of OpQuadPattern, but its not reusable yet
+    // TODO Create Jena PR
     public static QuadPattern toQuadPattern(Node g, BasicPattern basicPattern) {
 
         QuadPattern result = new QuadPattern();

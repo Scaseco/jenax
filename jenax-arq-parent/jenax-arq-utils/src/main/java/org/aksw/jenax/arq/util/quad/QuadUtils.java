@@ -1,6 +1,5 @@
 package org.aksw.jenax.arq.util.quad;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,6 +32,14 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 
 public class QuadUtils {
+
+    public static final String ng = "g";
+    public static final String ns = "s";
+    public static final String np = "p";
+    public static final String no = "o";
+
+    public static final List<String> quadVarNames = Arrays.asList(ng, ns, np, no);
+
 
     /** Create o stream of a quad's four nodes */
     public static Stream<Node> streamNodes(Quad q) {
