@@ -10,22 +10,34 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 public class LinkSparqlQueryTransform
     extends LinkSparqlQueryDelegateBase
 {
-    protected Function<? super Query, ? extends Query> transform;
+    protected Function<? super Query, ? extends Query> queryTransform;
+    protected Function<? super QueryExec, ? extends QueryExec> queryExecTransform;
 
-    public LinkSparqlQueryTransform(LinkSparqlQuery delegate, Function<? super Query, ? extends Query> transform) {
+    public LinkSparqlQueryTransform(
+            LinkSparqlQuery delegate, Function<? super Query, ? extends Query> transform,
+            Function<? super QueryExec, ? extends QueryExec> queryExecTransform) {
         super(delegate);
-        this.transform = transform;
+        this.queryTransform = transform;
+        this.queryExecTransform = queryExecTransform;
     }
 
     @Override
     public QueryExec query(Query query) {
-        Query effectiveQuery = transform.apply(query);
-        QueryExec result = getDelegate().query(effectiveQuery);
+        Query effectiveQuery = queryTransform == null
+                ? query
+                : queryTransform.apply(query);
+
+        QueryExec qe = getDelegate().query(effectiveQuery);
+
+        QueryExec result = queryExecTransform == null
+                ? qe
+                : queryExecTransform.apply(qe);
+
         return result;
     }
 
     @Override
     public QueryExecBuilder newQuery() {
-        return QueryExecBuilderWrapperWithTransform.create(delegate.newQuery(), transform, null);
+        return QueryExecBuilderWrapperWithTransform.create(delegate.newQuery(), queryTransform, queryExecTransform);
     }
 }

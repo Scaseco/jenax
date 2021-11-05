@@ -13,7 +13,7 @@ import org.aksw.commons.rx.op.RxOps;
 import org.aksw.jena_sparql_api.rx.io.resultset.OutputMode;
 import org.aksw.jena_sparql_api.rx.io.resultset.SPARQLResultExVisitor;
 import org.aksw.jena_sparql_api.rx.io.resultset.SPARQLResultExVisitorCollector;
-import org.aksw.jena_sparql_api.rx.util.connection.RDFConnectionUtils;
+import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;

@@ -20,8 +20,8 @@ public class QueryExecBuilderWrapperWithTransform
             Function<? super Query, ? extends Query> queryTransformer,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransformer) {
         super(delegate);
-        this.queryTransformer = queryTransformer != null ? queryTransformer : Function.identity();
-        this.queryExecTransformer = queryExecTransformer != null ? queryExecTransformer : Function.identity();
+        this.queryTransformer = queryTransformer;
+        this.queryExecTransformer = queryExecTransformer;
     }
 
     /**
@@ -40,14 +40,18 @@ public class QueryExecBuilderWrapperWithTransform
 
     @Override
     public QueryExecBuilder query(Query query) {
-        Query q = queryTransformer.apply(query);
+        Query q = queryTransformer == null
+                ? query
+                : queryTransformer.apply(query);
         return super.query(q);
     }
 
     @Override
     public QueryExec build() {
         QueryExec raw = super.build();
-        QueryExec result = queryExecTransformer.apply(raw);
+        QueryExec result = queryExecTransformer == null
+                ? raw
+                : queryExecTransformer.apply(raw);
         return result;
     }
 

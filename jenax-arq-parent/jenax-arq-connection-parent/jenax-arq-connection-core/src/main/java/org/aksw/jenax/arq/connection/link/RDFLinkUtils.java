@@ -4,24 +4,17 @@ import java.lang.reflect.Field;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryQueryTransform;
-import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.RDFDatasetConnection;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
-import org.apache.jena.rdflink.RDFLinkDataset;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
-import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
-
-import com.apicatalog.jsonld.http.link.Link;
 
 public class RDFLinkUtils {
 
@@ -199,13 +192,17 @@ public class RDFLinkUtils {
         return result[0];
     }
 
-    public static RDFLink wrapWithQueryTransform(RDFLink conn, Function<? super Query, ? extends Query> fn) {
+    public static RDFLink wrapWithQueryTransform(
+            RDFLink conn,
+            Function<? super Query, ? extends Query> queryTransform,
+            Function<? super QueryExec, ? extends QueryExec> queryExecTransform
+            ) {
         LinkSparqlQuery queryLink = unwrapQueryConnection(conn);
         LinkSparqlUpdate updateLink = unwrapUpdateConnection(conn);
         LinkDatasetGraph dgLink = unwrapDatasetConnection(conn);
 
         RDFLink result = new RDFLinkModular(
-                new LinkSparqlQueryTransform(queryLink, fn), updateLink, dgLink);
+                new LinkSparqlQueryTransform(queryLink, queryTransform, queryExecTransform), updateLink, dgLink);
 
         return result;
     }

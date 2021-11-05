@@ -17,6 +17,7 @@ import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkAdapter;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateExecutionFactory;
@@ -198,19 +199,14 @@ public class RDFConnectionUtils {
         return result[0];
     }
 
-    /** If the argument is an RDFConnectionAdapter then unwrap the RDFLink, otherwise
-     *  return a new RDFLinkAdapter wrapping the argument */
-    public static RDFLink asRDFLink(RDFConnection conn) {
-        RDFLink result = conn instanceof RDFConnectionAdapter
-                ? ((RDFConnectionAdapter)conn).getLink()
-                : RDFLinkAdapter.adapt(conn);
-
-        return result;
+    public static RDFConnection wrapWithTransform(
+            RDFConnection conn,
+            Function<? super Query, ? extends Query> queryTransform,
+            Function<? super QueryExec, ? extends QueryExec> queryExecTransform
+            ) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
+        return RDFConnectionAdapter.adapt(newLink);
     }
-
-    public static RDFConnection wrapWithQueryTransform(RDFConnection conn, Function<? super Query, ? extends Query> fn) {
-        return RDFConnectionAdapter.adapt(RDFLinkUtils.wrapWithQueryTransform(asRDFLink(conn), fn));
-     }
-
 
 }

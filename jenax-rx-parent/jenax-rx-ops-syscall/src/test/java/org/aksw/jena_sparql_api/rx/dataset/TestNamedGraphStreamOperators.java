@@ -6,6 +6,7 @@ import org.aksw.commons.io.syscall.sort.SysSort;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDatasetImpl;
+import org.aksw.jenax.sparql.rx.op.FlowOfRdfNodesInDatasetsOps;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
@@ -134,7 +135,7 @@ public class TestNamedGraphStreamOperators {
 //		RDFDataMgr.write(System.out, ds, RDFFormat.TRIG_PRETTY);
 
         RDFDataMgrRx.createFlowableDatasets("ngs-nato-phonetic-alphabet.trig", Lang.TRIG, null)
-        .map(ResourceInDatasetFlowOps
+        .map(FlowOfRdfNodesInDatasetsOps
                 .mapToNodesInDataset(QueryFactory.create("SELECT DISTINCT ?g ?s { GRAPH ?g { ?s ?p ?o } }"))::apply)
         .map(grid -> DatasetFlowOps.serializeForSort(DatasetFlowOps.GSON, grid.getDataset().asDatasetGraph().listGraphNodes().next(), grid))
         .map(line -> DatasetFlowOps.deserializeFromSort(DatasetFlowOps.GSON, line, NodesInDatasetImpl.class))
@@ -149,14 +150,14 @@ public class TestNamedGraphStreamOperators {
         sortCmd.reverse = true;
 
         RDFDataMgrRx.createFlowableDatasets("ngs-nato-phonetic-alphabet.trig", Lang.TRIG, null)
-        .map(ResourceInDatasetFlowOps
+        .map(FlowOfRdfNodesInDatasetsOps
                 .mapToNodesInDataset(QueryFactory.create("SELECT DISTINCT ?g ?s { GRAPH ?g { ?s ?p ?o } }"))::apply)
         .compose(ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null))
-        .flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset)
+        .flatMap(FlowOfRdfNodesInDatasetsOps::ungrouperResourceInDataset)
         //.compose(DatasetStreamOps.s)
         //.compose(ResourceInDatasetFlowOps.) //FlowableOps.sysCall(SysCalls.createDefaultSortSysCall(sortCmd)))
-        .compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
-        .flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset)
+        .compose(FlowOfRdfNodesInDatasetsOps.groupedResourceInDataset())
+        .flatMap(FlowOfRdfNodesInDatasetsOps::ungrouperResourceInDataset)
         .blockingForEach(x -> {
             System.out.println(x);
         })

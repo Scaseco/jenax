@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.rx.util.connection.RDFConnectionUtils;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
+import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
