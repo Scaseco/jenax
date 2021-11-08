@@ -53,8 +53,10 @@ public class FunctionBinder {
 
     public void register(String uri, Method method, Object invocationTarget) {
         logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+        // Stopwatch sw = Stopwatch.createStarted();
         FunctionFactory factory = factory(method, invocationTarget);
         functionRegistry.put(uri, factory);
+        // logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s) tookn %.2f s", uri, method, invocationTarget, sw.elapsed(TimeUnit.SECONDS) * 0.001f));
     }
 
     public void register(Method method) {
@@ -112,6 +114,8 @@ public class FunctionBinder {
     }
 
     public FunctionFactory factory(Method method, Object invocationTarget) {
+//    	return iri -> functionGenerator.wrap(method, invocationTarget);
+        // TODO Add a flag for deferred init to improve startup time
         Function fn = functionGenerator.wrap(method, invocationTarget);
         return iri -> fn;
     }
