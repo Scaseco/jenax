@@ -2,6 +2,7 @@ package org.aksw.jenax.sparql.algebra.walker;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -9,7 +10,7 @@ import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathOpsStr;
 import org.apache.jena.sparql.algebra.Op;
 
-import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 
@@ -27,7 +28,7 @@ public class Tracker<T> {
         super();
         this.path = PathOpsStr.newAbsolutePath();
         this.pathToOp = new LinkedHashMap<>();
-        this.parentToChildren = LinkedHashMultimap.create();
+        this.parentToChildren = ArrayListMultimap.create();
         this.pathToData = new HashMap<>();
     }
 
@@ -74,6 +75,23 @@ public class Tracker<T> {
     public T get() {
         return get(path);
     }
+
+    public Path<String> getChildPath(int childIndex) {
+        return getChildPath(path, childIndex);
+    }
+
+    public Path<String> getChildPath(Path<String> parent, int childIndex) {
+        List<Path<String>> children = (List<Path<String>>)parentToChildren.get(parent);
+        Path<String> result = children.get(childIndex);
+        return result;
+    }
+
+//    public T getChild(Path<String> parent, int childIndex) {
+//        List<Path<String>> children = parentToChildren.get(parent);
+//        Path<String> child = children.get(childIndex);
+//        T result = pathToData.get(child);
+//        return result;
+//    }
 
     public T computeIfAbsent(Function<? super Path<String>, ? extends T> fn) {
         return pathToData.computeIfAbsent(path, fn);

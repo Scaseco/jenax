@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.sparql.core.Var;
@@ -146,6 +147,16 @@ public class DnfUtils {
         Set<Set<Expr>> dnf = FilterUtils.toSets(clauses);
 
         return dnf;
+    }
+
+
+    public static List<List<Expr>> toListDnf(ExprList exprs)
+    {
+        List<List<Expr>> result = DnfUtils.toClauses(exprs).stream()
+                .map(el -> new ArrayList<>(el.getList())) // Ensure mutable lists for the clauses
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return result;
     }
 
     public static boolean isSatisfiable(Set<Set<Expr>> dnf) {

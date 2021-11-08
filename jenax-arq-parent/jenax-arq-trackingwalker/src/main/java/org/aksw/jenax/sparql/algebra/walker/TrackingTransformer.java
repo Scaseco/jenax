@@ -9,10 +9,10 @@ import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 
 public class TrackingTransformer {
-    public static Op transform(Tracker<?> pathState, Function<? super Tracker<?>, ? extends TrackingTransformCopy<?>> transformCtor) {
-        TrackingTransformCopy<?> transform = transformCtor.apply(pathState);
+    public static <T> Op transform(Tracker<T> tracker, Function<? super Tracker<T>, ? extends TrackingTransformCopy<T>> transformCtor) {
+        TrackingTransformCopy<?> transform = transformCtor.apply(tracker);
         OpVisitor beforeVisitor = transform.getBeforeVisitor();
-        return transform(pathState, transform, new ExprTransformCopy(), beforeVisitor);
+        return transform(tracker, transform, new ExprTransformCopy(), beforeVisitor);
     }
 
     public static Op transform(Tracker<?> tracker, Transform opTransform, ExprTransform exprTransform, OpVisitor beforeVisitor) {

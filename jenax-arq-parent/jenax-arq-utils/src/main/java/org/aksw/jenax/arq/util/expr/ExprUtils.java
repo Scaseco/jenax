@@ -31,6 +31,11 @@ import org.apache.jena.sparql.expr.E_NotOneOf;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprFunction;
+import org.apache.jena.sparql.expr.ExprFunction0;
+import org.apache.jena.sparql.expr.ExprFunction1;
+import org.apache.jena.sparql.expr.ExprFunction2;
+import org.apache.jena.sparql.expr.ExprFunction3;
+import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -128,6 +133,33 @@ public class ExprUtils {
 
     public static E_NotOneOf notOneOf(Node v, Node ... args) {
         return notOneOf(v, Arrays.asList(args));
+    }
+
+
+    public static <T> T applyToArgsOfBinaryExpr(Expr expr, BiFunction<? super Expr, ? super Expr, T> fn) {
+        T result = null;
+        if(expr.isFunction()) {
+            ExprFunction efn = expr.getFunction();
+            List<Expr> args = efn.getArgs();
+            if(args.size() == 2) {
+                result = fn.apply(args.get(0), args.get(1));
+            }
+        }
+        return result;
+    }
+
+    /** Return a non-null entry if either a or b is a constant. The entry's key will be
+     * the first constant argument */
+    public static Entry<NodeValue, Expr> tryGetConstAndExpr(Expr a, Expr b) {
+        Entry<NodeValue, Expr> result = null;
+
+        if (a.isConstant()) {
+            result = new SimpleEntry<>(a.getConstant(), b);
+        } else if (b.isConstant()) {
+            result = new SimpleEntry<>(b.getConstant(), a);
+        }
+
+        return result;
     }
 
     public static Entry<Var, Node> tryGetVarConst(Expr a, Expr b) {
@@ -560,4 +592,58 @@ public class ExprUtils {
 //        return result;
     }
 
+
+
+    public static Expr copy(Expr proto, Expr ... args) {
+        return copy(proto, ExprList.create(Arrays.asList(args)));
+    }
+
+    public static Expr copy(Expr proto, ExprList args) {
+        Expr result;
+
+        if (proto == null) {
+            throw new NullPointerException();
+        }
+        else if (proto instanceof ExprFunction0) {
+            result = copy((ExprFunction0)proto, args);
+        }
+        else if (proto instanceof ExprFunction1) {
+            result = copy((ExprFunction1)proto, args);
+        }
+        else if (proto instanceof ExprFunction2) {
+            result = copy((ExprFunction2)proto, args);
+        }
+        else if (proto instanceof ExprFunction3) {
+            result = copy((ExprFunction3)proto, args);
+        }
+        else if (proto instanceof ExprFunctionN) {
+            result = copy((ExprFunctionN)proto, args);
+        }
+        else {
+            throw new IllegalArgumentException("Don't know how to handle " + proto + " of class " + proto.getClass());
+        }
+
+        return result;
+    }
+
+
+    public static Expr copy(ExprFunction0 func, ExprList args) {
+        return func;
+    }
+
+    public static Expr copy(ExprFunction1 func, ExprList args) {
+        return func.copy(args.get(0));
+    }
+
+    public static Expr copy(ExprFunction2 func, ExprList args) {
+        return func.copy(args.get(0), args.get(1));
+    }
+
+    public static Expr copy(ExprFunction3 func, ExprList args) {
+        return func.copy(args.get(0), args.get(1), args.get(2));
+    }
+
+    public static Expr copy(ExprFunctionN func, ExprList args) {
+        return func.copy(args);
+    }
 }

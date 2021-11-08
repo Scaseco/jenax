@@ -172,9 +172,9 @@ public class TrackingWalkerVisitor implements OpVisitorByTypeAndExpr, ExprVisito
     public void visit0(Op0 op) {
         before(op) ;
         if ( opVisitor != null ) {
-            pushPath(getLabel(op), op);
+            // pushPath(getLabel(op), op);
             op.visit(opVisitor) ;
-            popPath();
+            // popPath();
         }
         after(op) ;
     }

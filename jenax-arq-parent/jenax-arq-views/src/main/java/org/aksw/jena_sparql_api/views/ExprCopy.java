@@ -289,7 +289,7 @@ public class ExprCopy {
     }
 
     public Expr copy(ExprFunction0 func, List<Expr> args) {
-        return func;
+        return func.copy();
     }
 
     public Expr copy(ExprFunction1 func, List<Expr> args) {
