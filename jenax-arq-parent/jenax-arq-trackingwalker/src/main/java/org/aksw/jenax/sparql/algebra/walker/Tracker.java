@@ -13,15 +13,27 @@ import org.apache.jena.sparql.algebra.Op;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
-
+/**
+ * A class that enables tracking of context information at every node of an
+ * algebra expression. Every node in an algebra expression is given a unique id
+ * in form of a Path&lt;String&gt;.
+ *
+ * @author raven
+ *
+ * @param <T>
+ */
 public class Tracker<T> {
     protected Path<String> path;
     protected Map<Path<String>, Op> pathToOp;
 
     /** Map for user data */
+    // We may want to use two maps in order to ease propagation of state along a
+    // depth first traversal; one for data before visiting a node, and one for data after.
     protected Map<Path<String>, T> pathToData;
 
-    // Parent to child map can actually be computed on demand
+
+
+    // Parent to child map could actually be computed on demand; but materializing it makes access alot easier
     protected Multimap<Path<String>, Path<String>> parentToChildren;
 
     public Tracker() {

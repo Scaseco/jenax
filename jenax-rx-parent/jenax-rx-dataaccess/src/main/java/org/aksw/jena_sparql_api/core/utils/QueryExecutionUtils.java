@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jena_sparql_api.mapper.BindingMapperUtils;
 import org.aksw.jenax.arq.aggregation.BindingMapper;
 import org.aksw.jenax.arq.aggregation.BindingMapperQuad;
@@ -23,6 +22,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
@@ -194,7 +194,7 @@ public class QueryExecutionUtils {
         final QueryExecution qe = qef.createQueryExecution(queryStr);
         ResultSet tmp = qe.execSelect();
 
-        ResultSetCloseable rs = new ResultSetCloseable(tmp, qe::close);
+        ResultSetCloseable rs = new ResultSetCloseable(tmp, qe);
 
         Iterator<Quad> result = new IteratorNQuads(rs);
         return result;

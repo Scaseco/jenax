@@ -8,9 +8,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
+import org.aksw.jena_sparql_api.core.utils.ResultSetUtils;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class CacheFile
             //cacheResultSetXml(rs, file);
         }
         InputStream in = new FileInputStream(file);
-        ResultSetCloseable result = ResultSetCloseable.fromXml(in);
+        ResultSetCloseable result = ResultSetUtils.fromXml(in);
         return result;
     }
 

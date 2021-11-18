@@ -17,6 +17,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -153,7 +154,7 @@ public abstract class QueryExecutionBaseSelect
 
         ResultSet tmp = decoratee.execSelect();
         final QueryExecution self = this;
-        ResultSetCloseable result = new ResultSetCloseable(tmp, self::close);
+        ResultSetCloseable result = new ResultSetCloseable(tmp, self);
 
         return result;
 

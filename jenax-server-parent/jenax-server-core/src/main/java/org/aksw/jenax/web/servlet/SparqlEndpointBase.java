@@ -116,7 +116,7 @@ public abstract class SparqlEndpointBase {
         }
 
         if (queryStr != null && updateStr != null) {
-            throw new RuntimeException("Both 'query' and 'update' statement strings provided in a single request");
+            throw new RuntimeException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
         }
 
         String stmtStr = queryStr != null ? queryStr : updateStr;
@@ -258,7 +258,7 @@ public abstract class SparqlEndpointBase {
     public void executeQueryRdfXmlPost(
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
-            @FormParam("query") String updateString) {
+            @FormParam("update") String updateString) {
         processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RDF_XML);
     }
 

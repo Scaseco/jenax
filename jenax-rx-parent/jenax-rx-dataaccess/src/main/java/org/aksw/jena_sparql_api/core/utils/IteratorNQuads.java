@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.core.utils;
 
 import org.aksw.commons.collections.SinglePrefetchIterator;
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.engine.binding.Binding;
 

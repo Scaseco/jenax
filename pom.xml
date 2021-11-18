@@ -544,14 +544,6 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-plugins-bundle</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-
-
-			<dependency>
-				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-collections</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -1150,6 +1142,13 @@
 				<artifactId>spring-context</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+
+                        <dependency>
+                                <groupId>org.springframework</groupId>
+                                <artifactId>spring-expression</artifactId>
+                                <version>${spring.version}</version>
+                        </dependency>
+
 
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->

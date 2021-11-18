@@ -199,7 +199,7 @@ public class ServiceUtils {
 
         } else if(query.isConstructType()) {
             Iterator<Triple> it = qe.execConstructTriples();
-            result = org.aksw.jena_sparql_api.core.utils.ResultSetUtils.tripleIteratorToResultSet(it, qe::close);
+            result = org.aksw.jena_sparql_api.core.utils.ResultSetUtils.tripleIteratorToResultSet(it, qe);
         } else {
             throw new RuntimeException("Query type is not supported: " + query);
         }

@@ -6,12 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.aksw.commons.collections.PrefetchIterator;
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.apache.jena.atlas.lib.Closeable;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
 import org.slf4j.Logger;
@@ -137,9 +137,9 @@ public class ResultSetPaginated
                 currentResultVars = currentResultSet.getResultVars();
 
 
-                currentResultSet = new ResultSetCloseable(currentResultSet, qe::close) {
+                currentResultSet = new ResultSetCloseable(currentResultSet, qe) {
                     @Override
-                    public void close() throws IOException {
+                    public void close() {
                         // Save the value of getRowNumber;
                         // After close getRowNumber raises an exception
                         lastSeenRowNumber = getRowNumber();

@@ -62,4 +62,9 @@ public class ResultSetDecorator
     public Model getResourceModel() {
         return decoratee.getResourceModel();
     }
+
+    @Override
+    public void close() {
+        decoratee.close();
+    }
 }

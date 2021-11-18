@@ -36,6 +36,39 @@
 			<artifactId>jenax-annotations-reprogen</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-shared</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-beans</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+
+
+
 		<!-- Used for RDFDatatypeCalendar -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
@@ -63,10 +96,8 @@
 		<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-resource-shape</artifactId> 
 			</dependency> -->
 
-		<dependency>
-			<groupId>org.aksw.spring</groupId>
-			<artifactId>spring-json-core</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.aksw.spring</groupId> <artifactId>spring-json-core</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>

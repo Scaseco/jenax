@@ -1,10 +1,8 @@
 package org.aksw.jena_sparql_api.transform.result_set;
 
-import java.io.Closeable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.var.Vars;
@@ -17,6 +15,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
@@ -62,7 +61,7 @@ public class QueryExecutionTransformResult
     public ResultSet execSelect() {
         ResultSet core = super.execSelect();
 
-        ResultSet result = applyNodeTransform(nodeTransform, core);
+        ResultSet result = applyNodeTransform(nodeTransform, core, this);
         return result;
     }
 
@@ -126,8 +125,8 @@ public class QueryExecutionTransformResult
         return result;
     }
 
-    public static ResultSet applyNodeTransform(NodeTransform nodeTransform, ResultSet rs) {
-        Closeable closeable = rs instanceof Closeable ? (Closeable)rs : null;
+    public static ResultSet applyNodeTransform(NodeTransform nodeTransform, ResultSet rs, QueryExecution qe) {
+        // Closeable closeable = rs instanceof Closeable ? (Closeable)rs : null;
         List<String> vars = rs.getResultVars();
 
         ExtendedIterator<Binding> it = WrappedIterator.create(RowSet.adapt(rs))
@@ -136,7 +135,7 @@ public class QueryExecutionTransformResult
         QueryIterator queryIter = QueryIterPlainWrapper.create(it);
         ResultSet core = ResultSetFactory.create(queryIter, vars);
 
-        ResultSet result = new ResultSetCloseable(core, closeable);
+        ResultSet result = new ResultSetCloseable(core, qe);
         return result;
     }
 

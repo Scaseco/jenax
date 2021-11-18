@@ -6,9 +6,10 @@ import java.sql.SQLException;
 import java.util.Iterator;
 
 import org.aksw.commons.util.StreamUtils;
-import org.aksw.jena_sparql_api.core.ResultSetCloseable;
+import org.aksw.jena_sparql_api.core.utils.ResultSetUtils;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -75,7 +76,8 @@ public class CacheResourceCacheEntry
     {
         final InputStream in = cacheEntry.getInputStream();
         ResultSet resultSet = ResultSetMgr.read(in, resultSetLang);
-        ResultSetCloseable result = new ResultSetCloseable(resultSet, in);
+
+        ResultSetCloseable result = ResultSetUtils.wrap(resultSet, in);
         return result;
     }
 
