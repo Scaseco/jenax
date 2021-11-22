@@ -22,6 +22,7 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-utils</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -75,11 +76,6 @@
             <scope>test</scope>
         </dependency>
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-utils</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 	</dependencies>
 </project>

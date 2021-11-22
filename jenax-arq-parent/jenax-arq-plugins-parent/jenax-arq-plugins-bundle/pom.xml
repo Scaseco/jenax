@@ -55,6 +55,17 @@
 			<artifactId>google-maps-services</artifactId>
 		</dependency>
 
+		<!-- Override version of tika -->
+		<dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+		</dependency>
+                        <dependency>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>jaxb-runtime</artifactId>
+                        </dependency>
+
+
 		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
 			rid of this dep -->
 		<!-- Possibly also used for result set comparison -->

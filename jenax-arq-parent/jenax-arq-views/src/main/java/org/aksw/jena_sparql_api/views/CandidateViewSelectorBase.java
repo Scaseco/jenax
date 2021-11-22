@@ -1786,9 +1786,9 @@ public abstract class CandidateViewSelectorBase<T extends IViewDef, C>
         } else if(op instanceof Op1) {
             return getRestrictions2(((Op1) op).getSubOp());
         } else if(op instanceof OpJoin) {
-            // throw new RuntimeException("TODO Merge the restrictions of both sides of the join");
-            logger.warn("TODO Merge the restrictions of both sides of the join");
-            return getRestrictions2(((OpJoin)op).getLeft());
+            throw new RuntimeException("TODO Merge the restrictions of both sides of the join");
+            // logger.warn("TODO Merge the restrictions of both sides of the join");
+            // return getRestrictions2(((OpJoin)op).getLeft());
         } else if(op instanceof OpLeftJoin) {
             return getRestrictions2(((OpLeftJoin) op).getLeft());
         } else if(op instanceof OpConditional) {

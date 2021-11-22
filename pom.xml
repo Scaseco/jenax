@@ -12,7 +12,6 @@
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
 	<url>https://github.com/Scaseco/jenax</url>
-
 	<modules>
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
@@ -62,19 +61,23 @@
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
-		<jetty.version>9.4.35.v20201120</jetty.version>
+		<!-- <jetty.version>9.4.35.v20201120</jetty.version> -->
+		<jetty.version>9.4.40.v20210413</jetty.version>
 
 		<!-- <jgrapht.version>1.1.0</jgrapht.version> -->
 
 		<!-- 2.18 could be tried out next -->
 		<!-- <jersey.version>2.26-b03</jersey.version> -->
-		<jersey.version>2.30</jersey.version>
+		<!-- <jersey.version>2.30</jersey.version> -->
+		<jersey.version>2.35</jersey.version>
+		<asm.version>8.0.1</asm.version>
 
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
 		<aksw.commons.version>0.9.1-SNAPSHOT</aksw.commons.version>
 
 		<javax.xml.version>2.3.1</javax.xml.version>
+		<jaxb.version>2.3.1</jaxb.version>
 
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
@@ -271,46 +274,46 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
-                                <plugin>
-                                        <groupId>org.bsc.maven</groupId>
-                                        <artifactId>maven-processor-plugin</artifactId>
-                                        <version>2.0.5</version>
-                                        <executions>
-                                                <execution>
-                                                        <id>process</id>
-                                                        <goals>
-                                                                <goal>process</goal>
-                                                        </goals>
-                                                        <phase>generate-sources</phase>
-                                                        <configuration>
-                                                                <processors>
-                                                                        <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-                                                                </processors>
-                                                        </configuration>
-                                                </execution>
-                                        </executions>
-                                        <dependencies>
-                                                <dependency>
-                                                        <groupId>org.hibernate</groupId>
-                                                        <artifactId>hibernate-jpamodelgen</artifactId>
-                                                        <version>5.3.6.Final</version>
-                                                </dependency>
+				<plugin>
+					<groupId>org.bsc.maven</groupId>
+					<artifactId>maven-processor-plugin</artifactId>
+					<version>2.0.5</version>
+					<executions>
+						<execution>
+							<id>process</id>
+							<goals>
+								<goal>process</goal>
+							</goals>
+							<phase>generate-sources</phase>
+							<configuration>
+								<processors>
+									<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+								</processors>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.hibernate</groupId>
+							<artifactId>hibernate-jpamodelgen</artifactId>
+							<version>5.3.6.Final</version>
+						</dependency>
 
-                                                <dependency>
-                                                        <groupId>javax.xml.bind</groupId>
-                                                        <artifactId>jaxb-api</artifactId>
-                                                        <version>${javax.xml.version}</version>
-                                                </dependency>
-                                                <dependency>
+						<dependency>
+							<groupId>javax.xml.bind</groupId>
+							<artifactId>jaxb-api</artifactId>
+							<version>${javax.xml.version}</version>
+						</dependency>
+						<dependency>
 
-                                                        <groupId>javax.annotation</groupId>
-                                                        <artifactId>javax.annotation-api</artifactId>
-                                                        <version>1.3.1</version>
-                                                </dependency>
+							<groupId>javax.annotation</groupId>
+							<artifactId>javax.annotation-api</artifactId>
+							<version>1.3.1</version>
+						</dependency>
 
 
-                                        </dependencies>
-                                </plugin>
+					</dependencies>
+				</plugin>
 
 			</plugins>
 		</pluginManagement>
@@ -320,17 +323,67 @@
 	<dependencyManagement>
 		<dependencies>
 
+			<!-- resolves conflicts between jersey, tika and hadoop -->
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>${jaxb.version}</version>
+			</dependency>
+<!-- 			<dependency> -->
+<!-- 				<groupId>org.glassfish.jaxb</groupId> -->
+<!-- 				<artifactId>jaxb-impl</artifactId> -->
+<!-- 				<version>${jaxb.version}</version> -->
+<!-- 			</dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.glassfish.jaxb</groupId> -->
+			<!-- <artifactId>jaxb-impl</artifactId> -->
+			<!-- <version>${jaxb.version}</version> -->
+			<!-- </dependency> -->
+
+
+
+			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
+				and tika -->
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-commons</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-tree</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-util</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.ow2.asm</groupId>
+				<artifactId>asm-analysis</artifactId>
+				<version>${asm.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jena</artifactId>
 				<version>1.5.1-1-SNAPSHOT</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.commons</groupId>
-                                <artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
-                                <version>1.5.1-1-SNAPSHOT</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
+				<version>1.5.1-1-SNAPSHOT</version>
+			</dependency>
 
 
 			<dependency>
@@ -498,11 +551,11 @@
 				<version>${project.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-reprogen-jpa</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-reprogen-jpa</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 
 
@@ -579,23 +632,23 @@
 			</dependency>
 
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-facete-vocab</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-facete-vocab</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-facete-api</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-facete-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-facete-impl</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-facete-impl</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 
 
@@ -632,11 +685,19 @@
 				<version>${javax.xml.version}</version>
 			</dependency>
 
+<!--
 			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-impl</artifactId>
 				<version>${javax.xml.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-core</artifactId>
+				<version>${javax.xml.version}</version>
+			</dependency>
+-->
 
 			<!-- <dependency> <groupId>org.glassfish.jaxb</groupId> <artifactId>jaxb-runtime</artifactId> 
 				<version>2.3.1</version> </dependency> -->
@@ -1090,6 +1151,46 @@
 				<version>3.3.1</version>
 				<!-- <exclusions> <exclusion> <groupId>*</groupId> <artifactId>*</artifactId> 
 					</exclusion> </exclusions> -->
+
+				<!-- Exclude web stuff (jetty, jersey)from hadoop -->
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse.jetty</groupId>
+						<artifactId>jetty-server</artifactId> 
+                                	</exclusion>
+                                        <exclusion>
+                                                <groupId>org.eclipse.jetty</groupId>
+                                                <artifactId>jetty-util</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>org.eclipse.jetty</groupId>
+                                                <artifactId>jetty-servlet</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>org.eclipse.jetty</groupId>
+                                                <artifactId>jetty-webapp</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>javax.servlet.jsp</groupId>
+                                                <artifactId>jsp-api</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>com.sun.jersey</groupId>
+                                                <artifactId>jersey-core</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>com.sun.jersey</groupId>
+                                                <artifactId>jersey-servlet</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>com.sun.jersey</groupId>
+                                                <artifactId>jersey-json</artifactId> 
+                                        </exclusion>
+                                        <exclusion>
+                                                <groupId>com.sun.jersey</groupId>
+                                                <artifactId>jersey-server</artifactId>
+                                        </exclusion>
+                                </exclusions>
 			</dependency>
 
 
@@ -1143,11 +1244,11 @@
 				<version>${spring.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.springframework</groupId>
-                                <artifactId>spring-expression</artifactId>
-                                <version>${spring.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-expression</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
 
 
 			<!-- <dependency> -->
@@ -1473,9 +1574,19 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<!-- <repository> <id>apache-repo-snapshots</id> <url>https://repository.apache.org/content/repositories/snapshots/</url> 
-			<releases> <enabled>false</enabled> </releases> <snapshots> <enabled>true</enabled> 
-			</snapshots> </repository> -->
+
+<!-- Repo for latest jena snapshots -->
+  <repository>
+    <id>apache-repo-snapshots</id>
+    <url>https://repository.apache.org/content/repositories/snapshots/</url>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+
 	</repositories>
 
 </project>
