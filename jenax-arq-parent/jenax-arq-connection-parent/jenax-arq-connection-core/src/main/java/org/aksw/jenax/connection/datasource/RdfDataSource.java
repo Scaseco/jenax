@@ -17,6 +17,11 @@ import org.apache.jena.rdfconnection.RDFConnection;
  * - etc.
  *
  */
-public interface RdfDataSource {
+public interface RdfDataSource
+    extends AutoCloseable
+{
     RDFConnection getConnection();
+
+    @Override
+    default void close() throws Exception { };
 }
