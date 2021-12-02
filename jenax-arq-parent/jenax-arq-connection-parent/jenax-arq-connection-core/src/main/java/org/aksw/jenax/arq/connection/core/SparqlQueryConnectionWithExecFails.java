@@ -19,8 +19,7 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
  *
  */
 public class SparqlQueryConnectionWithExecFails
-    extends TransactionalDelegate
-    implements SparqlQueryConnectionTmp
+    implements TransactionalDelegate, SparqlQueryConnectionTmp
 {
     protected SparqlQueryConnection delegate;
     protected Function<? super Query, ? extends Throwable> queryToThrowable;

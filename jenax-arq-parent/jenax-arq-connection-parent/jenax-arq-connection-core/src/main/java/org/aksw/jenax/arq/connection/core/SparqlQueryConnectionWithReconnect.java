@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class SparqlQueryConnectionWithReconnect
-    extends TransactionalDelegate
     implements SparqlQueryConnectionTmp
 {
     private static final Logger logger = LoggerFactory.getLogger(SparqlQueryConnectionWithReconnect.class);

@@ -29,6 +29,12 @@
 			<artifactId>jena-rdfconnection</artifactId>
 		</dependency>
 
+		<!-- Used for LinkDatasetGraph-to-StreamRDF-to-LinkSparqlQuery -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
+
 
 		<!-- Unit Testing -->
 

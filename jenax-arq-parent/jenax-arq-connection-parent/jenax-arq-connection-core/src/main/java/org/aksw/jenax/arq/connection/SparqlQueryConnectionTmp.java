@@ -21,7 +21,7 @@ import org.apache.jena.system.Txn;
  *
  */
 public interface SparqlQueryConnectionTmp
-    extends TransactionalTmp, SparqlQueryConnection
+    extends TransactionalDelegate, SparqlQueryConnection
 {
 
     // ---- SparqlQueryConnection

@@ -6,7 +6,7 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 
 public interface SparqlUpdateConnectionTmp
-    extends TransactionalTmp, SparqlUpdateConnection
+    extends TransactionalDelegate, SparqlUpdateConnection
 {
     // ---- SparqlUpdateConnection
 
@@ -29,7 +29,7 @@ public interface SparqlUpdateConnectionTmp
      * @param updateString
      */
     @Override
-     default void update(String updateString) {
+    default void update(String updateString) {
         update(parse(updateString));
     }
 }

@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.connection.link;
 
 import java.util.function.Consumer;
 
-import org.aksw.jenax.arq.connection.TransactionalTmp;
+import org.aksw.jenax.arq.connection.TransactionalDelegate;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -21,7 +21,7 @@ import org.apache.jena.system.Txn;
  *
  */
 public interface LinkSparqlQueryTmp
-    extends TransactionalTmp, LinkSparqlQuery
+    extends TransactionalDelegate, LinkSparqlQuery
 {
 
     // ---- SparqlQueryConnection

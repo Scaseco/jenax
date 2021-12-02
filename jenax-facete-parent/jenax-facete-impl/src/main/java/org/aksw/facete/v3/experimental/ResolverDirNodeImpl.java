@@ -16,6 +16,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.sparql.core.Transactional;
 
 public class ResolverDirNodeImpl
     extends PathDirNode<ResolverNode, ResolverMultiNode>
@@ -61,6 +62,11 @@ public class ResolverDirNodeImpl
 
     public SparqlQueryConnection virtualConn() {
         SparqlQueryConnection result = new SparqlQueryConnectionTmp() {
+            @Override
+            public Transactional getDelegate() {
+                return null;
+            }
+
             @Override
             public void close() {
                 // No-op - its the user's responsibility

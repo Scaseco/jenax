@@ -12,7 +12,7 @@ public class SparqlUpdateConnectionJsaBase<T extends UpdateProcessorFactory>
     protected Transactional transactional;
 
     public SparqlUpdateConnectionJsaBase(T updateProcessorFactory) {
-        this(updateProcessorFactory, new TransactionalTmp() {
+        this(updateProcessorFactory, new TransactionalDelegate() {
             @Override
             public Transactional getDelegate() {
                 return null;

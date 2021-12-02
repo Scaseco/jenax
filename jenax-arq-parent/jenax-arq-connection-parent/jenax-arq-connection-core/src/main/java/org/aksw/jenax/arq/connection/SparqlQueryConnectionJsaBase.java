@@ -7,14 +7,13 @@ import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.sparql.core.Transactional;
 
 public class SparqlQueryConnectionJsaBase<T extends QueryExecutionFactoryQuery>
-    extends TransactionalDelegate
-    implements SparqlQueryConnectionTmp
+    implements TransactionalDelegate, SparqlQueryConnectionTmp
 {
     protected T queryExecutionFactory;
     protected Transactional transactional;
 
     public SparqlQueryConnectionJsaBase(T queryExecutionFactory) {
-        this(queryExecutionFactory, new TransactionalTmp() {
+        this(queryExecutionFactory, new TransactionalDelegate() {
             @Override
             public Transactional getDelegate() {
                 return null;

@@ -13,7 +13,7 @@ import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.sparql.core.Quad;
 
 public abstract class RDFDatasetConnectionBase
-    implements TransactionalTmp, RDFDatasetConnection
+    implements TransactionalDelegate, RDFDatasetConnection
 {
     protected SparqlQueryConnection queryConn;
     protected SparqlUpdateConnection updateConn;
