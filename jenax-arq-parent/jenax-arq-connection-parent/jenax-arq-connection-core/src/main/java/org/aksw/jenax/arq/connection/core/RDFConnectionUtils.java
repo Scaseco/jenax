@@ -16,7 +16,6 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
-import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
@@ -204,9 +203,8 @@ public class RDFConnectionUtils {
             Function<? super Query, ? extends Query> queryTransform,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform
             ) {
-        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink oldLink = RDFLinkAdapterEx.adapt(conn);
         RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
         return RDFConnectionAdapter.adapt(newLink);
     }
-
 }

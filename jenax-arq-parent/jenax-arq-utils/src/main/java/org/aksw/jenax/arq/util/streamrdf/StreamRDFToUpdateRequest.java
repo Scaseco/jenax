@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.connection.link;
+package org.aksw.jenax.arq.util.streamrdf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,14 @@ import org.apache.jena.sparql.modify.request.QuadDataAcc;
 import org.apache.jena.sparql.modify.request.UpdateDataInsert;
 import org.apache.jena.update.UpdateRequest;
 
-
-public class StreamRDFFromRDFLink
+/**
+ * A StreamRDF sink that dispatches batches of triples/quads as
+ * SPARQL update requests.
+ *
+ * @author raven
+ *
+ */
+public class StreamRDFToUpdateRequest
     implements StreamRDF
 {
     // private static final Quad POISON = Quad.ANY;
@@ -43,14 +49,14 @@ public class StreamRDFFromRDFLink
 
     protected Prologue prologue;
 
-    public StreamRDFFromRDFLink(Prologue prologue, int batchSize, ExecutorService executorService, Consumer<UpdateRequest> insertHandler) {
+    public StreamRDFToUpdateRequest(Prologue prologue, int batchSize, ExecutorService executorService, Consumer<UpdateRequest> insertHandler) {
         this.prologue = prologue;
         this.batchSize = batchSize;
         this.insertHandler = insertHandler;
     }
 
     public static StreamRDF createWithTrie(int batchSize, ExecutorService executorService, Consumer<UpdateRequest> insertHandler) {
-        return new StreamRDFFromRDFLink(new Prologue(new PrefixMappingTrie()), batchSize, executorService, insertHandler);
+        return new StreamRDFToUpdateRequest(new Prologue(new PrefixMappingTrie()), batchSize, executorService, insertHandler);
     }
 
     public void sendBatch() {
@@ -73,10 +79,11 @@ public class StreamRDFFromRDFLink
             readLock.unlock();
         }
 
-        UpdateRequestUtils.optimizePrefixes(ur);
-
         // Should we do something with the future?
-        CompletableFuture.runAsync(() -> insertHandler.accept(ur), executorService);
+        CompletableFuture.runAsync(() -> {
+            UpdateRequestUtils.optimizePrefixes(ur);
+            insertHandler.accept(ur);
+        }, executorService);
     }
 
     public void checkSendBatch() {

@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.connection.link;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
 public class LinkSparqlQueryDelegateBase
-    extends LinkSparqlQueryDelegate
+    implements LinkSparqlQueryDelegate
 {
     protected LinkSparqlQuery delegate;
 

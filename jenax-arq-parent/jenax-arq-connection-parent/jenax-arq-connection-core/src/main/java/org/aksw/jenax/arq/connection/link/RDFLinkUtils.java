@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.prologue.PrologueUtils;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
@@ -11,8 +13,10 @@ import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.modify.request.UpdateLoad;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
+import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -207,5 +211,70 @@ public class RDFLinkUtils {
         return result;
     }
 
+
+    public static RDFLink wrapWithLoadViaInsert(RDFLink conn) {
+        LinkSparqlQuery lq = unwrapQueryConnection(conn);
+        LinkSparqlUpdate lu = unwrapUpdateConnection(conn);
+        LinkDatasetGraph ld = unwrapDatasetConnection(conn);
+
+        // FIXME Finish the wrapping!!!
+        return new RDFLinkModular(lq, lu, ld);
+    }
+
+    /** Wrap a link such that {@link UpdateLoad} requests are passed to
+     *  the load functions of the LinkDatasetGraph component of the RDFLink */
+    public static RDFLink wrapWithLoadViaLinkDatasetGraph(RDFLink conn) {
+        LinkSparqlQuery lq = unwrapQueryConnection(conn);
+        LinkSparqlUpdate lu = unwrapUpdateConnection(conn);
+        LinkDatasetGraph ld = unwrapDatasetConnection(conn);
+
+        LinkSparqlUpdate updateLink = new LinkSparqlUpdateRequest() {
+            @Override
+            public LinkSparqlUpdate getDelegate() {
+                return lu;
+            }
+
+            @Override
+            public void update(UpdateRequest update) {
+                // Prologue prologue = update.copy();
+                UpdateRequest pending = null;
+
+                for (Update u : update.getOperations()) {
+                    if (u instanceof UpdateLoad) {
+                        if (pending != null) {
+                            lu.update(pending);
+                            pending = null;
+                        }
+
+                        UpdateLoad load = (UpdateLoad)u;
+                        Node dest = load.getDest();
+                        String source = load.getSource();
+
+                        if (dest == null) {
+                            ld.load(source);
+                        } else {
+                            ld.load(dest, source);
+                        }
+                    } else {
+                        if (pending != null) {
+                            lu.update(pending);
+                        }
+
+                        pending = new UpdateRequest();
+                        PrologueUtils.copy(pending, update);
+                        pending.add(u);
+                    }
+                }
+
+                if (pending != null) {
+                    lu.update(pending);
+                }
+            }
+        };
+
+
+        RDFLink result = new RDFLinkModular(lq, updateLink, ld);
+        return result;
+    }
 
 }

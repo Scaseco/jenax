@@ -5,23 +5,23 @@ import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
-public abstract class LinkSparqlQueryDelegate
-    implements LinkSparqlQueryTmp
+public interface LinkSparqlQueryDelegate
+    extends LinkSparqlQueryTmp
 {
-    public abstract LinkSparqlQuery getDelegate();
+    public LinkSparqlQuery getDelegate();
 
     @Override
-    public QueryExecBuilder newQuery() {
+    default QueryExecBuilder newQuery() {
         return getDelegate().newQuery();
     }
 
     @Override
-    public void close() {
+    default void close() {
         getDelegate().close();
     }
 
     @Override
-    public QueryExec query(Query query) {
+    default QueryExec query(Query query) {
         return getDelegate().query(query);
     }
 }
