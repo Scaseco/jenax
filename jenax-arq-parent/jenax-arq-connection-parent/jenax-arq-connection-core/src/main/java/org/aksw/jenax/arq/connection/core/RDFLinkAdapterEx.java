@@ -9,7 +9,6 @@ import org.apache.jena.update.UpdateRequest;
 /** Jena 4.3.0-SNAPSHOT did not implement the update methods - this class can be removed once RDFLinkAdapter is fully functional */
 public class RDFLinkAdapterEx
     extends RDFLinkAdapter
-
 {
     // Just why are the relevant attributes always private...
     protected RDFConnection conn;
