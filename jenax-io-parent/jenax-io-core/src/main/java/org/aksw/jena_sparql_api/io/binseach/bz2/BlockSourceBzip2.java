@@ -149,7 +149,7 @@ public class BlockSourceBzip2
         // In order to allow multiple clients, wrap the block in a reference:
         // Only if there are no more client for a block then the block itself gets closed
         Block block = new DecodedDataBlock(this, blockStart, blockBuffer);
-        Ref<Block> result = RefImpl.create(block, block::close, "Root ref to block " + blockStart);
+        Ref<Block> result = RefImpl.create(block, null, block::close, "Root ref to block " + blockStart);
 
         return result;
     }

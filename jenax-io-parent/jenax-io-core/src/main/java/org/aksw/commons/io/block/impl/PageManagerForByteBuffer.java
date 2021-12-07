@@ -28,7 +28,7 @@ public class PageManagerForByteBuffer
     @Override
     public Ref<Page> requestBufferForPage(long page) {
         Page staticPage = new PageBase(this, 0, staticBuffer);
-        return RefImpl.create(staticPage, null, "Reference to static page");
+        return RefImpl.create(staticPage, null, null, "Reference to static page");
     }
 
     @Override

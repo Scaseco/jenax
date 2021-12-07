@@ -118,7 +118,7 @@ public class PageManagerWrapper
 
         Ref<? extends Page> delPage = delegatePage;
         Page tmp = new PageBase(this, page, resultBuffer);
-        Ref<Page> result = RefImpl.create(tmp, () -> {
+        Ref<Page> result = RefImpl.create(tmp, null, () -> {
             if(delPage != null) {
                 delPage.close();
             }

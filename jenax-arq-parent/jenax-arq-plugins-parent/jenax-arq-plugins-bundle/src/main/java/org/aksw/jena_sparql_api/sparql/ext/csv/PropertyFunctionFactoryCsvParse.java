@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
@@ -56,14 +57,14 @@ public class PropertyFunctionFactoryCsvParse
         return new PropertyFunctionEval(PropFuncArgType.PF_ARG_SINGLE, PropFuncArgType.PF_ARG_EITHER) {
 
             @Override
-            public QueryIterator execEvaluated(Binding binding, PropFuncArg argSubject,
+            public QueryIterator execEvaluated(Binding parentBinding, PropFuncArg argSubject,
                     Node predicate, PropFuncArg argObject, ExecutionContext execCtx) {
 
-                Node subject = argSubject.getArg();
+                Node rawSubject = argSubject.getArg();
 
-                Node node = subject.isVariable()
-                        ? binding.get((Var)subject)
-                        : subject;
+                Node subject = rawSubject.isVariable()
+                        ? parentBinding.get((Var)rawSubject)
+                        : rawSubject;
 
                 Node object;
                 Node options = NodeFactory.createLiteral("");
@@ -114,21 +115,28 @@ public class PropertyFunctionFactoryCsvParse
 
                 String optionStr = options.getLiteralValue().toString();
 
-                Stream<JsonElement> jsonObjStream;
+                Stream<JsonElement> jsonObjStreamTmp;
                 try {
-                    jsonObjStream = E_CsvParse.parseCsv(reader, optionStr);
+                    jsonObjStreamTmp = E_CsvParse.parseCsv(reader, optionStr);
                 } catch (IOException e) {
                     logger.warn("Failed to process csv input", e);
-                    jsonObjStream = Collections.<JsonElement>emptySet().stream();
+                    jsonObjStreamTmp = Collections.<JsonElement>emptySet().stream();
                 }
 
+//                List<JsonElement> list = jsonObjStreamTmp.collect(Collectors.toList());
+//                System.out.println(list);
+//                jsonObjStreamTmp = list.stream();
+
+                Stream<JsonElement> jsonObjStream = jsonObjStreamTmp;
+
                 QueryIterator result = QueryIterPlainWrapper.create(
-                    Iter.onCloseIO(
+                    Iter.onClose(
                             jsonObjStream
                             .map(RDFDatatypeJson::jsonToNode)
-                            .map(n -> BindingFactory.binding(outputVar, n))
+                            .map(n -> BindingFactory.binding(parentBinding, outputVar, n))
                             .iterator(),
-                    in));
+                            jsonObjStream::close
+                    ));
 
 
 //                if(result == null) {

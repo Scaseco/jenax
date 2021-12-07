@@ -126,7 +126,7 @@ public class PageManagerForFileChannel
 //						System.err.println("Allocated page " + page);
                         Page p = new PageBase(this, page, b);
 
-                        Ref<Page> r = RefImpl.create(p, () -> {
+                        Ref<Page> r = RefImpl.create(p, null, () -> {
                             // System.err.println("Released primary ref to page " + page);
                         }, "Primary ref to page " + page);
                         //Page r = new PageBase(this, page, b);

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.sparql.ext.xml.PropertyFunctionFactoryXmlUnnest;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
@@ -26,77 +25,77 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 
+
 /**
  * Recursively list URLs of directory content
- * 
+ *
  * @author Claus Stadler, Dec 5, 2018
  *
  */
 public class PropertyFunctionFactoryFsFind
-	implements PropertyFunctionFactory
+    implements PropertyFunctionFactory
 {
+    private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryFsFind.class);
 
-	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryFsFind.class);
-
-	protected Function<? super Path, ? extends Stream<? extends Path>> fn;
+    protected Function<? super Path, ? extends Stream<? extends Path>> fn;
 
     public PropertyFunctionFactoryFsFind(Function<? super Path, ? extends Stream<? extends Path>> fn) {
         super();
-    	this.fn = fn;
+        this.fn = fn;
     }
-    
+
     public static Stream<Path> parents(Path path) {
-    	try {
-	    	return Streams.stream(Traverser.<Path>forTree(p -> p == null || p.getParent() == null
-	    				? Collections.emptySet()
-	    				: Collections.singleton(p.getParent())
-	    			).depthFirstPreOrder(path));
-    	} catch(Exception e) {
-    		throw new RuntimeException(e);
-    	}
+        try {
+            return Streams.stream(Traverser.<Path>forTree(p -> p == null || p.getParent() == null
+                        ? Collections.emptySet()
+                        : Collections.singleton(p.getParent())
+                    ).depthFirstPreOrder(path));
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Stream<Path> find(Path path) {
-    	try {
-	    	return Files.list(path).flatMap(f -> {
-	    		Stream<Path> r = Stream.of(f);
-	    		
-	    		Stream<Path> s = null;
-	    		try {
-		    		if(Files.isDirectory(f)) {
-	    				s = find(f);
-		    		}
-	    		} catch (Exception e) {
-	    			logger.warn("Could not access path", e);
-	    		}
+        try {
+            return Files.list(path).flatMap(f -> {
+                Stream<Path> r = Stream.of(f);
 
-	    		r = s == null ? r : Stream.concat(r, s);
+                Stream<Path> s = null;
+                try {
+                    if(Files.isDirectory(f)) {
+                        s = find(f);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Could not access path", e);
+                }
 
-	    		return r;
-	    	});
-    	} catch(Exception e) {
-    		throw new RuntimeException(e);
-    	}
+                r = s == null ? r : Stream.concat(r, s);
+
+                return r;
+            });
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public PropertyFunction create(final String uri)
     {
-    	return new PathFunction(fn);
+        return new PathFunction(fn);
     }
 
 
     public static class PathFunction
-    	extends PFuncSimple
+        extends PFuncSimple
     {
-    	protected Function<? super Path, ? extends Stream<? extends Path>> fn;
-    	
-        public PathFunction(Function<? super Path, ? extends Stream<? extends Path>> fn) {
-			super();
-			this.fn = fn;
-		}
+        protected Function<? super Path, ? extends Stream<? extends Path>> fn;
 
-		@Override
+        public PathFunction(Function<? super Path, ? extends Stream<? extends Path>> fn) {
+            super();
+            this.fn = fn;
+        }
+
+        @Override
         public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object,
                 org.apache.jena.sparql.engine.ExecutionContext execCtx) {
             // Get the subject's value
@@ -108,27 +107,34 @@ public class PropertyFunctionFactoryFsFind
                 throw new RuntimeException("Object of json array splitting must be a variable");
             }
             Var outputVar = (Var)object;
-            
+
             Iterator<Binding> bindings = Collections.emptyIterator();
             try {
-            	if(node.isURI()) {
-            		String str = node.getURI();
-            		Path root = Paths.get(new URI(str));
-            		bindings = fn.apply(root)
-    					.map(path -> BindingFactory.binding(
-    							binding,
-    							outputVar,
-    							NodeFactory.createURI(path.toUri().toString())))
-    					.iterator();
-            		
+                if(node.isURI()) {
+                    String str = node.getURI();
+
+                    if (str.isEmpty()) {
+                        // FIXME Resolution of the path should be configurable
+                        // Maybe requires an additional context attribute
+                        str = "file://" + Paths.get(str).toAbsolutePath();
+                    }
+
+                    Path root = Paths.get(new URI(str));
+                    bindings = fn.apply(root)
+                        .map(path -> BindingFactory.binding(
+                                binding,
+                                outputVar,
+                                NodeFactory.createURI(path.toUri().toString())))
+                        .iterator();
+
 //            		while(bindings.hasNext()) {
 //            			System.out.println(bindings.next());
 //            		}
-            	}
+                }
             } catch(Exception e) {
-            	logger.warn("Error resolving node as URI: " + node, e);
+                logger.warn("Error resolving node as URI: " + node, e);
             }
-            
+
             QueryIterator result = QueryIterPlainWrapper.create(bindings);
             return result;
         }

@@ -169,7 +169,7 @@ public class DataPods {
             }
             logger.info("Loading of hdt complete " + pathStr);
 
-            Ref<HDT> hdtRef = RefImpl.create(hdt,
+            Ref<HDT> hdtRef = RefImpl.create(hdt, null,
                     () -> {
                         logger.debug("Closed HDT file: " + pathStr);
                         hdt.close();

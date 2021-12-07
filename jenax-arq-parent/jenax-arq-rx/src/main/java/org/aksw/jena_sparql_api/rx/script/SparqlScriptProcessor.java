@@ -202,17 +202,19 @@ public class SparqlScriptProcessor {
 
 
     public void process(List<String> filenames) {
+        int i = 1;
         for (String filename : filenames) {
-            process(filename);
+            process(i, filename);
+            ++i;
         }
     }
 
-    public void process(String filename) {
-        process(filename, sparqlStmts);
+    public void process(int index, String filename) {
+        process(index, filename, sparqlStmts);
     }
 
-    public void process(String filename, List<Entry<SparqlStmt, Provenance>> result) {
-        logger.info("Processing argument '" + filename + "'");
+    public void process(int index, String filename, List<Entry<SparqlStmt, Provenance>> result) {
+        logger.info("Interpreting argument" + (index >= 0 ? " #" + index : "" ) + ": '" + filename + "'");
 
         if(filename.startsWith(cwdKey)) {
             String cwdValue = filename.substring(cwdKey.length()).trim();
