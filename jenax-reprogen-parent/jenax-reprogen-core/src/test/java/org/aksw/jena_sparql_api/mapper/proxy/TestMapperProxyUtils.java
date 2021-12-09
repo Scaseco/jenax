@@ -27,6 +27,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.impl.ResourceImpl;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.RDF;
@@ -323,6 +324,17 @@ public class TestMapperProxyUtils {
 
         //Calendar expected = tmp.asCalendar();
 
+    }
+
+
+    @Test
+    public void testUnproxy() {
+        JenaSystem.init();
+        JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
+        TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
+        Resource r = sb.asResource();
+        Class<?> actual = r.getClass();
+        Assert.assertEquals(ResourceImpl.class, actual);
     }
 }
 

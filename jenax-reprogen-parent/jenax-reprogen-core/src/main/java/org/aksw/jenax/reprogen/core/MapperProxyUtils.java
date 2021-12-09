@@ -2,6 +2,7 @@ package org.aksw.jenax.reprogen.core;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -70,7 +71,6 @@ import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
 import org.apache.jena.ext.com.google.common.collect.Maps;
-import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -96,10 +96,17 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.implementation.InvocationHandlerAdapter;
+import net.bytebuddy.implementation.MethodCall;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -1830,19 +1837,11 @@ public class MapperProxyUtils {
 
 
         BiFunction<Node, EnhGraph, T> result;
-        boolean useCgLib = true;
+        boolean useCgLib = false;
+        boolean useByteBuddy = true;
 
 
         if(useCgLib) {
-//			new ByteBuddy()
-//			.subclass(ResourceImpl.class)
-//			.implement(clazz)
-//			.method(ElementMatchers.any())
-//				.intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
-//					return null;
-//				}))
-//			.make()
-//			.load(clazz.getClassLoader());
 
             Enhancer enhancer = new Enhancer();
             if(clazz.isInterface()) {
@@ -1927,7 +1926,63 @@ public class MapperProxyUtils {
                 return (T)o;
             };
         }
-        else {
+        else if (useByteBuddy) {
+
+            ByteBuddy bb = new ByteBuddy();
+            Builder<?> builder;
+            if(clazz.isInterface()) {
+                builder = bb
+                    .subclass(ResourceProxyBase.class)
+                    .implement(clazz);
+            } else {
+                if(!Resource.class.isAssignableFrom(clazz)) {
+                    throw new RuntimeException("Failed to use " + clazz + " as a resource view because but it does not extend  " + Resource.class);
+                }
+
+                // TODO Check for a (Node, EnhGraph) ctor
+
+                builder = bb.subclass(clazz);
+            }
+
+
+            // for(Entry<Method method : methodImplMap.e
+            for(Entry<Method, BiFunction<Object, Object[], Object>> e : methodImplMap.entrySet()) {
+                builder = builder.method(ElementMatchers.anyOf(e.getKey()))
+                        .intercept(InvocationHandlerAdapter.of((obj, method, args) -> {
+                            Object r = e.getValue().apply(obj, args);
+                            return r;
+                        }));
+            }
+
+            Class<?> clz = builder
+//                .method(ElementMatchers.any())
+//                .intercept(MethodDelegation.to(new MyMethodDelegation(methodImplMap)))
+                //.intercept(MethodCall.invokeSelf().on(new MyMethodDelegation(methodImplMap)).withAllArguments())
+                .make()
+                .load(clazz.getClassLoader())
+                .getLoaded();
+                // .load(ClassLoader.getSystemClassLoader(), ClassLoadingStrategy.Default.INJECTION);
+
+            result = (n, g) -> {
+                Object o;
+
+                // Synchronization due to ISSUE #30 - Race condition in mapper-proxy
+                // Also see test case {@link TestMapperProxyRaceCondiditon}
+                synchronized(MapperProxyUtils.class) {
+                    try {
+                        Constructor<?> ctor = clz.getConstructor(Node.class, EnhGraph.class);
+                        o = ctor.newInstance(n, g);
+                    } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    // o = enhancer.create(argTypes, argValues);
+                }
+                return (T)o;
+            };
+
+
+        } else {
             // This approach using only native java reflection does not work, because internally jena
             // performs a class cast to the abstract class EnhNode
             // Hence, we use cglib
@@ -1980,7 +2035,6 @@ public class MapperProxyUtils {
 
         return result;
     }
-
 
     public static BiFunction<Object, Object[], Object> proxyDefaultMethod(Method method) throws ReflectiveOperationException {
 

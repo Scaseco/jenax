@@ -41,7 +41,7 @@ public class SinkStreamingBinding
 
     protected BlockingQueue<Binding> blockingQueue = new ArrayBlockingQueue<Binding>(Flowable.bufferSize());
 
-    protected Thread thread = null;
+    protected volatile Thread thread = null;
     protected Throwable threadException = null;
     protected boolean closed = false;
 
@@ -70,47 +70,52 @@ public class SinkStreamingBinding
     @Override
     public void close() {
         if (thread != null) {
-
-            boolean closedIncompleteResult = false;
-            if (thread.isAlive()) {
-                closedIncompleteResult = !blockingQueue.isEmpty();
-//                if (closedIncompleteResult) {
-                    if (!blockingQueue.contains(POISON)) {
-                        try {
-                            blockingQueue.put(POISON);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException("Failed to put poison into queue");
-                        }
-                    }
-//                }
-            }
-
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (threadException != null) {
-                throw new RuntimeException("Consumer thread terminated exceptionally", threadException);
-            }
-
-            if (closedIncompleteResult) {
-                throw new RuntimeException("Closed incomplete result set (finish() was not called)");
-            }
+            thread.interrupt();
         }
+//        if (thread != null) {
+//
+//            boolean closedIncompleteResult = false;
+//            if (thread.isAlive()) {
+//                closedIncompleteResult = !blockingQueue.isEmpty();
+////                if (closedIncompleteResult) {
+//                    if (!blockingQueue.contains(POISON)) {
+//                        try {
+//                            blockingQueue.put(POISON);
+//                        } catch (InterruptedException e) {
+//                            throw new RuntimeException("Failed to put poison into queue");
+//                        }
+//                    }
+////                }
+//            }
+//
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            if (threadException != null) {
+//                throw new RuntimeException("Consumer thread terminated exceptionally", threadException);
+//            }
+//
+//            if (closedIncompleteResult) {
+//                throw new RuntimeException("Closed incomplete result set (finish() was not called)");
+//            }
+//        }
     }
 
     @Override
     protected void startActual() {
         Flowable<Binding> flowable = RxUtils.fromBlockingQueue(blockingQueue, item -> item == POISON);
         thread = new Thread(() -> {
-            try(QueryExecution qe = new ResultSetRxImpl(resultVars, flowable).asQueryExecution()) {
+            try (QueryExecution qe = new ResultSetRxImpl(resultVars, flowable).asQueryExecution()) {
                 ResultSet resultSet = qe.execSelect();
                 ResultSetMgr.write(out, resultSet, lang);
+            } catch (Exception e) {
+                threadException = e;
             }
         });
-        thread.setUncaughtExceptionHandler((t, e) -> threadException = e);
+        // thread.setUncaughtExceptionHandler((t, e) -> threadException = e);
         thread.start();
     }
 
@@ -140,6 +145,15 @@ public class SinkStreamingBinding
             blockingQueue.put(POISON);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+
+        // Wait for processing to finish
+        try {
+            thread.join();
+        } catch (Exception e) {
+            if (threadException != null) {
+                throw new RuntimeException("Consumer thread terminated exceptionally", threadException);
+            }
         }
     }
 }
