@@ -24,6 +24,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
@@ -383,13 +384,19 @@ public class RDFLinkDelegateWithWorkerThread
             return delegate;
         }
 
+        protected T copy(T item) {
+            return item;
+        }
+
         @Override
         protected Iterator<T> prefetch() throws Exception {
             List<T> batch = submit(() -> {
                 I d = getDelegate();
                 List<T> r = new ArrayList<>();
                 for (int i = 0; i < batchSize && d.hasNext(); ++i) {
-                    r.add(d.next());
+                    T rawItem = d.next();
+                    T item = copy(rawItem);
+                    r.add(item);
                 }
                 return r;
             });
@@ -410,6 +417,11 @@ public class RDFLinkDelegateWithWorkerThread
 
         public RowSetDelegate(RowSet delegate) {
             super(delegate);
+        }
+
+        @Override
+        protected Binding copy(Binding item) {
+            return BindingFactory.copy(item);
         }
 
         @Override
