@@ -352,7 +352,7 @@ public class SparqlScriptProcessor {
                             PrefixMap pm = it.getPrefixes();
                             // FIXME This log message should display how many prefixes were actually gathered from the file
                             //  The total number of prefixes includes preconfigured ones
-                            logger.info("A total of  " + pm.size() + " prefixes known after processing " + filename);
+                            logger.info("A total of " + pm.size() + " prefixes known after processing " + filename);
                             globalPrefixes.setNsPrefixes(pm.getMapping());
                             break;
                         }
