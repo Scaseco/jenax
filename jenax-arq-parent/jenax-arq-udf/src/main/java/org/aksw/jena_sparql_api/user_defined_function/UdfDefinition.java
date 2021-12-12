@@ -16,85 +16,85 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface UdfDefinition
-	extends Resource
+    extends Resource
 {
-	@Iri("http://ns.aksw.org/jena/udf/prefixMapping")
-	PrefixSet getPrefixSet();
-	
-	default PrefixMapping addTo(PrefixMapping pm) {
-		PrefixSet ps = getPrefixSet();
-		if(ps != null) {
-			ps.addTo(pm);
-		}
-		
-		return pm;
-	}
-	
-	@Iri("http://ns.aksw.org/jena/udf/expr")
-	String getExpr();
-	
-	@Iri("http://ns.aksw.org/jena/udf/params")
-	List<String> getParams();
-	
-	/**
-	 * Function definitions can be associated with profiles.
-	 * This allows loading a function if <b>any</b> of the profiles is active.
-	 * (I.e. the set of profiles is disjunctive)
-	 * 
-	 * @return
-	 */
-	@Iri(UdfVocab.Strs.profile)
-	Set<Resource> getProfiles();
+    @Iri("http://ns.aksw.org/jena/udf/prefixMapping")
+    PrefixSet getPrefixSet();
 
-	@Iri("http://ns.aksw.org/jena/udf/inverse")
-	Set<InverseDefinition> getInverses();
+    default PrefixMapping addTo(PrefixMapping pm) {
+        PrefixSet ps = getPrefixSet();
+        if(ps != null) {
+            ps.addTo(pm);
+        }
+
+        return pm;
+    }
+
+    @Iri("http://ns.aksw.org/jena/udf/expr")
+    String getExpr();
+
+    @Iri("http://ns.aksw.org/jena/udf/params")
+    List<String> getParams();
+
+    /**
+     * Function definitions can be associated with profiles.
+     * This allows loading a function if <b>any</b> of the profiles is active.
+     * (I.e. the set of profiles is disjunctive)
+     *
+     * @return
+     */
+    @Iri(UdfVocab.Strs.profile)
+    Set<Resource> getProfiles();
+
+    @Iri("http://ns.aksw.org/jena/udf/inverse")
+    Set<InverseDefinition> getInverses();
 
 //	<T> Set<T> getProfiles(Class<T> x);
 
-	/**
-	 * Definition that refers to another function for macro-expansion under the given profiles
-	 * 
-	 * @return
-	 */
-	@Iri("http://ns.aksw.org/jena/udf/aliasFor")
-	UserDefinedFunctionResource getAliasFor();
+    /**
+     * Definition that refers to another function for macro-expansion under the given profiles
+     *
+     * @return
+     */
+    @Iri("http://ns.aksw.org/jena/udf/aliasFor")
+    UserDefinedFunctionResource getAliasFor();
 
-	UdfDefinition setAliasFor(Resource r);
-	
+    UdfDefinition setAliasFor(Resource r);
 
-	/**
-	 * True means, that the function is realized using a property function with the same name
-	 * 
-	 * 
-	 * @return
-	 */
-	@Iri("http://ns.aksw.org/jena/udf/mapsToPropertyFunction")
-	boolean mapsToPropertyFunction();
+
+    /**
+     * True means, that the function is realized using a property function with the same name
+     *
+     *
+     * @return
+     */
+    @Iri("http://ns.aksw.org/jena/udf/mapsToPropertyFunction")
+    Boolean mapsToPropertyFunction();
 
 //	@Iri("http://ns.aksw.org/jena/udf/definition")
 //	boolean mapsToPropertyFunction;
 
-	public static UserDefinedFunctionDefinition toJena(String iri, UdfDefinition r) {
+    public static UserDefinedFunctionDefinition toJena(String iri, UdfDefinition r) {
 //		System.out.println(r);
 //		if(!r.isURIResource()) {
 //			throw new RuntimeException("Function definitions must be URI resources");
 //		}
-		
+
 //		String uri = r.getURI();
 
-		PrefixMapping pm = new PrefixMappingImpl();
-		r.addTo(pm);
-		
-		Logger logger = LoggerFactory.getLogger(UdfDefinition.class);
-		
-		logger.debug("Processing user defined function definition: " + iri + ": " + pm);
-		
-		List<String> paramsStr = r.getParams();
-		List<Var> params = paramsStr.stream()
-				.map(Var::alloc)
-				.collect(Collectors.toList());
-		String exprStr = r.getExpr();
-		
+        PrefixMapping pm = new PrefixMappingImpl();
+        r.addTo(pm);
+
+        Logger logger = LoggerFactory.getLogger(UdfDefinition.class);
+
+        logger.debug("Processing user defined function definition: " + iri + ": " + pm);
+
+        List<String> paramsStr = r.getParams();
+        List<Var> params = paramsStr.stream()
+                .map(Var::alloc)
+                .collect(Collectors.toList());
+        String exprStr = r.getExpr();
+
 //		List<String> parts = r.getSimpleDefinition();
 //		if(parts.size() < 1) {
 //			throw new RuntimeException("Function definition requires at least one expression");
@@ -102,11 +102,11 @@ public interface UdfDefinition
 //
 //		Iterator<String> it = parts.iterator();
 //		String defStr = it.next();
-		Expr e = ExprUtils.parse(exprStr, pm);
-		
-		UserDefinedFunctionDefinition result = new UserDefinedFunctionDefinition(iri, e, params);
-		return result;		
-	}
+        Expr e = ExprUtils.parse(exprStr, pm);
+
+        UserDefinedFunctionDefinition result = new UserDefinedFunctionDefinition(iri, e, params);
+        return result;
+    }
 
 }
 

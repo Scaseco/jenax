@@ -39,6 +39,7 @@ import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
+import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
@@ -82,6 +83,8 @@ public class QueryUtils {
 
         // Fix blank nodes introduced as graph names by e.g. Algebra.unionDefaultGraph
         //Element eltAfter = org.aksw.jena_sparql_api.backports.syntaxtransform.ElementTransformer.transform(eltBefore, new ElementTransformCopyBase() {
+
+        // With jena 4.3.0 a null argument for ExprTransform causes a NPE when transforming VarExprLists
         Element eltAfter = ElementTransformer.transform(eltBefore, new ElementTransformCopyBase() {
             protected Map<Node, Var> map = new HashMap<>();
 
@@ -100,7 +103,7 @@ public class QueryUtils {
                 }
                 return result;
             }
-        });
+        }, new ExprTransformCopy(false), null, null);
         afterQueryTmp.setQueryPattern(eltAfter);
 
         Query result = QueryUtils.restoreQueryForm(afterQueryTmp, beforeQuery);

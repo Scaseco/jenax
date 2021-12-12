@@ -100,7 +100,7 @@ public class UserDefinedFunctions {
                 // Resolve alias references
                 Resource ra = activeUdf.getAliasFor();
 
-                if(activeUdf.mapsToPropertyFunction()) {
+                if (Boolean.TRUE.equals(activeUdf.mapsToPropertyFunction())) {
                     logger.debug("Mapped property function: " + activeUdf + ", aliasFor: " + ra);
                     UserDefinedFunctionDefinition ud = new UserDefinedFunctionDefinition(fnIri,
                             ExprUtils.parse("<" + fnIri + ">(?s)"),
