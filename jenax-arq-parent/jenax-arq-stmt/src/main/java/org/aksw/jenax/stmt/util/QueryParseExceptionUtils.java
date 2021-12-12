@@ -7,7 +7,7 @@ import org.apache.jena.ext.com.google.common.collect.ComparisonChain;
 import org.apache.jena.query.QueryParseException;
 
 public class QueryParseExceptionUtils {
-    public static Pattern posPattern = Pattern.compile("line (\\d+), column (\\d+)");
+    public static final Pattern posPattern = Pattern.compile("(line )(\\d+)(, column )(\\d+)");
 
     /**
      * Replace 0 values in line and/or column with 1
@@ -40,8 +40,8 @@ public class QueryParseExceptionUtils {
 
         int[] result;
         if(m.find()) {
-            int line = Integer.parseInt(m.group(1));
-            int col = Integer.parseInt(m.group(2));
+            int line = Integer.parseInt(m.group(2));
+            int col = Integer.parseInt(m.group(4));
             result = new int[] {line, col};
         } else {
             result = null; // new int[] {0, 0};
@@ -67,6 +67,29 @@ public class QueryParseExceptionUtils {
         int l = e.getLine();
         int c = e.getColumn();
         return new int[] {l == -1 ? Integer.MAX_VALUE : l, c == -1 ? Integer.MAX_VALUE : c };
+    }
+
+    /**
+     * Creates a new QueryParseException from the provided one with line and column
+     * set the the given values.
+     * Attaches the original exception as a suppressed one - in order for the newly generated
+     * exception to appear as a root cause.
+     *
+     * The returned exception is presently always of type QueryParseException; subtypes may be considered in the future.
+     */
+    public static QueryParseException copyAndAdjust(QueryParseException e, int line, int column) {
+        String rawMsg = e.getMessage();
+        Matcher m = posPattern.matcher(rawMsg);
+        StringBuilder sb = new StringBuilder();
+        if (m.find()) {
+            m.appendReplacement(sb, "$1" + Integer.toString(line) + "$3" + Integer.toString(column));
+        }
+        m.appendTail(sb);
+        String adjustedMsg = sb.toString();
+
+        QueryParseException result = new QueryParseException(adjustedMsg, line, column);
+        result.addSuppressed(e);
+        return result;
     }
 
     public static int doCompare(QueryParseException a, QueryParseException b) {

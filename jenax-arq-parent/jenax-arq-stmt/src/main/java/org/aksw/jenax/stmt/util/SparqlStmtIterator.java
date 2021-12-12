@@ -107,19 +107,22 @@ public class SparqlStmtIterator extends AbstractIterator<SparqlStmt> {
             try {
                 retryStr = str.substring(0, pos);
             } catch(StringIndexOutOfBoundsException e) {
-                throw new QueryParseException("Error near line " + line + ", column " + column + ".", ex, line, column);
+                throw QueryParseExceptionUtils.copyAndAdjust(ex, line, column);
+                // throw new QueryParseException("Error near line " + line + ", column " + column + ".", ex, line, column);
             }
 
             // Note: Jena parses an empty string as a sparql update statement without errors
             if (isEmptyString(retryStr)) {
-                throw new QueryParseException("Error near line " + line + ", column " + column + ".", ex, line, column);
+                // throw new QueryParseException("Error near line " + line + ", column " + column + ".", ex, line, column);
+                throw QueryParseExceptionUtils.copyAndAdjust(ex, line, column);
             }
 
             result = parser.apply(retryStr);
 
             QueryParseException retryEx = result.getParseException();
             if (retryEx != null) {
-                throw new QueryParseException("Error near line " + line + ", column " + column + ".", retryEx, line, column);
+                // throw new QueryParseException("Error near line " + line + ", column " + column + ".", retryEx, line, column);
+                throw QueryParseExceptionUtils.copyAndAdjust(ex, line, column);
             }
 
             str = str.substring(pos);

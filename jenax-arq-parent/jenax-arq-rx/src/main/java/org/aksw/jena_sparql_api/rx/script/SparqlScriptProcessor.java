@@ -236,6 +236,8 @@ public class SparqlScriptProcessor {
             try {
                 Provenance prov = new Provenance(filename);
                 UpdateRequest ur = tryLoadFileAsUpdateRequest(filename, globalPrefixes);
+
+                // We rely on a NPE if ur is null - this is not optimal
                 result.add(new SimpleEntry<>(new SparqlStmtUpdate(ur), prov));
 
                 isProcessed = true;
@@ -256,6 +258,7 @@ public class SparqlScriptProcessor {
                     Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, sparqlParser);
 
                     if(it != null) {
+                        logger.info("Attempting to interpret argument as a file containing sparql queries");
                         //Path sparqlPath = Paths.get(filename).toAbsolutePath();
                         String sparqlFileName = SplitIRI.localname(filename);
 
@@ -300,7 +303,7 @@ public class SparqlScriptProcessor {
                         }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to process argument " + filename, e);
+                    throw new RuntimeException("Failed to process argument" + (index >= 0 ? " #" + index : "") + ": " + filename, e);
                 }
             }
         }
@@ -326,7 +329,11 @@ public class SparqlScriptProcessor {
 
 
             String contentType = tmpIn.getContentType();
-            logger.info("Detected format: " + contentType);
+            if (contentType == null) {
+                logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
+            } else {
+                logger.info("Detected data format: " + contentType);
+            }
             Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
 
             //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
