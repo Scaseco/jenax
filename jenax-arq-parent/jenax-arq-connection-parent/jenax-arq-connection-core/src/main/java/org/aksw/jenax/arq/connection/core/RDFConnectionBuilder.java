@@ -57,7 +57,7 @@ public class RDFConnectionBuilder<T, P> {
     }
 
     public RDFConnectionBuilder<RDFConnection, P> addQueryTransform(Function<? super Query, ? extends Query> queryTransform) {
-        RDFConnection r = RDFConnectionUtils.wrapWithTransform((RDFConnection)this.connection, queryTransform, null);
+        RDFConnection r = RDFConnectionUtils.wrapWithQueryTransform((RDFConnection)this.connection, queryTransform, null);
 
         return new RDFConnectionBuilder<RDFConnection, P>(null).setSource(r);
     }

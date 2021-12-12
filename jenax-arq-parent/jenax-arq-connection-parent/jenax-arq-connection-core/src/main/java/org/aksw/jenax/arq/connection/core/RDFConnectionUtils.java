@@ -198,7 +198,15 @@ public class RDFConnectionUtils {
         return result[0];
     }
 
-    public static RDFConnection wrapWithTransform(
+
+    public static RDFConnection wrapWithQueryTransform(
+            RDFConnection conn,
+            Function<? super Query, ? extends Query> queryTransform
+        ) {
+        return wrapWithQueryTransform(conn, queryTransform, null);
+    }
+
+    public static RDFConnection wrapWithQueryTransform(
             RDFConnection conn,
             Function<? super Query, ? extends Query> queryTransform,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform
