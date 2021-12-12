@@ -32,7 +32,7 @@ public class JenaExtensionJson {
 
         PropertyFunctionRegistry.get().put(ns + "unnest", new PropertyFunctionFactoryJsonUnnest());
 
-        FunctionBinder binder = JenaExtensionUtil.createFunctionBinder(FunctionRegistry.get());
+        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
         binder.registerAll(SparqlFnLibJson.class);
 
     }

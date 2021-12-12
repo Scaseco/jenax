@@ -8,7 +8,7 @@ import org.apache.jena.graph.Node;
 /**
  * Abstract base implementation of {@link Implementation}
  * that delegates calls.
- * 
+ *
  * @author raven
  *
  */

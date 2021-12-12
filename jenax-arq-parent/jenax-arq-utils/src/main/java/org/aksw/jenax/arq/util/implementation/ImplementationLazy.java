@@ -10,16 +10,15 @@ import org.apache.jena.enhanced.Implementation;
  * access to its methods. This can greatly increase application
  * startup times when the initialization of the actual implementation
  * performs reflection and byte code fiddling using cglib (weaving).
- * 
+ *
  * @author raven
  *
  */
 public class ImplementationLazy
-    extends ImplementationDelegate
+    extends ImplementationDelegateBase
 {
     protected Supplier<Implementation> ctor;
     protected Class<?> targetClass;
-    protected Implementation delegate;
 
     /**
      *
@@ -27,10 +26,9 @@ public class ImplementationLazy
      * @param targetClass The class the implementation is for. Serves informational purpose only.
      */
     public ImplementationLazy(Supplier<Implementation> ctor, Class<?> targetClass) {
-        super();
+        super(null);
         this.ctor = ctor;
         this.targetClass = targetClass;
-        this.delegate = null;
     }
 
     @Override

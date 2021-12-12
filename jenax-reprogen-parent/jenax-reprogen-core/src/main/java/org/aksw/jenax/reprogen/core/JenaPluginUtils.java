@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -169,18 +170,28 @@ public class JenaPluginUtils {
         for(ClassInfo classInfo : classInfos) {
             Class<?> clazz = classInfo.load();
 
-            registerResourceClass(clazz, p, pm, true);
+            registerResourceClass(true, clazz, p, () -> pm);
         }
     }
 
     @SafeVarargs
     public static void registerResourceClasses(Class<? extends Resource> ... classes) {
-        registerResourceClasses(Arrays.asList(classes));
+        registerResourceClasses(true, classes);
     }
 
     public static void registerResourceClasses(Iterable<Class<?>> classes) {
+        registerResourceClasses(true, classes);
+    }
+
+
+    @SafeVarargs
+    public static void registerResourceClasses(boolean lazy, Class<? extends Resource> ... classes) {
+        registerResourceClasses(lazy, Arrays.asList(classes));
+    }
+
+    public static void registerResourceClasses(boolean lazy, Iterable<Class<?>> classes) {
         for(Class<?> clazz : classes) {
-            registerResourceClass(clazz, BuiltinPersonalities.model, DefaultPrefixes.get());
+            registerResourceClass(lazy, clazz, BuiltinPersonalities.model, () -> DefaultPrefixes.get());
         }
     }
 
@@ -197,16 +208,18 @@ public class JenaPluginUtils {
         }
     }
 
-    public static Implementation createImplementation(Class<?> clazz, PrefixMapping pm, boolean lazy) {
+    public static Implementation createImplementation(boolean lazy, Class<?> clazz, Supplier<PrefixMapping> pm) {
         Implementation result;
         if (lazy) {
+            // We don't clone the prefixes anymore for performance reasons
+
             // Better clone the prefix mapping as the provided may have changed
             // by the time we actually perform the init
-            PrefixMapping clone = new PrefixMappingImpl();
-            clone.setNsPrefixes(pm);
-            result = new ImplementationLazy(() -> createImplementation(clazz, pm), clazz);
+            // PrefixMapping clone = new PrefixMappingImpl();
+            // clone.setNsPrefixes(pm);
+            result = new ImplementationLazy(() -> createImplementation(clazz, pm.get()), clazz);
         } else {
-            result = createImplementation(clazz, pm);
+            result = createImplementation(clazz, pm.get());
         }
 
         return result;
@@ -237,15 +250,15 @@ public class JenaPluginUtils {
         return result;
     }
 
-    public static void registerResourceClass(Class<?> clazz, Personality<RDFNode> p, PrefixMapping pm) {
-        registerResourceClass(clazz, p, pm, false);
-    }
+//    public static void registerResourceClass(Class<?> clazz, Personality<RDFNode> p, PrefixMapping pm) {
+//        registerResourceClass(clazz, p, pm, false);
+//    }
 
-    public static void registerResourceClass(Class<?> clazz, Personality<RDFNode> p, PrefixMapping pm, boolean lazy) {
+    public static void registerResourceClass(boolean lazy, Class<?> clazz, Personality<RDFNode> p, Supplier<PrefixMapping> pm) {
 
         if(Resource.class.isAssignableFrom(clazz)) {
             boolean supportsProxying = supportsProxying(clazz);
-            if(supportsProxying) {
+            if (supportsProxying) {
                 ResourceView resourceView = clazz.getAnnotation(ResourceView.class);
                 Class<?>[] rawSuperTypes = resourceView == null
                         ? null
@@ -259,7 +272,7 @@ public class JenaPluginUtils {
                 List<Class<?>> effectiveTypes = new ArrayList<>(Arrays.asList(superTypes));
                 //effectiveTypes.add(clazz);
 
-                Implementation impl = createImplementation(clazz, pm, lazy);
+                Implementation impl = createImplementation(lazy, clazz, pm);
 
                 for(Class<?> type : effectiveTypes) {
                     if(!type.isAssignableFrom(clazz)) {
@@ -268,7 +281,7 @@ public class JenaPluginUtils {
                         @SuppressWarnings("unchecked")
                         Class<? extends Resource> cls = (Class<? extends Resource>)type;
 
-                        logger.debug("Registering " + clazz);
+                        logger.debug("Registering ResourceView from " + clazz);
                         p.add(cls, impl);
                     }
                 }

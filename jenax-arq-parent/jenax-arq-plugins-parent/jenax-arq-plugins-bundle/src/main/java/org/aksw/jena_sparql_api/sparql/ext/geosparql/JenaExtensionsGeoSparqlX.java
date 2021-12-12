@@ -34,7 +34,7 @@ public class JenaExtensionsGeoSparqlX {
         WKTDatatype.registerDatatypes();
 
 
-        FunctionBinder binder = JenaExtensionUtil.createFunctionBinder(registry);
+        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
         FunctionGenerator generator = binder.getFunctionGenerator();
 
         // Define two-way Geometry - GeometryWrapper coercions

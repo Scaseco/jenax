@@ -247,8 +247,11 @@ public class FunctionGenerator {
             }
 
             result = new ConverterImpl(clz, NodeValue.class, (Object obj) -> {
-                Node node = NodeFactory.createLiteralByValue(obj, dtype);
-                NodeValue r = NodeValue.makeNode(node);
+                NodeValue r = null;
+                if (obj != null) {
+                    Node node = NodeFactory.createLiteralByValue(obj, dtype);
+                    r = NodeValue.makeNode(node);
+                }
                 return r;
             });
         }

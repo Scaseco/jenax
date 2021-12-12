@@ -10,7 +10,9 @@ import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
+import org.apache.jena.graph.Node;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionRegistry;
 
 public class JenaExtensionUtil {
@@ -26,6 +28,21 @@ public class JenaExtensionUtil {
         JenaExtensionFs.addPrefixes(pm);
         JenaExtensionSys.addPrefixes(pm);
     }
+
+
+    private static FunctionBinder DFT_FUNCTION_BINDER = null;
+
+    public static FunctionBinder getDefaultFunctionBinder() {
+        if (DFT_FUNCTION_BINDER == null) {
+            synchronized (JenaExtensionUtil.class) {
+                if (DFT_FUNCTION_BINDER == null) {
+                    DFT_FUNCTION_BINDER = createFunctionBinder(FunctionRegistry.get());
+                }
+            }
+        }
+        return DFT_FUNCTION_BINDER;
+    }
+
 
 
     public static FunctionBinder createFunctionBinder(FunctionRegistry functionRegistry) {
@@ -45,7 +62,9 @@ public class JenaExtensionUtil {
             .register(BigDecimal.class, Double.class,
                     BigDecimal::doubleValue, BigDecimal::new)
             .register(BigDecimal.class, Float.class,
-                    BigDecimal::floatValue, BigDecimal::new);
+                    BigDecimal::floatValue, BigDecimal::new)
+            .register(Node.class, NodeValue.class,
+                    NodeValue::makeNode, NodeValue::asNode);
 
         return binder;
     }
