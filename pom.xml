@@ -715,6 +715,12 @@
 				or test modules -->
 
 			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j18-impl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
@@ -724,12 +730,6 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-ext</artifactId>
 				<version>${slf4j.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j18-impl</artifactId>
-				<version>${log4j.version}</version>
 			</dependency>
 
 
@@ -1201,6 +1201,14 @@
 					<exclusion>
 						<groupId>com.sun.jersey</groupId>
 						<artifactId>jersey-server</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
