@@ -258,7 +258,7 @@ public class SparqlScriptProcessor {
                     Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, sparqlParser);
 
                     if(it != null) {
-                        logger.info("Attempting to interpret argument as a file containing sparql queries");
+                        logger.debug("Attempting to interpret argument as a file containing sparql queries");
                         //Path sparqlPath = Paths.get(filename).toAbsolutePath();
                         String sparqlFileName = SplitIRI.localname(filename);
 
