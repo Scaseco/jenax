@@ -72,6 +72,9 @@
 		<jersey.version>2.35</jersey.version>
 		<asm.version>8.0.1</asm.version>
 
+		<slf4j.version>1.8.0-beta4</slf4j.version>
+		<log4j.version>2.15.0</log4j.version>
+
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
 		<aksw.commons.version>0.9.1-SNAPSHOT</aksw.commons.version>
@@ -710,16 +713,23 @@
 
 			<!-- Never depend on the logging implementations unless in test cases 
 				or test modules -->
+
 			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>1.2.17</version>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.25</version>
+				<artifactId>slf4j-ext</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j18-impl</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 
 
@@ -975,19 +985,25 @@
 
 
 			<!-- Logging -->
-
-			<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
-				<version>1.2.17</version> <scope>test</scope> </dependency> -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.25</version>
+				<version>2.0.0-alpha5</version>
 			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-ext</artifactId>
-				<version>1.7.25</version>
-			</dependency>
+
+
+			<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+				<version>1.2.17</version> <scope>test</scope> </dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.slf4j</groupId> -->
+			<!-- <artifactId>slf4j-api</artifactId> -->
+			<!-- <version>1.7.25</version> -->
+			<!-- </dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.slf4j</groupId> -->
+			<!-- <artifactId>slf4j-ext</artifactId> -->
+			<!-- <version>1.7.25</version> -->
+			<!-- </dependency> -->
 			<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
 				<version>1.7.10</version> <scope>test</scope> </dependency> -->
 			<!-- AKSW Commons -->
