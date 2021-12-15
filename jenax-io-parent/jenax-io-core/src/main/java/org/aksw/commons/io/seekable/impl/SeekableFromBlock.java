@@ -698,7 +698,7 @@ public class SeekableFromBlock
 
         BlockIterState it = BlockIterState.fwd(true, currentBlockRef, currentSeekable);
 //        boolean isFirstIteration = true;
-        while(it.hasNext() && dst.remaining() > 0) {
+        while (it.hasNext() && dst.remaining() > 0) {
             it.advance();
 
 //            if(isFirstIteration) {
@@ -713,19 +713,28 @@ public class SeekableFromBlock
             setCurrent(it);
 
             //while(it.seekable != null && dst.remaining() > 0) {
-            while(dst.remaining() > 0) {
+            while (dst.remaining() > 0) {
                 int n = it.seekable.read(dst);
                 if(n == 0) {
                     throw new RuntimeException("Read returned 0 bytes - this should never be the case");
                 } else if(n == -1) {
+                    // Try to read the next block
                     break;
                 }
                 contrib += n;
                 actualPos += n;
             }
+
+            if (dst.remaining() == 0) {
+                break;
+            }
         }
 
-        int result = contrib == 0 && dst.remaining() > 0 ? -1 : contrib;
+        setCurrent(it);
+
+
+        // && dst.remaining() > 0
+        int result = contrib == 0 ? -1 : contrib;
 
         return result;
     }

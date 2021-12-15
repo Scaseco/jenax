@@ -44,7 +44,7 @@ public interface PageManager
     default long size() {
         long endPos = getEndPos();
         int pageSize = getPageSize();
-        long result = endPos / pageSize + 1 - (endPos % pageSize == 0 ? 1 : 0);
+        long result = endPos / pageSize + (endPos % pageSize == 0 ? 0 : 1);
         return result;
     }
 
@@ -65,7 +65,7 @@ public interface PageManager
 
     default boolean hasBlockAfter(long pos) throws IOException {
         long pageCount = size();
-        boolean result = pos >= -1 && pos < pageCount;
+        boolean result = pos >= -1 && (pos + 1) < pageCount;
         return result;
     }
 

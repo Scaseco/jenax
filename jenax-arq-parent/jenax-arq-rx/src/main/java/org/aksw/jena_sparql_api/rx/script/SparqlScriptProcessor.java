@@ -209,6 +209,10 @@ public class SparqlScriptProcessor {
         }
     }
 
+    public void process(String filename) {
+        process(-1, filename);
+    }
+
     public void process(int index, String filename) {
         process(index, filename, sparqlStmts);
     }
