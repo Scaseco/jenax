@@ -198,6 +198,13 @@ public class RDFConnectionUtils {
         return result[0];
     }
 
+    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, Function<? super RDFLink, ? extends RDFLink> linkDecorator) {
+        RDFLink oldLink = RDFLinkAdapterEx.adapt(conn);
+        RDFLink newLink = linkDecorator.apply(oldLink);
+        RDFConnection result = RDFConnectionAdapter.adapt(newLink);
+        return result;
+    }
+
 
     public static RDFConnection wrapWithQueryTransform(
             RDFConnection conn,

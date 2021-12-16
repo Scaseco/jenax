@@ -105,7 +105,6 @@ public class LookupServiceSparqlQuery
             Element newElement = ElementUtils.mergeElements(q.getQueryPattern(), filterElement);
             q.setQueryPattern(newElement);
 
-            // System.out.println("Lookup query: " + q);
             logger.debug("Looking up: " + q);
 
             result = SparqlRx.execSelectRaw(() -> sparqlService.query(q))

@@ -1,16 +1,9 @@
 package org.aksw.jenax.arq.connection.link;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.aksw.commons.collections.PrefetchIterator;
-import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.atlas.iterator.IteratorCloseable;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
@@ -31,28 +24,11 @@ import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateRequest;
 
-/**
- * Wraps an {@link RDFLink} such that all method calls originate from the same
- * (worker) thread.
- *
- * Transactions in jena are per-thread rather than per-connection. This means,
- * that if a main thread starts a write transaction on a connection and later a worker
- * thread wants to perform a write on the same connection it results in a deadlock.
- *
- * This wrapper resolves the deadlock situation at the cost of processing any request
- * from any thread made to the RDFLink sequentially in a single additional thread.
- *
- * Note that this class also wraps access to QueryExec, RowSet, etc such that it goes through the worker thread
- *
- *
- * @author raven
- *
- */
 public class RDFLinkDelegateWithWorkerThread
+    extends WorkerThreadBase
     implements RDFLink
 {
     protected RDFLink delegate;
-    protected ExecutorService es;
 
     public RDFLinkDelegateWithWorkerThread(RDFLink delegate) {
         super();
@@ -65,40 +41,6 @@ public class RDFLinkDelegateWithWorkerThread
 
     public RDFLink getDelegate() {
         return delegate;
-    }
-
-//    public static void submit(ExecutorService executorService, Runnable runnable) {
-//        try {
-//            executorService.submit(runnable).get();
-//        } catch (InterruptedException | ExecutionException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    public static <T> T submit(ExecutorService executorService, Callable<T> callable) {
-        try {
-            return executorService.submit(callable).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    public void submit(Runnable runnable) {
-        submit(() -> { runnable.run(); return null; });
-    }
-
-    public <T> T submit(Callable<T> callable) {
-        if (es == null) {
-            synchronized (this) {
-                if (es == null) {
-                    es = Executors.newSingleThreadExecutor();
-                }
-            }
-        }
-
-        T result = submit(es, callable);
-        return result;
     }
 
     @Override
@@ -303,7 +245,7 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public RowSet select() {
-            return submit(() -> new RowSetDelegate(getDelegate().select()));
+            return submit(() -> new RowSetDelegate(getDelegate().select(), es));
         }
 
         @Override
@@ -313,12 +255,12 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public Iterator<Triple> constructTriples() {
-            return submit(() -> new IteratorDelegate<>(getDelegate().constructTriples()));
+            return submit(() -> new IteratorDelegateWithWorkerThread<>(getDelegate().constructTriples(), es));
         }
 
         @Override
         public Iterator<Quad> constructQuads() {
-            return submit(() -> new IteratorDelegate<>(getDelegate().constructQuads()));
+            return submit(() -> new IteratorDelegateWithWorkerThread<>(getDelegate().constructQuads(), es));
         }
 
         @Override
@@ -333,7 +275,7 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public Iterator<Triple> describeTriples() {
-            return submit(() -> new IteratorDelegate<>(getDelegate().describeTriples()));
+            return submit(() -> new IteratorDelegateWithWorkerThread<>(getDelegate().describeTriples(), es));
         }
 
         @Override
@@ -348,7 +290,7 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public Iterator<JsonObject> execJsonItems() {
-            return submit(() -> new IteratorDelegate<>(getDelegate().execJsonItems()));
+            return submit(() -> new IteratorDelegateWithWorkerThread<>(getDelegate().execJsonItems(), es));
         }
 
         @Override
@@ -368,55 +310,16 @@ public class RDFLinkDelegateWithWorkerThread
 
     }
 
-    class IteratorDelegate<T, I extends Iterator<T>>
-        extends PrefetchIterator<T>
-        implements IteratorCloseable<T>
-    {
-        protected int batchSize = 128;
-        protected I delegate;
 
-        public IteratorDelegate(I delegate) {
-            super();
-            this.delegate = delegate;
-        }
 
-        public I getDelegate() {
-            return delegate;
-        }
-
-        protected T copy(T item) {
-            return item;
-        }
-
-        @Override
-        protected Iterator<T> prefetch() throws Exception {
-            List<T> batch = submit(() -> {
-                I d = getDelegate();
-                List<T> r = new ArrayList<>();
-                for (int i = 0; i < batchSize && d.hasNext(); ++i) {
-                    T rawItem = d.next();
-                    T item = copy(rawItem);
-                    r.add(item);
-                }
-                return r;
-            });
-            return batch.isEmpty() ? null : batch.iterator();
-        }
-
-        @Override
-        public void close() {
-            submit(() -> Iter.close(getDelegate()));
-        }
-    }
-
-    class RowSetDelegate
-        extends IteratorDelegate<Binding, RowSet>
+    static class RowSetDelegate
+        extends IteratorDelegateWithWorkerThread<Binding, RowSet>
         implements RowSet
     {
         protected RowSet delegate;
 
-        public RowSetDelegate(RowSet delegate) {
-            super(delegate);
+        public RowSetDelegate(RowSet delegate, ExecutorService es) {
+            super(delegate, es);
         }
 
         @Override
@@ -426,12 +329,12 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public List<Var> getResultVars() {
-            return submit(() -> getDelegate().getResultVars());
+            return helper.submit(() -> getDelegate().getResultVars());
         }
 
         @Override
         public long getRowNumber() {
-            return submit(() -> getDelegate().getRowNumber());
+            return helper.submit(() -> getDelegate().getRowNumber());
         }
     }
 
