@@ -25,9 +25,16 @@ public class TransactionalMultiplex<T extends Transactional>
     }
 
     protected void forEach(Consumer<? super T> handler) {
-        MultiplexUtils.forEach(delegates, handler);
+        forEachR(delegate -> { handler.accept(delegate); return null; });
     }
 
+    /**
+     * This method may be overridden in order to lock the set of delegates.
+     *
+     * @param <X>
+     * @param handler
+     * @return
+     */
     protected <X> X forEachR(Function<? super T, X> handler) {
         return MultiplexUtils.forEachAndReturnFirst(delegates, handler);
     }
