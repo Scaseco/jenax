@@ -1,9 +1,7 @@
 package org.aksw.jenax.arq.connection;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -12,102 +10,71 @@ import org.apache.jena.query.TxnType;
 import org.apache.jena.sparql.core.Transactional;
 
 public class TransactionalMultiplex<T extends Transactional>
-	implements Transactional
+    implements Transactional
 {
-	protected Collection<? extends T> delegates;
+    protected Collection<? extends T> delegates;
 
-	public static <T> void forEach(Collection<? extends T> items, Consumer<? super T> handler) {
-		List<Throwable> throwables = new ArrayList<>();
-		for(T item : items) {
-			try {
-				handler.accept(item);
-			} catch(Exception e) {
-				throwables.add(e);
-			}
-		}
+    @SafeVarargs
+    public TransactionalMultiplex(T ... delegates) {
+        this(Arrays.asList(delegates));
+    }
 
-		// TODO Throw a multi exception
-		if(!throwables.isEmpty()) {
-			throw new RuntimeException(throwables.iterator().next());
-		}
-	}
+    public TransactionalMultiplex(Collection<? extends T> delegates) {
+        super();
+        this.delegates = delegates;
+    }
 
-	public static <T, X> X forEachR(Collection<? extends T> items, Function<? super T, X> handler) {
-		List<Throwable> throwables = new ArrayList<>();
-		X result = null;
-		boolean isFirst = true;
-		for(T item : items) {
-			try {
-				X tmp = handler.apply(item);
-				if(isFirst) {
-					result = tmp;
-					isFirst = false;
-				}
-			} catch(Exception e) {
-				throwables.add(e);
-			}
-		}
+    protected void forEach(Consumer<? super T> handler) {
+        MultiplexUtils.forEach(delegates, handler);
+    }
 
-		// TODO Throw a multi exception
-		if(!throwables.isEmpty()) {
-			throw new RuntimeException(throwables.iterator().next());
-		}
-		return result;
-	}
+    protected <X> X forEachR(Function<? super T, X> handler) {
+        return MultiplexUtils.forEachAndReturnFirst(delegates, handler);
+    }
 
-	@SafeVarargs
-	public TransactionalMultiplex(T ... delegates) {
-		this(Arrays.asList(delegates));
-	}
+    @Override
+    public void begin(ReadWrite readWrite) {
+        forEach(d -> d.begin(readWrite));
+    }
 
-	public TransactionalMultiplex(Collection<? extends T> delegates) {
-		super();
-		this.delegates = delegates;
-	}
+    @Override
+    public void commit() {
+        forEach(Transactional::commit);
+    }
 
-	@Override
-	public void begin(ReadWrite readWrite) {
-		TransactionalMultiplex.forEach(delegates, d -> d.begin(readWrite));
-	}
+    @Override
+    public void abort() {
+        forEach(Transactional::abort);
+    }
 
-	@Override
-	public void commit() {
-		TransactionalMultiplex.forEach(delegates, Transactional::commit);
-	}
+    @Override
+    public void end() {
+        forEach(Transactional::end);
+    }
 
-	@Override
-	public void abort() {
-		TransactionalMultiplex.forEach(delegates, Transactional::abort);
-	}
+    @Override
+    public boolean isInTransaction() {
+        boolean result = delegates.isEmpty() ? false : delegates.iterator().next().isInTransaction();
+        return result;
+    }
 
-	@Override
-	public void end() {
-		TransactionalMultiplex.forEach(delegates, Transactional::end);
-	}
+    @Override
+    public void begin(TxnType type) {
+        forEach(d -> d.begin(type));
+    }
 
-	@Override
-	public boolean isInTransaction() {
-		boolean result = delegates.isEmpty() ? false : delegates.iterator().next().isInTransaction();
-		return result;
-	}
+    @Override
+    public boolean promote(Promote mode) {
+        return forEachR(d -> d.promote(mode));
+    }
 
-	@Override
-	public void begin(TxnType type) {
-		TransactionalMultiplex.forEach(delegates, d -> d.begin(type));		
-	}
+    @Override
+    public ReadWrite transactionMode() {
+        return forEachR(Transactional::transactionMode);
+    }
 
-	@Override
-	public boolean promote(Promote mode) {
-		return TransactionalMultiplex.forEachR(delegates, d -> d.promote(mode));
-	}
-
-	@Override
-	public ReadWrite transactionMode() {
-		return TransactionalMultiplex.forEachR(delegates, Transactional::transactionMode);
-	}
-
-	@Override
-	public TxnType transactionType() {
-		return TransactionalMultiplex.forEachR(delegates, Transactional::transactionType);
-	}
+    @Override
+    public TxnType transactionType() {
+        return forEachR(Transactional::transactionType);
+    }
 }
