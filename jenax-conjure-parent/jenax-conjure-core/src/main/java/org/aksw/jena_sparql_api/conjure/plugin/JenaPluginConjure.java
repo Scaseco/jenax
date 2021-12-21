@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.conjure.plugin;
 
-import org.aksw.dcat.ap.domain.api.Checksum;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefCatalog;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
@@ -24,7 +23,6 @@ import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversal0;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversal1;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversal2;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
-import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfoDefault;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jena_sparql_api.utils.turtle.TurtleWriterNoBase;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -54,9 +52,8 @@ public class JenaPluginConjure
                 OpTraversal.class, OpTraversal0.class, OpTraversal1.class,
                 OpTraversal2.class, OpTraversalSelf.class, OpPropertyPath.class);
 
-        JenaPluginUtils.registerResourceClasses(RdfEntityInfoDefault.class);
-
-        JenaPluginUtils.registerResourceClasses(Checksum.class);
+        // JenaPluginUtils.registerResourceClasses(RdfEntityInfoDefault.class);
+        // JenaPluginUtils.registerResourceClasses(Checksum.class);
 
         JenaPluginUtils.registerResourceClasses(
                 DataRef.class, DataRefCatalog.class, DataRefDcat.class, DataRefEmpty.class, DataRefExt.class,

@@ -16,6 +16,7 @@
 	<modules>
 		<module>jenax-arq-langtagvalidator</module>
 		<module>jenax-arq-anyresource</module>
+		<module>jenax-arq-tika</module>
 		<module>jenax-arq-json</module>
 		<module>jenax-arq-propertypaths</module>
 		<module>jenax-arq-datapaths</module>

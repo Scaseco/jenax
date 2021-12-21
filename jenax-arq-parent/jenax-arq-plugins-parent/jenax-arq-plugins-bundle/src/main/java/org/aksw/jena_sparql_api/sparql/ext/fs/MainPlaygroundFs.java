@@ -10,30 +10,30 @@ import org.apache.tika.exception.TikaException;
 import org.xml.sax.SAXException;
 
 public class MainPlaygroundFs {
-	public static void main(String[] args) throws TikaException, IOException, SAXException, CompressorException {
-		
-		//Path path = Paths.get("/home/raven/.dcat/test3/downloads/gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl/_content/data.ttl");
-//		Path path = Paths.get("/tmp/data.ttl.bz2");
-		Path path = Paths.get("/tmp/data.hdt");
+    public static void main(String[] args) throws TikaException, IOException, SAXException, CompressorException {
 
-		System.out.println(
-			ExprUtils.eval(
-				ExprUtils.parse("<java:org.aksw.jena_sparql_api.sparql.ext.fs.probeContentType>('/tmp/data.ttl')"))
-		);
-		System.out.println(
-				ExprUtils.eval(
-					ExprUtils.parse("<java:org.aksw.jena_sparql_api.sparql.ext.fs.probeEncoding>('/tmp/data.ttl.bz2')"))
-		);
-		System.out.println(
-				ExprUtils.eval(
-					ExprUtils.parse("<http://jsa.aksw.org/fn/fs/probeContentType>('/tmp/data.ttl')"))
-		);
-		System.out.println(
-				ExprUtils.eval(
-					ExprUtils.parse("<http://jsa.aksw.org/fn/fs/probeEncoding>('/tmp/data.ttl.bz2')"))
-		);
-		
-		
+        //Path path = Paths.get("/home/raven/.dcat/test3/downloads/gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl/_content/data.ttl");
+//		Path path = Paths.get("/tmp/data.ttl.bz2");
+        Path path = Paths.get("/tmp/data.hdt");
+
+        System.out.println(
+            ExprUtils.eval(
+                ExprUtils.parse("<java:org.aksw.jena_sparql_api.sparql.ext.fs.probeContentType>('/tmp/data.ttl')"))
+        );
+        System.out.println(
+                ExprUtils.eval(
+                    ExprUtils.parse("<java:org.aksw.jena_sparql_api.sparql.ext.fs.probeEncoding>('/tmp/data.ttl.bz2')"))
+        );
+        System.out.println(
+                ExprUtils.eval(
+                    ExprUtils.parse("<http://jsa.aksw.org/fn/fs/probeContentType>('/tmp/data.ttl')"))
+        );
+        System.out.println(
+                ExprUtils.eval(
+                    ExprUtils.parse("<http://jsa.aksw.org/fn/fs/probeEncoding>('/tmp/data.ttl.bz2')"))
+        );
+
+
 //		String ct = Files.probeContentType(path);
 //
 //		//try(InputStream in = Files.newInputStream(path)) {
@@ -43,7 +43,7 @@ public class MainPlaygroundFs {
 //			System.out.println(metadata);
 //		//}
 //		System.out.println(ct);
-		
+
 //		new TikaFile
 //		TikaConfig tika = new TikaConfig();
 //
@@ -60,5 +60,5 @@ public class MainPlaygroundFs {
 ////					new FileInputStream(f), new Metadata());
 ////		   System.out.println("Stream " + is + " is " + mimetype);
 ////		}	}
-	}
+    }
 }

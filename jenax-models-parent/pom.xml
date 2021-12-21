@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>jenax-models-dcat-api</module>
+		<module>jenax-models-entityinfo</module>
 	</modules>
 </project>
 

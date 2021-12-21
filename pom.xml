@@ -81,6 +81,7 @@
 		<log4j.version>2.16.0</log4j.version>
 		<hadoop.version>3.3.1</hadoop.version>
 		<junit.version>4.13.2</junit.version>
+		<tika.version>2.1.0</tika.version>
 
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
@@ -88,6 +89,7 @@
 
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
+		<jts.version>1.18.1</jts.version>
 
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
@@ -435,6 +437,18 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-entityinfo</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-tika</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1099,7 +1113,7 @@
 			<dependency>
 				<groupId>org.locationtech.jts</groupId>
 				<artifactId>jts-core</artifactId>
-				<version>1.18.1</version>
+				<version>${jts.version}</version>
 				<!-- Xerces delivered by Jena -->
 				<exclusions>
 					<exclusion>
@@ -1112,7 +1126,7 @@
 			<dependency>
 				<groupId>org.locationtech.jts.io</groupId>
 				<artifactId>jts-io-common</artifactId>
-				<version>1.18.1</version>
+				<version>${jts.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>junit</groupId>
@@ -1168,14 +1182,16 @@
 			</dependency>
 
 
-			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing to maintain separately) -->
+			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing 
+				to maintain separately) -->
 			<dependency>
 				<groupId>org.aksw.difs</groupId>
 				<artifactId>difs-system</artifactId>
 				<version>1.0.0-SNAPSHOT</version>
 			</dependency>
 
-			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro stuff would have to go t -->
+			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
+				stuff would have to go t -->
 			<dependency>
 				<groupId>net.sansa-stack</groupId>
 				<artifactId>sansa-spark-jena-java_2.12</artifactId>
@@ -1338,8 +1354,8 @@
 
 			<dependency>
 				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-java7</artifactId>
-				<version>1.23</version>
+				<artifactId>tika-core</artifactId>
+				<version>${tika.version}</version>
 			</dependency>
 
 			<!-- <dependency> -->
@@ -1649,6 +1665,34 @@
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
+
+		<!-- <repository> -->
+		<!-- <id>OSGeo</id> -->
+		<!-- <name>OSGeo Repository</name> -->
+		<!-- <url>http://download.osgeo.org/webdav/geotools/</url> -->
+		<!-- </repository> -->
+
+		<repository>
+			<id>locationtech-releases</id>
+			<url>
+            https://repo.locationtech.org/content/groups/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>jts-snapshots</id>
+			<url>
+            https://repo.locationtech.org/content/repositories/jts-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
 			</snapshots>
 		</repository>
 

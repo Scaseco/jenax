@@ -1,11 +1,10 @@
 package org.aksw.dcat.jena.domain.api;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.aksw.dcat.util.ObjectUtils;
-import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
+import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.DCAT;
 
 /**
  * Binding of the core to jena
@@ -16,13 +15,24 @@ import org.apache.jena.vocabulary.DCAT;
 public interface DcatDataset
     extends DcatEntity, DcatDatasetCore
 {
-    default <T extends Resource> Collection<T> getDistributions(Class<T> clazz) {
-        return new SetFromPropertyValues<>(this, DCAT.distribution, clazz);
-    }
+    // @Iri("dcat:distribution")
+    // Set<DcatDistribution> getDistribution();
 
-    default Collection<? extends DcatDistribution> getDistributions() {
+    @Iri("dcat:distribution")
+    // @Override
+    <T extends Resource> Set<T> getDistributions(Class<T> clazz);
+
+    default Set<? extends DcatDistribution> getDistributions() {
         return getDistributions(DcatDistribution.class);
     }
+
+//    default <T extends Resource> Collection<T> getDistributions(Class<T> clazz) {
+//        return new SetFromPropertyValues<>(this, DCAT.distribution, clazz);
+//    }
+//
+//    default Collection<? extends DcatDistribution> getDistributions() {
+//        return getDistributions(DcatDistribution.class);
+//    }
 
     public static String getLabel(DcatDataset ds) {
         String result = ObjectUtils.coalesce(

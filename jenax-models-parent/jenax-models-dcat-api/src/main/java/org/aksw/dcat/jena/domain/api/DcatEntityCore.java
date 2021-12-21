@@ -5,15 +5,15 @@ public interface DcatEntityCore {
 //	void setCkanId(String id);
 
     String getIdentifier();
-    void setIdentifier(String name);
+    DcatEntityCore setIdentifier(String name);
 
     /** A local name such as a human readable string in a CKAN catalog */
 //    String getLocalName();
 //    void setLocalName(String name);
 
     String getTitle();
-    void setTitle(String title);
+    DcatEntityCore setTitle(String title);
 
     String getDescription();
-    void setDescription(String description);
+    DcatEntityCore setDescription(String description);
 }

@@ -1,5 +1,7 @@
 package org.aksw.dcat.jena.domain.api;
 
+import java.util.List;
+
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -29,6 +31,6 @@ public interface MavenEntity
     MavenEntity setVersion(String version);
 
     @IriNs("mvn")
-    String getClassifier();
-    MavenEntity setClassifier(String classifier);
+    List<String> getClassifiers();
+    //MavenEntity setClassifier(String classifier);
 }

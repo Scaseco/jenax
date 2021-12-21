@@ -1,11 +1,29 @@
 package org.aksw.dcat.jena.domain.api;
 
+import java.util.Set;
+
+import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
+import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.apache.jena.rdf.model.Resource;
+
+
 public interface DcatDistribution
-	extends DcatEntity, DcatDistributionCore
+    extends DcatEntity, DcatDistributionCore
 {
+    /** Return the set of datasets this distribution is part of */
+    @Inverse
+    @Iri("dcat:distribution")
+    <T extends Resource> Set<T> getDcatDatasets(Class<T> datasetClass);
+
+    @Iri("dcat:accessURL")
+    Set<String> getAccessUrls();
+
+    @Iri("dcat:downloadURL")
+    Set<String> getDownloadUrls();
+
 //	Collection<Resource> getAccessResources();
 //	Collection<Resource> getDownloadResources();
-//	
+//
 //	default Collection<String> getAccessUrls() {
 //		Collection<String> result = new CollectionFromConverter<>(getAccessResources(),
 //				Converter.from(getModel()::createResource, Resource::getURI));
@@ -17,7 +35,7 @@ public interface DcatDistribution
 //				Converter.from(getModel()::createResource, Resource::getURI));
 //		return result;
 //	}
-	
+
 //	default SpdxChecksum getChecksum() {
 //		return null;
 //		//ResourceUtils.getProperty(this, Spdx.ge)

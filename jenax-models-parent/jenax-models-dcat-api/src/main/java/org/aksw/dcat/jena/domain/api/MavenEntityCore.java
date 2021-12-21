@@ -1,5 +1,7 @@
 package org.aksw.dcat.jena.domain.api;
 
+import java.util.List;
+
 public interface MavenEntityCore {
     String getGroupId();
     MavenEntityCore setGroupId(String groupId);
@@ -10,6 +12,8 @@ public interface MavenEntityCore {
     String getVersion();
     MavenEntityCore setVersion(String version);
 
-    String getClassifier();
-    MavenEntityCore setClassifier(String classifier);
+    List<String> getClassifiers();
+
+//    String getClassifier();
+//    MavenEntityCore setClassifier(String classifier);
 }

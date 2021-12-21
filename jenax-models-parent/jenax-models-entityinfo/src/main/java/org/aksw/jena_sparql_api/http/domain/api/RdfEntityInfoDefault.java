@@ -5,11 +5,10 @@ import java.util.Set;
 
 import org.aksw.dcat.ap.domain.api.Checksum;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 
 @ResourceView(RdfEntityInfo.class)
-@RdfType("eg:EntityInfo")
+// @RdfType("eg:EntityInfo")
 public interface RdfEntityInfoDefault
     extends RdfEntityInfo
 {

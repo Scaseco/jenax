@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.sparql.ext.fs;
+package org.aksw.jenax.arq.tika;
 
 import java.io.IOException;
 import java.nio.file.Path;

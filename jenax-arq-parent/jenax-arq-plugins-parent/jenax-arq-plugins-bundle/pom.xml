@@ -13,41 +13,6 @@
 		<version>4.3.1-1-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- <geotools.version>21.0</geotools.version> -->
-		<jts.version>1.16.1</jts.version>
-	</properties>
-
-	<repositories>
-		<repository>
-			<id>OSGeo</id>
-			<name>OSGeo Repository</name>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
-		</repository>
-
-		<repository>
-			<id>locationtech-releases</id>
-			<url>
-            https://repo.locationtech.org/content/groups/releases</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-
-		<repository>
-			<id>jts-snapshots</id>
-			<url>
-            https://repo.locationtech.org/content/repositories/jts-snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<!-- Google polyline encoder/decoder for sparql extension functions -->
 		<dependency>
@@ -57,13 +22,13 @@
 
 		<!-- Override version of tika -->
 		<dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
 		</dependency>
-                        <dependency>
-                                <groupId>org.glassfish.jaxb</groupId>
-                                <artifactId>jaxb-runtime</artifactId>
-                        </dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
 
 
 		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
@@ -86,7 +51,8 @@
 			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
 
-		<!-- Query federation to files in virtual file systems with binary search support -->
+		<!-- Query federation to files in virtual file systems with binary search 
+			support -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-plugins-service-vfs</artifactId>
@@ -99,11 +65,12 @@
 		</dependency>
 
 		<!-- Auto-binding of SPARQL and Java functions -->
-		<!-- May separate this functionality from resource proxy generation in the future -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.aksw.jenax</groupId> -->
-<!-- 			<artifactId>jenax-reprogen-core</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- May separate this functionality from resource proxy generation in 
+			the future -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.jenax</groupId> -->
+		<!-- <artifactId>jenax-reprogen-core</artifactId> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-functionbinder-core</artifactId>
@@ -151,15 +118,14 @@
 			<artifactId>commons-validator</artifactId>
 		</dependency>
 
-		<!-- Content type detection -->
 		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-java7</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-hdt</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-hdt</artifactId>
+			<artifactId>jenax-arq-tika</artifactId>
 		</dependency>
 
 		<!-- Geo extensions -->

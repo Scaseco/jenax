@@ -42,15 +42,7 @@
 			<artifactId>jenax-resources-prefixes</artifactId>
 		</dependency>
 
-		<!-- There are is one or two used collection implementations (one is MapFromResource) 
-			that make use of SparqlRx -->
-		<!-- Can we get rid of all the rx stuff at this point? -->
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-rx</artifactId>
-		</dependency>
-
-
+		<!-- the code that uses cglib is no longer used since the upgrade to bytebuddy -->
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>

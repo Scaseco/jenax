@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.commons.util.entity.EntityInfoImpl;
+import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
@@ -176,7 +177,7 @@ public class RDFDataMgrEx {
      * @return
      * @throws IOException
      */
-    public static EntityInfo probeEntityInfo(InputStream in, Iterable<Lang> candidates) throws IOException {
+    public static RdfEntityInfo probeEntityInfo(InputStream in, Iterable<Lang> candidates) throws IOException {
         if (!in.markSupported()) {
             in = new BufferedInputStream(in);
         }
@@ -184,7 +185,7 @@ public class RDFDataMgrEx {
 
         CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
 
-        EntityInfo result;
+        RdfEntityInfo result;
         try (InputStream is = in) {
 
             InputStream nextIn = is;
@@ -211,7 +212,13 @@ public class RDFDataMgrEx {
             try (TypedInputStream tis = RDFDataMgrEx.probeLang(nextIn, candidates)) {
                 String contentType = tis.getContentType();
                 String charset = tis.getCharset();
-                result = new EntityInfoImpl(encodings, contentType, charset);
+
+                result = ModelFactory.createDefaultModel().createResource().as(RdfEntityInfo.class);
+                result.getContentEncodings().addAll(encodings);
+                result.setContentType(contentType);
+                result.setCharset(charset);
+
+                // result = new EntityInfoImpl(encodings, contentType, charset);
             }
         }
 

@@ -1,9 +1,7 @@
-package org.aksw.dcat.jena.plugin;
+package org.aksw.jenax.model.entityinfo.plugin;
 
-import org.aksw.dcat.jena.conf.api.DcatRepoConfig;
-import org.aksw.dcat.jena.domain.api.DcatDataset;
-import org.aksw.dcat.jena.domain.api.DcatDistribution;
-import org.aksw.dcat.jena.domain.api.MavenEntity;
+import org.aksw.dcat.ap.domain.api.Checksum;
+import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfoDefault;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -11,11 +9,11 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 
 
-public class JenaPluginDcat
+public class JenaPluginEntityInfo
     implements JenaSubsystemLifecycle {
 
     public void start() {
-        JenaPluginDcat.init();
+        JenaPluginEntityInfo.init();
     }
 
     @Override
@@ -28,9 +26,7 @@ public class JenaPluginDcat
 
     public static void init(Personality<RDFNode> p) {
         JenaPluginUtils.registerResourceClasses(
-                DcatRepoConfig.class,
-                MavenEntity.class,
-                DcatDataset.class,
-                DcatDistribution.class);
+                RdfEntityInfoDefault.class,
+                Checksum.class);
     }
 }

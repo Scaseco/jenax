@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.dcat.jena.domain.api.DcatDataset;
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
@@ -69,7 +70,7 @@ public class ExecutionUtils {
      */
     public static String deriveId(Resource r) {
         MavenEntity ds = ModelFactory.createDefaultModel().createResource().as(MavenEntity.class);
-        String mvnId = Arrays.asList(ds.getGroupId(), ds.getArtifactId(), ds.getVersion(), ds.getClassifier()).stream()
+        String mvnId = Stream.concat(Arrays.asList(ds.getGroupId(), ds.getArtifactId(), ds.getVersion()).stream(), ds.getClassifiers().stream())
             .filter(Objects::nonNull)
             .collect(Collectors.joining(":"));
 
@@ -225,7 +226,7 @@ public class ExecutionUtils {
             DcatDistribution dist = resultModel.createResource().as(DcatDistribution.class);
             dists.add(dist);
             String downloadUrl = dataEntry.getKey().getAbsolutePath().toUri().toString();
-            dist.setDownloadURL(downloadUrl);
+            dist.setDownloadUrl(downloadUrl);
 
             logger.info("Download url: " + downloadUrl);
 
