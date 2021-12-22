@@ -41,6 +41,10 @@ public interface OpDataRefResource
                 .setDataRef(cloneDataRef);
     }
 
+    public static OpDataRefResource from(DataRef dataRef) {
+        return from(dataRef.getModel(), dataRef);
+    }
+
     public static OpDataRefResource from(Model model, DataRef dataRef) {
         OpDataRefResource result = model
                 .createResource().as(OpDataRefResource.class)

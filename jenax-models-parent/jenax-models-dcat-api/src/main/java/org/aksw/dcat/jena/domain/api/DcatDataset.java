@@ -22,7 +22,7 @@ public interface DcatDataset
     // @Override
     <T extends Resource> Set<T> getDistributions(Class<T> clazz);
 
-    default Set<? extends DcatDistribution> getDistributions() {
+    default Set<? extends DcatDistribution> getDistributions2() {
         return getDistributions(DcatDistribution.class);
     }
 

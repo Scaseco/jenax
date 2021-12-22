@@ -1,7 +1,9 @@
 package org.aksw.jena_sparql_api.conjure.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,24 +239,16 @@ public class ContentTypeUtils {
      * @param fileName
      * @return
      */
-    public static RdfEntityInfo deriveHeadersFromFileExtension(String fileName) {
-        // TODO This method expects a file name - not the file extension alone - so
-        // an argument of x.ttl works, but just ttl will fail - fix that!S
-        // TODO Should we remove trailing slashes?
+    public static RdfEntityInfo deriveHeadersFromFileName(String fileName) {
+
+        List<String> parts = Arrays.asList(fileName.split("\\."));
+        Collections.reverse(parts);
 
         String contentType = null;
         List<String> codings = new ArrayList<>();
 
 
-        String current = fileName;
-
-        while(true) {
-            String ext = com.google.common.io.Files.getFileExtension(current);
-
-            if(ext == null) {
-                break;
-            }
-
+        for (String ext : parts) {
             // Classify the extension - once it maps to a content type, we are done
             String coding = codingExtensions.getAlternatives().get(ext);
             String ct = ctExtensions.getAlternatives().get(ext);
@@ -268,17 +262,16 @@ public class ContentTypeUtils {
                 codings.add(coding);
             }
 
+            // Once we detect a content typ abort
             if(ct != null) {
                 contentType = ct;//MediaType.parse(ct);
                 break;
             }
 
-            // both coding and ct were null - skip
+            // both coding and ct were null - break out of loop
             if(coding == null && ct == null) {
                 break;
             }
-
-            current = com.google.common.io.Files.getNameWithoutExtension(current);//current.substring(0, current.length() - ext.length());
         }
 
         RdfEntityInfo result = null;

@@ -674,7 +674,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
 //				|| ct.equalsIgnoreCase(ContentType.parse("application/x-bzip").getMimeType())
                 || ct.equalsIgnoreCase(ContentType.parse("application/x-bzip2").getMimeType())
                 ) {
-            meta = ContentTypeUtils.deriveHeadersFromFileExtension(uri);
+            meta = ContentTypeUtils.deriveHeadersFromFileName(uri);
         }
 
         RdfHttpEntityFile rdfEntity = targetResource.allocate(meta);

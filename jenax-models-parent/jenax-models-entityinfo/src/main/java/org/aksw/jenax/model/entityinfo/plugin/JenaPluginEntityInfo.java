@@ -2,6 +2,7 @@ package org.aksw.jenax.model.entityinfo.plugin;
 
 import org.aksw.dcat.ap.domain.api.Checksum;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfoDefault;
+import org.aksw.jena_sparql_api.http.domain.api.RdfList;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -26,6 +27,7 @@ public class JenaPluginEntityInfo
 
     public static void init(Personality<RDFNode> p) {
         JenaPluginUtils.registerResourceClasses(
+                RdfList.class,
                 RdfEntityInfoDefault.class,
                 Checksum.class);
     }

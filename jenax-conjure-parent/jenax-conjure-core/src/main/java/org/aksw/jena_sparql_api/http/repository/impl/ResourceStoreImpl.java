@@ -53,7 +53,7 @@ class ResourceSourceFileImpl
     @Override
     public Resource getResource(Path path) {
         String fileName = path.getFileName().toString();
-        RdfEntityInfo result = ContentTypeUtils.deriveHeadersFromFileExtension(fileName);
+        RdfEntityInfo result = ContentTypeUtils.deriveHeadersFromFileName(fileName);
         return result;
     }
 }

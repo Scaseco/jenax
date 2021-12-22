@@ -383,6 +383,7 @@ public class OpExecutorDefault
         String varName = op.getName();
         Map<String, Op> map = taskContext.getDataRefMapping();
         Op dataRef = map.get(varName);
+        Objects.requireNonNull(dataRef, String.format("OpVar %s is unbound", varName));
 
         RdfDataPod result = dataRef.accept(this);
 

@@ -271,16 +271,16 @@ public class ClassDescriptor {
 
 
         //for(Entry<P_Path0, Function<? super Resource, ? extends Collection<? extends RDFNode>>> e : rawPropertyProcessors.entrySet()) {
-        for(PropertyDescriptor pd : getPropertyDescriptors()) {
+        for (PropertyDescriptor pd : getPropertyDescriptors()) {
             //P_Path0 path = e.getKey();
             P_Path0 path = pd.getPath();
 
-            if(!pd.isIriType()) {
+            if (!pd.isIriType()) {
     //            System.err.println("Scanning " + path);
                 Function<? super Resource, ? extends Collection<? extends RDFNode>> propertyAccessor = pd.getRawProcessor();
                 Collection<? extends RDFNode> col = propertyAccessor.apply(node);
 
-                for(RDFNode rdfNode : col) {
+                for (RDFNode rdfNode : col) {
                     try {
                         if(!cxt.isPending(rdfNode)) {
     //                        System.err.println("Traversing from " + node.asResource() + " (" + clazz + ") to " + rdfNode.asResource() + " via " + path);

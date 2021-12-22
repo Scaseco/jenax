@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.shared.AddDeniedException;
 import org.apache.jena.util.iterator.NiceIterator;
 import org.apache.jena.vocabulary.RDF;
 
@@ -28,12 +29,20 @@ public class ListFromRDFList
 
     protected RDFList getList() {
         // Pick any resource and treat it as a list
-        // Also, clear all any other value for consistency
         Resource o = ResourceUtils.getPropertyValue(s, p, isFwd, Resource.class);
         if(o == null) {
             o = RDF.nil.inModel(s.getModel());
         }
-        ResourceUtils.setProperty(s, p, isFwd, o);
+
+        if (false) {
+            // TODO Should we also clear any other value for consistency?
+            // This would cause a get-method to cause a side effect - it breaks on read only models
+            // // Also, clear all any other value for consistency
+            try {
+                ResourceUtils.setProperty(s, p, isFwd, o);
+            } catch (AddDeniedException e) {
+            }
+        }
 
         return o.as(RDFList.class);
     }

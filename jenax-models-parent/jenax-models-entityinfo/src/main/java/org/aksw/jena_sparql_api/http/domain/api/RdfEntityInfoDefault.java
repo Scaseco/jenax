@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.dcat.ap.domain.api.Checksum;
+import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 
@@ -15,6 +16,16 @@ public interface RdfEntityInfoDefault
     @IriNs("eg")
     @Override
     List<String> getContentEncodings();
+
+
+    /**
+     * Helper attribute to skolemize the rdf list of content encodings.
+     * At present {@code @HashId} always generates ids for 'this'; we
+     * cannot express generate an ID for the lists underlying target rdf resource.
+     * we need some new annotation in the future such as {@code @ValueHashId}.
+     */
+    @Iri("eg:contentEncodings")
+    RdfList getContentEncodingsRdfList();
 
     @IriNs("eg")
     @Override

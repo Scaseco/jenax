@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -104,8 +105,6 @@ import com.google.common.hash.Hashing;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.DynamicType.Builder;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
-import net.bytebuddy.implementation.MethodCall;
-import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -496,7 +495,7 @@ public class MapperProxyUtils {
             rawView,
             converter);//new SetFromPropertyValues<>(s, p, rdfType);
 
-        boolean isRdfItems = RDFNode.class.isAssignableFrom(RDFNode.class);
+        boolean isRdfItems = RDFNode.class.isAssignableFrom(itemType);
         if(isRdfItems) {
             rawView = (List<RDFNode>)javaView;
         }
@@ -2107,10 +2106,17 @@ public class MapperProxyUtils {
      * @return The resource that is the skolemization of 'root' in the same model as 'root'
      */
     public static Resource skolemize(String iriPrefix, Resource root) {
+        return skolemize(iriPrefix, root, null);
+    }
+
+    public static Resource skolemize(String iriPrefix, Resource root, Consumer<Map<RDFNode, String>> renamesCallback) {
         HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(root);
 
         // The mapping of RDFNodes to string IDs (not IRIs at this point) is obtained via
         Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
+        if (renamesCallback != null) {
+            renamesCallback.accept(renames);
+        }
 
         // Get a mapping from the original resources to the renamed ones.
         Map<Resource, Resource> map = ResourceUtils.renameResources(iriPrefix, renames);

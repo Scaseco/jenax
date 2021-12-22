@@ -210,6 +210,10 @@ public class JenaPluginUtils {
 
     public static Implementation createImplementation(boolean lazy, Class<?> clazz, Supplier<PrefixMapping> pm) {
         Implementation result;
+
+        TypeDecider typeDecider = getTypeDecider();
+        ((TypeDeciderImpl)typeDecider).registerClasses(clazz);
+
         if (lazy) {
             // We don't clone the prefixes anymore for performance reasons
 
@@ -236,8 +240,6 @@ public class JenaPluginUtils {
                 MapperProxyUtils.createProxyFactory(cls, pm, typeDecider);
 
 
-        ((TypeDeciderImpl)typeDecider).registerClasses(clazz);
-
         BiFunction<Node, EnhGraph, ? extends Resource> proxyFactory2 = (n, m) -> {
             Resource tmp = new ResourceImpl(n, m);
             typeDecider.writeTypeTriples(tmp, cls);
@@ -256,7 +258,7 @@ public class JenaPluginUtils {
 
     public static void registerResourceClass(boolean lazy, Class<?> clazz, Personality<RDFNode> p, Supplier<PrefixMapping> pm) {
 
-        if(Resource.class.isAssignableFrom(clazz)) {
+        if (Resource.class.isAssignableFrom(clazz)) {
             boolean supportsProxying = supportsProxying(clazz);
             if (supportsProxying) {
                 ResourceView resourceView = clazz.getAnnotation(ResourceView.class);
