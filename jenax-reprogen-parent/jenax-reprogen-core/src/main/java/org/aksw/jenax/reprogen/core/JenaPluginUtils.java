@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
@@ -30,7 +31,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -306,4 +306,42 @@ public class JenaPluginUtils {
 
         return result;
     }
+
+
+    /**
+     * Utility method for easing implementations of 'getOrSet' default methods on resource views.
+     *
+     * Example usage:
+     * <pre>
+     * {@code
+     * class QualifiedDerivation {
+     *   @Iri(ProvTerms.hadActivity)
+     *   Activity getHadActivity();
+     *   QualifiedDerivation setHadActivity(Resource activity);
+     *
+     *   default Activity getOrSetHadActivity() {
+     *     return JenaPluginUtils.getOrSet(this, Activity.class, this::getHadActivity, this::setHadActivity);
+     *   }
+     * }
+     * }
+     * </pre>
+     *
+     * @param <I>
+     * @param <O>
+     * @param in
+     * @param clz
+     * @param getter
+     * @param setter
+     * @return
+     */
+    public static <I extends RDFNode, O extends RDFNode> O getOrSet(
+            I in, Class<O> clz, Supplier<? extends O> getter, Function<? super O, ?> setter) {
+        O result = getter.get();
+        if (result == null) {
+            result = in.getModel().createResource().as(clz);
+            setter.apply(result);
+        }
+        return result;
+    }
+
 }

@@ -2,7 +2,7 @@ package org.aksw.dcat.jena.domain.api;
 
 import java.util.Set;
 
-import org.aksw.dcat.util.ObjectUtils;
+import org.aksw.commons.util.obj.ObjectUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.apache.jena.rdf.model.Resource;
 

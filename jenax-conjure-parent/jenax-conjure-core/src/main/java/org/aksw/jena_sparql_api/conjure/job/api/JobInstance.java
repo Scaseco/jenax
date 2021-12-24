@@ -12,30 +12,35 @@ import org.apache.jena.rdf.model.Resource;
 /**
  * A Job instance binds the placeholders/variables
  * of a job to concrete values
- * 
+ *
  * @author raven
  *
  */
 @ResourceView
 @RdfTypeNs("rpif")
 public interface JobInstance
-	extends Resource
+    extends Resource
 {
-	@IriNs("rpif")
-	Job getJob();
-	JobInstance setJob(Job job);
-	// These are variables that are substituted with literals
-	//Map<String, RDFNode> setEnvMap();
-	@IriNs("rpif")
-	Map<String, Node> getEnvMap();
+    @IriNs("rpif")
+    Job getJob();
+    JobInstance setJob(Job job);
+    // These are variables that are substituted with literals
+    //Map<String, RDFNode> setEnvMap();
+    @IriNs("rpif")
+    Map<String, Node> getEnvMap();
 
-	// Mapping of OpVar variables - these are variables that are substituted by sub workflows
-	// I.e. their evaluation yields datasets
-	// TODO Maybe instead of OpVar - ResourceVar or so would be better
-	// so extension points where a resource from another RDF graph (together with that graph)
-	// can be injected
-	//Map<String, RDFNode> setOpVarMap();
-	@IriNs("rpif")
-	Map<String, Op> getOpVarMap();
+    // Mapping of OpVar variables - these are variables that are substituted by sub workflows
+    // I.e. their evaluation yields datasets
+    // TODO Maybe instead of OpVar - ResourceVar or so would be better
+    // so extension points where a resource from another RDF graph (together with that graph)
+    // can be injected
+    //Map<String, RDFNode> setOpVarMap();
+    @IriNs("rpif")
+    Map<String, Op> getOpVarMap();
 
+
+    public static JobInstance create(Job job) {
+        return job.getModel().createResource().as(JobInstance.class)
+                .setJob(job);
+    }
 }
