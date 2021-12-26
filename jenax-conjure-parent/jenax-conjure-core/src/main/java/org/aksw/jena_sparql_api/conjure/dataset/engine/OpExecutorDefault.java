@@ -38,6 +38,7 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSequence;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSet;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpStmtList;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUnion;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUnionDefaultGraph;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUpdateRequest;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUtils;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVar;
@@ -83,6 +84,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.lang.SinkQuadsToDataset;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.algebra.TransformUnionQuery;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -188,7 +190,7 @@ public class OpExecutorDefault
         RdfDataPod result;
 
         Op subOp = op.getSubOp();
-        try(RdfDataPod subDataPod = subOp.accept(this)) {
+        try (RdfDataPod subDataPod = subOp.accept(this)) {
             try(RDFConnection conn = subDataPod.openConnection()) {
 
                 Collection<String> queryStrs = op.getQueryStrings();
@@ -689,5 +691,34 @@ public class OpExecutorDefault
 
     public Map<String, Node> getExecCtx() {
         return execCtx;
+    }
+
+    @Override
+    public RdfDataPod visit(OpUnionDefaultGraph op) {
+        Op subOp = op.getSubOp();
+        RdfDataPod subPod = subOp.accept(this);
+
+        // Wrap the underlying pod's connection factory
+        RdfDataPod result = new RdfDataPodBase() {
+            @Override
+            protected RDFConnection newConnection() {
+                RDFConnection raw = subPod.openConnection();
+                RDFConnection result = RDFConnectionBuilder.from(raw)
+                    .addQueryTransform(q -> QueryUtils.applyOpTransform(q, TransformUnionQuery::transform))
+                    .getConnection();
+                return result;
+            }
+            @Override
+            public boolean isMutable() {
+                return false;
+            }
+
+            @Override
+            public void close() throws Exception {
+                subPod.close();
+            }
+        };
+
+        return result;
     }
 }

@@ -2,17 +2,24 @@ package org.aksw.jenax.arq.util.streamrdf;
 
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.irix.IRIx;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.riot.system.StreamRDFWrapper;
 import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.riot.system.SyntaxLabels;
 import org.apache.jena.riot.writer.WriterStreamRDFBase;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.Context;
 
@@ -27,11 +34,46 @@ public class StreamRDFWriterEx {
 
     public static StreamRDF getWriterStream(
             OutputStream out,
-            RDFFormat rdfFormat) {
-        return getWriterStream(out, rdfFormat, null, null, null, null);
+            RDFFormat rdfFormat,
+            Context context) {
+        return getWriterStream(out, rdfFormat, context, null, null, null, null);
     }
 
 
+    public static void writeAsGiven(DatasetGraph dg, OutputStream out, RDFFormat format, Context cxt,
+            Function<StreamRDF, StreamRDF> applyWrapper) {
+        writeAsGiven(dg, StreamRDFOps::sendDatasetToStream, out, format, cxt, applyWrapper);
+    }
+
+    public static void writeAsGiven(Graph graph, OutputStream out, RDFFormat format, Context cxt,
+            Function<StreamRDF, StreamRDF> applyWrapper) {
+        writeAsGiven(graph, StreamRDFOps::sendGraphToStream, out, format, cxt, applyWrapper);
+    }
+
+    /**
+    *
+    * @param dg The dataset
+    * @param out The output stream
+    * @param format The RDF format
+    * @param cxt The context for riot
+    * @param applyWrapper A callback for optionally wrapping the internal streamRdf; may be null.
+    */
+
+    public static <T> void writeAsGiven(
+            T data, BiConsumer<T, StreamRDF> sendToStream,
+            OutputStream out, RDFFormat format, Context cxt,
+            Function<StreamRDF, StreamRDF> applyWrapper) {
+        StreamRDF streamRdf = getWriterStream(out, format, cxt);
+
+        // streamRdf = new StreamRDFDeferred(streamRdf, true, DefaultPrefixes.get(), 1000, 1000, null);
+        if (applyWrapper != null) {
+            streamRdf = applyWrapper.apply(streamRdf);
+        }
+
+        streamRdf.start();
+        sendToStream.accept(data, streamRdf);
+        streamRdf.finish();
+    }
     /**
      * Create a StreamRDF writer with extended options.
      *
@@ -50,6 +92,7 @@ public class StreamRDFWriterEx {
             RDFFormat rdfFormat,
             Context context,
             PrefixMapping fixedPrefixes,
+            IRIx irix,
             NodeToLabel nodeToLabel,
             Boolean mapQuadsToTriplesForTripleLangs
     ) {
@@ -61,10 +104,15 @@ public class StreamRDFWriterEx {
         if (coreWriter instanceof WriterStreamRDFBase) {
             WriterStreamRDFBase tmp = (WriterStreamRDFBase)coreWriter;
 
+            IRIx effectiveIrix = irix == null
+                    ? IRIxResolverUtils.newIRIxAsGiven("")
+                    : irix;
+
             NodeToLabel effectiveNodeToLabel = nodeToLabel == null
                     ? SyntaxLabels.createNodeToLabelAsGiven()
                     : nodeToLabel;
 
+            WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
             WriterStreamRDFBaseUtils.setNodeToLabel(tmp, effectiveNodeToLabel);
 
             if (fixedPrefixes != null) {
@@ -88,4 +136,23 @@ public class StreamRDFWriterEx {
 
         return rawWriter;
     }
+
+//  public static StreamRDF getWriterAsGiven(OutputStream out, RDFFormat rdfFormat, Context context) {
+//	return getWriterStream(out, rdfFormat, context, null, )
+//    getWriterStream(out, rdfFormat, );
+//
+//    StreamRDF rawWriter = StreamRDFWriter.getWriterStream(out, rdfFormat, context);
+//    StreamRDF coreWriter = StreamRDFUtils.unwrap(rawWriter);
+//
+//    // Retain blank nodes as given
+//    if (coreWriter instanceof WriterStreamRDFBase) {
+//        WriterStreamRDFBase tmp = (WriterStreamRDFBase)coreWriter;
+//        WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, IRIxResolverUtils.newIRIxAsGiven(""));
+//        WriterStreamRDFBaseUtils.setNodeToLabel(tmp, SyntaxLabels.createNodeToLabelAsGiven());
+//
+//    }
+//
+//    return rawWriter;
+//}
+
 }

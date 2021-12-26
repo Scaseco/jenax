@@ -222,4 +222,5 @@ public class RDFConnectionUtils {
         RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
         return RDFConnectionAdapter.adapt(newLink);
     }
+    
 }

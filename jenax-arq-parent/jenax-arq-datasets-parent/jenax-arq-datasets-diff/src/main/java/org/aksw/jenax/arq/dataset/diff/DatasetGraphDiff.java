@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -153,9 +154,9 @@ public class DatasetGraphDiff
 //        }
 //        itBase = materialized.iterator();
 
-        Iterator<Quad> itActualAdded = Iterators.filter(added.find(g, s, p, o), quad -> !base.contains(quad));
-        Iterator<Quad> itVisibleBase = Iterators.filter(itBase, quad -> !removed.contains(quad));
-        Iterator<Quad> result = Iterators.concat(itVisibleBase, itActualAdded);
+        Iterator<Quad> itActualAdded = Iter.filter(added.find(g, s, p, o), quad -> !base.contains(quad));
+        Iterator<Quad> itVisibleBase = Iter.filter(itBase, quad -> !removed.contains(quad));
+        Iterator<Quad> result = Iter.concat(itVisibleBase, itActualAdded);
 
         return result;
     }
@@ -163,9 +164,9 @@ public class DatasetGraphDiff
     @Override
     public Iterator<Quad> findNG(Node g, Node s, Node p, Node o) {
         Iterator<Quad> itBase = base.findNG(g, s, p, o);
-        Iterator<Quad> itActualAdded = Iterators.filter(added.findNG(g, s, p, o), quad -> !base.contains(quad));
-        Iterator<Quad> itVisibleBase = Iterators.filter(itBase, quad -> !removed.contains(quad));
-        Iterator<Quad> result = Iterators.concat(itVisibleBase, itActualAdded);
+        Iterator<Quad> itActualAdded = Iter.filter(added.findNG(g, s, p, o), quad -> !base.contains(quad));
+        Iterator<Quad> itVisibleBase = Iter.filter(itBase, quad -> !removed.contains(quad));
+        Iterator<Quad> result = Iter.concat(itVisibleBase, itActualAdded);
 
         return result;
     }
@@ -199,12 +200,15 @@ public class DatasetGraphDiff
     public Iterator<Node> listGraphNodes() {
         Iterator<Node> result = base.listGraphNodes();
         // TODO Add flag to treat empty graphs as effectively removed
-        result = Iterators.filter(result, node -> !removedGraphs.contains(node));
+        result = Iter.filter(result, node -> !removedGraphs.contains(node));
 
+        // Add explicitly added graphs as well as those derived from quads
         Set<Node> effectiveAddedGraphs = new LinkedHashSet<Node>(addedGraphs);
-        added.listGraphNodes().forEachRemaining(effectiveAddedGraphs::add);
+        Iterators
+            .filter(added.listGraphNodes(), gn -> !base.containsGraph(gn))
+            .forEachRemaining(effectiveAddedGraphs::add);
 
-        result = Iterators.concat(result, effectiveAddedGraphs.iterator());
+        result = Iter.concat(result, effectiveAddedGraphs.iterator());
 
 
         return result;

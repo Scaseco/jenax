@@ -9,6 +9,28 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefGit;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefOp;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op1;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op2;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpCoalesce;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpError;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpHdtHeader;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJobInstance;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpMacroCall;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpN;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpPersist;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpQueryOverViews;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSequence;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSet;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpStmtList;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUnion;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUnionDefaultGraph;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUpdateRequest;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVar;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobBinding;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
@@ -70,28 +92,30 @@ public class JenaPluginConjure
                 );
 
         JenaPluginUtils.registerResourceClasses(
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.Op.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.Op1.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.Op2.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpCoalesce.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpError.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpHdtHeader.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJobInstance.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpMacroCall.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpN.class,
-//        		org.aksw.jena_sparql_api.conjure.dataset.algebra.OpNothing.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpPersist.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpQueryOverViews.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSequence.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpSet.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpStmtList.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUnion.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUpdateRequest.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVar.class,
-                org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen.class
+                Op.class,
+                Op1.class,
+                Op2.class,
+                OpCoalesce.class,
+                OpConstruct.class,
+                OpUnionDefaultGraph.class,
+
+                OpData.class,
+                OpDataRefResource.class,
+                OpError.class,
+                OpHdtHeader.class,
+                OpJobInstance.class,
+                OpMacroCall.class,
+                OpN.class,
+//        		OpNothing.class,
+                OpPersist.class,
+                OpQueryOverViews.class,
+                OpSequence.class,
+                OpSet.class,
+                OpStmtList.class,
+                OpUnion.class,
+                OpUpdateRequest.class,
+                OpVar.class,
+                OpWhen.class
                 );
 
         JenaPluginUtils.registerResourceClasses(

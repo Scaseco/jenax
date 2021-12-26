@@ -554,7 +554,9 @@ public class RDFDataMgrEx {
                 rdfFormat,
                 cxt,
                 null,
-                NodeToLabel.createBNodeByLabelAsGiven(),
+                null,
+                null,
+                // NodeToLabel.createBNodeByLabelAsGiven(),
                 true
         );
 

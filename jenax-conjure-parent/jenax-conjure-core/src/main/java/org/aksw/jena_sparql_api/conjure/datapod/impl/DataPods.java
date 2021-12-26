@@ -24,6 +24,7 @@ import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFi
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
+import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
@@ -35,7 +36,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -102,7 +102,10 @@ public class DataPods {
         return new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                RDFConnection result = RDFConnectionFactory.connect(dataset);
+                // The simple connection approach is broken with jena 4.3.x because
+                // QueryExecutionCompat.get() returns a null QueryExec
+                // RDFConnection result = RDFConnection.connect(dataset);
+                RDFConnection result = DatasetRDFConnectionFactoryBuilder.connect(dataset);
                 return result;
             }
 

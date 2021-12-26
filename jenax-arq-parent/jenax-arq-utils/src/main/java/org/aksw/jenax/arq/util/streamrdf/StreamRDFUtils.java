@@ -21,11 +21,12 @@ public class StreamRDFUtils {
     }
 
     public static StreamRDF wrapWithoutPrefixDelegation(StreamRDF other) {
-    	return new StreamRDFWrapper(other) {
-    		@Override
-    		public void prefix(String prefix, String iri) {
-    			// Do nothing
-    		}
-    	};
+        return new StreamRDFWrapper(other) {
+            @Override
+            public void prefix(String prefix, String iri) {
+                // Do nothing
+            }
+        };
     }
+
 }

@@ -9,9 +9,11 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.engine.QueryEngineFactory;
 import org.apache.jena.sparql.engine.QueryEngineRegistry;
+import org.apache.jena.sparql.exec.QueryExecutionCompat;
 import org.apache.jena.sparql.modify.UpdateEngineFactory;
 import org.apache.jena.sparql.modify.UpdateEngineRegistry;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.ContextAccumulator;
 
 /**
  * Similar to {@link RDFConnectionFactory#connect(Dataset)} but
@@ -31,11 +33,27 @@ public class DatasetRDFConnectionFactoryBuilder {
     protected QueryEngineFactoryProvider queryEngineFactoryProvider = null;
     protected UpdateEngineFactoryProvider updateEngineFactoryProvider = null;
 
-    // Use a context supplier?
+    /** Use {@link ContextAccumulator} ? */
     protected Context context;
+
+    /**
+     * This approach is a workaround for a bug with {@link RDFConnection#connect(Dataset)} for at least jena 4.3.x:
+     * Due to the bug an internal {@link QueryExecutionCompat} is created whose .get() method returns a null
+     * QueryExec instance. The workaround works because the resulting connection uses a different kind of
+     * wrapping.
+     */
+    public static RDFConnection connect(Dataset dataset) {
+        return createWithDefaults().build().connect(dataset);
+    }
 
     public static DatasetRDFConnectionFactoryBuilder create() {
         return new DatasetRDFConnectionFactoryBuilder();
+    }
+
+    public static DatasetRDFConnectionFactoryBuilder createWithDefaults() {
+        return create()
+                .setDefaultQueryEngineFactoryProvider()
+                .setDefaultUpdateEngineFactoryProvider();
     }
 
     public DatasetRDFConnectionFactoryBuilder setQueryEngineFactoryProvider(QueryEngineFactoryProvider queryEngineFactoryProvider) {

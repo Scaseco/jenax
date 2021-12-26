@@ -42,6 +42,7 @@ public interface ConjureFluent {
     ConjureFluent update(String updateRequest);
     ConjureFluent views(String ... queryStrs);
     ConjureFluent views(Collection<Query> queries);
+    ConjureFluent unionDefaultGraph();
 
 
     ConjureFluent set(String ctxVar, String selector, String path);
