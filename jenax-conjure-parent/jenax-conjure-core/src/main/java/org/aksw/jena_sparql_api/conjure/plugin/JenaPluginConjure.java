@@ -36,6 +36,7 @@ import org.aksw.jena_sparql_api.conjure.job.api.JobBinding;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
 import org.aksw.jena_sparql_api.conjure.job.api.Macro;
 import org.aksw.jena_sparql_api.conjure.job.api.MacroParam;
+import org.aksw.jena_sparql_api.conjure.noderef.NodeRef;
 import org.aksw.jena_sparql_api.conjure.resourcespec.ResourceSpec;
 import org.aksw.jena_sparql_api.conjure.resourcespec.ResourceSpecInline;
 import org.aksw.jena_sparql_api.conjure.resourcespec.ResourceSpecUrl;
@@ -103,6 +104,8 @@ public class JenaPluginConjure
                 OpDataRefResource.class,
                 OpError.class,
                 OpHdtHeader.class,
+
+                NodeRef.class,
                 OpJobInstance.class,
                 OpMacroCall.class,
                 OpN.class,

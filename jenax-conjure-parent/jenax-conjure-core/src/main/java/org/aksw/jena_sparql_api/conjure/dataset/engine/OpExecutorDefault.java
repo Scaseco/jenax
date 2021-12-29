@@ -46,6 +46,7 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
+import org.aksw.jena_sparql_api.conjure.noderef.NodeRef;
 import org.aksw.jena_sparql_api.conjure.traversal.engine.FunctionAssembler;
 import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFileSystem;
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
@@ -679,7 +680,22 @@ public class OpExecutorDefault
         subExecutor.getTaskContext().getDataRefMapping().putAll(opMap);
 
 
+        NodeRef jobRef = ji.getJobRef();
         Job job = ji.getJob();
+
+        if (job == null) {
+            if (jobRef == null) {
+                throw new RuntimeException("Neither job nor reference to a job set on job instance " + ji);
+            }
+
+            RdfDataPod jobDataPod = DataPods.fromDataRef(jobRef.getDataRef(), repo, this);
+            Model jobModel = jobDataPod.getModel();
+
+            job = jobModel.asRDFNode(jobRef.getNode()).as(Job.class);
+        } else if (jobRef != null) {
+            logger.warn("Both job and jobRef provided; using the former");
+        }
+
         Op subOp = job.getOp();
 
         RdfDataPod result = subOp.accept(subExecutor);

@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.conjure.job.api;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
+import org.aksw.jena_sparql_api.conjure.noderef.NodeRef;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.RdfTypeNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -24,6 +25,11 @@ public interface JobInstance
     @IriNs("rpif")
     Job getJob();
     JobInstance setJob(Job job);
+
+    @IriNs("rpif")
+    NodeRef getJobRef();
+    JobInstance setJobRef(Resource res);
+
     // These are variables that are substituted with literals
     //Map<String, RDFNode> setEnvMap();
     @IriNs("rpif")

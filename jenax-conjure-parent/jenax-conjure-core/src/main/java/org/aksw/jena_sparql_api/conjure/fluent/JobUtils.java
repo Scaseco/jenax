@@ -15,6 +15,7 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUtils;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
+import org.aksw.jena_sparql_api.conjure.resourcespec.RPIF;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
@@ -24,10 +25,32 @@ import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.lang.arq.ParseException;
+import org.apache.jena.vocabulary.RDF;
+
+import com.google.common.collect.Iterables;
 
 public class JobUtils {
+
+    public static List<Job> listJobs(Model model) {
+        Resource xjob = ResourceFactory.createResource(RPIF.ns + "Job");
+
+        List<Job> jobs = model.listResourcesWithProperty(RDF.type, xjob)
+                .mapWith(r -> r.as(Job.class))
+                .toList();
+        return jobs;
+    }
+
+
+    public static Job getOnlyJob(Model model) {
+        List<Job> jobs = listJobs(model);
+        Job job = Iterables.getOnlyElement(jobs);
+        return job;
+    }
+
 
     public static Job fromSparqlFile(String path) throws FileNotFoundException, IOException, ParseException {
         // TODO Add API for Query objects to fluent
