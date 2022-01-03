@@ -352,7 +352,11 @@
 			<!-- <version>${jaxb.version}</version> -->
 			<!-- </dependency> -->
 
-
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-plugins-datatypes</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
 				and tika -->

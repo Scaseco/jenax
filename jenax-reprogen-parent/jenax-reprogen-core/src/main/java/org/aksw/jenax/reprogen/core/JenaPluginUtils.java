@@ -3,6 +3,7 @@ package org.aksw.jenax.reprogen.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -342,6 +343,20 @@ public class JenaPluginUtils {
             setter.apply(result);
         }
         return result;
+    }
+
+    public static <I extends RDFNode, O extends RDFNode, C extends Collection<O>>
+    O addNew(I in, Class<O> clz, Function<? super I, C> getCollection) {
+        return addNewCore(in, clz, () -> getCollection.apply(in), Collection::add);
+    }
+
+    public static <I extends RDFNode, X extends RDFNode, C> X addNewCore(
+            I in, Class<X> clz, Supplier<C> getter, BiFunction<C, X, ?> adder) {
+        C collection = getter.get();
+        X item = in.getModel().createResource().as(clz);
+        adder.apply(collection, item);
+
+        return item;
     }
 
 }

@@ -34,6 +34,7 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobBinding;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
+import org.aksw.jena_sparql_api.conjure.job.api.JobParam;
 import org.aksw.jena_sparql_api.conjure.job.api.Macro;
 import org.aksw.jena_sparql_api.conjure.job.api.MacroParam;
 import org.aksw.jena_sparql_api.conjure.noderef.NodeRef;
@@ -68,7 +69,7 @@ public class JenaPluginConjure
         JenaPluginHdt.init();
 
         JenaPluginUtils.registerResourceClasses(
-                Job.class, JobBinding.class, JobInstance.class, Macro.class,
+                Job.class, JobParam.class, JobBinding.class, JobInstance.class, Macro.class,
                 MacroParam.class);
 
         JenaPluginUtils.registerResourceClasses(

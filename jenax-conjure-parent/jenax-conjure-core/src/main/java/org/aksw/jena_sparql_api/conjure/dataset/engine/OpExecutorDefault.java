@@ -23,6 +23,7 @@ import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.RdfDataPodBase;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.RdfDataPodHdt;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpCoalesce;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct;
@@ -44,6 +45,7 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUtils;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVar;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpWhen;
+import org.aksw.jena_sparql_api.conjure.fluent.JobUtils;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
 import org.aksw.jena_sparql_api.conjure.noderef.NodeRef;
@@ -688,10 +690,17 @@ public class OpExecutorDefault
                 throw new RuntimeException("Neither job nor reference to a job set on job instance " + ji);
             }
 
-            RdfDataPod jobDataPod = DataPods.fromDataRef(jobRef.getDataRef(), repo, this);
+            DataRef dataRef = jobRef.getDataRef();
+            RdfDataPod jobDataPod = DataPods.fromDataRef(dataRef, repo, this);
             Model jobModel = jobDataPod.getModel();
 
-            job = jobModel.asRDFNode(jobRef.getNode()).as(Job.class);
+            Node jobNode = jobRef.getNode();
+            if (jobNode == null) {
+                job = JobUtils.getOnlyJob(jobModel);
+            } else {
+                job = jobModel.asRDFNode(jobNode).as(Job.class);
+            }
+
         } else if (jobRef != null) {
             logger.warn("Both job and jobRef provided; using the former");
         }

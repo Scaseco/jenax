@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
@@ -41,6 +42,7 @@ import org.aksw.jena_sparql_api.conjure.fluent.QLib;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobBinding;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
+import org.aksw.jena_sparql_api.conjure.job.api.JobParam;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
@@ -129,7 +131,8 @@ public class MainConjurePlayground {
         Map<String, Op> map = Collections.singletonMap("ARG", op);
 
         System.out.println("Op Vars: " + job.getOpVars());
-        System.out.println("Literal Vars: " + job.getDeclaredVars());
+        //  .getDeclaredVars()
+        System.out.println("Literal Vars: " + job.getParams().stream().map(JobParam::getParamName).collect(Collectors.toList()));
 
         JobInstance ji = JobUtils.createJobInstanceWithCopy(job, env, map);
 

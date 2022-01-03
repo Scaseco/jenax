@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
+import org.aksw.jena_sparql_api.conjure.resourcespec.RpifTerms;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversal;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
@@ -12,6 +13,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.IriType;
 import org.aksw.jena_sparql_api.mapper.annotation.PolymorphicOnly;
 import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 
@@ -41,15 +43,29 @@ public interface Job
 
     /**
      * Explicitly declared variables for the job.
-     * Can be automatically derived from the description (TODO add link to util method),
-     * but an explicit description can be useful.
+     * Can be automatically derived from certain jobs, such as ones making use of placeholders in sparql quries.
+     * (TODO add link to util method),
+     * An explicit description is always useful.
      *
      *
      * @return
      */
-    @Iri("rpif:declaredVar")
-    Set<String> getDeclaredVars();
-    Job setDeclaredVars(Collection<String> varNames);
+//    @Iri("rpif:declaredVar")
+//    Set<String> getDeclaredVars();
+//    Job setDeclaredVars(Collection<String> varNames);
+
+    @IriNs(RpifTerms.NS)
+    Set<JobParam> getParams();
+
+    /** Return a view of only the variable names */
+    default Iterable<String> getDeclaredVars() {
+        return () -> getParams().stream().map(JobParam::getParamName).iterator();
+    }
+
+
+    default JobParam addNewParam() {
+        return JenaPluginUtils.addNew(this, JobParam.class, Job::getParams);
+    }
 
     @Iri("rpif:opVar")
     Set<String> getOpVars();

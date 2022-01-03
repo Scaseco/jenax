@@ -15,7 +15,8 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpUtils;
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
-import org.aksw.jena_sparql_api.conjure.resourcespec.RPIF;
+import org.aksw.jena_sparql_api.conjure.job.api.JobParam;
+import org.aksw.jena_sparql_api.conjure.resourcespec.RpifTerms;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
@@ -36,7 +37,7 @@ import com.google.common.collect.Iterables;
 public class JobUtils {
 
     public static List<Job> listJobs(Model model) {
-        Resource xjob = ResourceFactory.createResource(RPIF.ns + "Job");
+        Resource xjob = ResourceFactory.createResource(RpifTerms.NS + "Job");
 
         List<Job> jobs = model.listResourcesWithProperty(RDF.type, xjob)
                 .mapWith(r -> r.as(Job.class))
@@ -95,9 +96,14 @@ public class JobUtils {
 
         Job result = Job.create(cj.getContext().getModel())
                 .setOp(op)
-                .setDeclaredVars(envVars)
+                // .setDeclaredVars(envVars)
                 .setOpVars(Collections.singleton(opVarName));
 
+        // Set<JobParam> params = result.getParams();
+        for (String varName : envVars) {
+            JobParam param = result.addNewParam();
+            param.setParamName(varName);
+        }
 
         return result;
     }

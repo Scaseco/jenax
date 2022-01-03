@@ -12,7 +12,7 @@ import org.aksw.commons.collector.core.AggBuilder;
 import org.aksw.commons.collector.core.AggLcaMap;
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
-import org.aksw.jenax.util.traversal.BreadthFirstSearchLib;
+import org.aksw.commons.util.traverse.BreadthFirstSearchLib;
 import org.aksw.jenax.util.traversal.GraphSuccessorFunction;
 import org.aksw.jenax.util.traversal.NaiveLCAFinder;
 import org.apache.jena.datatypes.RDFDatatype;

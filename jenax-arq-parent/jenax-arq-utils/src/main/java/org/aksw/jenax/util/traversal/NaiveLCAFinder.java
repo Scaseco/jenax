@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.commons.util.traverse.BreadthFirstSearchLib;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.ext.com.google.common.collect.Maps;

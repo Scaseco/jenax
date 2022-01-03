@@ -1,10 +1,11 @@
-package org.aksw.jenax.path.plugin;
+package org.aksw.jenax.arq.datatype.plugin;
 
-import org.aksw.jenax.path.datatype.RDFDatatypePPath;
+import org.aksw.jenax.arq.datatype.RDFDatatypeExpr;
+import org.aksw.jenax.arq.datatype.RDFDatatypeQuery;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 
-public class JenaPluginPath
+public class JenaPluginDatatypes
     implements JenaSubsystemLifecycle {
 
     public void start() {
@@ -18,6 +19,7 @@ public class JenaPluginPath
 
     public static void init() {
         TypeMapper typeMapper = TypeMapper.getInstance();
-        typeMapper.registerDatatype(RDFDatatypePPath.INSTANCE);
+        typeMapper.registerDatatype(RDFDatatypeExpr.INSTANCE);
+        typeMapper.registerDatatype(RDFDatatypeQuery.INSTANCE);
     }
 }
