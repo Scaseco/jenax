@@ -3,6 +3,7 @@ package org.aksw.jenax.model.prov;
 import java.time.Instant;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -13,6 +14,7 @@ public interface Activity
     extends ProvComponent
 {
     @Iri(ProvTerms.hadPlan)
+    @HashId
     Plan getHadPlan();
     Activity setHadPlan(Resource plan);
 
@@ -22,6 +24,7 @@ public interface Activity
 
 
     @Iri(ProvTerms.wasAssociatedWith)
+    @HashId
     Entity getWasAssociatedWith();
     Activity setWasAssociatedWith(Resource entity);
 

@@ -3,6 +3,7 @@ package org.aksw.dcat.jena.plugin;
 import org.aksw.dcat.jena.conf.api.DcatRepoConfig;
 import org.aksw.dcat.jena.domain.api.DcatDataset;
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
+import org.aksw.dcat.jena.domain.api.DcatDownloadUrl;
 import org.aksw.dcat.jena.domain.api.MavenEntity;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
@@ -31,6 +32,7 @@ public class JenaPluginDcat
                 DcatRepoConfig.class,
                 MavenEntity.class,
                 DcatDataset.class,
-                DcatDistribution.class);
+                DcatDistribution.class,
+                DcatDownloadUrl.class);
     }
 }

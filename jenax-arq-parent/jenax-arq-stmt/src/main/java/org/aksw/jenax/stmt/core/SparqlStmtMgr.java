@@ -21,6 +21,7 @@ import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.rdf.model.Model;
@@ -263,6 +264,22 @@ public class SparqlStmtMgr {
 
         return it;
     }
+
+
+    /**
+     * Load a query of which one variable acts as a placeholder as a function.
+     * This method may be refactored to use a {@link ParameterizedSparqlString} as a base.
+     */
+    public static Function<String, Query> loadTemplate(String fileOrURI, String templateArgName) throws FileNotFoundException, IOException, ParseException {
+        Query templateQuery = SparqlStmtMgr.loadQuery(fileOrURI);
+
+        Function<String, Query> result = value -> {
+            Map<String, String> map = Collections.singletonMap(templateArgName, value);
+            Query r = QueryUtils.applyNodeTransform(templateQuery, x -> NodeEnvsubst.subst(x, map::get));
+            return r;
+        };
+        return result;
+    };
 
 //	public static Model execConstruct(RDFConnection conn, String queryStr) {
 //		Model result = ModelFactory.createDefaultModel();
