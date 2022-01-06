@@ -1,9 +1,12 @@
 package org.aksw.dcat.jena.domain.api;
 
+import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
+
 public interface DcatEntityCore {
 //	String getCkanId();
 //	void setCkanId(String id);
 
+    @IriNs("dcterms")
     String getIdentifier();
     DcatEntityCore setIdentifier(String name);
 
@@ -11,9 +14,11 @@ public interface DcatEntityCore {
 //    String getLocalName();
 //    void setLocalName(String name);
 
+    @IriNs("dcterms")
     String getTitle();
     DcatEntityCore setTitle(String title);
 
+    @IriNs("dcterms")
     String getDescription();
     DcatEntityCore setDescription(String description);
 }

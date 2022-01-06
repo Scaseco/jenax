@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.conjure.noderef;
 
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -41,6 +42,17 @@ public interface NodeRef
 
       return result;
     }
+
+    public static NodeRef createForDcatEntity(Model model, Node dcatEntity, Node node, Node graph) {
+        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecord(model.wrapAsResource(dcatEntity));
+
+        NodeRef result = model.createResource().as(NodeRef.class)
+          .setDataRef(dataRef)
+          .setNode(node)
+          .setGraph(graph);
+
+        return result;
+      }
 
 }
 
