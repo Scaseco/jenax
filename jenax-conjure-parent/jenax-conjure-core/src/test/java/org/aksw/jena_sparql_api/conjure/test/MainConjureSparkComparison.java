@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.dcat.ap.utils.DcatUtils;
+import org.aksw.dcat.jena.domain.api.DcatUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;

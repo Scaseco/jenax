@@ -2,6 +2,7 @@ package org.aksw.dcat.jena.domain.api;
 
 import java.util.Set;
 
+import org.aksw.commons.collections.IterableUtils;
 import org.aksw.dcat.jena.term.DcatTerms;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -27,6 +28,10 @@ public interface DcatDistribution
     @Iri(DcatTerms.downloadURL)
     Set<DcatDownloadUrl> getDownloadUrlResources();
 
+
+    default String getDownloadUrl() {
+        return IterableUtils.expectZeroOrOneItems(getDownloadUrls());
+    }
 
 //	Collection<Resource> getAccessResources();
 //	Collection<Resource> getDownloadResources();
