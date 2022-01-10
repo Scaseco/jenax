@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.utils.views.map;
 
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -9,8 +8,10 @@ import java.util.function.BiFunction;
 import org.aksw.commons.collections.ConvertingCollection;
 import org.aksw.commons.collections.SinglePrefetchIterator;
 import org.aksw.commons.collections.sets.SetFromCollection;
+import org.aksw.commons.util.convert.ConvertFunction;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
+import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -18,9 +19,11 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 
 import com.google.common.base.Converter;
-import com.google.common.collect.Maps;
 
 /**
+ * In this map implementation, the value resources themselves also act as the entry resources.
+ * Values have a designated key attribute.
+ *
  * Entry resources are not managed in this map - i.e. the put method requires a resource
  * with appropriate entry information which is usually not what you want!
  * Use {@link MapFromResource} instead which creates anonymous resources for map entries.
@@ -43,10 +46,9 @@ import com.google.common.collect.Maps;
  *
  */
 public class MapFromResourceUnmanaged
-    extends AbstractMap<RDFNode, Resource>
+    extends MapFromResourceBase<RDFNode, Resource>
     implements RdfMap<RDFNode, Resource>
 {
-    protected final Resource subject;
     protected final Property entryProperty;
     //protected final boolean isReverseEntryProperty;
     protected final Property keyProperty;
@@ -61,16 +63,29 @@ public class MapFromResourceUnmanaged
             Resource subject,
             Property entryProperty,
             Property keyProperty) {
-        this(subject, entryProperty, keyProperty, (s, k) -> s.getModel().createResource());
+        this(subject, entryProperty, keyProperty, null, null, (s, k) -> s.getModel().createResource());
     }
 
     public MapFromResourceUnmanaged(
             Resource subject,
             Property entryProperty,
             Property keyProperty,
+            ConvertFunction<? super RDFNode, RDFNode> keyConverter,
+            ConvertFunction<? super RDFNode, Resource> valueConverter
+            ) {
+        this(subject, entryProperty, keyProperty, keyConverter, valueConverter, (s, k) -> s.getModel().createResource());
+    }
+
+
+    public MapFromResourceUnmanaged(
+            Resource subject,
+            Property entryProperty,
+            Property keyProperty,
+            ConvertFunction<? super RDFNode, RDFNode> keyConverter,
+            ConvertFunction<? super RDFNode, Resource> valueConverter,
             BiFunction<Resource, RDFNode, Resource> sAndKeyToEntry) {
-        super();
-        this.subject = subject;
+        super(subject, keyConverter, valueConverter);
+
         this.entryProperty = entryProperty;
         //this.isReverseEntryProperty = false;
         this.keyProperty = keyProperty;
@@ -168,7 +183,8 @@ public class MapFromResourceUnmanaged
     @Override
     public Set<Entry<RDFNode, Resource>> entrySet() {
         Converter<Resource, Entry<RDFNode, Resource>> converter = Converter.from(
-                e -> Maps.immutableEntry(ResourceUtils.getPropertyValue(e, keyProperty), e),
+                e -> new RdfEntryWithCast<RDFNode, Resource>(new RdfEntryK(e.asNode(), (EnhGraph)e.getModel(), entryProperty, keyProperty), keyConverter, valueConverter),
+                // e -> Maps.immutableEntry(ResourceUtils.getPropertyValue(e, keyProperty), e),
                 e -> e.getValue()); // TODO Ensure to add the resource and its key to the subject model
 
         Set<Entry<RDFNode, Resource>> result =

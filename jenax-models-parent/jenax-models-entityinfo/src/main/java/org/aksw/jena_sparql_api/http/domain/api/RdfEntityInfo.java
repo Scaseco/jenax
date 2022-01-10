@@ -13,6 +13,12 @@ public interface RdfEntityInfo
     RdfEntityInfo setContentEncodings(List<String> enocdings);
     RdfEntityInfo setContentType(String contentType);
     RdfEntityInfo setCharset(String charset);
+
+    RdfEntityInfo setByteSize(Long size);
+
+    // Only applicable for encoded entities
+    RdfEntityInfo setUncompressedByteSize(Long size);
+
 //	RdfEntityInfo setContentLength(Long length);
 
     Collection<Checksum> getHashes();

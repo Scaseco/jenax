@@ -1,6 +1,6 @@
 package org.aksw.jenax.arq.functionbinder;
 
-import org.aksw.commons.util.convert.Converter;
+import org.aksw.commons.util.convert.ConvertFunctionRaw;
 
 /**
  * Metadata for mapping RDF terms passed as arguments to a SPARQL function
@@ -18,12 +18,12 @@ public class Param {
 	protected Class<?> inputClass;
 
 	/* Converter from the working class to the actual class */
-	protected Converter inputConverter;
+	protected ConvertFunctionRaw inputConverter;
 
 	/* The default value of type paramClass */
 	protected Object defaultValue;
 	
-	public Param(Class<?> paramClass, Class<?> inputClass, Converter inputConverter, Object defaultValue) {
+	public Param(Class<?> paramClass, Class<?> inputClass, ConvertFunctionRaw inputConverter, Object defaultValue) {
 		super();
 		this.paramClass = paramClass;
 		this.inputClass = inputClass;
@@ -39,7 +39,7 @@ public class Param {
 		return inputClass;
 	}
 	
-	public Converter getInputConverter() {
+	public ConvertFunctionRaw getInputConverter() {
 		return inputConverter;
 	}
 }

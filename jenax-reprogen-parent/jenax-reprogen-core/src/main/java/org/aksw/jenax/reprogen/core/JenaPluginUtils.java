@@ -10,6 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.aksw.commons.collections.IterableUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
@@ -61,6 +62,11 @@ public class JenaPluginUtils {
 
 
 
+    public static <T extends RDFNode> T polymorphicCast(RDFNode rdfNode, Class<T> viewClass, TypeDecider typeDecider) {
+        T result = RDFNodeMapperImpl.castRdfNode(rdfNode, viewClass, typeDecider, false, false);
+        return result;
+    }
+
     /**
      * Cast an RDFNode to a given view w.r.t. types registered in the global TypeDecider
      *
@@ -74,6 +80,25 @@ public class JenaPluginUtils {
         T result = RDFNodeMapperImpl.castRdfNode(rdfNode, viewClass, typeDecider, false, false);
         return result;
     }
+
+    /**
+     * Cast an RDFNode to a given view w.r.t. types registered in the global TypeDecider
+     *
+     * @param <T>
+     * @param rdfNode
+     * @return
+     */
+    public static <T extends RDFNode> T polymorphicCast(RDFNode rdfNode) {
+        TypeDecider typeDecider = getTypeDecider();
+        Collection<Class<?>> candidateClasses = typeDecider.getApplicableTypes(rdfNode.asResource());
+
+        Class<?> clz = IterableUtils.expectOneItem(candidateClasses);
+        @SuppressWarnings("unchecked")
+        T result = polymorphicCast(rdfNode, (Class<T>)clz, typeDecider);
+
+        return result;
+    }
+
 
 
     public static <T extends RDFNode> T inModel(T rdfNode, Class<T> viewClass, Model target) {
@@ -139,9 +164,13 @@ public class JenaPluginUtils {
 //		return result;
 //	}
 
-    public static synchronized TypeDecider getTypeDecider() {
+    public static TypeDecider getTypeDecider() {
         if(typeDecider == null) {
-            typeDecider = new TypeDeciderImpl();
+            synchronized(JenaPluginUtils.class) {
+                if (typeDecider == null) {
+                    typeDecider = new TypeDeciderImpl();
+                }
+            }
         }
         return typeDecider;
     }

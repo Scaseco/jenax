@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.utils.views.map;
 
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -10,6 +9,7 @@ import java.util.function.BiFunction;
 import org.aksw.commons.collections.ConvertingCollection;
 import org.aksw.commons.collections.SinglePrefetchIterator;
 import org.aksw.commons.collections.sets.SetFromCollection;
+import org.aksw.commons.util.convert.ConvertFunction;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
 import org.apache.jena.enhanced.EnhGraph;
@@ -41,12 +41,12 @@ import com.google.common.base.Converter;
  *
  */
 public class MapFromResource
-    extends AbstractMap<RDFNode, RDFNode>
+    extends MapFromResourceBase<RDFNode, RDFNode>
 {
-    protected final Resource subject;
     protected final Property entryProperty;
     protected final Property keyProperty;
     protected final Property valueProperty;
+
 
     protected BiFunction<Resource, RDFNode, Resource> sAndKeyToEntry;
     //protected fin
@@ -58,7 +58,7 @@ public class MapFromResource
             Property keyProperty,
             Property valueProperty)
     {
-        this(subject, entryProperty, keyProperty, valueProperty, (s, k) -> s.getModel().createResource());
+        this(subject, entryProperty, keyProperty, valueProperty, null, null);
     }
 
     public MapFromResource(
@@ -66,12 +66,27 @@ public class MapFromResource
             Property entryProperty,
             Property keyProperty,
             Property valueProperty,
-            BiFunction<Resource, RDFNode, Resource> sAndKeyToEntry) {
-        super();
-        this.subject = subject;
+            ConvertFunction<? super RDFNode, RDFNode> keyConverter,
+            ConvertFunction<? super RDFNode, RDFNode> valueConverter
+            )
+    {
+        this(subject, entryProperty, keyProperty, valueProperty, keyConverter, valueConverter, (s, k) -> s.getModel().createResource());
+    }
+
+    public MapFromResource(
+            Resource subject,
+            Property entryProperty,
+            Property keyProperty,
+            Property valueProperty,
+            ConvertFunction<? super RDFNode, RDFNode> keyConverter,
+            ConvertFunction<? super RDFNode, RDFNode> valueConverter,
+            BiFunction<Resource, RDFNode, Resource> sAndKeyToEntry
+            ) {
+        super(subject, keyConverter, valueConverter);
         this.entryProperty = entryProperty;
         this.keyProperty = keyProperty;
         this.valueProperty = valueProperty;
+
         this.sAndKeyToEntry = sAndKeyToEntry;
     }
 
@@ -167,7 +182,7 @@ public class MapFromResource
     @Override
     public Set<Entry<RDFNode, RDFNode>> entrySet() {
         Converter<Resource, Entry<RDFNode, RDFNode>> converter = Converter.from(
-                e -> new RdfEntry(e.asNode(), (EnhGraph)e.getModel(), keyProperty, valueProperty),
+                e -> new RdfEntryWithCast(new RdfEntryKv(e.asNode(), (EnhGraph)e.getModel(), entryProperty, keyProperty, valueProperty), keyConverter, valueConverter),
                 e -> (Resource)e); // TODO Ensure to add the resource and its key to the subject model
 
         Set<Entry<RDFNode, RDFNode>> result =

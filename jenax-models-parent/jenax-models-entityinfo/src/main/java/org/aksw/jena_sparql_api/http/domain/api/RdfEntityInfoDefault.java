@@ -62,4 +62,13 @@ public interface RdfEntityInfoDefault
     @IriNs("eg")
     @Override
     Set<Checksum> getHashes();
+
+
+    @IriNs("eg")
+    @Override
+    Long getByteSize();
+
+    @IriNs("eg")
+    @Override
+    Long getUncompressedByteSize();
 }

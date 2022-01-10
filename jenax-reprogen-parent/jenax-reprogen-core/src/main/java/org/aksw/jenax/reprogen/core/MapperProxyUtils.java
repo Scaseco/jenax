@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +36,8 @@ import org.aksw.commons.collections.ConvertingList;
 import org.aksw.commons.collections.ConvertingSet;
 import org.aksw.commons.collections.MutableCollectionViews;
 import org.aksw.commons.collections.sets.SetFromCollection;
+import org.aksw.commons.util.convert.ConvertFunction;
+import org.aksw.commons.util.convert.ConvertFunctionImpl;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.IriType;
@@ -59,6 +62,8 @@ import org.aksw.jena_sparql_api.utils.views.map.MapFromResource;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromResourceUnmanaged;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromValueConverter;
 import org.aksw.jena_sparql_api.utils.views.map.MapVocab;
+import org.aksw.jena_sparql_api.utils.views.map.RdfEntry;
+import org.aksw.jena_sparql_api.utils.views.map.RdfEntryWithCast;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.reprogen.hashid.ClassDescriptor;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
@@ -73,6 +78,7 @@ import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -85,6 +91,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.util.PrefixMapping2;
 import org.slf4j.Logger;
@@ -168,6 +175,75 @@ public class MapperProxyUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(MapperProxyUtils.class);
 
+
+    static {
+
+        // Special handling of the 'RdfEntryWithCast' class which
+        // is used for representing map entries
+
+        ClassDescriptor cd = Metamodel.get().getOrCreate(RdfEntryWithCast.class)
+        		.registerDirectStringIdProcessor(createDefaultStringIdProcessor("entry"));
+
+        // Having entries whose identity depends on the owner causes a cyclic dependency
+        // if the owner's identity depends on which entries (e.g. config settings) are present.
+        if (false) {
+            cd
+                .getOrCreatePropertyDescriptor(new P_Link(NodeFactory.createURI("owner")))
+                .setIncludedInHashId(true)
+                .setRdfPropertyExcludedFromHashId(false)
+                .setIriType(false)
+                .setRawProcessor(s -> {
+                    RdfEntry<?, ?> x = (RdfEntry<?, ?>)s;
+                    Collection<RDFNode> r = Collections.singleton(x.getOwner());
+                    // ViewBundle vb = g.apply(s);
+                    // Collection<? extends RDFNode> col = vb.getRawView();
+                    return r;
+                });
+        }
+//	        .setAllowDescendPredicate(stmt -> {
+//	            RdfEntryWithCast<?, ?> e = (RdfEntryWithCast<?, ?>)stmt.getSubject();
+//	            boolean r = RDFNode.class.isAssignableFrom(e.getKeyConverter().getTo());
+//	            return r;
+//	        });
+
+        cd
+            .getOrCreatePropertyDescriptor(new P_Link(NodeFactory.createURI("urn:key")))
+            .setIncludedInHashId(true)
+            .setRdfPropertyExcludedFromHashId(false)
+            .setIriType(false)
+            .setRawProcessor(s -> {
+                RdfEntry<?, ?> x = (RdfEntry<?, ?>)s;
+                Collection<RDFNode> r = Collections.singleton((RDFNode)x.getKey());
+                // ViewBundle vb = g.apply(s);
+                // Collection<? extends RDFNode> col = vb.getRawView();
+                return r;
+            })
+            .setAllowDescendPredicate(stmt -> {
+                RdfEntryWithCast<?, ?> e = (RdfEntryWithCast<?, ?>)stmt.getSubject();
+                boolean r = RDFNode.class.isAssignableFrom(e.getKeyConverter().getTo());
+                return r;
+            });
+
+
+        cd
+            .getOrCreatePropertyDescriptor(new P_Link(NodeFactory.createURI("urn:value")))
+            .setIncludedInHashId(true)
+            .setRdfPropertyExcludedFromHashId(false)
+            .setIriType(false)
+            .setRawProcessor(s -> {
+                RdfEntry<?, ?> x = (RdfEntry<?, ?>)s;
+                Collection<RDFNode> r = Collections.singleton((RDFNode)x.getValue());
+                // ViewBundle vb = g.apply(s);
+                // Collection<? extends RDFNode> col = vb.getRawView();
+                return r;
+            })
+            .setAllowDescendPredicate(stmt -> {
+                RdfEntryWithCast<?, ?> e = (RdfEntryWithCast<?, ?>)stmt.getSubject();
+                boolean r = RDFNode.class.isAssignableFrom(e.getKeyConverter().getTo());
+                return r;
+            });
+
+    }
 
     // Getter must be no-arg methods, whose result type is either a subclass of
     // RDFNode or a type registered at jena's type factory
@@ -376,7 +452,7 @@ public class MapperProxyUtils {
 //    }
 
 
-    public static Function<Property, Function<Resource, Object>>
+    public static Function<Property, Function<Resource, ViewBundle>>
         viewAsMap(
                 Method m,
                 boolean isValueIriType,
@@ -386,7 +462,7 @@ public class MapperProxyUtils {
                 TypeMapper typeMapper,
                 TypeDecider typeDecider)
     {
-        Function<Property, Function<Resource, Object>> result = null;
+        Function<Property, Function<Resource, ViewBundle>> result = null;
 
     //	boolean isIriType = m.getAnnotation(IriType.class) != null;
         if(String.class.isAssignableFrom(valueType) && isValueIriType) {
@@ -396,12 +472,12 @@ public class MapperProxyUtils {
 //						new ListFromRDFList(s, p),
 //						new ConverterFromNodeMapperAndModel<>(s.getModel(), RDFNode.class, new ConverterFromNodeMapper<>(NodeMappers.uriString)));
         } else {
-            RDFNodeMapper<?> keyMapper = RDFNodeMappers.from(keyType, typeMapper, typeDecider, polymorphicOnly, false);
-            Converter<RDFNode, ?> keyConverter  = new ConverterFromRDFNodeMapper<>(keyMapper);
+            // RDFNodeMapper<?> keyMapper = RDFNodeMappers.from(keyType, typeMapper, typeDecider, polymorphicOnly, false);
+            // Converter<RDFNode, ?> keyConverter  = new ConverterFromRDFNodeMapper<>(keyMapper);
 
 
-            RDFNodeMapper<?> valueMapper = RDFNodeMappers.from(valueType, typeMapper, typeDecider, polymorphicOnly, false);
-            Converter<RDFNode, ?> valueConverter  = new ConverterFromRDFNodeMapper<>(valueMapper);
+            // RDFNodeMapper<?> valueMapper = RDFNodeMappers.from(valueType, typeMapper, typeDecider, polymorphicOnly, false);
+            // Converter<RDFNode, ?> valueConverter  = new ConverterFromRDFNodeMapper<>(valueMapper);
 
             // Decide on the map model to use
             // If a value property is present then the map mode is to use dedicated resources for entries
@@ -424,23 +500,38 @@ public class MapperProxyUtils {
                     ? MapVocab.value
                     : valuePropertyTmp;
 
-            if (valueProperty != null) {
-                result = p -> s ->
-                    new MapFromValueConverter<>(new MapFromKeyConverter<>(
-                        new MapFromResource(s, p, keyProperty, valueProperty),
-                    keyConverter), valueConverter);
-            } else {
-                // Ugly type-unsafe adapter to convert RDFNode from the converter to Resource expected by the Map
-                Converter<Resource, ?> valueConverterRes = Converter.from(
-                    res -> valueConverter.convert(res),
-                    obj -> ((RDFNode)((Converter)valueConverter.reverse()).convert(obj)).asResource()
-                );
+            result = p -> s -> createViewBundleFromMapAndConverter(
+                    s, p,
+                    keyProperty, valueProperty,
+                    keyType, valueType, typeMapper, typeDecider, polymorphicOnly);
 
-                result = p -> s ->
-                    new MapFromValueConverter<>(new MapFromKeyConverter<>(
-                        new MapFromResourceUnmanaged(s, p, keyProperty),
-                    keyConverter), valueConverterRes);
-            }
+//            if (valueProperty != null) {
+//                result = p -> s -> createViewBundleFromMapAndConverter(
+//                        s, p,
+//                        keyProperty, valueProperty,
+//                        keyType, valueType, typeMapper, typeDecider, polymorphicOnly);
+//
+////                    result = p -> s ->
+////                    new MapFromValueConverter<>(new MapFromKeyConverter<>(
+////                        new MapFromResource(s, p, keyProperty, valueProperty),
+////                    keyConverter), valueConverter);
+//            } else {
+//                // Ugly type-unsafe adapter to convert RDFNode from the converter to Resource expected by the Map
+//                Converter<Resource, ?> valueConverterRes = Converter.from(
+//                    res -> valueConverter.convert(res),
+//                    obj -> ((RDFNode)((Converter)valueConverter.reverse()).convert(obj)).asResource()
+//                );
+//
+//                result = p -> s -> createViewBundleFromMapAndConverter(
+//                        s, p,
+//                        keyProperty, valueProperty,
+//                        keyType, valueType, typeMapper, typeDecider, polymorphicOnly);
+//
+////                result = p -> s ->
+////                    new MapFromValueConverter<>(new MapFromKeyConverter<>(
+////                        new MapFromResourceUnmanaged(s, p, keyProperty),
+////                    keyConverter), valueConverterRes);
+//            }
         }
 
         return result;
@@ -502,6 +593,124 @@ public class MapperProxyUtils {
 
         return new ViewBundle(rawView, javaView);
     }
+
+
+    /**
+     * Return a function that accepts an RDFNode and attempts to convert it to its actual RDFNode subtype w.r.t. to the type decider.
+     * Not for use with literals as input.
+     *
+     *
+     *
+     * @param valueType
+     * @param typeMapper
+     * @param typeDecider
+     * @return
+     */
+//    public static Function<RDFNode, RDFNode> createCastFunction(
+//            Class<?> valueType, TypeMapper typeMapper, TypeDecider typeDecider, boolean polymorphicOnly) {
+//
+//        RDFNodeMapper<?> rdfNodeMapper = RDFNodeMappers.from(valueType, typeMapper, typeDecider, polymorphicOnly, false);
+//
+//        boolean isKeyClassSubclassOfRdfNode = RDFNode.class.isAssignableFrom(keyMapper.getJavaClass());
+//
+//
+//        return in -> {
+//            if (!rdfNodeMapper.canMap(in)) {
+//
+//            }
+//        };
+
+
+//
+//        Converter<RDFNode, ?> keyConverter = new ConverterFromRDFNodeMapper<>(keyMapper);
+//
+//        RDFNodeMapper<?> rdfNodeMapper = RDFNodeMappers.from(valueType, typeMapper, typeDecider, polymorphicOnly, false);
+//
+//
+//
+//        result = (p, isFwd) -> s ->
+//            createViewBundleFromSetAndConverter(
+//                    itemType,
+//                    new SetFromPropertyValues<>(s, p, isFwd, RDFNode.class),
+//                    new ConverterFromRDFNodeMapper<>(rdfNodeMapper),
+//                    false);
+//
+//    }
+
+    public static ViewBundle createViewBundleFromMapAndConverter(
+            Resource s,
+            Property p,
+            // Map<RDFNode, RDFNode> map,
+            Property keyProperty,
+            Property valueProperty,
+            Class<?> keyType,
+            Class<?> valueType,
+            TypeMapper typeMapper,
+            TypeDecider typeDecider,
+            boolean polymorphicOnly) {
+        // List<RDFNode> rawView = MutableCollectionViews.filteringList(list, converter);
+
+
+        RDFNodeMapper<?> keyMapper = RDFNodeMappers.from(keyType, typeMapper, typeDecider, polymorphicOnly, false);
+        Converter<RDFNode, ?> keyConverter = new ConverterFromRDFNodeMapper<>(keyMapper);
+
+        ConvertFunction<? super RDFNode, RDFNode> keyCastFunction = RDFNode.class.isAssignableFrom(keyType)
+                ? ConvertFunctionImpl.create(RDFNode.class, keyType, rdfNode -> (RDFNode)keyMapper.toJava(rdfNode))
+                : ConvertFunctionImpl.create(RDFNode.class, RDFNode.class, x -> x);
+
+
+        RDFNodeMapper<?> valueMapper = RDFNodeMappers.from(valueType, typeMapper, typeDecider, polymorphicOnly, false);
+        Converter<RDFNode, Object> valueConverter = (Converter<RDFNode, Object>)new ConverterFromRDFNodeMapper<>(valueMapper);
+
+        Function<? super RDFNode, RDFNode> valueCastFunction = RDFNode.class.isAssignableFrom(valueType)
+                ? rdfNode -> (RDFNode)valueMapper.toJava(rdfNode)
+                : rdfNode -> rdfNode;
+
+
+        Collection<RDFNode> rdfEntrySet;
+        Map<?, ?> javaMap;
+
+        if (valueProperty == null) {
+            Map<RDFNode, Resource> rdfMap = new MapFromResourceUnmanaged(
+                    s, p,
+                    keyProperty,
+                    ConvertFunctionImpl.create(RDFNode.class, keyType, (RDFNode k) -> keyCastFunction.convert(k)),
+                    ConvertFunctionImpl.create(Resource.class, valueType, v -> (Resource)valueCastFunction.apply(v))
+                    );
+
+            // Ugly cast; the entries *are* RDFNodes
+            rdfEntrySet = (Collection<RDFNode>)(Collection<?>)rdfMap.entrySet();
+
+            // Painful conversion because in this map we are building
+            // the value type is Resource rather than RDFNode
+            Converter<Resource, Object> vc = Converter.from(
+                r -> valueConverter.convert(r),
+                o -> (Resource)valueConverter.reverse().convert(o)
+            );
+
+            javaMap = new MapFromValueConverter<>(new MapFromKeyConverter<>(
+                    rdfMap,
+                    keyConverter), vc);
+
+        } else {
+            Map<RDFNode, RDFNode> rdfMap = new MapFromResource(
+                    s, p,
+                    keyProperty, valueProperty,
+                    ConvertFunctionImpl.create(RDFNode.class, keyType, (RDFNode k) -> keyCastFunction.convert(k)),
+                    ConvertFunctionImpl.create(RDFNode.class, valueType, v -> (RDFNode)valueCastFunction.apply(v))
+//                    keyCastFunction, valueCastFunction
+                    );
+
+            rdfEntrySet = (Collection<RDFNode>)(Collection<?>)rdfMap.entrySet();
+
+            javaMap = new MapFromValueConverter<>(new MapFromKeyConverter<>(
+                    rdfMap,
+                    keyConverter), valueConverter);
+        }
+
+        return new ViewBundle(rdfEntrySet, javaMap);
+    }
+
 
     /**
      *
@@ -1523,7 +1732,7 @@ public class MapperProxyUtils {
 
 
                 // A simple read method may be a custom hash function
-                if(isStringId) {
+                if (isStringId) {
 
                     if(directStringIdProcessor != null) {
                         // FIXME Add conflicting methods to the error message
@@ -1746,16 +1955,27 @@ public class MapperProxyUtils {
 //							throw new RuntimeException("Unsupported collection type");
 //						}
 
-                } else if(isMapValued) { // Case for maps
+                } else if (isMapValued) { // Case for maps
                     //System.out.println("Map type detected");
                     Class<?> keyType = readMethodDescriptor.getKeyType();
                     Class<?> valueType = readMethodDescriptor.getValueType();
 
-                    Function<Property, Function<Resource, Object>> getter =
+                    Function<Property, Function<Resource, ViewBundle>> getter =
                             viewAsMap(readMethod, isIriType, polymorphicOnly, keyType, valueType, typeMapper, typeDecider);
 
-                    Function<Resource, Object> g = getter.apply(p);
-                        methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o));
+                    Function<Resource, ViewBundle> g = getter.apply(p);
+                        methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o).getJavaView());
+
+                    classDescriptor.getOrCreatePropertyDescriptor(path)
+                        .setIncludedInHashId(isHashId)
+                        .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
+                        .setIriType(isIriType)
+                        .setRawProcessor(s -> {
+                            ViewBundle vb = g.apply(s);
+                            Collection<? extends RDFNode> col = vb.getRawView();
+                            return col;
+                        });
+
 
                 } else { // Case for scalar values / non-collections
 
@@ -1822,13 +2042,8 @@ public class MapperProxyUtils {
         }
 
 
-        if(directStringIdProcessor == null) {
-            directStringIdProcessor = (r, cxt) -> {
-                HashCode hashCode = cxt.getHashId(r);
-                String part = cxt.getHashAsString(hashCode); //BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
-                String rr = prefix + "-" + part;
-                return rr;
-            };
+        if (directStringIdProcessor == null) {
+            directStringIdProcessor = createDefaultStringIdProcessor(prefix);
         }
 
         classDescriptor.registerDirectStringIdProcessor(directStringIdProcessor);
@@ -2033,6 +2248,15 @@ public class MapperProxyUtils {
         }
 
         return result;
+    }
+
+    public static BiFunction<Resource, HashIdCxt, String> createDefaultStringIdProcessor(String prefix) {
+        return (r, cxt) -> {
+            HashCode hashCode = cxt.getHashId(r);
+            String part = cxt.getHashAsString(hashCode); //BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+            String rr = prefix + "-" + part;
+            return rr;
+        };
     }
 
     public static BiFunction<Object, Object[], Object> proxyDefaultMethod(Method method) throws ReflectiveOperationException {

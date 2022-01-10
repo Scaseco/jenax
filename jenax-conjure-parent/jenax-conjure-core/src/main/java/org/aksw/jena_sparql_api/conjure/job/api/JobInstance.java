@@ -8,6 +8,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.RdfTypeNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jena_sparql_api.mapper.annotation.ValueIri;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
@@ -38,6 +39,7 @@ public interface JobInstance
     //Map<String, RDFNode> setEnvMap();
     @IriNs("rpif")
     @HashId
+    @ValueIri
     Map<String, Node> getEnvMap();
 
     // Mapping of OpVar variables - these are variables that are substituted by sub workflows
@@ -48,6 +50,7 @@ public interface JobInstance
     //Map<String, RDFNode> setOpVarMap();
     @IriNs("rpif")
     @HashId
+    @ValueIri
     Map<String, Op> getOpVarMap();
 
 

@@ -8,20 +8,22 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.impl.StatementImpl;
 import org.apache.jena.sparql.path.P_Path0;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,12 +87,14 @@ public class ClassDescriptor {
 //    }
 
 
-    public void registerDirectHashIdProcessor(BiFunction<? super Resource, ? super HashIdCxt, ? extends HashCode> processor) {
+    public ClassDescriptor registerDirectHashIdProcessor(BiFunction<? super Resource, ? super HashIdCxt, ? extends HashCode> processor) {
         directHashIdProcessors.add(processor);
+        return this;
     }
 
-    public void registerDirectStringIdProcessor(BiFunction<? super Resource, ? super HashIdCxt, ? extends String> processor) {
+    public ClassDescriptor registerDirectStringIdProcessor(BiFunction<? super Resource, ? super HashIdCxt, ? extends String> processor) {
         directStringIdProcessors.add(processor);
+        return this;
     }
 
 
@@ -122,9 +126,9 @@ public class ClassDescriptor {
 
         HashCode result;
         String resultStr = null;
-        if(!hashIdProcessors.isEmpty() || !directHashIdProcessors.isEmpty()) {
+        if (!hashIdProcessors.isEmpty() || !directHashIdProcessors.isEmpty()) {
             List<HashCode> hashes = new ArrayList<>();
-            for(PropertyDescriptor pd : hashIdProcessors) {
+            for (PropertyDescriptor pd : hashIdProcessors) {
                 P_Path0 path = pd.getPath();
 
                 boolean isIriType = pd.isIriType();
@@ -134,6 +138,13 @@ public class ClassDescriptor {
 
                 String iri = path.getNode().getURI();
                 boolean isFwd = path.isForward();
+
+//                boolean isMap = Map.class.isAssignableFrom(pd.classDescriptor.clazz);
+//                if (isMap) {
+//                    System.err.println("Map type found");
+//                }
+
+
                 Function<? super Resource, ? extends Collection<? extends RDFNode>> propertyAccessor = pd.getRawProcessor();
 
                 Collection<? extends RDFNode> col = propertyAccessor.apply(node);
@@ -144,20 +155,37 @@ public class ClassDescriptor {
                 List<HashCode> hashContribs = new ArrayList<>();
                 for(RDFNode item : col) {
 
+                    // Set up a statement in order to give the property descriptor's
+                    // 'allow descend predicate' the opportunity to reject a descend
+                    Property p = ResourceFactory.createProperty(iri);
+                    Statement stmt = new StatementImpl(node, p, item);
+
+                    Predicate<Statement> predicate = pd.getAllowDescendPredicate();
+                    boolean allowDescend = isIriType
+                            ? false
+                            : predicate == null ? false : predicate.test(stmt);
+
+
                     // If the property is marked as iriType then IRIs are treated as strings
-                    if(isIriType) {
+                    if (!allowDescend) {
                         if(item.isURIResource()) {
                             String tmp = item.asResource().getURI();
                             item = item.getModel().createLiteral(tmp);
                         }
                     }
 
-                    logger.debug("Gathering hashId contrib from " + clazz.getCanonicalName() + "." + path + " from " + ResourceUtils.asBasicRdfNode(node) + " to " + ResourceUtils.asBasicRdfNode(item));
 
+                    logger.debug("Gathering hashId contrib from " + clazz.getCanonicalName() + "." + path + " from " + ResourceUtils.asBasicRdfNode(node) + " to " + ResourceUtils.asBasicRdfNode(item));
                     HashCode partialHashContrib = cxt.getGlobalProcessor().apply(item, cxt);
 
                     if(partialHashContrib == null) {
-                        throw new NullPointerException("Failed to gather hashId contrib from " + clazz.getCanonicalName() + "." + path + " from " + ResourceUtils.asBasicRdfNode(node) + " to " + ResourceUtils.asBasicRdfNode(item));
+                        // Try whether the item can be converted to a different class
+                        Resource castItem = JenaPluginUtils.polymorphicCast(item);
+                        partialHashContrib = cxt.getGlobalProcessor().apply(castItem, cxt);
+
+                        if (partialHashContrib == null) {
+                            throw new NullPointerException("Failed to gather hashId contrib from " + clazz.getCanonicalName() + "." + path + " from " + ResourceUtils.asBasicRdfNode(node) + " to " + ResourceUtils.asBasicRdfNode(item));
+                        }
                     }
 
                     // Note that here we repeatedly compute the hash of the property

@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.conjure.noderef;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.apache.jena.graph.Node;
@@ -15,14 +16,17 @@ public interface NodeRef
     extends Resource
 {
     @IriNs("rpif")
+    @HashId
     DataRef getDataRef();
     NodeRef setDataRef(Resource dataRef);
 
     @IriNs("rpif")
+    @HashId
     Node getNode();
     NodeRef setNode(Node node);
 
     @IriNs("rpif")
+    @HashId
     Node getGraph();
     NodeRef setGraph(Node node);
 
@@ -44,7 +48,8 @@ public interface NodeRef
     }
 
     public static NodeRef createForDcatEntity(Model model, Node dcatEntity, Node node, Node graph) {
-        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecord(model.wrapAsResource(dcatEntity));
+        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecordNode(dcatEntity);
+//        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecord(model.wrapAsResource(dcatEntity));
 
         NodeRef result = model.createResource().as(NodeRef.class)
           .setDataRef(dataRef)

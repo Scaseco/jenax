@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.commons.util.convert.Converter;
-import org.aksw.commons.util.convert.ConverterImpl;
+import org.aksw.commons.util.convert.ConvertFunctionRaw;
+import org.aksw.commons.util.convert.ConvertFunctionRawImpl;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.aksw.commons.util.convert.ConverterRegistryImpl;
 import org.aksw.jena_sparql_api.mapper.annotation.DefaultValue;
@@ -84,8 +84,8 @@ public class FunctionGenerator {
     }
 
 
-    public Converter getPreConvert(Class<?> targetJavaType, Class<?> internalJavaType) {
-        Converter preConvert = null;
+    public ConvertFunctionRaw getPreConvert(Class<?> targetJavaType, Class<?> internalJavaType) {
+        ConvertFunctionRaw preConvert = null;
         if (internalJavaType != null) {
             preConvert = converterRegistry.getConverter(targetJavaType, internalJavaType);
 
@@ -131,7 +131,7 @@ public class FunctionGenerator {
         // Set up conversion of the result value
         java.util.function.Function<Object, NodeValue> returnValueConverter;
         {
-            Converter resultConverter;
+            ConvertFunctionRaw resultConverter;
             Class<?> targetJavaType = method.getReturnType();
             AnnotatedType art = method.getAnnotatedReturnType();
 
@@ -140,9 +140,9 @@ public class FunctionGenerator {
             Class<?> internalJavaType = returnTypeMap.get(targetJavaType);
             Class<?> workingType = internalJavaType != null ? internalJavaType : targetJavaType;
 
-            Converter preConvert = internalJavaType == null ? null : getPreConvert(targetJavaType, internalJavaType);
+            ConvertFunctionRaw preConvert = internalJavaType == null ? null : getPreConvert(targetJavaType, internalJavaType);
 
-            Converter internalTypeToNodeValue = createNodeValueMapper(
+            ConvertFunctionRaw internalTypeToNodeValue = createNodeValueMapper(
                     workingType,
                     converterRegistry,
                     typeMapper,
@@ -153,7 +153,7 @@ public class FunctionGenerator {
                 ? internalTypeToNodeValue
                 : preConvert.andThen(internalTypeToNodeValue);
 
-            returnValueConverter = in -> (NodeValue)resultConverter.convert(in);
+            returnValueConverter = in -> (NodeValue)resultConverter.convertRaw(in);
         }
 
         // Set up parameter conversions and default values
@@ -177,7 +177,7 @@ public class FunctionGenerator {
 
             Class<?> inputClass = returnTypeMap.get(paramClass);
             Class<?> rdfClass = inputClass != null ? inputClass : paramClass;
-            Converter inputConverter = inputClass == null ? null : getPreConvert(inputClass, paramClass);
+            ConvertFunctionRaw inputConverter = inputClass == null ? null : getPreConvert(inputClass, paramClass);
 
             // Consult override map first because some datatypes may lack appropriate metadata
             String datatypeIri = typeByClassOverrides.get(rdfClass);
@@ -225,13 +225,13 @@ public class FunctionGenerator {
         return result;
     }
 
-    public static Converter createNodeValueMapper(
+    public static ConvertFunctionRaw createNodeValueMapper(
             Class<?> clz,
             ConverterRegistry converterRegistry,
             TypeMapper typeMapper,
             Map<Class<?>, String> typeByClassOverrides) {
         // Check the converterRegistry for a direct conversion
-        Converter result = converterRegistry.getConverter(clz, NodeValue.class);
+        ConvertFunctionRaw result = converterRegistry.getConverter(clz, NodeValue.class);
 
         if (result == null) {
             String datatypeIri = typeByClassOverrides.get(clz);
@@ -246,7 +246,7 @@ public class FunctionGenerator {
                 throw new RuntimeException(String.format("No RDF datatype registered for %1$s", clz));
             }
 
-            result = new ConverterImpl(clz, NodeValue.class, (Object obj) -> {
+            result = new ConvertFunctionRawImpl(clz, NodeValue.class, (Object obj) -> {
                 NodeValue r = null;
                 if (obj != null) {
                     Node node = NodeFactory.createLiteralByValue(obj, dtype);

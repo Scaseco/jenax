@@ -2,9 +2,11 @@ package org.aksw.jenax.reprogen.hashid;
 
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.path.P_Path0;
 
 public class PropertyDescriptor {
@@ -13,11 +15,25 @@ public class PropertyDescriptor {
 
     protected Function<? super Resource, ? extends Collection<? extends RDFNode>> rawProcessor;
 
+
+    /** A predicate that can decide for a given RDFNode whether to descend into that node.
+     * If the predicate evaluates to false for an IRIs then it is not descended into */
+    protected Predicate<Statement> allowDescendPredicate = null;
+
     protected boolean includedInHashId;
 
     // If true the values are represented as IRIs but for the sake of identity are treated as string literals
     // Hence, ID computation does not descend into those RDF resources
+    // Effectively an attribute that tells that preventDescend is always true
     protected boolean isIriType;
+
+
+    /**
+     * If ownsValue is true then the properties value is owned by the source entity.
+     * The referred to entity does not have a hashId of its own, instead, the hashId
+     * is defined by the owning class and the referring property IRI.
+     */
+    // protected boolean ownsValue;
 
     /**
      * Only valid if includeInHashId is true:
@@ -64,8 +80,18 @@ public class PropertyDescriptor {
         return isIriType;
     }
 
-    public void setRawProcessor(Function<? super Resource, ? extends Collection<? extends RDFNode>> rawProcessor) {
+    public PropertyDescriptor setAllowDescendPredicate(Predicate<Statement> allowDescendPredicate) {
+        this.allowDescendPredicate = allowDescendPredicate;
+        return this;
+    }
+
+    public Predicate<Statement> getAllowDescendPredicate() {
+        return allowDescendPredicate;
+    }
+
+    public PropertyDescriptor setRawProcessor(Function<? super Resource, ? extends Collection<? extends RDFNode>> rawProcessor) {
         this.rawProcessor = rawProcessor;
+        return this;
     }
 
     public Function<? super Resource, ? extends Collection<? extends RDFNode>> getRawProcessor() {

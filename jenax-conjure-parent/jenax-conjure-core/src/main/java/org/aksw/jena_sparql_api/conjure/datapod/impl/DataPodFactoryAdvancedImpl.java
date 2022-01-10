@@ -15,9 +15,9 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.engine.OpExecutorDefault;
 import org.aksw.jena_sparql_api.conjure.dataset.engine.TaskContext;
 import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFileSystem;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.system.Txn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,21 +68,25 @@ public class DataPodFactoryAdvancedImpl
 
         TaskContext context = ((OpExecutorDefault)opExecutor).getTaskContext();
 
-        Resource dcatRecord = dataRef.getDcatRecord();
+        // Resource dcatRecord = dataRef.getDcatRecord();
+        Node dcatRecord = dataRef.getDcatRecordNode();
 
-        Iterator<Entry<String, Model>> it =
-                Stream.concat(
-                    Stream.<Entry<String, Model>>of(new SimpleEntry<>("provided", dcatRecord.getModel())),
-                    context.getCtxModels().entrySet().stream()).iterator();
+//        Iterator<Entry<String, Model>> it =
+//                Stream.concat(
+//                    Stream.<Entry<String, Model>>of(new SimpleEntry<>("provided", dcatRecord.getModel())),
+//                    context.getCtxModels().entrySet().stream()).iterator();
+
+        Iterator<Entry<String, Model>> it = context.getCtxModels().entrySet().stream().iterator();
 
         //RDFDataMgr.write(System.out, dataRef.getDcatResource().getModel(), RDFFormat.TURTLE_PRETTY);
 
 
         DcatDistribution dist = null;
         for (; dist == null && it.hasNext();) {
-            Entry<String, Model>  e = it.next();
+            Entry<String, Model> e = it.next();
             Model candidateModel = e.getValue();
-            Resource r = dcatRecord.inModel(candidateModel);
+            Resource r = candidateModel.wrapAsResource(dcatRecord);
+            // Resource r = dcatRecord.inModel(candidateModel);
             // dist = Txn.calculateRead(candidateModel, () -> DcatUtils.resolveDistribution(r));
             dist = DcatUtils.resolveDistribution(r);
         }
