@@ -26,6 +26,11 @@
 			<artifactId>tika-core</artifactId>
 		</dependency>
 
+                <dependency>
+                        <groupId>org.apache.tika</groupId>
+                        <artifactId>tika-java7</artifactId>
+                </dependency>
+
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>

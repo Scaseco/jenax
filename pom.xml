@@ -1362,6 +1362,13 @@
 				<version>${tika.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.apache.tika</groupId>
+                                <artifactId>tika-java7</artifactId>
+                                <version>${tika.version}</version>
+                        </dependency>
+
+
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-io</artifactId> -->
