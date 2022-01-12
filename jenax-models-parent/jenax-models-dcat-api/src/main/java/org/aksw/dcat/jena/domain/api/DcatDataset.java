@@ -1,5 +1,6 @@
 package org.aksw.dcat.jena.domain.api;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.aksw.commons.util.obj.ObjectUtils;
@@ -25,6 +26,10 @@ public interface DcatDataset
     default Set<? extends DcatDistribution> getDistributions2() {
         return getDistributions(DcatDistribution.class);
     }
+
+    @Iri("dcterms:keyword")
+    @Override
+    Collection<String> getKeywords();
 
 //    default <T extends Resource> Collection<T> getDistributions(Class<T> clazz) {
 //        return new SetFromPropertyValues<>(this, DCAT.distribution, clazz);
