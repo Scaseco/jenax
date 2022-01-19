@@ -19,13 +19,6 @@ import org.aksw.commons.collections.frontier.FrontierImpl;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.concept.parser.SparqlRelationParser;
 import org.aksw.jena_sparql_api.concept.parser.SparqlRelationParserImpl;
-import org.aksw.jena_sparql_api.mapper.annotation.Datatype;
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
-import org.aksw.jena_sparql_api.mapper.annotation.MappedBy;
-import org.aksw.jena_sparql_api.mapper.annotation.MultiValued;
 import org.aksw.jena_sparql_api.mapper.model.F_GetValue;
 import org.aksw.jena_sparql_api.mapper.model.RdfMapperProperty;
 import org.aksw.jena_sparql_api.mapper.model.RdfMapperPropertyMulti;
@@ -35,6 +28,13 @@ import org.aksw.jena_sparql_api.mapper.model.RdfTypeFactory;
 import org.aksw.jena_sparql_api.mapper.model.TypeConversionService;
 import org.aksw.jena_sparql_api.mapper.model.TypeConversionServiceImpl;
 import org.aksw.jena_sparql_api.mapper.model.TypeConverter;
+import org.aksw.jenax.annotation.reprogen.Datatype;
+import org.aksw.jenax.annotation.reprogen.DefaultIri;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.MappedBy;
+import org.aksw.jenax.annotation.reprogen.MultiValued;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -184,7 +184,7 @@ public class RdfTypeFactoryImpl
     protected RdfClass allocateRdfClass(EntityOps entityOps) {
 
         //org.aksw.jena_sparql_api.mapper.annotation.RdfType rdfType = AnnotationUtils.findAnnotation(clazz, org.aksw.jena_sparql_api.mapper.annotation.RdfType.class);
-        org.aksw.jena_sparql_api.mapper.annotation.RdfType rdfType = entityOps.findAnnotation(org.aksw.jena_sparql_api.mapper.annotation.RdfType.class);
+        org.aksw.jenax.annotation.reprogen.RdfType rdfType = entityOps.findAnnotation(org.aksw.jenax.annotation.reprogen.RdfType.class);
 
         //DefaultIri defaultIri = AnnotationUtils.findAnnotation(clazz, DefaultIri.class);
         DefaultIri defaultIri = entityOps.findAnnotation(DefaultIri.class);

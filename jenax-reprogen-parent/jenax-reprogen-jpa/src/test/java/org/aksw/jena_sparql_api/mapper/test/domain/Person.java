@@ -4,8 +4,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jenax.annotation.reprogen.DefaultIri;
+import org.aksw.jenax.annotation.reprogen.Iri;
 
 //@DefaultIri("o:#{firstName}-#{lastName}-#{birthPlace}-#{birthDate.toString()}")
 @DefaultIri("o:#{firstName}-#{lastName}-#{birthPlace}")

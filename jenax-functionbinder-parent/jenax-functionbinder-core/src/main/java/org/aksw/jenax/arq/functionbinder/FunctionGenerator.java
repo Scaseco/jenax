@@ -12,7 +12,7 @@ import org.aksw.commons.util.convert.ConvertFunctionRaw;
 import org.aksw.commons.util.convert.ConvertFunctionRawImpl;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.aksw.commons.util.convert.ConverterRegistryImpl;
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultValue;
+import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;

@@ -3,10 +3,10 @@ package org.aksw.jena_sparql_api.conjure.job.api;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.conjure.resourcespec.RpifTerms;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.expr.Expr;
 

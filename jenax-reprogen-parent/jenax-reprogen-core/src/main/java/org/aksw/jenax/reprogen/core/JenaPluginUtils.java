@@ -12,12 +12,12 @@ import java.util.function.Supplier;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDecider;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDeciderImpl;
 import org.aksw.jena_sparql_api.rdf.collections.RDFNodeMapperImpl;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.arq.util.implementation.ImplementationLazy;
 import org.aksw.jenax.reprogen.util.ImplementationProxy;
 import org.apache.jena.enhanced.BuiltinPersonalities;

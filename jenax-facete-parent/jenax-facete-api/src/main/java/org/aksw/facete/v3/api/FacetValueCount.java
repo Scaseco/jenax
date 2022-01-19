@@ -1,7 +1,7 @@
 package org.aksw.facete.v3.api;
 
 import org.aksw.commons.util.range.CountInfo;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.hobbit.benchmark.faceted_browsing.v2.domain.Vocab;
 
 

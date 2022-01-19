@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.mapper.test.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.mapper.annotation.MappedBy;
+import org.aksw.jenax.annotation.reprogen.MappedBy;
 
 public class Author
     extends NamedEntity

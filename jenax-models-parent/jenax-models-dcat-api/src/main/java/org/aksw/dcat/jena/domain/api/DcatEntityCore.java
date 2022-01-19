@@ -1,6 +1,6 @@
 package org.aksw.dcat.jena.domain.api;
 
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriNs;
 
 public interface DcatEntityCore {
 //	String getCkanId();

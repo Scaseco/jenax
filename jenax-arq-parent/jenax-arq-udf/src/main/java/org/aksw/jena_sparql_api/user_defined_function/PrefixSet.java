@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.user_defined_function;
 
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jenax.annotation.reprogen.Iri;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.PrefixMapping;
 

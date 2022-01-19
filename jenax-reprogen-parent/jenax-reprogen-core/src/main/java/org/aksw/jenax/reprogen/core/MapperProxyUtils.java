@@ -5,10 +5,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +28,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.aksw.commons.beans.datatype.DataType;
+import org.aksw.commons.beans.datatype.DataTypes;
+import org.aksw.commons.beans.datatype.TypeUtils;
 import org.aksw.commons.beans.model.MethodHandleLookup;
 import org.aksw.commons.collections.ConvertingCollection;
 import org.aksw.commons.collections.ConvertingList;
@@ -38,15 +39,6 @@ import org.aksw.commons.collections.MutableCollectionViews;
 import org.aksw.commons.collections.sets.SetFromCollection;
 import org.aksw.commons.util.convert.ConvertFunction;
 import org.aksw.commons.util.convert.ConvertFunctionImpl;
-import org.aksw.jena_sparql_api.mapper.annotation.HashId;
-import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
-import org.aksw.jena_sparql_api.mapper.annotation.KeyIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Namespace;
-import org.aksw.jena_sparql_api.mapper.annotation.Namespaces;
-import org.aksw.jena_sparql_api.mapper.annotation.PolymorphicOnly;
-import org.aksw.jena_sparql_api.mapper.annotation.StringId;
-import org.aksw.jena_sparql_api.mapper.annotation.ValueIri;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDecider;
 import org.aksw.jena_sparql_api.rdf.collections.ConverterFromNodeMapper;
 import org.aksw.jena_sparql_api.rdf.collections.ConverterFromNodeMapperAndModel;
@@ -64,6 +56,15 @@ import org.aksw.jena_sparql_api.utils.views.map.MapFromValueConverter;
 import org.aksw.jena_sparql_api.utils.views.map.MapVocab;
 import org.aksw.jena_sparql_api.utils.views.map.RdfEntry;
 import org.aksw.jena_sparql_api.utils.views.map.RdfEntryWithCast;
+import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.Inverse;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.KeyIri;
+import org.aksw.jenax.annotation.reprogen.Namespace;
+import org.aksw.jenax.annotation.reprogen.Namespaces;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
+import org.aksw.jenax.annotation.reprogen.StringId;
+import org.aksw.jenax.annotation.reprogen.ValueIri;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.reprogen.hashid.ClassDescriptor;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
@@ -76,7 +77,6 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
-import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Literal;
@@ -182,7 +182,7 @@ public class MapperProxyUtils {
         // is used for representing map entries
 
         ClassDescriptor cd = Metamodel.get().getOrCreate(RdfEntryWithCast.class)
-        		.registerDirectStringIdProcessor(createDefaultStringIdProcessor("entry"));
+                .registerDirectStringIdProcessor(createDefaultStringIdProcessor("entry"));
 
         // Having entries whose identity depends on the owner causes a cyclic dependency
         // if the owner's identity depends on which entries (e.g. config settings) are present.
@@ -245,74 +245,7 @@ public class MapperProxyUtils {
 
     }
 
-    // Getter must be no-arg methods, whose result type is either a subclass of
-    // RDFNode or a type registered at jena's type factory
 
-    public static List<Class<?>> extractItemTypes(Type genericType) {
-        List<Class<?>> result = new ArrayList<>();
-        if(genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)genericType;
-            java.lang.reflect.Type[] types = pt.getActualTypeArguments();
-            for( java.lang.reflect.Type argType : types) {
-                if(argType instanceof Class) {
-                    result.add((Class<?>)argType);
-                } else if(argType instanceof WildcardType) {
-                    // TODO We should take bounds into account
-                    result.add(Object.class);
-                } else {
-                    result.add(null);
-                    //throw new RuntimeException("Don't know how to handle " + argType);
-                }
-            }
-        }
-        return result;
-    }
-
-    public static Entry<Class<?>, Class<?>> extractMapTypes(Type genericType) {
-        Entry<Class<?>, Class<?>> result = null;
-        List<Class<?>> types = extractItemTypes(genericType);
-        if(types.size() == 2) {
-            Class<?> keyType = types.get(0);
-            Class<?> valueType = types.get(1);
-            if(keyType != null && valueType != null) {
-                result = Maps.immutableEntry(keyType, valueType);
-            } else {
-                throw new RuntimeException("Don't know how to handle " + genericType);
-            }
-        }
-        return result;
-    }
-
-    public static Class<?> extractItemType(Type genericType) {
-        Class<?> result = null;
-        List<Class<?>> types = extractItemTypes(genericType);
-        if(types.size() == 1) {
-            Class<?> argType = types.get(0);
-            if(argType != null) {
-                result = argType;
-            } else {
-                throw new RuntimeException("Don't know how to handle " + genericType);
-            }
-        }
-
-//        if(genericType instanceof ParameterizedType) {
-//            ParameterizedType pt = (ParameterizedType)genericType;
-//            java.lang.reflect.Type[] types = pt.getActualTypeArguments();
-//            if(types.length == 1) {
-//            	Type argType = types[0];
-//            	if(argType instanceof Class) {
-//            		result = (Class<?>)argType;
-//            	} else if(argType instanceof WildcardType) {
-//            		// TODO We should take bounds into account
-//            		result = Object.class;
-//            	} else {
-//            		throw new RuntimeException("Don't know how to handle " + argType);
-//            	}
-//            }
-//        }
-
-        return result;
-    }
 
 //	public static Function<Class<?>, Function<Property, Function<Resource, Object>>>
 //		viewAsDynamicList(Method m, boolean isIriType, TypeMapper typeMapper)
@@ -901,7 +834,7 @@ public class MapperProxyUtils {
 
             // Deal with (non-nested) collections first
             if(Iterable.class.isAssignableFrom(paramType)) {
-                Class<?> itemType = extractItemType(m.getParameters()[0].getParameterizedType());
+                Class<?> itemType = TypeUtils.extractItemType(m.getParameters()[0].getParameterizedType());
                 boolean isFluentCompatible = returnType.isAssignableFrom(clazz);
 
                 result = MethodDescriptor.collectionSetter(m, isFluentCompatible, paramType, itemType);
@@ -926,7 +859,7 @@ public class MapperProxyUtils {
         if(paramCount == 0) {
             // Deal with (non-nested) collections first
             if(Map.class.isAssignableFrom(returnType)) {
-                Entry<Class<?>, Class<?>> mapTypes = extractMapTypes(m.getGenericReturnType());
+                Entry<Class<?>, Class<?>> mapTypes = TypeUtils.extractMapTypes(m.getGenericReturnType());
                 if(mapTypes != null) {
                     result = MethodDescriptor.mapGetter(m, mapTypes);
                 }
@@ -975,7 +908,7 @@ public class MapperProxyUtils {
         if(paramCount == 0) {
             // Deal with (non-nested) collections first
             if(Iterable.class.isAssignableFrom(returnType)) {
-                Class<?> itemType = extractItemType(m.getGenericReturnType());
+                Class<?> itemType = TypeUtils.extractItemType(m.getGenericReturnType());
                 if(itemType != null) {
                     result = MethodDescriptor.collectionGetter(m, returnType, itemType);
                 }
@@ -1813,6 +1746,7 @@ public class MapperProxyUtils {
                             Set.class.isAssignableFrom(effectiveCollectionType)
                             || (effectiveCollectionType.isAssignableFrom(Set.class) && !isListType);
 
+                    DataType targetDataType = DataTypes.newCollectionType(effectiveCollectionType, effectiveItemType);
 
                     if (isDynamicGetter) {
                         Function<Class<?>, BiFunction<Property, Boolean, Function<Resource, ViewBundle>>> collectionGetter;
@@ -1841,6 +1775,7 @@ public class MapperProxyUtils {
                                 classDescriptor.getOrCreatePropertyDescriptor(path)
                                     .setIncludedInHashId(isHashId)
                                     .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
+                                    .setTargetType(targetDataType)
                                     .setIriType(isIriType)
                                     .setRawProcessor(s -> {
                                         BiFunction<Property, Boolean, Function<Resource, ViewBundle>> ps = collectionGetter.apply(effectiveItemType);
@@ -1885,6 +1820,7 @@ public class MapperProxyUtils {
                         methodImplMap.put(readMethod, readImpl);
 
                         classDescriptor.getOrCreatePropertyDescriptor(path)
+                            .setTargetType(targetDataType)
                             .setIncludedInHashId(isHashId)
                             .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
                             .setIriType(isIriType)
@@ -1960,6 +1896,8 @@ public class MapperProxyUtils {
                     Class<?> keyType = readMethodDescriptor.getKeyType();
                     Class<?> valueType = readMethodDescriptor.getValueType();
 
+                    DataType targetDataType = DataTypes.newMapType(keyType, valueType);
+
                     Function<Property, Function<Resource, ViewBundle>> getter =
                             viewAsMap(readMethod, isIriType, polymorphicOnly, keyType, valueType, typeMapper, typeDecider);
 
@@ -1967,6 +1905,7 @@ public class MapperProxyUtils {
                         methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o).getJavaView());
 
                     classDescriptor.getOrCreatePropertyDescriptor(path)
+                        .setTargetType(targetDataType)
                         .setIncludedInHashId(isHashId)
                         .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
                         .setIriType(isIriType)
@@ -1983,6 +1922,8 @@ public class MapperProxyUtils {
                         throw new RuntimeException("Incompatible types on getter / setter for property '" + beanPropertyName + "' on class " + clazz);
                     }
 
+                    DataType targetDataType = DataTypes.of(effectiveType);
+
                     // Scalar case
                     BiFunction<Property, Boolean, Function<Resource, ViewBundle>> getter = viewAsScalarGetter(readMethodDescriptor, effectiveType, isIriType, polymorphicOnly, typeMapper, typeDecider);
                     if(getter != null) {
@@ -1990,6 +1931,7 @@ public class MapperProxyUtils {
                         methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o).getJavaView());
 
                             classDescriptor.getOrCreatePropertyDescriptor(path)
+                            .setTargetType(targetDataType)
                                 .setIncludedInHashId(isHashId)
                                 .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
                                 .setIriType(isIriType)

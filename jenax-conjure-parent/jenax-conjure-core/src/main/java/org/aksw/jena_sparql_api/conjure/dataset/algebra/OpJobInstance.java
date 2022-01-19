@@ -2,9 +2,9 @@ package org.aksw.jena_sparql_api.conjure.dataset.algebra;
 
 import org.aksw.jena_sparql_api.conjure.job.api.Job;
 import org.aksw.jena_sparql_api.conjure.job.api.JobInstance;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfTypeNs;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.RdfTypeNs;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 

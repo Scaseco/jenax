@@ -2,10 +2,10 @@ package org.aksw.jena_sparql_api.mapper.test.domain;
 
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.MappedBy;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
+import org.aksw.jenax.annotation.reprogen.DefaultIri;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.MappedBy;
+import org.aksw.jenax.annotation.reprogen.RdfType;
 
 @DefaultIri("o:department-#{name}")
 @RdfType("o:Department")

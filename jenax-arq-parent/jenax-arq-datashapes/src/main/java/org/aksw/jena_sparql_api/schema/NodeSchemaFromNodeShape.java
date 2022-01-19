@@ -7,8 +7,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -57,6 +58,10 @@ public interface NodeSchemaFromNodeShape
     }
 
 
+    @Iri(SH.NS + "targetClass")
+    Resource getTargetClass();
+    NodeSchemaFromNodeShape setTargetClass(Resource targetClass);
+
     /** Scan all property schemas for one that matches the predicate and direction - runs in O(n) */
     default Stream<PropertySchemaFromPropertyShape> getPropertySchemas(Node predicate, boolean isForward) {
         return getPredicateSchemas().stream()
@@ -64,7 +69,7 @@ public interface NodeSchemaFromNodeShape
     }
 
     @Override
-    default PropertySchema createPropertySchema(Node predicate, boolean isForward) {
+    default PropertySchemaFromPropertyShape createPropertySchema(Node predicate, boolean isForward) {
         Set<PropertySchemaFromPropertyShape> set = getPropertySchemas(predicate, isForward).collect(Collectors.toSet());
         PropertySchemaFromPropertyShape result = set.isEmpty() ? null : Iterables.getOnlyElement(set);
 
@@ -82,7 +87,7 @@ public interface NodeSchemaFromNodeShape
             propertyShape.addProperty(SH.path, path);
             nodeShape.addProperty(SH.property, propertyShape);
 
-            // result = new PropertySchemaFromPropertyShape(propertyShape);
+            result = propertyShape.as(PropertySchemaFromPropertyShape.class);// new PropertySchemaFromPropertyShape(propertyShape);
         }
         return result;
     }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.aksw.commons.beans.datatype.DataType;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -12,6 +13,10 @@ import org.apache.jena.sparql.path.P_Path0;
 public class PropertyDescriptor {
     protected ClassDescriptor classDescriptor;
     protected P_Path0 path;
+
+
+    // TODO Also track target type for generics?
+    protected DataType targetType;
 
     protected Function<? super Resource, ? extends Collection<? extends RDFNode>> rawProcessor;
 
@@ -42,6 +47,14 @@ public class PropertyDescriptor {
      *
      */
     protected boolean rdfPropertyExcludedFromHashId;
+
+
+    /**
+     * Whether the target of this property is owned by the source entity.
+     * Ownerships trigger a second hash-id assignment pass that alters the hash
+     * ids of owned entities with the hash id of the owner.
+     */
+    protected boolean isTargetOwned;
 
     public PropertyDescriptor(ClassDescriptor classDescriptor, P_Path0 path) {
         super();
@@ -96,5 +109,23 @@ public class PropertyDescriptor {
 
     public Function<? super Resource, ? extends Collection<? extends RDFNode>> getRawProcessor() {
         return rawProcessor;
+    }
+
+    public boolean isTargetOwned() {
+        return isTargetOwned;
+    }
+
+    public PropertyDescriptor setTargetOwned(boolean isTargetOwned) {
+        this.isTargetOwned = isTargetOwned;
+        return this;
+    }
+
+    public DataType getTargetType() {
+        return targetType;
+    }
+
+    public PropertyDescriptor setTargetType(DataType targetType) {
+        this.targetType = targetType;
+        return this;
     }
 }

@@ -3,11 +3,11 @@ package org.aksw.jena_sparql_api.conjure.dataset.algebra;
 import java.util.List;
 
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
-import org.aksw.jena_sparql_api.mapper.annotation.HashId;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.PolymorphicOnly;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfTypeNs;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
+import org.aksw.jenax.annotation.reprogen.RdfTypeNs;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;

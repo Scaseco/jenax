@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.mapper.test.domain;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.RdfType;
 
 @RdfType("http://spinrdf.org/sp#Query")
 public class LsqQuery {

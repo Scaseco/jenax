@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.mapper.test.domain;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jenax.annotation.reprogen.Inverse;
+import org.aksw.jenax.annotation.reprogen.Iri;
 
 public class Employee
 	extends PersonOld

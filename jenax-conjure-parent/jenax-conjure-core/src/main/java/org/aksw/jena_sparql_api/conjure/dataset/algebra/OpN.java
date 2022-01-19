@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.conjure.dataset.algebra;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.PolymorphicOnly;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
 
 public interface OpN
 	extends Op

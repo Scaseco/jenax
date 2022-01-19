@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.rdf.collections.NodeMappers;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
+import org.aksw.jenax.annotation.reprogen.Inverse;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.RdfType;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.collect.Sets;

@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultValue;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
+import org.aksw.jenax.annotation.reprogen.DefaultValue;
+import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.locationtech.jts.geom.Geometry;

@@ -2,10 +2,10 @@ package org.aksw.jena_sparql_api.conjure.dataref.rdf.api;
 
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefOp;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.PolymorphicOnly;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfTypeNs;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
+import org.aksw.jenax.annotation.reprogen.RdfTypeNs;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 
 @ResourceView
 @RdfTypeNs("rpif")

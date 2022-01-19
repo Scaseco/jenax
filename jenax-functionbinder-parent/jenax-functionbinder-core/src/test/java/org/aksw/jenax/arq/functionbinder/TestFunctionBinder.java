@@ -1,7 +1,7 @@
 package org.aksw.jenax.arq.functionbinder;
 
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultValue;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jenax.annotation.reprogen.DefaultValue;
+import org.aksw.jenax.annotation.reprogen.Iri;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Assert;

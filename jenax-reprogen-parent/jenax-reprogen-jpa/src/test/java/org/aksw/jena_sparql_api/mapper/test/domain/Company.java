@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.mapper.test.domain;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Datatype;
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
+import org.aksw.jenax.annotation.reprogen.Datatype;
+import org.aksw.jenax.annotation.reprogen.DefaultIri;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.RdfType;
 
 @RdfType("dbo:Company")
 @DefaultIri("dbr:#{label}")

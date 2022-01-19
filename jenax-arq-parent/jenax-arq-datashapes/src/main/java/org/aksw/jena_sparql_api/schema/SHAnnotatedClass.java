@@ -2,9 +2,9 @@ package org.aksw.jena_sparql_api.schema;
 
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.Inverse;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 import org.topbraid.shacl.vocabulary.SH;
 

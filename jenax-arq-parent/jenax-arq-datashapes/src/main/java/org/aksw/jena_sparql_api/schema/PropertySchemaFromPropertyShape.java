@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -70,6 +71,19 @@ public interface PropertySchemaFromPropertyShape
 
     @Iri(SH.NS + "class")
     SHAnnotatedClass getSHClass();
+
+    PropertySchemaFromPropertyShape setSHClass(Resource shClass);
+
+//    @Iri(SH.NS + "class")
+//    String getClassIri();
+//    PropertySchemaFromPropertyShape setClassIri(String classIri);
+
+    @Iri(SH.NS + "datatype")
+    @IriType
+    String getDataTypeIri();
+    PropertySchemaFromPropertyShape setDataTypeIri(String datatypeIri);
+
+
 
     // FIXME This is wrong: A property shape may have a class attribute whose value is related to a set of NodeShapes
     // This indirection is missing here

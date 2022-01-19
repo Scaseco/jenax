@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.mapper.test.domain;
 
 import org.aksw.commons.collections.NaturalComparator;
-import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.Ordering;
+import org.aksw.jenax.annotation.reprogen.DefaultIri;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.Ordering;
 
 @DefaultIri("http://ex.org/#{name}")
 public class Country {

@@ -3,9 +3,9 @@ package org.aksw.jenax.connection.extra;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriType;
 import org.apache.jena.rdf.model.Resource;
 
 public interface RDFConnectionMetaData

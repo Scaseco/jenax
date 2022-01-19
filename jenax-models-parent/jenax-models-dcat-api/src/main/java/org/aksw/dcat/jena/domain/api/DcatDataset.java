@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.aksw.commons.util.obj.ObjectUtils;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jenax.annotation.reprogen.Iri;
 import org.apache.jena.rdf.model.Resource;
+
 
 /**
  * Binding of the core to jena

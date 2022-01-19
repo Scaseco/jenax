@@ -3,9 +3,9 @@ package org.aksw.jena_sparql_api.mapper.proxy;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.mapper.annotation.HashId;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.apache.jena.rdf.model.Model;
