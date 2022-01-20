@@ -31,9 +31,15 @@ import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.HashMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
+import org.apache.jena.ext.com.google.common.collect.Multimaps;
+import org.apache.jena.ext.com.google.common.collect.Streams;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.graph.compose.Delta;
+import org.apache.jena.graph.impl.GraphBase;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.TableFactory;
@@ -51,6 +57,8 @@ import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.WrappedIterator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -599,5 +607,99 @@ public class GraphChange
         }
 
         return result;
+    }
+    
+    /**
+     * A graph view of the final state:
+     * - Nodes that were renamed are no longer visible.
+     *
+     * @return
+     */
+    public static Graph createEffectiveGraphView(Graph baseGraph, GraphChange graphChange) {    	
+    	
+        return new GraphBase() {
+            @Override
+            protected ExtendedIterator<Triple> graphBaseFind(Triple triplePattern) {
+
+
+            	// TODO Delta should allow for setting the graphs directly without having to copy them
+            	Delta delta = new Delta(baseGraph);
+            	GraphUtil.addInto(delta.getAdditions(), graphChange.getAdditionGraph());
+            	GraphUtil.addInto(delta.getDeletions(), graphChange.getDeletionGraph());
+
+            	
+            	ObservableMap<Node, Node> renamedNodes = graphChange.getRenamedNodes();
+            	ObservableMap<Triple, Triple> tripleReplacements = graphChange.getTripleReplacements();
+            	
+                // If there is a request for x but x was renamed to y
+                // then rephrase the express in terms of y.
+
+                Map<Node, Node> nodeToCluster = new HashMap<>(renamedNodes);
+                // For each value that is not mapped to by a key map it to itself
+                for (Node v : renamedNodes.values()) {
+                    Node newV = renamedNodes.get(v);
+
+                    if (newV == null) {
+                        nodeToCluster.put(v,  v);
+                    }
+                }
+                Multimap<Node, Node> clusterToMembers = nodeToCluster.entrySet().stream()
+                        .collect(Multimaps.toMultimap(Entry::getValue, Entry::getKey, HashMultimap::create));
+
+//                Multimap<Node, Node> fwdMap = Multimaps.forMap(renamedNodes);
+
+                // If a node was renamed it ceases to exist
+                Stream<Triple> expandedLookups = expand(triplePattern, Triple.createMatch(null, null, null),
+                        x -> {
+                            Collection<Node> sources = clusterToMembers.get(x);
+                            Collection<Node> r = !sources.isEmpty()
+                                    ? sources
+                                    : renamedNodes.containsKey(x)
+                                        ? sources
+                                        : Collections.singleton(x);
+                            return r;
+                        });
+//                        x -> renamedNodes.get(x) != null ? Collections.emptySet() : clusterToMembers.get(x));
+
+
+                List<Triple> tmpX = expandedLookups.collect(Collectors.toList());
+                expandedLookups = tmpX.stream();
+//                System.out.println("Expanded " + triplePattern + " to " + tmpX);
+
+                Stream<Triple> rawTriples = expandedLookups
+                        .flatMap(pattern -> Streams.stream(delta.find(pattern)));
+
+                Stream<Triple> stream = rawTriples
+                    .flatMap(triple -> {
+
+                        Stream<Triple> r;
+
+                        boolean isRemapped = tripleReplacements.containsKey(triple);
+                        if (isRemapped) {
+                            Triple replacement = tripleReplacements.get(triple);
+                            r = replacement == null
+                                    ? Stream.empty()
+                                    : Stream.of(replacement);
+                        } else {
+                            r = Stream.of(triple);
+                        }
+
+                        return r;
+                    })
+                    .flatMap(triple -> {
+                        return expand(triple, triplePattern,
+                                x -> nullableSingleton(renamedNodes.getOrDefault(x, x)));
+                    });
+
+                List<Triple> tmp = stream.collect(Collectors.toList());
+                stream = tmp.stream();
+
+//                System.out.println("Lookup for " + triplePattern);
+//                System.out.println("Returned: " + tmp);
+
+                ExtendedIterator<Triple> result = WrappedIterator.create(stream.iterator());
+                return result;
+            }
+        };
     }
 }
