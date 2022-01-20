@@ -63,8 +63,16 @@ public class ShaclGenerator {
 
                 Class<?> targetCls;
 
+                Long minCount = null;
+                Long maxCount = null;
+
                 if (type.isScalarType()) {
                     targetCls = type.asScalarType().getJavaClass();
+
+                    // TODO Add an isNullable() flag; if false then minCount is 1.
+                    maxCount = 1l;
+
+
                 } else if (type.isSetType()) {
                     // TODO Nested collections not supported yet
                     targetCls = type.asSetType().getItemType().asScalarType().getJavaClass();
@@ -84,6 +92,10 @@ public class ShaclGenerator {
                     String dtypeIri = dtype.getURI();
                     ps.setDataTypeIri(dtypeIri);
                 }
+
+                ps
+                    .setMinCount(minCount)
+                    .setMaxCount(maxCount);
             }
         }
 

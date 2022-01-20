@@ -57,10 +57,11 @@ public interface NodeSchemaFromNodeShape
         return as(SHNodeShape.class);
     }
 
-
     @Iri(SH.NS + "targetClass")
     Resource getTargetClass();
     NodeSchemaFromNodeShape setTargetClass(Resource targetClass);
+
+
 
     /** Scan all property schemas for one that matches the predicate and direction - runs in O(n) */
     default Stream<PropertySchemaFromPropertyShape> getPropertySchemas(Node predicate, boolean isForward) {

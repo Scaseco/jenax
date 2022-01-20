@@ -30,6 +30,31 @@ public interface PropertySchemaFromPropertyShape
         return as(SHPropertyShape.class);
     }
 
+    @Iri(SH.NS + "class")
+    SHAnnotatedClass getSHClass();
+
+    PropertySchemaFromPropertyShape setSHClass(Resource shClass);
+
+//    @Iri(SH.NS + "class")
+//    String getClassIri();
+//    PropertySchemaFromPropertyShape setClassIri(String classIri);
+
+    @Iri(SH.NS + "datatype")
+    @IriType
+    String getDataTypeIri();
+    PropertySchemaFromPropertyShape setDataTypeIri(String datatypeIri);
+
+    @Iri(SH.NS + "minCount")
+    @IriType
+    Long getMinCount();
+    PropertySchemaFromPropertyShape setMinCount(Long value);
+
+    @Iri(SH.NS + "maxCount")
+    @IriType
+    Long getMaxCount();
+    PropertySchemaFromPropertyShape setMaxCount(Long value);
+
+
     default Node getPredicate() {
         SHPropertyShape propertyShape = getPropertyShape();
         Resource r = propertyShape.getPath();
@@ -68,20 +93,6 @@ public interface PropertySchemaFromPropertyShape
 
         return result;
     }
-
-    @Iri(SH.NS + "class")
-    SHAnnotatedClass getSHClass();
-
-    PropertySchemaFromPropertyShape setSHClass(Resource shClass);
-
-//    @Iri(SH.NS + "class")
-//    String getClassIri();
-//    PropertySchemaFromPropertyShape setClassIri(String classIri);
-
-    @Iri(SH.NS + "datatype")
-    @IriType
-    String getDataTypeIri();
-    PropertySchemaFromPropertyShape setDataTypeIri(String datatypeIri);
 
 
 
