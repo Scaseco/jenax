@@ -37,9 +37,12 @@ import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
+import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
@@ -560,6 +563,15 @@ public class QueryUtils {
 //        return result;
 //	}
 
+
+    public static void injectFilter(Query query, String varName, Node node) {
+    	injectFilter(query, Var.alloc(varName), node);
+    }
+
+    public static void injectFilter(Query query, Var var, Node node) {
+        Expr expr = new E_Equals(new ExprVar(var), NodeValue.makeNode(node));
+        injectFilter(query, expr);
+    }
 
     public static void injectFilter(Query query, String exprStr) {
         Expr expr = ExprUtils.parse(exprStr);

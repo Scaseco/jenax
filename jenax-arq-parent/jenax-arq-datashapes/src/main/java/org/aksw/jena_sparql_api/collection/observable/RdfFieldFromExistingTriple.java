@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.collection.observable;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
 import java.util.List;
 import java.util.Map;
 
@@ -85,5 +86,11 @@ public class RdfFieldFromExistingTriple
 //        pce.addPropertyChangeListener(listener);
 //        return () -> pce.removePropertyChangeListener(listener);
     }
+
+
+	@Override
+	public Runnable addVetoableChangeListener(VetoableChangeListener listener) {
+		throw new UnsupportedOperationException();
+	}
 
 }
