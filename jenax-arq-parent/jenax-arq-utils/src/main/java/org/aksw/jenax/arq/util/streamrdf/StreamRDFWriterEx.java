@@ -56,7 +56,7 @@ public class StreamRDFWriterEx {
     * @param out The output stream
     * @param format The RDF format
     * @param cxt The context for riot
-    * @param applyWrapper A callback for optionally wrapping the internal streamRdf; may be null.
+    * @param applyWrapper A callback for optionally wrapping the internal streamRdf (e.g. deferring output while sampling used prefixes); may be null.
     */
 
     public static <T> void writeAsGiven(
