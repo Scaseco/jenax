@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +15,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import org.aksw.commons.util.entity.EntityInfo;
-import org.aksw.commons.util.entity.EntityInfoImpl;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
@@ -47,7 +46,6 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.RIOT;
-import org.apache.jena.riot.out.NodeToLabel;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
@@ -82,6 +80,21 @@ public class RDFDataMgrEx {
             // RDFLanguages.TRIX
     ));
 
+    
+    public static String toString(Model model, RDFFormat rdfFormat) {
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	RDFDataMgr.write(out, model, rdfFormat);
+    	return out.toString(StandardCharsets.UTF_8);
+    }
+
+    public static String toString(Dataset dataset, RDFFormat rdfFormat) {
+    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    	RDFDataMgr.write(out, dataset, rdfFormat);
+    	return out.toString(StandardCharsets.UTF_8);
+    }
+
+    
+    
     public static boolean isStdIn(String filenameOrIri) {
         return "-".equals(filenameOrIri);
     }
