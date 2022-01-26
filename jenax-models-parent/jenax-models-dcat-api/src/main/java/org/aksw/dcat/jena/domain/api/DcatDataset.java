@@ -24,13 +24,17 @@ public interface DcatDataset
     // @Override
     <T extends Resource> Set<T> getDistributionsAs(Class<T> clazz);
 
-    default Set<DcatDistribution> getDistributions() {
+    default Set<? extends DcatDistribution> getDistributions() {
+        return getDistributionsAs(DcatDistribution.class);
+    }
+
+    default Set<DcatDistribution> getBasicDistributions() {
         return getDistributionsAs(DcatDistribution.class);
     }
 
     default DcatDistribution addNewDistribution(String iri) {
     	DcatDistribution result = getModel().createResource(iri).as(DcatDistribution.class);
-    	getDistributions().add(result);
+    	getBasicDistributions().add(result);
     	return result;
     }
     
