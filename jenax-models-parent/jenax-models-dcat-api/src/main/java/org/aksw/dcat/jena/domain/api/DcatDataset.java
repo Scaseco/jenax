@@ -22,12 +22,18 @@ public interface DcatDataset
 
     @Iri("dcat:distribution")
     // @Override
-    <T extends Resource> Set<T> getDistributions(Class<T> clazz);
+    <T extends Resource> Set<T> getDistributionsAs(Class<T> clazz);
 
-    default Set<? extends DcatDistribution> getDistributions2() {
-        return getDistributions(DcatDistribution.class);
+    default Set<DcatDistribution> getDistributions() {
+        return getDistributionsAs(DcatDistribution.class);
     }
 
+    default DcatDistribution addNewDistribution(String iri) {
+    	DcatDistribution result = getModel().createResource(iri).as(DcatDistribution.class);
+    	getDistributions().add(result);
+    	return result;
+    }
+    
     @Iri("dcterms:keyword")
     @Override
     Collection<String> getKeywords();

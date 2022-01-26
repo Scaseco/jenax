@@ -57,7 +57,7 @@ public class DcatUtils {
             result = durl.getDistributions();
             if (result.isEmpty()) {
                 DcatDataset ds = res.as(DcatDataset.class);
-                result = ds.getDistributions2();
+                result = ds.getDistributions();
             }
         } else {
             result = Collections.singleton(dist);

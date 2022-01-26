@@ -222,7 +222,7 @@ public class ExecutionUtils {
             //result.add(dcatDataset);
 
 
-            Collection<DcatDistribution> dists = result.getDistributions(DcatDistribution.class);
+            Collection<DcatDistribution> dists = result.getDistributionsAs(DcatDistribution.class);
             DcatDistribution dist = resultModel.createResource().as(DcatDistribution.class);
             dists.add(dist);
             String downloadUrl = dataEntry.getKey().getAbsolutePath().toUri().toString();

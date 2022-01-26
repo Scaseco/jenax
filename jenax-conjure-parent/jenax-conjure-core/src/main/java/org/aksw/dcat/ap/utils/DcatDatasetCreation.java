@@ -26,7 +26,7 @@ public class DcatDatasetCreation {
         DcatDataset result = model.createResource(url + "#dataset").as(DcatDataset.class);
 
         DcatDistribution dist = model.createResource(url + "#distribution").as(DcatDistribution.class);
-        result.getDistributions(DcatDistribution.class).add(dist);
+        result.getDistributionsAs(DcatDistribution.class).add(dist);
         dist.setDownloadUrl(url);
 
         return result;
