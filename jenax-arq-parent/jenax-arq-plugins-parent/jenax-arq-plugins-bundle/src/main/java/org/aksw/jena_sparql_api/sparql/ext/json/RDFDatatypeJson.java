@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.ToNumberPolicy;
+import com.google.gson.ToNumberStrategy;
 
 
 
@@ -40,6 +42,15 @@ public class RDFDatatypeJson
         } catch(NoSuchMethodError e) {
             logger.warn("Gson.setLenient not available");
         }
+
+        try {
+            builder.setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE);
+            builder.setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE);
+        } catch(NoSuchMethodError e) {
+            logger.warn("Gson.setObjectToNumberStrategy and/or Gson.setNumberToNumberStrategy not available");
+        }
+
+        
         Gson result = builder.create();
         return result;
     }

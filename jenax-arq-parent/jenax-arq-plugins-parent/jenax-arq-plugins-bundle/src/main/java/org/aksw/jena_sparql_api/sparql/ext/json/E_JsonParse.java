@@ -1,11 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionBase1;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-
 /**
  * Deprecated:
  * Instead of json:parse(?str) just parse strings as json using

@@ -29,7 +29,7 @@ public class E_JsonPath
     private Gson gson;
 
     public E_JsonPath() {
-        this(new Gson());
+        this(RDFDatatypeJson.INSTANCE.getGson());
     }
 
     public E_JsonPath(Gson gson) {

@@ -35,6 +35,24 @@ public class TestSparqlExtJson {
     }
 
     @Test
+    public void testJsonInteger() {
+        Query q = parser.apply("SELECT ?v ?w { BIND(\"123\"^^xsd:json AS ?v) BIND(json:path(?v, '$') AS ?w) }");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            System.out.println(ResultSetFormatter.asText(qe.execSelect()));
+        }
+    }
+
+    @Test
+    public void testJsonIntegerObj() {
+        Query q = parser.apply("SELECT ?v { BIND(json:path(\"{'value':123}\"^^xsd:json, '$.value') AS ?v) }");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            System.out.println(ResultSetFormatter.asText(qe.execSelect()));
+        }
+    }
+    
+    @Test
     public void testJsonEntries() {
         Query q = parser.apply("SELECT ?s { BIND(json:path(\"{'x':{'y': 'z' }}\"^^xsd:json, '$.x') AS ?s) }");
 //        Query q = parser.apply("SELECT ?s { BIND(json:path(json:entries(\"{'k':'v'}\"^^xsd:json), '$[*].value') AS ?s) }");
