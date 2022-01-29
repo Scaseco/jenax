@@ -1,12 +1,16 @@
 package org.aksw.jenax.model.prov;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
@@ -31,12 +35,22 @@ public interface Activity
     @Iri(ProvTerms.qualifiedAssociation)
     Set<QualifiedAssociation> getQualifiedAssociations();
 
-    @Iri(ProvTerms.startedAtTime)
-    Instant getStartedAtTime();
-    Activity setStartedAtTime(Instant instant);
+    // Jena's type mapper by default does not have a registration for Instant (as of jena 4.3.2)
 
     @Iri(ProvTerms.startedAtTime)
-    Instant getEndedAtTime();
-    Activity setEndedAtTime(Instant instant);
+    XSDDateTime getStartedAtTimeDt();
+    Activity setStartedAtTimeDt(XSDDateTime dateTime);
+
+    @Iri(ProvTerms.endedAtTime)
+    XSDDateTime getEndedAtTimeDt();
+    Activity setEndedAtTimeDt(XSDDateTime dateTime);
+
+    // @Iri(ProvTerms.startedAtTime)
+    default Instant getStartedAtTime() { return Instant.ofEpochSecond(getStartedAtTimeDt().getFullSeconds()); }
+    default Activity setStartedAtTime(Instant instant) { return setStartedAtTimeDt(new XSDDateTime(GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)))); }
+
+    // @Iri(ProvTerms.endedAtTime)
+    default Instant getEndedAtTime() { return Instant.ofEpochSecond(getEndedAtTimeDt().getFullSeconds()); }
+    default Activity setEndedAtTime(Instant instant) { return setEndedAtTimeDt(new XSDDateTime(GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)))); }
 
 }

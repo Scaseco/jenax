@@ -4,6 +4,10 @@ package org.aksw.jenax.model.prov;
 public class ProvTerms {
     public static final String NS = "http://www.w3.org/ns/prov#";
 
+    public static final String Entity = NS + "Entity";
+    public static final String Activity = NS + "Activity";
+    public static final String Agent = NS + "Agent";
+    
     public static final String entity = NS + "entity";
     public static final String hadUsage = NS + "hadUsage";
     public static final String hadPlan = NS + "hadPlan";

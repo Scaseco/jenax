@@ -51,6 +51,7 @@ import org.apache.jena.sparql.syntax.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
@@ -71,6 +72,22 @@ public class SparqlRx {
 
     private static final Logger logger = LoggerFactory.getLogger(SparqlRx.class);
 
+    public static Single<Boolean> execAsk(Function<Query, QueryExecution> qeSupp, Query query) {
+    	return Flowable.<Boolean, QueryExecution>generate(
+    		() -> qeSupp.apply(query),
+    		(qe, e) -> {
+    			try {
+    				boolean r = qe.execAsk();
+    				e.onNext(r);
+    				e.onComplete();
+    			} catch (Exception ex) {
+    				e.onError(ex);
+    			}
+    		},
+    		QueryExecution::close)
+    		.singleOrError();
+    }
+    
     /**
      * Create a Flowable from a supplier of connections and a query.
      * Each subscription obtains a fresh connection
@@ -85,6 +102,10 @@ public class SparqlRx {
         // FIXME Close the connection; tie it to the query execution
         // Queryexecution qe = new QueryExecution();
         return SparqlRx.execSelectRaw(() -> queryConnSupp.call().query(query));
+    }
+
+    public static Flowable<Binding> execSelectRaw(Function<? super Query, ? extends QueryExecution> qeSupp, Query query) {
+    	return execSelectRaw(() -> qeSupp.apply(query));
     }
 
     public static Flowable<Binding> execSelectRaw(SparqlQueryConnection queryConn, Query query) {
@@ -773,6 +794,12 @@ public class SparqlRx {
 
     public static Flowable<Node> execConceptRaw(Function<? super Query, ? extends QueryExecution> qef, Query query, Var var) {
         return execConceptRaw(() -> qef.apply(query), var);
+    }
+
+    /** Convenience method that assumes a single projected variable */
+    public static Flowable<Node> execConceptRaw(Function<? super Query, ? extends QueryExecution> qef, Query query) {
+    	Var var = Iterables.getOnlyElement(query.getProjectVars());
+        return execConceptRaw(qef, query, var);
     }
 
 

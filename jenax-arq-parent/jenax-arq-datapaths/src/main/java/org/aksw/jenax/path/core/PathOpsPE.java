@@ -99,6 +99,11 @@ public class PathOpsPE
     public UnaryXExpr getParentToken() {
         return PARENT;
     }
+    
+    @Override
+    public String toStringRaw(Object path) {
+    	return toString((PathPE)path);
+    }
 
     @Override
     public String toString(PathPE path) {

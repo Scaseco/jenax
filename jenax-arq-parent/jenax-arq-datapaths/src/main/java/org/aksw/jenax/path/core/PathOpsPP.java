@@ -69,6 +69,11 @@ public class PathOpsPP
     }
 
     @Override
+    public String toStringRaw(Object path) {
+    	return toString((PathPP)path);
+    }
+
+    @Override
     public String toString(PathPP path) {
         org.apache.jena.sparql.path.Path tmp = PathUtils.toSparqlPath(path.getSegments());
         String str = tmp.toString(new Prologue(PrefixMapping.Extended));

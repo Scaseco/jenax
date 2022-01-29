@@ -939,14 +939,14 @@ public class ResourceUtils {
         Statement result;
         Model m = s.getModel();
         if(isFwd) {
-            if(!s.isResource()) {
-                throw new IllegalArgumentException("Subject must be a resource for forward properties");
-            }
+//            if(!s.isResource()) {
+//                throw new IllegalArgumentException("Subject must be a resource for forward properties");
+//            }
             result = m.createStatement(s.asResource(), p, o);
         } else {
-            if(!o.isResource()) {
-                throw new IllegalArgumentException("Object must be a resource for backward properties");
-            }
+//            if(!o.isResource()) {
+//                throw new IllegalArgumentException("Object must be a resource for backward properties");
+//            }
             result = m.createStatement(o.asResource(), p, s);
         }
 

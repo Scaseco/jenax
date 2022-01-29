@@ -1,9 +1,12 @@
 package org.aksw.jena_sparql_api.rdf.collections;
 
 import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.aksw.commons.collections.ConvertingList;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
@@ -11,6 +14,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.AddDeniedException;
 import org.apache.jena.util.iterator.NiceIterator;
 import org.apache.jena.vocabulary.RDF;
+
+import com.google.common.base.Converter;
 
 /**
  * Create a modifiable {@link List} view over an {@link RDFList}
@@ -34,23 +39,47 @@ public class ListFromRDFList
             o = RDF.nil.inModel(s.getModel());
         }
 
+        // TODO Should we also clear any other value for consistency?
+        // This would cause a get-method to cause a side effect - it breaks on read only models
+        // // Also, clear all any other value for consistency
         if (false) {
-            // TODO Should we also clear any other value for consistency?
-            // This would cause a get-method to cause a side effect - it breaks on read only models
-            // // Also, clear all any other value for consistency
+        	ensureNonNull();
+        }
+
+        return o.as(RDFList.class);
+    }
+
+    /** Ensure that the value for property p of source node s is non null. If it is then set that value to rdf:nil. */
+    public ListFromRDFList ensureNonNull() {
+        Resource o = ResourceUtils.getPropertyValue(s, p, isFwd, Resource.class);
+        if(o == null) {
+            o = RDF.nil.inModel(s.getModel());
+
             try {
                 ResourceUtils.setProperty(s, p, isFwd, o);
             } catch (AddDeniedException e) {
             }
         }
 
-        return o.as(RDFList.class);
+    	
+    	return this;
     }
-
+    
+    /** Ensure that adding an empty collection to a non-intialized list result in termination with rdf:nil */
+    @Override
+    public boolean addAll(Collection<? extends RDFNode> c) {
+    	ensureNonNull();
+    	return super.addAll(c);
+    }
+    
     public ListFromRDFList(Resource subject, Property property) {
         this(subject, property, true);
     }
 
+    public static ListFromRDFList create(Resource subject, Property property) {
+        return new ListFromRDFList(subject, property);
+    }
+    
     public ListFromRDFList(Resource subject, Property property, boolean isFwd) {
         super();
         this.s = subject;
@@ -285,4 +314,10 @@ public class ListFromRDFList
     }
 
     // TODO hashCode and equals
+
+    /** Return a (new) mutable view of the list as Nodes */
+    public List<Node> asNodes() {
+    	Converter<RDFNode, Node> converter = Converter.from(RDFNode::asNode, s.getModel()::asRDFNode);
+    	return new ConvertingList<>(this, converter);
+    }
 }

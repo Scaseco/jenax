@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.aksw.jenax.arq.dataset.api.DatasetGraphOneNg;
+import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.iterator.NullIterator;
 import org.apache.jena.graph.Graph;
@@ -57,6 +58,13 @@ public class DatasetGraphOneNgImpl
         // Didn't find a GraphView so no backing DatasetGraph; work on the graph as given.
         return new DatasetGraphOneNgImpl(graphName, graph);
     }
+    
+    
+    public static DatasetGraphOneNg create(DatasetGraph datasetGraph, Node graphName) {
+    	Graph graph = DatasetGraphUtils.getDefaultOrNamedGraph(datasetGraph, graphName);
+        return new DatasetGraphOneNgImpl(graphName, graph, datasetGraph);
+    }
+
 
     private static Graph unwrap(Graph graph) {
         for (;;) {

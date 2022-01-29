@@ -1,5 +1,6 @@
 package org.aksw.jenax.path.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,13 +29,19 @@ import org.apache.jena.riot.tokens.TokenizerText;
  *
  */
 public class PathOpsNode
-    implements PathOps<Node, PathNode>
+    implements PathOps<Node, PathNode>, Serializable
 {
-    public static final Node PARENT = NodeFactory.createURI("..");
+	private static final long serialVersionUID = 1L;
+
+	public static final Node PARENT = NodeFactory.createURI("..");
     public static final Node SELF = NodeFactory.createURI(".");
 
     private static PathOpsNode INSTANCE = null;
 
+    private Object readResolve() {
+    	return get();
+    }
+    
     public static PathOpsNode get() {
         if (INSTANCE == null) {
             synchronized (PathOpsNode.class) {
@@ -89,6 +96,11 @@ public class PathOpsNode
     @Override
     public Node getParentToken() {
         return PARENT;
+    }
+    
+    @Override
+    public String toStringRaw(Object path) {
+    	return toString((PathNode)path);
     }
 
     @Override

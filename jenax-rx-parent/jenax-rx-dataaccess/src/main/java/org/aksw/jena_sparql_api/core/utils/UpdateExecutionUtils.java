@@ -267,12 +267,12 @@ public class UpdateExecutionUtils {
     }
 
 
-    public static UpdateDeleteInsert createUpdateRename(Node before, Node after, int i) {
-        Node[] deleteTerms = { Quad.defaultGraphIRI, Vars.s, Vars.p, Vars.o };
+    public static UpdateDeleteInsert createUpdateRename(Node g, Node before, Node after, int i) {
+        Node[] deleteTerms = { g, Vars.s, Vars.p, Vars.o };
         deleteTerms[i] = before;
         Quad deleteQuad = QuadUtils.create(deleteTerms);
 
-        Node[] insertTerms = { Quad.defaultGraphIRI, Vars.s, Vars.p, Vars.o };
+        Node[] insertTerms = { g, Vars.s, Vars.p, Vars.o };
         insertTerms[i] = after;
         Quad insertQuad = QuadUtils.create(insertTerms);
 
@@ -293,13 +293,13 @@ public class UpdateExecutionUtils {
      * @param after
      * @return
      */
-    public static UpdateRequest createUpdateRequestRename(Node before, Node after) {
+    public static UpdateRequest createUpdateRequestRename(Node graph, Node before, Node after) {
         UpdateRequest result = new UpdateRequest();
 
-        Update g = createUpdateRename(before, after, 0);
-        Update s = createUpdateRename(before, after, 1);
-        Update p = createUpdateRename(before, after, 2);
-        Update o = createUpdateRename(before, after, 3);
+        Update g = createUpdateRename(graph, before, after, 0);
+        Update s = createUpdateRename(graph, before, after, 1);
+        Update p = createUpdateRename(graph, before, after, 2);
+        Update o = createUpdateRename(graph, before, after, 3);
 
         result.add(g);
         result.add(s);
@@ -310,8 +310,8 @@ public class UpdateExecutionUtils {
     }
 
 
-    public static UpdateProcessor executeUpdateRename(UpdateExecutionFactory uef, Node before, Node after) {
-        UpdateRequest updateRequest = createUpdateRequestRename(before, after);
+    public static UpdateProcessor executeUpdateRename(UpdateExecutionFactory uef, Node graph, Node before, Node after) {
+        UpdateRequest updateRequest = createUpdateRequestRename(graph, before, after);
         UpdateProcessor result = executeUnlessEmpty(uef, updateRequest);
 
         return result;

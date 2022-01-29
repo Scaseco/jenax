@@ -188,13 +188,19 @@ public class ContentTypeUtils {
         return result;
     }
 
-    public static String toFileExtension(List<String> codings) {
+    public static List<String> toFileExtensionParts(List<String> codings) {
         List<String> parts = new ArrayList<>(codings.size());
 
         for(String coding : codings) {
             String part = Objects.requireNonNull(codingExtensions.getPrimary().get(coding));
             parts.add(part);
         }
+        
+        return parts;
+    }
+    
+    public static String toFileExtension(List<String> codings) {
+        List<String> parts = toFileExtensionParts(codings);
 
         String result = parts.stream().collect(Collectors.joining("."));
 
@@ -209,9 +215,9 @@ public class ContentTypeUtils {
         return result;
     }
 
-    public static String toFileExtension(String contentType) {
+    public static String toFileExtension(String contentType, boolean precedeWithDotIfNotEmpty) {
         String result = Objects.requireNonNull(ctExtensions.getPrimary().get(contentType));
-        result = result.isEmpty() ? result : "." + result;
+        result = precedeWithDotIfNotEmpty && !result.isEmpty() ? "." + result : result;
         return result;
     }
 
