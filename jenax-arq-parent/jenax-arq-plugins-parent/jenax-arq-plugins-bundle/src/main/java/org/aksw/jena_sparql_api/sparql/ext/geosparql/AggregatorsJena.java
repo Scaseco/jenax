@@ -13,18 +13,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 public class AggregatorsJena {
 
-	public static Geometry extractGeometryOrNull(NodeValue nv) {
-		Geometry result = null;
-		try {
-			GeometryWrapper wrapper = GeometryWrapper.extract(nv);
-			result = wrapper.getParsingGeometry();
-		} catch (Exception e) {
-			// Nothing to do
-		}
-		
-		return result;
-	}
-	
 	public static Aggregator<Binding, NodeValue> aggGeometryCollection(Expr geomExpr, boolean distinct) {
 		return aggGeometryCollection(geomExpr, distinct, CustomGeometryFactory.theInstance());
 	}
@@ -41,7 +29,7 @@ public class AggregatorsJena {
 				AggBuilder.inputTransform(
 						(Binding binding) -> {
 							NodeValue nv = geomExpr.eval(binding, null);
-							return AggregatorsJena.extractGeometryOrNull(nv);
+							return GeometryWrapper2.extractGeometryOrNull(nv);
 						},
 						AggBuilder.inputFilter(input -> input != null,
 							AggregatorsJts.aggGeometryCollection(distinct, geomFactory))),

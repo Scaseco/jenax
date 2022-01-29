@@ -262,6 +262,9 @@ public class DatasetGraphDiff
         removed.find().forEachRemaining(base::delete);
         added.find().forEachRemaining(base::add);
 
+        removedGraphs.forEach(base::removeGraph);
+        addedGraphs.forEach(base::getGraph);
+        
         added.clear();
         addedGraphs.clear();
         removed.clear();

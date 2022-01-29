@@ -65,11 +65,10 @@ public class QueryFlowOps
         Preconditions.checkArgument(!query.isConstructType(), "Construct query expected");
 
         Template template = query.getConstructTemplate();
-        Op op = Algebra.compile(query);
 
         return upstream ->
             upstream
-                .compose(createMapperBindings(op))
+                .compose(createMapperBindings(query))
                 .flatMap(createMapperTriples(template)::apply);
     }
 
@@ -79,15 +78,26 @@ public class QueryFlowOps
         Preconditions.checkArgument(query.isConstructType(), "Construct query expected");
 
         Template template = query.getConstructTemplate();
-        Op op = Algebra.compile(query);
 
         return upstream ->
             upstream
-                .compose(createMapperBindings(op))
+                .compose(createMapperBindings(query))
                 .flatMap(createMapperQuads(template)::apply);
     }
 
 
+    public static FlowableTransformer<Binding, Binding> createMapperBindings(Query query) {
+    	Op op = Algebra.compile(query);
+    	return createMapperBindings(op);
+    }
+
+    /**
+     * Evaluates the given algebra for each input binding individually.
+     * Note that this does not allow for aggregation over the input bindings!
+     * 
+     * @param op
+     * @return
+     */
     public static FlowableTransformer<Binding, Binding> createMapperBindings(Op op) {
         return upstream -> {
             DatasetGraph ds = DatasetGraphFactory.create();
