@@ -164,5 +164,21 @@ public class FunctionBinder {
         return result;
     }
 
+    /** Lookup a function for a given method in the default registry. Uses {@link #getFunction(FunctionRegistry, Method)}. */
+    public static Function getFunction(Method method) {
+    	return getFunction(FunctionRegistry.get(), method);
+    }
+    
+    /**
+     * Read a (static) method's @Iri annotation and use it to lookup a function in the given registry
+     * 
+     * At present there is no direct mapping of methods to FuncionFactories (without having to read the @Iri annotation)
+     */
+    public static Function getFunction(FunctionRegistry registry, Method method) {
+        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
+        FunctionFactory factory = registry.get(iri);
+        Function result = factory == null ? null : factory.create(iri);
+        return result;
+    }
 
 }
