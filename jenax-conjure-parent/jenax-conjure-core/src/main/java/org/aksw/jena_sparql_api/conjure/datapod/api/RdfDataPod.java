@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.conjure.datapod.api;
 
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 
@@ -73,4 +75,13 @@ public interface RdfDataPod
         }
         return result;
     }
+
+    default Dataset getDataset() {
+        Dataset result;
+        try(RDFConnection conn = openConnection()) {
+            result = conn.fetchDataset(); // conn.fetchDataset("CONSTRUCT WHERE { ?s ?p ?o }");
+        }
+        return result;
+    }
+
 }
