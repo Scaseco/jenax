@@ -61,7 +61,7 @@ public class RDFLanguagesEx {
      */
     public static List<Lang> getResultSetProbeLangs() {
         List<Lang> result = RDFLanguagesEx.getResultSetLangs();
-        result.remove(ResultSetLang.SPARQLResultSetCSV);
+        result.remove(ResultSetLang.RS_CSV);
         return result;
     }
 

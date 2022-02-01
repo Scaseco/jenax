@@ -5,8 +5,9 @@ import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
+
+import java.net.http.HttpClient;
 
 /**
  * A SPARQL service factory that intercepts update request and keeps track

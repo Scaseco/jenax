@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.update;
 
+import java.net.http.HttpClient;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,6 @@ import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnec
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactorySparqlUpdateConnection;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;

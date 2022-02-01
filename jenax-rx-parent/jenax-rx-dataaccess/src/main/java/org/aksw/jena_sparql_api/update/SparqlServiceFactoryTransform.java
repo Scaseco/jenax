@@ -1,10 +1,10 @@
 package org.aksw.jena_sparql_api.update;
 
+import java.net.http.HttpClient;
 import java.util.function.Function;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 public class SparqlServiceFactoryTransform

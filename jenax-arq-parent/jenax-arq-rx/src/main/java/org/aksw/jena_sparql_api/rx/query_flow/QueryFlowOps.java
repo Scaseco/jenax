@@ -34,7 +34,6 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingComparator;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.binding.BindingMap;
 import org.apache.jena.sparql.engine.binding.BindingProject;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.expr.Expr;

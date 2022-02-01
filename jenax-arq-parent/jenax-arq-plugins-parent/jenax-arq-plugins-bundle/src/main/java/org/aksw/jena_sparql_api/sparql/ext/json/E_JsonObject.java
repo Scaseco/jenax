@@ -7,7 +7,7 @@ import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
-import org.apache.jena.sparql.sse.builders.ExprBuildException;
+import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -53,7 +53,7 @@ public class E_JsonObject
     @Override
     public void checkBuild(String uri, ExprList args) {
         if (args.size() % 2 != 0) {
-            throw new ExprBuildException("Json object creation requires an even number of arguments (every two arguments are interpreted as a key-value pair");
+            throw new SSE_ExprBuildException("Json object creation requires an even number of arguments (every two arguments are interpreted as a key-value pair");
         }
     }
 

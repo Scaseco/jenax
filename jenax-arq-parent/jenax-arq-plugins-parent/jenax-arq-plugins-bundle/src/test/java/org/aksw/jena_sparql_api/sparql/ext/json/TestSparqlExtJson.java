@@ -12,7 +12,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.sse.builders.ExprBuildException;
+import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -97,7 +97,7 @@ public class TestSparqlExtJson {
     }
 
     /** Attempting to create a json object with an odd argument count must fail */
-    @Test(expected = ExprBuildException.class)
+    @Test(expected = SSE_ExprBuildException.class)
     public void testJsonObjectCreationOddArguments() {
         ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch')", pm));
     }

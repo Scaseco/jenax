@@ -311,7 +311,7 @@ public class SPARQLResultExProcessorBuilder {
                    closeAction) { //new SinkStreamingBinding(err, resultSetVars, ResultSetLang.SPARQLResultSetText)) {
                @Override
                public Void onResultSet(ResultSet rs) {
-                   ResultSetMgr.write(err, rs, ResultSetLang.SPARQLResultSetText);
+                   ResultSetMgr.write(err, rs, ResultSetLang.RS_Text);
                    return null;
                }
            };
@@ -326,7 +326,7 @@ public class SPARQLResultExProcessorBuilder {
                    closeAction) {
                @Override
                public Void onResultSet(ResultSet rs) {
-                   ResultSetMgr.write(err, rs, ResultSetLang.SPARQLResultSetText);
+                   ResultSetMgr.write(err, rs, ResultSetLang.RS_Text);
                    return null;
                }
            };

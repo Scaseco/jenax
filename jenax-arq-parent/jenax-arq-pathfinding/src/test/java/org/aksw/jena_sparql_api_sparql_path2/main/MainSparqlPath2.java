@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api_sparql_path2.main;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,7 +67,6 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;

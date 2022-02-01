@@ -1,10 +1,11 @@
 package org.aksw.jena_sparql_api.core;
 
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 import com.google.common.base.Predicate;
+
+import java.net.http.HttpClient;
 
 public class SparqlServiceFactoryDefaults
     implements SparqlServiceFactory

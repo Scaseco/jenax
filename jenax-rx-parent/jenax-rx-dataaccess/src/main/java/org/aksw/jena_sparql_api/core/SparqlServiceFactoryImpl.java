@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
+import java.net.http.HttpClient;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,6 @@ import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 

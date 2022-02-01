@@ -21,6 +21,7 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateRequest;
 
@@ -101,6 +102,11 @@ public class RDFLinkDelegateWithWorkerThread
     @Override
     public QueryExecBuilder newQuery() {
         return submit(() -> getDelegate().newQuery());
+    }
+
+    @Override
+    public UpdateExecBuilder newUpdate() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -205,6 +211,7 @@ public class RDFLinkDelegateWithWorkerThread
             es.shutdownNow();
         }
     }
+
 
 
 

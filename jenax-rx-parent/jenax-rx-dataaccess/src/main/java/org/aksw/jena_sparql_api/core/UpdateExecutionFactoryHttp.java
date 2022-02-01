@@ -1,10 +1,12 @@
 package org.aksw.jena_sparql_api.core;
 
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.modify.UpdateProcessRemote;
+import org.apache.jena.sparql.exec.http.UpdateExecutionHTTP;
+import org.apache.jena.sparql.exec.http.UpdateExecutionHTTPBuilder;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+
+import java.net.http.HttpClient;
 
 public class UpdateExecutionFactoryHttp
     extends UpdateExecutionFactoryParsingBase
@@ -33,11 +35,14 @@ public class UpdateExecutionFactoryHttp
         // Fixing var names should be done with transform
         // UpdateRequestUtils.fixVarNames(updateRequest);
 
-        UpdateProcessRemote result = new UpdateProcessRemote(updateRequest, remoteEndpoint, null);//request, endpoint, context);
+        UpdateExecutionHTTPBuilder builder = UpdateExecutionHTTPBuilder.create()
+                .update(updateRequest)
+                .httpClient(httpClient)
+                .endpoint(remoteEndpoint);
+        datasetDescription.getNamedGraphURIs().forEach(builder::addUsingNamedGraphURI);
+        datasetDescription.getDefaultGraphURIs().forEach(builder::addUsingGraphURI);
 
-        result.setClient(httpClient);
-        result.setDefaultGraphs(datasetDescription.getDefaultGraphURIs());;
-        result.setNamedGraphs(datasetDescription.getNamedGraphURIs());
+        UpdateExecutionHTTP result = builder.build();
 
         return result;
     }

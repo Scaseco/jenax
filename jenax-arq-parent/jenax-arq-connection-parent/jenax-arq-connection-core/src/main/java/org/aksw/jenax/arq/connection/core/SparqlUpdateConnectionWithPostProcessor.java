@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.aksw.jenax.arq.connection.SparqlUpdateConnectionTmp;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
+import org.apache.jena.update.UpdateExecutionBuilder;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -41,5 +42,10 @@ public class SparqlUpdateConnectionWithPostProcessor
     @Override
     public void close() {
         delegate.close();
+    }
+
+    @Override
+    public UpdateExecutionBuilder newUpdate() {
+        throw new UnsupportedOperationException();
     }
 }

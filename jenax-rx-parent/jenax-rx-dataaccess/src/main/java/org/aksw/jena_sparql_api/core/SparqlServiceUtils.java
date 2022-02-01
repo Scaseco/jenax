@@ -4,11 +4,13 @@ import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+
+import java.net.http.HttpClient;
+
 
 public class SparqlServiceUtils {
 
