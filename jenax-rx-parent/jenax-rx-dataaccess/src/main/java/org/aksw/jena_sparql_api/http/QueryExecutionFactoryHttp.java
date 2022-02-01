@@ -62,6 +62,10 @@ public class QueryExecutionFactoryHttp
         datasetDescription.getNamedGraphURIs().forEach(builder::addNamedGraphURI);
         datasetDescription.getDefaultGraphURIs().forEach(builder::addDefaultGraphURI);
 
+        if (httpClient != null) {
+            builder.httpClient(httpClient);
+        }
+
         QueryExecution result = builder.build();
         result = new QueryExecutionHttpWrapper(result);
         return result;
@@ -70,9 +74,9 @@ public class QueryExecutionFactoryHttp
     @Override
     public QueryExecution createQueryExecution(String queryString) {
         QueryExecutionHTTPBuilder builder = QueryExecutionHTTPBuilder.create()
-                .httpClient(httpClient)
                 .endpoint(service)
                 .query(queryString);
+
         QueryExecution result = postProcess(builder);
 
         return result;
