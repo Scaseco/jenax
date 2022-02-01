@@ -85,9 +85,9 @@ public class QueryExecutionFactoryHttp
     @Override
     public QueryExecution createQueryExecution(Query query) {
         QueryExecutionHTTPBuilder builder = QueryExecutionHTTPBuilder.create()
-                .httpClient(httpClient)
                 .endpoint(service)
                 .query(query);
+
         QueryExecution result = postProcess(builder);
 
         return result;
