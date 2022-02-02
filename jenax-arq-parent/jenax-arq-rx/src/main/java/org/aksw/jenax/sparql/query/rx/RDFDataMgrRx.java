@@ -566,6 +566,10 @@ public class RDFDataMgrRx {
         return result;
     }
 
+    public static Flowable<Quad> createFlowableQuads(Path path, Iterable<Lang> probeLangs) {
+    	return createFlowableQuads(() -> RDFDataMgrEx.open(path, probeLangs));
+    }
+    
     public static Flowable<Quad> createFlowableQuads(Callable<TypedInputStream> inSupplier) {
 
         Flowable<Quad> result = createFlowableFromInputStream(
@@ -580,6 +584,9 @@ public class RDFDataMgrRx {
         return result;
     }
 
+    public static Flowable<Quad> createFlowableTriples(Path path, Iterable<Lang> probeLangs) {
+    	return createFlowableQuads(() -> RDFDataMgrEx.open(path, probeLangs));
+    }
 
     public static Flowable<Triple> createFlowableTriples(Callable<TypedInputStream> inSupplier) {
 

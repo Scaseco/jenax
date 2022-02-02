@@ -639,4 +639,32 @@ public class SparqlStmtUtils {
 
         return result;
     }
+    
+    
+    /**
+     * Get all variables mentioned in the nodes w.r.t. to the variable representations
+     * supported by {@link NodeEnvsubst}
+     * 
+     * @param sparqlStmts
+     * @return
+     */
+    public static Set<String> getMentionedEnvVars(Collection<? extends SparqlStmt> sparqlStmts) {
+        NodeTransformCollectNodes collector = new NodeTransformCollectNodes();
+
+        for (SparqlStmt sparqlStmt : sparqlStmts) {
+            SparqlStmtUtils.applyNodeTransform(sparqlStmt, collector);
+        }
+
+        // Get all environment references
+        // TODO Make this a util function
+        Set<String> usedEnvVarNames = collector.getNodes().stream()
+            .map(NodeEnvsubst::getEnvKey)
+            .filter(Objects::nonNull)
+            .map(Entry::getKey)
+            .distinct()
+            .collect(Collectors.toSet());
+
+        return usedEnvVarNames;
+    }
+
 }

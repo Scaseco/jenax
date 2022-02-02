@@ -72,6 +72,11 @@ public class FlowOfDatasetOps {
         return mapper;
     }
 
+    
+    public static Flowable<DatasetOneNg> namedGraphs(Dataset dataset) {
+    	return Flowable.just(dataset).compose(flatMapNamedGraphs());
+    }
+    
     /**
      * For any non-DatasetOnNg input map its named graphs to individual
      * DatasetOnNg instances.

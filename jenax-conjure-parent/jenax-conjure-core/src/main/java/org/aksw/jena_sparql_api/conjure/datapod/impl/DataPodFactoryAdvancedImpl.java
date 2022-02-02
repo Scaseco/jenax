@@ -1,9 +1,7 @@
 package org.aksw.jena_sparql_api.conjure.datapod.impl;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
 import org.aksw.dcat.jena.domain.api.DcatUtils;

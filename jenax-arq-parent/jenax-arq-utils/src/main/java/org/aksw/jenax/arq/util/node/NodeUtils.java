@@ -158,4 +158,7 @@ public class NodeUtils {
         return result;
     }
 
+    public static List<Node> createLiteralNodes(Iterable<String> strings) {
+		return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+    }
 }

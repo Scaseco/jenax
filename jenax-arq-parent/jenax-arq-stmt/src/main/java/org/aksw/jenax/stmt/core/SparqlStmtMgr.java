@@ -3,6 +3,8 @@ package org.aksw.jenax.stmt.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -17,8 +19,9 @@ import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.stmt.resultset.SPARQLResultSinkQuads;
+import org.aksw.jenax.stmt.util.SparqlStmtIterator;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ParameterizedSparqlString;
@@ -34,6 +37,8 @@ import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
+
+import com.google.common.collect.Streams;
 
 public class SparqlStmtMgr {
     // private static final Logger logger = LoggerFactory.getLogger(SparqlStmtMgr.class);
@@ -210,6 +215,49 @@ public class SparqlStmtMgr {
                 q -> result.add(ModelUtils.tripleToStatement(result, q.asTriple())));
         return result;
     }
+    
+    
+    public static List<SparqlStmt> loadSparqlStmts(Path path) {
+    	return loadSparqlStmts(path, SparqlStmtParserImpl.create());
+    }
+
+
+    public static List<SparqlStmt> loadSparqlStmts(Path path, SparqlStmtParser parser) {
+    	List<SparqlStmt> result = new ArrayList<>();
+    	try (InputStream in = Files.newInputStream(path)) {
+    		SparqlStmtIterator it = SparqlStmtUtils.parse(in, parser);
+    		it.forEachRemaining(result::add);
+    	} catch (IOException e) {
+    		throw new RuntimeException(e);
+		}
+    	
+        return result;
+    }
+
+    public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI) {
+    	return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create());
+    }
+
+    public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, SparqlStmtParser parser) {
+
+    	List<SparqlStmt> result;
+    	try (TypedInputStream in = SparqlStmtUtils.openInputStream(filenameOrURI)) {
+            if(in == null) {
+                throw new RuntimeException("Could not open input stream from " + filenameOrURI);
+            }
+
+            SparqlStmtIterator it;
+			try {
+				it = SparqlStmtUtils.parse(in, parser);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+            
+            result = Streams.stream(it).collect(Collectors.toList());
+        }
+
+        return result;
+    }
 
     /**
      * Read a sequence of SPARQL statements from either a file or string.
@@ -224,7 +272,7 @@ public class SparqlStmtMgr {
      * @throws ParseException
      * @throws IOException
      */
-    public static Iterator<SparqlStmt> loadSparqlStmts(
+    public static Iterator<SparqlStmt> createIteratorSparqlStmts(
             String filenameOrStr,
             // PrefixMapping globalPrefixes,
             SparqlStmtParser sparqlParser) throws ParseException, IOException {

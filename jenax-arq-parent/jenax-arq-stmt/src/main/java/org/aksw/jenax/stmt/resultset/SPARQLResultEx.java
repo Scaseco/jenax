@@ -1,12 +1,15 @@
 package org.aksw.jenax.stmt.resultset;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.resultset.ResultSetException;
 import org.apache.jena.sparql.resultset.SPARQLResult;
@@ -152,4 +155,5 @@ public class SPARQLResultEx
             closeAction.run();
         }
     }
+    
 }

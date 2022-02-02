@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -163,27 +165,36 @@ public class SparqlScriptProcessor {
         return sparqlStmts;
     }
 
+    public List<SparqlStmt> getPlainSparqlStmts() {
+    	return Lists.transform(sparqlStmts, Entry::getKey);
+    }
+    
     public SparqlStmtParser getSparqlParser() {
         return sparqlParserFactory.apply(new Prologue(globalPrefixes));
 //        return sparqlParser;
     }
 
-
-    public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
+    public static SparqlStmtParser createParserPlain(Prologue prologue) {
         SparqlQueryParser queryParser = SparqlQueryParserWrapperSelectShortForm.wrap(
                 SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue));
 
         SparqlUpdateParser updateParser = SparqlUpdateParserImpl
                 .create(Syntax.syntaxARQ, prologue);
+        
+        return new SparqlStmtParserImpl(queryParser, updateParser, true);
+    }
 
+    public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
+    	SparqlStmtParser core = createParserPlain(prologue);
         SparqlStmtParser sparqlParser =
                 SparqlStmtParser.wrapWithTransform(
-                        new SparqlStmtParserImpl(queryParser, updateParser, true),
+                       core,
                         stmt -> SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, System::getenv)));
 
         return sparqlParser;
     }
 
+    
     /**
      * Create a script processor that substitutes references to environment variables
      * with the appropriate values.
@@ -198,14 +209,35 @@ public class SparqlScriptProcessor {
         return result;
     }
 
+    public static SparqlScriptProcessor createPlain(PrefixMapping globalPrefixes) {
+        SparqlScriptProcessor result = new SparqlScriptProcessor(
+                SparqlScriptProcessor::createParserPlain,
+                globalPrefixes);
+        return result;
+    }
+
 
 
 
     public void process(List<String> filenames) {
         int i = 1;
         for (String filename : filenames) {
-            process(i, filename);
-            ++i;
+            process(i++, filename);
+        }
+    }
+    
+    public void processPaths(Collection<Path> paths) {
+        int i = 1;
+        for (Path path : paths) {
+            process(i++, path);
+        }    	
+    }
+    
+    public void process(int index, Path path) {
+        logger.info("Interpreting path" + (index >= 0 ? " #" + index : "" ) + ": '" + path + "'");
+        List<SparqlStmt> stmts = SparqlStmtMgr.loadSparqlStmts(path, getSparqlParser());
+        for (SparqlStmt stmt : stmts) {
+        	sparqlStmts.add(new SimpleEntry<>(stmt, new Provenance(path.toString())));
         }
     }
 
@@ -259,7 +291,7 @@ public class SparqlScriptProcessor {
                             globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
                             IRIxResolver.create(baseIri).build());
                     SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
-                    Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, sparqlParser);
+                    Iterator<SparqlStmt> it = SparqlStmtMgr.createIteratorSparqlStmts(filename, sparqlParser);
 
                     if(it != null) {
                         logger.debug("Attempting to interpret argument as a file containing sparql queries");
@@ -313,7 +345,7 @@ public class SparqlScriptProcessor {
         }
 
     }
-
+    
 
     public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, PrefixMapping globalPrefixes) throws IOException {
         UpdateRequest result = null;

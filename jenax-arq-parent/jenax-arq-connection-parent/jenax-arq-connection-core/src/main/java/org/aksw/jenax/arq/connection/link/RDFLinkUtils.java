@@ -5,7 +5,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
+import org.aksw.jenax.connection.query.QueryExecWithNodeTransform;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
@@ -13,6 +15,7 @@ import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
@@ -275,6 +278,39 @@ public class RDFLinkUtils {
 
         RDFLink result = new RDFLinkModular(lq, updateLink, ld);
         return result;
+    }
+
+
+    /**
+     * Standard sparql does not support creating relative IRIs.
+     * The spec states that the IRI function *must* return an absolute IRI.
+     * 
+     * This wrapper sets a dummy base IRI on queries that do not have a base set and post processes result sets such that IRIs with that dummy base
+     * have the base removed.
+     *
+     * @param conn
+     */
+    public static RDFLink enableRelativeIrisInQueryResults(RDFLink delegate) {
+    	String dummyBaseUrl = "http://dummy.base/url/";
+    	int offset = dummyBaseUrl.length();
+    	
+    	NodeTransform xform = node -> {
+    		Node r = node;
+    		if (node.isURI()) {
+    			String str = node.getURI();
+    			r = str.startsWith(dummyBaseUrl) ? NodeFactory.createURI(str.substring(offset)) : node;
+    		}
+    		return r;
+    	};
+    	
+    	return wrapWithQueryTransform(delegate,
+    			query -> {
+    				if (!query.explicitlySetBaseURI()) {
+    					query.setBaseURI(dummyBaseUrl);
+    				}
+    				return query;
+    			},
+    			qe -> new QueryExecWithNodeTransform(qe, xform));
     }
 
 }

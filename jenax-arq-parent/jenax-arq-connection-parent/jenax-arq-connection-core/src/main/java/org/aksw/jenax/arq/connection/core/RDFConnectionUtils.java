@@ -222,5 +222,9 @@ public class RDFConnectionUtils {
         RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
         return RDFConnectionAdapter.adapt(newLink);
     }
+        
     
+    public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
+    	return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+    }
 }
