@@ -10,6 +10,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
@@ -21,9 +22,11 @@ import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromPipedRDFIterator;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
+import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.node.BlankNodeAllocatorAsGivenOrRandom;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
+import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
 import org.aksw.jenax.sparql.query.rx.StreamUtils.QuadEncoderDistinguish;
 import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
 import org.apache.jena.atlas.iterator.Iter;
@@ -31,7 +34,6 @@ import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.ext.com.google.common.base.Predicate;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -381,7 +383,8 @@ public class RDFDataMgrRx {
         return new ParserProfileStd(factory,
                                     errorHandler,
                                     // IRIxResolver.create(IRIs.getSystemBase()).build(),
-                                    IRIxResolver.create().noBase().allowRelative(true).build(),
+                                    // IRIxResolver.create().noBase().allowRelative(true).build(),
+                                    IRIxResolverUtils.newIRIxResolverAsGiven(),
                                     PrefixMapFactory.create(),
                                     RIOT.getContext().copy(),
                                     checking,
@@ -461,6 +464,7 @@ public class RDFDataMgrRx {
     public static void parseFromInputStream(StreamRDF destination, InputStream in, String baseUri, Lang lang, Context context) {
         RDFParser.create()
             .source(in)
+            .resolver(IRIxResolverUtils.newIRIxResolverAsGiven())
             // Disabling checking does not seem to give a significant performance gain
             // For a 3GB Trig file parsing took ~1:45 min +- 5 seconds either way
             //.checking(false)
@@ -795,11 +799,33 @@ public class RDFDataMgrRx {
                 .onErrorReturn(t -> t);
     }
 
+    
+    public static <C extends Collection<Quad>> FlowableTransformer<C, Throwable> createBatchWriterQuads2(OutputStream out, RDFFormat format) {
+        if (!Lang.NQUADS.equals(format.getLang())) {
+            throw new IllegalArgumentException("Only nquads based formats are currently supported");
+        }
+        
+        return upstream -> upstream
+        		.concatMap(Flowable::fromIterable)
+        		.<StreamRDF>reduceWith(() -> {
+        			StreamRDF s = StreamRDFWriterEx.getWriterStream(out, format, null);
+        			s.start();
+        			return s;
+        		}, (s, q) -> {
+        			s.quad(q);
+        			return s;
+        		})
+        		.doAfterSuccess(StreamRDF::finish)
+        		.mapOptional(x -> Optional.<Throwable>empty())
+        		.onErrorReturn(t -> t)
+        		.toFlowable();
+    }
+
     public static void writeQuads(Flowable<Quad> flowable, OutputStream out, RDFFormat format) throws IOException {
 
         Flowable<Throwable> tmp = flowable
             .buffer(128)
-            .compose(RDFDataMgrRx.createBatchWriterQuads(out, format));
+            .compose(RDFDataMgrRx.createBatchWriterQuads2(out, format));
 
         Throwable e = tmp.singleElement().blockingGet();
         if(e != null) {
