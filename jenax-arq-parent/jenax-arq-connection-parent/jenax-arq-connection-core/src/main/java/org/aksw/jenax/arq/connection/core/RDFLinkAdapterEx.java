@@ -8,7 +8,6 @@ import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.QueryExecAdapter;
 import org.apache.jena.update.UpdateRequest;
 
 /** Jena 4.3.0-SNAPSHOT did not implement the update methods - this class can be removed once RDFLinkAdapter is fully functional */
