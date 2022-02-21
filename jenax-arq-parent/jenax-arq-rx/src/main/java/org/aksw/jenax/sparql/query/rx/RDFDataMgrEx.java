@@ -539,9 +539,17 @@ public class RDFDataMgrEx {
     }
 
     public static void readAsGiven(Model model, String uri) {
-        readAsGiven(model.getGraph(), uri);
+        newParserBuilderForReadAsGiven(null).source(uri).parse(model);
     }
 
+    public static void readAsGiven(DatasetGraph datasetGraph, String uri) {
+        newParserBuilderForReadAsGiven(null).source(uri).parse(datasetGraph);
+    }
+
+    public static void readAsGiven(Dataset dataset, String uri) {
+        newParserBuilderForReadAsGiven(null).source(uri).parse(dataset);
+    }
+    
     public static Model loadModelAsGiven(String uri) {
         Model result = ModelFactoryEx.createInsertOrderPreservingModel();
         readAsGiven(result, uri);
