@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.file.Path;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -17,6 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jena_sparql_api.rx.AllocScopePolicy;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromIterator;
@@ -32,7 +32,6 @@ import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
-import org.apache.jena.ext.com.google.common.base.Predicate;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ResultSet;
@@ -136,7 +135,7 @@ public class RDFDataMgrRx {
      * @return
      */
     public static Flowable<Binding> createFlowableBindings(Callable<TypedInputStream> inSupp) {
-        Flowable<Binding> result = createFlowableFromResource(
+        Flowable<Binding> result = FlowableUtils.createFlowableFromResource(
                 inSupp,
                 in -> {
                     Lang lang = RDFLanguages.contentTypeToLang(in.getContentType());
@@ -151,63 +150,6 @@ public class RDFDataMgrRx {
         return result;
     }
 
-
-    /**
-     * Generic helper to create a Flowable by mapping some resource such as in InputStream or
-     * a QueryExecution to an iterable such as an ResultSet
-     *
-     * @param <R>
-     * @param <I>
-     * @param <T>
-     * @param resourceSupplier
-     * @param resourceToIterator
-     * @param hasNext
-     * @param next
-     * @param closeResource
-     * @return
-     */
-    public static <R, I, T> Flowable<T> createFlowableFromResource(
-            Callable<R> resourceSupplier,
-            Function<? super R, I> resourceToIterator,
-            Predicate<? super I> hasNext,
-            Function<? super I, T> next,
-            Consumer<? super R> closeResource) {
-
-        Flowable<T> result = Flowable.generate(
-                () -> {
-                    R in = resourceSupplier.call();
-                    return new SimpleEntry<R, I>(in, null);
-                },
-                (state, emitter) -> {
-                    I it = state.getValue();
-
-                    try {
-                        if (it == null) {
-                            R in = state.getKey();
-                            it = resourceToIterator.apply(in);
-                            state.setValue(it);
-                        }
-
-                        boolean hasMore = hasNext.apply(it);
-                        if (hasMore) {
-                            T value = next.apply(it);
-                            emitter.onNext(value);
-                        } else {
-                            emitter.onComplete();
-                        }
-                    } catch (Exception e) {
-                        emitter.onError(e);
-                    }
-                },
-                state -> {
-                    R in = state.getKey();
-                    if (in != null) {
-                        closeResource.accept(in);
-                    }
-                });
-
-        return result;
-    }
 
     public static Flowable<Triple> createFlowableTriples(Callable<InputStream> inSupplier, Lang lang, String baseIRI) {
         return createFlowableFromInputStream(
