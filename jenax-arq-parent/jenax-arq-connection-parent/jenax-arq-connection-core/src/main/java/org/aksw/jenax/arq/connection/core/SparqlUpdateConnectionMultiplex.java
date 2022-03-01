@@ -7,6 +7,7 @@ import org.aksw.jenax.arq.connection.MultiplexUtils;
 import org.aksw.jenax.arq.connection.TransactionalMultiplex;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.update.Update;
+import org.apache.jena.update.UpdateExecutionBuilder;
 import org.apache.jena.update.UpdateRequest;
 
 public class SparqlUpdateConnectionMultiplex
@@ -42,5 +43,8 @@ public class SparqlUpdateConnectionMultiplex
         MultiplexUtils.forEach(delegates, d -> d.close());
     }
 
-
+    @Override
+    public UpdateExecutionBuilder newUpdate() {
+         throw new UnsupportedOperationException();
+    }
 }

@@ -1,16 +1,16 @@
 package org.aksw.jena_sparql_api.http;
 
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactoryBase;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTPBuilder;
 
 /**
  * @author Claus Stadler
@@ -58,26 +58,37 @@ public class QueryExecutionFactoryHttp
         return result;
     }
 
-    public QueryExecution postProcess(QueryEngineHTTP qe) {
-        qe.setDefaultGraphURIs(datasetDescription.getDefaultGraphURIs());
-        qe.setNamedGraphURIs(datasetDescription.getNamedGraphURIs());
+    public QueryExecution postProcess(QueryExecutionHTTPBuilder builder) {
+        datasetDescription.getNamedGraphURIs().forEach(builder::addNamedGraphURI);
+        datasetDescription.getDefaultGraphURIs().forEach(builder::addDefaultGraphURI);
 
-        QueryExecution result = new QueryExecutionHttpWrapper(qe);
+        if (httpClient != null) {
+            builder.httpClient(httpClient);
+        }
+
+        QueryExecution result = builder.build();
+        result = new QueryExecutionHttpWrapper(result);
         return result;
     }
 
     @Override
     public QueryExecution createQueryExecution(String queryString) {
-        QueryEngineHTTP qe = new QueryEngineHTTP(service, queryString, httpClient);
-        QueryExecution result = postProcess(qe);
+        QueryExecutionHTTPBuilder builder = QueryExecutionHTTPBuilder.create()
+                .endpoint(service)
+                .query(queryString);
+
+        QueryExecution result = postProcess(builder);
 
         return result;
     }
 
     @Override
     public QueryExecution createQueryExecution(Query query) {
-        QueryEngineHTTP qe = new QueryEngineHTTP(service, query, httpClient);
-        QueryExecution result = postProcess(qe);
+        QueryExecutionHTTPBuilder builder = QueryExecutionHTTPBuilder.create()
+                .endpoint(service)
+                .query(query);
+
+        QueryExecution result = postProcess(builder);
 
         return result;
     }

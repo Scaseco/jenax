@@ -11,7 +11,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 
 public class RDFConnectionFactoryEx {
 
@@ -59,27 +59,28 @@ public class RDFConnectionFactoryEx {
 
 
     public static RDFConnection wrapWithDatasetAndXmlContentType(RDFConnection rawConn, DatasetDescription datasetDescription) {
-        RDFConnection result =
-                new RDFConnectionModular(new SparqlQueryConnectionJsa(
-                        FluentQueryExecutionFactory
-                            .from(new QueryExecutionFactorySparqlQueryConnection(rawConn))
-                            .config()
-                                //.withClientSideConstruct()
-                                .withDatasetDescription(datasetDescription)
-                                .withPostProcessor(qe -> {
-                                    if(qe instanceof QueryEngineHTTP) {
-                                        QueryEngineHTTP qeh = (QueryEngineHTTP)qe;
-                                        qeh.setSelectContentType(WebContent.contentTypeResultsXML);
-                                        qeh.setModelContentType(WebContent.contentTypeNTriples);
-                                        qeh.setDatasetContentType(WebContent.contentTypeNQuads);
-                                    }
-                                })
-                                .end()
-                            .create()
-                            ), rawConn, rawConn);
-
-
-        return result;
+//        RDFConnection result =
+//                new RDFConnectionModular(new SparqlQueryConnectionJsa(
+//                        FluentQueryExecutionFactory
+//                            .from(new QueryExecutionFactorySparqlQueryConnection(rawConn))
+//                            .config()
+//                                //.withClientSideConstruct()
+//                                .withDatasetDescription(datasetDescription)
+//                                .withPostProcessor(qe -> {
+//                                    if(qe instanceof QueryExecutionHTTP) {
+//                                        QueryExecutionHTTP qeh = (QueryExecutionHTTP)qe;
+//                                        qeh.setSelectContentType(WebContent.contentTypeResultsXML);
+//                                        qeh.setModelContentType(WebContent.contentTypeNTriples);
+//                                        qeh.setDatasetContentType(WebContent.contentTypeNQuads);
+//                                    }
+//                                })
+//                                .end()
+//                            .create()
+//                            ), rawConn, rawConn);
+//
+//
+//        return result;
+        throw new UnsupportedOperationException();
     }
 
 }

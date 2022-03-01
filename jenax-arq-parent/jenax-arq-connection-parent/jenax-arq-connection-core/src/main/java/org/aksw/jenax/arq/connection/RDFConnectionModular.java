@@ -12,6 +12,8 @@ import org.apache.jena.rdfconnection.RDFDatasetConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
+import org.apache.jena.update.UpdateExecutionBuilder;
 import org.apache.jena.update.UpdateRequest;
 
 /**
@@ -84,6 +86,12 @@ public class RDFConnectionModular implements RDFConnection {
     @Override
     public void update(UpdateRequest update) {
         updateConnection().update(update);
+    }
+
+
+    @Override
+    public UpdateExecutionBuilder newUpdate() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

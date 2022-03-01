@@ -84,7 +84,7 @@ public class OutputFormatSpec {
 
             switch (outputMode) {
             case BINDING:
-                outLang = ResultSetLang.SPARQLResultSetJSON;
+                outLang = ResultSetLang.RS_JSON;
                 // outRdfFormat = new RDFFormat(outLang);
                 break;
             case TRIPLE:

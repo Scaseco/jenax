@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.update;
 
+import java.net.http.HttpClient;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +9,6 @@ import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
 import org.aksw.jena_sparql_api.core.UpdateContext;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 public class SparqlServiceFactoryEventSource

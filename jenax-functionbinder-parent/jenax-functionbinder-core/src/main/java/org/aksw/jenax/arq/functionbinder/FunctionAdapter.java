@@ -14,7 +14,7 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionEnv;
-import org.apache.jena.sparql.sse.builders.ExprBuildException;
+import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 
 /**
  * Jena function implementation that delegates to a backing Java method.
@@ -96,7 +96,7 @@ public class FunctionAdapter
 
         int n = args.size();
         if (n < mandatoryArgsCount || n > params.length) {
-            throw new ExprBuildException(
+            throw new SSE_ExprBuildException(
                     String.format("at least %d and at most %d args expected but %d provided",
                                 mandatoryArgsCount, params.length, n));
         }

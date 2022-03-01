@@ -4,7 +4,6 @@ import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryDataset;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryModel;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -12,6 +11,8 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.DatasetImpl;
 import org.apache.jena.sparql.util.Context;
+
+import java.net.http.HttpClient;
 
 public class FluentUpdateExecutionFactory {
     private UpdateExecutionFactory uef;

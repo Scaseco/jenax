@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.connection;
 
 import org.aksw.jenax.connection.update.UpdateProcessorFactory;
 import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.update.UpdateExecutionBuilder;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -29,6 +30,11 @@ public class SparqlUpdateConnectionJsaBase<T extends UpdateProcessorFactory>
     public void update(UpdateRequest updateRequest) {
         UpdateProcessor updateProcessor = updateProcessorFactory.createUpdateProcessor(updateRequest);
         updateProcessor.execute();
+    }
+
+    @Override
+    public UpdateExecutionBuilder newUpdate() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
