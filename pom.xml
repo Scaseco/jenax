@@ -65,6 +65,8 @@
 		<!-- <jetty.version>9.4.35.v20201120</jetty.version> -->
 		<jetty.version>9.4.40.v20210413</jetty.version>
 
+		<kryo.version>4.0.2</kryo.version>
+
 		<!-- <jgrapht.version>1.1.0</jgrapht.version> -->
 
 		<!-- 2.18 could be tried out next -->
@@ -360,6 +362,13 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo</artifactId>
+				<version>${kryo.version}</version>
+			</dependency>
+
+
 			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
 				and tika -->
 			<dependency>
@@ -443,6 +452,12 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-kryo</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -1364,11 +1379,11 @@
 				<version>${tika.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.apache.tika</groupId>
-                                <artifactId>tika-java7</artifactId>
-                                <version>${tika.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-java7</artifactId>
+				<version>${tika.version}</version>
+			</dependency>
 
 
 			<!-- <dependency> -->

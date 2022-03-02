@@ -15,5 +15,6 @@
 
 	<modules>
 		<module>jenax-io-core</module>
+		<module>jenax-io-kryo</module>
 	</modules>
 </project>

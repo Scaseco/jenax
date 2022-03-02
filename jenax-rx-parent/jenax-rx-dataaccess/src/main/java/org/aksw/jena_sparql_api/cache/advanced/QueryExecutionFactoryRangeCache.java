@@ -6,16 +6,20 @@ import java.util.List;
 import org.aksw.commons.io.buffer.array.ArrayOps;
 import org.aksw.commons.io.cache.AdvancedRangeCacheConfig;
 import org.aksw.commons.io.cache.AdvancedRangeCacheImpl;
-import org.aksw.commons.io.slice.SliceBufferNew;
+import org.aksw.commons.io.slice.SliceWithPagesSyncToDisk;
 import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathOpsStr;
 import org.aksw.commons.rx.cache.range.ListPaginatorWithAdvancedCache;
 import org.aksw.commons.rx.lookup.ListPaginator;
 import org.aksw.commons.store.object.key.api.ObjectStore;
+import org.aksw.commons.store.object.key.impl.KryoUtils;
+import org.aksw.commons.store.object.key.impl.ObjectStoreImpl;
+import org.aksw.commons.store.object.path.impl.ObjectSerializerKryo;
 import org.aksw.jena_sparql_api.lookup.ListPaginatorSparql;
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
 import org.apache.jena.ext.com.google.common.io.BaseEncoding;
@@ -60,6 +64,15 @@ public class QueryExecutionFactoryRangeCache
                 .build();
     }
 
+    public static QueryExecutionFactoryRangeCache create(
+            QueryExecutionFactory decoratee, java.nio.file.Path baseFolder, int maxCachedQueries, AdvancedRangeCacheConfig cacheConfig) {
+
+        ObjectStore objectStore = ObjectStoreImpl.create(baseFolder, ObjectSerializerKryo.create(
+                KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses)));
+
+        QueryExecutionFactoryRangeCache result = new QueryExecutionFactoryRangeCache(decoratee, objectStore, maxCachedQueries, cacheConfig);
+        return result;
+    }
 
     @Override
     public QueryExecution createQueryExecution(Query query) {
@@ -85,7 +98,7 @@ public class QueryExecutionFactoryRangeCache
 
                 // KeyObjectStore store = KeyObjectStoreWithKeyTransform.wrapWithPrefix(objectStore, List.of(str));
                 Path<String> objectStorePath = PathOpsStr.newRelativePath(str);
-                SliceBufferNew<Binding[]> sliceBuffer = SliceBufferNew.create(
+                SliceWithPagesSyncToDisk<Binding[]> sliceBuffer = SliceWithPagesSyncToDisk.create(
                         arrayOps, objectStore, objectStorePath,
                         cacheConfig.getPageSize(), cacheConfig.getTerminationDelay());
 
