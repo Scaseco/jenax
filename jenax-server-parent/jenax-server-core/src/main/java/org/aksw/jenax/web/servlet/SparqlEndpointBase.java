@@ -163,9 +163,12 @@ public abstract class SparqlEndpointBase {
         QueryExecution qe = new QueryExecutionDecoratorBase<QueryExecution>(tmp) {
             @Override
             public void close() {
-                super.close();
-                conn.close();
-                logger.debug("Closed connection: " + System.identityHashCode(conn));
+                try {
+                    super.close();
+                } finally {
+                    conn.close();
+                    logger.debug("Closed connection: " + System.identityHashCode(conn));
+                }
             }
         };
 
