@@ -2518,4 +2518,5 @@
 @prefix cpant: <http://purl.org/NET/cpan-uri/terms#> .
 @prefix wikidata: <http://www.wikidata.org/entity/> .
 @prefix somaf: <http://sweetontology.net/matrFacility/> .
+@prefix spatialF: <http://jena.apache.org/function/spatial#> .
 

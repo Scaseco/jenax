@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+        <parent>
+                <groupId>org.aksw.jenax</groupId>
+                <artifactId>jenax-fsrdfstore-parent</artifactId>
+                <version>4.4.0-1-SNAPSHOT</version>
+        </parent>
+
+	<artifactId>jenax-fsrdfstore-system</artifactId>
+	<packaging>jar</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-server-standalone</artifactId>
+		</dependency>
+
+
+		<!-- Override transitive ancient codec versions -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.jena</groupId> -->
+		<!-- <artifactId>jena-fuseki-main</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.jena</groupId> -->
+		<!-- <artifactId>jena-fuseki-webapp</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.jena</groupId> -->
+		<!-- <artifactId>jena-fuseki-fulljar</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-fsrdfstore-facade</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.thirdparty.com.sshtools</groupId>
+			<artifactId>vfs2nio</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2-jackrabbit1</artifactId>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>commons-httpclient</groupId> -->
+<!-- 			<artifactId>commons-httpclient</artifactId> -->
+<!-- 		</dependency> -->
+
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-webdav</artifactId>
+			<!-- <version>2.21.5</version> -->
+		</dependency>
+
+		<!-- Unit Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
+		<!-- <artifactId>jena-sparql-api-resources-test-config</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
+		<!-- <artifactId>jena-sparql-api-resources</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
+
+	</dependencies>
+</project>
+

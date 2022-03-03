@@ -3,6 +3,8 @@
     "afn": "http://jena.apache.org/ARQ/function#",
     "apf": "http://jena.hpl.hp.com/ARQ/property#",
     "list": "http://jena.apache.org/ARQ/list#",
-    "agg": "http://jena.apache.org/ARQ/function/aggregate#"
+    "agg": "http://jena.apache.org/ARQ/function/aggregate#",
+    "spatialF": "http://jena.apache.org/function/spatial#"
   }
 }
+

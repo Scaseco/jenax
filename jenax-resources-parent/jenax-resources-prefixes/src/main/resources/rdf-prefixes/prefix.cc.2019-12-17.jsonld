@@ -2544,6 +2544,7 @@
         "bsh": "https://brickschema.org/schema/1.1.0/BrickShape#",
         "osys": "http://purl.org/olia/system.owl#",
         "qk": "http://qudt.org/vocab/quantitykind/",
-        "ods": "http://lod.xdams.org/ontologies/ods/"
+        "ods": "http://lod.xdams.org/ontologies/ods/",
+        "spatialF": "http://jena.apache.org/function/spatial#"
     }
 }

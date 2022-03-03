@@ -20,6 +20,7 @@
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
+		<module>jenax-fsrdfstore-parent</module>
 		<module>jenax-io-parent</module>
 		<module>jenax-models-parent</module>
 		<module>jenax-facete-parent</module>
@@ -77,7 +78,7 @@
 
 		<guava.version>31.0.1-jre</guava.version>
 		<commons-compress.version>1.21</commons-compress.version>
-
+		<commons-vfs2.version>2.9.0-805-SNAPSHOT</commons-vfs2.version>
 
 		<slf4j.version>1.8.0-beta4</slf4j.version>
 		<log4j.version>2.17.1</log4j.version>
@@ -87,7 +88,7 @@
 
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
-		<aksw.commons.version>0.9.1-SNAPSHOT</aksw.commons.version>
+		<aksw.commons.version>0.9.2-SNAPSHOT</aksw.commons.version>
 
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
@@ -403,15 +404,14 @@
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jena</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<version>1.5.1-1</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<version>1.5.1-1</version>
 			</dependency>
-
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -549,10 +549,39 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-server-standalone</artifactId>
+				<artifactId>jenax-arq-datasets-diff</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-arq-quadengine</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-server-standalone</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-fsrdfstore-core</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-fsrdfstore-system</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-fsrdfstore-facade</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -910,7 +939,7 @@
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>jena-jgrapht-bindings</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<version>1.5.1-1</version>
 			</dependency>
 
 			<dependency>
@@ -1075,6 +1104,13 @@
 				<version>${aksw.commons.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.aksw.commons</groupId>
+                                <artifactId>aksw-commons-txn</artifactId>
+                                <version>${aksw.commons.version}</version>
+                        </dependency>
+
+
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-collectors</artifactId>
@@ -1205,14 +1241,64 @@
 
 			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing 
 				to maintain separately) -->
+
 			<dependency>
-				<groupId>org.aksw.difs</groupId>
-				<artifactId>difs-system</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
+				<groupId>org.aksw.thirdparty.com.sshtools</groupId>
+				<artifactId>vfs2nio</artifactId>
+				<version>0.0.1-2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-vfs2</artifactId>
+				<version>${commons-vfs2.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-vfs2-jackrabbit1</artifactId>
+				<version>${commons-vfs2.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+<!-- 			<dependency> -->
+<!-- 				<groupId>commons-httpclient</groupId> -->
+<!-- 				<artifactId>commons-httpclient</artifactId> -->
+<!-- 				<version>3.1</version> -->
+<!-- 			</dependency> -->
+
+			<dependency>
+				<groupId>org.apache.jackrabbit</groupId>
+				<artifactId>jackrabbit-webdav</artifactId>
+				<!-- <version>2.21.5</version> -->
+				<version>2.12.11</version>
+			</dependency>
+
 
 			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
 				stuff would have to go t -->
+<!--
 			<dependency>
 				<groupId>net.sansa-stack</groupId>
 				<artifactId>sansa-spark-jena-java_2.12</artifactId>
@@ -1228,6 +1314,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+-->
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>

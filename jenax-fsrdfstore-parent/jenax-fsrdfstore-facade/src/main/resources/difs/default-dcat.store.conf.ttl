@@ -1,0 +1,20 @@
+[ <http://example.org/index>      [ <http://example.org/folder>     "identifier" ;
+                                    <http://example.org/method>     "org.aksw.difs.index.impl.RdfIndexerFactoryLexicalForm" ;
+                                    <http://example.org/predicate>  <http://purl.org/dc/terms/identifier>
+                                  ] ;
+  <http://example.org/index>      [ <http://example.org/folder>     "downloadUrl" ;
+                                    <http://example.org/method>     "org.aksw.difs.index.impl.RdfTermIndexerFactoryIriToFolder" ;
+                                    <http://example.org/predicate>  <http://www.w3.org/ns/dcat#downloadURL>
+                                  ] ;
+  <http://example.org/index>      [ <http://example.org/folder>     "version" ;
+                                    <http://example.org/method>     "org.aksw.difs.index.impl.RdfIndexerFactoryLexicalForm" ;
+                                    <http://example.org/predicate>  <http://purl.org/dc/terms/hasVersion>
+                                  ] ;
+  <http://example.org/index>      [ <http://example.org/folder>     "group" ;
+                                    <http://example.org/method>     "org.aksw.difs.index.impl.RdfTermIndexerFactoryIriToFolder" ;
+                                    <http://example.org/predicate>  <http://dataid.dbpedia.org/ns/core#group>
+                                  ] ;
+  <http://example.org/indexPath>  "index" ;
+  <http://example.org/storePath>  "store"
+] .
+
