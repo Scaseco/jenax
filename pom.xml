@@ -8,7 +8,7 @@
 	<artifactId>jenax-parent</artifactId>
 
 	<packaging>pom</packaging>
-	<version>4.4.0-1-SNAPSHOT</version>
+	<version>4.4.0-1</version>
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
 	<url>https://github.com/Scaseco/jenax</url>
