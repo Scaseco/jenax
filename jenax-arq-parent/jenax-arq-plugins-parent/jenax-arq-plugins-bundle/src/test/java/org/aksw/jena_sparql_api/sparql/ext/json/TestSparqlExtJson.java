@@ -170,9 +170,9 @@ public class TestSparqlExtJson {
 
     @Test
     public void testJsonExplode() {
-        Query q = parser.apply("SELECT ?_0 ?_1 ?_2 {\n"
+        Query q = parser.apply("SELECT ?x10 ?x11 ?x12 ?x13 {\n"
                 + "  BIND(json:array(true, 'item2', 3, json:object('item', 4)) AS ?jsonArray)\n"
-                + "  ?jsonArray json:explode ()\n"
+                + "  ?jsonArray json:explode ('x' 10)\n"
                 + "}\n"
                 + "");
       Model m = ModelFactory.createDefaultModel();
