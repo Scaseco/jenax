@@ -246,7 +246,7 @@ public class DatasetGraphIndexerFromFileSystem
 
 
             try {
-                FileUtilsExtra.ensureFolderExists(idxFullPath, x -> {
+                FileUtilsExtra.ensureFolderExists(idxFullPath, () -> {
 
                     // TODO We probably want a mgmtLock on the folder to prevent concurrent modification
                     // to the set of links
