@@ -2,33 +2,40 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
-import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
+import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
+import org.aksw.jenax.annotation.reprogen.DefaultValue;
+import org.aksw.jenax.arq.datatype.RDFDatatypeBinding;
+import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
-import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
+import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
+ * Make all keys of a json object available as sparql variables.
+ * For json arrays, variables are named ?prefix_{offset + index}
+ *
  * {
  *    Bind("['foo', 'bar']"^^xsd:json As ?json)
- *    ?json json:array ?items.
+ *    ?json json:explode ("prefix_", 1).
  * }
  *
  * @author raven
@@ -37,16 +44,26 @@ import com.google.gson.JsonElement;
 public class PropertyFunctionFactoryJsonExplode
     implements PropertyFunctionFactory {
 
-    protected Gson gson;
+    // The jena wrapper for the explode function
+    public static Function FN_EXPLODE;
 
-    public PropertyFunctionFactoryJsonExplode() {
-        this(new Gson());
+    static {
+        try {
+            FN_EXPLODE = JenaExtensionUtil.getDefaultFunctionBinder().getFunctionGenerator()
+                    .wrap(PropertyFunctionFactoryJsonExplode.class.getDeclaredMethod(
+                            "explode", JsonElement.class, String.class, Integer.TYPE));
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public PropertyFunctionFactoryJsonExplode(Gson gson) {
-        super();
-        this.gson = gson;
+    /** The function being wrapped by FN_EXPLODE */
+    public static Binding explode(JsonElement json, @DefaultValue("_") String varPrefix, @DefaultValue("0") int offset) {
+        // JsonElement json = RDFDatatypeJson.extractOrNull(node);
+        Binding result = explode(json, null, varPrefix, offset);
+        return result;
     }
+
 
     @Override
     public PropertyFunction create(final String uri)
@@ -64,82 +81,90 @@ public class PropertyFunctionFactoryJsonExplode
                         ? binding.get((Var)subject)
                         : subject;
 
-                Node object = objects.getArg(0);
+                List<Node> args = new ArrayList<>(1 + objects.getArgListSize());
+                args.add(node);
+                args.addAll(objects.getArgList());
 
-                if(!object.isVariable()) {
-                    throw new RuntimeException("Object of json array unnesting must be a variable");
-                }
-                Var outputVar = (Var)object;
+                Node n = FunctionUtils.invokeWithNodes(FN_EXPLODE, args);
+                Binding contrib = RDFDatatypeBinding.extractBinding(n);
 
-                Node index = objects.getArgListSize() > 1 ? objects.getArg(1) : null;
-                Var indexVar = null;
-                Integer indexVal = null;
+                Binding tmp = BindingFactory.builder(binding).addAll(contrib).build();
 
-                if(index != null && index.isVariable()) {
-                    indexVar = (Var)index;
-//                    throw new RuntimeException("Index of json array unnesting must be a variable");
-                } else if(index.isLiteral()) {
-                    Object obj = NodeMapperFromRdfDatatype.toJavaCore(index, index.getLiteralDatatype());
-                    if(obj instanceof Number) {
-                        indexVal = ((Number)obj).intValue();
-                    }
-                }
-
-
-
-                QueryIterator result = null;
-
-                boolean isJson = node != null && node.isLiteral() && node.getLiteralDatatype() instanceof RDFDatatypeJson;
-                if(isJson) {
-                    JsonElement data = (JsonElement)node.getLiteralValue();
-                    if(data != null && data.isJsonArray()) {
-                        JsonArray arr = data.getAsJsonArray();
-                        List<Binding> bindings = new ArrayList<Binding>(arr.size());
-
-                        //for(JsonElement item : arr) {
-                        if(indexVal != null) {
-                            Binding b = itemToBinding(binding, arr, indexVal, gson, indexVar, outputVar);
-                            bindings.add(b);
-                        } else {
-	                        for(int i = 0; i < arr.size(); ++i) {
-	                        	Binding b = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
-	                            bindings.add(b);
-	                        }	
-	                    }
-                        result = QueryIterPlainWrapper.create(bindings.iterator());
-                    }
-                }
-
-                if(result == null) {
-                    result = QueryIterNullIterator.create(execCxt);
-                }
+                QueryIterator result = ofNullableBinding(tmp, execCxt);
 
                 return result;
             }
         };
     }
 
-    public static Binding itemToBinding(Binding binding, JsonArray arr, int i, Gson gson, Var indexVar, Var outputVar) {
-        JsonElement item;
+    public static QueryIterator ofNullableBinding(Binding b, ExecutionContext execCxt) {
+        return b == null
+            ? QueryIterNullIterator.create(execCxt)
+            : QueryIterSingleton.create(b, execCxt);
+    }
 
-        try {
-            item = arr.get(i);
-        } catch(Exception e) {
-            throw new ExprEvalException(e);
+
+    public static Binding explode(Node node, Binding parent, String varPrefix, int offset) {
+        JsonElement json = RDFDatatypeJson.extractOrNull(node);
+        Binding result = explode(json, parent, varPrefix, offset);
+        return result;
+    }
+
+
+    public static Binding explode(JsonElement json, Binding parent, String varPrefix, int offset) {
+        Binding result;
+
+        if (json == null) {
+            throw new ExprEvalException("Not a json element");
+        } else if (json.isJsonArray()) {
+            JsonArray arr = json.getAsJsonArray();
+            result = explode(arr, parent, varPrefix, offset);
+        } else if (json.isJsonObject()) {
+            JsonObject obj = json.getAsJsonObject();
+            result = explode(obj, parent, varPrefix);
+        } else {
+            throw new ExprEvalException("Neither a json array nor a json object");
         }
-        RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
 
-        Node n = E_JsonPath.jsonToNode(item, gson, jsonDatatype);
-        // NodeValue nv = n == null ? null : NodeValue.makeNode(n);
+        return result;
+    }
 
-        if (n != null) {
-            binding = BindingFactory.binding(binding, outputVar, n);
+    public static Binding explode(JsonArray arr, Binding parent, String varPrefix, int offset) {
+        BindingBuilder builder = BindingFactory.builder(parent);
+        int size = arr.size();
+        for (int i = 0; i < size; ++i) {
+            JsonElement item = arr.get(i);
+
+            String str = Integer.toString(offset + i);
+            if (varPrefix != null && !varPrefix.isEmpty()) {
+                str = varPrefix + str;
+            }
+
+            Var v = Var.alloc(str);
+            Node n = RDFDatatypeJson.jsonToNode(item);
+
+            builder.add(v, n);
         }
 
-        if(indexVar != null) {
-            binding = BindingFactory.binding(binding, indexVar, NodeValue.makeInteger(i).asNode());
+        Binding result = builder.build();
+        return result;
+    }
+
+    public static Binding explode(JsonObject obj, Binding parent, String varPrefix) {
+        BindingBuilder builder = BindingFactory.builder(parent);
+        for (Entry<String, JsonElement> e : obj.entrySet()) {
+            String str = e.getKey();
+            if (varPrefix != null && !varPrefix.isEmpty()) {
+                str = varPrefix + str;
+            }
+
+            Var v = Var.alloc(str);
+            Node n = RDFDatatypeJson.jsonToNode(e.getValue());
+
+            builder.add(v, n);
         }
 
-        return binding;
+        Binding result = builder.build();
+        return result;
     }
 }

@@ -189,7 +189,7 @@ public class FunctionGenerator {
             // RDFDatatype dtype = typeMapper.getTypeByClass(rdfClass);
 
             if (dtype == null) {
-                throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s", inputClass));
+                throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s derived from %2$s", inputClass, paramClass));
             }
 
             Object defaultValue = null;

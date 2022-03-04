@@ -101,11 +101,11 @@ public class PropertyFunctionFactoryJsonUnnest
                             Binding b = itemToBinding(binding, arr, indexVal, gson, indexVar, outputVar);
                             bindings.add(b);
                         } else {
-	                        for(int i = 0; i < arr.size(); ++i) {
-	                        	Binding b = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
-	                            bindings.add(b);
-	                        }	
-	                    }
+                            for(int i = 0; i < arr.size(); ++i) {
+                                Binding b = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
+                                bindings.add(b);
+                            }
+                        }
                         result = QueryIterPlainWrapper.create(bindings.iterator());
                     }
                 }
