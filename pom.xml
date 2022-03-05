@@ -451,14 +451,27 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-io-core</artifactId>
+				<artifactId>jenax-io-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-kryo</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-objectstore</artifactId>
+				<version>${aksw.commons.version}</version>
 			</dependency>
 
 			<dependency>
@@ -553,35 +566,35 @@
 				<version>${project.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-arq-quadengine</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-quadengine</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-server-standalone</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-server-standalone</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-fsrdfstore-core</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-fsrdfstore-system</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-system</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.jenax</groupId>
-                                <artifactId>jenax-fsrdfstore-facade</artifactId>
-                                <version>${project.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-facade</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -1104,11 +1117,11 @@
 				<version>${aksw.commons.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.aksw.commons</groupId>
-                                <artifactId>aksw-commons-txn</artifactId>
-                                <version>${aksw.commons.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-txn</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
 
 
 			<dependency>
@@ -1252,8 +1265,8 @@
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
 					<exclusion>
-	                	                <groupId>org.apache.commons</groupId>
-        		                        <artifactId>commons-vfs2</artifactId>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-vfs2</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1286,18 +1299,18 @@
 				</exclusions>
 			</dependency>
 
-                <dependency>
-                        <groupId>org.apache.httpcomponents.client5</groupId>
-                        <artifactId>httpclient5</artifactId>
-                        <version>5.1</version>
-                </dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>5.1</version>
+			</dependency>
 
 
-<!-- 			<dependency> -->
-<!-- 				<groupId>commons-httpclient</groupId> -->
-<!-- 				<artifactId>commons-httpclient</artifactId> -->
-<!-- 				<version>3.1</version> -->
-<!-- 			</dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>commons-httpclient</groupId> -->
+			<!-- <artifactId>commons-httpclient</artifactId> -->
+			<!-- <version>3.1</version> -->
+			<!-- </dependency> -->
 
 			<dependency>
 				<groupId>org.apache.jackrabbit</groupId>
@@ -1309,23 +1322,10 @@
 
 			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
 				stuff would have to go t -->
-<!--
-			<dependency>
-				<groupId>net.sansa-stack</groupId>
-				<artifactId>sansa-spark-jena-java_2.12</artifactId>
-				<version>0.8.0-RC2-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>log4j</groupId>
-						<artifactId>log4j</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
--->
+			<!-- <dependency> <groupId>net.sansa-stack</groupId> <artifactId>sansa-spark-jena-java_2.12</artifactId> 
+				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
+				<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
+				<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>

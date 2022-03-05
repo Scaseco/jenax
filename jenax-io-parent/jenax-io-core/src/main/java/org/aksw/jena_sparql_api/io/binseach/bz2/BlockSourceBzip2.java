@@ -112,6 +112,7 @@ public class BlockSourceBzip2
                 public int read(byte[] dest, int offs, int len) throws IOException {
                     int r = super.read(dest, offs, len);
                     if (r == -2) {
+
                         // FIXME For some reason CBZip2InputStream reports block boundaries
                         //   even if there is no (immediate) subsequent CBZip2InputStream.BLOCK_DELIMITER
                         //   ( == COMPRESSED_MAGIC_STR). I don't know why this happens but it causes the stream gets cut of prematurely.

@@ -14,6 +14,7 @@
 	</parent>
 
 	<modules>
+		<module>jenax-io-json</module>
 		<module>jenax-io-core</module>
 		<module>jenax-io-kryo</module>
 	</modules>
