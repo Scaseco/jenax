@@ -103,7 +103,7 @@ public class QueryExecutionFactoryRangeCache
                         cacheConfig.getPageSize(), cacheConfig.getTerminationDelay());
 
 
-                AdvancedRangeCacheImpl.Builder<Binding[]> cacheBuilder = AdvancedRangeCacheImpl.Builder.<Binding[]>create()
+                AdvancedRangeCacheImpl.Builder<Binding[]> cacheBuilder = AdvancedRangeCacheImpl.<Binding[]>newBuilder()
                         // .setDataSource(dataSource)
                         .setWorkerBulkSize(128)
                         .setSlice(sliceBuffer)
