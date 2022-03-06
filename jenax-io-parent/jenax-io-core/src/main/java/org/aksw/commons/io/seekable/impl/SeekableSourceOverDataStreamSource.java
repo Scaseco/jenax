@@ -20,22 +20,20 @@ import com.nimbusds.jose.util.StandardCharset;
  * @author raven
  *
  */
-public class SeekableSourceFromSequentialReaderSource
+public class SeekableSourceOverDataStreamSource
     implements SeekableSource
 {
     protected DataStreamSource<byte[]> source;
-    protected long knownSize;
 
     // Maximum number of items for which a seek operation performs needless reads rather than
     // starting a new request
     protected long maxSeekByReadLength;
 
     // Use -1 if the size is unknown
-    public SeekableSourceFromSequentialReaderSource(DataStreamSource<byte[]> source, long knownSize, long maxSeekByReadLength) {
+    public SeekableSourceOverDataStreamSource(DataStreamSource<byte[]> source, long maxSeekByReadLength) {
         super();
         this.source = source;
         this.maxSeekByReadLength = maxSeekByReadLength;
-        this.knownSize = knownSize;
     }
 
     @Override
@@ -50,7 +48,7 @@ public class SeekableSourceFromSequentialReaderSource
 
     @Override
     public long size() throws IOException {
-        return knownSize;
+        return source.size();
     }
 
 
@@ -70,7 +68,7 @@ public class SeekableSourceFromSequentialReaderSource
 
         public SeekableFromSequentialReaderSource(long currentPos) {
             super();
-            this.currentActualPos = currentPos;
+            this.currentRequestedPos = currentPos;
         }
 
         @Override
@@ -135,31 +133,50 @@ public class SeekableSourceFromSequentialReaderSource
         public int checkNext(int len, boolean changePos) throws IOException {
             long savedPos = currentActualPos;
 
-            int sbs = skipBuffer.length;
-            if (skipBuffer == null) {
-                skipBuffer = new byte[1024 * 4];
-            }
+            int result;
+            long size = size();
+            if (size >= 0) {
+                long available = size - currentRequestedPos;
+                result = Math.max(Ints.saturatedCast(Math.min(len, available)), 0);
 
-            int remaining = len;
-            int contrib = 0;
-            while (
-                    contrib >= 0 &&
-                    (remaining -= contrib) > 0 &&
-                    (contrib = read(skipBuffer, 0, Math.min(remaining, sbs))) >= 0) {
-            }
+                if (changePos) {
+                    currentRequestedPos += result;
+                }
+            } else {
+                if (true) {
+                    throw new UnsupportedOperationException("unknown size is not yet supported");
+                }
+                int sbs = skipBuffer.length;
+                if (skipBuffer == null) {
+                    skipBuffer = new byte[1024 * 4];
+                }
 
-            int result = len - remaining;
+                int remaining = len;
+                int contrib = 0;
+                while (
+                        contrib >= 0 &&
+                        (remaining -= contrib) > 0 &&
+                        (contrib = read(skipBuffer, 0, Math.min(remaining, sbs))) >= 0) {
+                }
 
-            if (!changePos) {
-                setPos(savedPos);
+                result = len - remaining;
+
+                if (!changePos) {
+                    setPos(savedPos);
+                }
             }
 
             return result;
         }
 
+
         @Override
         public int checkPrev(int len, boolean changePos) throws IOException {
-            throw new UnsupportedOperationException("not supported");
+            int result = Ints.saturatedCast(Math.min(currentRequestedPos, len));
+            if (changePos) {
+                currentRequestedPos -= result;
+            }
+            return result;
         }
 
         @Override
@@ -218,5 +235,10 @@ public class SeekableSourceFromSequentialReaderSource
             }
         }
 
+        @Override
+        public long size() throws IOException {
+            long result = SeekableSourceOverDataStreamSource.this.size();
+            return result;
+        }
     }
 }

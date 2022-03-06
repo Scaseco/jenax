@@ -62,6 +62,7 @@ public class JenaKryoRegistratorLib {
         // Serializer<Node> nodeSerializer = new GenericNodeSerializerViaThrift(false);
         Serializer<Node> nodeSerializer = new GenericNodeSerializerCustom();
 
+
         registerNodeSerializers(kryo, nodeSerializer);
         kryo.register(Var.class, new VarSerializer());
         kryo.register(Node_Variable.class, new VariableNodeSerializer());
@@ -104,5 +105,6 @@ public class JenaKryoRegistratorLib {
         kryo.register(Node_Blank.class, nodeSerializer);
         kryo.register(Node_URI.class, nodeSerializer);
         kryo.register(Node_Literal.class, nodeSerializer);
+        kryo.register(Node_Triple.class, nodeSerializer);
     }
 }

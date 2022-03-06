@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.io.block.impl.BlockSources;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
+import org.aksw.commons.io.input.DataStreamSource;
+import org.aksw.commons.io.input.DataStreamSources;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
@@ -43,7 +45,29 @@ public class TestBinSearchBz2 {
 
     @Test
     public void testBinarySearchBz2Lookups() throws IOException {
-        runTest();
+
+        Path path = Paths.get("src/test/resources/2015-11-02-Amenity.node.5mb-uncompressed.sorted.nt.bz2");
+        Map<Node, Graph> expected = loadData(path);
+
+        // runBinSearchOnBzip2ViaFileChannel();
+        runBinSearchOnBzip2ViaPath(path, expected);
+    }
+
+    public static Map<Node, Graph> loadData(Path path) {
+        // Read file and map each key to the number of lines
+        Stopwatch sw = Stopwatch.createStarted();
+        Map<Node, Graph> result = RDFDataMgrRx.createFlowableTriples(
+                    () -> new BZip2CompressorInputStream(Files.newInputStream(path, StandardOpenOption.READ), true),
+                    Lang.NTRIPLES, null)
+                .compose(GraphOpsRx.graphsFromConsecutiveSubjectsRaw())
+                .toMap(Entry::getKey, Entry::getValue)
+                .blockingGet()
+                ;
+
+        // Note that the logged time is for cold state - repeated loads should
+        // exhibit significant speedups
+        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds to load " + path);
+        return result;
     }
 
 //    public static void main(String[] args) throws IOException {
@@ -90,24 +114,9 @@ public class TestBinSearchBz2 {
      *
      *
      */
-    public static void runTest() throws IOException {
-        Path path = Paths.get("src/test/resources/2015-11-02-Amenity.node.5mb-uncompressed.sorted.nt.bz2");
-
-        // Read file and map each key to the number of lines
+    public static void runBinSearchOnBzip2ViaFileChannel(Path path, Map<Node, Graph> expectedResults) throws IOException {
         Stopwatch sw = Stopwatch.createStarted();
-        Map<Node, Graph> map = RDFDataMgrRx.createFlowableTriples(
-                    () -> new BZip2CompressorInputStream(Files.newInputStream(path, StandardOpenOption.READ), true),
-                    Lang.NTRIPLES, null)
-                .compose(GraphOpsRx.graphsFromConsecutiveSubjectsRaw())
-                .toMap(Entry::getKey, Entry::getValue)
-                .blockingGet()
-                ;
 
-        // Note that the logged time is for cold state - repeated loads should
-        // exhibit significant speedups
-        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds to load " + path);
-
-        sw.reset().start();
         int i = 0;
         try(FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ)) {
             BinarySearcher bs = BlockSources.createBinarySearcherBz2(fileChannel, PageManagerForFileChannel.DEFAULT_PAGE_SIZE, false);
@@ -120,7 +129,7 @@ public class TestBinSearchBz2 {
 
             // Generic tests
 
-            for(Entry<Node, Graph> e : map.entrySet()) {
+            for(Entry<Node, Graph> e : expectedResults.entrySet()) {
                 Node s = e.getKey();
                 ++i;
 //                System.out.println("Test #" + (++i) + ": " + s);
@@ -156,6 +165,54 @@ public class TestBinSearchBz2 {
 
     }
 
+    public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
+        Stopwatch sw = Stopwatch.createStarted();
+
+        int i = 0;
+        DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
+        BinarySearcher bs = BlockSources.createBinarySearcherBz2(source);
+
+        // This key overlaps on the block boundary (byte 2700000)
+//            try(InputStream in = bs.search("<http://linkedgeodata.org/geometry/node1012767568>")) {
+//                MainPlaygroundScanFile.printLines(in, 10);
+//            }
+//
+
+        // Generic tests
+
+        for(Entry<Node, Graph> e : expectedResults.entrySet()) {
+            Node s = e.getKey();
+            ++i;
+//                System.out.println("Test #" + (++i) + ": " + s);
+            Graph expected = e.getValue();
+
+//                if(s.getURI().equals("http://linkedgeodata.org/geometry/node1012767568")) {
+//                    System.err.println("DEBUG POINT");
+//                }
+
+            //String str = s.isURI() ? "<" + s.getURI() + ">" : s.getBlankNodeLabel()
+            String str = NodeFmtLib.str(s);
+            try(InputStream in = bs.search(str)) {
+                Graph actual = GraphFactory.createDefaultGraph();
+                RDFDataMgr.read(actual, in, Lang.NTRIPLES);
+
+
+                // Assert.assertEquals(expected, actual);
+                boolean isOk = expected.isIsomorphicWith(actual);
+                if(!isOk) {
+                    System.err.println("Expected:");
+                    RDFDataMgr.write(System.err, expected, RDFFormat.TURTLE_PRETTY);
+                    System.err.println("Actual:");
+                    RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
+                }
+                Assert.assertTrue(isOk);
+            }
+
+        }
+
+        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds for " + i + " lookups on " + path);
+
+    }
 
 //    @Test
     public void testLocalBinSearch() throws IOException, Exception {

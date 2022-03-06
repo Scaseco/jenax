@@ -8,9 +8,11 @@ import java.nio.file.StandardOpenOption;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
+import org.aksw.commons.io.input.DataStreamSource;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.impl.SeekableFromBlock;
 import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
+import org.aksw.commons.io.seekable.impl.SeekableSourceOverDataStreamSource;
 import org.aksw.commons.util.ref.Ref;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearchOnBlockSource;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
@@ -40,6 +42,18 @@ public class BlockSources {
         BlockSource blockSource = BlockSourceBzip2.create(pagedSource);
 
         BinarySearcher result = new BinarySearchOnBlockSource(blockSource, closeChannel ? fileChannel::close : null);
+        return result;
+    }
+
+    public static BinarySearcher createBinarySearcherBz2(DataStreamSource<byte[]> dataStreamSource) throws IOException {
+        SeekableSource seekableSource = new SeekableSourceOverDataStreamSource(dataStreamSource, 1024 * 512);
+        return createBinarySearcherBz2(seekableSource);
+    }
+
+    public static BinarySearcher createBinarySearcherBz2(SeekableSource seekableSource) throws IOException {
+        BlockSource blockSource = BlockSourceBzip2.create(seekableSource);
+
+        BinarySearcher result = new BinarySearchOnBlockSource(blockSource, null);
         return result;
     }
 
