@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,12 +14,18 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.io.block.impl.BlockSources;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
+import org.aksw.commons.io.input.DataStream;
 import org.aksw.commons.io.input.DataStreamSource;
 import org.aksw.commons.io.input.DataStreamSources;
+import org.aksw.commons.io.input.DataStreams;
+import org.aksw.commons.io.seekable.api.Seekable;
+import org.aksw.commons.io.seekable.api.SeekableSource;
+import org.aksw.commons.io.seekable.impl.SeekableSourceOverDataStreamSource;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
@@ -37,6 +44,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Range;
+import com.google.common.primitives.Ints;
 
 
 public class TestBinSearchBz2 {
@@ -49,7 +59,9 @@ public class TestBinSearchBz2 {
         Path path = Paths.get("src/test/resources/2015-11-02-Amenity.node.5mb-uncompressed.sorted.nt.bz2");
         Map<Node, Graph> expected = loadData(path);
 
-        // runBinSearchOnBzip2ViaFileChannel();
+        // testSeekableOverDataStreamSource(path);
+
+        // runBinSearchOnBzip2ViaFileChannel(path, expected);
         runBinSearchOnBzip2ViaPath(path, expected);
     }
 
@@ -165,11 +177,57 @@ public class TestBinSearchBz2 {
 
     }
 
+    public static void testSeekableOverDataStreamSource(Path path) throws IOException {
+
+        // Test to compare seeking on a DataStream directly and using the Seekable abstraction
+        DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
+        SeekableSource ss = new SeekableSourceOverDataStreamSource(source, 100);
+
+        int size = Ints.saturatedCast(source.size());
+        int maxDelta = size / 10;
+
+        Random random = new Random(0);
+        for (int i = 0; i < 30; ++i) {
+            long baseOffset = random.nextInt(size);
+            try (Seekable seekable = ss.get(baseOffset)) {
+                long offset = baseOffset;
+                int requestDelta = random.nextInt(maxDelta) - (maxDelta >> 1);
+                int actualDelta;
+                if (requestDelta >= 0) {
+                    actualDelta = seekable.checkNext(requestDelta, true);
+                    offset += actualDelta;
+                } else {
+                    actualDelta = seekable.checkPrev(-requestDelta, true);
+                    offset -= actualDelta;
+                }
+
+                try (DataStream<byte[]> raw = source.newDataStream(Range.atLeast(offset))) {
+
+                    // Check reading of a single byte
+                    Byte expectedByte = Iterators.getNext(DataStreams.newBoxedIterator(raw, 1), null);
+                    Byte actualByte = seekable.get();
+                    Assert.assertEquals(expectedByte, actualByte);
+
+                    seekable.nextPos(1);
+
+                    // Check reading of all remaining data
+                    byte[] expecteds = IOUtils.toByteArray(Channels.newInputStream(DataStreams.newChannel(raw)));
+                    byte[] actuals = IOUtils.toByteArray(Channels.newInputStream(seekable));
+
+                    Assert.assertArrayEquals(expecteds, actuals);
+                }
+            }
+        }
+    }
+
     public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
+
+        DataStreamSource<byte[]> rawSource = DataStreamSources.of(path);
+        DataStreamSource<byte[]> source = DataStreamSources.cacheInMemory(rawSource, 1024 * 1024, 128, Long.MAX_VALUE);
         Stopwatch sw = Stopwatch.createStarted();
 
         int i = 0;
-        DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
+
         BinarySearcher bs = BlockSources.createBinarySearcherBz2(source);
 
         // This key overlaps on the block boundary (byte 2700000)
@@ -205,6 +263,8 @@ public class TestBinSearchBz2 {
                     System.err.println("Actual:");
                     RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
                 }
+
+                System.out.println("Iteration #" + i + ": ok? " + isOk);
                 Assert.assertTrue(isOk);
             }
 

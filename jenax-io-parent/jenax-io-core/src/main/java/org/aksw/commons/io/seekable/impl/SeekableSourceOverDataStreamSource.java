@@ -81,13 +81,17 @@ public class SeekableSourceOverDataStreamSource
             return new SeekableFromSequentialReaderSource(currentActualPos);
         }
 
+        /** Ensure that the actual position matches the requested one */
         protected void syncPos() throws IOException {
-            int delta = Ints.saturatedCast(currentRequestedPos - currentActualPos);
-            if (delta > 0 && delta < maxSeekByReadLength && delta != Integer.MAX_VALUE) {
-                checkNext(delta, true);
-            } else if (currentRequestedPos != currentActualPos) {
-                currentReader.close();
-                currentReader = null;
+            if (currentReader != null) {
+                int delta = Ints.saturatedCast(currentRequestedPos - currentActualPos);
+                if (delta > 0 && delta < maxSeekByReadLength && delta != Integer.MAX_VALUE) {
+                    // checkNext(delta, true);
+                    skip(delta);
+                } else if (currentRequestedPos != currentActualPos) {
+                    currentReader.close();
+                    currentReader = null;
+                }
             }
         }
 
@@ -126,13 +130,37 @@ public class SeekableSourceOverDataStreamSource
 
         @Override
         public boolean isPosAfterEnd() throws IOException {
-            return currentRequestedPos == Long.MAX_VALUE;
+            long size = size();
+
+            boolean result = currentRequestedPos == Long.MAX_VALUE || (size >= 0 && currentRequestedPos >= size);
+            return result;
+        }
+
+        protected int skip(int len) throws IOException {
+            if (skipBuffer == null) {
+                skipBuffer = new byte[1024 * 4];
+            }
+
+            int sbs = skipBuffer.length;
+
+            int remaining = len;
+            int contrib = 0;
+            while (
+                    contrib >= 0 &&
+                    (remaining -= contrib) > 0 &&
+                    (contrib = currentReader.read(skipBuffer, 0, Math.min(remaining, sbs))) >= 0) {
+            }
+
+            int result = len - remaining;
+
+            currentActualPos += result;
+            currentRequestedPos = currentActualPos;
+
+            return result;
         }
 
         @Override
         public int checkNext(int len, boolean changePos) throws IOException {
-            long savedPos = currentActualPos;
-
             int result;
             long size = size();
             if (size >= 0) {
@@ -143,26 +171,10 @@ public class SeekableSourceOverDataStreamSource
                     currentRequestedPos += result;
                 }
             } else {
+                long savedPos = currentActualPos;
+
                 if (true) {
                     throw new UnsupportedOperationException("unknown size is not yet supported");
-                }
-                int sbs = skipBuffer.length;
-                if (skipBuffer == null) {
-                    skipBuffer = new byte[1024 * 4];
-                }
-
-                int remaining = len;
-                int contrib = 0;
-                while (
-                        contrib >= 0 &&
-                        (remaining -= contrib) > 0 &&
-                        (contrib = read(skipBuffer, 0, Math.min(remaining, sbs))) >= 0) {
-                }
-
-                result = len - remaining;
-
-                if (!changePos) {
-                    setPos(savedPos);
                 }
             }
 
@@ -197,10 +209,11 @@ public class SeekableSourceOverDataStreamSource
 
             int result = currentReader.read(dst, offset, length);
 
-            if (result == -1) {
+            if (result >= 0) {
+                currentActualPos += result;
+            } else {
                 currentActualPos = Long.MAX_VALUE;
             }
-            currentActualPos += result;
 
             currentRequestedPos = currentActualPos;
             return result;
@@ -208,23 +221,24 @@ public class SeekableSourceOverDataStreamSource
 
         @Override
         public int read(ByteBuffer dst) throws IOException {
-            int r;
+            int result;
             int n = dst.remaining();
             if (dst.hasArray()) {
-                r = read(dst.array(), dst.position(), n);
-                if (r >= 0) {
-                    dst.position(dst.position() + r);
+                int dstPos = Ints.checkedCast(dst.position());
+                result = read(dst.array(), dstPos, n);
+                if (result > 0) {
+                    dst.position(dstPos + result);
                 }
             } else {
                 byte[] buf = new byte[n];
-                r = read(buf, 0, n);
+                result = read(buf, 0, n);
 
-                if (r >= 0) {
-                    dst.put(buf, 0, r);
+                if (result > 0) {
+                    dst.put(buf, 0, result);
                 }
             }
 
-            return r;
+            return result;
         }
 
 

@@ -247,6 +247,8 @@ public class BlockSourceBzip2
             Matcher matcher = fwdMagicPattern.matcher(charSequence);
             boolean didFind = matcher.find();
 
+            logger.trace(String.format("contentAtOrAfter(%d, %b) -> found block? %s", requestPos, inclusive, didFind));
+
             if(didFind) {
                 long blockStart = seekable.getPos() + matcher.start();
                 seekable.setPos(blockStart);
