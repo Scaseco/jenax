@@ -61,8 +61,8 @@ public class TestBinSearchBz2 {
 
         // testSeekableOverDataStreamSource(path);
 
-        // runBinSearchOnBzip2ViaFileChannel(path, expected);
-        runBinSearchOnBzip2ViaPath(path, expected);
+        runBinSearchOnBzip2ViaFileChannel(path, expected);
+        // runBinSearchOnBzip2ViaPath(path, expected);
     }
 
     public static Map<Node, Graph> loadData(Path path) {
@@ -166,6 +166,8 @@ public class TestBinSearchBz2 {
                         System.err.println("Actual:");
                         RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
                     }
+
+                    // System.out.println("Iteration #" + i + ": ok? " + isOk);
                     Assert.assertTrue(isOk);
                 }
 
@@ -222,8 +224,8 @@ public class TestBinSearchBz2 {
 
     public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
 
-        DataStreamSource<byte[]> rawSource = DataStreamSources.of(path);
-        DataStreamSource<byte[]> source = DataStreamSources.cacheInMemory(rawSource, 1024 * 1024, 128, Long.MAX_VALUE);
+        DataStreamSource<byte[]> source = DataStreamSources.of(path);
+        // source = DataStreamSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
         Stopwatch sw = Stopwatch.createStarted();
 
         int i = 0;
@@ -264,7 +266,7 @@ public class TestBinSearchBz2 {
                     RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
                 }
 
-                System.out.println("Iteration #" + i + ": ok? " + isOk);
+                // System.out.println("Iteration #" + i + ": ok? " + isOk);
                 Assert.assertTrue(isOk);
             }
 
