@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -21,6 +22,7 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.AbstractIterator;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -40,9 +42,12 @@ public class RowSetJson
 
         System.out.println("ResultVars: " + rs.getResultVars());
 
-        for (int i = 0; i < 10 && rs.hasNext(); ++i) {
-            System.out.println(rs.next());
+        Stopwatch sw = Stopwatch.createStarted();
+        for (int i = 0; i < 1000000 && rs.hasNext(); ++i) {
+            rs.next();
+            // System.out.println(rs.next());
         }
+        System.out.println("Elapsed: " + sw.elapsed(TimeUnit.MILLISECONDS) * 0.001f + "s - final row: " + rs.getRowNumber());
         rs.close();
     }
 
@@ -161,6 +166,7 @@ public class RowSetJson
             case BINDINGS:
                 while (reader.hasNext()) {
                     result = parseBinding(gson, reader, labelMap);
+                    ++rowNumber;
                     break outer;
                 }
                 reader.endArray();
@@ -179,25 +185,31 @@ public class RowSetJson
     public static Node parseOneTerm(JsonObject json, LabelToNode labelMap) {
         Node result;
 
+        String value;
         String type = json.get("type").getAsString();
-        String value = json.get("value").getAsString();
         switch (type) {
         case "uri":
+            value = json.get("value").getAsString();
             result = NodeFactory.createURI(value);
             break;
         case "literal":
+            value = json.get("value").getAsString();
+            JsonElement langJson = json.get("lang");
+            JsonElement dtJson = json.get("datatype");
             result = NodeFactoryExtra.createLiteralNode(
                     value,
-                    json.get("lang").getAsString(),
-                    json.get("datatype").getAsString());
+                    langJson == null ? null : langJson.getAsString(),
+                    dtJson == null ? null : dtJson.getAsString());
             break;
         case "bnode":
+            value = json.get("value").getAsString();
             result = labelMap.get(null, value);
             break;
         case "triple":
-            Node s = parseOneTerm(json.get("subject").getAsJsonObject(), labelMap);
-            Node p = parseOneTerm(json.get("predicate").getAsJsonObject(), labelMap);
-            Node o = parseOneTerm(json.get("object").getAsJsonObject(), labelMap);
+            JsonObject tripleJson = json.get("value").getAsJsonObject();
+            Node s = parseOneTerm(tripleJson.get("subject").getAsJsonObject(), labelMap);
+            Node p = parseOneTerm(tripleJson.get("predicate").getAsJsonObject(), labelMap);
+            Node o = parseOneTerm(tripleJson.get("object").getAsJsonObject(), labelMap);
             result = NodeFactory.createTripleNode(new Triple(s, p, o));
             break;
         default:
