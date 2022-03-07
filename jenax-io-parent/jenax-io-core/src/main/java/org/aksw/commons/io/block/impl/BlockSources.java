@@ -45,10 +45,6 @@ public class BlockSources {
         return result;
     }
 
-    public static BinarySearcher createBinarySearcherBz2(DataStreamSource<byte[]> dataStreamSource) throws IOException {
-        SeekableSource seekableSource = new SeekableSourceOverDataStreamSource(dataStreamSource, 1024 * 512);
-        return createBinarySearcherBz2(seekableSource);
-    }
 
     public static BinarySearcher createBinarySearcherBz2(SeekableSource seekableSource) throws IOException {
         BlockSource blockSource = BlockSourceBzip2.create(seekableSource);

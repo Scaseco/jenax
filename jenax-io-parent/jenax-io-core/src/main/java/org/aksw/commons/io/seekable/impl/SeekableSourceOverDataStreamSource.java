@@ -15,11 +15,16 @@ import com.nimbusds.jose.util.StandardCharset;
 
 
 /**
- * Seekable abstraction over a DataStream
+ * Seekable abstraction over a DataStreamSource.
+ *
+ * Deprecated because this type of wrapping is too inefficient.
+ * Instead first wrap with DataStreamSource with a PageManager and then
+ * use a PageNavigator on top of that.
  *
  * @author raven
  *
  */
+@Deprecated
 public class SeekableSourceOverDataStreamSource
     implements SeekableSource
 {

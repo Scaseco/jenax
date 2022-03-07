@@ -17,14 +17,21 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.aksw.commons.cache.async.AsyncClaimingCacheImpl;
+import org.aksw.commons.cache.async.AsyncClaimingCacheImpl.Builder;
+import org.aksw.commons.io.block.api.PageManager;
 import org.aksw.commons.io.block.impl.BlockSources;
+import org.aksw.commons.io.block.impl.Page;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
+import org.aksw.commons.io.block.impl.PageManagerOverDataStreamSource;
 import org.aksw.commons.io.input.DataStream;
 import org.aksw.commons.io.input.DataStreamSource;
 import org.aksw.commons.io.input.DataStreamSources;
 import org.aksw.commons.io.input.DataStreams;
 import org.aksw.commons.io.seekable.api.Seekable;
 import org.aksw.commons.io.seekable.api.SeekableSource;
+import org.aksw.commons.io.seekable.api.SeekableSources;
+import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
 import org.aksw.commons.io.seekable.impl.SeekableSourceOverDataStreamSource;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
@@ -43,6 +50,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -61,8 +69,8 @@ public class TestBinSearchBz2 {
 
         // testSeekableOverDataStreamSource(path);
 
-        runBinSearchOnBzip2ViaFileChannel(path, expected);
-        // runBinSearchOnBzip2ViaPath(path, expected);
+        // runBinSearchOnBzip2ViaFileChannel(path, expected);
+        runBinSearchOnBzip2ViaPath(path, expected);
     }
 
     public static Map<Node, Graph> loadData(Path path) {
@@ -183,7 +191,7 @@ public class TestBinSearchBz2 {
 
         // Test to compare seeking on a DataStream directly and using the Seekable abstraction
         DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
-        SeekableSource ss = new SeekableSourceOverDataStreamSource(source, 100);
+        SeekableSource ss = SeekableSources.of(source, 4096, 128); // new SeekableSourceOverDataStreamSource(source, 100);
 
         int size = Ints.saturatedCast(source.size());
         int maxDelta = size / 10;
@@ -225,12 +233,15 @@ public class TestBinSearchBz2 {
     public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
 
         DataStreamSource<byte[]> source = DataStreamSources.of(path);
-        // source = DataStreamSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
+        source = DataStreamSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
+        SeekableSource seekableSource = SeekableSources.of(source, 1024 * 1024, 128);
+
+
         Stopwatch sw = Stopwatch.createStarted();
 
         int i = 0;
 
-        BinarySearcher bs = BlockSources.createBinarySearcherBz2(source);
+        BinarySearcher bs = BlockSources.createBinarySearcherBz2(seekableSource);
 
         // This key overlaps on the block boundary (byte 2700000)
 //            try(InputStream in = bs.search("<http://linkedgeodata.org/geometry/node1012767568>")) {
