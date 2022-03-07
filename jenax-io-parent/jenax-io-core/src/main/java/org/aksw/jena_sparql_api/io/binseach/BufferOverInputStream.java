@@ -39,7 +39,7 @@ import com.google.common.primitives.Ints;
  *
  */
 @ThreadSafe
-public class BufferFromInputStream
+public class BufferOverInputStream
     implements ChannelFactory<Seekable>
 {
     /** The buffered data */
@@ -92,8 +92,8 @@ public class BufferFromInputStream
      * @param preconfiguredBucketSizes
      * @return
      */
-    public static BufferFromInputStream create(InputStream in, int maxReadSize, int ... preconfiguredBucketSizes) {
-        BufferFromInputStream result = new BufferFromInputStream(maxReadSize, in);
+    public static BufferOverInputStream create(InputStream in, int maxReadSize, int ... preconfiguredBucketSizes) {
+        BufferOverInputStream result = new BufferOverInputStream(maxReadSize, in);
         return result;
     }
 
@@ -466,7 +466,7 @@ public class BufferFromInputStream
         return new ByteArrayChannel(0, null);
     }
 
-    public BufferFromInputStream(
+    public BufferOverInputStream(
             int initialBucketSize,
             InputStream dataSupplier) {
         if (initialBucketSize <= 0) {
@@ -673,7 +673,7 @@ public class BufferFromInputStream
         }
 
         InputStream in = new ByteArrayInputStream(data);
-        BufferFromInputStream b = BufferFromInputStream.create(in, 2);
+        BufferOverInputStream b = BufferOverInputStream.create(in, 2);
         Seekable s = b.newChannel();
 
         // System.out.println("Pos changed? " + s.nextPos(10000 * 10 - 1));
@@ -721,7 +721,7 @@ public class BufferFromInputStream
             int maxReadLength = rand.nextInt(1000) + 1;
 
             InputStream in = new ByteArrayInputStream(baseData);
-            BufferFromInputStream buffer = BufferFromInputStream.create(in, maxReadLength);
+            BufferOverInputStream buffer = BufferOverInputStream.create(in, maxReadLength);
 
             // Test 100 ranges in parallel
             IntStream.range(0, 1000).mapToObj(x -> x).collect(Collectors.toList()).stream()

@@ -14,8 +14,8 @@ import org.aksw.commons.io.seekable.api.Seekable;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.util.ref.Ref;
 import org.aksw.commons.util.ref.RefImpl;
-import org.aksw.jena_sparql_api.io.binseach.BufferFromInputStream;
-import org.aksw.jena_sparql_api.io.binseach.BufferFromInputStream.ByteArrayChannel;
+import org.aksw.jena_sparql_api.io.binseach.BufferOverInputStream;
+import org.aksw.jena_sparql_api.io.binseach.BufferOverInputStream.ByteArrayChannel;
 import org.aksw.jena_sparql_api.io.binseach.CharSequenceFromSeekable;
 import org.aksw.jena_sparql_api.io.binseach.DecodedDataBlock;
 import org.aksw.jena_sparql_api.io.binseach.ReverseCharSequenceFromSeekable;
@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.primitives.Ints;
-
 
 public class BlockSourceBzip2
     implements BlockSource
@@ -53,11 +54,34 @@ public class BlockSourceBzip2
 //    protected MatcherFactory fwdBlockStartMatcherFactory;
 //    protected MatcherFactory bwdBlockStartMatcherFactory;
 
-    protected Cache<Long, Ref<Block>> blockCache = CacheBuilder
+
+    public static long ABSENT = -1;
+    public static long UNKNOWN = -2;
+
+    static class Neighbour {
+        long prevBlockOffset = UNKNOWN;
+        long nextBlockOffset = UNKNOWN;
+    }
+
+    protected LoadingCache<Long, Neighbour> blockTopologyCache = CacheBuilder.newBuilder()
+            .maximumSize(10000)
+            .build(new CacheLoader<Long, Neighbour>() {
+                @Override
+                public Neighbour load(Long key) throws Exception {
+                    return new Neighbour();
+                }
+            });
+
+
+    protected Cache<Long, Ref<Block>> blockContentCache = CacheBuilder
             .newBuilder()
             .removalListener((RemovalNotification<Long, Ref<Block>> notification) -> { notification.getValue().close(); })
             .build();
 
+
+    // The block size determined from reading one block (rather then checking the header)
+    protected long cachedBlockSize = UNKNOWN;
+    protected long cachedLastBlockSize = UNKNOWN;
 
 
     public BlockSourceBzip2(
@@ -150,7 +174,7 @@ public class BlockSourceBzip2
 //                }));
 //        }
 
-        BufferFromInputStream blockBuffer = new BufferFromInputStream(8192, effectiveIn);
+        BufferOverInputStream blockBuffer = new BufferOverInputStream(8192, effectiveIn);
 
         // Closing the block would close the input stream -
         // In order to allow multiple clients, wrap the block in a reference:
@@ -162,41 +186,67 @@ public class BlockSourceBzip2
     }
 
 
+    public long findBlockAtOrBeforeCached(Seekable seekable) throws IOException {
+        long result;
+        long pos = seekable.getPos();
+
+        Neighbour n;
+        try {
+            n = blockTopologyCache.get(pos);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (n != null && n.prevBlockOffset >= ABSENT) {
+            result = n.prevBlockOffset;
+            if (result >= 0) {
+                seekable.setPos(result);
+            }
+        } else {
+            result = findBlockAtOrBefore(seekable);
+            n.prevBlockOffset = result;
+        }
+        return result;
+    }
+
+
+    public long findBlockAtOrBefore(Seekable seekable) throws IOException {
+        long result;
+        long internalRequestPos = seekable.getPos();
+
+        int searchRangeLimit = Math.min(Ints.saturatedCast(internalRequestPos + 1), MAX_SEARCH_RANGE);
+        CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, searchRangeLimit);
+        Matcher matcher = bwdMagicPattern.matcher(charSequence);
+        boolean didFind = matcher.find();
+
+        if(didFind) {
+            // Move to the beginning of the pattern
+            // seekable.prevPos(magic.length - 1);
+
+            // long blockStart = seekable.getPos();
+            int end = matcher.end();
+            result = seekable.getPos() - (end - 1);
+
+            seekable.setPos(result);
+
+        } else {
+            result = -1;
+        }
+        return result;
+    }
+
     @Override
     public Ref<Block> contentAtOrBefore(long requestPos, boolean inclusive) throws IOException {
         logger.trace(String.format("contentAtOrBefore(%d, %b)", requestPos, inclusive));
 
-        // If the requestPos is already in the cache, serve it from there
-        // TODO Track consecutive blocks in a cache
-//        if(!inclusive) {
-//            inclusive = true;
-//        }
-
         long internalRequestPos = requestPos - (inclusive ? 0 : 1) + (COMPRESSED_MAGIC_STR.length() - 1);
-        Ref<Block> result = blockCache.getIfPresent(internalRequestPos);
-
-        int searchRangeLimit = Math.min(Ints.saturatedCast(internalRequestPos + 1), MAX_SEARCH_RANGE);
+        Ref<Block> result = blockContentCache.getIfPresent(internalRequestPos);
 
         if(result == null) {
             Seekable seekable = seekableSource.get(internalRequestPos);
-//            System.out.println("Size: " + seekableSource.size());
 
-
-//            SeekableMatcher matcher = bwdBlockStartMatcherFactory.newMatcher();
-//            boolean didFind = matcher.find(seekable);
-            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, searchRangeLimit);
-            Matcher matcher = bwdMagicPattern.matcher(charSequence);
-            boolean didFind = matcher.find();
-
-            if(didFind) {
-                // Move to the beginning of the pattern
-                // seekable.prevPos(magic.length - 1);
-
-                // long blockStart = seekable.getPos();
-                int end = matcher.end();
-                long blockStart = seekable.getPos() - (end - 1);
-                seekable.setPos(blockStart);
-
+            long blockStart = findBlockAtOrBeforeCached(seekable);
+            if (blockStart >= 0) {
                 result = cache(blockStart, seekable);
             } else {
                 seekable.close();
@@ -206,11 +256,104 @@ public class BlockSourceBzip2
         return result == null ? null : result.acquire(null);
     }
 
+    public long findBlockAtOrAfterCached(Seekable seekable) throws IOException {
+        long result;
+        long pos = seekable.getPos();
+
+        Neighbour n;
+        try {
+            n = blockTopologyCache.get(pos);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (n != null && n.nextBlockOffset >= ABSENT) {
+            result = n.nextBlockOffset;
+            if (result >= 0) {
+                seekable.setPos(result);
+            }
+        } else {
+            result = findBlockAtOrAfter(seekable);
+            n.nextBlockOffset = result;
+        }
+        return result;
+    }
+
+    public long findBlockAtOrAfter(Seekable seekable) throws IOException {
+        long result;
+        long internalRequestPos = seekable.getPos();
+
+        int searchRangeLimit = Math.min(Ints.saturatedCast(seekableSource.size() - internalRequestPos), MAX_SEARCH_RANGE);
+
+        CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, searchRangeLimit);
+        Matcher matcher = fwdMagicPattern.matcher(charSequence);
+        boolean didFind = matcher.find();
+
+        if(didFind) {
+            result = seekable.getPos() + matcher.start();
+            seekable.setPos(result);
+            // We are now at the beginning of the pattern
+        } else {
+            result = -1;
+        }
+
+        return result;
+    }
+
+    @Override
+    public Ref<Block> contentAtOrAfter(long requestPos, boolean inclusive) throws IOException {
+        logger.trace(String.format("contentAtOrAfter(%d, %b)", requestPos, inclusive));
+
+        long internalRequestPos = requestPos + (inclusive ? 0 : 1);
+        Ref<Block> result = blockContentCache.getIfPresent(internalRequestPos);
+
+        if(result == null) {
+            Seekable seekable = seekableSource.get(internalRequestPos);
+
+            long blockStart = findBlockAtOrAfterCached(seekable);
+            if (blockStart >= 0) {
+                result = cache(blockStart, seekable);
+            } else {
+                seekable.close();
+            }
+        }
+
+        return result == null ? null : result.acquire(null);
+    }
+
+    @Override
+    public boolean hasBlockAfter(long pos) throws IOException {
+        boolean result;
+        try(Seekable seekable = seekableSource.get(pos + 1)) {
+            result = findBlockAtOrAfterCached(seekable) >= 0;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean hasBlockBefore(long pos) throws IOException {
+        boolean result;
+        long internalRequestPos = pos - 1 + (COMPRESSED_MAGIC_STR.length() - 1);
+
+        try(Seekable seekable = seekableSource.get(internalRequestPos)) {
+            result = findBlockAtOrBeforeCached(seekable) >= 0;
+        }
+        return result;
+    }
+
+
+    @Override
+    public long size() throws IOException {
+        long result = seekableSource.size();
+        return result;
+    }
+
+
     public Ref<Block> cache(long blockStart, Seekable seekable) throws IOException {
         Ref<Block> result;
         try {
             boolean[] usedLoader = { false };
-            result = blockCache.get(blockStart, () -> {
+            result = blockContentCache.get(blockStart, () -> {
                 usedLoader[0] = true;
                 return loadBlock(seekable);
             });
@@ -225,47 +368,49 @@ public class BlockSourceBzip2
         return result;
     }
 
+
+    // ISSUE The code relies on getSizeOfBlock to load all data into the buffer of a BufferOverInputStream
+    // such that the underlying input stream can be closed
+    // Using the cached version raises exception about closed input streams
     @Override
-    public Ref<Block> contentAtOrAfter(long requestPos, boolean inclusive) throws IOException {
-        logger.trace(String.format("contentAtOrAfter(%d, %b)", requestPos, inclusive));
+    public long getSizeOfBlock(long pos) throws IOException {
+//        return getSizeOfBlockCached(pos);
+        return loadBlock(pos);
+    }
 
-        // TODO Track consecutive blocks in a cache
-//        if(!inclusive) {
-//            inclusive = true;
-//        }
-        long internalRequestPos = requestPos + (inclusive ? 0 : 1);
-        Ref<Block> result = blockCache.getIfPresent(internalRequestPos);
+    public long getSizeOfBlockCached(long pos) throws IOException {
+        long result;
 
-        int searchRangeLimit = Math.min(Ints.saturatedCast(seekableSource.size() - internalRequestPos), MAX_SEARCH_RANGE);
+        boolean isLastBlock;
+        try(Seekable seekable = seekableSource.get(pos + 1)) {
+            isLastBlock = findBlockAtOrAfterCached(seekable) < 0;
+        }
 
-        if(result == null) {
-            Seekable seekable = seekableSource.get(internalRequestPos);
-//            SeekableMatcher matcher = fwdBlockStartMatcherFactory.newMatcher();
-//            boolean didFind = matcher.find(seekable);
-
-            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, searchRangeLimit);
-            Matcher matcher = fwdMagicPattern.matcher(charSequence);
-            boolean didFind = matcher.find();
-
-            logger.trace(String.format("contentAtOrAfter(%d, %b) -> found block? %s", requestPos, inclusive, didFind));
-
-            if(didFind) {
-                long blockStart = seekable.getPos() + matcher.start();
-                seekable.setPos(blockStart);
-                // We are now at the beginning of the pattern
-                //long blockStart = seekable.getPos();
-//                System.err.println("Bz2 block for " + requestPos + " found at " + blockStart);
-                result = cache(blockStart, seekable);
+        if (isLastBlock) {
+            if (cachedLastBlockSize < 0) {
+                result = loadBlock(pos);
+                if (cachedLastBlockSize != ABSENT) { // replace UNKNOWN with the known size
+                    cachedLastBlockSize = result;
+                }
             } else {
-                seekable.close();
+                result = cachedLastBlockSize;
+            }
+        } else {
+            if (cachedBlockSize < 0) {
+                result = loadBlock(pos);
+                if (cachedBlockSize != ABSENT) { // replace UNKNOWN with the known size
+                    cachedBlockSize = result;
+                }
+            } else {
+                result = cachedBlockSize;
             }
         }
 
-        return result == null ? null : result.acquire(null);
+        return result;
     }
 
-    @Override
-    public long getSizeOfBlock(long pos) throws IOException {
+    protected long loadBlock(long pos)  throws IOException {
+
         // TODO If the pos is not an exact offset, raise an error
         // TODO The block size may be known - e.g. 900K - in that case we only need to check whether there
         // is subsequent block - only if there is none we actually have to compute the length
@@ -282,81 +427,4 @@ public class BlockSourceBzip2
 
         return result;
     }
-
-
-
-    @Override
-    public boolean hasBlockAfter(long pos) throws IOException {
-        boolean result;
-        try(Seekable seekable = seekableSource.get(pos + 1)) {
-            int searchRangeLimit = Math.min(Ints.saturatedCast(seekableSource.size() - (pos + 1)), MAX_SEARCH_RANGE);
-
-//            SeekableMatcher matcher = fwdBlockStartMatcherFactory.newMatcher();
-//            result = matcher.find(seekable);
-            CharSequence charSequence = new CharSequenceFromSeekable(seekable, 0, searchRangeLimit);
-            Matcher matcher = fwdMagicPattern.matcher(charSequence);
-            result = matcher.find();
-        }
-        return result;
-    }
-
-    @Override
-    public boolean hasBlockBefore(long pos) throws IOException {
-        boolean result;
-        long internalRequestPos = pos - 1 + (COMPRESSED_MAGIC_STR.length() - 1);
-
-        int searchRangeLimit = Math.min(Ints.saturatedCast(internalRequestPos + 1), MAX_SEARCH_RANGE);
-
-        try(Seekable seekable = seekableSource.get(internalRequestPos)) {
-//            SeekableMatcher matcher = bwdBlockStartMatcherFactory.newMatcher();
-//            result = matcher.find(seekable);
-//            try(Seekable clone = seekable.clone()) {
-            CharSequence charSequence = new ReverseCharSequenceFromSeekable(seekable, 0, searchRangeLimit);
-            Matcher matcher = bwdMagicPattern.matcher(charSequence);
-            result = matcher.find();
-//            }
-        }
-        return result;
-    }
-
-
-    @Override
-    public long size() throws IOException {
-        long result = seekableSource.size();
-        return result;
-    }
-
-
-//	@Override
-//	public long getXBoundBefore(long pos) {
-//		Seekable seekable = seekableSource.get(pos);
-//
-//
-//
-//		// Get a seekable for the given position
-//		// Scan the seekable in reverse for the magic bytes
-//
-//		return 0;
-//	}
-    // Hack to set up an empty bz2 stream in order to reuse the header
-    // this way we don't have to copy and adapt the BZip2CompressorInputStream class
-//	ByteArrayOutputStream headerOut = new ByteArrayOutputStream();
-//	OutputStream out = new BZip2CompressorOutputStream(headerOut);
-//	out.flush();
-//	out.close();
-//	byte[] headerBytes = headerOut.toByteArray();
-//	int headerLen = 0; //headerBytes.length; //12; //Bytes.indexOf(headerBytes, magic);
-
-//	System.out.println(headerBytes.length);
-
-//
-//	byte[] test = new byte[16];
-//	seekable.peekNextBytes(test, 0, 16);
-//
-//	System.out.println(new String(test));
-//	System.out.println("blockStart: " + blockStart);
-
-
-
-
 }
