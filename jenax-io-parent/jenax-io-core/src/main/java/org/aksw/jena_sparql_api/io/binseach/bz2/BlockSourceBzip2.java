@@ -80,6 +80,7 @@ public class BlockSourceBzip2
 
 
     // The block size determined from reading one block (rather then checking the header)
+    // A value of ABSENT disables caching
     protected long cachedBlockSize = UNKNOWN;
     protected long cachedLastBlockSize = UNKNOWN;
 
