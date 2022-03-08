@@ -165,7 +165,7 @@ public class SyncedDataset {
     }
 
     protected void writeData(OutputStream out, DatasetGraph datasetGraph) {
-        RDFDataMgr.write(out, datasetGraph, RDFFormat.TRIG_BLOCKS);
+        RDFDataMgrEx.writeAsGiven(out, datasetGraph, RDFFormat.TRIG_BLOCKS, null);
     }
 
     protected DatasetGraph newDatasetGraph() {
