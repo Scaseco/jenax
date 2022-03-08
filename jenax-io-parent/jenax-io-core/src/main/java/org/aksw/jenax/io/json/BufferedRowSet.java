@@ -2,6 +2,7 @@ package org.aksw.jenax.io.json;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.jena.atlas.data.BagFactory;
 import org.apache.jena.atlas.data.DataBag;
@@ -38,18 +39,21 @@ public class BufferedRowSet
     // The buffer may be filled upon calling getResultVars()
     // Data will be served from the buffer first until it is exhausted, then
     // data is served from the delegate again
+
+    protected Supplier<DataBag<Binding>> bufferFactory;
     protected DataBag<Binding> buffer = null;
     protected Iterator<Binding> bufferIterator = null;
 
     protected long rowNumber;
 
-    public BufferedRowSet(RowSet delegate) {
-        this(delegate, 0);
+    public BufferedRowSet(RowSet delegate, Supplier<DataBag<Binding>> bufferFactory) {
+        this(delegate, bufferFactory, 0);
     }
 
-    public BufferedRowSet(RowSet delegate, long rowNumber) {
+    public BufferedRowSet(RowSet delegate, Supplier<DataBag<Binding>> bufferFactory, long rowNumber) {
         super();
         this.delegate = delegate;
+        this.bufferFactory = bufferFactory;
         this.rowNumber = rowNumber;
     }
 
@@ -61,12 +65,11 @@ public class BufferedRowSet
     @Override
     public List<Var> getResultVars() {
         List<Var> result;
+
         while (((result = getDelegate().getResultVars()) == null) && getDelegate().hasNext()) {
 
             if (buffer == null) {
-                Context cxt = ARQ.getContext(); // .copy(); // execCxt.getContext();
-                ThresholdPolicy<Binding> policy = ThresholdPolicyFactory.policyFromContext(cxt);
-                buffer = BagFactory.newDefaultBag(policy, SerializationFactoryFinder.bindingSerializationFactory());
+                buffer = bufferFactory.get();
             }
 
             // Log a warning if we read a lot of data here?

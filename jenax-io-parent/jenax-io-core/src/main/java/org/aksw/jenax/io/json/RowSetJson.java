@@ -8,18 +8,29 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.apache.jena.atlas.data.BagFactory;
+import org.apache.jena.atlas.data.DataBag;
+import org.apache.jena.atlas.data.ThresholdPolicy;
+import org.apache.jena.atlas.data.ThresholdPolicyFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.riot.lang.LabelToNode;
+import org.apache.jena.riot.system.SyntaxLabels;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.system.SerializationFactoryFinder;
+import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 
 import com.google.common.base.Stopwatch;
@@ -35,27 +46,28 @@ public class RowSetJson
     implements RowSet
 {
 
-    public static void main(String[] args) throws MalformedURLException, IOException {
-        RowSet rs = createBuffered(
-                new URL("http://moin.aksw.org/sparql?query=SELECT%20*%20{%20?s%20?p%20?o%20}").openStream(),
-                LabelToNode.createUseLabelAsGiven());
+    public static RowSet createBuffered(InputStream in, Context context) {
+        Context cxt = context == null ? ARQ.getContext() : context;
 
-        System.out.println("ResultVars: " + rs.getResultVars());
+        boolean inputGraphBNodeLabels = cxt.isTrue(ARQ.inputGraphBNodeLabels);
+        LabelToNode labelMap = inputGraphBNodeLabels
+            ? SyntaxLabels.createLabelToNodeAsGiven()
+            : SyntaxLabels.createLabelToNode();
 
-        Stopwatch sw = Stopwatch.createStarted();
-        for (int i = 0; i < 1000000 && rs.hasNext(); ++i) {
-            rs.next();
-            // System.out.println(rs.next());
-        }
-        System.out.println("Elapsed: " + sw.elapsed(TimeUnit.MILLISECONDS) * 0.001f + "s - final row: " + rs.getRowNumber());
-        rs.close();
+        Supplier<DataBag<Binding>> bufferFactory = () -> {
+            ThresholdPolicy<Binding> policy = ThresholdPolicyFactory.policyFromContext(cxt);
+            DataBag<Binding> r = BagFactory.newDefaultBag(policy, SerializationFactoryFinder.bindingSerializationFactory());
+            return r;
+        };
+
+        return createBuffered(in, labelMap, bufferFactory);
     }
 
-    public static RowSet createBuffered(InputStream in, LabelToNode labelMap) {
-        return new BufferedRowSet(create(in, labelMap));
+    public static RowSet createBuffered(InputStream in, LabelToNode labelMap, Supplier<DataBag<Binding>> bufferFactory) {
+        return new BufferedRowSet(createUnbuffered(in, labelMap), bufferFactory);
     }
 
-    public static RowSet create(InputStream in, LabelToNode labelMap) {
+    public static RowSet createUnbuffered(InputStream in, LabelToNode labelMap) {
         Gson gson = new Gson();
         JsonReader reader = gson.newJsonReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         RowSet result = new RowSetJson(gson, reader, LabelToNode.createUseLabelAsGiven());
@@ -80,6 +92,11 @@ public class RowSetJson
 
     protected LabelToNode labelMap;
 
+    // Hold the context for reference?
+    // protected Context context;
+
+    protected Function<JsonObject, Node> onUnknownRdfTermType = null;
+
     protected State state;
 
 
@@ -92,11 +109,14 @@ public class RowSetJson
         this.gson = gson;
         this.reader = reader;
         this.labelMap = labelMap;
+
         this.resultVars = resultVars;
         this.rowNumber = rowNumber;
 
         this.state = State.INIT;
     }
+
+
 
     @Override
     public List<Var> getResultVars() {
@@ -165,7 +185,7 @@ public class RowSetJson
 
             case BINDINGS:
                 while (reader.hasNext()) {
-                    result = parseBinding(gson, reader, labelMap);
+                    result = parseBinding(gson, reader, labelMap, onUnknownRdfTermType);
                     ++rowNumber;
                     break outer;
                 }
@@ -182,69 +202,15 @@ public class RowSetJson
         return result;
     }
 
-    public static Node parseOneTerm(JsonObject json, LabelToNode labelMap) {
-        Node result;
-
-        String value;
-        String type = json.get("type").getAsString();
-        switch (type) {
-        case "uri":
-            value = json.get("value").getAsString();
-            result = NodeFactory.createURI(value);
-            break;
-        case "literal":
-            value = json.get("value").getAsString();
-            JsonElement langJson = json.get("lang");
-            JsonElement dtJson = json.get("datatype");
-            result = NodeFactoryExtra.createLiteralNode(
-                    value,
-                    langJson == null ? null : langJson.getAsString(),
-                    dtJson == null ? null : dtJson.getAsString());
-            break;
-        case "bnode":
-            value = json.get("value").getAsString();
-            result = labelMap.get(null, value);
-            break;
-        case "triple":
-            JsonObject tripleJson = json.get("value").getAsJsonObject();
-            Node s = parseOneTerm(tripleJson.get("subject").getAsJsonObject(), labelMap);
-            Node p = parseOneTerm(tripleJson.get("predicate").getAsJsonObject(), labelMap);
-            Node o = parseOneTerm(tripleJson.get("object").getAsJsonObject(), labelMap);
-            result = NodeFactory.createTripleNode(new Triple(s, p, o));
-            break;
-        default:
-            result = null;
-            break;
-        }
-
-        return result;
-    }
-
-    public static Binding parseBinding(Gson gson, JsonReader reader, LabelToNode labelMap) throws IOException {
-        JsonObject obj = gson.fromJson(reader, JsonObject.class);
-
-        BindingBuilder bb = BindingFactory.builder();
-
-        for (Entry<String, JsonElement> e : obj.entrySet()) {
-            Var v = Var.alloc(e.getKey());
-            JsonObject nodeObj = e.getValue().getAsJsonObject();
-
-            Node node = parseOneTerm(nodeObj, labelMap);
-            bb.add(v, node);
-        }
-
-        return bb.build();
-    }
-
-
-    public List<Var> parseHead() throws IOException {
+    protected List<Var> parseHead() throws IOException {
         List<Var> result = null;
 
         reader.beginObject();
         String n = reader.nextName();
         switch (n) {
         case "vars":
-            result = gson.fromJson(reader, new TypeToken<List<String>>() {}.getType());
+            List<String> varNames = gson.fromJson(reader, new TypeToken<List<String>>() {}.getType());
+            result = Var.varList(varNames);
             break;
         default:
             onUnexpectedJsonElement();
@@ -268,4 +234,68 @@ public class RowSetJson
             throw new JenaException(e);
         }
     }
+
+
+    public static Node parseOneTerm(JsonObject json, LabelToNode labelMap, Function<JsonObject, Node> onUnknownRdfTermType) {
+        Node result;
+
+        String type = json.get("type").getAsString();
+        JsonElement valueJson = json.get("value");
+        String valueStr;
+        switch (type) {
+        case "uri":
+            valueStr = valueJson.getAsString();
+            result = NodeFactory.createURI(valueStr);
+            break;
+        case "literal":
+            valueStr = valueJson.getAsString();
+            JsonElement langJson = json.get("xml:lang");
+            JsonElement dtJson = json.get("datatype");
+            result = NodeFactoryExtra.createLiteralNode(
+                    valueStr,
+                    langJson == null ? null : langJson.getAsString(),
+                    dtJson == null ? null : dtJson.getAsString());
+            break;
+        case "bnode":
+            valueStr = valueJson.getAsString();
+            result = labelMap.get(null, valueStr);
+            break;
+        case "triple":
+            JsonObject tripleJson = valueJson.getAsJsonObject();
+            Node s = parseOneTerm(tripleJson.get("subject").getAsJsonObject(), labelMap, onUnknownRdfTermType);
+            Node p = parseOneTerm(tripleJson.get("predicate").getAsJsonObject(), labelMap, onUnknownRdfTermType);
+            Node o = parseOneTerm(tripleJson.get("object").getAsJsonObject(), labelMap, onUnknownRdfTermType);
+            result = NodeFactory.createTripleNode(new Triple(s, p, o));
+            break;
+        default:
+            if (onUnknownRdfTermType != null) {
+                result = onUnknownRdfTermType.apply(json);
+                Objects.requireNonNull(result, "Custom handler return null for unknown term type " + type);
+            } else {
+                throw new IllegalStateException("Unknown rdf term type: " + type);
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    public static Binding parseBinding(
+            Gson gson, JsonReader reader, LabelToNode labelMap,
+            Function<JsonObject, Node> onUnknownRdfTermType) throws IOException {
+        JsonObject obj = gson.fromJson(reader, JsonObject.class);
+
+        BindingBuilder bb = BindingFactory.builder();
+
+        for (Entry<String, JsonElement> e : obj.entrySet()) {
+            Var v = Var.alloc(e.getKey());
+            JsonObject nodeObj = e.getValue().getAsJsonObject();
+
+            Node node = parseOneTerm(nodeObj, labelMap, onUnknownRdfTermType);
+            bb.add(v, node);
+        }
+
+        return bb.build();
+    }
+
 }
