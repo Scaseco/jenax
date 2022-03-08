@@ -151,7 +151,7 @@ public class SyncedDataset {
             new PathState(diffSourcePath, diffTimestamp)
         );
 
-        logger.debug("Loaded state: " + result);
+        logger.debug("Read state: " + result);
 
         return result;
     }
@@ -248,12 +248,13 @@ public class SyncedDataset {
         return fileSync;
     }
 
-    public void load() {
-        ensureLoaded();
-    }
+//    public void load() {
+//        ensureLoaded();
+//    }
 
     public DatasetGraphDiff get() {
-        ensureLoaded();
+        // ensureLoaded();
+        updateIfNeeded();
         return diff;
     }
 
@@ -272,6 +273,17 @@ public class SyncedDataset {
     }
 
 
+    public void updateIfNeeded() {
+        State verify = getState();
+
+        if (!verify.equals(state)) {
+            if (!isDirty()) {
+                forceLoad();
+            } else {
+                throw new RuntimeException("Dataset was modified while there were pending changes");
+            }
+        }
+    }
 
     public void ensureUpToDate() {
         Objects.requireNonNull(state);
@@ -328,6 +340,7 @@ public class SyncedDataset {
                     }
                 });
 
+                diff.materialize();
                 // Update metadata
                 updateState();
 

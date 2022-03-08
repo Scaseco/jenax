@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.apache.jena.irix.IRIxResolver;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 
@@ -11,7 +12,12 @@ public class PrologueUtils {
 
     /** Create a new prologue without base URL that retains relative IRIs and has an empty prefix mapping */
     public static Prologue newPrologueAsGiven() {
-        return new Prologue(new PrefixMappingImpl(), IRIxResolverUtils.newIRIxResolverAsGiven());
+        return newPrologueAsGiven(new PrefixMappingImpl());
+    }
+
+    /** Create a new prologue without base URL that retains relative IRIs and has the supplied prefix mapping */
+    public static Prologue newPrologueAsGiven(PrefixMapping prefixMapping) {
+        return new Prologue(prefixMapping, IRIxResolverUtils.newIRIxResolverAsGiven());
     }
 
     /** Configure the target prologue by copying the config from source and setting the baseURI */

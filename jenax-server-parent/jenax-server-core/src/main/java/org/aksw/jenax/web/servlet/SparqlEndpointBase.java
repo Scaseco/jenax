@@ -155,8 +155,8 @@ public abstract class SparqlEndpointBase {
             }
             response.resume(e);
 
-            return ;
-            // throw new RuntimeException(e);
+            throw new RuntimeException(e);
+            // return ;
         }
 
         // Wrap the query execution such that close() also closes the connection

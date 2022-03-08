@@ -472,6 +472,7 @@ public class DatasetGraphFromTxnMgr
         SyncedDataset entry;
         try {
             entry = syncCache.get(resourceKey);
+            // entry.updateIfNeeded();
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -693,6 +694,8 @@ public class DatasetGraphFromTxnMgr
             SyncedDataset synced;
             try {
                 synced = syncCache.get(key);
+                // synced.updateIfNeeded();
+
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
