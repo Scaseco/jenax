@@ -4,16 +4,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.apache.jena.atlas.data.BagFactory;
 import org.apache.jena.atlas.data.DataBag;
-import org.apache.jena.atlas.data.ThresholdPolicy;
-import org.apache.jena.atlas.data.ThresholdPolicyFactory;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.system.SerializationFactoryFinder;
-import org.apache.jena.sparql.util.Context;
 
 import com.google.common.collect.AbstractIterator;
 

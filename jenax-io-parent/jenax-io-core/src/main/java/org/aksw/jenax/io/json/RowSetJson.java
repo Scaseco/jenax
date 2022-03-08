@@ -3,13 +3,10 @@ package org.aksw.jenax.io.json;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -33,7 +30,6 @@ import org.apache.jena.sparql.system.SerializationFactoryFinder;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.AbstractIterator;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -41,6 +37,22 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
+
+/**
+ * Streaming RowSet implementation for application/sparql-results+json
+ * The {@link #getResultVars()} will return null as long as the header has not
+ * been consumed from the underlying stream.
+ *
+ * Use {@link BufferedRowSet} to modify the behavior such that {@link #getResultVars()}
+ * immediately consumes the underlying stream until the header is read,
+ * thereby buffering any encountered bindings for replay.
+ *
+ * Use {@link #createBuffered(InputStream, Context)} to create a buffered row set
+ * with appropriate configuration w.r.t. ARQ.inputGraphBNodeLabels and ThresholdPolicyFactory.
+ *
+ * @author Claus Stadler
+ *
+ */
 public class RowSetJson
     extends AbstractIterator<Binding>
     implements RowSet
@@ -270,7 +282,7 @@ public class RowSetJson
         default:
             if (onUnknownRdfTermType != null) {
                 result = onUnknownRdfTermType.apply(json);
-                Objects.requireNonNull(result, "Custom handler return null for unknown term type " + type);
+                Objects.requireNonNull(result, "Custom handler returned null for unknown rdf term type '" + type + "'");
             } else {
                 throw new IllegalStateException("Unknown rdf term type: " + type);
             }
