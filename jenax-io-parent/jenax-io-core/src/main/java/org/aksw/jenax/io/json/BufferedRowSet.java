@@ -58,18 +58,19 @@ public class BufferedRowSet
     /** Reads and buffers bindings until the delegate's header no longer returns null */
     @Override
     public List<Var> getResultVars() {
-        List<Var> result;
+        List<Var> result = getDelegate().getResultVars();
 
-        while (((result = getDelegate().getResultVars()) == null) && getDelegate().hasNext()) {
-
+        if (result == null && getDelegate().hasNext()) {
             if (buffer == null) {
                 buffer = bufferFactory.get();
             }
 
-            // Log a warning if we read a lot of data here?
+            while (((result = getDelegate().getResultVars()) == null) && getDelegate().hasNext()) {
+                Binding b = getDelegate().next();
+                buffer.add(b);
 
-            Binding b = getDelegate().next();
-            buffer.add(b);
+                // Log a warning if we read a lot of data here?
+            }
         }
 
         return result;
