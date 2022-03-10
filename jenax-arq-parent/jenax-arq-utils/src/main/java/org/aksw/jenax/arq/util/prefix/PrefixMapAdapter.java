@@ -55,7 +55,14 @@ public class PrefixMapAdapter
 
     @Override
     public String abbreviate(String uriStr) {
-        return prefixMapping.shortForm(uriStr);
+        String tmp = prefixMapping.shortForm(uriStr);
+
+        // Abbreviate should return null if there is no mapping
+        // Conversely, the default implementation of shortForm returns its
+        // argument if there is no entry - we rely on this to map the result
+        // back to null
+        String result = tmp == uriStr ? null : tmp;
+        return result;
     }
 
     @Override
