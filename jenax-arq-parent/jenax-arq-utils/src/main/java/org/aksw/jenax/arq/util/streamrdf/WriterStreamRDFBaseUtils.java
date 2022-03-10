@@ -59,5 +59,10 @@ public class WriterStreamRDFBaseUtils {
 
         return result;
     }
+
+    /** Replace the internal prefix map - enables injection of our trie-backed on */
+    public static void setPrefixMap(WriterStreamRDFBase writer, PrefixMap pm) {
+        ClassUtils.setFieldValue(WriterStreamRDFBase.class, "pMap", writer, pm);
+    }
 }
 
