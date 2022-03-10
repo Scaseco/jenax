@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.aksw.jenax.arq.analytics.ResultSetAnalytics;
+import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.arq.schema_mapping.SchemaMapperImpl;
 import org.aksw.jenax.arq.schema_mapping.TypePromoterImpl;
 import org.aksw.jenax.arq.util.var.VarUtils;
@@ -18,10 +18,27 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
+import org.apache.jena.sparql.exec.RowSet;
 import org.junit.Test;
+
+import com.google.common.collect.Streams;
 
 public class TestPrefixAggregation {
 
+    @Test
+    public void testUsedPrefixes() {
+        Map<String, String> prefixes = DefaultPrefixes.get().getNsPrefixMap();
+        Model model = RDFDataMgr.loadModel("xsd-ontology.ttl");
+
+        try (QueryExecution qe = QueryExecutionFactory.create("SELECT * { ?s ?p ?o }", model)) {
+            Map<String, String> used = Streams.stream(RowSet.adapt(qe.execSelect()))
+            .sequential()
+            .collect(BindingAnalytics.usedPrefixes(prefixes).asCollector());
+
+            System.out.println(used);
+        }
+
+    }
 
     @Test
     public void testPrefixAggregation() {
@@ -37,12 +54,12 @@ public class TestPrefixAggregation {
         }
 
         Map<Var, Set<String>> usedIriPrefixes = list.stream()
-            .collect(ResultSetAnalytics.usedPrefixes(7).asCollector());
+            .collect(BindingAnalytics.usedPrefixes(7).asCollector());
         System.out.println(usedIriPrefixes);
 
 
         Map<Var, Entry<Set<String>, Long>> usedDatatypesAndNulls = list.stream()
-                .collect(ResultSetAnalytics.usedDatatypesAndNullCounts(resultVars).asCollector());
+                .collect(BindingAnalytics.usedDatatypesAndNullCounts(resultVars).asCollector());
 
         System.out.println(usedDatatypesAndNulls);
 

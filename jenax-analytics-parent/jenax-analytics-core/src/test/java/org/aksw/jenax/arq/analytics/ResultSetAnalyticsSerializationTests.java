@@ -33,7 +33,7 @@ public class ResultSetAnalyticsSerializationTests {
      */
     @Test
     public void testSerialization1() throws IOException, ClassNotFoundException {
-        ParallelAggregator<Binding, Map<Var, Entry<Set<String>, Long>>, ?> expectedAgg = ResultSetAnalytics.aggPerVar(
+        ParallelAggregator<Binding, Map<Var, Entry<Set<String>, Long>>, ?> expectedAgg = BindingAnalytics.aggPerVar(
                 Sets.newHashSet(Vars.s, Vars.p, Vars.o), NodeAnalytics.usedDatatypesAndNullCounts());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
