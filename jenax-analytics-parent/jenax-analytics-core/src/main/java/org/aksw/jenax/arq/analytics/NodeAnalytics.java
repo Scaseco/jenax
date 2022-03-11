@@ -95,6 +95,8 @@ public class NodeAnalytics {
                         : null;
                     return e;
                 },
+                // Using Objects::nonNull in the line below raises CCE -
+                //  "TrieEntry cannot be assigned to String" - JVM bug?
                 AggBuilder.inputFilter((Entry<String, String> e) -> e != null,
                     AggBuilder.mapSupplier(() -> new PatriciaTrie<String>()))));
 
