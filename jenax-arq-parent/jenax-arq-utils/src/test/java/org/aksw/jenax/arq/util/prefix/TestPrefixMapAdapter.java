@@ -5,6 +5,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.vocabulary.DCAT;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,6 +21,7 @@ public class TestPrefixMapAdapter {
         PrefixMap pm = new PrefixMapAdapter(pmTrie);;
 
         Assert.assertEquals("rdf:type", pm.abbreviate(RDF.type.getURI()));
+        Assert.assertEquals("rdfs:subClassOf", pm.abbreviate(RDFS.subClassOf.getURI()));
         Assert.assertEquals("owl:Class", pm.abbreviate(OWL.Class.getURI()));
         Assert.assertEquals(null, pm.abbreviate(DCAT.Dataset.getURI()));
         Assert.assertEquals(null, pm.abbreviate(""));
