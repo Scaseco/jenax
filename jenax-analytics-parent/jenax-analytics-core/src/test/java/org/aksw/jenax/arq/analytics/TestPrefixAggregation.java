@@ -32,7 +32,6 @@ public class TestPrefixAggregation {
 
         try (QueryExecution qe = QueryExecutionFactory.create("SELECT * { ?s ?p ?o }", model)) {
             Map<String, String> used = Streams.stream(RowSet.adapt(qe.execSelect()))
-            .sequential()
             .collect(BindingAnalytics.usedPrefixes(prefixes).asCollector());
 
             System.out.println(used);

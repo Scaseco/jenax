@@ -86,7 +86,7 @@ public class NodeAnalytics {
         // Create an aggregator that returns the subset of the prefix map
         // that is in use w.r.t. the encountered IRIs.
         ParallelAggregator<Node, SetOverMap<String, String>, ?> tmp =
-            AggBuilder.inputFilter(n -> n != null && n.isURI(),
+            AggBuilder.inputFilter((Node n) -> n != null && n.isURI(),
                 AggBuilder.inputTransform((Node node) -> {
                     String uri = node.getURI();
                     Entry<String, String> cand = trie.select(uri);
@@ -95,7 +95,7 @@ public class NodeAnalytics {
                         : null;
                     return e;
                 },
-                AggBuilder.inputFilter(Objects::nonNull,
+                AggBuilder.inputFilter((Entry<String, String> e) -> e != null,
                     AggBuilder.mapSupplier(() -> new PatriciaTrie<String>()))));
 
         // Post process the result:
