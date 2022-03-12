@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.web.server;
+package org.aksw.jenax.web.frontend;
 
 import java.net.URISyntaxException;
 import java.net.URL;

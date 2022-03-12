@@ -475,6 +475,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-models-csvw-domain</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-entityinfo</artifactId>
 				<version>${project.version}</version>

@@ -1,10 +1,9 @@
-package org.aksw.jena_sparql_api.server.utils;
+package org.aksw.jenax.web.boot;
 
 import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.aksw.jena_sparql_api.web.server.ServerUtils;
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.aksw.jenax.arq.connection.SparqlQueryConnectionJsaBase;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
@@ -12,6 +11,7 @@ import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.web.frontend.ServerUtils;
 import org.aksw.jenax.web.servlet.RdfConnectionFactory;
 import org.apache.jena.query.Syntax;
 import org.eclipse.jetty.server.Server;

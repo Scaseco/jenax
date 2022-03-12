@@ -1,9 +1,9 @@
-package org.aksw.jena_sparql_api.server.utils;
+package org.aksw.jenax.web.boot;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.aksw.jena_sparql_api.web.server.WebAppInitializerSparqlServiceUtils;
+import org.aksw.jenax.web.frontend.WebAppInitializerSparqlServiceUtils;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.WebApplicationContext;
 
