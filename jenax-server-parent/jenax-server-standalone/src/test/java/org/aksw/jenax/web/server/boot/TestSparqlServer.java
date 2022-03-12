@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.web.server.utils;
+package org.aksw.jenax.web.server.boot;
 
 import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.web.boot.FactoryBeanSparqlServer;
