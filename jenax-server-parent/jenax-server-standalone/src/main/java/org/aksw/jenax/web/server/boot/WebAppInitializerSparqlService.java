@@ -1,4 +1,4 @@
-package org.aksw.jenax.web.boot;
+package org.aksw.jenax.web.server.boot;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

@@ -1,7 +1,7 @@
 package org.aksw.jenax.web.server.boot;
 
 import org.aksw.jenax.connection.datasource.RdfDataSource;
-import org.aksw.jenax.web.boot.FactoryBeanSparqlServer;
+import org.aksw.jenax.web.server.boot.FactoryBeanSparqlServer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
