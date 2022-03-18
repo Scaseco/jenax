@@ -4,11 +4,11 @@ import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.aksw.commons.collections.diff.Diff;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -17,7 +17,18 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 
+import com.google.common.collect.Streams;
+
 public class DatasetGraphUtils {
+
+    public static Stream<Node> streamNodes(DatasetGraph dg) {
+        return Streams.stream(dg.find()).flatMap(QuadUtils::streamNodes);
+    }
+
+    public static Iterator<Node> iterateNodes(DatasetGraph dg) {
+        return streamNodes(dg).iterator();
+    }
+
     public static void addAll(DatasetGraph target, Node g, Graph source) {
         Iterator<Triple> it = source.find();
         while(it.hasNext()) {

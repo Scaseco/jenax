@@ -1,12 +1,24 @@
 package org.aksw.jenax.arq.util.triple;
 
+import java.util.Iterator;
+import java.util.stream.Stream;
+
 import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 
 /**
  * @author Claus Stadler
  */
 public class ModelUtils {
+
+    public static Stream<Node> streamNodes(Model model) {
+        return GraphUtils.streamNodes(model.getGraph());
+    }
+
+    public static Iterator<Node> iterateNodes(Model model) {
+        return GraphUtils.iterateNodes(model.getGraph());
+    }
 
     /**
      * Remove all unused prefixes form the given model's prefix mapping.
