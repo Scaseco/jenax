@@ -45,7 +45,7 @@ public class NodeRanges
     extends ValueSpaceBase<ComparableNodeValue, Object>
     implements Contradictable, Cloneable
 {
-    // Additional (pseudo) value space classifications for unform handing of IRIs and bnodes
+    // Additional (pseudo) value space classifications for uniform handing of IRIs and bnodes
     public static final String VSC_IRI = "xVSPACE_IRI";
     public static final String VSC_BNODE = "xVSPACE_BNODE";
     public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
