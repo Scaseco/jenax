@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.commons.collection.observable.ObservableValue;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -31,6 +32,10 @@ public class RdfFieldFromExistingTriple
         this.graph = graph;
         this.existingTriple = existingTriple;
         this.componentIdx = componentIdx;
+    }
+
+    public Node getOriginalValue() {
+        return TripleUtils.getNode(existingTriple, componentIdx);
     }
 
 
@@ -81,7 +86,7 @@ public class RdfFieldFromExistingTriple
     }
 
     @Override
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         return graph.getTripleReplacements().addPropertyChangeListener(ev -> {
             PropertyChangeEvent adapted = adaptEvent(ev);
             listener.propertyChange(adapted);

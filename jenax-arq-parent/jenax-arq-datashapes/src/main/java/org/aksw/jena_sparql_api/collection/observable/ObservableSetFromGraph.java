@@ -15,6 +15,7 @@ import org.aksw.commons.collection.observable.ObservableMap;
 import org.aksw.commons.collection.observable.ObservableMapImpl;
 import org.aksw.commons.collection.observable.ObservableSet;
 import org.aksw.commons.collection.observable.ObservableSets;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
@@ -108,7 +109,7 @@ public class ObservableSetFromGraph
      * @return A Runnable that de-registers the listener upon calling .run()
      */
     @Override
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         return getGraph().addPropertyChangeListener(ev -> {
             PropertyChangeEvent newEvent = convertEvent(ev);
             listener.propertyChange(newEvent);

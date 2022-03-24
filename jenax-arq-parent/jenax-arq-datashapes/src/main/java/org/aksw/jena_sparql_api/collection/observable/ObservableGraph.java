@@ -8,6 +8,7 @@ import org.aksw.commons.collection.observable.ObservableCollection;
 import org.aksw.commons.collection.observable.ObservableSet;
 import org.aksw.commons.collection.observable.ObservableValue;
 import org.aksw.commons.collection.observable.ObservableValueFromObservableCollection;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -17,7 +18,7 @@ public interface ObservableGraph
     extends Graph
 {
     Runnable addVetoableChangeListener(VetoableChangeListener listener);
-    Runnable addPropertyChangeListener(PropertyChangeListener listener);
+    Registration addPropertyChangeListener(PropertyChangeListener listener);
 
     boolean delta(Collection<? extends Triple> rawAdditions, Collection<?> rawDeletions);
 

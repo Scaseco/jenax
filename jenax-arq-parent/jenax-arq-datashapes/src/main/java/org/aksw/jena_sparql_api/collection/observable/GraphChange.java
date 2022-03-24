@@ -608,29 +608,29 @@ public class GraphChange
 
         return result;
     }
-    
+
     /**
      * A graph view of the final state:
      * - Nodes that were renamed are no longer visible.
      *
      * @return
      */
-    public static Graph createEffectiveGraphView(Graph baseGraph, GraphChange graphChange) {    	
-    	
+    public static Graph createEffectiveGraphView(Graph baseGraph, GraphChange graphChange) {
+
         return new GraphBase() {
             @Override
             protected ExtendedIterator<Triple> graphBaseFind(Triple triplePattern) {
 
 
-            	// TODO Delta should allow for setting the graphs directly without having to copy them
-            	Delta delta = new Delta(baseGraph);
-            	GraphUtil.addInto(delta.getAdditions(), graphChange.getAdditionGraph());
-            	GraphUtil.addInto(delta.getDeletions(), graphChange.getDeletionGraph());
+                // TODO Delta should allow for setting the graphs directly without having to copy them
+                Delta delta = new Delta(baseGraph);
+                GraphUtil.addInto(delta.getAdditions(), graphChange.getAdditionGraph());
+                GraphUtil.addInto(delta.getDeletions(), graphChange.getDeletionGraph());
 
-            	
-            	ObservableMap<Node, Node> renamedNodes = graphChange.getRenamedNodes();
-            	ObservableMap<Triple, Triple> tripleReplacements = graphChange.getTripleReplacements();
-            	
+
+                ObservableMap<Node, Node> renamedNodes = graphChange.getRenamedNodes();
+                ObservableMap<Triple, Triple> tripleReplacements = graphChange.getTripleReplacements();
+
                 // If there is a request for x but x was renamed to y
                 // then rephrase the express in terms of y.
 
