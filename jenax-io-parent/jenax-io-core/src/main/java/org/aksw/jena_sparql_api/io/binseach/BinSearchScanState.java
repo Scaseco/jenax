@@ -11,8 +11,8 @@ package org.aksw.jena_sparql_api.io.binseach;
  *
  */
 public class BinSearchScanState {
-    long size;          // Absolute end of the data region on which the match was run
-    long matchDelimPos; // The match position found by binary search
     long firstDelimPos; // The match position found by scanning backwards with Pattern.match
+    long matchDelimPos; // The match position found by binary search
     byte[] prefixBytes; // Generalize using lambda with a compatible signature to Pattern.match
+    long size;          // Absolute end of the data region on which the match was run
 }

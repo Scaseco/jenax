@@ -1,5 +1,9 @@
 package org.aksw.jenax.arq.util.expr;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.aksw.jenax.arq.util.execution.ExecutionContextUtils;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.graph.Node;
@@ -17,43 +21,57 @@ import org.apache.jena.sparql.function.FunctionFactory;
 import org.apache.jena.sparql.function.FunctionRegistry;
 
 public class FunctionUtils {
-	/** Invoke a function in the default registry by URI */
-	public static Node invokeWithNodes(String iri, Node ... nodes) {
-		Node result = invokeWithNodes(FunctionRegistry.get(), iri, nodes);
-		return result;
-	}
+    /** Invoke a function in the default registry by URI */
+    public static Node invokeWithNodes(String iri, Node ... nodes) {
+        Node result = invokeWithNodes(FunctionRegistry.get(), iri, nodes);
+        return result;
+    }
 
-	/** Invoke a function in the default registry by URI */
-	public static Node invokeWithNodes(FunctionRegistry registry, String iri, Node ... nodes) {
-		FunctionFactory ff = registry.get(iri);
-		Function fn = ff.create(iri);
-		Node result = invokeWithNodes(fn, iri, nodes);
-		return result;
-	}
-	/** Invoke a function with nodes and get the result as nodes. Passes null for the iri. */
-	public static Node invokeWithNodes(Function fn, Node ... nodes) {		
-		return invokeWithNodes(fn, null, nodes);
-	}
-	
-	/** Invoke a function with nodes and get the result as nodes */
-	public static Node invokeWithNodes(Function fn, String iri, Node ... nodes) {		
-		BindingBuilder bb = BindingFactory.builder();
-		ExprList args = new ExprList();
-		for (int i = 0; i < nodes.length; ++i) {
-			Var v = Var.alloc("arg" + i);
-			args.add(new ExprVar(v));
-			bb.add(Var.alloc("arg" + i), nodes[i]);
-		}
-		Binding b = bb.build();
-		FunctionEnv env = ExecutionContextUtils.createFunctionEnv();
+    /** Invoke a function in the default registry by URI */
+    public static Node invokeWithNodes(FunctionRegistry registry, String iri, Node ... nodes) {
+        FunctionFactory ff = registry.get(iri);
+        Function fn = ff.create(iri);
+        Node result = invokeWithNodes(fn, iri, nodes);
+        return result;
+    }
+    /** Invoke a function with nodes and get the result as nodes. Passes null for the iri. */
+    public static Node invokeWithNodes(Function fn, Node ... nodes) {
+        return invokeWithNodes(fn, null, nodes);
+    }
 
-		NodeValue nv = null;
-		try {
-			nv = fn.exec(b, args, iri, env);
-		} catch (ExprEvalException | DatatypeFormatException e) {
-			/** nothing to do */
-		}
-		Node result = nv == null ? null : nv.asNode();
-		return result;
-	}
+    public static Node invokeWithNodes(Function fn, Iterable<Node> nodes) {
+        return invokeWithNodes(fn, null, nodes);
+    }
+
+    public static Node invokeWithNodes(Function fn, String iri, Node ... nodes) {
+        return invokeWithNodes(fn, iri, Arrays.asList(nodes));
+    }
+
+    /** Invoke a function with nodes and get the result as nodes */
+    public static Node invokeWithNodes(Function fn, String iri, Iterable<Node> nodes) {
+        BindingBuilder bb = BindingFactory.builder();
+        ExprList args = new ExprList();
+
+        int i = 0;
+        Iterator<Node> it = nodes.iterator();
+        while (it.hasNext()) {
+            Node n = it.next();
+            Var v = Var.alloc("arg" + i);
+            args.add(new ExprVar(v));
+            bb.add(v, n);
+            ++i;
+        }
+
+        Binding b = bb.build();
+        FunctionEnv env = ExecutionContextUtils.createFunctionEnv();
+
+        NodeValue nv = null;
+        try {
+            nv = fn.exec(b, args, iri, env);
+        } catch (ExprEvalException | DatatypeFormatException e) {
+            /** nothing to do */
+        }
+        Node result = nv == null ? null : nv.asNode();
+        return result;
+    }
 }

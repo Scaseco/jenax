@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-io-parent</artifactId>
-		<version>4.4.0-1</version>
+		<version>4.4.0-2</version>
 	</parent>
 
 	<dependencies>
@@ -41,6 +41,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-io-kryo</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
 		</dependency>
@@ -49,7 +54,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>

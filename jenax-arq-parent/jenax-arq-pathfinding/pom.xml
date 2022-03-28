@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>4.4.0-1</version>
+		<version>4.4.0-2</version>
 	</parent>
 
 	<dependencies>
@@ -24,6 +24,13 @@
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>jena-jgrapht-bindings</artifactId>
 		</dependency>
+
+
+		<!-- Override guava version drawn in by jgrapht-bindings -->
+                <dependency>
+                	<groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                </dependency>
 
 		<!-- Override the arq version from the jgrapht-bindings -->
 		<dependency>

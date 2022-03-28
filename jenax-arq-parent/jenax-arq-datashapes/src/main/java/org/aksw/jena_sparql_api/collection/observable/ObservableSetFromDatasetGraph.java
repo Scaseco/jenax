@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import org.aksw.commons.collection.observable.CollectionChangedEventImpl;
 import org.aksw.commons.collection.observable.ObservableSet;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jenax.arq.util.quad.SetFromDatasetGraph;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.apache.jena.graph.Graph;
@@ -71,7 +72,7 @@ public class ObservableSetFromDatasetGraph
      * @return A Runnable that de-registers the listener upon calling .run()
      */
     @Override
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         return getDatasetGraph().addPropertyChangeListener(ev -> {
             PropertyChangeEvent newEvent = convertEvent(ev);
             listener.propertyChange(newEvent);

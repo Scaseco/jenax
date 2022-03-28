@@ -136,7 +136,9 @@ public class PageNavigator
     }
 
     /**
-     * Limit the
+     * Restrict the maximum number of items that can be read to length  items
+     * from the current position.
+     *
      * @param length
      * @return
      */
@@ -156,7 +158,7 @@ public class PageNavigator
     }
 
     /**
-     * Limit the maxmimum position by length bytes from the current position.
+     * Limit the maximum position by length bytes from the current position.
      *
      * @param length
      * @return

@@ -27,12 +27,25 @@ public class WriterStreamRDFBaseUtils {
 //            modifiersField.setInt(nodeToLabelField, nodeToLabelField.getModifiers() & ~Modifier.FINAL);
 //            nodeToLabelField.set(writer, nodeToLabel);
 
+//            Method setFormatterMethod = WriterStreamRDFBase.class.getDeclaredMethod("setFormatter");
+//            setFormatterMethod.setAccessible(true);
+//            setFormatterMethod.invoke(writer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    // It is important to call this method after changing baseIri, formatter and/or prefix map on the writer
+    public static void updateFormatter(WriterStreamRDFBase writer) {
+        try {
             Method setFormatterMethod = WriterStreamRDFBase.class.getDeclaredMethod("setFormatter");
             setFormatterMethod.setAccessible(true);
             setFormatterMethod.invoke(writer);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public static void setNodeFormatter(WriterStreamRDFBase writer, NodeFormatterTTL fmt) {
@@ -58,6 +71,11 @@ public class WriterStreamRDFBaseUtils {
 //            pMapField.setAccessible(false);
 
         return result;
+    }
+
+    /** Replace the internal prefix map - enables injection of our trie-backed on */
+    public static void setPrefixMap(WriterStreamRDFBase writer, PrefixMap pm) {
+        ClassUtils.setFieldValue(WriterStreamRDFBase.class, "pMap", writer, pm);
     }
 }
 

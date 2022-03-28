@@ -1,8 +1,10 @@
 package org.aksw.jena_sparql_api.sparql.ext.osrm;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.time.Duration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
+
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.F_ParsePolyline;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
 import org.aksw.jena_sparql_api.sparql.ext.url.E_UrlText;
@@ -26,10 +28,9 @@ import org.locationtech.jts.geom.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Function;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  * {

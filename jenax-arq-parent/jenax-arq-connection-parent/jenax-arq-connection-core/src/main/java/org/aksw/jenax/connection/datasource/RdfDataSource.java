@@ -18,7 +18,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
  *
  */
 public interface RdfDataSource
-    extends AutoCloseable
+    extends AutoCloseable // The close method will be moved to RdfDataEngine
 {
     RDFConnection getConnection();
 

@@ -9,9 +9,8 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collection.observable.CollectionChangedEvent;
 import org.aksw.commons.collection.observable.CollectionChangedEventImpl;
-import org.aksw.commons.collection.observable.ObservableCollectionOps;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.commons.collection.observable.StreamOps;
-import org.aksw.commons.collections.ConvertingCollection;
 import org.aksw.jena_sparql_api.relation.TripleConstraint;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
@@ -105,7 +104,7 @@ public class ObservableSubGraph
 
 
     @Override
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         return get().addPropertyChangeListener(ev -> {
             CollectionChangedEvent<Triple> newEv = filter(this, (CollectionChangedEvent<Triple>)ev, predicate);
 

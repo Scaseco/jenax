@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.jenax.arq.analytics.ResultSetAnalytics;
+import org.aksw.jenax.arq.analytics.BindingAnalytics;
 import org.aksw.jenax.arq.decisiontree.api.DecisionTreeSparqlExpr;
 import org.aksw.jenax.arq.decisiontree.api.E_SerializableIdentity;
 import org.aksw.jenax.arq.util.node.NodeUtils;
@@ -48,7 +48,7 @@ import com.google.common.collect.SetMultimap;
  * as well as from schemas of virtual result sets such as obtained by rewriting a SPARQL query
  * w.r.t. a set of R2RML mappings.
  *
- * Example for using this class in conjunction with {@link ResultSetAnalytics} on a concrete SPARQL result set:
+ * Example for using this class in conjunction with {@link BindingAnalytics} on a concrete SPARQL result set:
  *
  * <pre>
  * {@code

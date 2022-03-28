@@ -31,6 +31,7 @@ public class JenaExtensionJson {
         TypeMapper.getInstance().registerDatatype(new RDFDatatypeJson());
 
         PropertyFunctionRegistry.get().put(ns + "unnest", new PropertyFunctionFactoryJsonUnnest());
+        PropertyFunctionRegistry.get().put(ns + "explode", new PropertyFunctionFactoryJsonExplode());
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
         binder.registerAll(SparqlFnLibJson.class);

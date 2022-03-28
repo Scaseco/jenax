@@ -31,6 +31,10 @@ public class GraphUtils {
             .flatMap(TripleUtils::streamNodes);
     }
 
+    public static Iterator<Node> iterateNodes(Graph graph) {
+        return streamNodes(graph).iterator();
+    }
+
     /**
      * Remove all unused prefixes form the given graph's prefix mapping.
      * Scans all triples in the graph.

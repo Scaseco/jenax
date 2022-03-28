@@ -114,6 +114,7 @@ public class StreamRDFWriterEx {
 
             WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
             WriterStreamRDFBaseUtils.setNodeToLabel(tmp, effectiveNodeToLabel);
+            WriterStreamRDFBaseUtils.updateFormatter(tmp);
 
             if (fixedPrefixes != null) {
                 PrefixMap pm = WriterStreamRDFBaseUtils.getPrefixMap(tmp);

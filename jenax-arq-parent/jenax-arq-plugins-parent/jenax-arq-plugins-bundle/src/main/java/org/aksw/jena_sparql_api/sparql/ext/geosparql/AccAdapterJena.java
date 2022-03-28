@@ -5,24 +5,25 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.aggregate.Accumulator;
 import org.apache.jena.sparql.function.FunctionEnv;
 
+/** Bridge to enable use of Accumulator of aksw-commons with jena */
 public class AccAdapterJena
-	implements Accumulator {
+    implements Accumulator {
 
-	protected org.aksw.commons.collector.domain.Accumulator<Binding, NodeValue> accDelegate;
-	
-	public AccAdapterJena(org.aksw.commons.collector.domain.Accumulator<Binding, NodeValue> accDelegate) {
-		super();
-		this.accDelegate = accDelegate;
-	}
+    protected org.aksw.commons.collector.domain.Accumulator<Binding, NodeValue> accDelegate;
 
-	@Override
-	public void accumulate(Binding binding, FunctionEnv functionEnv) {
-		accDelegate.accumulate(binding);
-	}
+    public AccAdapterJena(org.aksw.commons.collector.domain.Accumulator<Binding, NodeValue> accDelegate) {
+        super();
+        this.accDelegate = accDelegate;
+    }
 
-	@Override
-	public NodeValue getValue() {
-		NodeValue result = accDelegate.getValue();
-		return result;
-	}
+    @Override
+    public void accumulate(Binding binding, FunctionEnv functionEnv) {
+        accDelegate.accumulate(binding);
+    }
+
+    @Override
+    public NodeValue getValue() {
+        NodeValue result = accDelegate.getValue();
+        return result;
+    }
 }
