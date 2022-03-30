@@ -8,7 +8,7 @@
 	<artifactId>jenax-parent</artifactId>
 
 	<packaging>pom</packaging>
-	<version>4.4.0-3-SNAPSHOT</version>
+	<version>4.5.0-1-SNAPSHOT</version>
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
 	<url>https://github.com/Scaseco/jenax</url>
@@ -59,7 +59,7 @@
 	</developers>
 
 	<properties>
-		<jena.version>4.4.0</jena.version>
+		<jena.version>4.5.0-SNAPSHOT</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
