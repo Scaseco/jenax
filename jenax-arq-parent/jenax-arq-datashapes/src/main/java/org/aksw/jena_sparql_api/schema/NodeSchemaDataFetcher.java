@@ -16,10 +16,12 @@ import org.aksw.jena_sparql_api.entity.graph.metamodel.PredicateStats;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceMetamodel;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
 import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -428,8 +430,9 @@ public class NodeSchemaDataFetcher {
 
 
         RDFConnection conn = RDFConnectionFactory.connect(ds);
+        QueryExecutionFactory qef = new QueryExecutionFactoryDataset(ds);
 
-        LookupService<Node, ResourceMetamodel> metaDataService = ResourceExplorer.createMetamodelLookup(conn);
+        LookupService<Node, ResourceMetamodel> metaDataService = ResourceExplorer.createMetamodelLookup(qef);
 
         NodeSchemaDataFetcher dataFetcher = new NodeSchemaDataFetcher();
         // Map<Node, ResourceState> resourceCache = new HashMap<>();

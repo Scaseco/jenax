@@ -2,7 +2,6 @@ package org.aksw.jena_sparql_api.entity.graph.metamodel;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,8 @@ import org.aksw.jena_sparql_api.schema.PropertySchema;
 import org.aksw.jena_sparql_api.schema.PropertySchemaFromPropertyShape;
 import org.aksw.jena_sparql_api.schema.ResourceExplorer;
 import org.aksw.jena_sparql_api.schema.SHAnnotatedClass;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -195,7 +196,8 @@ public class MainPlaygroundResourceMetamodel {
 //        Set<ResourceMetamodel> tmp = m.listSubjectsWithProperty(p).mapWith(r -> r.as(ResourceMetamodel.class)).toSet();
 //
 
-        LookupService<Node, ResourceMetamodel> lookupService = ResourceExplorer.createMetamodelLookup(conn);
+        QueryExecutionFactory qef = new QueryExecutionFactorySparqlQueryConnection(conn);
+        LookupService<Node, ResourceMetamodel> lookupService = ResourceExplorer.createMetamodelLookup(qef);
         List<ResourceMetamodel> tmp = lookupService.fetchList(nodes);
 
 
@@ -311,7 +313,7 @@ public class MainPlaygroundResourceMetamodel {
         Multimap<NodeSchema, Node> schemaToNodes = HashMultimap.create();
         Multimaps.invertFrom(roots, schemaToNodes);
 
-        analyzeResources(dsm, schemaToNodes, shapeModel, conn);
+        analyzeResources(dsm, schemaToNodes, shapeModel, new QueryExecutionFactorySparqlQueryConnection(conn));
 
         RDFDataMgr.write(System.out, dsm.getModel(), RDFFormat.TURTLE_PRETTY);
     }
@@ -320,7 +322,7 @@ public class MainPlaygroundResourceMetamodel {
             DatasetMetamodel dsm,
             Multimap<NodeSchema, Node> schemaToNodes,
             Model shapeModel,
-            RDFConnection conn) {
+            QueryExecutionFactory qef) {
 
 
         // Try to fetch for every resource all triples w.r.t. to the schema
@@ -331,7 +333,7 @@ public class MainPlaygroundResourceMetamodel {
         NodeSchemaDataFetcher dataFetcher = new NodeSchemaDataFetcher();
 
         LookupService<Node, ResourceMetamodel> metaModelService =
-                ResourceExplorer.createMetamodelLookup(conn).cache();
+                ResourceExplorer.createMetamodelLookup(qef).cache();
 
 
         //Graph dataGraph = GraphFactory.createDefaultGraph();

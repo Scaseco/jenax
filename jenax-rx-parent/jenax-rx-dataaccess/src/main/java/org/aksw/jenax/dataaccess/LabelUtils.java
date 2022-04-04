@@ -18,6 +18,7 @@ import org.aksw.jenax.arq.aggregation.AccBestLiteral;
 import org.aksw.jenax.arq.aggregation.BestLiteralConfig;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
@@ -26,7 +27,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapAdapter;
@@ -109,19 +109,20 @@ public class LabelUtils {
      * @return
      */
     public static LookupService<Node, String> getLabelLookupService(
-            SparqlQueryConnection conn,
+            QueryExecutionFactoryQuery conn,
             Property labelProperty,
             PrefixMapping prefixMapping) {
 
         BinaryRelation labelRelation = BinaryRelationImpl.create(labelProperty);
         return LookupServiceUtils.createLookupService(conn, labelRelation)
               .partition(10)
+              .defaultForAbsentKeys(k -> null)
               .cache()
               .mapValues(LabelUtils::getLabelFromLookup);
     }
 
     public static String getLabelFromLookup(Node node, List<Node> results) {
-        Node labelNode = !results.isEmpty()
+        Node labelNode = results != null && !results.isEmpty()
                 ? results.get(0)
                 : node;
 
