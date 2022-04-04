@@ -1,7 +1,6 @@
 package org.aksw.jenax.arq.util.triple;
 
 import org.aksw.commons.collections.diff.Diff;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Statement;

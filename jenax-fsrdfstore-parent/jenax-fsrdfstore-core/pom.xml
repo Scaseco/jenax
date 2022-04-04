@@ -16,8 +16,8 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>jena-jgrapht-bindings</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-jgrapht-bindings</artifactId>
 		</dependency>
 
 		<dependency>

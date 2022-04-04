@@ -26,6 +26,8 @@
 		<module>jenax-facete-parent</module>
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
+
+		<module>jenax-jgrapht-parent</module>
 		<!-- <module>jenax-cli-core</module> -->
 	</modules>
 
@@ -68,7 +70,7 @@
 
 		<kryo.version>4.0.2</kryo.version>
 
-		<!-- <jgrapht.version>1.1.0</jgrapht.version> -->
+		<jgrapht.version>1.5.1</jgrapht.version>
 
 		<!-- 2.18 could be tried out next -->
 		<!-- <jersey.version>2.26-b03</jersey.version> -->
@@ -400,6 +402,12 @@
 				<artifactId>asm-analysis</artifactId>
 				<version>${asm.version}</version>
 			</dependency>
+
+                        <dependency>
+                                <groupId>org.jgrapht</groupId>
+                                <artifactId>jgrapht-core</artifactId>
+                                <version>${jgrapht.version}</version>
+                        </dependency>
 
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
@@ -956,9 +964,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.commons</groupId>
-				<artifactId>jena-jgrapht-bindings</artifactId>
-				<version>1.5.1-1</version>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-jgrapht-bindings</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
