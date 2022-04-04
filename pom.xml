@@ -15,6 +15,7 @@
 	<modules>
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
+		<module>jenax-jgrapht-parent</module>
 		<module>jenax-arq-parent</module>
 		<module>jenax-rx-parent</module>
 		<module>jenax-analytics-parent</module>
@@ -27,7 +28,6 @@
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
 
-		<module>jenax-jgrapht-parent</module>
 		<!-- <module>jenax-cli-core</module> -->
 	</modules>
 

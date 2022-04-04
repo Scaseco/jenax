@@ -3,8 +3,8 @@ package org.aksw.commons.graph.index.jena;
 import java.util.function.Function;
 
 import org.aksw.commons.graph.index.core.SetOps;
-import org.aksw.commons.jena.graph.GraphIsoMapImpl;
-import org.aksw.commons.jena.graph.GraphVarImpl;
+import org.aksw.jenax.arq.util.triple.GraphIsoMapImpl;
+import org.aksw.jenax.arq.util.triple.GraphVarImpl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
