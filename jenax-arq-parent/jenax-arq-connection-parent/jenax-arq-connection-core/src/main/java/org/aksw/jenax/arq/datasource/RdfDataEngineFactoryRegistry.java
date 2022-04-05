@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A global registry for instances of
- * {@link RdfDataSourceFactory} and {@link RdfDataSourceDecorator}.
+ * {@link RdfDataEngineFactory} and {@link RdfDataSourceDecorator}.
  *
  * This class provides the infrastructure for third party plugins.
  *
@@ -13,35 +13,35 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author raven
  *
  */
-public class RdfDataSourceFactoryRegistry {
-    private static RdfDataSourceFactoryRegistry INSTANCE;
+public class RdfDataEngineFactoryRegistry {
+    private static RdfDataEngineFactoryRegistry INSTANCE;
 
-    public static RdfDataSourceFactoryRegistry get() {
+    public static RdfDataEngineFactoryRegistry get() {
         if (INSTANCE == null) {
-            synchronized (RdfDataSourceFactoryRegistry.class) {
+            synchronized (RdfDataEngineFactoryRegistry.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new RdfDataSourceFactoryRegistry();
+                    INSTANCE = new RdfDataEngineFactoryRegistry();
                 }
             }
         }
         return INSTANCE;
     }
 
-    protected Map<String, RdfDataSourceFactory> factoryRegistry = new ConcurrentHashMap<>();
+    protected Map<String, RdfDataEngineFactory> factoryRegistry = new ConcurrentHashMap<>();
     protected Map<String, RdfDataSourceDecorator> decoratorRegistry = new ConcurrentHashMap<>();
 
 
-    public RdfDataSourceFactoryRegistry putFactory(String name, RdfDataSourceFactory factory) {
+    public RdfDataEngineFactoryRegistry putFactory(String name, RdfDataEngineFactory factory) {
         factoryRegistry.put(name, factory);
         return this;
     }
 
-    public RdfDataSourceFactory getFactory(String name) {
+    public RdfDataEngineFactory getFactory(String name) {
         return factoryRegistry.get(name);
     }
 
 
-    public RdfDataSourceFactoryRegistry putDecorator(String name, RdfDataSourceDecorator factory) {
+    public RdfDataEngineFactoryRegistry putDecorator(String name, RdfDataSourceDecorator factory) {
         decoratorRegistry.put(name, factory);
         return this;
     }

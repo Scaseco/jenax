@@ -118,6 +118,13 @@ public class GraphEntityUtils {
         return r;
     }
 
+    public static DatasetOneNg newModelByTimestamp(Dataset dataset) {
+        String graphName = createUtcGraphTimestamp();
+        Node node = NodeFactory.createURI(graphName.toString());
+        DatasetOneNg r = DatasetOneNgImpl.create(dataset, node);
+        return r;
+    }
+
     public static DatasetOneNg getOrCreateModel(Dataset dataset, List<Node> nodes, Supplier<String> graphNameFactory) {
 
         // Note that the code below could be changed such that the txn gets promoted from read to write as necessary

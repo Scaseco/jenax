@@ -20,15 +20,15 @@ public class DatasetOneNgImpl
     public static DatasetOneNg wrap(DatasetGraphOneNg dsg) {
         return new DatasetOneNgImpl(dsg);
     }
-    
+
 
     public static DatasetOneNg create(Dataset dataset, String graphName) {
-    	return create(dataset, NodeFactory.createURI(graphName));
+        return create(dataset, NodeFactory.createURI(graphName));
     }
 
     public static DatasetOneNg create(Dataset dataset, Node graphName) {
-    	DatasetGraphOneNg ng = DatasetGraphOneNgImpl.create(dataset.asDatasetGraph(), graphName);
-    	return wrap(ng);
+        DatasetGraphOneNg ng = DatasetGraphOneNgImpl.create(dataset.asDatasetGraph(), graphName);
+        return wrap(ng);
     }
 
 

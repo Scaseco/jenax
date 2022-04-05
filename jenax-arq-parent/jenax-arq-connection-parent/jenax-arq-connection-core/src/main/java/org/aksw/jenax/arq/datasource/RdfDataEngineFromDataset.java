@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.datasource;
 import java.io.Closeable;
 import java.util.function.Function;
 
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.connection.dataengine.RdfDataEngine;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 
@@ -14,14 +14,14 @@ import org.apache.jena.rdfconnection.RDFConnection;
  * @author raven
  *
  */
-public class RdfDataSourceFromDataset
-    implements RdfDataSource, HasDataset
+public class RdfDataEngineFromDataset
+    implements RdfDataEngine, HasDataset
 {
     protected Dataset dataset;
     protected Function<? super Dataset, ? extends RDFConnection> connSupplier;
     protected Closeable closeAction;
 
-    public RdfDataSourceFromDataset(
+    public RdfDataEngineFromDataset(
             Dataset dataset,
             Function<? super Dataset, ? extends RDFConnection> connSupplier,
             Closeable closeAction) {
@@ -48,11 +48,11 @@ public class RdfDataSourceFromDataset
         }
     }
 
-    public static RdfDataSourceFromDataset create(Dataset dataset, Function<? super Dataset, ? extends RDFConnection> connSupplier, Closeable closeAction) {
-        return new RdfDataSourceFromDataset(dataset, connSupplier, closeAction);
+    public static RdfDataEngineFromDataset create(Dataset dataset, Function<? super Dataset, ? extends RDFConnection> connSupplier, Closeable closeAction) {
+        return new RdfDataEngineFromDataset(dataset, connSupplier, closeAction);
     }
 
-    public static RdfDataSourceFromDataset create(Dataset dataset, boolean closeDataset) {
-        return new RdfDataSourceFromDataset(dataset, RDFConnection::connect, closeDataset ? dataset::close : null);
+    public static RdfDataEngineFromDataset create(Dataset dataset, boolean closeDataset) {
+        return new RdfDataEngineFromDataset(dataset, RDFConnection::connect, closeDataset ? dataset::close : null);
     }
 }
