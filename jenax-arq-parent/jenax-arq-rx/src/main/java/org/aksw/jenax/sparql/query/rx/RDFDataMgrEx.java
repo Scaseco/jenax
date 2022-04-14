@@ -82,21 +82,21 @@ public class RDFDataMgrEx {
             // RDFLanguages.TRIX
     ));
 
-    
+
     public static String toString(Model model, RDFFormat rdfFormat) {
-    	ByteArrayOutputStream out = new ByteArrayOutputStream();
-    	RDFDataMgr.write(out, model, rdfFormat);
-    	return out.toString(StandardCharsets.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RDFDataMgr.write(out, model, rdfFormat);
+        return out.toString(StandardCharsets.UTF_8);
     }
 
     public static String toString(Dataset dataset, RDFFormat rdfFormat) {
-    	ByteArrayOutputStream out = new ByteArrayOutputStream();
-    	RDFDataMgr.write(out, dataset, rdfFormat);
-    	return out.toString(StandardCharsets.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RDFDataMgr.write(out, dataset, rdfFormat);
+        return out.toString(StandardCharsets.UTF_8);
     }
 
-    
-    
+
+
     public static boolean isStdIn(String filenameOrIri) {
         return "-".equals(filenameOrIri);
     }
@@ -381,40 +381,40 @@ public class RDFDataMgrEx {
 
         return result;
     }
-    
+
     /** open via nio */
     public static TypedInputStream open(Path path, Iterable<Lang> probeLangs) {
-    	InputStream in;
-		try {
-			in = Files.newInputStream(path);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    	
-    	return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs);
+        InputStream in;
+        try {
+            in = Files.newInputStream(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs);
     }
-    
-	public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
-		// TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
-		// rather than the actual content - so we may be fooled here
-		ContentType mediaType = result.getMediaType();
-		if (mediaType != null) {
-		    // Check if the detected content type matches the ones we are probing for
-		    // If not then unset the content type and probe the content again
-		    String mediaTypeStr = mediaType.toHeaderString();
-		    boolean mediaTypeInProbeLangs = Streams.stream(probeLangs)
-		            .anyMatch(lang -> RDFLanguagesEx.getAllContentTypes(lang).contains(mediaTypeStr));
 
-		    if (!mediaTypeInProbeLangs) {
-		        mediaType = null;
-		    }
-		}
+    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
+        // TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
+        // rather than the actual content - so we may be fooled here
+        ContentType mediaType = result.getMediaType();
+        if (mediaType != null) {
+            // Check if the detected content type matches the ones we are probing for
+            // If not then unset the content type and probe the content again
+            String mediaTypeStr = mediaType.toHeaderString();
+            boolean mediaTypeInProbeLangs = Streams.stream(probeLangs)
+                    .anyMatch(lang -> RDFLanguagesEx.getAllContentTypes(lang).contains(mediaTypeStr));
 
-		if(mediaType == null) {
-		    result = probeLang(forceBuffered(result.getInputStream()), probeLangs);
-		}
-		return result;
-	}
+            if (!mediaTypeInProbeLangs) {
+                mediaType = null;
+            }
+        }
+
+        if(mediaType == null) {
+            result = probeLang(forceBuffered(result.getInputStream()), probeLangs);
+        }
+        return result;
+    }
 
 
     public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
@@ -534,42 +534,50 @@ public class RDFDataMgrEx {
     }
 
 
-    public static void readAsGiven(Graph graph, String uri) {
+    public static Graph readAsGiven(Graph graph, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(graph);
+        return graph;
     }
 
-    public static void readAsGiven(Model model, String uri) {
+    public static Model readAsGiven(Model model, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(model);
+        return model;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, String uri) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, String uri) {
+    public static Dataset readAsGiven(Dataset dataset, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(dataset);
+        return dataset;
     }
-    
+
     public static Model loadModelAsGiven(String uri) {
         Model result = ModelFactoryEx.createInsertOrderPreservingModel();
         readAsGiven(result, uri);
         return result;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, String uri, String baseIri) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, String uri, String baseIri) {
         newParserBuilderForReadAsGiven(baseIri).source(uri).parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, String uri, String baseIri) {
+    public static Dataset readAsGiven(Dataset dataset, String uri, String baseIri) {
         readAsGiven(dataset.asDatasetGraph(), uri, baseIri);
+        return dataset;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, InputStream in, Lang lang) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, InputStream in, Lang lang) {
         newParserBuilderForReadAsGiven(null).source(in).lang(lang).build().parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, InputStream in, Lang lang) {
+    public static Dataset readAsGiven(Dataset dataset, InputStream in, Lang lang) {
         readAsGiven(dataset.asDatasetGraph(), in, lang);
+        return dataset;
     }
 
     public static Dataset loadDatasetAsGiven(String uri, String baseIri) {

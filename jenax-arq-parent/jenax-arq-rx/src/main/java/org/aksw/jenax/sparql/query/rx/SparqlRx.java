@@ -74,21 +74,21 @@ public class SparqlRx {
     private static final Logger logger = LoggerFactory.getLogger(SparqlRx.class);
 
     public static Single<Boolean> execAsk(Function<Query, QueryExecution> qeSupp, Query query) {
-    	return Flowable.<Boolean, QueryExecution>generate(
-    		() -> qeSupp.apply(query),
-    		(qe, e) -> {
-    			try {
-    				boolean r = qe.execAsk();
-    				e.onNext(r);
-    				e.onComplete();
-    			} catch (Exception ex) {
-    				e.onError(ex);
-    			}
-    		},
-    		QueryExecution::close)
-    		.singleOrError();
+        return Flowable.<Boolean, QueryExecution>generate(
+            () -> qeSupp.apply(query),
+            (qe, e) -> {
+                try {
+                    boolean r = qe.execAsk();
+                    e.onNext(r);
+                    e.onComplete();
+                } catch (Exception ex) {
+                    e.onError(ex);
+                }
+            },
+            QueryExecution::close)
+            .singleOrError();
     }
-    
+
     /**
      * Create a Flowable from a supplier of connections and a query.
      * Each subscription obtains a fresh connection
@@ -106,7 +106,7 @@ public class SparqlRx {
     }
 
     public static Flowable<Binding> execSelectRaw(Function<? super Query, ? extends QueryExecution> qeSupp, Query query) {
-    	return execSelectRaw(() -> qeSupp.apply(query));
+        return execSelectRaw(() -> qeSupp.apply(query));
     }
 
     public static Flowable<Binding> execSelectRaw(SparqlQueryConnection queryConn, Query query) {
@@ -171,7 +171,7 @@ public class SparqlRx {
             }
             emitter.onComplete();
         } catch (Exception e) {
-            Exception f = HttpExceptionUtils.makeHumanFriendly(e);
+            Throwable f = HttpExceptionUtils.makeHumanFriendly(e);
             emitter.onError(new Throwable("Error executing " + q, f));
         }
     }
@@ -799,7 +799,7 @@ public class SparqlRx {
 
     /** Convenience method that assumes a single projected variable */
     public static Flowable<Node> execConceptRaw(Function<? super Query, ? extends QueryExecution> qef, Query query) {
-    	Var var = Iterables.getOnlyElement(query.getProjectVars());
+        Var var = Iterables.getOnlyElement(query.getProjectVars());
         return execConceptRaw(qef, query, var);
     }
 
