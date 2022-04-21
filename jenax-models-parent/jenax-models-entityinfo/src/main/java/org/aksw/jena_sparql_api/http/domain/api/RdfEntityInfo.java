@@ -35,4 +35,16 @@ public interface RdfEntityInfo
             .orElse(null);
         return result;
     }
+
+
+    public static void copy(RdfEntityInfo tgt, RdfEntityInfo src) {
+        tgt
+            .setCharset(src.getCharset())
+            .setContentEncodings(src.getContentEncodings())
+            .setContentType(src.getContentType())
+            .setByteSize(src.getByteSize())
+            .setUncompressedByteSize(src.getUncompressedByteSize())
+            ;
+    }
+
 }

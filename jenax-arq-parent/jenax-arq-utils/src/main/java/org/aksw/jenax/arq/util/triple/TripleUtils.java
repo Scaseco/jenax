@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -32,6 +33,11 @@ public class TripleUtils {
     public static Stream<Node> streamNodes(Triple t) {
         return Stream.of(t.getSubject(), t.getPredicate(), t.getObject());
     }
+
+    public static Iterator<Node> iterateNodes(Triple t) {
+        return streamNodes(t).iterator();
+    }
+
 
     /** Access a triple's component by a zero-based index in order s, p, o.
      * Raises {@link IndexOutOfBoundsException} for any index outside of the range [0, 2]*/

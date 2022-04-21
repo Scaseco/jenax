@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,10 +14,25 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.aksw.commons.cache.async.AsyncClaimingCacheImpl;
+import org.aksw.commons.cache.async.AsyncClaimingCacheImpl.Builder;
+import org.aksw.commons.io.block.api.PageManager;
 import org.aksw.commons.io.block.impl.BlockSources;
+import org.aksw.commons.io.block.impl.Page;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
+import org.aksw.commons.io.block.impl.PageManagerOverDataStreamSource;
+import org.aksw.commons.io.input.DataStream;
+import org.aksw.commons.io.input.DataStreamSource;
+import org.aksw.commons.io.input.DataStreamSources;
+import org.aksw.commons.io.input.DataStreams;
+import org.aksw.commons.io.seekable.api.Seekable;
+import org.aksw.commons.io.seekable.api.SeekableSource;
+import org.aksw.commons.io.seekable.api.SeekableSources;
+import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
+import org.aksw.commons.io.seekable.impl.SeekableSourceOverDataStreamSource;
 import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
@@ -34,7 +50,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Range;
+import com.google.common.primitives.Ints;
 
 
 public class TestBinSearchBz2 {
@@ -43,7 +63,31 @@ public class TestBinSearchBz2 {
 
     @Test
     public void testBinarySearchBz2Lookups() throws IOException {
-        runTest();
+
+        Path path = Paths.get("src/test/resources/2015-11-02-Amenity.node.5mb-uncompressed.sorted.nt.bz2");
+        Map<Node, Graph> expected = loadData(path);
+
+        // testSeekableOverDataStreamSource(path);
+
+        // runBinSearchOnBzip2ViaFileChannel(path, expected);
+        runBinSearchOnBzip2ViaPath(path, expected);
+    }
+
+    public static Map<Node, Graph> loadData(Path path) {
+        // Read file and map each key to the number of lines
+        Stopwatch sw = Stopwatch.createStarted();
+        Map<Node, Graph> result = RDFDataMgrRx.createFlowableTriples(
+                    () -> new BZip2CompressorInputStream(Files.newInputStream(path, StandardOpenOption.READ), true),
+                    Lang.NTRIPLES, null)
+                .compose(GraphOpsRx.graphsFromConsecutiveSubjectsRaw())
+                .toMap(Entry::getKey, Entry::getValue)
+                .blockingGet()
+                ;
+
+        // Note that the logged time is for cold state - repeated loads should
+        // exhibit significant speedups
+        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds to load " + path);
+        return result;
     }
 
 //    public static void main(String[] args) throws IOException {
@@ -90,24 +134,9 @@ public class TestBinSearchBz2 {
      *
      *
      */
-    public static void runTest() throws IOException {
-        Path path = Paths.get("src/test/resources/2015-11-02-Amenity.node.5mb-uncompressed.sorted.nt.bz2");
-
-        // Read file and map each key to the number of lines
+    public static void runBinSearchOnBzip2ViaFileChannel(Path path, Map<Node, Graph> expectedResults) throws IOException {
         Stopwatch sw = Stopwatch.createStarted();
-        Map<Node, Graph> map = RDFDataMgrRx.createFlowableTriples(
-                    () -> new BZip2CompressorInputStream(Files.newInputStream(path, StandardOpenOption.READ), true),
-                    Lang.NTRIPLES, null)
-                .compose(GraphOpsRx.graphsFromConsecutiveSubjectsRaw())
-                .toMap(Entry::getKey, Entry::getValue)
-                .blockingGet()
-                ;
 
-        // Note that the logged time is for cold state - repeated loads should
-        // exhibit significant speedups
-        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds to load " + path);
-
-        sw.reset().start();
         int i = 0;
         try(FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ)) {
             BinarySearcher bs = BlockSources.createBinarySearcherBz2(fileChannel, PageManagerForFileChannel.DEFAULT_PAGE_SIZE, false);
@@ -120,7 +149,7 @@ public class TestBinSearchBz2 {
 
             // Generic tests
 
-            for(Entry<Node, Graph> e : map.entrySet()) {
+            for(Entry<Node, Graph> e : expectedResults.entrySet()) {
                 Node s = e.getKey();
                 ++i;
 //                System.out.println("Test #" + (++i) + ": " + s);
@@ -145,6 +174,8 @@ public class TestBinSearchBz2 {
                         System.err.println("Actual:");
                         RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
                     }
+
+                    // System.out.println("Iteration #" + i + ": ok? " + isOk);
                     Assert.assertTrue(isOk);
                 }
 
@@ -156,6 +187,105 @@ public class TestBinSearchBz2 {
 
     }
 
+    public static void testSeekableOverDataStreamSource(Path path) throws IOException {
+
+        // Test to compare seeking on a DataStream directly and using the Seekable abstraction
+        DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
+        SeekableSource ss = SeekableSources.of(source, 4096, 128); // new SeekableSourceOverDataStreamSource(source, 100);
+
+        int size = Ints.saturatedCast(source.size());
+        int maxDelta = size / 10;
+
+        Random random = new Random(0);
+        for (int i = 0; i < 30; ++i) {
+            long baseOffset = random.nextInt(size);
+            try (Seekable seekable = ss.get(baseOffset)) {
+                long offset = baseOffset;
+                int requestDelta = random.nextInt(maxDelta) - (maxDelta >> 1);
+                int actualDelta;
+                if (requestDelta >= 0) {
+                    actualDelta = seekable.checkNext(requestDelta, true);
+                    offset += actualDelta;
+                } else {
+                    actualDelta = seekable.checkPrev(-requestDelta, true);
+                    offset -= actualDelta;
+                }
+
+                try (DataStream<byte[]> raw = source.newDataStream(Range.atLeast(offset))) {
+
+                    // Check reading of a single byte
+                    Byte expectedByte = Iterators.getNext(DataStreams.newBoxedIterator(raw, 1), null);
+                    Byte actualByte = seekable.get();
+                    Assert.assertEquals(expectedByte, actualByte);
+
+                    seekable.nextPos(1);
+
+                    // Check reading of all remaining data
+                    byte[] expecteds = IOUtils.toByteArray(Channels.newInputStream(DataStreams.newChannel(raw)));
+                    byte[] actuals = IOUtils.toByteArray(Channels.newInputStream(seekable));
+
+                    Assert.assertArrayEquals(expecteds, actuals);
+                }
+            }
+        }
+    }
+
+    public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
+
+        DataStreamSource<byte[]> source = DataStreamSources.of(path);
+        source = DataStreamSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
+        SeekableSource seekableSource = SeekableSources.of(source, 1024 * 1024, 128);
+
+
+        Stopwatch sw = Stopwatch.createStarted();
+
+        int i = 0;
+
+        BinarySearcher bs = BlockSources.createBinarySearcherBz2(seekableSource);
+
+        // This key overlaps on the block boundary (byte 2700000)
+//            try(InputStream in = bs.search("<http://linkedgeodata.org/geometry/node1012767568>")) {
+//                MainPlaygroundScanFile.printLines(in, 10);
+//            }
+//
+
+        // Generic tests
+
+        for(Entry<Node, Graph> e : expectedResults.entrySet()) {
+            Node s = e.getKey();
+            ++i;
+//                System.out.println("Test #" + (++i) + ": " + s);
+            Graph expected = e.getValue();
+
+//                if(s.getURI().equals("http://linkedgeodata.org/geometry/node1012767568")) {
+//                    System.err.println("DEBUG POINT");
+//                }
+
+            //String str = s.isURI() ? "<" + s.getURI() + ">" : s.getBlankNodeLabel()
+            String str = NodeFmtLib.str(s);
+            try(InputStream in = bs.search(str)) {
+                Graph actual = GraphFactory.createDefaultGraph();
+                RDFDataMgr.read(actual, in, Lang.NTRIPLES);
+
+
+                // Assert.assertEquals(expected, actual);
+                boolean isOk = expected.isIsomorphicWith(actual);
+                if(!isOk) {
+                    System.err.println("Expected:");
+                    RDFDataMgr.write(System.err, expected, RDFFormat.TURTLE_PRETTY);
+                    System.err.println("Actual:");
+                    RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
+                }
+
+                // System.out.println("Iteration #" + i + ": ok? " + isOk);
+                Assert.assertTrue(isOk);
+            }
+
+        }
+
+        logger.debug("Needed " + (sw.elapsed(TimeUnit.MILLISECONDS) * 0.001) + " seconds for " + i + " lookups on " + path);
+
+    }
 
 //    @Test
     public void testLocalBinSearch() throws IOException, Exception {

@@ -16,7 +16,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.ToNumberPolicy;
-import com.google.gson.ToNumberStrategy;
 
 
 
@@ -50,7 +49,7 @@ public class RDFDatatypeJson
             logger.warn("Gson.setObjectToNumberStrategy and/or Gson.setNumberToNumberStrategy not available");
         }
 
-        
+
         Gson result = builder.create();
         return result;
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.commons.collection.observable.ObservableValue;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -31,6 +32,10 @@ public class RdfFieldFromExistingTriple
         this.graph = graph;
         this.existingTriple = existingTriple;
         this.componentIdx = componentIdx;
+    }
+
+    public Node getOriginalValue() {
+        return TripleUtils.getNode(existingTriple, componentIdx);
     }
 
 
@@ -62,16 +67,29 @@ public class RdfFieldFromExistingTriple
 //        pce.firePropertyChange("value", cachedValue, value);
     }
 
+    protected PropertyChangeEvent adaptEvent(PropertyChangeEvent ev) {
+        Map<Triple, Triple> oldMap = (Map<Triple, Triple>)ev.getOldValue();
+        Map<Triple, Triple> newMap = (Map<Triple, Triple>)ev.getNewValue();
+
+        Node oldValue = getLatestValue(oldMap);
+        Node newValue = getLatestValue(newMap);
+
+        return new PropertyChangeEvent(this, "value", oldValue, newValue);
+    }
+
     @Override
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Runnable addVetoableChangeListener(VetoableChangeListener listener) {
+        return graph.getTripleReplacements().addVetoableChangeListener(ev -> {
+            PropertyChangeEvent adapted = adaptEvent(ev);
+            listener.vetoableChange(adapted);
+        });
+    }
+
+    @Override
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         return graph.getTripleReplacements().addPropertyChangeListener(ev -> {
-            Map<Triple, Triple> oldMap = (Map<Triple, Triple>)ev.getOldValue();
-            Map<Triple, Triple> newMap = (Map<Triple, Triple>)ev.getNewValue();
-
-            Node oldValue = getLatestValue(oldMap);
-            Node newValue = getLatestValue(newMap);
-
-            listener.propertyChange(new PropertyChangeEvent(this, "value", oldValue, newValue));
+            PropertyChangeEvent adapted = adaptEvent(ev);
+            listener.propertyChange(adapted);
         });
 
 //        return graph.addPostUpdateListener(ev -> {
@@ -86,11 +104,5 @@ public class RdfFieldFromExistingTriple
 //        pce.addPropertyChangeListener(listener);
 //        return () -> pce.removePropertyChangeListener(listener);
     }
-
-
-	@Override
-	public Runnable addVetoableChangeListener(VetoableChangeListener listener) {
-		throw new UnsupportedOperationException();
-	}
 
 }

@@ -35,12 +35,16 @@ public class QueryExecutionFactoryPaginated
 
     @Override
     public QueryExecution createQueryExecution(Query query) {
-        query = query.cloneQuery();
-        PaginationQueryIterator queryIterator = new PaginationQueryIterator(query, pageSize);
-
-        return new QueryExecutionIterated(query, decoratee, queryIterator);
+    	return createQueryExecution(decoratee, query, pageSize);
     }
 
+    public static QueryExecution createQueryExecution(QueryExecutionFactory qef, Query query, long pageSize) {
+        Query q = query.cloneQuery();
+        PaginationQueryIterator queryIterator = new PaginationQueryIterator(q, pageSize);
+
+        return new QueryExecutionIterated(query, qef, queryIterator);
+    }
+    
     /*
     @Override
     public QueryExecution createQueryExecution(String queryString) {

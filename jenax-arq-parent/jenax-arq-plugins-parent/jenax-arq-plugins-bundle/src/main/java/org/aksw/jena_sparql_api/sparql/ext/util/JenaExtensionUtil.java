@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
+import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
@@ -14,6 +15,8 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionRegistry;
+
+import com.google.gson.JsonElement;
 
 public class JenaExtensionUtil {
 //    public static void registerAll() {
@@ -64,7 +67,11 @@ public class JenaExtensionUtil {
             .register(BigDecimal.class, Float.class,
                     BigDecimal::floatValue, BigDecimal::new)
             .register(Node.class, NodeValue.class,
-                    NodeValue::makeNode, NodeValue::asNode);
+                    NodeValue::makeNode, NodeValue::asNode)
+            .register(Node.class, JsonElement.class,
+                    RDFDatatypeJson::extract, RDFDatatypeJson::jsonToNode)
+            ;
+
 
         return binder;
     }

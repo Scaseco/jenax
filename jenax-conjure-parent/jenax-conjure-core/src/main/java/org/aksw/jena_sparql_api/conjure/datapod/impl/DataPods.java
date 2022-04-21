@@ -24,6 +24,7 @@ import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFi
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
+import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.http.HttpHeaders;
@@ -247,7 +248,6 @@ public class DataPods {
                 .destination(serviceUrl)
                 .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
                 .build();
-
 
         RdfDataPod result = fromConnectionSupplier(supplier);
         return result;

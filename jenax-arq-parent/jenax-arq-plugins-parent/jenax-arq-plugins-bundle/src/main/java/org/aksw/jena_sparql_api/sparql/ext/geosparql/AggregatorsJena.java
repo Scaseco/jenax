@@ -52,8 +52,14 @@ public class AggregatorsJena {
 	 * Creates an aggregator that collects geometries into a geometry collection
 	 * All geometries must have the same spatial reference system (SRS).
 	 * The resulting geometry will be in the same SRS.
+	 * 
+	 * @param distinct Whether to collect geometries in a set or a list
+	 * @param geomFactory The geometry factory. If null then jena's default one is used.
 	 */
 	public static ParallelAggregator<GeometryWrapper, GeometryWrapper, ?> aggGeometryWrapperCollection(boolean distinct, GeometryFactory geomFactory) {
+		
+		GeometryFactory gf = geomFactory == null ? CustomGeometryFactory.theInstance() : geomFactory;
+		
 		SerializableSupplier<Collection<GeometryWrapper>> collectionSupplier = distinct
 				? LinkedHashSet::new
 				: ArrayList::new; // LinkedList?
@@ -67,7 +73,7 @@ public class AggregatorsJena {
 				} else {				
 					Set<String> srsUris = col.stream().map(GeometryWrapper::getSrsURI).collect(Collectors.toSet());
 					Collection<Geometry> geoms = col.stream().map(GeometryWrapper::getParsingGeometry).collect(Collectors.toList());
-					Geometry geom = geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
+					Geometry geom = gf.createGeometryCollection(geoms.toArray(new Geometry[0]));
 					
 					// Mixing SRS not allowed here; convert before aggregation
 					String srsUri = Iterables.getOnlyElement(srsUris);

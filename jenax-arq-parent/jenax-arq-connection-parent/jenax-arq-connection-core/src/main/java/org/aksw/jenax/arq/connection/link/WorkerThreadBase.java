@@ -41,7 +41,8 @@ public class WorkerThreadBase {
     public static <T> T submit(ExecutorService executorService, Callable<T> callable) {
         try {
             return executorService.submit(callable).get();
-        } catch (InterruptedException | ExecutionException e) {
+        // } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

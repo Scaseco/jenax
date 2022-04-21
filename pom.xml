@@ -15,16 +15,19 @@
 	<modules>
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
+		<module>jenax-jgrapht-parent</module>
 		<module>jenax-arq-parent</module>
 		<module>jenax-rx-parent</module>
 		<module>jenax-analytics-parent</module>
 		<module>jenax-functionbinder-parent</module>
 		<module>jenax-reprogen-parent</module>
+		<module>jenax-fsrdfstore-parent</module>
 		<module>jenax-io-parent</module>
 		<module>jenax-models-parent</module>
 		<module>jenax-facete-parent</module>
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
+
 		<!-- <module>jenax-cli-core</module> -->
 	</modules>
 
@@ -65,7 +68,9 @@
 		<!-- <jetty.version>9.4.35.v20201120</jetty.version> -->
 		<jetty.version>9.4.40.v20210413</jetty.version>
 
-		<!-- <jgrapht.version>1.1.0</jgrapht.version> -->
+		<kryo.version>4.0.2</kryo.version>
+
+		<jgrapht.version>1.5.1</jgrapht.version>
 
 		<!-- 2.18 could be tried out next -->
 		<!-- <jersey.version>2.26-b03</jersey.version> -->
@@ -75,7 +80,7 @@
 
 		<guava.version>31.0.1-jre</guava.version>
 		<commons-compress.version>1.21</commons-compress.version>
-
+		<commons-vfs2.version>2.9.0</commons-vfs2.version>
 
 		<slf4j.version>1.8.0-beta4</slf4j.version>
 		<log4j.version>2.17.1</log4j.version>
@@ -85,13 +90,13 @@
 
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
-		<aksw.commons.version>0.9.1-SNAPSHOT</aksw.commons.version>
+		<aksw.commons.version>0.9.4-SNAPSHOT</aksw.commons.version>
 
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
 		<jts.version>1.18.1</jts.version>
 
-		<gson.version>2.8.9</gson.version>
+		<gson.version>2.9.0</gson.version>
 
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
@@ -157,7 +162,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -172,7 +177,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.3.1</version>
 				<configuration>
 					<failOnError>false</failOnError>
 				</configuration>
@@ -360,6 +365,13 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo</artifactId>
+				<version>${kryo.version}</version>
+			</dependency>
+
+
 			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
 				and tika -->
 			<dependency>
@@ -391,18 +403,23 @@
 				<version>${asm.version}</version>
 			</dependency>
 
+                        <dependency>
+                                <groupId>org.jgrapht</groupId>
+                                <artifactId>jgrapht-core</artifactId>
+                                <version>${jgrapht.version}</version>
+                        </dependency>
+
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jena</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<version>1.5.1-1</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<version>1.5.1-1</version>
 			</dependency>
-
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -442,8 +459,33 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-json</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-core</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-kryo</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-objectstore</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-models-csvw-domain</artifactId>
+				<version>${aksw.commons.version}</version>
 			</dependency>
 
 			<dependency>
@@ -534,10 +576,39 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-datasets-diff</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-quadengine</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-server-standalone</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-system</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-fsrdfstore-facade</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -893,9 +964,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.commons</groupId>
-				<artifactId>jena-jgrapht-bindings</artifactId>
-				<version>1.5.1-1-SNAPSHOT</version>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-jgrapht-bindings</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
@@ -1062,6 +1133,13 @@
 
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-txn</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-collectors</artifactId>
 				<version>${aksw.commons.version}</version>
 			</dependency>
@@ -1190,29 +1268,78 @@
 
 			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing 
 				to maintain separately) -->
-			<dependency>
-				<groupId>org.aksw.difs</groupId>
-				<artifactId>difs-system</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
-			</dependency>
 
-			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
-				stuff would have to go t -->
 			<dependency>
-				<groupId>net.sansa-stack</groupId>
-				<artifactId>sansa-spark-jena-java_2.12</artifactId>
-				<version>0.8.0-RC2-SNAPSHOT</version>
+				<groupId>org.aksw.thirdparty.com.sshtools</groupId>
+				<artifactId>vfs2nio</artifactId>
+				<version>0.0.1-2</version>
 				<exclusions>
 					<exclusion>
-						<groupId>log4j</groupId>
-						<artifactId>log4j</artifactId>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
 					</exclusion>
 					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-vfs2</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-vfs2</artifactId>
+				<version>${commons-vfs2.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-vfs2-jackrabbit1</artifactId>
+				<version>${commons-vfs2.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents.client5</groupId>
+				<artifactId>httpclient5</artifactId>
+				<version>5.1</version>
+			</dependency>
+
+
+			<!-- <dependency> -->
+			<!-- <groupId>commons-httpclient</groupId> -->
+			<!-- <artifactId>commons-httpclient</artifactId> -->
+			<!-- <version>3.1</version> -->
+			<!-- </dependency> -->
+
+			<dependency>
+				<groupId>org.apache.jackrabbit</groupId>
+				<artifactId>jackrabbit-webdav</artifactId>
+				<!-- <version>2.21.5</version> -->
+				<version>2.12.11</version>
+			</dependency>
+
+
+			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
+				stuff would have to go t -->
+			<!-- <dependency> <groupId>net.sansa-stack</groupId> <artifactId>sansa-spark-jena-java_2.12</artifactId> 
+				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
+				<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
+				<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -1364,11 +1491,11 @@
 				<version>${tika.version}</version>
 			</dependency>
 
-                        <dependency>
-                                <groupId>org.apache.tika</groupId>
-                                <artifactId>tika-java7</artifactId>
-                                <version>${tika.version}</version>
-                        </dependency>
+			<dependency>
+				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-java7</artifactId>
+				<version>${tika.version}</version>
+			</dependency>
 
 
 			<!-- <dependency> -->
@@ -1514,7 +1641,7 @@
 			<dependency>
 				<groupId>io.reactivex.rxjava3</groupId>
 				<artifactId>rxjava</artifactId>
-				<version>3.0.6</version>
+				<version>3.1.3</version>
 			</dependency>
 
 
@@ -1551,7 +1678,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
+						<version>3.3.1</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>

@@ -21,6 +21,8 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_IRI;
@@ -36,6 +38,7 @@ import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.NiceIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 
 /** Note transforms not captured by {@link NodeTransformLib} such as Bindings, Graphs, Models, Datsets, ... */
@@ -168,6 +171,38 @@ public class NodeTransformLib2 {
         }
 
         return dg;
+    }
+    
+    
+    public static RowSet applyNodeTransform(NodeTransform nodeTransform, RowSet decoratee) {
+    	Iterator<Binding> it = WrappedIterator.create(decoratee).mapWith(b -> NodeTransformLib.transform(b, nodeTransform));    	
+    	return new RowSet() {
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public Binding next() {
+				return it.next();
+			}
+
+			@Override
+			public List<Var> getResultVars() {
+				return decoratee.getResultVars();
+			}
+
+			@Override
+			public long getRowNumber() {
+				return decoratee.getRowNumber();
+			}
+
+			@Override
+			public void close() {
+				decoratee.close();
+			}
+		};
     }
 
 

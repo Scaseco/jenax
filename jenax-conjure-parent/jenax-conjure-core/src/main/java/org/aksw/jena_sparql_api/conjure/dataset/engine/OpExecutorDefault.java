@@ -56,6 +56,7 @@ import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.http.repository.impl.ResourceStoreImpl;
 import org.aksw.jenax.arq.connection.core.RDFConnectionBuilder;
+import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -194,8 +195,12 @@ public class OpExecutorDefault
 
         Op subOp = op.getSubOp();
         try (RdfDataPod subDataPod = subOp.accept(this)) {
-            try(RDFConnection conn = subDataPod.openConnection()) {
+            try(RDFConnection tmpConn = subDataPod.openConnection()) {
 
+                // FIXME This transformation should be represented explicitly in the RDF model
+                RDFConnection conn = RDFConnectionUtils.enableRelativeIrisInQueryResults(tmpConn);
+
+            	
                 Collection<String> queryStrs = op.getQueryStrings();
 
                 Model model = ModelFactory.createDefaultModel();

@@ -6,11 +6,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.lang.BlankNodeAllocator;
-import org.apache.jena.riot.lang.BlankNodeAllocatorLabel;
-import org.apache.jena.riot.lang.BlankNodeAllocatorLabelEncoded;
 
 /**
- * An adaption of {@link BlankNodeAllocatorLabel}/{@link BlankNodeAllocatorLabelEncoded}
+ * An adaption of {@link org.apache.jena.riot.lang.BlankNodeAllocatorLabelEncoded}
  * which passes on labels as given, but allocates fresh ones based on incrementing a value
  * scoped with a random per-jvm value.
  *

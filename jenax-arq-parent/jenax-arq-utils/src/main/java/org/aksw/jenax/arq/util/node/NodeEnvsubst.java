@@ -65,7 +65,7 @@ public class NodeEnvsubst {
             Node value = lookup.apply(key);
             if(value != null) {
                 result = isUri
-                    ? NodeFactory.createURI(value.toString())
+                    ? NodeFactory.createURI(value.toString(false))
                     : value; // NodeFactory.createLiteral(value);
             }
         }

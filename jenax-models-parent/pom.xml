@@ -17,6 +17,7 @@
 		<module>jenax-models-prov</module>
 		<module>jenax-models-dcat-api</module>
 		<module>jenax-models-entityinfo</module>
+		<module>jenax-models-csvw</module>
 	</modules>
 </project>
 

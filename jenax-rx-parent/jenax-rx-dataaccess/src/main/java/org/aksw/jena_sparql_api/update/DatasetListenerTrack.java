@@ -13,14 +13,13 @@ import org.aksw.jena_sparql_api.core.DatasetListener;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.core.UpdateContext;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Quad;
 
@@ -75,7 +74,8 @@ public class DatasetListenerTrack
 
             Diff<Set<Triple>> diff = entry.getValue();
 
-            SparqlQueryConnection qef = new SparqlQueryConnectionJsa(trackerService.getQueryExecutionFactory());
+            // SparqlQueryConnection qef = new SparqlQueryConnectionJsa(trackerService.getQueryExecutionFactory());
+            QueryExecutionFactoryQuery qef = trackerService.getQueryExecutionFactory();
             Map<Node, ChangeSet> changesets = ChangeSetUtils.createChangeSets(qef, serviceUri, graphUri, changesetMetadata, diff, p);
 
             for(ChangeSet changeset : changesets.values()) {

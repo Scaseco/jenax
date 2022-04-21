@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
@@ -202,7 +203,7 @@ public class SparqlRx {
 //	}
 
     public static <T> Flowable<T> execSelect(Callable<? extends QueryExecution> qes, Function<? super ResultSet, T> next) {
-        Flowable<T> result = RDFDataMgrRx.createFlowableFromResource(
+        Flowable<T> result = FlowableUtils.createFlowableFromResource(
                 qes::call,
                 QueryExecution::execSelect,
                 ResultSet::hasNext,
@@ -267,7 +268,7 @@ public class SparqlRx {
     }
 
     public static Flowable<Triple> execConstructTriples(Callable<QueryExecution> qes) {
-        Flowable<Triple> result = RDFDataMgrRx.createFlowableFromResource(
+        Flowable<Triple> result = FlowableUtils.createFlowableFromResource(
                 qes::call,
                 QueryExecution::execConstructTriples,
                 Iterator::hasNext,
@@ -282,7 +283,7 @@ public class SparqlRx {
     }
 
     public static Flowable<Quad> execConstructQuads(Callable<QueryExecution> qes) {
-        Flowable<Quad> result = RDFDataMgrRx.createFlowableFromResource(
+        Flowable<Quad> result = FlowableUtils.createFlowableFromResource(
                 qes::call,
                 QueryExecution::execConstructQuads,
                 Iterator::hasNext,
@@ -299,7 +300,7 @@ public class SparqlRx {
 
     public static Flowable<JsonObject> execJsonItems(Callable<QueryExecution> qes) {
         // Gson gson = new Gson();
-        Flowable<JsonObject> result = RDFDataMgrRx.createFlowableFromResource(
+        Flowable<JsonObject> result = FlowableUtils.createFlowableFromResource(
                 qes::call,
                 QueryExecution::execJsonItems,
                 Iterator::hasNext,

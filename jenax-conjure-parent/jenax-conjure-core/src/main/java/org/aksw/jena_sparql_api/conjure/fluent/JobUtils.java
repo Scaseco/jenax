@@ -28,6 +28,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.vocabulary.RDF;
@@ -52,6 +54,81 @@ public class JobUtils {
         return job;
     }
 
+    
+    /**
+     * Create a job to derive a new dataset using a set of sparql construct statements.
+     * (Update statements could be made part of the workflow but are not supported by this method yet)
+     * 
+     * The OpVar placeholder for the input dataset is "ARG".
+     * 
+     * @param stmts
+     * @param optionalArgs
+     * @param varToExpr
+     * @return
+     */
+    public static Job fromSparqlStmts(
+            Collection<SparqlStmt> stmts,
+            Set<String> optionalArgs,
+            Map<Var, Expr> varToExpr
+        ) {
+
+
+        Set<String> mentionedEnvVars = SparqlStmtUtils.getMentionedEnvVars(stmts);
+
+// TODO Add API for Query objects to fluent
+//		List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(DefaultPrefixes.prefixes, path))
+//				.collect(Collectors.toList());
+
+        List<String> stmtStrs = stmts.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+//
+//		List<String> queries = RDFDataMgrEx.loadQueries(path, DefaultPrefixes.prefixes).stream()
+//				.map(Object::toString)
+//				.collect(Collectors.toList());
+        ConjureBuilder cj = new ConjureBuilderImpl();
+
+        String opVarName = "ARG";
+//        Op op = cj.fromVar(opVarName).stmts(stmtStrs).getOp();
+        Op op = cj.fromVar(opVarName).construct(stmtStrs).getOp();
+
+//		Set<String> vars = OpUtils.mentionedVarNames(op);
+//		for(SparqlStmt stmt : stmts) {
+//			System.out.println("Env vars: " + SparqlStmtUtils.mentionedEnvVars(stmt));
+//		}
+
+        Map<String, Boolean> combinedMap = stmts.stream()
+            .map(SparqlStmtUtils::mentionedEnvVars)
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
+            .distinct()
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        Set<String> envVars = combinedMap.keySet();
+//		System.out.println("All env vars: " + combinedMap);
+
+
+//		System.out.println("MentionedVars: " + vars);
+
+        Job result = Job.create(cj.getContext().getModel())
+                .setOp(op)
+                // .setDeclaredVars(envVars)
+                .setOpVars(Collections.singleton(opVarName));
+
+        for (String varName : mentionedEnvVars) {
+            JobParam param = result.addNewParam();
+            param.setParamName(varName);
+
+            Var v = Var.alloc(varName);
+            Expr expr = varToExpr.get(v);
+            param.setDefaultValueExpr(expr);
+        }
+        // result.setDeclaredVars(mentionedEnvVars);
+
+
+        return result;
+    }
 
     public static Job fromSparqlFile(String path) throws FileNotFoundException, IOException, ParseException {
         // TODO Add API for Query objects to fluent

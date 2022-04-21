@@ -46,5 +46,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- The prefixes module use the PrefixMappingTrie class from here
+		So as it stands we cannot refer to the prefixes without introducing
+		a cyclic dependency
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-prefixes</artifactId>
+			<scope>test</scope>
+		</dependency>
+ 		-->
 	</dependencies>
 </project>

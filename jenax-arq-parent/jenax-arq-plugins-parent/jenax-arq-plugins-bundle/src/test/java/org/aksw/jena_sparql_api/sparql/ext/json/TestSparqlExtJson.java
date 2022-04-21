@@ -51,7 +51,7 @@ public class TestSparqlExtJson {
             System.out.println(ResultSetFormatter.asText(qe.execSelect()));
         }
     }
-    
+
     @Test
     public void testJsonEntries() {
         Query q = parser.apply("SELECT ?s { BIND(json:path(\"{'x':{'y': 'z' }}\"^^xsd:json, '$.x') AS ?s) }");
@@ -166,5 +166,18 @@ public class TestSparqlExtJson {
         Gson gson = new Gson();
         Object tmp = gson.fromJson("{\"foo\": \"bar\"}", Object.class);
         JsonPath.read(tmp, "$.baz");
+    }
+
+    @Test
+    public void testJsonExplode() {
+        Query q = parser.apply("SELECT ?x10 ?x11 ?x12 ?x13 {\n"
+                + "  BIND(json:array(true, 'item2', 3, json:object('item', 4)) AS ?jsonArray)\n"
+                + "  ?jsonArray json:explode ('x' 10)\n"
+                + "}\n"
+                + "");
+      Model m = ModelFactory.createDefaultModel();
+      try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+          System.out.println(ResultSetFormatter.asText(qe.execSelect()));
+      }
     }
 }

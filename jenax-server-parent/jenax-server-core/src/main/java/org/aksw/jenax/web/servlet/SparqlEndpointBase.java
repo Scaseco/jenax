@@ -155,17 +155,20 @@ public abstract class SparqlEndpointBase {
             }
             response.resume(e);
 
-            return ;
-            // throw new RuntimeException(e);
+            throw new RuntimeException(e);
+            // return ;
         }
 
         // Wrap the query execution such that close() also closes the connection
         QueryExecution qe = new QueryExecutionDecoratorBase<QueryExecution>(tmp) {
             @Override
             public void close() {
-                super.close();
-                conn.close();
-                logger.debug("Closed connection: " + System.identityHashCode(conn));
+                try {
+                    super.close();
+                } finally {
+                    conn.close();
+                    logger.debug("Closed connection: " + System.identityHashCode(conn));
+                }
             }
         };
 

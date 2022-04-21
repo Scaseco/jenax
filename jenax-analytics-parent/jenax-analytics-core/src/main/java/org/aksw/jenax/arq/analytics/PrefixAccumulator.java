@@ -253,7 +253,7 @@ public class PrefixAccumulator
         try (QueryExecution qe = QueryExecutionHTTP.create().endpoint("http://dbpedia.org/sparql").query(QueryFactory.create("Select * { ?s a <http://dbpedia.org/ontology/Airport> } Limit 100")).build()) {
             ResultSet rs = qe.execSelect();
 
-            Accumulator<Binding, Map<Var, Set<String>>> acc = ResultSetAnalytics.usedPrefixes(50).createAccumulator();
+            Accumulator<Binding, Map<Var, Set<String>>> acc = BindingAnalytics.usedPrefixes(50).createAccumulator();
             new QueryIteratorResultSet(rs).forEachRemaining(acc::accumulate);
             Map<Var, Set<String>> ps = acc.getValue();
             System.out.println("Prefixes: " + ps);

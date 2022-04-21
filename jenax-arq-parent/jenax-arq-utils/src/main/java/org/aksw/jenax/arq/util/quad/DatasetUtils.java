@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.quad;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -16,6 +17,14 @@ import org.apache.jena.sparql.core.Quad;
 
 
 public class DatasetUtils {
+
+    public static Stream<Node> streamNodes(Dataset ds) {
+        return DatasetGraphUtils.streamNodes(ds.asDatasetGraph());
+    }
+
+    public static Iterator<Node> iterateNodes(Dataset ds) {
+        return DatasetGraphUtils.iterateNodes(ds.asDatasetGraph());
+    }
 
     /**
      * Returns an iterable over the models in the dataset - with the default graph being the first element

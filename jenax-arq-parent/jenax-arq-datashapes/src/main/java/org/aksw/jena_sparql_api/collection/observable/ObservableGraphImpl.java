@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collection.observable.CollectionChangedEventImpl;
+import org.aksw.commons.collection.observable.Registration;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.apache.jena.graph.Graph;
@@ -338,9 +339,16 @@ public class ObservableGraphImpl
         return () -> vcs.removeVetoableChangeListener(listener);
     }
 
-    public Runnable addPropertyChangeListener(PropertyChangeListener listener) {
+    public Registration addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
-        return () -> pcs.removePropertyChangeListener(listener);
+        // return () -> pcs.removePropertyChangeListener(listener);
+        return Registration.from(
+            () -> {
+                listener.propertyChange(new CollectionChangedEventImpl<Triple>(this,
+                        this, this,
+                        Collections.emptySet(), Collections.emptySet(), Collections.emptySet()));
+            },
+            () -> pcs.removePropertyChangeListener(listener));
     }
 
     //public static <T> ExtendedIterator<T> wrapWithClose()

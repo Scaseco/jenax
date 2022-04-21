@@ -92,7 +92,7 @@ public class PageManagerForFileChannel
         } catch (UnsupportedOperationException e) {
             if (!MapMode.READ_ONLY.equals(mapMode)) {
                 throw new UnsupportedOperationException(
-                        "The fallback for file channels without 'map' support can only MapMode.READ_ONLY", e);
+                        "The fallback for file channels without 'map' support requires MapMode.READ_ONLY", e);
             }
 
             int l = Ints.saturatedCast(length);

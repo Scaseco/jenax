@@ -57,16 +57,18 @@ public class PathUtils {
         //return ExprUtils.opifyBalanced(steps, P_Seq::new);
     }
 
+    @Deprecated // Use path utlis from util package
     public static P_Path0 createStep(String predicate, boolean isFwd) {
         return createStep(NodeFactory.createURI(predicate), isFwd);
     }
 
+    @Deprecated // Use path utlis from util package
     public static P_Path0 createStep(Node predicate, boolean isFwd) {
         P_Path0 result = isFwd ? new P_Link(predicate) : new P_ReverseLink(predicate);
         return result;
     }
 
-
+    @Deprecated // Use path utlis from util package
     public static Path create(Path path, boolean isFwd) {
         Path result = isFwd ? path : PathFactory.pathInverse(path);
         return result;

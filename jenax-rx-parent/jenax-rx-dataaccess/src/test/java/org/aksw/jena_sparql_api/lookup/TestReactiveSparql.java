@@ -14,8 +14,11 @@ import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
@@ -36,10 +39,12 @@ public class TestReactiveSparql {
 
     //@Test
     public void testSelectLookupSimple() {
-        RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        // RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        Dataset dataset = RDFDataMgr.loadDataset("virtual-predicates-example.ttl");
+        QueryExecutionFactoryQuery qef = new QueryExecutionFactoryDataset(dataset);
 
         LookupService<Node, Table> ls = new LookupServiceSparqlQuery(
-                conn,
+                qef,
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);
 

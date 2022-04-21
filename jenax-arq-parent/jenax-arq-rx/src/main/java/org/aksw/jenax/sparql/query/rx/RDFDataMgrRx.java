@@ -6,32 +6,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.file.Path;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jena_sparql_api.rx.AllocScopePolicy;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromIterator;
 import org.aksw.jena_sparql_api.rx.RDFIteratorFromPipedRDFIterator;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
+import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.node.BlankNodeAllocatorAsGivenOrRandom;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
+import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
 import org.aksw.jenax.sparql.query.rx.StreamUtils.QuadEncoderDistinguish;
 import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
-import org.apache.jena.ext.com.google.common.base.Predicate;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -134,7 +135,7 @@ public class RDFDataMgrRx {
      * @return
      */
     public static Flowable<Binding> createFlowableBindings(Callable<TypedInputStream> inSupp) {
-        Flowable<Binding> result = createFlowableFromResource(
+        Flowable<Binding> result = FlowableUtils.createFlowableFromResource(
                 inSupp,
                 in -> {
                     Lang lang = RDFLanguages.contentTypeToLang(in.getContentType());
@@ -149,63 +150,6 @@ public class RDFDataMgrRx {
         return result;
     }
 
-
-    /**
-     * Generic helper to create a Flowable by mapping some resource such as in InputStream or
-     * a QueryExecution to an iterable such as an ResultSet
-     *
-     * @param <R>
-     * @param <I>
-     * @param <T>
-     * @param resourceSupplier
-     * @param resourceToIterator
-     * @param hasNext
-     * @param next
-     * @param closeResource
-     * @return
-     */
-    public static <R, I, T> Flowable<T> createFlowableFromResource(
-            Callable<R> resourceSupplier,
-            Function<? super R, I> resourceToIterator,
-            Predicate<? super I> hasNext,
-            Function<? super I, T> next,
-            Consumer<? super R> closeResource) {
-
-        Flowable<T> result = Flowable.generate(
-                () -> {
-                    R in = resourceSupplier.call();
-                    return new SimpleEntry<R, I>(in, null);
-                },
-                (state, emitter) -> {
-                    I it = state.getValue();
-
-                    try {
-                        if (it == null) {
-                            R in = state.getKey();
-                            it = resourceToIterator.apply(in);
-                            state.setValue(it);
-                        }
-
-                        boolean hasMore = hasNext.apply(it);
-                        if (hasMore) {
-                            T value = next.apply(it);
-                            emitter.onNext(value);
-                        } else {
-                            emitter.onComplete();
-                        }
-                    } catch (Exception e) {
-                        emitter.onError(e);
-                    }
-                },
-                state -> {
-                    R in = state.getKey();
-                    if (in != null) {
-                        closeResource.accept(in);
-                    }
-                });
-
-        return result;
-    }
 
     public static Flowable<Triple> createFlowableTriples(Callable<InputStream> inSupplier, Lang lang, String baseIRI) {
         return createFlowableFromInputStream(
@@ -381,7 +325,8 @@ public class RDFDataMgrRx {
         return new ParserProfileStd(factory,
                                     errorHandler,
                                     // IRIxResolver.create(IRIs.getSystemBase()).build(),
-                                    IRIxResolver.create().noBase().allowRelative(true).build(),
+                                    // IRIxResolver.create().noBase().allowRelative(true).build(),
+                                    IRIxResolverUtils.newIRIxResolverAsGiven(),
                                     PrefixMapFactory.create(),
                                     RIOT.getContext().copy(),
                                     checking,
@@ -461,6 +406,7 @@ public class RDFDataMgrRx {
     public static void parseFromInputStream(StreamRDF destination, InputStream in, String baseUri, Lang lang, Context context) {
         RDFParser.create()
             .source(in)
+            .resolver(IRIxResolverUtils.newIRIxResolverAsGiven())
             // Disabling checking does not seem to give a significant performance gain
             // For a 3GB Trig file parsing took ~1:45 min +- 5 seconds either way
             //.checking(false)
@@ -566,6 +512,10 @@ public class RDFDataMgrRx {
         return result;
     }
 
+    public static Flowable<Quad> createFlowableQuads(Path path, Iterable<Lang> probeLangs) {
+    	return createFlowableQuads(() -> RDFDataMgrEx.open(path, probeLangs));
+    }
+    
     public static Flowable<Quad> createFlowableQuads(Callable<TypedInputStream> inSupplier) {
 
         Flowable<Quad> result = createFlowableFromInputStream(
@@ -580,6 +530,9 @@ public class RDFDataMgrRx {
         return result;
     }
 
+    public static Flowable<Quad> createFlowableTriples(Path path, Iterable<Lang> probeLangs) {
+    	return createFlowableQuads(() -> RDFDataMgrEx.open(path, probeLangs));
+    }
 
     public static Flowable<Triple> createFlowableTriples(Callable<TypedInputStream> inSupplier) {
 
@@ -788,11 +741,33 @@ public class RDFDataMgrRx {
                 .onErrorReturn(t -> t);
     }
 
+    
+    public static <C extends Collection<Quad>> FlowableTransformer<C, Throwable> createBatchWriterQuads2(OutputStream out, RDFFormat format) {
+        if (!Lang.NQUADS.equals(format.getLang())) {
+            throw new IllegalArgumentException("Only nquads based formats are currently supported");
+        }
+        
+        return upstream -> upstream
+        		.concatMap(Flowable::fromIterable)
+        		.<StreamRDF>reduceWith(() -> {
+        			StreamRDF s = StreamRDFWriterEx.getWriterStream(out, format, null);
+        			s.start();
+        			return s;
+        		}, (s, q) -> {
+        			s.quad(q);
+        			return s;
+        		})
+        		.doAfterSuccess(StreamRDF::finish)
+        		.mapOptional(x -> Optional.<Throwable>empty())
+        		.onErrorReturn(t -> t)
+        		.toFlowable();
+    }
+
     public static void writeQuads(Flowable<Quad> flowable, OutputStream out, RDFFormat format) throws IOException {
 
         Flowable<Throwable> tmp = flowable
             .buffer(128)
-            .compose(RDFDataMgrRx.createBatchWriterQuads(out, format));
+            .compose(RDFDataMgrRx.createBatchWriterQuads2(out, format));
 
         Throwable e = tmp.singleElement().blockingGet();
         if(e != null) {
