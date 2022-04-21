@@ -1,9 +1,15 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
+import org.apache.jena.geosparql.InitGeoSPARQL;
+import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.datatype.GMLDatatype;
+import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
+import org.apache.jena.geosparql.implementation.parsers.gml.GMLReader;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
@@ -75,21 +81,26 @@ public class TestSparqlExtGeoSparql {
 
 	@Test
 	public void testAsGeoJSON() throws ParseException {
-		PrefixMapping pm = new PrefixMappingImpl();
-		pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
+		new InitGeoSPARQL().start();
 
 		String queryStr =
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#> " +
 						"PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " +
-						"PREFIX gml: <http://www.opengis.net/ont/gml#> " +
-						"SELECT ?g { BIND(geof:asGeoJSON('<gml:LineString srsName=\"EPSG:25832\"><gml:coordinates>663957.75944074022118,5103981.64908889029175 663955.915655555087142,5103991.151674075052142</gml:coordinates></gml:LineString>'^^geo:gmlLiteral) AS ?g) }";
+						"SELECT ?g { BIND(geof:asGeoJSON('<gml:LineString xmlns:gml=\"http://www.opengis.net/ont/gml\" srsName=\"EPSG:25832\">" +
+						"<gml:posList>" +
+						"663957.75944074022118 5103981.64908889029175 663955.915655555087142 5103991.151674075052142" +
+						"</gml:posList>" +
+						"</gml:LineString>'^^geo:gmlLiteral) AS ?g) }";
 		String[] tmpActual = {null};
-		QueryExecutionFactory.create(queryStr, ModelFactory.createDefaultModel()).execSelect()
+		Model model = ModelFactory.createDefaultModel();
+		model.setNsPrefix("gml", "http://www.opengis.net/ont/gml");
+		QueryExecutionFactory.create(queryStr, model).execSelect()
 				.forEachRemaining(
 						qs -> tmpActual[0] = qs.get("g").asNode().getLiteralLexicalForm());
 		String actual = tmpActual[0];
+		System.out.println(tmpActual[0]);
 		String expected =
-				"LINESTRING (11.12011600889509 46.06974332787273, 11.120095457435852 46.06982923685294)";
+				"{\"type\":\"LineString\",\"coordinates\":[[663957.75944074,5103981.64908889],[663955.91565556,5103991.15167408]],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}";
 		GeometryFactory geometryFactory = new GeometryFactory();
 		GeoJsonReader reader = new GeoJsonReader(geometryFactory);
 		LineString expectedGeo = (LineString) reader.read(expected);
