@@ -33,28 +33,28 @@ public interface MavenEntityCore {
             t = "jar";
         }
 
-        return new MavenEntityCoreImpl(g, a, v, c, t);
+        return new MavenEntityCoreImpl(g, a, v, t, c);
     }
 
     public static String toString(MavenEntityCore coord) {
-        String c = coord.getClassifier();
         String t = coord.getType();
+        String c = coord.getClassifier();
 
         String suffix =
-                (t.isEmpty() ? "" : ":" + t) +
-                (c.isEmpty() ? "" : ":" + c);
+                (t == null || t.isEmpty() ? "" : ":" + t) +
+                (c == null || c.isEmpty() ? "" : ":" + c);
 
         String result = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion() + suffix;
         return result;
     }
 
     public static String getFileNameSuffix(MavenEntityCore coord) {
-        String c = coord.getClassifier();
         String t = coord.getType();
+        String c = coord.getClassifier();
 
         String result =
-                (c.isEmpty() ? "" : "-" + c) +
-                (t.isEmpty() ? "" : "." + t);
+                (c == null || c.isEmpty() ? "" : "-" + c) +
+                (t == null || t.isEmpty() ? "" : "." + t);
 
         return result;
     }
@@ -87,5 +87,12 @@ public interface MavenEntityCore {
         String result = g + "/" + coord.getArtifactId() + "/" + coord.getVersion();
 
         return result;
+    }
+
+    public static MavenEntityCore parse(String mvnId) {
+        String[] tmp = mvnId.split(":", 5);
+        String[] parts = new String[5];
+        System.arraycopy(tmp, 0, parts, 0, tmp.length);
+        return new MavenEntityCoreImpl(parts[0], parts[1], parts[2], parts[3], parts[4]);
     }
 }

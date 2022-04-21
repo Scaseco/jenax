@@ -36,7 +36,8 @@ public class QueryExecWithNodeTransform
 
     @Override
     public DatasetGraph getDataset() {
-        return NodeTransformLib2.copyWithNodeTransform(nodeTransform, getDecoratee().getDataset());
+        return getDecoratee().getDataset();
+        // return NodeTransformLib2.copyWithNodeTransform(nodeTransform, getDecoratee().getDataset());
     }
 
     @Override

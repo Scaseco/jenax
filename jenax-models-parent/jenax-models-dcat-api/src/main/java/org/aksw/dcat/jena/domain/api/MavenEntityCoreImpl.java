@@ -6,20 +6,24 @@ public class MavenEntityCoreImpl
     protected String groupId;
     protected String artifactId;
     protected String version;
-    protected String classifier;
     protected String type;
+    protected String classifier;
 
     public MavenEntityCoreImpl() {
         super();
     }
 
-    public MavenEntityCoreImpl(String groupId, String artifactId, String version, String classifier, String type) {
+    public MavenEntityCoreImpl(MavenEntityCore base) {
+        this(base.getGroupId(), base.getArtifactId(), base.getVersion(), base.getType(), base.getClassifier());
+    }
+
+    public MavenEntityCoreImpl(String groupId, String artifactId, String version, String type, String classifier) {
         super();
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
-        this.classifier = classifier;
         this.type = type;
+        this.classifier = classifier;
     }
 
     @Override
