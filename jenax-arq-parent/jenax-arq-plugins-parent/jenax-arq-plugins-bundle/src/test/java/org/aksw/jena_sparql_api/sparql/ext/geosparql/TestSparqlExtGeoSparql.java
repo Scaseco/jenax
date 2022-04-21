@@ -79,7 +79,10 @@ public class TestSparqlExtGeoSparql {
 		pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
 
 		String queryStr =
-				"SELECT ?g { BIND(fn:asGeoJSON('<gml:LineString srsName=\"EPSG:25832\"><gml:coordinates>663957.75944074022118,5103981.64908889029175 663955.915655555087142,5103991.151674075052142</gml:coordinates></gml:LineString>') AS ?g) }";
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#> " +
+						"PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " +
+						"PREFIX gml: <http://www.opengis.net/ont/gml#> " +
+						"SELECT ?g { BIND(geof:asGeoJSON('<gml:LineString srsName=\"EPSG:25832\"><gml:coordinates>663957.75944074022118,5103981.64908889029175 663955.915655555087142,5103991.151674075052142</gml:coordinates></gml:LineString>'^^geo:gmlLiteral) AS ?g) }";
 		String[] tmpActual = {null};
 		QueryExecutionFactory.create(queryStr, ModelFactory.createDefaultModel()).execSelect()
 				.forEachRemaining(
