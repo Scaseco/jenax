@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.conjure.dataset.algebra;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
@@ -21,8 +21,8 @@ public interface OpDataRefResource
     @PolymorphicOnly
     @IriNs("rpif")
     @HashId
-    DataRef getDataRef();
-    OpDataRefResource setDataRef(DataRef dataRef);
+    RdfDataRef getDataRef();
+    OpDataRefResource setDataRef(RdfDataRef dataRef);
 
     @Override
     default <T> T accept(OpVisitor<T> visitor) {
@@ -37,17 +37,17 @@ public interface OpDataRefResource
         Model tmp = ResourceUtils.reachableClosure(tmpDataRef);
         cloneModel.add(tmp);
         Resource dataRef = tmpDataRef.inModel(cloneModel);
-        DataRef cloneDataRef = JenaPluginUtils.polymorphicCast(dataRef, DataRef.class);
+        RdfDataRef cloneDataRef = JenaPluginUtils.polymorphicCast(dataRef, RdfDataRef.class);
 
         return this.inModel(cloneModel).as(OpDataRefResource.class)
                 .setDataRef(cloneDataRef);
     }
 
-    public static OpDataRefResource from(DataRef dataRef) {
+    public static OpDataRefResource from(RdfDataRef dataRef) {
         return from(dataRef.getModel(), dataRef);
     }
 
-    public static OpDataRefResource from(Model model, DataRef dataRef) {
+    public static OpDataRefResource from(Model model, RdfDataRef dataRef) {
         OpDataRefResource result = model
                 .createResource().as(OpDataRefResource.class)
                 .setDataRef(dataRef);

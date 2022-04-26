@@ -1,13 +1,13 @@
 package org.aksw.jena_sparql_api.conjure.dataref.core.api;
 
-public interface PlainDataRefCatalog
-	extends PlainDataRef
+public interface DataRefCatalog
+	extends DataRef
 {
-	PlainDataRef getCatalogDataRef();
+	DataRef getCatalogDataRef();
 	String getEntryId();
 	
 	@Override
-	default <T> T accept(PlainDataRefVisitor<T> visitor) {
+	default <T> T accept(DataRefVisitor<T> visitor) {
 		T result = visitor.visit(this);
 		return result;
 	}

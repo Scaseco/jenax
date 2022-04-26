@@ -1,14 +1,14 @@
 package org.aksw.jena_sparql_api.conjure.plugin;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefCatalog;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefEmpty;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefExt;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefGit;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefOp;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefCatalog;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefEmpty;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefExt;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefGit;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefOp;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op1;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op2;
@@ -80,8 +80,8 @@ public class JenaPluginConjure
         // JenaPluginUtils.registerResourceClasses(Checksum.class);
 
         JenaPluginUtils.registerResourceClasses(
-                DataRef.class, DataRefCatalog.class, DataRefDcat.class, DataRefEmpty.class, DataRefExt.class,
-                DataRefGit.class, DataRefOp.class, DataRefSparqlEndpoint.class, DataRefUrl.class);
+                RdfDataRef.class, RdfDataRefCatalog.class, RdfDataRefDcat.class, RdfDataRefEmpty.class, RdfDataRefExt.class,
+                RdfDataRefGit.class, RdfDataRefOp.class, RdfDataRefSparqlEndpoint.class, RdfDataRefUrl.class);
 
         JenaPluginUtils.registerResourceClasses(
                 org.aksw.jena_sparql_api.conjure.entity.algebra.Op.class,

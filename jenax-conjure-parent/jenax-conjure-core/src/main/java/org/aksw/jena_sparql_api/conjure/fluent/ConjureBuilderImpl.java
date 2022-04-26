@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpCoalesce;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData;
@@ -46,7 +46,7 @@ public class ConjureBuilderImpl
 
     @Override
     public ConjureFluent fromUrl(String url) {
-        return wrap(OpDataRefResource.from(context.getModel(), DataRefUrl.create(context.getModel(), url)));
+        return wrap(OpDataRefResource.from(context.getModel(), RdfDataRefUrl.create(context.getModel(), url)));
     }
 
     @Override
@@ -55,16 +55,16 @@ public class ConjureBuilderImpl
     }
 
     @Override
-    public ConjureFluent fromDataRefFn(Function<? super Model, ? extends DataRef> dataRefFn) {
+    public ConjureFluent fromDataRefFn(Function<? super Model, ? extends RdfDataRef> dataRefFn) {
         Model model = context.getModel();
-        DataRef dataRef = dataRefFn.apply(model);
+        RdfDataRef dataRef = dataRefFn.apply(model);
         return wrap(OpDataRefResource.from(context.getModel(), dataRef));
     }
 
     @Override
-    public ConjureFluent fromDataRef(DataRef dataRef) {
+    public ConjureFluent fromDataRef(RdfDataRef dataRef) {
         // Copy all triples of the dataref into the model of the fluent
-        DataRef copy = JenaPluginUtils.copyInto(dataRef, DataRef.class, context.getModel());
+        RdfDataRef copy = JenaPluginUtils.copyInto(dataRef, RdfDataRef.class, context.getModel());
         return wrap(OpDataRefResource.from(context.getModel(), copy));
     }
 

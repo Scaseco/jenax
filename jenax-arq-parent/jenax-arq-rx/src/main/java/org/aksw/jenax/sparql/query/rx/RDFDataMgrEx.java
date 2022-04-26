@@ -39,6 +39,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
@@ -586,6 +587,9 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static void writeAsGiven(OutputStream out, Model model, RDFFormat rdfFormat, String baseIri) {
+        writeAsGiven(out, DatasetFactory.wrap(model), rdfFormat, baseIri);
+    }
 
     public static void writeAsGiven(OutputStream out, Dataset dataset, RDFFormat rdfFormat, String baseIri) {
         writeAsGiven(out, dataset.asDatasetGraph(), rdfFormat, baseIri);

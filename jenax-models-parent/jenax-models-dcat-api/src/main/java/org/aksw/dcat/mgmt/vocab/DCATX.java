@@ -6,4 +6,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public class DCATX {
     public static final Resource DataProject = ResourceFactory.createResource(DcatXTerms.DataProject);
     public static final Resource defaultGroupId = ResourceFactory.createResource(DcatXTerms.defaultGroupId);
+
+    public static final Resource graphIri = ResourceFactory.createProperty(DcatXTerms.graphIri);
 }

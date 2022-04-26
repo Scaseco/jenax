@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.conjure.dataref.rdf.api;
 
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefDcat;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriType;
@@ -13,8 +13,8 @@ import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
 @RdfTypeNs("rpif")
-public interface DataRefDcat
-    extends PlainDataRefDcat, DataRef
+public interface RdfDataRefDcat
+    extends DataRefDcat, RdfDataRef
 {
 //    @IriNs("rpif")
 //    // @PolymorphicOnly
@@ -25,19 +25,19 @@ public interface DataRefDcat
     @HashId
     @IriType
     Node getDcatRecordNode();
-    DataRefDcat setDcatRecordNode(Node iri);
+    RdfDataRefDcat setDcatRecordNode(Node iri);
 
     @Override
-    default <T> T accept2(DataRefVisitor<T> visitor) {
+    default <T> T acceptRdf(RdfDataRefVisitor<T> visitor) {
         T result = visitor.visit(this);
         return result;
     }
 
-    public static DataRefDcat create(Model model, Resource dcatRecord) {
+    public static RdfDataRefDcat create(Model model, Resource dcatRecord) {
         model.add(dcatRecord.getModel());
         dcatRecord = dcatRecord.inModel(model);
 
-        DataRefDcat result = model.createResource().as(DataRefDcat.class)
+        RdfDataRefDcat result = model.createResource().as(RdfDataRefDcat.class)
                 .setDcatRecordNode(dcatRecord.asNode());
 
         return result;

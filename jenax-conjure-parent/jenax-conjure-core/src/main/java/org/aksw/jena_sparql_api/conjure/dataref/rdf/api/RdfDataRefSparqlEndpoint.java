@@ -3,23 +3,23 @@ package org.aksw.jena_sparql_api.conjure.dataref.rdf.api;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefSparqlEndpoint;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriType;
-import org.aksw.jenax.annotation.reprogen.RdfTypeNs;
+import org.aksw.jenax.annotation.reprogen.RdfType;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Model;
 
 @ResourceView
-@RdfTypeNs("rpif")
-public interface DataRefSparqlEndpoint
-    extends PlainDataRefSparqlEndpoint, DataRef
+@RdfType("rpif:DataRefSparqlEndpoint")
+public interface RdfDataRefSparqlEndpoint
+    extends DataRefSparqlEndpoint, RdfDataRef
 {
     @HashId
     @Iri("rpif:serviceUrl")
     @IriType
-    DataRefSparqlEndpoint setServiceUrl(String serviceUrl);
+    RdfDataRefSparqlEndpoint setServiceUrl(String serviceUrl);
 
     @HashId
     @Override
@@ -34,18 +34,18 @@ public interface DataRefSparqlEndpoint
     List<String> getDefaultGraphs();
 
     @Override
-    default <T> T accept2(DataRefVisitor<T> visitor) {
+    default <T> T acceptRdf(RdfDataRefVisitor<T> visitor) {
         T result = visitor.visit(this);
         return result;
     }
 
 
-    default DataRefSparqlEndpoint mutateDefaultGraphs(Consumer<? super List<? super String>> defaultGraphsMutator) {
+    default RdfDataRefSparqlEndpoint mutateDefaultGraphs(Consumer<? super List<? super String>> defaultGraphsMutator) {
         defaultGraphsMutator.accept(getDefaultGraphs());
         return this;
     }
 
-    default DataRefSparqlEndpoint mutateNamedGraphs(Consumer<? super List<? super String>> namedGraphsMutator) {
+    default RdfDataRefSparqlEndpoint mutateNamedGraphs(Consumer<? super List<? super String>> namedGraphsMutator) {
         namedGraphsMutator.accept(getNamedGraphs());
         return this;
     }
@@ -57,8 +57,8 @@ public interface DataRefSparqlEndpoint
 //
 //	}
 
-    public static DataRefSparqlEndpoint create(Model model, String serviceUrl) {
-        DataRefSparqlEndpoint result = model.createResource().as(DataRefSparqlEndpoint.class)
+    public static RdfDataRefSparqlEndpoint create(Model model, String serviceUrl) {
+        RdfDataRefSparqlEndpoint result = model.createResource().as(RdfDataRefSparqlEndpoint.class)
                 .setServiceUrl(serviceUrl);
         return result;
 

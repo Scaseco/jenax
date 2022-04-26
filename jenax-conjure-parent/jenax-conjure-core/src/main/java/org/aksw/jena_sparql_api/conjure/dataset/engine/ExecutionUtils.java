@@ -127,7 +127,7 @@ public class ExecutionUtils {
             throw new RuntimeException(e);
         }
 //        ResourceStore cacheStore = repo.getCacheStore();
-        OpExecutorDefault catalogExecutor = new OpExecutorDefault(repo, TaskContext.empty(), new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
+        OpExecutorDefault catalogExecutor = new OpExecutorDefault(null, repo, TaskContext.empty(), new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
 
         RdfDataPod result = op.accept(catalogExecutor);
         return result;
@@ -361,6 +361,7 @@ public class ExecutionUtils {
                         Entry::getValue));
 
         OpExecutorDefault executor = new OpExecutorDefault(
+                null,
                 repo,
                 taskContext,
                 execCtx,

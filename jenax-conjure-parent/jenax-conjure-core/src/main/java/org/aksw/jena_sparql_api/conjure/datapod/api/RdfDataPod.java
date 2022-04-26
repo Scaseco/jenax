@@ -1,14 +1,15 @@
 package org.aksw.jena_sparql_api.conjure.datapod.api;
 
-import org.apache.jena.query.Dataset;
+import org.aksw.jenax.connection.dataengine.RdfDataEngine;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 
 /** FIXME Consolidate RdfDataPod and RdfDataSource; are they the some or is the RdfDataPod more high level? */
+// @Deprecated // Use RdfDataEngine instead of RdfDataPod
 public interface RdfDataPod
-    extends DataPod
+    extends RdfDataEngine, DataPod
 {
 //	@Override
 //	default RdfEntityInfo persist(Path file) throws IOException {
@@ -58,7 +59,7 @@ public interface RdfDataPod
      *
      * @return
      */
-    RDFConnection openConnection();
+    // RDFConnection getConnection();
 
     /**
      * Obtain a {@link Model} for the data backing this pod.
@@ -70,7 +71,7 @@ public interface RdfDataPod
      */
     default Model getModel() {
         Model result;
-        try(RDFConnection conn = openConnection()) {
+        try(RDFConnection conn = getConnection()) {
             result = conn.queryConstruct("CONSTRUCT WHERE { ?s ?p ?o }");
         }
         return result;
@@ -78,7 +79,7 @@ public interface RdfDataPod
 
     default Dataset getDataset() {
         Dataset result;
-        try(RDFConnection conn = openConnection()) {
+        try(RDFConnection conn = getConnection()) {
             result = conn.fetchDataset(); // conn.fetchDataset("CONSTRUCT WHERE { ?s ?p ?o }");
         }
         return result;

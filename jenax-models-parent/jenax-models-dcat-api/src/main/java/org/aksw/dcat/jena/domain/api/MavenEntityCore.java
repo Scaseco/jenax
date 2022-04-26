@@ -2,9 +2,13 @@ package org.aksw.dcat.jena.domain.api;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface MavenEntityCore {
+
+    public static final String URN_MVN = "urn:mvn:";
+
     String getGroupId();
     MavenEntityCore setGroupId(String groupId);
 
@@ -89,10 +93,58 @@ public interface MavenEntityCore {
         return result;
     }
 
-    public static MavenEntityCore parse(String mvnId) {
+    public static MavenEntityCore parseId(String mvnId) {
         String[] tmp = mvnId.split(":", 5);
         String[] parts = new String[5];
         System.arraycopy(tmp, 0, parts, 0, tmp.length);
         return new MavenEntityCoreImpl(parts[0], parts[1], parts[2], parts[3], parts[4]);
+    }
+
+    public static MavenEntityCore parseUrn(String mvnUrn) {
+        if (!mvnUrn.startsWith(URN_MVN)) {
+            throw new IllegalArgumentException("Argument does not start with urn:mvn: - got: " + mvnUrn);
+        }
+
+        String arg = mvnUrn.substring(URN_MVN.length());
+        MavenEntityCore result = parseId(arg);
+        return result;
+    }
+
+    /** Parse a maven GAV pattern with colons. The pattern may be ptionally prefixed with urn:mvn: */
+    public static MavenEntityCore parse(String mvnIdOrUrn) {
+        String arg = mvnIdOrUrn.startsWith(URN_MVN)
+                ? mvnIdOrUrn.substring(URN_MVN.length())
+                : mvnIdOrUrn;
+
+        return parseId(arg);
+    }
+
+    public static String toPath(
+            MavenEntityCore entity,
+            String snapshotPrefix,
+            String internalPrefix,
+            String componentSeparator,
+            boolean includePrefix,
+            boolean includeDirectories,
+            boolean includeFileName) {
+        String result = null;
+
+        boolean isSnapshot = Optional.ofNullable(entity.getVersion())
+                .map(String::toUpperCase)
+                .map(str -> str.endsWith("-SNAPSHOT")).orElse(false);
+
+        String prefix = includePrefix
+                ? (isSnapshot ? snapshotPrefix : internalPrefix)
+                : null
+                ;
+
+        String pathStr = includeDirectories ? toPath(entity) : null;
+        String fileName = includeFileName ? toFileName(entity) : null;
+
+        result = Arrays.asList(prefix, pathStr, fileName).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(componentSeparator));
+
+        return result;
     }
 }

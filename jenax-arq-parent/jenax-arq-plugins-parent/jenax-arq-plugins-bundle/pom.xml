@@ -44,6 +44,11 @@
 			<artifactId>jenax-arq-plugins-datatypes</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-dcat-api</artifactId>
+		</dependency>
+
 		<!-- Used for cutsom Aggregators (should probably go to jsa utls) -->
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
