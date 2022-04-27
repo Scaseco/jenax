@@ -104,6 +104,7 @@ public class FunctionAdapter
         for (int i = 0; i < params.length; ++i) {
             Object javaArg;
             Param param = params[i];
+            Class<?> inputClass = param.getInputClass();
             Class<?> paramType = param.getParamClass();
 
             if (i < n) {
@@ -119,7 +120,12 @@ public class FunctionAdapter
 
                 NodeValue nv = arg.getConstant();
                 Node node = nv.asNode();
-                Object intermediateObj = node.getLiteralValue();
+                Object intermediateObj;
+                if (Node.class.isAssignableFrom(inputClass)) {
+                    intermediateObj = node;
+                } else {
+                    intermediateObj = node.getLiteralValue();
+                }
 
 //				try {
                     javaArg = convert(intermediateObj, paramType, converterRegistry);
