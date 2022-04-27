@@ -121,7 +121,7 @@ public class FunctionAdapter
                 NodeValue nv = arg.getConstant();
                 Node node = nv.asNode();
                 Object intermediateObj;
-                if (Node.class.isAssignableFrom(inputClass)) {
+                if (inputClass != null && Node.class.isAssignableFrom(inputClass)) {
                     intermediateObj = node;
                 } else {
                     intermediateObj = node.getLiteralValue();
