@@ -4,11 +4,11 @@ import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefOp;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
-import org.aksw.jenax.annotation.reprogen.RdfTypeNs;
+import org.aksw.jenax.annotation.reprogen.RdfType;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 
 @ResourceView
-@RdfTypeNs("rpif:DataRefOp")
+@RdfType("rpif:DataRefOp")
 public interface RdfDataRefOp
     extends DataRefOp, RdfDataRef
 {

@@ -5,6 +5,7 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
@@ -17,6 +18,7 @@ public interface NodeRef
 {
     @IriNs("rpif")
     @HashId
+    @PolymorphicOnly
     RdfDataRef getDataRef();
     NodeRef setDataRef(Resource dataRef);
 
@@ -51,15 +53,21 @@ public interface NodeRef
         RdfDataRef dataRef = model.createResource().as(RdfDataRefDcat.class)
                 .setDcatRecordNode(dcatEntity);
 
-//        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecord(model.wrapAsResource(dcatEntity));
+        NodeRef result = createForDataRef(model, dataRef.asNode(), node, graph);
+
+        return result;
+      }
+
+    public static NodeRef createForDataRef(Model model, Node dataRef, Node node, Node graph) {
 
         NodeRef result = model.createResource().as(NodeRef.class)
-          .setDataRef(dataRef)
+          .setDataRef(model.wrapAsResource(dataRef))
           .setNode(node)
           .setGraph(graph);
 
         return result;
       }
+
 
 }
 

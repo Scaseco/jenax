@@ -6,6 +6,7 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefEmpty;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefExt;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefGit;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefGraph;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefOp;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
@@ -81,7 +82,7 @@ public class JenaPluginConjure
 
         JenaPluginUtils.registerResourceClasses(
                 RdfDataRef.class, RdfDataRefCatalog.class, RdfDataRefDcat.class, RdfDataRefEmpty.class, RdfDataRefExt.class,
-                RdfDataRefGit.class, RdfDataRefOp.class, RdfDataRefSparqlEndpoint.class, RdfDataRefUrl.class);
+                RdfDataRefGit.class, RdfDataRefOp.class, RdfDataRefSparqlEndpoint.class, RdfDataRefUrl.class, RdfDataRefGraph.class);
 
         JenaPluginUtils.registerResourceClasses(
                 org.aksw.jena_sparql_api.conjure.entity.algebra.Op.class,

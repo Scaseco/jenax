@@ -7,7 +7,7 @@ public class ProvTerms {
     public static final String Entity = NS + "Entity";
     public static final String Activity = NS + "Activity";
     public static final String Agent = NS + "Agent";
-    
+
     public static final String entity = NS + "entity";
     public static final String hadUsage = NS + "hadUsage";
     public static final String hadPlan = NS + "hadPlan";
@@ -18,9 +18,12 @@ public class ProvTerms {
     public static final String qualifiedAssociation = NS + "qualifiedAssociation";
 
     public static final String hadPrimarySource = NS + "hadPrimarySource";
-    public static final String atTime = "atTime";
-    public static final String startedAtTime = "startedAtTime";
-    public static final String endedAtTime = "endedAtTime";
-    public static final String wasGeneratedBy = "wasGeneratedBy";
-    public static final String wasAssociatedWith = "wasAssociatedWith";
+    public static final String atTime = NS + "atTime";
+    public static final String startedAtTime = NS + "startedAtTime";
+    public static final String endedAtTime = NS + "endedAtTime";
+    public static final String wasGeneratedBy = NS + "wasGeneratedBy";
+    public static final String wasAssociatedWith = NS + "wasAssociatedWith";
+
+    public static final String generated = NS + "generated";
+
 }
