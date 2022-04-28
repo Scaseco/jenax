@@ -9,6 +9,7 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
@@ -62,7 +63,6 @@ public class QueryExecutionUtils {
         return result;
     }
 
-
     public static List<Node> executeList(Function<? super Query, ? extends QueryExecution> qef, Query query, Var var) {
         List<Node> result = new ArrayList<Node>();
 
@@ -78,5 +78,30 @@ public class QueryExecutionUtils {
 
         return result;
     }
+
+    public static <T extends RDFNode> List<T> executeRdfList(Function<? super Query, ? extends QueryExecution> qef, Query query, Class<T> viewClass) {
+        Var var = QueryUtils.extractSoleProjectVar(query);
+
+        List<T> result = executeRdfList(qef, query, var.getName(), viewClass);
+        return result;
+    }
+
+    public static <T extends RDFNode> List<T> executeRdfList(Function<? super Query, ? extends QueryExecution> qef, Query query, String varName, Class<T> viewClass) {
+        List<T> result = new ArrayList<>();
+
+        try (QueryExecution qe = qef.apply(query)) {
+            ResultSet rs = qe.execSelect();
+            while(rs.hasNext()) {
+                QuerySolution qs = rs.next();
+                RDFNode rdfNode = qs.get(varName);
+
+                T item = rdfNode.as(viewClass);
+                result.add(item);
+            }
+        }
+
+        return result;
+    }
+
 
 }

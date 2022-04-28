@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.connection.dataset;
 import java.util.Objects;
 
 import org.aksw.jenax.connection.query.QueryEngineFactoryProvider;
+import org.aksw.jenax.connection.update.UpdateEngineFactoryCore;
 import org.aksw.jenax.connection.update.UpdateEngineFactoryProvider;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -72,6 +73,9 @@ public class DatasetRDFConnectionFactoryBuilder {
         return this;
     }
 
+    public DatasetRDFConnectionFactoryBuilder setUpdateEngineFactoryCore(UpdateEngineFactoryCore updateEngineFactoryCore) {
+        return setUpdateEngineFactory(updateEngineFactoryCore.asFactory());
+    }
 
     public DatasetRDFConnectionFactoryBuilder setUpdateEngineFactoryProvider(UpdateEngineFactoryProvider updateEngineFactoryProvider) {
         this.updateEngineFactoryProvider = updateEngineFactoryProvider;
@@ -79,7 +83,7 @@ public class DatasetRDFConnectionFactoryBuilder {
     }
 
     /** Set the provider to always provide the given query engine factory */
-    public DatasetRDFConnectionFactoryBuilder setUpdateEngineFactoryProvider(UpdateEngineFactory updateEngineFactory) {
+    public DatasetRDFConnectionFactoryBuilder setUpdateEngineFactory(UpdateEngineFactory updateEngineFactory) {
         this.updateEngineFactoryProvider = (dataset, context) -> updateEngineFactory;
         return this;
     }

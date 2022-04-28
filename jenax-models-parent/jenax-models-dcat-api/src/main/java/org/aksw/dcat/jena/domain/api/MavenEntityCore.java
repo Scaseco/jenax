@@ -75,7 +75,8 @@ public interface MavenEntityCore {
     /** Return the file name: artifactId-version-classifier.type */
     public static String toFileName(MavenEntityCore coord) {
         String suffix = getFileNameSuffix(coord);
-        String result = coord.getArtifactId() + "-" + coord.getVersion() + suffix;
+        String v = coord.getVersion();
+        String result = coord.getArtifactId() + (v.isEmpty() ? "" : "-") + v + suffix;
         return result;
     }
 
