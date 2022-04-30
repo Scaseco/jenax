@@ -27,6 +27,7 @@ import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -180,9 +181,10 @@ public class DataPods {
                     }, "HDT Data Pod from " + pathStr);
             result = new RdfDataPodHdtImpl(hdtRef, false);
         } else {
-            Model model;
-            model = RDFDataMgr.loadModel(url);
-            result = DataPods.fromModel(model);
+            // Model model;
+            // model = RDFDataMgr.loadModel(url);
+            Dataset dataset = RDFDataMgrEx.loadDatasetAsGiven(url, null);
+            result = DataPods.fromDataset(dataset); // fromModel(model);
         }
 
 

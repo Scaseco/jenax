@@ -219,7 +219,7 @@ public class OpExecutorDefault
 
                     // TODO Check whether substitution is needed
 //					logger.info("Query before substitution: " + queryStr);
-                    logger.info("Query after substitution: " + effQuery);
+                    logger.info("Query after env-var substitution: " + effQuery);
 
 //					Model contrib = conn.queryConstruct(queryStr);
                     Model contrib = conn.queryConstruct(effQuery);
