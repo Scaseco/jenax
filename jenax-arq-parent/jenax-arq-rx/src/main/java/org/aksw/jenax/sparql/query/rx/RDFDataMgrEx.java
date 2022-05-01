@@ -24,7 +24,6 @@ import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
-import org.aksw.jenax.arq.util.streamrdf.WriterStreamRDFBaseUtils;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
@@ -52,7 +51,6 @@ import org.apache.jena.riot.RIOT;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
-import org.apache.jena.riot.writer.WriterStreamRDFBase;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -600,22 +598,21 @@ public class RDFDataMgrEx {
         Context cxt = RIOT.getContext().copy();
         cxt.setTrue(RIOT.symTurtleOmitBase);
 
+        IRIx irix = baseIri == null
+                ? null
+                : IRIx.create(baseIri) // IRIxResolverUtils.newIRIxAsGiven(baseIri)
+                ;
+
         StreamRDF writer = StreamRDFWriterEx.getWriterStream(
                 out,
                 rdfFormat,
                 cxt,
                 null,
-                null,
+                irix,
                 null,
                 // NodeToLabel.createBNodeByLabelAsGiven(),
                 true
         );
-
-        if (baseIri != null) {
-            // IRIx irix = IRIx.createAny(baseIri);
-            IRIx irix = IRIxResolverUtils.newIRIxAsGiven(baseIri);
-            WriterStreamRDFBaseUtils.setNodeFormatterIRIx((WriterStreamRDFBase)writer, irix);
-        }
 
 
         writer.start();

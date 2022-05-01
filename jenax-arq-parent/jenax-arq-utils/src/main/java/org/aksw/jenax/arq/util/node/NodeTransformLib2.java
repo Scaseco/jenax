@@ -3,11 +3,13 @@ package org.aksw.jenax.arq.util.node;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -21,7 +23,6 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_Function;
@@ -38,7 +39,6 @@ import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
-import org.apache.jena.util.iterator.NiceIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 
 /** Note transforms not captured by {@link NodeTransformLib} such as Bindings, Graphs, Models, Datsets, ... */
@@ -49,6 +49,26 @@ public class NodeTransformLib2 {
         return x -> {
             Node tmp = xform.apply(x);
             Node r = tmp == null ? x : tmp;
+            return r;
+        };
+    }
+
+    public static NodeTransform substPrefix(Map<String, String> map, String separator) {
+        return node -> {
+            Node r = node;
+            if (node.isURI()) {
+                String oldStr = node.getURI();
+                String[] parts = oldStr.split(separator, 2);
+                String oldPrefix = parts[0];
+                String newPrefix = map.get(oldPrefix);
+
+                String newStr = newPrefix != null
+                    ? newPrefix + (parts.length > 1 ? separator + parts[1] : "")
+                    : oldStr;
+
+                r = newStr == oldStr ? node : NodeFactory.createURI(newStr);
+                // System.out.println(node + " -> " + r);
+            }
             return r;
         };
     }
@@ -172,37 +192,37 @@ public class NodeTransformLib2 {
 
         return dg;
     }
-    
-    
+
+
     public static RowSet applyNodeTransform(NodeTransform nodeTransform, RowSet decoratee) {
-    	Iterator<Binding> it = WrappedIterator.create(decoratee).mapWith(b -> NodeTransformLib.transform(b, nodeTransform));    	
-    	return new RowSet() {
+        Iterator<Binding> it = WrappedIterator.create(decoratee).mapWith(b -> NodeTransformLib.transform(b, nodeTransform));
+        return new RowSet() {
 
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
 
-			@Override
-			public Binding next() {
-				return it.next();
-			}
+            @Override
+            public Binding next() {
+                return it.next();
+            }
 
-			@Override
-			public List<Var> getResultVars() {
-				return decoratee.getResultVars();
-			}
+            @Override
+            public List<Var> getResultVars() {
+                return decoratee.getResultVars();
+            }
 
-			@Override
-			public long getRowNumber() {
-				return decoratee.getRowNumber();
-			}
+            @Override
+            public long getRowNumber() {
+                return decoratee.getRowNumber();
+            }
 
-			@Override
-			public void close() {
-				decoratee.close();
-			}
-		};
+            @Override
+            public void close() {
+                decoratee.close();
+            }
+        };
     }
 
 
