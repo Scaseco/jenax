@@ -639,12 +639,12 @@ public class SparqlStmtUtils {
 
         return result;
     }
-    
-    
+
+
     /**
      * Get all variables mentioned in the nodes w.r.t. to the variable representations
      * supported by {@link NodeEnvsubst}
-     * 
+     *
      * @param sparqlStmts
      * @return
      */

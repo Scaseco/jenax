@@ -179,10 +179,15 @@ public class NodeTransformLib2 {
 
     // Performs an in-place transform
     public static DatasetGraph applyNodeTransform(NodeTransform nodeTransform, DatasetGraph dg) {
+        return applyQuadTransform(q -> NodeTransformLib.transform(nodeTransform, q), dg);
+    }
+
+    // Performs an in-place transform
+    public static DatasetGraph applyQuadTransform(Function<? super Quad, ? extends Quad> quadTransform, DatasetGraph dg) {
 
         List<Quad> quads = new ArrayList<>();
         WrappedIterator.create(dg.find())
-            .mapWith(q -> NodeTransformLib.transform(nodeTransform, q))
+            .mapWith(quadTransform::apply)
             .forEachRemaining(quads::add);
 
         dg.clear();

@@ -89,6 +89,31 @@ public class QuadUtils {
         return result;
     }
 
+    public static Quad applyNodeTransform(Quad quad,
+            NodeTransform nodeTransform, boolean tg, boolean ts, boolean tp, boolean to) {
+        Node g = quad.getGraph();
+        Node s = quad.getSubject();
+        Node p = quad.getPredicate();
+        Node o = quad.getObject();
+
+        // new values after transformation
+        Node ng = tg ? nodeTransform.apply(g) : g;
+        Node ns = ts ? nodeTransform.apply(s) : s;
+        Node np = tp ? nodeTransform.apply(p) : p;
+        Node no = to ? nodeTransform.apply(o) : o;
+
+        // final values
+        Node fg = ng != null ? ng : g;
+        Node fs = ns != null ? ns : s;
+        Node fp = np != null ? np : p;
+        Node fo = no != null ? no : o;
+
+        Quad result = fg == g && fs == s && fp == p && fo == o
+                ? quad
+                : new Quad(fg, fs, fp, fo);
+        return result;
+    }
+
     /**
      * Create a quad from an array
      *

@@ -29,6 +29,9 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
+import org.apache.jena.sparql.algebra.TransformCopy;
+import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.algebra.op.OpGraph;
 import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -36,6 +39,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
@@ -58,6 +62,7 @@ import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
+import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformApplyElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryShallowCopyWithPresetPrefixes;
 import org.apache.jena.sparql.util.ExprUtils;
@@ -72,42 +77,74 @@ public class QueryUtils {
 
     public static Query applyOpTransform(Query beforeQuery, Function<? super Op, ? extends Op> transform) {
         Op beforeOp = Algebra.compile(beforeQuery);
-        Op afterOp = transform.apply(beforeOp);
+        Op afterOpTmp = transform.apply(beforeOp);
 
         //Set<Var> afterOpVars = OpVars.visibleVars(afterOp);
 //		Op op = NodeTransformLib.transform(new NodeTransformBNodesToVariables(), afterOp);
 
+        // Rename.reverseVarRename(afterOp, true);
         Collection<Var> mentionedVars = OpVars.mentionedVars(beforeOp);
-        Query afterQueryTmp = OpAsQuery.asQuery(afterOp);
-//		Query afterQuery = fixVarNames(afterQueryTmp);
-
         Generator<Var> vargen = VarGeneratorBlacklist.create(mentionedVars);
-        Element eltBefore = afterQueryTmp.getQueryPattern();
 
         // Fix blank nodes introduced as graph names by e.g. Algebra.unionDefaultGraph
-        //Element eltAfter = org.aksw.jena_sparql_api.backports.syntaxtransform.ElementTransformer.transform(eltBefore, new ElementTransformCopyBase() {
-
-        // With jena 4.3.0 a null argument for ExprTransform causes a NPE when transforming VarExprLists
-        Element eltAfter = ElementTransformer.transform(eltBefore, new ElementTransformCopyBase() {
+        TransformCopy nodeFix = new TransformCopy(false) {
             protected Map<Node, Var> map = new HashMap<>();
 
             @Override
-            public Element transform(ElementNamedGraph el, Node gn, Element elt1) {
-                Element result;
+            public Op transform(OpGraph opGraph, Op subOp) {
+                Op result;
+                Node gn = opGraph.getNode();
                 if(gn.isBlank() || (gn.isVariable() && gn.getName().startsWith("?"))) {
                     Var v = map.get(gn);
                     if(v == null) {
                         v = vargen.next();
                         map.put(gn, v);
                     }
-                    result = new ElementNamedGraph(v, elt1);
+                    result = new OpGraph(v, subOp);
                 } else {
-                    result = super.transform(el, gn, elt1);
+                    return super.transform(opGraph, subOp);
                 }
                 return result;
             }
-        }, new ExprTransformCopy(false), null, null);
-        afterQueryTmp.setQueryPattern(eltAfter);
+        };
+
+        Op afterOp = Transformer.transform(nodeFix, afterOpTmp);
+
+        Query afterQueryTmp = OpAsQuery.asQuery(afterOp);
+
+        // NOTE ElementTransform for transform OpFunctions i.e. (NOT) EXISTS is broken
+        // after OpAsQuery in jena 4.5.0 because it only sets the Op but not the Element
+        // ElementTransform ignores the Op and only reads the Element which was not set though
+
+//		Query afterQuery = fixVarNames(afterQueryTmp);
+
+//        Element eltBefore = afterQueryTmp.getQueryPattern();
+
+        // Fix blank nodes introduced as graph names by e.g. Algebra.unionDefaultGraph
+        //Element eltAfter = org.aksw.jena_sparql_api.backports.syntaxtransform.ElementTransformer.transform(eltBefore, new ElementTransformCopyBase() {
+
+        // With jena 4.3.0 a null argument for ExprTransform causes a NPE when transforming VarExprLists
+//        ElementTransform fixGraphName = new ElementTransformCopyBase() {
+//            protected Map<Node, Var> map = new HashMap<>();
+//
+//            @Override
+//            public Element transform(ElementNamedGraph el, Node gn, Element elt1) {
+//                Element result;
+//                if(gn.isBlank() || (gn.isVariable() && gn.getName().startsWith("?"))) {
+//                    Var v = map.get(gn);
+//                    if(v == null) {
+//                        v = vargen.next();
+//                        map.put(gn, v);
+//                    }
+//                    result = new ElementNamedGraph(v, elt1);
+//                } else {
+//                    result = super.transform(el, gn, elt1);
+//                }
+//                return result;
+//            }
+//        };
+//        Element eltAfter = ElementTransformer.transform(eltBefore, fixGraphName, new ExprTransformApplyElementTransform(fixGraphName)); // , null, null);
+//        afterQueryTmp.setQueryPattern(eltAfter);
 
         Query result = QueryUtils.restoreQueryForm(afterQueryTmp, beforeQuery);
 
@@ -565,7 +602,7 @@ public class QueryUtils {
 
 
     public static void injectFilter(Query query, String varName, Node node) {
-    	injectFilter(query, Var.alloc(varName), node);
+        injectFilter(query, Var.alloc(varName), node);
     }
 
     public static void injectFilter(Query query, Var var, Node node) {
