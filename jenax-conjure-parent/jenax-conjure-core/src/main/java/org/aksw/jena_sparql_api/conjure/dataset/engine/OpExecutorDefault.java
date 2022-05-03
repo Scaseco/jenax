@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.algebra.transform.TransformUnionQuery2;
 import org.aksw.jena_sparql_api.algebra.utils.VirtualPartitionedQuery;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
@@ -88,7 +89,6 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.lang.SinkQuadsToDataset;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.algebra.TransformUnionQuery;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -737,7 +737,7 @@ public class OpExecutorDefault
             protected RDFConnection newConnection() {
                 RDFConnection raw = subPod.getConnection();
                 RDFConnection result = RDFConnectionBuilder.from(raw)
-                    .addQueryTransform(q -> QueryUtils.applyOpTransform(q, TransformUnionQuery::transform))
+                    .addQueryTransform(q -> QueryUtils.applyOpTransform(q, TransformUnionQuery2::transform))
                     .getConnection();
                 return result;
             }
