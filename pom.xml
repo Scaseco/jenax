@@ -1487,6 +1487,12 @@
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-java7</artifactId>
 				<version>${tika.version}</version>
+                                <exclusions>
+                                        <exclusion>
+                                                <groupId>xerces</groupId>
+                                                <artifactId>xercesImpl</artifactId>
+                                        </exclusion>
+                                </exclusions>
 			</dependency>
 
 

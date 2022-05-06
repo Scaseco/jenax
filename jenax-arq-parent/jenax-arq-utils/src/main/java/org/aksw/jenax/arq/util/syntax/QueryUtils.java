@@ -70,6 +70,7 @@ import com.google.common.collect.Range;
 
 public class QueryUtils {
 
+
     public static Query applyOpTransform(Query beforeQuery, Function<? super Op, ? extends Op> transform) {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOp = transform.apply(beforeOp);
@@ -565,7 +566,7 @@ public class QueryUtils {
 
 
     public static void injectFilter(Query query, String varName, Node node) {
-    	injectFilter(query, Var.alloc(varName), node);
+        injectFilter(query, Var.alloc(varName), node);
     }
 
     public static void injectFilter(Query query, Var var, Node node) {
