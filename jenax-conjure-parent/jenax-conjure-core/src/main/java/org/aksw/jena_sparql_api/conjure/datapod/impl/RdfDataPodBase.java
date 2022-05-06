@@ -32,7 +32,7 @@ public abstract class RdfDataPodBase
 	}
 
 	@Override
-	public synchronized RDFConnection openConnection() {
+	public synchronized RDFConnection getConnection() {
 //		if(openConnections.isEmpty()) {
 //			throw new RuntimeException("A prior obtained connection has not yet been closed");
 //		}

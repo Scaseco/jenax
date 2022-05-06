@@ -88,8 +88,9 @@ public abstract class SparqlEndpointBase {
         }
     }
 
+
     @GET
-    @Produces({MediaType.APPLICATION_JSON, "application/sparql-results+json"})
+    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
     public void executeQueryJson(
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
@@ -99,8 +100,8 @@ public abstract class SparqlEndpointBase {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({MediaType.APPLICATION_JSON, "application/sparql-results+json"})
-    public void executeQueryXmlPost(
+    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
+    public void executeQueryJsonPost(
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("update") String updateStr) {
@@ -109,6 +110,16 @@ public abstract class SparqlEndpointBase {
         }
         processStmtAsync(asyncResponse, queryString, updateStr, ResultsFormat.FMT_RS_JSON);
     }
+
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLQuery)
+    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
+    public void executeQueryJsonPostDirect(
+            @Suspended final AsyncResponse asyncResponse,
+            String queryString) {
+        processStmtAsync(asyncResponse, queryString, null, ResultsFormat.FMT_RS_JSON);
+    }
+
 
     public void processStmtAsync(final AsyncResponse response, String queryStr, String updateStr, final ResultsFormat format) {
         if(queryStr == null && updateStr == null) {
@@ -265,8 +276,18 @@ public abstract class SparqlEndpointBase {
         processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RDF_XML);
     }
 
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLQuery)
+    @Produces("application/rdf+xml")
+    public void executeQueryRdfXmlPostDirect(
+            @Suspended final AsyncResponse asyncResponse,
+            String queryString) {
+        processStmtAsync(asyncResponse, queryString, null, ResultsFormat.FMT_RDF_XML);
+    }
+
+
     @GET
-    @Produces("application/sparql-results+xml")
+    @Produces(WebContent.contentTypeResultsXML)
     public void executeQueryResultSetXml(
             @Suspended final AsyncResponse asyncResponse,
             @QueryParam("query") String queryString,
@@ -274,16 +295,25 @@ public abstract class SparqlEndpointBase {
         processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
     }
 
-
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces("application/sparql-results+xml")
+    @Produces(WebContent.contentTypeResultsXML)
     public void executeQueryResultSetXmlPost(
             @Suspended final AsyncResponse asyncResponse,
             @FormParam("query") String queryString,
             @FormParam("update") String updateString) {
         processStmtAsync(asyncResponse, queryString, updateString, ResultsFormat.FMT_RS_XML);
     }
+
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLQuery)
+    @Produces(WebContent.contentTypeResultsXML)
+    public void executeQueryResultSetXmlPostDirect(
+            @Suspended final AsyncResponse asyncResponse,
+            String queryString) {
+        processStmtAsync(asyncResponse, queryString, null, ResultsFormat.FMT_RS_XML);
+    }
+
 
 
     @GET

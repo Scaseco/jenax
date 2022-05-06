@@ -7,10 +7,12 @@ import java.util.GregorianCalendar;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.Inverse;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
@@ -26,6 +28,16 @@ public interface Activity
         return JenaPluginUtils.getOrSet(this, Plan.class, this::getHadPlan, this::setHadPlan);
     }
 
+    @Iri(ProvTerms.wasGeneratedBy)
+    @Inverse
+    @HashId
+    Node getGeneratedNode();
+    Activity setGeneratedNode(Node entity);
+
+    @Iri(ProvTerms.wasGeneratedBy)
+    @Inverse
+    Entity getGenerated();
+    Activity setGenerated(Resource entity);
 
     @Iri(ProvTerms.wasAssociatedWith)
     @HashId

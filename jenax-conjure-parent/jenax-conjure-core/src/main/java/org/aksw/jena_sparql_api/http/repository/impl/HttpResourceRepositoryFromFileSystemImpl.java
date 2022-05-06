@@ -277,7 +277,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
 
     public static final String IDENTITY_ENCODING = "identity";
 
-    static class Plan {
+    public static class Plan {
         protected Op op;
         protected RdfEntityInfo info;
 
@@ -296,7 +296,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
         }
     }
 
-    public Plan findBestPlanToServeRequest(HttpRequest request,
+    public static Plan findBestPlanToServeRequest(HttpRequest request,
             Collection<RdfHttpEntityFile> entities,
             OpExecutor opExecutor) throws IOException {
         Header[] headers = request.getAllHeaders();
@@ -375,7 +375,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
 
                     Op op = Planner.createPlan(entity, tgtContentType, tgtEncodings);
                     if(op != null) {
-                        op = opExecutor.optimizeInPlace(op);
+              //           op = opExecutor.optimizeInPlace(op);
 
 
                         int numOps = ResourceTreeUtils.getNumOps(op, Op::getChildren);

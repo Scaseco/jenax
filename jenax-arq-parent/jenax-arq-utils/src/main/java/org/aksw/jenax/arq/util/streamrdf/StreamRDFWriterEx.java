@@ -105,16 +105,16 @@ public class StreamRDFWriterEx {
             WriterStreamRDFBase tmp = (WriterStreamRDFBase)coreWriter;
 
             IRIx effectiveIrix = irix == null
-                    ? IRIxResolverUtils.newIRIxAsGiven("")
+                    ? IRIx.create("") // IRIxResolverUtils.newIRIxAsGiven("")
                     : irix;
 
             NodeToLabel effectiveNodeToLabel = nodeToLabel == null
                     ? SyntaxLabels.createNodeToLabelAsGiven()
                     : nodeToLabel;
 
-            WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
             WriterStreamRDFBaseUtils.setNodeToLabel(tmp, effectiveNodeToLabel);
             WriterStreamRDFBaseUtils.updateFormatter(tmp);
+            WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
 
             if (fixedPrefixes != null) {
                 PrefixMap pm = WriterStreamRDFBaseUtils.getPrefixMap(tmp);

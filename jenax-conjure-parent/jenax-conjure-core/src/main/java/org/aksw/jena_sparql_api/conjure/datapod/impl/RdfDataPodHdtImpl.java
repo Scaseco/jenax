@@ -44,7 +44,7 @@ public class RdfDataPodHdtImpl
     }
 
     @Override
-    public RDFConnection openConnection() {
+    public RDFConnection getConnection() {
         HDT hdt = hdtRef.get();
 
         Graph graph;

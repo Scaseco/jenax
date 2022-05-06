@@ -1,6 +1,9 @@
 package org.aksw.dcat.jena.conf.api;
 
+import java.util.Map;
+
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.KeyIri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 
@@ -24,4 +27,8 @@ public interface DcatRepoConfig
     @IriNs("eg")
     Resource getEngineConf();
     DcatRepoConfig setEngineConf(Resource resource);
+
+    @IriNs("eg")
+    @KeyIri("http://dcat.aksw.org/key")
+    Map<String, String> getProperties();
 }

@@ -8,19 +8,18 @@ import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.LookupServiceCacheMem;
 import org.aksw.commons.rx.lookup.LookupServicePartition;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Var;
 
 // TODO Move to some test suite
 public class MainLookupServiceTest {
     public static void main(String[] args) {
-        SparqlQueryConnection sparqlService = new SparqlQueryConnectionJsa(new QueryExecutionFactoryHttp("http://dbpedia.org/sparql", "http://dbpedia.org"));
+        QueryExecutionFactoryQuery sparqlService = new QueryExecutionFactoryHttp("http://dbpedia.org/sparql", "http://dbpedia.org");
 
         Var var = Var.alloc("s");
         Query query = QueryFactory.create("Prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> Prefix dbpo: <http://dbpedia.org/ontology/> Select ?s ?w { ?s a dbpo:Castle ; geo:geometry ?w }");

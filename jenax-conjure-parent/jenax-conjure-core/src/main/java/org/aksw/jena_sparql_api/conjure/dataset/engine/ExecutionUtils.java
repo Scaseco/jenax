@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.aksw.dcat.jena.domain.api.DcatDataset;
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
 import org.aksw.dcat.jena.domain.api.MavenEntity;
+import org.aksw.dcat.jena.domain.api.MavenEntityCore;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
@@ -70,9 +71,10 @@ public class ExecutionUtils {
      */
     public static String deriveId(Resource r) {
         MavenEntity ds = ModelFactory.createDefaultModel().createResource().as(MavenEntity.class);
-        String mvnId = Stream.concat(Arrays.asList(ds.getGroupId(), ds.getArtifactId(), ds.getVersion()).stream(), ds.getClassifiers().stream())
-            .filter(Objects::nonNull)
-            .collect(Collectors.joining(":"));
+        String mvnId = MavenEntityCore.toString(MavenEntityCore.normalize(ds));
+//        		Stream.concat(Arrays.asList(ds.getGroupId(), ds.getArtifactId(), ds.getVersion()).stream(), ds.getClassifiers().stream())
+//            .filter(Objects::nonNull)
+//            .collect(Collectors.joining(":"));
 
         String result = !mvnId.isEmpty()
                 ? mvnId
@@ -125,7 +127,7 @@ public class ExecutionUtils {
             throw new RuntimeException(e);
         }
 //        ResourceStore cacheStore = repo.getCacheStore();
-        OpExecutorDefault catalogExecutor = new OpExecutorDefault(repo, TaskContext.empty(), new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
+        OpExecutorDefault catalogExecutor = new OpExecutorDefault(null, repo, TaskContext.empty(), new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
 
         RdfDataPod result = op.accept(catalogExecutor);
         return result;
@@ -359,6 +361,7 @@ public class ExecutionUtils {
                         Entry::getValue));
 
         OpExecutorDefault executor = new OpExecutorDefault(
+                null,
                 repo,
                 taskContext,
                 execCtx,

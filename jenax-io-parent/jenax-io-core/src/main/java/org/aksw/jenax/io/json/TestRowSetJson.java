@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.curator.shaded.com.google.common.base.Objects;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.riot.resultset.ResultSetLang;
-import org.apache.jena.riot.rowset.rw.RowSetReaderJSON;
+import org.apache.jena.riot.rowset.RowSetReaderRegistry;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
@@ -32,7 +32,7 @@ public class TestRowSetJson {
 
         System.out.println("Data retrieved");
         RowSet actuals = RowSetJson.createBuffered(new ByteArrayInputStream(data), cxt);
-        RowSet expecteds = RowSetReaderJSON.factory.create(ResultSetLang.RS_JSON).read(new ByteArrayInputStream(data), cxt);
+        RowSet expecteds = RowSetReaderRegistry.getFactory(ResultSetLang.RS_JSON).create(ResultSetLang.RS_JSON).read(new ByteArrayInputStream(data), cxt);
 
         boolean isOk = true;
         while (actuals.hasNext() && expecteds.hasNext()) {

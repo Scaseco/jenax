@@ -3,15 +3,16 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.LookupService;
+import org.aksw.commons.rx.util.FlowableEx;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.table.TableN;
 import org.apache.jena.sparql.core.Var;
@@ -47,40 +48,11 @@ public class LookupServiceSparqlQuery
 {
     private static final Logger logger = LoggerFactory.getLogger(LookupServiceSparqlQuery.class);
 
-    public static class Builder {
-        protected QueryExecutionFactory qef;
-        protected Query query;
-        protected String queryString;
-        protected Syntax syntax;
-
-        public void setConnection(RDFConnection conn) {
-
-        }
-
-        public void setQuery(Query query) {
-
-        }
-
-        public void setQuery(String queryString, Syntax syntax) {
-
-        }
-
-
-        public LookupServiceSparqlQuery build() {
-//    		if(queryString != null) {
-//    			query
-//    		}
-            return null;
-        }
-
-    }
-
-
-    protected SparqlQueryConnection sparqlService;
+    protected QueryExecutionFactoryQuery sparqlService;
     protected Query query;
     protected Var var;
 
-    public LookupServiceSparqlQuery(SparqlQueryConnection sparqlService, Query query, Var var) {
+    public LookupServiceSparqlQuery(QueryExecutionFactoryQuery sparqlService, Query query, Var var) {
         this.sparqlService = sparqlService;
         this.query = query;
         this.var = var;
@@ -107,7 +79,7 @@ public class LookupServiceSparqlQuery
 
             logger.debug("Looking up: " + q);
 
-            result = SparqlRx.execSelectRaw(() -> sparqlService.query(q))
+            result = SparqlRx.execSelectRaw(() -> sparqlService.createQueryExecution(q))
                 .groupBy(b -> b.get(var))
                 .flatMapSingle(groups -> groups
                         .collectInto((Table)new TableN(), (t, b) -> t.addBinding(b))
@@ -157,4 +129,34 @@ public class LookupServiceSparqlQuery
 
         return result;
     }
+
+
+    public static class Builder {
+        protected QueryExecutionFactory qef;
+        protected Query query;
+        protected String queryString;
+        protected Syntax syntax;
+
+        public void setConnection(RDFConnection conn) {
+
+        }
+
+        public void setQuery(Query query) {
+
+        }
+
+        public void setQuery(String queryString, Syntax syntax) {
+
+        }
+
+
+        public LookupServiceSparqlQuery build() {
+//    		if(queryString != null) {
+//    			query
+//    		}
+            return null;
+        }
+
+    }
+
 }

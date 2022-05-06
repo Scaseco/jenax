@@ -1,8 +1,16 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
+import org.apache.jena.geosparql.InitGeoSPARQL;
+import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.datatype.GMLDatatype;
+import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
+import org.apache.jena.geosparql.implementation.parsers.gml.GMLReader;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -11,6 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.math.DoubleMath;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 
 public class TestSparqlExtGeoSparql {
@@ -64,6 +77,35 @@ public class TestSparqlExtGeoSparql {
 		Assert.assertTrue(DoubleMath.fuzzyEquals(1, GeoFunctionsJena.y(gw.getParsingGeometry()), TOLERANCE));
 		
 //		System.out.println(gw);
+	}
+
+	@Test
+	public void testAsGeoJSON() throws ParseException {
+		new InitGeoSPARQL().start();
+
+		String queryStr =
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#> " +
+						"PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " +
+						"SELECT ?g { BIND(geof:asGeoJSON('<gml:LineString xmlns:gml=\"http://www.opengis.net/ont/gml\" srsName=\"EPSG:25832\">" +
+						"<gml:posList>" +
+						"663957.75944074022118 5103981.64908889029175 663955.915655555087142 5103991.151674075052142" +
+						"</gml:posList>" +
+						"</gml:LineString>'^^geo:gmlLiteral) AS ?g) }";
+		String[] tmpActual = {null};
+		Model model = ModelFactory.createDefaultModel();
+		model.setNsPrefix("gml", "http://www.opengis.net/ont/gml");
+		QueryExecutionFactory.create(queryStr, model).execSelect()
+				.forEachRemaining(
+						qs -> tmpActual[0] = qs.get("g").asNode().getLiteralLexicalForm());
+		String actual = tmpActual[0];
+		System.out.println(tmpActual[0]);
+		String expected =
+				"{\"type\":\"LineString\",\"coordinates\":[[663957.75944074,5103981.64908889],[663955.91565556,5103991.15167408]],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}";
+		GeometryFactory geometryFactory = new GeometryFactory();
+		GeoJsonReader reader = new GeoJsonReader(geometryFactory);
+		LineString expectedGeo = (LineString) reader.read(expected);
+		LineString actualGeo = (LineString) reader.read(tmpActual[0]);
+		Assert.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
 	}
 
 //	@Test

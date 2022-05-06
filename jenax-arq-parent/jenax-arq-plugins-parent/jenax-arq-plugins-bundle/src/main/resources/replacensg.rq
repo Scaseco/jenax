@@ -1,0 +1,26 @@
+# Finds and replaces any occurrence of an old namespace (oldNS) with the new namespace (newNS)
+# SELECT (sys:getenv('SOURCE_NS') as ?source) (sys:getenv('TARGET_NS') as ?target) {}
+
+DELETE {
+  GRAPH ?g { ?s ?p ?o }
+}
+INSERT {
+  GRAPH ?gn { ?sn ?pn ?on }
+}
+WHERE
+{
+  GRAPH ?g { ?s ?p ?o }
+
+  BIND (isIRI(?g) && strstarts(str(?g), <env:SOURCE_NS>) AS ?gr)
+  BIND (isIRI(?s) && strstarts(str(?s), <env:SOURCE_NS>) AS ?sr)
+  BIND (isIRI(?p) && strstarts(str(?p), <env:SOURCE_NS>) AS ?pr)
+  BIND (isIRI(?o) && strstarts(str(?o), <env:SOURCE_NS>) AS ?or)
+
+  FILTER (?gr || ?sr || ?pr || ?or )
+
+  BIND (IF(?gr, IRI(replace(str(?g), <env:SOURCE_NS>, <env:TARGET_NS>)), ?g) AS ?gn)
+  BIND (IF(?sr, IRI(replace(str(?s), <env:SOURCE_NS>, <env:TARGET_NS>)), ?s) AS ?sn)
+  BIND (IF(?pr, IRI(replace(str(?p), <env:SOURCE_NS>, <env:TARGET_NS>)), ?p) AS ?pn)
+  BIND (IF(?or, IRI(replace(str(?o), <env:SOURCE_NS>, <env:TARGET_NS>)), ?o) AS ?on)
+}
+

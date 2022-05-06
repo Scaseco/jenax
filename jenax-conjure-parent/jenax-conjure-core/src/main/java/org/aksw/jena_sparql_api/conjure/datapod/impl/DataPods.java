@@ -11,11 +11,11 @@ import org.aksw.commons.io.util.UriUtils;
 import org.aksw.commons.util.ref.Ref;
 import org.aksw.commons.util.ref.RefImpl;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefSparqlEndpoint;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefUrl;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefVisitor;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefVisitor;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
@@ -27,6 +27,7 @@ import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -57,11 +58,11 @@ import org.slf4j.LoggerFactory;
 public class DataPods {
     private static final Logger logger = LoggerFactory.getLogger(DataPods.class);
 
-    public static RdfDataPod fromDataRef(DataRef dataRef) {
+    public static RdfDataPod fromDataRef(RdfDataRef dataRef) {
         //OpExecutorDefault catalogExecutor = new OpExecutorDefault(null, null, new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
 
         Resource rawCopy = dataRef.inModel(ResourceUtils.reachableClosure(dataRef));
-        DataRef copy = JenaPluginUtils.polymorphicCast(rawCopy, DataRef.class);
+        RdfDataRef copy = JenaPluginUtils.polymorphicCast(rawCopy, RdfDataRef.class);
         Op basicWorkflow = OpDataRefResource.from(copy.getModel(), copy);
         RdfDataPod result = ExecutionUtils.executeJob(basicWorkflow);
         //RdfDataPod result = basicWorkflow.accept(catalogExecutor);
@@ -81,9 +82,9 @@ public class DataPods {
         return result;
     }
 
-    public static RdfDataPod fromDataRef(PlainDataRef dataRef, HttpResourceRepositoryFromFileSystem repo, OpVisitor<? extends RdfDataPod> opExecutor) {
+    public static RdfDataPod fromDataRef(DataRef dataRef, Dataset dataset, HttpResourceRepositoryFromFileSystem repo, OpVisitor<? extends RdfDataPod> opExecutor) {
 
-        PlainDataRefVisitor<RdfDataPod> factory = new DataPodFactoryAdvancedImpl(opExecutor, repo);
+        DataRefVisitor<RdfDataPod> factory = new DataPodFactoryAdvancedImpl(dataset, opExecutor, repo);
 
 //		System.out.println("Got: " + dataRef + " - class: " + dataRef.getClass() + " inst:" + (dataRef instanceof DataRefResourceFromUrl));
         RdfDataPod result = dataRef.accept(factory);
@@ -91,8 +92,8 @@ public class DataPods {
     }
 
 
-    public static RdfDataPod fromDataRef(PlainDataRef dataRef, OpVisitor<? extends RdfDataPod> opExecutor) {
-        PlainDataRefVisitor<RdfDataPod> defaultFactory = new DataPodFactoryImpl(opExecutor);
+    public static RdfDataPod fromDataRef(DataRef dataRef, OpVisitor<? extends RdfDataPod> opExecutor) {
+        DataRefVisitor<RdfDataPod> defaultFactory = new DataPodFactoryImpl(opExecutor);
 
 //		System.out.println("Got: " + dataRef + " - class: " + dataRef.getClass() + " inst:" + (dataRef instanceof DataRefResourceFromUrl));
         RdfDataPod result = dataRef.accept(defaultFactory);
@@ -142,7 +143,7 @@ public class DataPods {
 //		};
     }
 
-    public static RdfDataPod fromUrl(PlainDataRefUrl dataRef) {
+    public static RdfDataPod fromUrl(DataRefUrl dataRef) {
         String url = dataRef.getDataRefUrl();
         RdfDataPod result = fromUrl(url);
         return result;
@@ -180,9 +181,10 @@ public class DataPods {
                     }, "HDT Data Pod from " + pathStr);
             result = new RdfDataPodHdtImpl(hdtRef, false);
         } else {
-            Model model;
-            model = RDFDataMgr.loadModel(url);
-            result = DataPods.fromModel(model);
+            // Model model;
+            // model = RDFDataMgr.loadModel(url);
+            Dataset dataset = RDFDataMgrEx.loadDatasetAsGiven(url, null);
+            result = DataPods.fromDataset(dataset); // fromModel(model);
         }
 
 
@@ -229,7 +231,7 @@ public class DataPods {
 
         return r;
     }
-    public static RdfDataPod fromSparqlEndpoint(PlainDataRefSparqlEndpoint dataRef) {
+    public static RdfDataPod fromSparqlEndpoint(DataRefSparqlEndpoint dataRef) {
         String serviceUrl = dataRef.getServiceUrl();
         //DatasetDescription dd = dataRef.getDatsetDescription();
 

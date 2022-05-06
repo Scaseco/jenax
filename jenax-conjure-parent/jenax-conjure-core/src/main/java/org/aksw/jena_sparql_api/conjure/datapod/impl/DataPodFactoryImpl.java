@@ -3,39 +3,40 @@ package org.aksw.jena_sparql_api.conjure.datapod.impl;
 import java.util.Objects;
 
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefCatalog;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefDcat;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefExt;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefGit;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefOp;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefSparqlEndpoint;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefUrl;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefVisitor;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefCatalog;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefExt;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefGit;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefGraph;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefOp;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataPodFactoryImpl
-	implements PlainDataRefVisitor<RdfDataPod>
+    implements DataRefVisitor<RdfDataPod>
 {
-	private static Logger logger = LoggerFactory.getLogger(DataPodFactoryImpl.class);
-	
-	protected OpVisitor<? extends RdfDataPod> opExecutor;
-	
-	public DataPodFactoryImpl(OpVisitor<? extends RdfDataPod> opExecutor) {
-		super();
-		this.opExecutor = Objects.requireNonNull(opExecutor);
-	}
+    private static Logger logger = LoggerFactory.getLogger(DataPodFactoryImpl.class);
 
-	@Override
-	public RdfDataPod visit(PlainDataRefUrl dataRef) {
-		throw new RuntimeException("no user handler");
-		
+    protected OpVisitor<? extends RdfDataPod> opExecutor;
+
+    public DataPodFactoryImpl(OpVisitor<? extends RdfDataPod> opExecutor) {
+        super();
+        this.opExecutor = Objects.requireNonNull(opExecutor);
+    }
+
+    @Override
+    public RdfDataPod visit(DataRefUrl dataRef) {
+        throw new RuntimeException("no user handler");
+
 //		// Check the static datasets of the executor first
 //		// TODO HACK - Add an interface to access an executor's task context
 //		String url = dataRef.getDataRefUrl();
-//		
+//
 //		TaskContext context = ((OpExecutorDefault)opExecutor).getTaskContext();
 //		Model m = context.getCtxModels().get(url);
 //		RdfDataPod result;
@@ -45,44 +46,49 @@ public class DataPodFactoryImpl
 //		} else {
 //			result = DataPods.fromUrl(dataRef);
 //		}
-//		
+//
 //		return result;
-	}
+    }
 
-	@Override
-	public RdfDataPod visit(PlainDataRefSparqlEndpoint dataRef) {
-		RdfDataPod result = DataPods.fromSparqlEndpoint(dataRef);
-		return result;
-	}
+    @Override
+    public RdfDataPod visit(DataRefSparqlEndpoint dataRef) {
+        RdfDataPod result = DataPods.fromSparqlEndpoint(dataRef);
+        return result;
+    }
 
-	@Override
-	public RdfDataPod visit(PlainDataRefExt dataRef) {
-		throw new RuntimeException("No override with custom handler");
-	}
+    @Override
+    public RdfDataPod visit(DataRefExt dataRef) {
+        throw new RuntimeException("No override with custom handler");
+    }
 
-	@Override
-	public RdfDataPod visit(PlainDataRefCatalog dataRef) {
-		throw new RuntimeException("To be done");
-	}
+    @Override
+    public RdfDataPod visit(DataRefCatalog dataRef) {
+        throw new RuntimeException("To be done");
+    }
 
-	@Override
-	public RdfDataPod visit(PlainDataRefOp dataRef) {
-		// We assume the Op type here
-		Op op = (Op)Objects.requireNonNull(dataRef.getOp());
-		RdfDataPod result = op.accept(opExecutor);
-		
-		return result;
-	}
+    @Override
+    public RdfDataPod visit(DataRefOp dataRef) {
+        // We assume the Op type here
+        Op op = (Op)Objects.requireNonNull(dataRef.getOp());
+        RdfDataPod result = op.accept(opExecutor);
 
-	@Override
-	public RdfDataPod visit(PlainDataRefDcat dataRef) {
-		throw new RuntimeException("No override with custom handler");
-	}
+        return result;
+    }
 
-	@Override
-	public RdfDataPod visit(PlainDataRefGit dataRef) {
-		throw new RuntimeException("No override with custom handler");
-	}
+    @Override
+    public RdfDataPod visit(DataRefDcat dataRef) {
+        throw new RuntimeException("No override with custom handler");
+    }
+
+    @Override
+    public RdfDataPod visit(DataRefGit dataRef) {
+        throw new RuntimeException("No override with custom handler");
+    }
+
+    @Override
+    public RdfDataPod visit(DataRefGraph dataRef) {
+        throw new RuntimeException("No override with custom handler");
+    }
 
 //	@Override
 //	public RdfDataObject visit(DataRefEmpty dataRef) {

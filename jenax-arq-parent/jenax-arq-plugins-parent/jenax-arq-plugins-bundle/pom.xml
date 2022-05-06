@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>4.4.0-3-SNAPSHOT</version>
+		<version>4.5.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -42,6 +42,11 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-plugins-datatypes</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-dcat-api</artifactId>
 		</dependency>
 
 		<!-- Used for cutsom Aggregators (should probably go to jsa utls) -->

@@ -45,9 +45,9 @@ public class FunctionGenerator {
     /** Declarations for mapping java types to jena internal types
      *  For example, jts.Geometry map by remapped to jena.GeometryWrapper
      *
-     *  The cardinality is 1:1 - one return type can only map to one jena type
+     *  The cardinality is 1:1 - one input type can only map to one jena type
      */
-    protected Map<Class<?>, Class<?>> returnTypeMap;
+    protected Map<Class<?>, Class<?>> javaToRdfTypeMap;
 
     /* WKTDatype (subclass of RDFDatatype) as of Jena 4 lacks the info about the corresponding Java class
      * So we have to add support for working around missing java class declaration... */
@@ -64,7 +64,7 @@ public class FunctionGenerator {
         super();
         this.typeMapper = typeMapper;
         this.converterRegistry = converterRegistry;
-        this.returnTypeMap = returnTypeMap;
+        this.javaToRdfTypeMap = returnTypeMap;
     }
 
     public Map<Class<?>, String> getTypeByClassOverrides() {
@@ -79,8 +79,18 @@ public class FunctionGenerator {
         return converterRegistry;
     }
 
+    /**
+     * A map for declaring forced conversions from a given input type to
+     * a target type. These conversions are applied before consulting
+     * jena's TypeMapper.
+     *
+     * If the target type is a sub-class of {@link Node} then the type mapper
+     * is not consulted because in that case the resulting type is already RDF.
+     *
+     * @return The map of forced conversions.
+     */
     public Map<Class<?>, Class<?>> getJavaToRdfTypeMap() {
-        return returnTypeMap;
+        return javaToRdfTypeMap;
     }
 
 
@@ -137,7 +147,7 @@ public class FunctionGenerator {
 
             // TODO Check for an @IriType annotation that would turn Strings into IRIs
 
-            Class<?> internalJavaType = returnTypeMap.get(targetJavaType);
+            Class<?> internalJavaType = javaToRdfTypeMap.get(targetJavaType);
             Class<?> workingType = internalJavaType != null ? internalJavaType : targetJavaType;
 
             ConvertFunctionRaw preConvert = internalJavaType == null ? null : getPreConvert(targetJavaType, internalJavaType);
@@ -175,7 +185,7 @@ public class FunctionGenerator {
                     Iterables.filter(Arrays.asList(as), DefaultValue.class));
             Class<?> paramClass = pts[i];
 
-            Class<?> inputClass = returnTypeMap.get(paramClass);
+            Class<?> inputClass = javaToRdfTypeMap.get(paramClass);
             Class<?> rdfClass = inputClass != null ? inputClass : paramClass;
             ConvertFunctionRaw inputConverter = inputClass == null ? null : getPreConvert(inputClass, paramClass);
 
@@ -188,8 +198,13 @@ public class FunctionGenerator {
 
             // RDFDatatype dtype = typeMapper.getTypeByClass(rdfClass);
 
+            // If the pre-conversion already yields Node then we don't need an rdf datatype
+            boolean isNodeType = inputClass != null && Node.class.isAssignableFrom(inputClass);
+
             if (dtype == null) {
-                throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s derived from %2$s", inputClass, paramClass));
+                if (!isNodeType) {
+                    throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s derived from %2$s", inputClass, paramClass));
+                }
             }
 
             Object defaultValue = null;

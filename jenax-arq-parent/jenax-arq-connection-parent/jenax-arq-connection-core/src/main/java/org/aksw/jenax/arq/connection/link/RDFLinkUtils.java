@@ -284,33 +284,36 @@ public class RDFLinkUtils {
     /**
      * Standard sparql does not support creating relative IRIs.
      * The spec states that the IRI function *must* return an absolute IRI.
-     * 
+     *
      * This wrapper sets a dummy base IRI on queries that do not have a base set and post processes result sets such that IRIs with that dummy base
      * have the base removed.
      *
      * @param conn
      */
     public static RDFLink enableRelativeIrisInQueryResults(RDFLink delegate) {
-    	String dummyBaseUrl = "http://dummy.base/url/";
-    	int offset = dummyBaseUrl.length();
-    	
-    	NodeTransform xform = node -> {
-    		Node r = node;
-    		if (node.isURI()) {
-    			String str = node.getURI();
-    			r = str.startsWith(dummyBaseUrl) ? NodeFactory.createURI(str.substring(offset)) : node;
-    		}
-    		return r;
-    	};
-    	
-    	return wrapWithQueryTransform(delegate,
-    			query -> {
-    				if (!query.explicitlySetBaseURI()) {
-    					query.setBaseURI(dummyBaseUrl);
-    				}
-    				return query;
-    			},
-    			qe -> new QueryExecWithNodeTransform(qe, xform));
+        String dummyBaseUrl = "http://dummy.base/url/";
+        int offset = dummyBaseUrl.length();
+
+        NodeTransform xform = node -> {
+            Node r = node;
+            if (node.isURI()) {
+                String str = node.getURI();
+                if (str.startsWith(dummyBaseUrl)) {
+                    r = NodeFactory.createURI(str.substring(offset));
+                }
+            }
+            return r;
+        };
+
+        return wrapWithQueryTransform(delegate,
+                query -> {
+                    if (!query.explicitlySetBaseURI()) {
+                        query = query.cloneQuery();
+                        query.setBaseURI(dummyBaseUrl);
+                    }
+                    return query;
+                },
+                qe -> new QueryExecWithNodeTransform(qe, xform));
     }
 
 }

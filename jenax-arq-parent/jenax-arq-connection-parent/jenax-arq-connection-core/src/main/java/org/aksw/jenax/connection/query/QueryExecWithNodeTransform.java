@@ -7,14 +7,13 @@ import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
-import org.apache.jena.sparql.util.Context;
 import org.apache.jena.util.iterator.WrappedIterator;
 
 
@@ -22,78 +21,86 @@ public class QueryExecWithNodeTransform
     implements QueryExecDecorator
 {
     //protected Converter<Node, Node> nodeConverter;
-	protected QueryExec decoratee;
+    protected QueryExec decoratee;
     protected NodeTransform nodeTransform;
 
     public QueryExecWithNodeTransform(QueryExec decoratee, NodeTransform nodeTransform) {
         this.decoratee = decoratee;
         this.nodeTransform = nodeTransform;
     }
-    
+
     @Override
     public QueryExec getDecoratee() {
-    	return decoratee;
+        return decoratee;
     }
 
-	@Override
-	public DatasetGraph getDataset() {
-		return NodeTransformLib2.copyWithNodeTransform(nodeTransform, getDecoratee().getDataset());
-	}
+    @Override
+    public DatasetGraph getDataset() {
+        return getDecoratee().getDataset();
+        // return NodeTransformLib2.copyWithNodeTransform(nodeTransform, getDecoratee().getDataset());
+    }
 
-	@Override
-	public RowSet select() {
-		return NodeTransformLib2.applyNodeTransform(nodeTransform, getDecoratee().select());
-	}
+    @Override
+    public RowSet select() {
+        return NodeTransformLib2.applyNodeTransform(nodeTransform, getDecoratee().select());
+    }
 
-	@Override
-	public Graph construct(Graph graph) {
-		constructTriples().forEachRemaining(graph::add);
-		return graph;
-	}
+    @Override
+    public Graph construct() {
+        Graph graph = GraphFactory.createDefaultGraph();
+        construct(graph);
+        return graph;
+    }
 
-	@Override
-	public Iterator<Triple> constructTriples() {
-		return WrappedIterator.create(getDecoratee().constructTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
-	}
+    @Override
+    public Graph construct(Graph graph) {
+        constructTriples().forEachRemaining(graph::add);
+        return graph;
+    }
 
-	@Override
-	public Iterator<Quad> constructQuads() {
-		return WrappedIterator.create(getDecoratee().constructQuads()).mapWith(q -> NodeTransformLib.transform(nodeTransform, q));
-	}
+    @Override
+    public Iterator<Triple> constructTriples() {
+        return WrappedIterator.create(getDecoratee().constructTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
+    }
 
-	@Override
-	public DatasetGraph constructDataset(DatasetGraph dataset) {
-		constructQuads().forEachRemaining(dataset::add);
-		return dataset;
-	}
+    @Override
+    public Iterator<Quad> constructQuads() {
+        return WrappedIterator.create(getDecoratee().constructQuads()).mapWith(q -> NodeTransformLib.transform(nodeTransform, q));
+    }
 
-	@Override
-	public Graph describe(Graph graph) {
-		describeTriples().forEachRemaining(graph::add);
-		return graph;
-	}
+    @Override
+    public DatasetGraph constructDataset(DatasetGraph dataset) {
+        constructQuads().forEachRemaining(dataset::add);
+        return dataset;
+    }
 
-	@Override
-	public Iterator<Triple> describeTriples() {
-		return WrappedIterator.create(getDecoratee().describeTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
-	}
+    @Override
+    public Graph describe(Graph graph) {
+        describeTriples().forEachRemaining(graph::add);
+        return graph;
+    }
 
-	@Override
-	public boolean ask() {
-		return getDecoratee().ask();
-	}
+    @Override
+    public Iterator<Triple> describeTriples() {
+        return WrappedIterator.create(getDecoratee().describeTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
+    }
 
-	@Override
-	public JsonArray execJson() {
-		return getDecoratee().execJson();
-	}
+    @Override
+    public boolean ask() {
+        return getDecoratee().ask();
+    }
 
-	@Override
-	public Iterator<JsonObject> execJsonItems() {
-		return getDecoratee().execJsonItems();
-	}
+    @Override
+    public JsonArray execJson() {
+        return getDecoratee().execJson();
+    }
 
-    
+    @Override
+    public Iterator<JsonObject> execJsonItems() {
+        return getDecoratee().execJsonItems();
+    }
+
+
 //
 //    @Override
 //    public RowSet execSelect() {

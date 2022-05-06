@@ -1,10 +1,14 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccumulatorFactories;
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.AggregatorsJena;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 
@@ -12,6 +16,11 @@ public class JenaExtensionJson {
     public static final String ns = "http://jsa.aksw.org/fn/json/";
 
     public static void register() {
+//        AggregateRegistry.register(
+//                ns + "collect",
+//                AccumulatorFactories.wrap1(AggregatorsJena::aggGeometryCollection));
+
+
         FunctionRegistry.get().put(ns + "object", E_JsonObject.class);
         FunctionRegistry.get().put(ns + "array", E_JsonArray.class);
         FunctionRegistry.get().put(ns + "convert", E_JsonConvert.class);

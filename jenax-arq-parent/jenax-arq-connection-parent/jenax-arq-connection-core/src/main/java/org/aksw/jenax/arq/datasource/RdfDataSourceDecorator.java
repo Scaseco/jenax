@@ -6,5 +6,5 @@ import org.aksw.jenax.connection.datasource.RdfDataSource;
 
 public interface RdfDataSourceDecorator
 {
-    public RdfDataSource decorate(RdfDataSource decorateee, Map<String, Object> options);
+    public RdfDataSource decorate(RdfDataSource decoratee, Map<String, Object> options);
 }

@@ -53,6 +53,7 @@ public class PrologueUtils {
     /** Set the target's resolver to that of source */
     public static Prologue copyResolver(Prologue target, Prologue source) {
         if (source.explicitlySetBaseURI()) {
+            target.setBaseURI(source.getBaseURI());
             target.setBase(source.getBase());
         } else {
             setResolver(target, source.getResolver());

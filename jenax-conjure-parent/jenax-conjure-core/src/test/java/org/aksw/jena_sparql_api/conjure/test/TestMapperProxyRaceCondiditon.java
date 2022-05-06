@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -50,7 +50,7 @@ public class TestMapperProxyRaceCondiditon {
 			    //System.out.println(id + " b: " + x.getModel().size() + " " + b + " <- " + a);
 		        
 			    // Problematic line: Sometimes y's model becomes that of another thread
-			    Resource y = x.as(DataRefUrl.class);
+			    Resource y = x.as(RdfDataRefUrl.class);
 			    int c = System.identityHashCode(y.getModel());
 			 
 		        if(c == b) {

@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.conjure.datapod.api;
 
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRef;
 
 public interface DataPodFactory {
-	DataPod create(PlainDataRef dataRef);
+	DataPod create(DataRef dataRef);
 }

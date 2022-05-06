@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-fsrdfstore-parent</artifactId>
-		<version>4.4.0-3-SNAPSHOT</version>
+		<version>4.5.0-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jenax-fsrdfstore-core</artifactId>
@@ -16,8 +16,8 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>jena-jgrapht-bindings</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-jgrapht-bindings</artifactId>
 		</dependency>
 
 		<dependency>

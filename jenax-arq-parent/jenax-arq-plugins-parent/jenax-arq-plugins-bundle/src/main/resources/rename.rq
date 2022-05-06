@@ -1,0 +1,40 @@
+# Annotation-aware renaming. Renaming x matches <x> and <x##.*>
+# Finds and replaces any occurrence of an old namespace (oldNS) with the new namespace (newNS)
+# SELECT (sys:getenv('SOURCE_NS') as ?source) (sys:getenv('TARGET_NS') as ?target) {}
+
+# There are 2 ways how to write the query:
+# Tuple centric: Scan all tuples and replace those where any component qualifies for replacement
+#   Naive sparql engines will fail to perfom a union of prefix index scans and thus perform full scans
+
+# Component centric: For each component have a union member that only updates tuples with appropriate component values
+#   Naive engines will scan the data for each component resulting in tuple-centric scans for every component
+
+DELETE {
+  ?s ?p ?o
+}
+INSERT {
+  ?sn ?pn ?on
+}
+WHERE
+{
+  BIND ('__' AS ?delim)
+  BIND (concat('^(', <env:SOURCE_NS>, ')') AS ?prefixPattern)
+  BIND (concat(?prefixPattern, '(', ?delim, '.*)?$') AS ?pattern)
+
+  ?s ?p ?o .
+
+  BIND (str(?s) AS ?ss)
+  BIND (str(?p) AS ?ps)
+  BIND (str(?o) AS ?os)
+
+  BIND (isIRI(?s) && strstarts(?ss, <env:SOURCE_NS>) && regex(?ss, ?pattern) AS ?sr)
+  BIND (isIRI(?p) && strstarts(?ps, <env:SOURCE_NS>) && regex(?sp, ?pattern) AS ?pr)
+  BIND (isIRI(?o) && strstarts(?os, <env:SOURCE_NS>) && regex(?so, ?pattern) AS ?or)
+
+  FILTER (?sr || ?pr || ?or )
+
+  BIND (IF(?sr, IRI(replace(?ss, ?prefixPattern, <env:TARGET_NS>)), ?s) AS ?sn)
+  BIND (IF(?pr, IRI(replace(?ps, ?prefixPattern, <env:TARGET_NS>)), ?p) AS ?pn)
+  BIND (IF(?or, IRI(replace(?os, ?prefixPattern, <env:TARGET_NS>)), ?o) AS ?on)
+}
+
