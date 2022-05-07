@@ -168,6 +168,8 @@ public class QueryUtils {
      * Typical use case is when a CONSTRUCT query should be restored after a
      * it was compiled using Algebra.compile() (which discards the template part).
      *
+     * Also restores FROM and FROM NAMED.
+     *
      * @param query
      * @param proto
      * @return
@@ -239,10 +241,8 @@ public class QueryUtils {
         result.setSyntax(proto.getSyntax());
         result.setPrefixMapping(proto.getPrefixMapping());
 
-
-        // TODO We may want to move (named) graph URI copying to a separate function
-//		result.getGraphURIs().addAll(proto.getGraphURIs());
-//		result.getNamedGraphURIs().addAll(proto.getNamedGraphURIs());
+        result.getGraphURIs().addAll(proto.getGraphURIs());
+        result.getNamedGraphURIs().addAll(proto.getNamedGraphURIs());
 
         return result;
     }

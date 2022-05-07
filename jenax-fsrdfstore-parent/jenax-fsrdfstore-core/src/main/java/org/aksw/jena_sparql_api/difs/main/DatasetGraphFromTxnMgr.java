@@ -28,11 +28,12 @@ import org.aksw.commons.txn.api.TxnMgr;
 import org.aksw.commons.txn.api.TxnResourceApi;
 import org.aksw.commons.txn.impl.ContentSync;
 import org.aksw.commons.txn.impl.FileSyncImpl;
-import org.aksw.commons.util.array.Array;
 import org.aksw.difs.index.api.DatasetGraphIndexPlugin;
 import org.aksw.jena_sparql_api.difs.txn.SyncedDataset;
 import org.aksw.jena_sparql_api.difs.txn.TxnUtils;
 import org.aksw.jenax.arq.dataset.diff.DatasetGraphDiff;
+import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -851,7 +852,7 @@ public class DatasetGraphFromTxnMgr
 
 
     protected Stream<Quad> findInSpecificNamedGraph(Txn local, Node g, Node s, Node p , Node o) {
-        logger.debug("Find in specific named graph: " + new Quad(g, s, p, o));
+        logger.debug("Find in specific named graph: " + QuadUtils.create(Arrays.asList(g, s, p, o).stream().map(NodeUtils::nullToAny).collect(Collectors.toList()).toArray(new Node[0])));
         String graphName = g.getURI();
         // String[] relPath = txnMgr.getResRepo().getPathSegments(res);
         org.aksw.commons.path.core.Path<String> relPath = getResourceKey(graphName);
