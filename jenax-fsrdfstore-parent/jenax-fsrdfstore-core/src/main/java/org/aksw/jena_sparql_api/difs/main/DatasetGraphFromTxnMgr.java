@@ -926,7 +926,7 @@ public class DatasetGraphFromTxnMgr
 
 
     public Stream<Quad> findInAnyNamedGraphs(Txn local, Node s, Node p, Node o) {
-        logger.debug("Find in any named graph: " + new Triple(s, p, o));
+        logger.debug("Find in any named graph: " + Triple.createMatch(s, p, o));
 
         // TODO Link the stream to the txn so at latest upon ending the txn the resource can be freed
         // return access(this, () -> findInAnyNamedGraphsCore(s, p, o));
