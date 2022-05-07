@@ -124,6 +124,14 @@ public class QuadUtils {
         return new Quad(nodes[0], nodes[1], nodes[2], nodes[3]);
     }
 
+    public static Quad createMatch(Node g, Node s, Node p, Node o) {
+        return new Quad(
+                NodeUtils.nullToAny(g),
+                NodeUtils.nullToAny(s),
+                NodeUtils.nullToAny(p),
+                NodeUtils.nullToAny(o));
+    }
+
     public static Node[] quadToArray(Quad quad) {
         return new Node[] { quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() };
     }

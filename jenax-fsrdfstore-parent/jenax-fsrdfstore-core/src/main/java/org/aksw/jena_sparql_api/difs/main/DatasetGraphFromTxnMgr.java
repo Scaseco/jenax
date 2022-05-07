@@ -3,7 +3,6 @@ package org.aksw.jena_sparql_api.difs.main;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,7 +31,6 @@ import org.aksw.difs.index.api.DatasetGraphIndexPlugin;
 import org.aksw.jena_sparql_api.difs.txn.SyncedDataset;
 import org.aksw.jena_sparql_api.difs.txn.TxnUtils;
 import org.aksw.jenax.arq.dataset.diff.DatasetGraphDiff;
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
@@ -852,7 +850,7 @@ public class DatasetGraphFromTxnMgr
 
 
     protected Stream<Quad> findInSpecificNamedGraph(Txn local, Node g, Node s, Node p , Node o) {
-        logger.debug("Find in specific named graph: " + QuadUtils.create(Arrays.asList(g, s, p, o).stream().map(NodeUtils::nullToAny).collect(Collectors.toList()).toArray(new Node[0])));
+        logger.debug("Find in specific named graph: " + QuadUtils.createMatch(g, s, p, o));
         String graphName = g.getURI();
         // String[] relPath = txnMgr.getResRepo().getPathSegments(res);
         org.aksw.commons.path.core.Path<String> relPath = getResourceKey(graphName);
