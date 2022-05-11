@@ -1,14 +1,18 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import com.sun.xml.txw2.NamespaceResolver;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -26,6 +30,7 @@ import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 /**
@@ -102,6 +107,7 @@ public class PropertyFunctionFactoryXmlUnnest
                         
         	            try {                            
         	            	XPathExpression expr = xPath.compile(queryStr);
+                            xPath.setNamespaceContext(new NamespaceResolver(xml.getOwnerDocument()));
         	            	Object tmp = expr.evaluate(xml, XPathConstants.NODESET);
         	            	
         	            	if(tmp instanceof NodeList) {
@@ -134,5 +140,33 @@ public class PropertyFunctionFactoryXmlUnnest
                 return result;
             }
 		};
+    }
+
+    static class NamespaceResolver implements NamespaceContext
+    {
+        //Store the source document to search the namespaces
+        private Document sourceDocument;
+
+        public NamespaceResolver(Document document) {
+            sourceDocument = document;
+        }
+
+        //The lookup for the namespace uris is delegated to the stored document.
+        public String getNamespaceURI(String prefix) {
+            if (prefix.equals(XMLConstants.DEFAULT_NS_PREFIX)) {
+                return sourceDocument.lookupNamespaceURI(null);
+            } else {
+                return sourceDocument.lookupNamespaceURI(prefix);
+            }
+        }
+
+        public String getPrefix(String namespaceURI) {
+            return sourceDocument.lookupPrefix(namespaceURI);
+        }
+
+        @SuppressWarnings("rawtypes")
+        public Iterator getPrefixes(String namespaceURI) {
+            return null;
+        }
     }
 }
