@@ -49,8 +49,9 @@ public class E_XPath
 	    	// If 'xml' is a Document with a single node, use the node as the context for the xpath evaluation
 	    	// Reason: Nodes matched by xml:unnest will be wrapped into new (invisible) XML documents
 	    	// We would expect to be able to run xpath expressions directly on the
-	    	// result nodes of the unnesting - without having to consider the invisible document root node 
-	    	if(xml instanceof Document && xml.getChildNodes().getLength() == 1) {
+	    	// result nodes of the unnesting - without having to consider the invisible document root node
+			NamespaceResolver namespaceResolver = new NamespaceResolver((Document) xml);
+			if(xml instanceof Document && xml.getChildNodes().getLength() == 1) {
 	    		xml = xml.getFirstChild();
 	    	}
 	    	
@@ -60,6 +61,7 @@ public class E_XPath
 	        	String queryStr = query.getString();	        	
 	        		        	
 	            try {
+					xPath.setNamespaceContext(namespaceResolver);
 	            	XPathExpression expr = xPath.compile(queryStr);
 	            	Object tmp = expr.evaluate(xml, XPathConstants.STRING);
 

@@ -38,7 +38,7 @@ public class RDFDatatypeXml
 //			result = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 	        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	        factory.setValidating(false);
-	        factory.setNamespaceAware(false);
+	        factory.setNamespaceAware(true);
 
 	        result = factory.newDocumentBuilder();
 	        result.setEntityResolver(new EntityResolver() {

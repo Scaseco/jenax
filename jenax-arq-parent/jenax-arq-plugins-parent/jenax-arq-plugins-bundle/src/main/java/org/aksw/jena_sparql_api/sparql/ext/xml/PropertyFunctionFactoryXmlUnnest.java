@@ -12,7 +12,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import com.sun.xml.txw2.NamespaceResolver;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -105,9 +104,9 @@ public class PropertyFunctionFactoryXmlUnnest
         	        if(queryStr != null && xml != null) {
                         List<Binding> bindings = new ArrayList<Binding>();                        
                         
-        	            try {                            
+        	            try {
+                            xPath.setNamespaceContext(new NamespaceResolver((Document) xml));
         	            	XPathExpression expr = xPath.compile(queryStr);
-                            xPath.setNamespaceContext(new NamespaceResolver(xml.getOwnerDocument()));
         	            	Object tmp = expr.evaluate(xml, XPathConstants.NODESET);
         	            	
         	            	if(tmp instanceof NodeList) {
@@ -142,31 +141,4 @@ public class PropertyFunctionFactoryXmlUnnest
 		};
     }
 
-    static class NamespaceResolver implements NamespaceContext
-    {
-        //Store the source document to search the namespaces
-        private Document sourceDocument;
-
-        public NamespaceResolver(Document document) {
-            sourceDocument = document;
-        }
-
-        //The lookup for the namespace uris is delegated to the stored document.
-        public String getNamespaceURI(String prefix) {
-            if (prefix.equals(XMLConstants.DEFAULT_NS_PREFIX)) {
-                return sourceDocument.lookupNamespaceURI(null);
-            } else {
-                return sourceDocument.lookupNamespaceURI(prefix);
-            }
-        }
-
-        public String getPrefix(String namespaceURI) {
-            return sourceDocument.lookupPrefix(namespaceURI);
-        }
-
-        @SuppressWarnings("rawtypes")
-        public Iterator getPrefixes(String namespaceURI) {
-            return null;
-        }
-    }
 }
