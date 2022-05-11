@@ -1,15 +1,21 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathEvaluationResult;
+import javax.xml.xpath.XPathEvaluationResult.XPathResultType;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathNodes;
 
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -39,6 +45,8 @@ public class E_XPath
 
     @Override
     public NodeValue exec(NodeValue nv, NodeValue query) {
+		RDFDatatype xmlDatatype = TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
+
         NodeValue result;
 
         // TODO If a node is of type string, we could still try to parse it as xml for convenience
@@ -61,8 +69,18 @@ public class E_XPath
 	        		        	
 	            try {
 	            	XPathExpression expr = xPath.compile(queryStr);
-	            	Object tmp = expr.evaluate(xml, XPathConstants.STRING);
+	            	// Object tmp = expr.evaluate(xml, XPathConstants.STRING);
 
+	            	XPathEvaluationResult<?> er = expr.evaluateExpression(xml);
+	            	org.apache.jena.graph.Node node = toNode(er, xmlDatatype);
+	            	
+	            	if (node == null) {
+	            		throw new ExprEvalException("XPath " + queryStr + " did not match any results");
+	            	}
+	            	
+	            	result = NodeValue.makeNode(node);
+	            	
+	            	
 //	            	if(tmp instanceof NodeList) {
 //	            		NodeList nodes = (NodeList)tmp;
 //	            		for(int i = 0; i < nodes.getLength(); ++i) {
@@ -73,7 +91,7 @@ public class E_XPath
 	            	
 		        	//Object tmp = xPath.evaluate(queryStr, xml, XPathConstants.STRING);
 		        	// FIXME Hack
-		        	result = NodeValue.makeString("" + tmp);
+		        	// result = NodeValue.makeString("" + tmp);
 	            } catch(Exception e) {
 	                logger.warn(e.getLocalizedMessage());
 	                result = null;
@@ -91,6 +109,48 @@ public class E_XPath
     	}
     	
         return result;
+    }
+    
+    
+    
+    public static org.apache.jena.graph.Node toNode(XPathEvaluationResult<?> er, RDFDatatype xmlDatatype) {
+    	org.apache.jena.graph.Node result = null;
+    	XPathResultType type = er.type();
+    	Object value = er.value();
+    	Class<?> cls = value.getClass();
+    	
+    	TypeMapper tm = TypeMapper.getInstance();
+    	
+    	switch (type) {
+    	case BOOLEAN:
+    	case NUMBER:
+    	case STRING:
+        	RDFDatatype dtype = tm.getTypeByClass(cls);
+        	result = NodeFactory.createLiteralByValue(value, dtype);
+    		break;
+    	case NODE:
+    		throw new IllegalStateException("Not implemented yet");
+    	case NODESET:
+    		XPathNodes nodes = (XPathNodes)value;
+    		for (Node node : nodes) {
+    			if (result != null) {
+    				throw new IllegalArgumentException("Node set must contain at most one value");
+    			}
+    			
+    			if (node instanceof Attr) {
+    				Attr attr = (Attr)node;
+    				result = NodeFactory.createLiteral(attr.getValue());
+    			} else {    			
+    				result = NodeFactory.createLiteralByValue(node, xmlDatatype);
+    			}
+    		}
+    		break;
+    	case ANY:
+    	default:
+    		throw new IllegalStateException("Should never come here: Result type was: " + type);
+    	}
+    	
+    	return result;
     }
 
 }

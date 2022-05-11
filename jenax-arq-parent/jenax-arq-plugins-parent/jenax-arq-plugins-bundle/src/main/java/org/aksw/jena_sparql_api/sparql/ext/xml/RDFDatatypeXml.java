@@ -29,6 +29,8 @@ import org.xml.sax.SAXException;
 public class RDFDatatypeXml
 	extends BaseDatatype
 {
+	public static final String IRI = XSD.NS + "xml";
+	
     protected DocumentBuilder documentBuilder;
 
     
@@ -38,7 +40,7 @@ public class RDFDatatypeXml
 //			result = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 	        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	        factory.setValidating(false);
-	        factory.setNamespaceAware(false);
+	        factory.setNamespaceAware(true);
 
 	        result = factory.newDocumentBuilder();
 	        result.setEntityResolver(new EntityResolver() {
@@ -62,7 +64,7 @@ public class RDFDatatypeXml
     }
     
     public RDFDatatypeXml(DocumentBuilder documentBuilder) {
-        this(XSD.getURI() + "xml", documentBuilder);
+        this(IRI, documentBuilder);
     }
 
     public RDFDatatypeXml(String uri, DocumentBuilder documentBuilder) {

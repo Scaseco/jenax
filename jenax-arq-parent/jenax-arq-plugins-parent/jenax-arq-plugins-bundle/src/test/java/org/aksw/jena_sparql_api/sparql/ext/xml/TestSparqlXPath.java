@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -15,6 +16,12 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.util.NodeFactoryExtra;
+import org.apache.jena.sparql.util.QueryExecUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,5 +49,23 @@ public class TestSparqlXPath {
 		}
 		
 		Assert.assertEquals(Arrays.asList("1", "2"), actual);
+	}
+	
+	
+	@Test
+	public void testSparqlXPath2() throws IOException, URISyntaxException {
+		URL url = Resources.getResource("sparql-ext-test-xml-02.xml");
+		String text = Resources.toString(url, StandardCharsets.UTF_8);
+
+		Binding b = BindingFactory.binding(Vars.x, NodeFactoryExtra.createLiteralNode(text, null, RDFDatatypeXml.IRI));
+		
+		Query query = QueryFactory.create("PREFIX xml: <http://jsa.aksw.org/fn/xml/> SELECT * { BIND(xml:path(?x, '//gml:Envelope') AS ?y) BIND(BOUND(?y) AS ?z)}");
+		try (QueryExec qe = QueryExec.newBuilder()
+				.initialBinding(b)
+				.dataset(DatasetGraphFactory.create())
+				.query(query)
+				.build()) {
+			QueryExecUtils.exec(qe);
+		}
 	}
 }
