@@ -59,7 +59,14 @@ public class TestSparqlXPath {
 
 		Binding b = BindingFactory.binding(Vars.x, NodeFactoryExtra.createLiteralNode(text, null, RDFDatatypeXml.IRI));
 		
-		Query query = QueryFactory.create("PREFIX xml: <http://jsa.aksw.org/fn/xml/> SELECT * { BIND(xml:path(?x, '//gml:Envelope') AS ?y) BIND(BOUND(?y) AS ?z)}");
+		Query query = QueryFactory.create(String.join("\n",
+				"PREFIX xml: <http://jsa.aksw.org/fn/xml/> SELECT ?dim ?isFoobarBound ?lowerCorner {",
+				"  ?x xml:unnest ('//gml:Envelope' ?env) ",
+				"  BIND(xml:path(?env, '@srsDimension') AS ?dim)",
+				"  BIND(xml:path(?env, '@foobar') AS ?foobar)",
+				"  BIND(BOUND(?foobar) AS ?isFoobarBound)",
+				"  BIND(xml:path(?env, '//gml:lowerCorner') AS ?lowerCorner)",
+				"}"));
 		try (QueryExec qe = QueryExec.newBuilder()
 				.initialBinding(b)
 				.dataset(DatasetGraphFactory.create())

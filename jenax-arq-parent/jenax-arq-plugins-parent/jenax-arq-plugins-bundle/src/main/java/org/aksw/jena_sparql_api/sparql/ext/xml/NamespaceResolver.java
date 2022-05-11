@@ -5,14 +5,13 @@ import java.util.Iterator;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
-import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
-public class NamespaceResolver implements NamespaceContext
-{
+public class NamespaceResolver implements NamespaceContext {
     //Store the source document to search the namespaces
-    private Document sourceDocument;
+    private Node sourceDocument;
 
-    public NamespaceResolver(Document document) {
+    public NamespaceResolver(Node document) {
         sourceDocument = document;
     }
 
@@ -29,8 +28,7 @@ public class NamespaceResolver implements NamespaceContext
         return sourceDocument.lookupPrefix(namespaceURI);
     }
 
-    @SuppressWarnings("rawtypes")
-    public Iterator getPrefixes(String namespaceURI) {
-        return null;
+    public Iterator<String> getPrefixes(String namespaceURI) {
+    	return null;
     }
 }

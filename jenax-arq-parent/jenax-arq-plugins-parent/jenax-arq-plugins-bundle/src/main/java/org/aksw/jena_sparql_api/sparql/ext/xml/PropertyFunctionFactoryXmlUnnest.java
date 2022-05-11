@@ -26,6 +26,7 @@ import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 /**
@@ -100,9 +101,9 @@ public class PropertyFunctionFactoryXmlUnnest
         	        if(queryStr != null && xml != null) {
                         List<Binding> bindings = new ArrayList<Binding>();                        
                         
-        	            try {                            
+        	            try {
+                            xPath.setNamespaceContext(new NamespaceResolver((Document) xml));
         	            	XPathExpression expr = xPath.compile(queryStr);
-                            xPath.setNamespaceContext(new NamespaceResolver(xml.getOwnerDocument()));
         	            	Object tmp = expr.evaluate(xml, XPathConstants.NODESET);
         	            	
         	            	if(tmp instanceof NodeList) {
@@ -134,6 +135,7 @@ public class PropertyFunctionFactoryXmlUnnest
 
                 return result;
             }
-		};
+        };
     }
+
 }
