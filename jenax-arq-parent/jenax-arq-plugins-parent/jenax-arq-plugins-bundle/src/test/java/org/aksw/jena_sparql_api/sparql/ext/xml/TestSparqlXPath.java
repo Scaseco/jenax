@@ -33,11 +33,11 @@ public class TestSparqlXPath {
 	public void testSparqlXPath() throws IOException, URISyntaxException {
 		URL url = Resources.getResource("sparql-ext-test-xml-01.sparql");
 		String text = Resources.toString(url, StandardCharsets.UTF_8);
-	
+
 		Query query = QueryFactory.create(text);
 		Op op = Algebra.compile(query);
 //		System.out.println(op);
-		
+
 		List<String> actual = new ArrayList<>();
 		try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.create())) {
 			conn.querySelect(query, b -> actual.add(b.get("str").toString()));
@@ -47,25 +47,28 @@ public class TestSparqlXPath {
 			//Model result = conn.queryConstruct(text);
 			//RDFDataMgr.write();
 		}
-		
+
 		Assert.assertEquals(Arrays.asList("1", "2"), actual);
 	}
-	
-	
+
+
 	@Test
 	public void testSparqlXPath2() throws IOException, URISyntaxException {
 		URL url = Resources.getResource("sparql-ext-test-xml-02.xml");
 		String text = Resources.toString(url, StandardCharsets.UTF_8);
 
 		Binding b = BindingFactory.binding(Vars.x, NodeFactoryExtra.createLiteralNode(text, null, RDFDatatypeXml.IRI));
-		
+
 		Query query = QueryFactory.create(String.join("\n",
-				"PREFIX xml: <http://jsa.aksw.org/fn/xml/> SELECT ?dim ?isFoobarBound ?lowerCorner {",
-				"  ?x xml:unnest ('//gml:Envelope' ?env) ",
-				"  BIND(xml:path(?env, '@srsDimension') AS ?dim)",
-				"  BIND(xml:path(?env, '@foobar') AS ?foobar)",
-				"  BIND(BOUND(?foobar) AS ?isFoobarBound)",
-				"  BIND(xml:path(?env, '//gml:lowerCorner') AS ?lowerCorner)",
+				"PREFIX xml: <http://jsa.aksw.org/fn/xml/> SELECT ?dim ?isFoobarBound ?lc ?lcStr ?status {",
+				// "  ?x xml:unnest ('//gml:Envelope' ?env) ",
+				// "  BIND(xml:path(?env, '@srsDimension') AS ?dim)",
+				// "  BIND(xml:path(?env, '@foobar') AS ?foobar)",
+				// "  BIND(BOUND(?foobar) AS ?isFoobarBound)",
+				// "  BIND(xml:path(?env, '//gml:lowerCorner') AS ?lc)",
+				// "  BIND(xml:path(?lc, 'text()') AS ?lcStr)",
+				"  ?x xml:unnest ('//gml:featureMembers/*' ?member) ",
+				"  BIND(xml:path(?member, '//gaul:status/text()') AS ?status)",
 				"}"));
 		try (QueryExec qe = QueryExec.newBuilder()
 				.initialBinding(b)
@@ -74,7 +77,7 @@ public class TestSparqlXPath {
 				.build()) {
 			QueryExecUtils.exec(qe);
 		}
-		
+
 		/* Expected:
 		---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		| dim | isFoobarBound | lowerCorner                                                                                                                                                                                       |

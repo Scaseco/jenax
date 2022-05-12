@@ -18,30 +18,31 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * Use the property function ?s xml:unnest (xpathexpr ?o) for dealing with (/iterating) NodeList
  * Use the function xml:path(?doc, pathexpr) to extract individual values
- * 
+ *
  * @author raven Mar 2, 2018
  *
  */
 public class E_XPath
 	extends FunctionBase2
-{	
+{
 	private static final Logger logger = LoggerFactory.getLogger(E_XPath.class);
 
-	
+
 	protected XPath xPath;
 
 	public E_XPath() {
 		 this(XPathFactory.newInstance().newXPath());
 	}
-	
+
 	public E_XPath(XPath xPath) {
 		 this.xPath = xPath;
 	}
-	
+
 
     @Override
     public NodeValue exec(NodeValue nv, NodeValue query) {
@@ -50,7 +51,7 @@ public class E_XPath
         NodeValue result;
 
         // TODO If a node is of type string, we could still try to parse it as xml for convenience
-        
+
         Object obj = nv.asNode().getLiteralValue();
     	if(obj instanceof Node) {
 	    	Node xml = (Node)obj;
@@ -62,12 +63,12 @@ public class E_XPath
 			if(xml instanceof Document && xml.getChildNodes().getLength() == 1) {
 	    		xml = xml.getFirstChild();
 	    	}
-	    	
+
 	    	//System.out.println(XmlUtils.toString(xml));
 
 	        if(query.isString() && xml != null) {
-	        	String queryStr = query.getString();	        	
-	        		        	
+	        	String queryStr = query.getString();
+
 	            try {
 					xPath.setNamespaceContext(namespaceResolver);
 	            	XPathExpression expr = xPath.compile(queryStr);
@@ -75,14 +76,14 @@ public class E_XPath
 
 	            	XPathEvaluationResult<?> er = expr.evaluateExpression(xml);
 	            	org.apache.jena.graph.Node node = toNode(er, xmlDatatype);
-	            	
+
 	            	if (node == null) {
 	            		throw new ExprEvalException("XPath " + queryStr + " did not match any results");
 	            	}
-	            	
+
 	            	result = NodeValue.makeNode(node);
-	            	
-	            	
+
+
 //	            	if(tmp instanceof NodeList) {
 //	            		NodeList nodes = (NodeList)tmp;
 //	            		for(int i = 0; i < nodes.getLength(); ++i) {
@@ -90,7 +91,7 @@ public class E_XPath
 //	            			//System.out.println("" + node);
 //	            		}
 //	            	}
-	            	
+
 		        	//Object tmp = xPath.evaluate(queryStr, xml, XPathConstants.STRING);
 		        	// FIXME Hack
 		        	// result = NodeValue.makeString("" + tmp);
@@ -109,20 +110,20 @@ public class E_XPath
     	if (result == null) {
     		throw new ExprEvalException("xpath evaluation yeld null result");
     	}
-    	
+
         return result;
     }
-    
-    
-    
+
+
+
     public static org.apache.jena.graph.Node toNode(XPathEvaluationResult<?> er, RDFDatatype xmlDatatype) {
     	org.apache.jena.graph.Node result = null;
     	XPathResultType type = er.type();
     	Object value = er.value();
     	Class<?> cls = value.getClass();
-    	
+
     	TypeMapper tm = TypeMapper.getInstance();
-    	
+
     	switch (type) {
     	case BOOLEAN:
     	case NUMBER:
@@ -138,11 +139,14 @@ public class E_XPath
     			if (result != null) {
     				throw new IllegalArgumentException("Node set must contain at most one value");
     			}
-    			
+
     			if (node instanceof Attr) {
     				Attr attr = (Attr)node;
     				result = NodeFactory.createLiteral(attr.getValue());
-    			} else {    			
+    			} else if (node instanceof Text) {
+    				Text text = (Text)node;
+    				result = NodeFactory.createLiteral(text.getData());
+    			} else {
     				result = NodeFactory.createLiteralByValue(node, xmlDatatype);
     			}
     		}
@@ -151,7 +155,7 @@ public class E_XPath
     	default:
     		throw new IllegalStateException("Should never come here: Result type was: " + type);
     	}
-    	
+
     	return result;
     }
 

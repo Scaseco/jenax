@@ -22,6 +22,13 @@ public class QueryStringHashCode {
     protected HashCode projectionHash;
     // protected
 
+    public static <T> BigInteger lehmerValue(
+            Collection<T> items,
+            Comparator<T> comparator) {
+    	int[] lehmerCode = lehmerCode(items, comparator);
+    	BigInteger result = valueOfLehmerCode(lehmerCode);
+    	return result;
+    }
 
     /**
      * For a given collection of unique items with a defined total ordering (via comparator)
@@ -35,7 +42,7 @@ public class QueryStringHashCode {
      * @param comparator
      * @return
      */
-    public static <T> BigInteger computePermutationIndex(
+    public static <T> int[] lehmerCode(
             Collection<T> items,
             Comparator<T> comparator) {
 
@@ -90,6 +97,14 @@ public class QueryStringHashCode {
             }
         }
 
+        return lehmer;
+    }
+
+
+    public static BigInteger valueOfLehmerCode(int[] lehmer) {
+        int n = lehmer.length;
+        int m = n - 1;
+
         BigInteger fac = BigInteger.valueOf(1);
         BigInteger result = BigInteger.valueOf(0);
         {
@@ -107,7 +122,7 @@ public class QueryStringHashCode {
 
     public static void main(String[] args) {
         Collection<String> items = Arrays.asList("d", "c", "b", "a");
-        BigInteger value = computePermutationIndex(items, Comparator.naturalOrder());
+        BigInteger value = lehmerValue(items, Comparator.naturalOrder());
         System.out.println(value);
     }
 
