@@ -385,6 +385,38 @@ public class SparqlStmtUtils {
     }
 
 
+    public static SPARQLResultEx execAny(QueryExecution qe, Query q) {
+    	SPARQLResultEx result;
+
+    	if (q == null) {
+    		q = qe.getQuery();
+    	}
+
+        if (q.isConstructQuad()) {
+            Iterator<Quad> it = qe.execConstructQuads();
+            result = SPARQLResultEx.createQuads(it, qe::close);
+
+        } else if (q.isConstructType()) {
+            // System.out.println(Algebra.compile(q));
+
+            Iterator<Triple> it = qe.execConstructTriples();
+            result = SPARQLResultEx.createTriples(it, qe::close);
+        } else if (q.isSelectType()) {
+            ResultSet rs = qe.execSelect();
+            result = new SPARQLResultEx(rs, qe::close);
+        } else if(q.isJsonType()) {
+            Iterator<JsonObject> it = qe.execJsonItems();
+            result = new SPARQLResultEx(it, qe::close);
+        } else if (q.isAskType()) {
+        	boolean v = qe.execAsk();
+        	result = new SPARQLResultEx(v);
+        } else {
+            throw new RuntimeException("Unsupported query type");
+        }
+
+        return result;
+    }
+
     public static SPARQLResultEx execAny(RDFConnection conn, SparqlStmt stmt) {
         SPARQLResultEx result = null;
 
@@ -405,24 +437,7 @@ public class SparqlStmtUtils {
                 cxt.set(symConnection, conn);
             }
 
-            if (q.isConstructQuad()) {
-                Iterator<Quad> it = qe.execConstructQuads();
-                result = SPARQLResultEx.createQuads(it, qe::close);
-
-            } else if (q.isConstructType()) {
-                // System.out.println(Algebra.compile(q));
-
-                Iterator<Triple> it = qe.execConstructTriples();
-                result = SPARQLResultEx.createTriples(it, qe::close);
-            } else if (q.isSelectType()) {
-                ResultSet rs = qe.execSelect();
-                result = new SPARQLResultEx(rs, qe::close);
-            } else if(q.isJsonType()) {
-                Iterator<JsonObject> it = qe.execJsonItems();
-                result = new SPARQLResultEx(it, qe::close);
-            } else {
-                throw new RuntimeException("Unsupported query type");
-            }
+            result = execAny(qe, q);
         } else if (stmt.isUpdateRequest()) {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 

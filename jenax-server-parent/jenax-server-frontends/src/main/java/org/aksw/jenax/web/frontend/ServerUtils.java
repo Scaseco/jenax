@@ -102,7 +102,7 @@ public class ServerUtils {
         	Path parent = path.getParent();
         	String rawFilename = "" + path.getFileName();
         	String filename = rawFilename.replace("-classes.jar", ".war");
-        	// Try if replacing '-classes.jar' with '.war' also exists        	
+        	// Try if replacing '-classes.jar' with '.war' also exists
         	Path warPath = parent.resolve(filename);
         	if(Files.exists(warPath)) {
         		externalForm = warPath.toString();
@@ -138,6 +138,9 @@ public class ServerUtils {
         // server.setConnectors(new Connector[] { connector });
 
         final WebAppContext webAppContext = new WebAppContext();
+
+
+
 //webAppContext.setInitParameter("org.apache.tomcat.InstanceManager", "org.apache.tomcat.SimpleInstanceManager");
 
         // AnnotationConfigWebApplicationContext rootContext = new
@@ -159,14 +162,14 @@ public class ServerUtils {
         classlist.addBefore(
                 "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
                 "org.eclipse.jetty.annotations.AnnotationConfiguration" );
-        
-        
-        webAppContext.setConfigurations( new Configuration[] { 
-        		  new WebInfConfiguration(), 
+
+
+        webAppContext.setConfigurations( new Configuration[] {
+        		  new WebInfConfiguration(),
         		  new WebXmlConfiguration(),
         		  new MetaInfConfiguration(),
-        		  new PlusConfiguration(), 
-        		  new JettyWebXmlConfiguration(), 
+        		  new PlusConfiguration(),
+        		  new JettyWebXmlConfiguration(),
         		  new AnnotationConfiguration()
         		} );
 
@@ -174,7 +177,7 @@ public class ServerUtils {
         // register the listener programmatically
         if(!externalForm.endsWith(".war")) {
         	Objects.requireNonNull(initializer, "Configuration from non-war file requires an WebAppInitializer");
-        	
+
 	        webAppContext.addLifeCycleListener(new AbstractLifeCycleListener() {
 	            @Override
 	            public void lifeCycleStarting(LifeCycle arg0) {
@@ -197,7 +200,7 @@ public class ServerUtils {
         // context.setDescriptor(externalForm + "/WEB-INF/web.xml");
         webAppContext.setWar(externalForm);
 
-        
+
       //webAppContext.setInitParameter("org.apache.tomcat.InstanceManager", "org.apache.tomcat.SimpleInstanceManager");
 
         server.setHandler(webAppContext);

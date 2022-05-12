@@ -17,13 +17,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 /**
  * Convenience WebAppInitializer for setting up a SPARQL service
  *
- * Note this class (with the utils suffix) no longer inherits from WebApplicationInitializer,
+ * Note this class no longer inherits from WebApplicationInitializer,
  * because servlets environments may wrongly pick up this class as an entry point
  * to the application.
- *
- * OK, IT DOES NOT WORK BECAUSE ANONYMOUS CLASSES ARE ALSO DETECTED FFS
- *
- * @author raven
  *
  */
 public class WebAppInitializerSparqlServiceUtils {
