@@ -8,16 +8,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.util.math.Lehmer;
+import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.syntax.PatternVars;
+import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.util.ExprUtils;
 
+import com.github.jsonldjava.shaded.com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
@@ -68,13 +75,42 @@ public class QueryHash {
 		HashFunction projHashFn = Hashing.murmur3_32_fixed();
 
     	Query bodyQuery = query.cloneQuery();
+		VarExprList proj = bodyQuery.getProject();
+
+    	if (bodyQuery.isConstructType()) {
+    		Set<Var> pvars = SetUtils.asSet(PatternVars.vars(bodyQuery.getQueryPattern()));
+
+    		Template template = bodyQuery.getConstructTemplate();
+    		List<Quad> quads = template.getQuads();
+    		Set<Var> vars = new TreeSet<>(QuadPatternUtils.getVarsMentioned(quads));
+
+    		Set<Var> effProj = Sets.intersection(vars, pvars);
+
+    		bodyQuery.setQuerySelectType();
+        	proj.clear();
+        	effProj.forEach(proj::add);
+    	}
 
     	bodyQuery.setLimit(Query.NOLIMIT);
     	bodyQuery.setOffset(Query.NOLIMIT);
     	bodyQuery.setQuerySelectType();
     	bodyQuery.resetResultVars();
 
-		VarExprList proj = bodyQuery.getProject();
+    	VarExprList baseProj = new VarExprList();
+    	if (bodyQuery.hasGroupBy()) {
+    		VarExprList vel = bodyQuery.getGroupBy();
+    		baseProj.addAll(vel);
+    	}
+
+    	if (bodyQuery.hasAggregators()) {
+//    		bodyQuery.getAggregators()
+//
+//    		List<ExprAggregator> eas = bodyQuery.getAggregators();
+//    		for (ExprAggregator ea : eas) {
+//    			ea.getExpr()te
+//    		}
+    	}
+
     	List<String> projStrs = new ArrayList<>();
     	for (Var var : bodyQuery.getProjectVars()) {
     		ExprVar ev = new ExprVar(var);
