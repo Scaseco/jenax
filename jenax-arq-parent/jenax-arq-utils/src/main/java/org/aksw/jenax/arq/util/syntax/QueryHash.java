@@ -95,6 +95,8 @@ public class QueryHash {
 		HashFunction bodyHashFn = Hashing.sha256();
 		HashFunction projHashFn = Hashing.murmur3_32_fixed();
 
+		// Full clone because we need a copy of the aggregator registration
+    	// Query bodyQuery = query.cloneQuery();
     	Query bodyQuery = QueryTransformOps.shallowCopy(query);
 		VarExprList proj = bodyQuery.getProject();
 

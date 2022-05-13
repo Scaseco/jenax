@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.aksw.commons.collections.IClosable;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.util.execution.QueryExecutionAdapter;
+import org.aksw.jenax.arq.util.exec.QueryExecutionAdapter;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

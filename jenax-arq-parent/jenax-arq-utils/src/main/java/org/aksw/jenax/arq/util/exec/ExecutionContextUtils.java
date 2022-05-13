@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.util.execution;
+package org.aksw.jenax.arq.util.exec;
 
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.ARQConstants;

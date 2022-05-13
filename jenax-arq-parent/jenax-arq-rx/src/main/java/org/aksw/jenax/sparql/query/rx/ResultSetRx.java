@@ -3,8 +3,10 @@ package org.aksw.jenax.sparql.query.rx;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jenax.arq.util.execution.QueryExecAdapter;
+import org.aksw.jenax.arq.util.exec.QueryExecAdapter;
 import org.aksw.jenax.sparql.rx.op.FlowOfBindingsOps;
+import org.aksw.jenax.stmt.core.SparqlStmtQuery;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -24,6 +26,9 @@ import io.reactivex.rxjava3.disposables.Disposable;
  *
  */
 public interface ResultSetRx {
+	// Reference to the query in order to be able to supply it
+    // in the wrappers returned by the asQueryExec* methods
+	SparqlStmtQuery getQueryStmt();
     List<Var> getVars();
     Flowable<Binding> getBindings();
 
@@ -45,6 +50,20 @@ public interface ResultSetRx {
     default QueryExec asQueryExec() {
     	QueryExec result = new QueryExecAdapter() {
             protected Disposable disposable = null;
+
+            @Override
+            public Query getQuery() {
+            	SparqlStmtQuery stmt = ResultSetRx.this.getQueryStmt();
+            	Query result = stmt != null && stmt.isParsed() ? stmt.getQuery() : null;
+            	return result;
+            }
+
+            @Override
+            public String getQueryString() {
+            	SparqlStmtQuery stmt = ResultSetRx.this.getQueryStmt();
+            	String result = stmt == null ? null : stmt.getOriginalString();
+            	return result;
+            }
 
             @Override
             public RowSet select() {

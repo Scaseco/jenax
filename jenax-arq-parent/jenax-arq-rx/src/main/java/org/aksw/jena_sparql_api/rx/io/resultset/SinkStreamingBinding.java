@@ -108,7 +108,7 @@ public class SinkStreamingBinding
     protected void startActual() {
         Flowable<Binding> flowable = RxUtils.fromBlockingQueue(blockingQueue, item -> item == POISON);
         thread = new Thread(() -> {
-            try (QueryExecution qe = new ResultSetRxImpl(resultVars, flowable).asQueryExecution()) {
+            try (QueryExecution qe = ResultSetRxImpl.create(resultVars, flowable).asQueryExecution()) {
                 ResultSet resultSet = qe.execSelect();
                 ResultSetMgr.write(out, resultSet, lang);
             } catch (Exception e) {

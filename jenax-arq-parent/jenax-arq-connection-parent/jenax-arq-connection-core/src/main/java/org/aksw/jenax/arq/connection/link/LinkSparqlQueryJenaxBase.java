@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.connection.link;
 import org.aksw.jenax.arq.connection.TransactionalDelegate;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.core.TransactionalNull;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
@@ -13,11 +14,7 @@ public class LinkSparqlQueryJenaxBase<T extends QueryExecFactoryQuery>
     protected Transactional transactional;
 
     public LinkSparqlQueryJenaxBase(T queryExecutionFactory) {
-        this(queryExecutionFactory, new TransactionalDelegate() {
-            @Override
-            public Transactional getDelegate() {
-                return null;
-            }});
+        this(queryExecutionFactory, new TransactionalNull());
     }
 
     public LinkSparqlQueryJenaxBase(T queryExecutionFactory, Transactional transactional) {

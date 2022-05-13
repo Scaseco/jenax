@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
+import org.aksw.jenax.arq.connection.fix.RDFLinkAdapterFix;
 import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -199,7 +200,7 @@ public class RDFConnectionUtils {
     }
 
     public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, Function<? super RDFLink, ? extends RDFLink> linkDecorator) {
-        RDFLink oldLink = RDFLinkAdapterEx.adapt(conn);
+        RDFLink oldLink = RDFLinkAdapterFix.adapt(conn);
         RDFLink newLink = linkDecorator.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
@@ -218,7 +219,7 @@ public class RDFConnectionUtils {
             Function<? super Query, ? extends Query> queryTransform,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform
             ) {
-        RDFLink oldLink = RDFLinkAdapterEx.adapt(conn);
+        RDFLink oldLink = RDFLinkAdapterFix.adapt(conn);
         RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
         return RDFConnectionAdapter.adapt(newLink);
     }

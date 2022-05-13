@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import org.aksw.jenax.connection.query.QueryExecutionSupplier;
 import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.QueryExecAdapter;
+import org.apache.jena.sparql.exec.QueryExecAdapterFix;
 
 @FunctionalInterface
 public interface QueryExecSupplier {
@@ -13,7 +13,7 @@ public interface QueryExecSupplier {
 	QueryExec get();
 
 	public static QueryExecSupplier adapt(QueryExecutionSupplier upper) {
-		return () -> QueryExecAdapter.adapt(upper.get());
+		return () -> QueryExecAdapterFix.adapt(upper.get());
 	}
 
 	public static QueryExecSupplier of(Supplier<QueryExec> supp) {

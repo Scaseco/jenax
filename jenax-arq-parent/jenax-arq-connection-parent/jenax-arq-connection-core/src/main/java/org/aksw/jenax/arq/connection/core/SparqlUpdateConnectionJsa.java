@@ -1,18 +1,14 @@
 package org.aksw.jenax.arq.connection.core;
 
 import org.aksw.jenax.arq.connection.SparqlUpdateConnectionJsaBase;
-import org.aksw.jenax.arq.connection.TransactionalDelegate;
 import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.core.TransactionalNull;
 
 public class SparqlUpdateConnectionJsa
    extends SparqlUpdateConnectionJsaBase<UpdateExecutionFactory>
 {
     public SparqlUpdateConnectionJsa(UpdateExecutionFactory updateExecutionFactory) {
-        this(updateExecutionFactory, new TransactionalDelegate() {
-            @Override
-            public Transactional getDelegate() {
-                return null;
-            }});
+        this(updateExecutionFactory, new TransactionalNull());
     }
 
     public SparqlUpdateConnectionJsa(UpdateExecutionFactory updateExecutionFactory, Transactional transactional) {

@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.util.execution;
+package org.aksw.jenax.arq.util.exec;
 
 import java.util.ArrayList;
 import java.util.List;

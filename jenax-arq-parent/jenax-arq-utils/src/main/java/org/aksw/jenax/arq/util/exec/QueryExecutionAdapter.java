@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.util.execution;
+package org.aksw.jenax.arq.util.exec;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;

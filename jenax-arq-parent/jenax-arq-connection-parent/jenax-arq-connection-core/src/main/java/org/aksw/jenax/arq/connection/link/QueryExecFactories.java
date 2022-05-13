@@ -6,7 +6,7 @@ import org.aksw.jenax.connection.query.QueryExecFactoryOverQueryExecutionFactory
 import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdflink.LinkSparqlQuery;
-import org.apache.jena.sparql.exec.QueryExecAdapter;
+import org.apache.jena.sparql.exec.QueryExecAdapterFix;
 
 /** Central utility class for working with QueryExecFactory* classes */
 public class QueryExecFactories {
@@ -32,12 +32,12 @@ public class QueryExecFactories {
 	}
 
 	public static QueryExecFactoryQuery adaptQuery(QueryExecutionFactoryQuery qef) {
-		return query -> QueryExecAdapter.adapt(qef.createQueryExecution(query));
+		return query -> QueryExecAdapterFix.adapt(qef.createQueryExecution(query));
 	}
 
 	public static LinkSparqlQuery toLink(QueryExecFactoryQuery qef) {
 		return new LinkSparqlQueryJenaxBase<QueryExecFactoryQuery>(qef);
 	}	public static QueryExecFactoryQuery adapt(QueryExecutionFactoryQuery qef) {
-		return query -> QueryExecAdapter.adapt(qef.createQueryExecution(query));
+		return query -> QueryExecAdapterFix.adapt(qef.createQueryExecution(query));
 	}
 }

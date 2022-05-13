@@ -5,7 +5,7 @@ import org.aksw.jenax.arq.connection.link.QueryExecFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.QueryExecAdapter;
+import org.apache.jena.sparql.exec.QueryExecAdapterFix;
 
 public class QueryExecFactoryOverQueryExecutionFactory
 	implements QueryExecFactory
@@ -30,13 +30,13 @@ public class QueryExecFactoryOverQueryExecutionFactory
 	@Override
 	public QueryExec create(String queryString) {
 	    QueryExecution qe = qef.createQueryExecution(queryString);
-	    return QueryExecAdapter.adapt(qe);
+	    return QueryExecAdapterFix.adapt(qe);
 	}
 
 	@Override
 	public QueryExec create(Query query) {
 		QueryExecution qe = qef.createQueryExecution(query);
-	    return QueryExecAdapter.adapt(qe);
+	    return QueryExecAdapterFix.adapt(qe);
 	}
 
 	@Override

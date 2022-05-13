@@ -25,7 +25,7 @@ import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraintBase;
 import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;

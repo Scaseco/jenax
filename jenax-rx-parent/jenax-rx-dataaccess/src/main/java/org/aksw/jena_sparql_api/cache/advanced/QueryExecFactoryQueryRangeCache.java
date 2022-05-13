@@ -130,7 +130,7 @@ public class QueryExecFactoryQueryRangeCache
 
         Flowable<Binding> flowable = tmp.apply(requestRange);
 
-        ResultSetRx rs = ResultSetRxImpl.create(resultVars, flowable);
+        ResultSetRx rs = ResultSetRxImpl.create(query, resultVars, flowable);
         QueryExec result = rs.asQueryExec();
 
         return result;

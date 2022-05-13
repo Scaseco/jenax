@@ -1,20 +1,15 @@
 package org.aksw.jenax.arq.connection.core;
 
 import org.aksw.jenax.arq.connection.SparqlQueryConnectionJsaBase;
-import org.aksw.jenax.arq.connection.TransactionalDelegate;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.core.TransactionalNull;
 
 
 public class SparqlQueryConnectionJsa
     extends SparqlQueryConnectionJsaBase<QueryExecutionFactory>
 {
     public SparqlQueryConnectionJsa(QueryExecutionFactory queryExecutionFactory) {
-        super(queryExecutionFactory, new TransactionalDelegate() {
-            @Override
-            public Transactional getDelegate() {
-                return null;
-            }});
+        super(queryExecutionFactory, new TransactionalNull());
     }
 
     @Override

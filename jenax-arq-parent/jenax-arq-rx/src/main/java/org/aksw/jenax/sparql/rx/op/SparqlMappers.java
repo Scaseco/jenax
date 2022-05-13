@@ -61,7 +61,7 @@ public class SparqlMappers {
     public static Function<RDFConnection, ResultSetRx> createProcessorResultSetRx(List<SparqlStmt> stmts, SPARQLResultExVisitor<?> sparqlResultExVisitor) {
         List<Var> vars = SparqlStmtUtils.getUnionProjectVars(stmts);
         Function<RDFConnection, Flowable<Binding>> mapper = createMapperBinding(stmts, sparqlResultExVisitor);
-        return conn -> new ResultSetRxImpl(vars, mapper.apply(conn));
+        return conn -> ResultSetRxImpl.create(vars, mapper.apply(conn));
     }
 
 
