@@ -28,4 +28,11 @@ public class QueryExecFactoryBackQuery
 		QueryExec result = create(query);
 		return result;
 	}
+
+	@Override
+	public void close() throws Exception {
+		if (decoratee instanceof AutoCloseable) {
+			((AutoCloseable)decoratee).close();
+		}
+	}
 }

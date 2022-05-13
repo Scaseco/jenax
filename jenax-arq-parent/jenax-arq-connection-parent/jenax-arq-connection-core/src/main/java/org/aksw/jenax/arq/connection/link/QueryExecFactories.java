@@ -28,7 +28,7 @@ public class QueryExecFactories {
 
 	/** {@link LinkSparqlQuery} -&gt; {@link QueryExecFactoryQuery} */
 	public static QueryExecFactory of(LinkSparqlQuery link) {
-		return new QueryExecFactoryQueryOverLinkSparqlQuery(link);
+		return new QueryExecFactoryOverLinkSparqlQuery(link);
 	}
 
 	public static QueryExecFactoryQuery adaptQuery(QueryExecutionFactoryQuery qef) {

@@ -41,13 +41,9 @@ public class QueryExecutionFactoryDecoratorBase<T extends QueryExecutionFactory>
     @SuppressWarnings("unchecked")
     @Override
     public <T> T unwrap(Class<T> clazz) {
-        T result;
-        if(getClass().isAssignableFrom(clazz)) {
-            result = (T)this;
-        }
-        else {
-            result = decoratee.unwrap(clazz);
-        }
+        T result = getClass().isAssignableFrom(clazz)
+			? (T)this
+			: decoratee.unwrap(clazz);
 
         return result;
     }

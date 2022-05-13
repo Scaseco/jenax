@@ -316,4 +316,18 @@ public class RDFLinkUtils {
                 qe -> new QueryExecWithNodeTransform(qe, xform));
     }
 
+
+    public static RDFLink apply(RDFLink link, LinkSparqlQueryDecorizer decorizer) {
+        LinkSparqlQuery queryLink = unwrapQueryConnection(link);
+        LinkSparqlUpdate updateLink = unwrapUpdateConnection(link);
+        LinkDatasetGraph dgLink = unwrapDatasetConnection(link);
+
+        LinkSparqlQuery newQueryLink = decorizer.apply(queryLink);
+
+        RDFLink result = new RDFLinkModular(newQueryLink, updateLink, dgLink);
+
+        return result;
+
+    }
+
 }

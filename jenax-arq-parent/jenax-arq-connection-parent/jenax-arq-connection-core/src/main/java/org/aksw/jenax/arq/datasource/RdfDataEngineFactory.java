@@ -8,7 +8,7 @@ public interface RdfDataEngineFactory {
     RdfDataEngine create(Map<String, Object> config) throws Exception;
 
     public static RdfDataEngineFactory wrap(RdfDataSourceFactory rdfDataSourceFactory) {
-        RdfDataEngineFactory tmp = config -> RdfDataEngines.wrap(rdfDataSourceFactory.create(config));
+        RdfDataEngineFactory tmp = config -> RdfDataEngines.of(rdfDataSourceFactory.create(config));
         return tmp;
     }
 }

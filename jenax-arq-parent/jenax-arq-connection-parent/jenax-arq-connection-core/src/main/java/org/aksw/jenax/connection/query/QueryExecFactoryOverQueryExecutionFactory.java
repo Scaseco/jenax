@@ -39,6 +39,11 @@ public class QueryExecFactoryOverQueryExecutionFactory
 	    return QueryExecAdapter.adapt(qe);
 	}
 
+	@Override
+	public void close() throws Exception {
+		qef.close();
+	}
+
 //	public void close() throws Exception {
 //	    if(closeDelegateOnClose) {
 //	        // conn.close();
