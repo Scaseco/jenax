@@ -43,6 +43,13 @@ import com.google.common.collect.Range;
 import io.reactivex.rxjava3.core.Flowable;
 
 
+/**
+ *
+ * Does not optimize / normalize prefixes.
+ *
+ * @author raven
+ *
+ */
 public class QueryExecFactoryQueryRangeCache
     extends QueryExecFactoryQueryDecoratorBase<QueryExecFactoryQuery>
 {

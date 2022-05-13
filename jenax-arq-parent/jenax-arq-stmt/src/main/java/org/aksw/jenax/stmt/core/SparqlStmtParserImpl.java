@@ -166,5 +166,4 @@ public class SparqlStmtParserImpl
     public static SparqlStmtParserImpl createAsGiven(boolean actAsClassifier) {
         return create(SparqlParserConfig.newInstance().parseAsGiven().applyDefaults(), actAsClassifier);
     }
-
 }
