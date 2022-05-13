@@ -8,6 +8,7 @@ import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 
 import com.google.common.collect.Range;
 
@@ -28,7 +29,8 @@ public class ListPaginatorSparql
 
     @Override
     public Flowable<Binding> apply(Range<Long> t) {
-        Query q = query.cloneQuery();
+        // Query q = query.cloneQuery();
+    	Query q = QueryTransformOps.shallowCopy(query);
         QueryUtils.applyRange(q, t);
 
         Flowable<Binding> result = SparqlRx.execSelectRaw(() -> qef.apply(q));

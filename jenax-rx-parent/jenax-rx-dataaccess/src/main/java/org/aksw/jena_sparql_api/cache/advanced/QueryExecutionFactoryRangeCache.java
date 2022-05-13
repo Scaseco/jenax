@@ -19,19 +19,16 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.lookup.ListPaginatorSparql;
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.syntax.QueryHash;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
-import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.util.QueryExecUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +94,7 @@ public class QueryExecutionFactoryRangeCache
         logger.debug("Query w/o slice: " + bodyQueryWithoutSlice);
         logger.debug("Query hash: " + hash + " " + requestRange);
 
-        List<Var> resultVars = bodyQueryWithoutSlice.getProjectVars();
+        List<Var> resultVars = query.getProjectVars();
 
         ListPaginator<Binding> frontend;
         try {
@@ -119,14 +116,9 @@ public class QueryExecutionFactoryRangeCache
                         .setRequestLimit(cacheConfig.getMaxRequestSize())
                         .setTerminationDelay(cacheConfig.getTerminationDelay());
 
-                ListPaginatorWithAdvancedCache<Binding> bodyPaginator = ListPaginatorWithAdvancedCache.create(backend, cacheBuilder);
+                ListPaginatorWithAdvancedCache<Binding> r = ListPaginatorWithAdvancedCache.create(backend, cacheBuilder);
 
-                logger.debug("Is cache complete? " + bodyPaginator.getCore().getSlice().isComplete());
-
-                ListPaginator<Binding> r = bodyPaginator;
-
-
-
+                logger.debug("Is cache complete? " + r.getCore().getSlice().isComplete());
 
 //                SmartRangeCacheImpl<Binding> r = SmartRangeCacheImpl.wrap(
 //                        backend, store, 10000, 10, Duration.ofSeconds(1), 10000, 10000);
@@ -138,9 +130,12 @@ public class QueryExecutionFactoryRangeCache
         }
 
 
+        // TODO Avoid needless projections
+        ListPaginator<Binding> tmp = frontend
+        		.map(b -> BindingUtils.project(b, resultVars));
 
+        Flowable<Binding> flowable = tmp.apply(requestRange);
 
-        Flowable<Binding> flowable = frontend.apply(requestRange);
         ResultSetRx rs = ResultSetRxImpl.create(resultVars, flowable);
         QueryExecution result = rs.asQueryExecution();
 
@@ -148,13 +143,16 @@ public class QueryExecutionFactoryRangeCache
     }
 
 
-    public static QueryExecutionFactory decorate(QueryExecutionFactory decoratee, java.nio.file.Path cacheDir) {
+    public static QueryExecutionFactory decorate(
+    		QueryExecutionFactory decoratee,
+    		java.nio.file.Path cacheDir,
+    		long maxRequestSize) {
         KryoPool kryoPool = KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses);
 
         // KeyObjectStore keyObjectStore = SmartRangeCacheImpl.createKeyObjectStore(Paths.get(cacheDir), kryoPool);
         ObjectStore objectStore = ObjectStoreImpl.create(cacheDir, ObjectSerializerKryo.create(kryoPool));
 
-        AdvancedRangeCacheConfig arcc = AdvancedRangeCacheConfigImpl.newDefaultsForObjects();
+        AdvancedRangeCacheConfig arcc = AdvancedRangeCacheConfigImpl.newDefaultsForObjects(maxRequestSize);
 
 //        QueryExecutionFactory core = new QueryExecutionFactoryBackQuery() {
 //
@@ -187,24 +185,4 @@ public class QueryExecutionFactoryRangeCache
 
         return qef;
     }
-
-
-    public static void main(String[] args) {
-    	java.nio.file.Path cacheRoot = java.nio.file.Path.of("/tmp/query-cache");
-    	java.nio.file.Path endpointRoot = cacheRoot.resolve("moin/default");
-
-    	QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://moin.aksw.org/sparql")
-    			.config()
-    			.compose(x -> decorate(x, cacheRoot))
-    			.withParser(SparqlQueryParserImpl.create())
-    			.end()
-    			.create();
-
-    	try (QueryExecution qe = qef.createQueryExecution("SELECT ?p { ?s ?p ?o } LIMIT 10")) {
-    		// QueryExecUtils.exec(QueryExec.adapt(qe));
-    		ResultSetFormatter.out(System.out, qe.execSelect());
-    	}
-    }
-
-
 }

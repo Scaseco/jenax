@@ -30,6 +30,7 @@ import org.apache.jena.sparql.expr.E_LogicalOr;
 import org.apache.jena.sparql.expr.E_NotOneOf;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.expr.ExprFunction0;
 import org.apache.jena.sparql.expr.ExprFunction1;
@@ -37,6 +38,7 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprFunction3;
 import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.FunctionLabel;
@@ -61,6 +63,32 @@ public class ExprUtils {
      * @return
      */
     // public static Expr makeNode(Node node) { }
+
+
+
+    public static class ContainsExprAggregator
+		extends ExprTransformCopy
+	{
+		protected boolean seenExprAggregator = false;
+
+		@Override
+		public Expr transform(ExprAggregator eAgg) {
+			seenExprAggregator = true;
+			return super.transform(eAgg);
+		}
+
+		public boolean seenExprAggregator() {
+			return seenExprAggregator;
+		}
+	}
+
+    /** Return true iff expr makes use of at least one ExprAggregator */
+	public static boolean containsExprAggregator(Expr expr) {
+		ContainsExprAggregator xform = new ContainsExprAggregator();
+		ExprTransformer.transform(xform, expr);
+		boolean result = xform.seenExprAggregator();
+		return result;
+	}
 
 
 

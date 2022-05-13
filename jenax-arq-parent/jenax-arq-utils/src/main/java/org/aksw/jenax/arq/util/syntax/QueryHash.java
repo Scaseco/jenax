@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -18,10 +19,10 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 
 import com.github.jsonldjava.shaded.com.google.common.collect.Sets;
@@ -63,18 +64,38 @@ public class QueryHash {
 	}
 
     public String getBodyHashStr() {
-    	return BaseEncoding.base64Url().encode(bodyHash.asBytes());
+    	return BaseEncoding.base64Url().omitPadding().encode(bodyHash.asBytes());
     }
 
     public String getProjHashStr() {
-    	return BaseEncoding.base64Url().encode(projHash.asBytes());
+    	return BaseEncoding.base64Url().omitPadding().encode(projHash.asBytes());
+    }
+
+    /** Return the set of result variables that DO NOT map to an expression making use of an aggregator */
+    public static Set<Var> getNonAggregateVars(Query query) {
+    	Set<Var> result = new HashSet<>();
+    	VarExprList proj = query.getProject();
+
+    	for (Var var : proj.getVars()) {
+    		Expr expr = proj.getExpr(var);
+
+    		boolean containsExprAggregator = expr == null
+    				? false
+    				: org.aksw.jenax.arq.util.expr.ExprUtils.containsExprAggregator(expr);
+
+    		if (!containsExprAggregator) {
+    			result.add(var);
+    		}
+    	}
+
+    	return result;
     }
 
 	public static QueryHash createHash(Query query) {
 		HashFunction bodyHashFn = Hashing.sha256();
 		HashFunction projHashFn = Hashing.murmur3_32_fixed();
 
-    	Query bodyQuery = query.cloneQuery();
+    	Query bodyQuery = QueryTransformOps.shallowCopy(query);
 		VarExprList proj = bodyQuery.getProject();
 
     	if (bodyQuery.isConstructType()) {
@@ -94,22 +115,34 @@ public class QueryHash {
     	bodyQuery.setLimit(Query.NOLIMIT);
     	bodyQuery.setOffset(Query.NOLIMIT);
     	bodyQuery.setQuerySelectType();
-    	bodyQuery.resetResultVars();
 
-    	VarExprList baseProj = new VarExprList();
+    	// VarExprList baseProj = new VarExprList(proj);
     	if (bodyQuery.hasGroupBy()) {
     		VarExprList vel = bodyQuery.getGroupBy();
-    		baseProj.addAll(vel);
+    		proj.addAll(vel);
+    	} else {
+        	bodyQuery.setQueryResultStar(true);
     	}
 
-    	if (bodyQuery.hasAggregators()) {
-//    		bodyQuery.getAggregators()
-//
-//    		List<ExprAggregator> eas = bodyQuery.getAggregators();
-//    		for (ExprAggregator ea : eas) {
-//    			ea.getExpr()te
-//    		}
-    	}
+    	bodyQuery.resetResultVars();
+
+    	Comparator<Var> cmp = Comparator.comparing(Object::toString);
+		Set<Var> nonAggVars = new TreeSet<>(cmp);
+		Set<Var> aggVars = new TreeSet<>(cmp);
+
+		nonAggVars.addAll(getNonAggregateVars(bodyQuery));
+		aggVars.addAll(proj.getVars());
+		aggVars.removeAll(nonAggVars);
+
+		VarExprList newVel = new VarExprList();
+		for (Var var : nonAggVars) {
+			VarExprListUtils.add(newVel, var, proj.getExpr(var));
+		}
+		for (Var var : aggVars) {
+			VarExprListUtils.add(newVel, var, proj.getExpr(var));
+		}
+		proj.clear();
+		proj.addAll(newVel);
 
     	List<String> projStrs = new ArrayList<>();
     	for (Var var : bodyQuery.getProjectVars()) {
@@ -118,6 +151,7 @@ public class QueryHash {
     		Expr e = expr == null ? ev : new E_Equals(ev, expr);
 
     		String str = ExprUtils.fmtSPARQL(e);
+
     		projStrs.add(str);
     	}
 
@@ -128,7 +162,6 @@ public class QueryHash {
     	}
     	HashCode projHashCode = projHasher.hash();
 
-    	bodyQuery.setQueryResultStar(true);
      	bodyQuery.resetResultVars();
 
     	String bodyStr = bodyQuery.toString();
@@ -142,15 +175,17 @@ public class QueryHash {
 
     @Override
 	public String toString() {
-		return "QueryStringHashCode [query=" + query + ", bodyQuery=" + bodyQuery + ", bodyHash=" + getBodyHashStr() + ", projHash=" + getProjHashStr()
+		return "QueryStringHashCode [Original Query:\n" + query + "BodyQuery:\n" + bodyQuery + ", bodyHash=" + getBodyHashStr() + ", projHash=" + getProjHashStr()
 				+ ", projLehmerValue=" + projLehmerValue + "]";
 	}
 
 	public static void main(String[] args) {
-		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s ?p { ?s ?p ?o } LIMIT 10 OFFSET 100")));
+//		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s ?p { ?s ?p ?o } LIMIT 10 OFFSET 100")));
+//
+//		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
+//		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
 
-		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
-		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
+		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?p) { ?s ?p ?o } GROUP BY STR(?o) LIMIT 10")));
 
 //        Collection<String> items = Arrays.asList("d", "c", "b", "a");
 //        BigInteger value = Lehmer.lehmerValue(items, Comparator.naturalOrder());
