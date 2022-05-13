@@ -1,8 +1,10 @@
 package org.aksw.jena_sparql_api.lookup;
 
 import org.aksw.commons.rx.lookup.ListPaginator;
+import org.aksw.jenax.arq.connection.link.QueryExecFactories;
 import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -18,6 +20,10 @@ public class ListPaginatorSparql
 {
     protected Query query;
     protected QueryExecFactoryQuery qef; // Function<? super Query, ? extends QueryExecution> qef;
+
+    public ListPaginatorSparql(Query query, QueryExecutionFactoryQuery qef) {
+    	this(query, QueryExecFactories.adapt(qef));
+    }
 
     public ListPaginatorSparql(Query query, QueryExecFactoryQuery qef) {
         super();
