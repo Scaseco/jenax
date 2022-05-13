@@ -1,6 +1,5 @@
 package org.aksw.jenax.web.servlet;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
@@ -395,6 +394,8 @@ public abstract class SparqlEndpointBase {
     	ResultSetWriterFactory rswf = ResultSetWriterRegistry.getFactory(lang);
 
 		Query q = qe.getQuery();
+
+		// Try to process the query with a result set language
 		if (rswf != null) {
 			result = out -> {
 				ResultSetWriter rsWriter = rswf.create(lang);
@@ -408,6 +409,7 @@ public abstract class SparqlEndpointBase {
 				}
 			};
     	} else {
+    		// Try to process the query with a triple / quad language
     		if (StreamRDFWriter.registered(lang)) {
     			result = out -> {
 	    			StreamRDF writer = StreamRDFWriter.getWriterStream(out, lang, cxt);
