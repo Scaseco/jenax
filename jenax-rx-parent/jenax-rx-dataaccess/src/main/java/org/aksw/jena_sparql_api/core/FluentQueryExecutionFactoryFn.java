@@ -333,7 +333,7 @@ public class FluentQueryExecutionFactoryFn<P>
     }
 
 
-    public FluentQueryExecutionFactoryFn<P> composeWith(QueryExecFactoryQueryDecorizer decorizer) {
+    public FluentQueryExecutionFactoryFn<P> composeExec(QueryExecFactoryQueryDecorizer decorizer) {
         compose(qef -> {
         	QueryExecFactory before = QueryExecFactories.adapt(qef);
         	QueryExecFactoryQuery afterRaw = decorizer.apply(before);
