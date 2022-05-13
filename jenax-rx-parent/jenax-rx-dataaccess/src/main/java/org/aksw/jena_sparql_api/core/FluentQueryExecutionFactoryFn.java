@@ -19,7 +19,12 @@ import org.aksw.jena_sparql_api.retry.core.QueryExecutionFactoryRetry;
 import org.aksw.jena_sparql_api.timeout.QueryExecutionTimeoutExogeneous;
 import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryQueryTransform;
 import org.aksw.jena_sparql_api.transform.result_set.QueryExecutionFactoryTransformResult;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.link.QueryExecFactories;
+import org.aksw.jenax.arq.connection.link.QueryExecFactory;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecorizer;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.shared.PrefixMapping;
@@ -326,6 +331,19 @@ public class FluentQueryExecutionFactoryFn<P>
 //
         return this;
     }
+
+
+    public FluentQueryExecutionFactoryFn<P> composeWith(QueryExecFactoryQueryDecorizer decorizer) {
+        compose(qef -> {
+        	QueryExecFactory before = QueryExecFactories.adapt(qef);
+        	QueryExecFactoryQuery afterRaw = decorizer.apply(before);
+        	QueryExecFactory after = QueryExecFactories.adapt(afterRaw);
+        	return QueryExecutionFactories.adapt(after);
+        });
+
+        return this;
+    }
+
 
     public static FluentQueryExecutionFactoryFn<?> start() {
         return new FluentQueryExecutionFactoryFn<Object>();

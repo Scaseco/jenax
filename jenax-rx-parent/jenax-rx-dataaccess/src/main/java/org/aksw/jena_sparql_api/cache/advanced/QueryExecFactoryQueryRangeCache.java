@@ -16,11 +16,11 @@ import org.aksw.commons.store.object.key.impl.KryoUtils;
 import org.aksw.commons.store.object.key.impl.ObjectStoreImpl;
 import org.aksw.commons.store.object.path.impl.ObjectSerializerKryo;
 import org.aksw.jena_sparql_api.lookup.ListPaginatorSparql;
-import org.aksw.jenax.arq.connection.link.LinkSparqlQueryMod;
+import org.aksw.jenax.arq.connection.link.LinkSparqlQueryDecorizer;
 import org.aksw.jenax.arq.connection.link.QueryExecFactories;
 import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecoratorBase;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryMod;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecorizer;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.syntax.QueryHash;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -158,13 +158,13 @@ public class QueryExecFactoryQueryRangeCache
         return result;
     }
 
-    public static QueryExecFactoryQueryMod createQueryExecMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    public static QueryExecFactoryQueryDecorizer createQueryExecMod(java.nio.file.Path cacheDir, long maxRequestSize) {
     	return qef -> create(qef, cacheDir, maxRequestSize);
     }
 
-    public static LinkSparqlQueryMod createLinkMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    public static LinkSparqlQueryDecorizer createLinkMod(java.nio.file.Path cacheDir, long maxRequestSize) {
     	return link -> {
-        	QueryExecFactoryQuery qef = QueryExecFactories.adapt(link);
+        	QueryExecFactoryQuery qef = QueryExecFactories.of(link);
         	qef = create(qef, cacheDir, maxRequestSize);
         	LinkSparqlQuery result = QueryExecFactories.toLink(qef);
         	return result;
@@ -172,7 +172,7 @@ public class QueryExecFactoryQueryRangeCache
     }
 
     public static LinkSparqlQuery decorate(LinkSparqlQuery link, java.nio.file.Path cacheDir, long maxRequestSize) {
-    	LinkSparqlQueryMod mod = createLinkMod(cacheDir, maxRequestSize);
+    	LinkSparqlQueryDecorizer mod = createLinkMod(cacheDir, maxRequestSize);
     	LinkSparqlQuery result = mod.apply(link);
     	return result;
     }

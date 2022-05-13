@@ -5,7 +5,7 @@ import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.exec.QueryExec;
 
 public class QueryExecFactoryQueryOverLinkSparqlQuery
-	implements QueryExecFactoryQuery
+	implements QueryExecFactory
 {
 	protected LinkSparqlQuery link;
 
@@ -17,6 +17,12 @@ public class QueryExecFactoryQueryOverLinkSparqlQuery
 	@Override
 	public QueryExec create(Query query) {
 		QueryExec result = link.query(query);
+		return result;
+	}
+
+	@Override
+	public QueryExec create(String queryString) {
+		QueryExec result = link.query(queryString);
 		return result;
 	}
 }

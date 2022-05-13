@@ -1100,7 +1100,7 @@ public class DataQueryImpl<T extends RDFNode>
 //        }
 //        Query query = e.getValue();
         //		QueryExecutionUtils.countQuery(query, new QueryExecutionFactorySparqlQueryConnection(conn));
-        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(QueryExecutionFactories.adapt(conn), query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
+        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(QueryExecutionFactories.of(conn), query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
                 .map(range -> CountUtils.toCountInfo(range));
 
         return result;

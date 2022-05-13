@@ -4,9 +4,9 @@ import java.util.function.Function;
 
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
-/** Transform a {@link LinkSparqlQuery} into another one*/
+/** Transform a {@link LinkSparqlQuery} into another one */
 @FunctionalInterface
-public interface LinkSparqlQueryMod
+public interface LinkSparqlQueryDecorizer
 	extends Function<LinkSparqlQuery, LinkSparqlQuery>
 {
 }

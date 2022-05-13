@@ -19,6 +19,7 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
+import org.aksw.jenax.arq.connection.link.QueryExecFactories;
 import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
@@ -571,7 +572,7 @@ public class SparqlRx {
             Long itemLimit,
             Long rowLimit) {
     	return fetchCountQueryPartition(
-    			QueryExecFactoryQuery.adapt(qef),
+    			QueryExecFactories.adapt(qef),
     			query,
     			partitionVars,
     			itemLimit,
@@ -625,7 +626,7 @@ public class SparqlRx {
             Query query,
             Long itemLimit,
             Long rowLimit) {
-        Single<Range<Long>> result = fetchCountQueryPartition(qef.levelDown(), query, null, itemLimit, rowLimit);
+        Single<Range<Long>> result = fetchCountQueryPartition(QueryExecFactories.adapt(qef), query, null, itemLimit, rowLimit);
         return result;
     }
 
