@@ -20,17 +20,17 @@ import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
 import org.aksw.jena_sparql_api.sparql_path2.SparqlKShortestPathFinder;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.path.Path;
 
 public class SparqlKShortestPathFinderYen
     implements SparqlKShortestPathFinder
 {
-    protected SparqlQueryConnection qef;
+    protected QueryExecutionFactoryQuery qef;
     protected int resourceBatchSize;
 
-    public SparqlKShortestPathFinderYen(SparqlQueryConnection qef, int resourceBatchSize) {
+    public SparqlKShortestPathFinderYen(QueryExecutionFactoryQuery qef, int resourceBatchSize) {
         this.qef = qef;
         this.resourceBatchSize = resourceBatchSize;
     }

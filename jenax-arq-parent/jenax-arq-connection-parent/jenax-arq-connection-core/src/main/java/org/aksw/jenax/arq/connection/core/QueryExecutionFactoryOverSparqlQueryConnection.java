@@ -4,17 +4,17 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
-public class QueryExecutionFactorySparqlQueryConnection
+public class QueryExecutionFactoryOverSparqlQueryConnection
     implements QueryExecutionFactory
 {
     protected SparqlQueryConnection conn;
     protected boolean closeDelegateOnClose;
 
-    public QueryExecutionFactorySparqlQueryConnection(SparqlQueryConnection conn) {
+    public QueryExecutionFactoryOverSparqlQueryConnection(SparqlQueryConnection conn) {
         this(conn, true);
     }
 
-    public QueryExecutionFactorySparqlQueryConnection(SparqlQueryConnection conn, boolean closeDelegate) {
+    public QueryExecutionFactoryOverSparqlQueryConnection(SparqlQueryConnection conn, boolean closeDelegate) {
         super();
         this.conn = conn;
         this.closeDelegateOnClose = closeDelegate;

@@ -13,7 +13,7 @@ import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactoryOverSparqlQueryConnection;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactorySparqlUpdateConnection;
 import org.aksw.jenax.connectionless.SparqlService;
@@ -199,7 +199,7 @@ public class FluentSparqlService<P>
         SparqlService sparqlService = new SparqlServiceImpl(
                 null,
                 null,
-                new QueryExecutionFactorySparqlQueryConnection(conn),
+                new QueryExecutionFactoryOverSparqlQueryConnection(conn),
                 new UpdateExecutionFactorySparqlUpdateConnection(conn));
 
         FluentSparqlService<?> result = from(sparqlService);

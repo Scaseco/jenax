@@ -22,6 +22,7 @@ import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -31,9 +32,6 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.BasicPattern;
@@ -104,7 +102,7 @@ public class NodeSchemaDataFetcher {
     public void sync(
             // NodeGraphSchema schema,
             Multimap<NodeSchema, Node> schemaAndNodes,
-            SparqlQueryConnection conn,
+            QueryExecutionFactoryQuery conn,
             LookupService<Node, ResourceMetamodel> metaDataService,
             ResourceCache graphToResourceState
             ) {
@@ -123,7 +121,7 @@ public class NodeSchemaDataFetcher {
     public Multimap<NodeSchema, Node> step(
             // NodeGraphSchema schema,
             Multimap<NodeSchema, Node> schemaAndNodes,
-            SparqlQueryConnection conn,
+            QueryExecutionFactoryQuery conn,
             Multimap<NodeSchema, Node> done,
             LookupService<Node, ResourceMetamodel> metaDataService,
             ResourceCache resourceCache) {
@@ -429,7 +427,6 @@ public class NodeSchemaDataFetcher {
 //        RDFDataMgr.write(System.out, ds, RDFFormat.TRIG);
 
 
-        RDFConnection conn = RDFConnectionFactory.connect(ds);
         QueryExecutionFactory qef = new QueryExecutionFactoryDataset(ds);
 
         LookupService<Node, ResourceMetamodel> metaDataService = ResourceExplorer.createMetamodelLookup(qef);
@@ -437,7 +434,7 @@ public class NodeSchemaDataFetcher {
         NodeSchemaDataFetcher dataFetcher = new NodeSchemaDataFetcher();
         // Map<Node, ResourceState> resourceCache = new HashMap<>();
         ResourceCache resourceCache = new ResourceCache();
-        dataFetcher.sync(roots, conn, metaDataService, resourceCache);
+        dataFetcher.sync(roots, qef, metaDataService, resourceCache);
 
 
         Graph graph = GraphFactory.createDefaultGraph();
@@ -452,7 +449,7 @@ public class NodeSchemaDataFetcher {
          Model m = ModelFactory.createModelForGraph(graph);
          RDFDataMgr.write(System.out, m, RDFFormat.TURTLE_PRETTY);
 
-         ShapedNode sn = ShapedNode.create(datasetNode, schema, resourceCache, conn);
+         ShapedNode sn = ShapedNode.create(datasetNode, schema, resourceCache, qef);
 
          ShapedProperty sp = sn.getShapedProperties().get(PathFactory.pathLink(DCAT.distribution.asNode()));
 

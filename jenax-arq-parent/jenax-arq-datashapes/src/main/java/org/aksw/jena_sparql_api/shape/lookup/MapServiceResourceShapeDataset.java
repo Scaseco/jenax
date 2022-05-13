@@ -5,18 +5,18 @@ import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetGraph;
 
 public class MapServiceResourceShapeDataset
     implements MapService<Concept, Node, DatasetGraph>
 {
-    private SparqlQueryConnection qef;
+    private QueryExecutionFactoryQuery qef;
     private ResourceShape resourceShape;
     private boolean isLeftJoin;
 
-    public MapServiceResourceShapeDataset(SparqlQueryConnection qef,
+    public MapServiceResourceShapeDataset(QueryExecutionFactoryQuery qef,
             ResourceShape resourceShape,
             boolean isLeftJoin) {
         super();
@@ -32,7 +32,7 @@ public class MapServiceResourceShapeDataset
         return result;
     }
 
-    public static MapServiceResourceShapeDataset create(SparqlQueryConnection qef, ResourceShape resourceShape, boolean isLeftJoin) {
+    public static MapServiceResourceShapeDataset create(QueryExecutionFactoryQuery qef, ResourceShape resourceShape, boolean isLeftJoin) {
         MapServiceResourceShapeDataset result = new MapServiceResourceShapeDataset(qef, resourceShape, isLeftJoin);
         return result;
     }

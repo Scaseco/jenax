@@ -1,12 +1,10 @@
 package org.aksw.jena_sparql_api.lookup;
 
-import java.util.function.Function;
-
 import org.aksw.commons.rx.lookup.ListPaginator;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 
@@ -19,9 +17,9 @@ public class ListPaginatorSparql
     implements ListPaginator<Binding>
 {
     protected Query query;
-    protected Function<? super Query, ? extends QueryExecution> qef;
+    protected QueryExecFactoryQuery qef; // Function<? super Query, ? extends QueryExecution> qef;
 
-    public ListPaginatorSparql(Query query, Function<? super Query, ? extends QueryExecution> qef) {
+    public ListPaginatorSparql(Query query, QueryExecFactoryQuery qef) {
         super();
         this.query = query;
         this.qef = qef;
@@ -33,7 +31,7 @@ public class ListPaginatorSparql
     	Query q = QueryTransformOps.shallowCopy(query);
         QueryUtils.applyRange(q, t);
 
-        Flowable<Binding> result = SparqlRx.execSelectRaw(() -> qef.apply(q));
+        Flowable<Binding> result = SparqlRx.select(qef, query);
         return result;
     }
 

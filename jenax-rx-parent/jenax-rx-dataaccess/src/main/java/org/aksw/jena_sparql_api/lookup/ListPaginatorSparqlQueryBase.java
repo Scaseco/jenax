@@ -2,12 +2,12 @@ package org.aksw.jena_sparql_api.lookup;
 
 import org.aksw.commons.rx.lookup.ListPaginator;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 
 /**
  * Paginator based on a concept.
- * 
- * 
+ *
+ *
  * @author raven
  *
  * @param <T>
@@ -15,11 +15,11 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 public abstract class ListPaginatorSparqlQueryBase<T>
     implements ListPaginator<T>
 {
-    protected SparqlQueryConnection qef;
+    protected QueryExecutionFactoryQuery qef;
     protected Concept filterConcept;
     protected boolean isLeftJoin;
 
-    public ListPaginatorSparqlQueryBase(SparqlQueryConnection qef, Concept filterConcept, boolean isLeftJoin) {
+    public ListPaginatorSparqlQueryBase(QueryExecutionFactoryQuery qef, Concept filterConcept, boolean isLeftJoin) {
         this.qef = qef;
         this.filterConcept = filterConcept;
         this.isLeftJoin = isLeftJoin;

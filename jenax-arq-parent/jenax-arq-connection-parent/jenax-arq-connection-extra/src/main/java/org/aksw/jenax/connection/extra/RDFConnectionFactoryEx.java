@@ -3,7 +3,7 @@ package org.aksw.jenax.connection.extra;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactoryOverSparqlQueryConnection;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;

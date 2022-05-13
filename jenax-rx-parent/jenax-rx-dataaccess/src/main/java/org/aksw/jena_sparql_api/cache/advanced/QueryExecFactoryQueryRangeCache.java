@@ -15,10 +15,12 @@ import org.aksw.commons.store.object.key.api.ObjectStore;
 import org.aksw.commons.store.object.key.impl.KryoUtils;
 import org.aksw.commons.store.object.key.impl.ObjectStoreImpl;
 import org.aksw.commons.store.object.path.impl.ObjectSerializerKryo;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.lookup.ListPaginatorSparql;
-import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.link.LinkSparqlQueryMod;
+import org.aksw.jenax.arq.connection.link.QueryExecFactories;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecoratorBase;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryMod;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.syntax.QueryHash;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -26,9 +28,10 @@ import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
+import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +42,11 @@ import com.google.common.collect.Range;
 
 import io.reactivex.rxjava3.core.Flowable;
 
-public class QueryExecutionFactoryRangeCache
-    extends QueryExecutionFactoryDecorator
+
+public class QueryExecFactoryQueryRangeCache
+    extends QueryExecFactoryQueryDecoratorBase<QueryExecFactoryQuery>
 {
-    private static final Logger logger = LoggerFactory.getLogger(QueryExecutionFactoryRangeCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(QueryExecFactoryQueryRangeCache.class);
 
     protected ObjectStore objectStore;
     protected AdvancedRangeCacheConfig cacheConfig;
@@ -51,8 +55,8 @@ public class QueryExecutionFactoryRangeCache
     protected Cache<Path<String>, ListPaginator<Binding>> queryToCache;
 
 
-    public QueryExecutionFactoryRangeCache(
-            QueryExecutionFactory decoratee,
+    public QueryExecFactoryQueryRangeCache(
+    		QueryExecFactoryQuery decoratee,
             ObjectStore objectStore,
             int maxCachedQueries,
             AdvancedRangeCacheConfig cacheConfig
@@ -65,18 +69,8 @@ public class QueryExecutionFactoryRangeCache
                 .build();
     }
 
-    public static QueryExecutionFactoryRangeCache create(
-            QueryExecutionFactory decoratee, java.nio.file.Path baseFolder, int maxCachedQueries, AdvancedRangeCacheConfig cacheConfig) {
-
-        ObjectStore objectStore = ObjectStoreImpl.create(baseFolder, ObjectSerializerKryo.create(
-                KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses)));
-
-        QueryExecutionFactoryRangeCache result = new QueryExecutionFactoryRangeCache(decoratee, objectStore, maxCachedQueries, cacheConfig);
-        return result;
-    }
-
     @Override
-    public QueryExecution createQueryExecution(Query query) {
+    public QueryExec create(Query query) {
         Range<Long> requestRange = QueryUtils.toRange(query);
 
         QueryHash hash = QueryHash.createHash(query);
@@ -100,7 +94,7 @@ public class QueryExecutionFactoryRangeCache
         try {
             Path<String> objectStorePath = PathOpsStr.newRelativePath(bodyHash).resolve(projHash);
             frontend = queryToCache.get(objectStorePath, () -> {
-                ListPaginator<Binding> backend = new ListPaginatorSparql(bodyQueryWithoutSlice, decoratee::createQueryExecution);
+                ListPaginator<Binding> backend = new ListPaginatorSparql(bodyQueryWithoutSlice, decoratee);
                 // SequentialReaderSource<Binding[]> dataSource = SequentialReaderSourceRx.create(arrayOps, backend);
 
                 // KeyObjectStore store = KeyObjectStoreWithKeyTransform.wrapWithPrefix(objectStore, List.of(str));
@@ -137,52 +131,49 @@ public class QueryExecutionFactoryRangeCache
         Flowable<Binding> flowable = tmp.apply(requestRange);
 
         ResultSetRx rs = ResultSetRxImpl.create(resultVars, flowable);
-        QueryExecution result = rs.asQueryExecution();
+        QueryExec result = rs.asQueryExec();
 
         return result;
     }
 
+    public static QueryExecFactoryQueryRangeCache create(
+            QueryExecFactoryQuery decoratee,
+            java.nio.file.Path cacheFolder,
+            int maxCachedQueries,
+            AdvancedRangeCacheConfig cacheConfig) {
+    	KryoPool kryoPool = KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses);
+        ObjectStore objectStore = ObjectStoreImpl.create(cacheFolder, ObjectSerializerKryo.create(
+                kryoPool));
+        QueryExecFactoryQueryRangeCache result = new QueryExecFactoryQueryRangeCache(decoratee, objectStore, maxCachedQueries, cacheConfig);
+        return result;
+    }
 
-    public static QueryExecutionFactory decorate(
-    		QueryExecutionFactory decoratee,
-    		java.nio.file.Path cacheDir,
+    public static QueryExecFactoryQueryRangeCache create(
+    		QueryExecFactoryQuery decoratee,
+    		java.nio.file.Path cacheFolder,
     		long maxRequestSize) {
-        KryoPool kryoPool = KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses);
-
-        // KeyObjectStore keyObjectStore = SmartRangeCacheImpl.createKeyObjectStore(Paths.get(cacheDir), kryoPool);
-        ObjectStore objectStore = ObjectStoreImpl.create(cacheDir, ObjectSerializerKryo.create(kryoPool));
-
         AdvancedRangeCacheConfig arcc = AdvancedRangeCacheConfigImpl.newDefaultsForObjects(maxRequestSize);
+        QueryExecFactoryQueryRangeCache result = create(decoratee, cacheFolder, 1024, arcc);
 
-//        QueryExecutionFactory core = new QueryExecutionFactoryBackQuery() {
-//
-//            @Override
-//            public QueryExecution createQueryExecution(Query query) {
-//                QueryExecution qe = QueryExecutionHTTP.create()
-//                        .acceptHeader(ResultSetLang.RS_XML.getContentType().getContentTypeStr())
-//                        .endpoint(endpointUrl).query(query).build();
-//                return qe;
-//            }
-//
-//            @Override
-//            public String getState() {
-//                return "";
-//            }
-//
-//            @Override
-//            public String getId() {
-//                return "";
-//            }
-//        };
+        return result;
+    }
 
-        QueryExecutionFactory qef = FluentQueryExecutionFactory.from(decoratee)
-                .config()
-//                    .withCache(new CacheBackendMem())
-                // .withCache(new CacheBackendFile(new File("/tmp/moinapp/cache"), 1000 * 60 * 60 * 24L))
-                .compose(_decoratee -> new QueryExecutionFactoryRangeCache(_decoratee, objectStore, 100, arcc))
-//                .withCache(new CacheBackendFile(new File("/tmp/moinapp/cache"), 1000 * 60 * 60 * 24L * 30))
-                .end().create();
+    public static QueryExecFactoryQueryMod createQueryExecMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    	return qef -> create(qef, cacheDir, maxRequestSize);
+    }
 
-        return qef;
+    public static LinkSparqlQueryMod createLinkMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    	return link -> {
+        	QueryExecFactoryQuery qef = QueryExecFactories.adapt(link);
+        	qef = create(qef, cacheDir, maxRequestSize);
+        	LinkSparqlQuery result = QueryExecFactories.toLink(qef);
+        	return result;
+    	};
+    }
+
+    public static LinkSparqlQuery decorate(LinkSparqlQuery link, java.nio.file.Path cacheDir, long maxRequestSize) {
+    	LinkSparqlQueryMod mod = createLinkMod(cacheDir, maxRequestSize);
+    	LinkSparqlQuery result = mod.apply(link);
+    	return result;
     }
 }

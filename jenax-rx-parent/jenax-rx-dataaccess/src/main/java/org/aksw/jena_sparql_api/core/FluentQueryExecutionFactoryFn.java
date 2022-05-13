@@ -50,7 +50,6 @@ public class FluentQueryExecutionFactoryFn<P>
         return this;
     }
 
-
     public FluentQueryExecutionFactoryFn(Supplier<P> parentSupplier, Function<QueryExecutionFactory, QueryExecutionFactory> fn) {
         super(true);
         this.parentSupplier = parentSupplier;

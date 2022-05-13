@@ -2,11 +2,11 @@ package org.aksw.jena_sparql_api.lookup;
 
 import java.util.concurrent.Callable;
 
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.sparql.exec.QueryExec;
 
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -14,14 +14,13 @@ public class PaginatorQueryTriple
     extends PaginatorQueryBase<Triple>
 {
 
-    public PaginatorQueryTriple(SparqlQueryConnection qef, Query query) {
+    public PaginatorQueryTriple(QueryExecFactoryQuery qef, Query query) {
         super(qef, query);
     }
 
     @Override
-    protected Flowable<Triple> obtainResultIterator(Callable<QueryExecution> qeSupplier) {
-        Flowable<Triple> result = SparqlRx.execConstructTriples(qeSupplier);
-        //Iterator<Triple> result = qe.execConstructTriples();
+    protected Flowable<Triple> obtainResultIterator(Callable<QueryExec> qeSupplier) {
+        Flowable<Triple> result = SparqlRx.constructTriples(qeSupplier);
         return result;
     }
 }

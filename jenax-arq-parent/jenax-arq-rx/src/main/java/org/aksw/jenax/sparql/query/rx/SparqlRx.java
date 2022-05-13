@@ -19,10 +19,12 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -44,7 +46,9 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
-import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.exec.http.QueryExecHTTP;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
@@ -105,8 +109,8 @@ public class SparqlRx {
         return SparqlRx.execSelectRaw(() -> queryConnSupp.call().query(query));
     }
 
-    public static Flowable<Binding> execSelectRaw(Function<? super Query, ? extends QueryExecution> qeSupp, Query query) {
-        return execSelectRaw(() -> qeSupp.apply(query));
+    public static Flowable<Binding> execSelectRaw(QueryExecutionFactoryQuery qeSupp, Query query) {
+        return execSelectRaw(() -> qeSupp.createQueryExecution(query));
     }
 
     public static Flowable<Binding> execSelectRaw(SparqlQueryConnection queryConn, Query query) {
@@ -278,6 +282,18 @@ public class SparqlRx {
         return result;
     }
 
+
+    public static Flowable<Triple> constructTriples(Callable<QueryExec> qes) {
+        Flowable<Triple> result = FlowableUtils.createFlowableFromResource(
+                qes::call,
+                QueryExec::constructTriples,
+                Iterator::hasNext,
+                Iterator::next,
+                QueryExec::close
+            );
+        return result;
+    }
+
     public static Flowable<Quad> execConstructQuads(SparqlQueryConnection conn, Query query) {
         return execConstructQuads(() -> conn.query(query));
     }
@@ -318,6 +334,38 @@ public class SparqlRx {
 //
 //        return result;
 //    }
+
+
+
+    public static <T> Flowable<T> select(Callable<? extends QueryExec> qes, Function<? super RowSet, T> next) {
+        Flowable<T> result = FlowableUtils.createFlowableFromResource(
+                qes::call,
+                QueryExec::select,
+                RowSet::hasNext,
+                next,
+                QueryExec::close
+            );
+        return result;
+    }
+
+
+//    public static Single<Range<Long>> fetchCountQuery(
+//            QueryExecFactoryQuery qef,
+//            Query query,
+//            Long itemLimit,
+//            Long rowLimit) {
+//        Single<Range<Long>> result = fetchCountQueryPartition(qef, query, null, itemLimit, rowLimit);
+//        return result;
+//    }
+
+    public static Flowable<Binding> select(QueryExecFactoryQuery qef, Query query) {
+        return select(() -> qef.create(query));
+    }
+
+    public static Flowable<Binding> select(Callable<? extends QueryExec> qes) {
+        return select(qes, RowSet::next);
+    }
+
 
     public static Entry<List<Var>, Flowable<Binding>> mapToFlowable(ResultSet rs) {
         Iterator<Binding> it = new QueryIteratorResultSet(rs);
@@ -463,23 +511,23 @@ public class SparqlRx {
         // NOTE This way, the main thread will terminate before the queries are processed
     }
 
-    public static Single<Number> fetchNumber(
-            SparqlQueryConnection conn,
-            Query query,
-            Var var) {
-        return fetchNumber(conn::query, query, var);
-    }
+//    public static Single<Number> fetchNumber(
+//            SparqlQueryConnection conn,
+//            Query query,
+//            Var var) {
+//        return fetchNumber(conn::query, query, var);
+//    }
 
 
     public static Single<Number> fetchNumber(
-            Function<? super Query, ? extends QueryExecution> qef,
+            QueryExecFactoryQuery qef,
             Query query,
             Var var) {
-        return fetchNumber(() -> qef.apply(query), var);
+        return fetchNumber(() -> qef.create(query), var);
     }
 
-    public static Single<Number> fetchNumber(Callable<? extends QueryExecution> queryConnSupp, Var var) {
-        return SparqlRx.execSelectRaw(queryConnSupp)
+    public static Single<Number> fetchNumber(Callable<? extends QueryExec> queryConnSupp, Var var) {
+        return SparqlRx.select(queryConnSupp)
                 .map(b -> b.get(var))
                 .map(countNode -> ((Number)countNode.getLiteralValue()))
                 .map(Optional::ofNullable)
@@ -507,17 +555,32 @@ public class SparqlRx {
 //    }
 
 
+//    public static Single<Range<Long>> fetchCountQueryPartition(
+//            SparqlQueryConnection conn,
+//            Query query,
+//            Collection<Var> partitionVars,
+//            Long itemLimit,
+//            Long rowLimit) {
+//        return fetchCountQueryPartition(conn::query, query, partitionVars, itemLimit, rowLimit);
+//    }
+
     public static Single<Range<Long>> fetchCountQueryPartition(
-            SparqlQueryConnection conn,
+            QueryExecutionFactoryQuery qef,
             Query query,
             Collection<Var> partitionVars,
             Long itemLimit,
             Long rowLimit) {
-        return fetchCountQueryPartition(conn::query, query, partitionVars, itemLimit, rowLimit);
+    	return fetchCountQueryPartition(
+    			QueryExecFactoryQuery.adapt(qef),
+    			query,
+    			partitionVars,
+    			itemLimit,
+    			rowLimit
+    	);
     }
 
     public static Single<Range<Long>> fetchCountQueryPartition(
-            Function<? super Query, ? extends QueryExecution> qef,
+            QueryExecFactoryQuery qef,
             Query query,
             Collection<Var> partitionVars,
             Long itemLimit,
@@ -543,22 +606,31 @@ public class SparqlRx {
     public static Single<Long> fetchBindingCount(String serviceUrl, Query query) {
         Entry<Var, Query> countQuery = QueryGenerationUtils.createQueryCount(query);
         return SparqlRx.fetchNumber(() ->
-            QueryExecutionHTTP.newBuilder().endpoint(serviceUrl).query(countQuery.getValue()).build(),
+            QueryExecHTTP.newBuilder().endpoint(serviceUrl).query(countQuery.getValue()).build(),
                 countQuery.getKey())
                 .map(Number::longValue);
     }
 
+//    public static Single<Range<Long>> fetchCountQuery(
+//            SparqlQueryConnection conn,
+//            Query query,
+//            Long itemLimit,
+//            Long rowLimit) {
+//        Single<Range<Long>> result = fetchCountQuery(conn::query, query, itemLimit, rowLimit);
+//        return result;
+//    }
+
     public static Single<Range<Long>> fetchCountQuery(
-            SparqlQueryConnection conn,
+            QueryExecutionFactoryQuery qef,
             Query query,
             Long itemLimit,
             Long rowLimit) {
-        Single<Range<Long>> result = fetchCountQuery(conn::query, query, itemLimit, rowLimit);
+        Single<Range<Long>> result = fetchCountQueryPartition(qef.levelDown(), query, null, itemLimit, rowLimit);
         return result;
     }
 
     public static Single<Range<Long>> fetchCountQuery(
-            Function<? super Query, ? extends QueryExecution> qef,
+            QueryExecFactoryQuery qef,
             Query query,
             Long itemLimit,
             Long rowLimit) {

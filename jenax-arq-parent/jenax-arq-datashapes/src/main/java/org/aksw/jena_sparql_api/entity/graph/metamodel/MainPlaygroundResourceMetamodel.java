@@ -22,7 +22,7 @@ import org.aksw.jena_sparql_api.schema.PropertySchemaFromPropertyShape;
 import org.aksw.jena_sparql_api.schema.ResourceExplorer;
 import org.aksw.jena_sparql_api.schema.SHAnnotatedClass;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactoryOverSparqlQueryConnection;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -196,7 +196,7 @@ public class MainPlaygroundResourceMetamodel {
 //        Set<ResourceMetamodel> tmp = m.listSubjectsWithProperty(p).mapWith(r -> r.as(ResourceMetamodel.class)).toSet();
 //
 
-        QueryExecutionFactory qef = new QueryExecutionFactorySparqlQueryConnection(conn);
+        QueryExecutionFactory qef = new QueryExecutionFactoryOverSparqlQueryConnection(conn);
         LookupService<Node, ResourceMetamodel> lookupService = ResourceExplorer.createMetamodelLookup(qef);
         List<ResourceMetamodel> tmp = lookupService.fetchList(nodes);
 
@@ -313,7 +313,7 @@ public class MainPlaygroundResourceMetamodel {
         Multimap<NodeSchema, Node> schemaToNodes = HashMultimap.create();
         Multimaps.invertFrom(roots, schemaToNodes);
 
-        analyzeResources(dsm, schemaToNodes, shapeModel, new QueryExecutionFactorySparqlQueryConnection(conn));
+        analyzeResources(dsm, schemaToNodes, shapeModel, new QueryExecutionFactoryOverSparqlQueryConnection(conn));
 
         RDFDataMgr.write(System.out, dsm.getModel(), RDFFormat.TURTLE_PRETTY);
     }
