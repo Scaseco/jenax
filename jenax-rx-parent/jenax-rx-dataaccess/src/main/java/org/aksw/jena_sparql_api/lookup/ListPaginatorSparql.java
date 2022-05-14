@@ -37,7 +37,7 @@ public class ListPaginatorSparql
     	Query q = QueryTransformOps.shallowCopy(query);
         QueryUtils.applyRange(q, t);
 
-        Flowable<Binding> result = SparqlRx.select(qef, query);
+        Flowable<Binding> result = SparqlRx.select(qef, q);
         return result;
     }
 
