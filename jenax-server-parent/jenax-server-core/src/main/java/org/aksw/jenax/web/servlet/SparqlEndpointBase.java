@@ -227,14 +227,14 @@ public abstract class SparqlEndpointBase {
      */
 
 
-    @GET
-    @Consumes(WebContent.contentTypeSPARQLUpdate)
-    @Produces(MediaType.APPLICATION_JSON)
-    public void executeUpdateGet(
-            @Suspended AsyncResponse asyncResponse,
-            @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, null, updateString, null);
-    }
+//    @GET
+//    @Consumes(WebContent.contentTypeSPARQLUpdate)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public void executeUpdateGet(
+//            @Suspended AsyncResponse asyncResponse,
+//            @QueryParam("update") String updateString) {
+//        processStmtAsync(asyncResponse, null, updateString, null);
+//    }
 
 
 
@@ -456,7 +456,7 @@ public abstract class SparqlEndpointBase {
     	if (lang != null) {
 	    	String contentTypeStr = lang.getContentType().getContentTypeStr();
 	    	StreamingOutput processor = createQueryProcessor(qe, lang, null)::accept;
-	    	result = Response.ok(processor).type(contentTypeStr).build();
+	    	result = Response.ok(processor, contentTypeStr).build();
     	} else {
     		// Send the query to the backend and determine the response content type from
     		// the backend's content type

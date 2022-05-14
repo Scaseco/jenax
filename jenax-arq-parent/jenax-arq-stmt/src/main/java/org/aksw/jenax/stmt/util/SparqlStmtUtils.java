@@ -133,18 +133,22 @@ public class SparqlStmtUtils {
     }
 
     /**
-     * In-place optimize an update request's prefixes to only used prefixes
+     * In-place optimize a parsed sparql statement's prefixes to only used prefixes.
+     * If the statement is not parsed then this operation does nothing!
      * The global prefix map may be null.
+     *
      *
      * @param stmt
      * @param globalPm
      * @return
      */
     public static SparqlStmt optimizePrefixes(SparqlStmt stmt, PrefixMapping globalPm) {
-        if(stmt.isQuery()) {
-            QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
-        } else if(stmt.isUpdateRequest()) {
-            UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
+        if (stmt.isParsed()) {
+	    	if(stmt.isQuery()) {
+	            QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
+	        } else if(stmt.isUpdateRequest()) {
+	            UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
+	        }
         }
         return stmt;
     }
