@@ -7,6 +7,12 @@ import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
+
+/**
+ * LinkSparqlQuery wrapper that can transform both
+ * the incoming Query and the obtained QueryExec instances.
+ * Supplied transformation functions may be null.
+ */
 public class LinkSparqlQueryTransform
     extends LinkSparqlQueryDelegateBase
 {
@@ -14,7 +20,8 @@ public class LinkSparqlQueryTransform
     protected Function<? super QueryExec, ? extends QueryExec> queryExecTransform;
 
     public LinkSparqlQueryTransform(
-            LinkSparqlQuery delegate, Function<? super Query, ? extends Query> transform,
+            LinkSparqlQuery delegate,
+            Function<? super Query, ? extends Query> transform,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform) {
         super(delegate);
         this.queryTransform = transform;

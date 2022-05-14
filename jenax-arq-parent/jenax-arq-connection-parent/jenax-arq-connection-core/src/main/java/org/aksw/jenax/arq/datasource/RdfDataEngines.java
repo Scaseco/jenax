@@ -1,12 +1,18 @@
 package org.aksw.jenax.arq.datasource;
 
+import java.util.function.Function;
+
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
+import org.aksw.jenax.connection.dataengine.RdfDataEngineDecoratorBase;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.sparql.exec.QueryExec;
 
 public class RdfDataEngines {
     public static class RdfDataEngineOverRdfDataSource
@@ -90,5 +96,29 @@ public class RdfDataEngines {
                 : new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
 
         return result;
+    }
+
+    /**
+     * Return a new RdfDataEngine with the given query and queryExec transforms applied.
+     *
+     * @param dataEngine
+     * @param queryTransform
+     * @param queryExecTransform
+     * @return
+     */
+    public static RdfDataEngine wrapWithQueryTransform(
+            RdfDataEngine dataEngine,
+            Function<? super Query, ? extends Query> queryTransform,
+            Function<? super QueryExec, ? extends QueryExec> queryExecTransform
+            ) {
+
+    	return new RdfDataEngineDecoratorBase<RdfDataEngine>(dataEngine) {
+    		@Override
+    		public RDFConnection getConnection() {
+    			RDFConnection raw = decoratee.getConnection();
+    			RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(raw, queryTransform, queryExecTransform);
+    			return result;
+    		}
+    	};
     }
 }
