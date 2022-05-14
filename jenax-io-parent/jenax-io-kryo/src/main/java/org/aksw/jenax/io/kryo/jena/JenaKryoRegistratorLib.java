@@ -1,10 +1,14 @@
 package org.aksw.jenax.io.kryo.jena;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.google.gson.Gson;
 import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
-import org.apache.jena.graph.*;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Node_ANY;
+import org.apache.jena.graph.Node_Blank;
+import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node_Triple;
+import org.apache.jena.graph.Node_URI;
+import org.apache.jena.graph.Node_Variable;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -18,9 +22,37 @@ import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.DatasetImpl;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
-import org.apache.jena.sparql.engine.binding.*;
-import org.apache.jena.sparql.expr.*;
-import org.apache.jena.sparql.expr.nodevalue.*;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.Binding0;
+import org.apache.jena.sparql.engine.binding.Binding1;
+import org.apache.jena.sparql.engine.binding.Binding2;
+import org.apache.jena.sparql.engine.binding.Binding3;
+import org.apache.jena.sparql.engine.binding.Binding4;
+import org.apache.jena.sparql.engine.binding.BindingOverMap;
+import org.apache.jena.sparql.engine.binding.BindingRoot;
+import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
+import org.apache.jena.sparql.expr.E_BNode;
+import org.apache.jena.sparql.expr.E_Datatype;
+import org.apache.jena.sparql.expr.E_Equals;
+import org.apache.jena.sparql.expr.E_IRI;
+import org.apache.jena.sparql.expr.E_StrConcat;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueBoolean;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueDateTime;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueDecimal;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueDouble;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueDuration;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueFloat;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueInteger;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueLang;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueSortKey;
+import org.apache.jena.sparql.expr.nodevalue.NodeValueString;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.google.gson.Gson;
 
 /**
  * Note: KryoRegistrator is an interface introduced by spark; hence we cannot use it
@@ -97,6 +129,10 @@ public class JenaKryoRegistratorLib {
         kryo.register(ResourceImpl.class, new RDFNodeSerializer<>(RDFNode::asResource, gson));
         kryo.register(PropertyImpl.class, new RDFNodeSerializer<>(n -> ResourceFactory.createProperty(n.asResource().getURI()), gson));
         kryo.register(LiteralImpl.class, new RDFNodeSerializer<>(RDFNode::asLiteral, gson));
+
+
+        // Serializers for sending encountered exceptions over a wire
+        kryo.register(QueryExceptionHTTP.class, new QueryExceptionHTTPSerializer());
     }
 
 
