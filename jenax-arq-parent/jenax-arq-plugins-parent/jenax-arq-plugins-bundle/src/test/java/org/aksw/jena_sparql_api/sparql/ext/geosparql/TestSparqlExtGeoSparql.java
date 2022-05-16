@@ -86,11 +86,11 @@ public class TestSparqlExtGeoSparql {
 		String queryStr =
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#> " +
 						"PREFIX geof: <http://www.opengis.net/def/function/geosparql/> " +
-						"SELECT ?g { BIND(geof:asGeoJSON('<gml:LineString xmlns:gml=\"http://www.opengis.net/ont/gml\" srsName=\"EPSG:25832\">" +
+						"SELECT ?x ?g { BIND('<gml:LineString xmlns:gml=\"http://www.opengis.net/ont/gml\" srsName=\"EPSG:25832\">" +
 						"<gml:posList>" +
 						"663957.75944074022118 5103981.64908889029175 663955.915655555087142 5103991.151674075052142" +
 						"</gml:posList>" +
-						"</gml:LineString>'^^geo:gmlLiteral) AS ?g) }";
+						"</gml:LineString>'^^geo:gmlLiteral as ?x) BIND(geof:asGeoJSON(?x) AS ?g) }";
 		String[] tmpActual = {null};
 		Model model = ModelFactory.createDefaultModel();
 		model.setNsPrefix("gml", "http://www.opengis.net/ont/gml");
@@ -100,7 +100,7 @@ public class TestSparqlExtGeoSparql {
 		String actual = tmpActual[0];
 		System.out.println(tmpActual[0]);
 		String expected =
-				"{\"type\":\"LineString\",\"coordinates\":[[663957.75944074,5103981.64908889],[663955.91565556,5103991.15167408]],\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}";
+				"{\"type\":\"LineString\",\"coordinates\":[[11.120116,46.069743],[11.120095,46.069829]]}";
 		GeometryFactory geometryFactory = new GeometryFactory();
 		GeoJsonReader reader = new GeoJsonReader(geometryFactory);
 		LineString expectedGeo = (LineString) reader.read(expected);
