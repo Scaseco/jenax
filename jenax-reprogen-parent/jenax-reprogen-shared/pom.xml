@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-reprogen-parent</artifactId>
-		<version>4.6.0-SNAPSHOT</version>
+		<version>4.6.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
