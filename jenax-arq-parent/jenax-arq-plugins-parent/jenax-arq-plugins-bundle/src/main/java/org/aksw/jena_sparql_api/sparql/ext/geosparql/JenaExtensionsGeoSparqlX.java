@@ -7,8 +7,11 @@ import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
+import org.apache.jena.geosparql.implementation.vocabulary.SpatialExtension;
+import org.apache.jena.geosparql.spatial.property_functions.EqualsPF;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
+import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.locationtech.jts.geom.Geometry;
 
 public class JenaExtensionsGeoSparqlX {
@@ -58,5 +61,8 @@ public class JenaExtensionsGeoSparqlX {
 //			binder.register(GeoFunctionsJena.class.getMethod("centroid", Geometry.class));
 
         // FunctionRegistry.get().put(ns + "nearestPoints", uri -> new E_ST_NearestPoints());
+
+        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
+        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
     }
 }
