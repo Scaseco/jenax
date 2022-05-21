@@ -35,6 +35,10 @@ public class InputStreamProviderBZip2
 
     @Override
     public void close() {
-        decoratee.close();
+    	try {
+    		decoratee.close();
+    	} catch (Exception e) {
+    		throw new RuntimeException(e);
+    	}
     }
 }

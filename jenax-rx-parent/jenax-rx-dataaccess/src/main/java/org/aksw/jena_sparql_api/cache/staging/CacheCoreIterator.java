@@ -1,12 +1,12 @@
 package org.aksw.jena_sparql_api.cache.staging;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import org.aksw.commons.collections.IClosable;
 import org.aksw.commons.collections.SinglePrefetchIterator;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.cache.extra.CacheEntryImpl;
@@ -23,15 +23,15 @@ public class CacheCoreIterator
 
     // The action to perform when closing the input stream of a generated
     // cache entry. E.g. close the result set, commit the transaction, ...
-    private IClosable inputStreamCloseAction;
+    private Closeable inputStreamCloseAction;
 
-    public CacheCoreIterator(ResultSet rs, IClosable inputStreamCloseAction, long timeToLive) {
+    public CacheCoreIterator(ResultSet rs, Closeable inputStreamCloseAction, long timeToLive) {
         this.rs = rs;
         this.inputStreamCloseAction = inputStreamCloseAction;
         this.timeToLive = timeToLive;
     }
 
-    public static CacheEntryImpl createCacheEntry(ResultSet rs, IClosable closeAction, long timeToLive) throws SQLException {
+    public static CacheEntryImpl createCacheEntry(ResultSet rs, Closeable closeAction, long timeToLive) throws SQLException {
 
         byte[] rawQueryHash = rs.getBytes("id");
         String queryHash = StringUtils.bytesToHexString(rawQueryHash);

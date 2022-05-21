@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.cache.extra;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.aksw.commons.collections.IClosable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  *         Time: 11:54 PM
  */
 public class ClosableCacheSql
-    implements IClosable
+    implements Closeable
 {
     private static final Logger logger = LoggerFactory.getLogger(ClosableCacheSql.class);
 
@@ -29,7 +29,7 @@ public class ClosableCacheSql
 
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         //SqlUtils.close(rs);
         resource.close();
         if(in != null) {

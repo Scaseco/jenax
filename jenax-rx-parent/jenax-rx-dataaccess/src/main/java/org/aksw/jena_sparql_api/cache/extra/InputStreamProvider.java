@@ -1,8 +1,7 @@
 package org.aksw.jena_sparql_api.cache.extra;
 
+import java.io.Closeable;
 import java.io.InputStream;
-
-import org.aksw.commons.collections.IClosable;
 
 /**
  * A class that can provide an InputStream.
@@ -21,7 +20,7 @@ import org.aksw.commons.collections.IClosable;
  *         Time: 10:25 PM
  */
 public interface InputStreamProvider
-    extends IClosable
+    extends Closeable
 {
     InputStream open();
 }

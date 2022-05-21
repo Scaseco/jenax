@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.cache.staging;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -10,8 +11,8 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 
-import org.aksw.commons.collections.IClosable;
 import org.aksw.commons.util.StreamUtils;
+import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.cache.extra.CacheEntryImpl;
 import org.aksw.jena_sparql_api.cache.extra.SqlUtils;
@@ -82,7 +83,7 @@ public class CacheBackendDaoPostgres
         */
 
 
-        IClosable closeAction = new IClosable() {
+        Closeable closeAction = new Closeable() {
             boolean isClosed = false;
 
             @Override
@@ -132,7 +133,7 @@ public class CacheBackendDaoPostgres
             */
         }
         else {
-            closeAction.close();
+        	AutoCloseables.close(closeAction);
         }
 
 //		if(result != null) {

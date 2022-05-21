@@ -8,8 +8,8 @@ import org.aksw.commons.cache.async.AsyncClaimingCacheImpl;
 import org.aksw.commons.cache.plain.ClaimingCache;
 import org.aksw.commons.cache.plain.ClaimingCacheOverAsync;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.input.DataStreamSource;
-import org.aksw.commons.io.input.DataStreams;
+import org.aksw.commons.io.input.ReadableChannelSource;
+import org.aksw.commons.io.input.ReadableChannels;
 import org.aksw.commons.util.range.PageHelper;
 import org.aksw.commons.util.ref.Ref;
 import org.apache.commons.io.IOUtils;
@@ -20,7 +20,7 @@ import com.google.common.collect.Range;
 public class PageManagerOverDataStreamSource
     implements PageManager
 {
-    protected DataStreamSource<byte[]> source;
+    protected ReadableChannelSource<byte[]> source;
     protected int pageSize;
     protected ClaimingCache<Long, Page> pageCache;
 
@@ -29,7 +29,7 @@ public class PageManagerOverDataStreamSource
     protected long lastPageId;
 
     public PageManagerOverDataStreamSource(
-            DataStreamSource<byte[]> source, int pageSize, AsyncClaimingCacheImpl.Builder<Long, Page> cacheBuilder) {
+            ReadableChannelSource<byte[]> source, int pageSize, AsyncClaimingCacheImpl.Builder<Long, Page> cacheBuilder) {
         super();
         this.source = source;
         this.pageSize = pageSize;
@@ -60,8 +60,8 @@ public class PageManagerOverDataStreamSource
         // Adjust the size of the last page
         int effectivePageSize = pageId != lastPageId ? pageSize : (int)(sourceSize % pageSize);
 
-        try (ReadableByteChannel channel = DataStreams.newChannel(
-                source.newDataStream(Range.closedOpen(offset, offset + effectivePageSize)))) {
+        try (ReadableByteChannel channel = ReadableChannels.newChannel(
+                source.newReadableChannel(Range.closedOpen(offset, offset + effectivePageSize)))) {
 
             ByteBuffer buffer = ByteBuffer.allocate(effectivePageSize);
             ByteBuffer dup = buffer.duplicate();
