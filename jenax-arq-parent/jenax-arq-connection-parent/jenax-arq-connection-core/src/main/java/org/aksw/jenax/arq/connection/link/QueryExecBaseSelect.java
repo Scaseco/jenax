@@ -353,7 +353,7 @@ public abstract class QueryExecBaseSelect
 
 	@Override
 	public RowSet select() {
-		if (!query.isSelectType()) {
+		if (query != null && !query.isSelectType()) {
 		    throw new RuntimeException("SELECT query expected. Got: ["
 		            + query.toString() + "]");
 		}

@@ -48,7 +48,8 @@ public interface ResultSetRx {
     }
 
     default QueryExec asQueryExec() {
-    	Query query = getQueryStmt().getQuery();
+    	SparqlStmtQuery queryStmt = getQueryStmt();
+    	Query query = queryStmt == null ? null : queryStmt.getQuery();
     	QueryExec result = new QueryExecBaseSelect(query, null, null) {
             protected Disposable disposable = null;
 
