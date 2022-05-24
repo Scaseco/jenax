@@ -30,7 +30,9 @@ public class E_UrlText
         return result;
     }
 
-    public static NodeValue resolve(NodeValue nv) throws Exception {
+
+    public static InputStream openInputStream(NodeValue nv) throws Exception {
+    	InputStream result = null;
 
         String url;
         if(nv.isString()) {
@@ -42,7 +44,6 @@ public class E_UrlText
             url = null;
         }
 
-        NodeValue result = null;
         if(url != null) {
         	URI uri = new URI(url);
         	URL u = uri.toURL();
@@ -50,18 +51,24 @@ public class E_UrlText
         	String contentType = conn.getContentType();
 
         	// TODO Add support for content types, e.g. parsing json
-        	
-        	InputStream in = conn.getInputStream();
-        	
-        	String str = CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8));
-        	
-            result = NodeValue.makeString(str);
+
+        	result = conn.getInputStream();
         }
 
-        if(result == null) {
-            // result = NodeValue.nvNothing;
-        	throw new ExprEvalException("Failed to obtain text from node " + nv);
-        }
+        return result;
+    }
+
+    public static NodeValue resolve(NodeValue nv) throws Exception {
+    	NodeValue result;
+    	try (InputStream in = openInputStream(nv)) {
+	    	if (in != null) {
+	    		String str = CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8));
+
+	    		result = NodeValue.makeString(str);
+	    	} else {
+	        	throw new ExprEvalException("Failed to obtain text from node " + nv);
+	        }
+    	}
 
         return result;
     }

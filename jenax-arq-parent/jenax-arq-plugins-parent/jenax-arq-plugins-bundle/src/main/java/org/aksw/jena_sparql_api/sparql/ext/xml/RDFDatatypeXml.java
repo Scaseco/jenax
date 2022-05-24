@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 
@@ -19,6 +20,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.vocabulary.XSD;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -26,14 +28,16 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.healthmarketscience.jackcess.expr.EvalException;
+
 public class RDFDatatypeXml
 	extends BaseDatatype
 {
 	public static final String IRI = XSD.NS + "xml";
-	
+
     protected DocumentBuilder documentBuilder;
 
-    
+
     public static DocumentBuilder createDefaultDocumentBuilder() {
     	DocumentBuilder result;
 		try {
@@ -58,11 +62,11 @@ public class RDFDatatypeXml
 
     	return result;
     }
-    
+
     public RDFDatatypeXml() {
         this(createDefaultDocumentBuilder());
     }
-    
+
     public RDFDatatypeXml(DocumentBuilder documentBuilder) {
         this(IRI, documentBuilder);
     }
@@ -108,8 +112,11 @@ public class RDFDatatypeXml
 
         return result;
     }
-    
-    
+
+    public DocumentBuilder getDocumentBuilder() {
+		return documentBuilder;
+	}
+
     public static String toString(Node node)
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -139,5 +146,17 @@ public class RDFDatatypeXml
         Source source = new DOMSource(node);
         Result output = new StreamResult(out);
         transformer.transform(source, output);
-    }    
+    }
+
+
+    public static org.apache.jena.graph.Node parse(InputStream in, RDFDatatypeXml dtype) {
+    	Node node;
+    	try {
+    		node = dtype.getDocumentBuilder().parse(in);
+    	} catch (Exception e) {
+    		throw new EvalException("Failed to parse xml from input stream");
+    	}
+    	org.apache.jena.graph.Node result = NodeFactory.createLiteralByValue(node, dtype);
+    	return result;
+    }
 }
