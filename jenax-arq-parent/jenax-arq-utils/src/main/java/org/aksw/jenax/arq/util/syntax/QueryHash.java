@@ -100,12 +100,14 @@ public class QueryHash {
     	Query bodyQuery = QueryTransformOps.shallowCopy(query);
 		VarExprList proj = bodyQuery.getProject();
 
+    	Comparator<Var> cmp = Comparator.comparing(Object::toString);
     	if (bodyQuery.isConstructType()) {
     		Set<Var> pvars = SetUtils.asSet(PatternVars.vars(bodyQuery.getQueryPattern()));
 
     		Template template = bodyQuery.getConstructTemplate();
     		List<Quad> quads = template.getQuads();
-    		Set<Var> vars = new TreeSet<>(QuadPatternUtils.getVarsMentioned(quads));
+    		Set<Var> vars = new TreeSet<>(cmp);
+    		vars.addAll(QuadPatternUtils.getVarsMentioned(quads));
 
     		Set<Var> effProj = Sets.intersection(vars, pvars);
 
@@ -128,7 +130,6 @@ public class QueryHash {
 
     	bodyQuery.resetResultVars();
 
-    	Comparator<Var> cmp = Comparator.comparing(Object::toString);
 		Set<Var> nonAggVars = new TreeSet<>(cmp);
 		Set<Var> aggVars = new TreeSet<>(cmp);
 

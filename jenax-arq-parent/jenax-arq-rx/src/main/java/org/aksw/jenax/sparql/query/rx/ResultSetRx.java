@@ -3,7 +3,7 @@ package org.aksw.jenax.sparql.query.rx;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jenax.arq.util.exec.QueryExecAdapter;
+import org.aksw.jenax.arq.connection.link.QueryExecBaseSelect;
 import org.aksw.jenax.sparql.rx.op.FlowOfBindingsOps;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.apache.jena.query.Query;
@@ -48,25 +48,40 @@ public interface ResultSetRx {
     }
 
     default QueryExec asQueryExec() {
-    	QueryExec result = new QueryExecAdapter() {
+    	SparqlStmtQuery queryStmt = getQueryStmt();
+    	Query query = queryStmt == null ? null : queryStmt.getQuery();
+    	QueryExec result = new QueryExecBaseSelect(query, null, null) {
             protected Disposable disposable = null;
 
+//            @Override
+//            public Query getQuery() {
+//            	SparqlStmtQuery stmt = getQueryStmt();
+//            	Query result = stmt != null && stmt.isParsed() ? stmt.getQuery() : null;
+//            	return result;
+//            }
+//
+//            @Override
+//            public String getQueryString() {
+//            	SparqlStmtQuery stmt = getQueryStmt();
+//            	String result = stmt == null ? null : stmt.getOriginalString();
+//            	return result;
+//            }
+//
             @Override
-            public Query getQuery() {
-            	SparqlStmtQuery stmt = ResultSetRx.this.getQueryStmt();
-            	Query result = stmt != null && stmt.isParsed() ? stmt.getQuery() : null;
-            	return result;
+            public void abort() {
+                close();
             }
 
             @Override
-            public String getQueryString() {
-            	SparqlStmtQuery stmt = ResultSetRx.this.getQueryStmt();
-            	String result = stmt == null ? null : stmt.getOriginalString();
-            	return result;
+            public void closeActual() {
+                if (disposable != null) {
+                    disposable.dispose();
+                }
+                // super.closeActual();
             }
 
-            @Override
-            public RowSet select() {
+			@Override
+			protected RowSet createRowSet(Query query) {
                 if (disposable != null) {
                     throw new IllegalStateException("execSelect has already been called");
                 }
@@ -77,21 +92,7 @@ public interface ResultSetRx {
                 disposable = (Disposable)it;
                 RowSet result = RowSetStream.create(vars, it);
                 return result;
-            }
-
-            @Override
-            public void abort() {
-                super.abort();
-                close();
-            }
-
-            @Override
-            public void close() {
-                if (disposable != null) {
-                    disposable.dispose();
-                }
-                super.close();
-            }
+			}
         };
 
         return result;

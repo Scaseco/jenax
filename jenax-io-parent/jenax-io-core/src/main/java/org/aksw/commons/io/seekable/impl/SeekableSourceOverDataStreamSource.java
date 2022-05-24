@@ -3,8 +3,8 @@ package org.aksw.commons.io.seekable.impl;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.aksw.commons.io.input.DataStream;
-import org.aksw.commons.io.input.DataStreamSource;
+import org.aksw.commons.io.input.ReadableChannel;
+import org.aksw.commons.io.input.ReadableChannelSource;
 import org.aksw.commons.io.seekable.api.Seekable;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.util.closeable.AutoCloseableWithLeakDetectionBase;
@@ -28,14 +28,14 @@ import com.nimbusds.jose.util.StandardCharset;
 public class SeekableSourceOverDataStreamSource
     implements SeekableSource
 {
-    protected DataStreamSource<byte[]> source;
+    protected ReadableChannelSource<byte[]> source;
 
     // Maximum number of items for which a seek operation performs needless reads rather than
     // starting a new request
     protected long maxSeekByReadLength;
 
     // Use -1 if the size is unknown
-    public SeekableSourceOverDataStreamSource(DataStreamSource<byte[]> source, long maxSeekByReadLength) {
+    public SeekableSourceOverDataStreamSource(ReadableChannelSource<byte[]> source, long maxSeekByReadLength) {
         super();
         this.source = source;
         this.maxSeekByReadLength = maxSeekByReadLength;
@@ -61,7 +61,7 @@ public class SeekableSourceOverDataStreamSource
         extends AutoCloseableWithLeakDetectionBase
         implements Seekable
     {
-        protected DataStream<byte[]> currentReader;
+        protected ReadableChannel<byte[]> currentReader;
 
         protected long currentRequestedPos;
 
@@ -208,7 +208,7 @@ public class SeekableSourceOverDataStreamSource
         protected int read(byte[] dst, int offset, int length) throws IOException {
             syncPos();
             if (currentReader == null) {
-                currentReader = source.newDataStream(Range.atLeast(currentRequestedPos));
+                currentReader = source.newReadableChannel(Range.atLeast(currentRequestedPos));
                 currentActualPos = currentRequestedPos;
             }
 

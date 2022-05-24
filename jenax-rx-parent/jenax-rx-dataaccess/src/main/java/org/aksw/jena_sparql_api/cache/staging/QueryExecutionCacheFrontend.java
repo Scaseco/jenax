@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.cache.staging;
 
 import java.io.IOException;
 
+import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jena_sparql_api.cache.core.ModelProvider;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.cache.extra.CacheResource;
@@ -41,10 +42,10 @@ public class QueryExecutionCacheFrontend
 
     private void setResource(CacheResource resource) {
         if(this.resource != null) {
-            this.resource.close();
+            AutoCloseables.close(this.resource);
 
             if(resource != null) {
-                resource.close();
+            	AutoCloseables.close(resource);
             }
             //throw new RuntimeException("Attempted to set a resource while another one was in use");
         }
@@ -65,9 +66,7 @@ public class QueryExecutionCacheFrontend
         ResultSet rs;
         if(resource == null || resource.isOutdated()) {
 
-            if(resource != null) {
-                resource.close();
-            }
+        	AutoCloseables.close(resource);
 
             try {
                 rs = getDelegate().execSelect();
@@ -250,9 +249,7 @@ public class QueryExecutionCacheFrontend
 
      @Override
      public void abort() {
-         if(resource != null) {
-             resource.close();
-         }
+    	 AutoCloseables.close(resource);
 
          // TODO We also need to close writes!
 
