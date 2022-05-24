@@ -9,7 +9,7 @@ public class JenaExtensionXml {
     public static String ns = "http://jsa.aksw.org/fn/xml/";
 
     public static void register() {
-        TypeMapper.getInstance().registerDatatype(new RDFDatatypeXml());
+        TypeMapper.getInstance().registerDatatype(RDFDatatypeXml.INSTANCE);
 
         FunctionRegistry.get().put(ns + "parse", E_XmlParse.class);
         PropertyFunctionRegistry.get().put(ns + "parse", new PropertyFunctionFactoryXmlParse());

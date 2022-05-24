@@ -44,7 +44,7 @@ public class PropertyFunctionFactoryXmlParse
 
                 List<Binding> bindings;
                 try {
-                	NodeValue nv = E_XmlParse.resolve(NodeValue.makeNode(node));
+                	NodeValue nv = JenaXmlUtils.resolve(NodeValue.makeNode(node));
 
                     bindings = Collections.singletonList(BindingFactory.binding(binding, outputVar, nv.asNode()));
 
