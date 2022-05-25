@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
@@ -27,10 +28,10 @@ import com.google.gson.Gson;
 public class PropertyFunctionFactoryUrlText
     implements PropertyFunctionFactory {
 
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryUrlText.class);
 
-	
+
     protected Gson gson;
 
     public PropertyFunctionFactoryUrlText() {
@@ -47,11 +48,11 @@ public class PropertyFunctionFactoryUrlText
     {
         return new PFuncSimple()
         {
-        	
+
             @Override
             public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object,
-                    org.apache.jena.sparql.engine.ExecutionContext execCtx) {
-            	            	
+                    ExecutionContext execCtx) {
+
                 // Get the subject's value
                 Node node = subject.isVariable()
                         ? binding.get((Var)subject)
@@ -61,13 +62,13 @@ public class PropertyFunctionFactoryUrlText
                     throw new RuntimeException("Object of json array splitting must be a variable");
                 }
                 Var outputVar = (Var)object;
-                
+
                 List<Binding> bindings;
                 try {
-                	NodeValue nv = E_UrlText.resolve(NodeValue.makeNode(node));
-                	
+                	NodeValue nv = JenaUrlUtils.resolve(NodeValue.makeNode(node), execCtx);
+
                     bindings = Collections.singletonList(BindingFactory.binding(binding, outputVar, nv.asNode()));
-                    
+
                 } catch(Exception e) {
                 	logger.warn("Error resolving node as URI: " + node, e);
 

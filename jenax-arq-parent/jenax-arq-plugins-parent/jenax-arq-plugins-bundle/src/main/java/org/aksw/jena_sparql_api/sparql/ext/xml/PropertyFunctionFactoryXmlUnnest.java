@@ -3,9 +3,6 @@ package org.aksw.jena_sparql_api.sparql.ext.xml;
 import java.util.Iterator;
 import java.util.Objects;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathEvaluationResult;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.jena.atlas.iterator.Iter;
@@ -97,7 +94,7 @@ public class PropertyFunctionFactoryXmlUnnest
                         // List<Binding> bindings = new ArrayList<Binding>();
 
         	            try {
-        	            	Iterator<Node> nodeIt = JenaXmlUtils.evalXpath(xPathFactory, queryStr, xmlNode);
+        	            	Iterator<Node> nodeIt = JenaXmlUtils.evalXPath(xPathFactory, queryStr, xmlNode);
         	            	Iterator<Binding> bindingIt = Iter.map(nodeIt, jenaNode -> {
 
         	            		// For some reason xpath evaluation on prior xpath results does not yield expected results
@@ -110,7 +107,7 @@ public class PropertyFunctionFactoryXmlUnnest
         	            		return b;
         	            	});
 
-        	            	result = QueryIterPlainWrapper.create(bindingIt);
+        	            	result = QueryIterPlainWrapper.create(bindingIt, execCxt);
         	            } catch(Exception e) {
         	                logger.warn(e.getLocalizedMessage());
         	            }

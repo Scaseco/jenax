@@ -2,27 +2,14 @@ package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import java.util.Iterator;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathEvaluationResult;
-import javax.xml.xpath.XPathEvaluationResult.XPathResultType;
-import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathNodes;
 
-import org.apache.curator.shaded.com.google.common.collect.Iterators;
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase2;
-import org.rdfhdt.hdt.iterator.utils.Iter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
 
 /**
  * Use the property function ?s xml:unnest (xpathexpr ?o) for dealing with (/iterating) NodeList
@@ -46,12 +33,9 @@ public class E_XPath
 		 this.xPathFactory = xPathFactory;
 	}
 
-
     @Override
     public NodeValue exec(NodeValue nv, NodeValue query) {
         NodeValue result;
-
-        // TODO If a node is of type string, we could still try to parse it as xml for convenience
 
         org.w3c.dom.Node xmlNode = JenaXmlUtils.extractXmlNode(nv);
 
@@ -59,24 +43,34 @@ public class E_XPath
 	        if(query.isString()) {
 	        	String queryStr = query.getString();
 
-	            try {
-	            	Iterator<org.apache.jena.graph.Node> nodes = JenaXmlUtils.evalXpath(xPathFactory, queryStr, xmlNode);
-	            	org.apache.jena.graph.Node node = Iterators.getOnlyElement(nodes);
-	            	if (node == null) {
-	            		throw new ExprEvalException("XPath " + queryStr + " did not match any results");
-	            	}
+            	Iterator<org.apache.jena.graph.Node> nodes;
+				try {
+					nodes = JenaXmlUtils.evalXPath(xPathFactory, queryStr, xmlNode);
+				} catch (XPathExpressionException e) {
+					logger.warn("XPath evaluation failed", e);
+					throw new ExprEvalException("XPath evaluation failed");
+				}
+
+            	// Ensure that hasNext() is called on the iterator due to misbehavior:
+            	// Guava's getOnlyElement() relies on a NoSuchElement exception when calling next() on an empty iterator
+            	// But at least one jena iterator returns null instead
+            	if (nodes.hasNext()) {
+            		org.apache.jena.graph.Node node = nodes.next();
+
+            		if (nodes.hasNext()) {
+            			throw new ExprEvalException("XPath " + queryStr + " evaluated to multiple results");
+            		}
 
 	            	result = NodeValue.makeNode(node);
+            	} else {
+            		throw new ExprEvalException("XPath " + queryStr + " did not match any results");
+            	}
 
-	            } catch(Exception e) {
-	                logger.warn(e.getLocalizedMessage());
-	                result = null;
-	            }
 	        } else {
-	        	result = null;
+        		throw new ExprEvalException("XPath query argument is not a string: " + query);
 	        }
         } else {
-            result = null;
+    		throw new ExprEvalException("XPath xml node argument is not an xml node ");
         }
 
     	if (result == null) {
@@ -85,7 +79,5 @@ public class E_XPath
 
         return result;
     }
-
-
-
 }
+
