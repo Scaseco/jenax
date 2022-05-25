@@ -106,7 +106,12 @@ public class RDFLinkDelegateWithWorkerThread
 
     @Override
     public UpdateExecBuilder newUpdate() {
-        throw new UnsupportedOperationException();
+    	return new UpdateExecBuilderDelegateBase(getDelegate().newUpdate()) {
+    		@Override
+    		public void execute() {
+    			submit(() -> delegate.execute());
+    		}
+    	};
     }
 
     @Override

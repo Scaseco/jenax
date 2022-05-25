@@ -44,6 +44,7 @@ import org.apache.jena.ext.com.google.common.io.CharStreams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.http.HttpOp;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -465,7 +466,11 @@ public class SparqlStmtUtils {
         } else if (stmt.isUpdateRequest()) {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 
-            conn.update(u);
+            // conn.update(u);
+        	Context cxt = ARQ.getContext().copy();
+        	cxtMutator.accept(cxt);
+        	conn.newUpdate().update(u).context(cxt).execute();
+
             result = SPARQLResultEx.createUpdateType();
         }
 
