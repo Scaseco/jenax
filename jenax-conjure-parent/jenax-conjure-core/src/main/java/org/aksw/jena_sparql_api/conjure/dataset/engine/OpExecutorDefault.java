@@ -664,7 +664,7 @@ public class OpExecutorDefault
                 SparqlStmt after = SparqlStmtUtils.applyNodeTransform(before, this::substNode);
 
 
-                SparqlStmtUtils.process(conn, after, sink);
+                SparqlStmtUtils.process(conn, after, null, sink);
             }
         } finally {
             tmp.close();

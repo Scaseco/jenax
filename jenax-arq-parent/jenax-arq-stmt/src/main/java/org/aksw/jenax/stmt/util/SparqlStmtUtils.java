@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,7 @@ import org.apache.jena.http.HttpOp;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -94,6 +97,19 @@ public class SparqlStmtUtils {
 
         return result;
     }
+
+    /** Check for this specific QueryParseException - often occurs when attempting to parse a file name */
+	public static boolean isEncounteredSlashException(Throwable t) {
+        boolean result = false;
+		if(t instanceof QueryParseException) {
+            QueryParseException qpe = (QueryParseException)t;
+            result = Optional.ofNullable(qpe.getMessage())
+                    .orElse("").contains("Encountered: \"/\"");
+        }
+
+		return result;
+	}
+
 
     /**
      * For the given collection of SparqlStmts yield the set of used projection vars
@@ -421,7 +437,7 @@ public class SparqlStmtUtils {
         return result;
     }
 
-    public static SPARQLResultEx execAny(RDFConnection conn, SparqlStmt stmt) {
+    public static SPARQLResultEx execAny(RDFConnection conn, SparqlStmt stmt, Consumer<Context> cxtMutator) {
         SPARQLResultEx result = null;
 
         if (stmt.isQuery()) {
@@ -438,6 +454,10 @@ public class SparqlStmtUtils {
             QueryExecution qe = conn.query(q);
             Context cxt = qe.getContext();
             if(cxt != null) {
+            	if (cxtMutator != null) {
+            		cxtMutator.accept(cxt);
+            	}
+
                 cxt.set(symConnection, conn);
             }
 
@@ -581,8 +601,8 @@ public class SparqlStmtUtils {
 //		}
 //	}
 
-    public static void process(RDFConnection conn, SparqlStmt stmt, SPARQLResultVisitor sink) {
-        SPARQLResultEx sr = execAny(conn, stmt);
+    public static void process(RDFConnection conn, SparqlStmt stmt, Consumer<Context> cxtMutator, SPARQLResultVisitor sink) {
+        SPARQLResultEx sr = execAny(conn, stmt, cxtMutator);
         output(sr, sink);
     }
 

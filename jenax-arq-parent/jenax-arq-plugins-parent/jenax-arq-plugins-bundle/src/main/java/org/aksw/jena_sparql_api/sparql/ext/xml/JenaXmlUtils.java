@@ -21,7 +21,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathNodes;
 
-import org.aksw.jena_sparql_api.sparql.ext.url.E_UrlText;
+import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -29,6 +29,7 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.rdfhdt.hdt.iterator.utils.Iter;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -106,11 +107,11 @@ public class JenaXmlUtils {
     	return result;
     }
 
-	public static NodeValue resolve(NodeValue nv) throws Exception {
+	public static NodeValue resolve(NodeValue nv, FunctionEnv env) throws Exception {
 		RDFDatatypeXml dtype = (RDFDatatypeXml)TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
 
 		NodeValue result;
-		try (InputStream in = E_UrlText.openInputStream(nv)) {
+		try (InputStream in = JenaUrlUtils.openInputStream(nv, env)) {
 	    	if (in != null) {
 	    		result = JenaXmlUtils.parse(in, dtype);
 	    	} else {
@@ -168,7 +169,7 @@ public class JenaXmlUtils {
 		return result;
     }
 
-    public static Iterator<Node> evalXpath(XPathFactory xPathFactory, String queryStr, org.w3c.dom.Node xmlNode)
+    public static Iterator<Node> evalXPath(XPathFactory xPathFactory, String queryStr, org.w3c.dom.Node xmlNode)
     		throws XPathExpressionException
     {
 		NamespaceResolver namespaceResolver = new NamespaceResolver(xmlNode);
