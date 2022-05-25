@@ -119,11 +119,11 @@ public class PropertyFunctionFactoryFsFind
                     IRIx irix = JenaUrlUtils.createIriX(NodeValue.makeString(str), execCtx);
                     String iri = irix.str();
 
-//                    if (str.isEmpty()) {
-//                        // FIXME Resolution of the path should be configurable
-//                        // Maybe requires an additional context attribute
-//                        str = "file://" + Paths.get(str).toAbsolutePath();
-//                    }
+                    if (iri.isEmpty()) {
+                        // FIXME Resolution of the path should be configurable
+                        // Maybe requires an additional context attribute
+                        iri = "file://" + Paths.get(str).toAbsolutePath();
+                    }
 
                     Path root = Paths.get(new URI(iri));
                     bindings = fn.apply(root)

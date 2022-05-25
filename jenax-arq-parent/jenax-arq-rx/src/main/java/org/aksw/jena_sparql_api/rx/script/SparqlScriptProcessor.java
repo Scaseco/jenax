@@ -317,27 +317,33 @@ public class SparqlScriptProcessor {
                     SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
 
 
-                    TypedInputStream tmpIn;
+                    TypedInputStream tmpIn = null;
                     Iterator<SparqlStmt> it;
                     try {
-                        tmpIn = SparqlStmtUtils.openInputStream(filename);
+                    	// On NPE we enter the catch block with the fallback strategy
+                        tmpIn = Objects.requireNonNull(SparqlStmtUtils.openInputStream(filename));
+
                     	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
                     	it.hasNext();
 
                     	logger.debug("Attempting to interpret argument as a file containing sparql statements");
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                     	try {
+                    		if (tmpIn != null) {
+                    			tmpIn.close();
+                    		}
+
 	                    	tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
 	                    	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
 	                    	it.hasNext();
-                    	} catch (QueryParseException f) {
+                    	} catch (Exception f) {
                     		Throwable cause = f.getCause();
                     		if (!SparqlStmtUtils.isEncounteredSlashException(cause)) {
                     			throw new RuntimeException(filename + " could not be openend and failed to parse as SPARQL query", f);
+                            } else {
+                            	throw new RuntimeException("Could not parse " + filename, e);
                             }
                     	}
-
-                    	throw new RuntimeException("Could not parse " + filename, e);
                     }
 
                     try (TypedInputStream in = tmpIn) {
