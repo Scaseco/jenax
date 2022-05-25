@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import org.apache.jena.graph.Node;
@@ -96,8 +97,15 @@ public class JenaUrlUtils {
         	// If there is no scheme then default to file://
         	String scheme = uri.getScheme();
         	if (scheme == null) {
-        		String fileUrl = "file://" + urlStr;
-        		uri = new URI(fileUrl);
+        		// If the urlStr after resolution against the function env is still a
+        		// relative IRI then resolve it against the current working directory
+        		if (!urlStr.startsWith("/")) {
+        			Path cwd = Path.of("");
+        			uri = cwd.resolve(urlStr).toUri();
+        		} else {
+        			String fileUrl = "file://" + urlStr;
+        			uri = new URI(fileUrl);
+        		}
         	}
 
         	URL u;
