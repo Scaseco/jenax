@@ -129,7 +129,7 @@ public class PropertyFunctionFactoryJsonUnnest
         }
         RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
 
-        Node n = E_JsonPath.jsonToNode(item, gson, jsonDatatype);
+        Node n = JenaJsonUtils.jsonToNode(item, gson, jsonDatatype);
         // NodeValue nv = n == null ? null : NodeValue.makeNode(n);
 
         if (n != null) {

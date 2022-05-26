@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -60,19 +60,23 @@ public class E_JsonNashorn extends FunctionBase {
                 throw new ExprEvalException(e);
             }
 
-            List<Object> jsos = args.subList(1, args.size()).stream()
-                .map(E_JsonPath::asJson)
-                .map(Object::toString)
-                .map(item -> jsonParse.call(null, item))
-                .collect(Collectors.toList());
+            List<NodeValue> fnArgs = args.subList(1, args.size());
+            List<Object> jsos = new ArrayList<>(fnArgs.size());
+            for (NodeValue arg : fnArgs) {
+            	JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
+            	String jsonStr = gson.toJson(jsonElt);
+            	Object engineObj = jsonParse.call(null, jsonStr);
+            	// JSObject jsObj = (JSObject)engineObj;
+            	jsos.add(engineObj);
+            }
 
             RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
 
-            JSObject[] as = jsos.toArray(new JSObject[0]);
+            Object[] as = jsos.toArray(new Object[0]);
             Object raw = fn.call(fn, as);
             String jsonStr = jsonStringify.call(null, raw).toString();
             JsonElement jsonEl = gson.fromJson(jsonStr, JsonElement.class);
-            Node node = E_JsonPath.jsonToNode(jsonEl, gson, dtype);
+            Node node = JenaJsonUtils.jsonToNode(jsonEl, gson, dtype);
             result = NodeValue.makeNode(node);
         }
         return result;
