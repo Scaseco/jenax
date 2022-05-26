@@ -7,8 +7,6 @@ import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
-import org.apache.jena.geosparql.implementation.vocabulary.SpatialExtension;
-import org.apache.jena.geosparql.spatial.property_functions.EqualsPF;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;

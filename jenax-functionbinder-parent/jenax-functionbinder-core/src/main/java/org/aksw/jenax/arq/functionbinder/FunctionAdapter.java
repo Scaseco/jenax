@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.aksw.commons.util.convert.ConvertFunctionRaw;
+import org.aksw.commons.util.convert.ConverterRegistries;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -77,7 +78,7 @@ public class FunctionAdapter
             if (org.apache.commons.lang3.ClassUtils.isAssignable(inputClass, target)) {
                 result = input;
             } else {
-                ConvertFunctionRaw converter = converterRegistry.getConverter(inputClass, target);
+                ConvertFunctionRaw converter = ConverterRegistries.getConverterBoxed(converterRegistry, inputClass, target);
 
                 if (converter == null) {
                     throw new RuntimeException(String.format("No converter registered from %1$s to %2$s", inputClass, target));

@@ -10,7 +10,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 
 public class GeoFunctionsJena {
-		
+
 	@IriNs(GeoSPARQL_URI.GEOF_URI)
 	public static GeometryWrapper simplifyDp(
 			GeometryWrapper geom,
