@@ -31,7 +31,6 @@ public class JenaExtensionsGeoSparqlX {
         registry.put(GeoSPARQL_URI.GEOF_URI + "parsePolyline", F_ParsePolyline.class);
         registry.put(GeoSPARQL_URI.GEOF_URI + "asGeoJSON", F_AsGeoJSON.class);
 
-
         // Ensure GeoSPARQL datatypes are available
         // TODO Our plugin should be loaded after geosparql; but I couldn't find whether the geosparql module
         //   is loaded with JenaSubsystemLifecycle and if so what level it uses.
@@ -64,5 +63,6 @@ public class JenaExtensionsGeoSparqlX {
 
         PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
         PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
+        registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
     }
 }
