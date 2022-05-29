@@ -1,14 +1,11 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Objects;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -26,8 +23,6 @@ import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 /**
  * {
@@ -40,28 +35,26 @@ import org.w3c.dom.NodeList;
  */
 public class PropertyFunctionFactoryXmlUnnest
     implements PropertyFunctionFactory {
-	
-	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryXmlUnnest.class);
-    protected XPath xPath;
-    
-    
-    public PropertyFunctionFactoryXmlUnnest() {
 
-    	this(XPathFactory.newInstance().newXPath());
+	private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionFactoryXmlUnnest.class);
+    protected XPathFactory xPathFactory;
+
+
+    public PropertyFunctionFactoryXmlUnnest() {
+    	this(XPathFactory.newInstance());
     }
 
-    public PropertyFunctionFactoryXmlUnnest(XPath xPath) {
+    public PropertyFunctionFactoryXmlUnnest(XPathFactory xPathFactory) {
         super();
-
-        this.xPath = xPath;
+        this.xPathFactory = xPathFactory;
     }
 
     @Override
     public PropertyFunction create(final String uri)
     {
-    	
+
         return new PFuncSimpleAndList() {
-        	
+
 			@Override
 			public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object,
 					ExecutionContext execCxt) {
@@ -83,7 +76,7 @@ public class PropertyFunctionFactoryXmlUnnest
 
                 Node xpathNode = object.getArg(0);
                 Node outputNode = object.getArg(1);
-                
+
                 if(!outputNode.isVariable()) {
                     throw new RuntimeException("Object of xml array splitting must be a variable");
                 }
@@ -91,38 +84,30 @@ public class PropertyFunctionFactoryXmlUnnest
 
                 QueryIterator result = null;
 
-                boolean isXml = node.isLiteral() && node.getLiteralDatatype() instanceof RDFDatatypeXml;
-                if(isXml) {
-                    org.w3c.dom.Node xml = (org.w3c.dom.Node)node.getLiteralValue();
+                org.w3c.dom.Node xmlNode = JenaXmlUtils.extractXmlNode(node);
+                if(xmlNode != null) {
 
                     Object queryObj = xpathNode.isLiteral() ? xpathNode.getLiteralValue() : null;
                     String queryStr = queryObj instanceof String ? (String)queryObj : null;
-                    
-        	        if(queryStr != null && xml != null) {
-                        List<Binding> bindings = new ArrayList<Binding>();                        
-                        
-        	            try {
-                            xPath.setNamespaceContext(new NamespaceResolver((Document) xml));
-        	            	XPathExpression expr = xPath.compile(queryStr);
-        	            	Object tmp = expr.evaluate(xml, XPathConstants.NODESET);
-        	            	
-        	            	if(tmp instanceof NodeList) {
-        	            		NodeList nodes = (NodeList)tmp;
-        	            		for(int i = 0; i < nodes.getLength(); ++i) {
-        	            			org.w3c.dom.Node item = nodes.item(i);
-        	            			
-        	            			// It seems running xpath queries on nodes returned as
-        	            			// xpaths results is not supported - hence we need to serialize xml Nodes
-        	            			item = (org.w3c.dom.Node)xmlDatatype.parse(xmlDatatype.unparse(item));
-        	            			
-        	            			//System.out.println("" + node);
 
-        	            			Node xmlNode = NodeFactory.createLiteralByValue(item, xmlDatatype);
-                                    Binding b = BindingFactory.binding(binding, outputVar, xmlNode);
-                                    bindings.add(b);
-        	            		}
-        	            	}
-                            result = QueryIterPlainWrapper.create(bindings.iterator());
+        	        if(queryStr != null) {
+                        // List<Binding> bindings = new ArrayList<Binding>();
+
+        	            try {
+        	            	Iterator<Node> nodeIt = JenaXmlUtils.evalXPath(xPathFactory, queryStr, xmlNode);
+        	            	Iterator<Binding> bindingIt = Iter.map(nodeIt, jenaNode -> {
+
+        	            		// For some reason xpath evaluation on prior xpath results does not yield expected results
+        	            		// Therefore 'clone' (by means of serialize/parse) the result into an independent document)
+        	            		// Commenting the following two lines out causes at least one test to fail.
+        	            		org.w3c.dom.Node reparsedXmlNode = (org.w3c.dom.Node)xmlDatatype.parse(jenaNode.getLiteralLexicalForm());
+    	            			Node reparsedNode = NodeFactory.createLiteralByValue(reparsedXmlNode, xmlDatatype);
+
+    	            			Binding b = BindingFactory.binding(binding, outputVar, reparsedNode);
+        	            		return b;
+        	            	});
+
+        	            	result = QueryIterPlainWrapper.create(bindingIt, execCxt);
         	            } catch(Exception e) {
         	                logger.warn(e.getLocalizedMessage());
         	            }
@@ -139,3 +124,22 @@ public class PropertyFunctionFactoryXmlUnnest
     }
 
 }
+
+
+//if(tmp instanceof NodeList) {
+//NodeList nodes = (NodeList)tmp;
+//for(int i = 0; i < nodes.getLength(); ++i) {
+//	org.w3c.dom.Node item = nodes.item(i);
+//
+//	// It seems running xpath queries on nodes returned as
+//	// xpaths results is not supported - hence we need to serialize xml Nodes
+//	item = (org.w3c.dom.Node)xmlDatatype.parse(xmlDatatype.unparse(item));
+//
+//	//System.out.println("" + node);
+//
+//	Node xmlNode = NodeFactory.createLiteralByValue(item, xmlDatatype);
+//    Binding b = BindingFactory.binding(binding, outputVar, xmlNode);
+//    bindings.add(b);
+//}
+//}
+// result = QueryIterPlainWrapper.create(bindings.iterator());

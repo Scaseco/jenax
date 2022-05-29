@@ -24,10 +24,10 @@ import org.aksw.commons.io.block.impl.BlockSources;
 import org.aksw.commons.io.block.impl.Page;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
 import org.aksw.commons.io.block.impl.PageManagerOverDataStreamSource;
-import org.aksw.commons.io.input.DataStream;
-import org.aksw.commons.io.input.DataStreamSource;
-import org.aksw.commons.io.input.DataStreamSources;
-import org.aksw.commons.io.input.DataStreams;
+import org.aksw.commons.io.input.ReadableChannel;
+import org.aksw.commons.io.input.ReadableChannelSource;
+import org.aksw.commons.io.input.ReadableChannelSources;
+import org.aksw.commons.io.input.ReadableChannels;
 import org.aksw.commons.io.seekable.api.Seekable;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.api.SeekableSources;
@@ -190,7 +190,7 @@ public class TestBinSearchBz2 {
     public static void testSeekableOverDataStreamSource(Path path) throws IOException {
 
         // Test to compare seeking on a DataStream directly and using the Seekable abstraction
-        DataStreamSource<byte[]> source = DataStreamSources.of(path, true);
+        ReadableChannelSource<byte[]> source = ReadableChannelSources.of(path, true);
         SeekableSource ss = SeekableSources.of(source, 4096, 128); // new SeekableSourceOverDataStreamSource(source, 100);
 
         int size = Ints.saturatedCast(source.size());
@@ -211,17 +211,17 @@ public class TestBinSearchBz2 {
                     offset -= actualDelta;
                 }
 
-                try (DataStream<byte[]> raw = source.newDataStream(Range.atLeast(offset))) {
+                try (ReadableChannel<byte[]> raw = source.newReadableChannel(Range.atLeast(offset))) {
 
                     // Check reading of a single byte
-                    Byte expectedByte = Iterators.getNext(DataStreams.newBoxedIterator(raw, 1), null);
+                    Byte expectedByte = Iterators.getNext(ReadableChannels.newBoxedIterator(raw, 1), null);
                     Byte actualByte = seekable.get();
                     Assert.assertEquals(expectedByte, actualByte);
 
                     seekable.nextPos(1);
 
                     // Check reading of all remaining data
-                    byte[] expecteds = IOUtils.toByteArray(Channels.newInputStream(DataStreams.newChannel(raw)));
+                    byte[] expecteds = IOUtils.toByteArray(Channels.newInputStream(ReadableChannels.newChannel(raw)));
                     byte[] actuals = IOUtils.toByteArray(Channels.newInputStream(seekable));
 
                     Assert.assertArrayEquals(expecteds, actuals);
@@ -232,8 +232,8 @@ public class TestBinSearchBz2 {
 
     public static void runBinSearchOnBzip2ViaPath(Path path, Map<Node, Graph> expectedResults) throws IOException {
 
-        DataStreamSource<byte[]> source = DataStreamSources.of(path);
-        source = DataStreamSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
+        ReadableChannelSource<byte[]> source = ReadableChannelSources.of(path);
+        source = ReadableChannelSources.cacheInMemory(source, 1024 * 1024, 128, Long.MAX_VALUE);
         SeekableSource seekableSource = SeekableSources.of(source, 1024 * 1024, 128);
 
 

@@ -50,7 +50,7 @@ public class E_JsonEntries
     public NodeValue exec(NodeValue nv) {
 
         NodeValue result = null;
-        JsonElement json = E_JsonPath.asJson(nv);
+        JsonElement json = JenaJsonUtils.extractJsonElement(nv);
 
         if(json != null) {
             if(json.isJsonObject() && !json.isJsonArray()) {
@@ -58,7 +58,7 @@ public class E_JsonEntries
                 JsonArray arr = keysToArray(jo, "key", "value");
 
                 RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-                Node node = E_JsonPath.jsonToNode(arr, gson, jsonDatatype);
+                Node node = JenaJsonUtils.jsonToNode(arr, gson, jsonDatatype);
                 result = NodeValue.makeNode(node);
             }
         }

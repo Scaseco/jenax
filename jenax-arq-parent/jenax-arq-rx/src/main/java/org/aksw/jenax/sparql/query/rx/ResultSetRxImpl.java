@@ -38,7 +38,6 @@ public class ResultSetRxImpl
         return bindings;
     }
 
-
     public static ResultSetRxImpl create(List<Var> vars, Flowable<Binding> bindings) {
         return new ResultSetRxImpl(null, vars, bindings);
     }

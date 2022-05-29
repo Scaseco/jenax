@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.sparql.ext.json.E_JsonPath;
+import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -83,7 +83,7 @@ public class PropertyFunctionFactoryBenchmark
 //		            && resultSetNode.isVariable()
                 if(resultSetNode != null) {
                     b.add((Var)resultSetNode,
-                            E_JsonPath.jsonToNode(json.get("result")));
+                    		JenaJsonUtils.jsonToNode(json.get("result")));
                 }
 
                 result = QueryIterPlainWrapper.create(Iterators.singletonIterator(b.build()), execCxt) ;

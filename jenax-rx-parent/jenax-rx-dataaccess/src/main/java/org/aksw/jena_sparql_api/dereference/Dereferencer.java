@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.dereference;
 
-import org.aksw.commons.collections.IClosable;
+import java.io.Closeable;
+
 import org.apache.jena.rdf.model.Model;
 
 /**
@@ -10,7 +11,7 @@ import org.apache.jena.rdf.model.Model;
  *         Time: 4:23 PM
  */
 public interface Dereferencer
-    extends IClosable
+    extends Closeable
 {
     Model dereference(String url);
 }

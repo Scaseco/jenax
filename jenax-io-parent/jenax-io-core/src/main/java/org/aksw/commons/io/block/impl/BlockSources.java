@@ -8,7 +8,7 @@ import java.nio.file.StandardOpenOption;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.input.DataStreamSource;
+import org.aksw.commons.io.input.ReadableChannelSource;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.impl.SeekableFromBlock;
 import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;

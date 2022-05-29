@@ -1,34 +1,57 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
 import org.w3c.dom.Node;
 
-public class NamespaceResolver implements NamespaceContext {
-    //Store the source document to search the namespaces
-    private Node sourceDocument;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
 
-    public NamespaceResolver(Node document) {
-        sourceDocument = document;
+public class NamespaceResolver
+	implements NamespaceContext
+{
+    protected Node xmlNode;
+
+    public NamespaceResolver(Node xmlNode) {
+        this.xmlNode = xmlNode;
     }
 
     //The lookup for the namespace uris is delegated to the stored document.
     public String getNamespaceURI(String prefix) {
-        if (prefix.equals(XMLConstants.DEFAULT_NS_PREFIX)) {
-            return sourceDocument.lookupNamespaceURI(null);
-        } else {
-            return sourceDocument.lookupNamespaceURI(prefix);
-        }
+    	Iterable<Node> traverser = Traverser.<Node>forTree(xmlNode -> new ListOverNodeList(xmlNode.getChildNodes()))
+    		.breadthFirst(xmlNode);
+
+    	String key = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? null : prefix;
+
+    	String result = Streams.stream(traverser)
+    		.map(xmlNode -> xmlNode.lookupNamespaceURI(key))
+    		.filter(Objects::nonNull)
+    		.findFirst()
+    		.orElse(null);
+
+    	// String result = xmlNode.lookupNamespaceURI(key);
+    	return result;
     }
 
+    @Override
     public String getPrefix(String namespaceURI) {
-        return sourceDocument.lookupPrefix(namespaceURI);
+        return xmlNode.lookupPrefix(namespaceURI);
     }
 
+    @Override
     public Iterator<String> getPrefixes(String namespaceURI) {
-    	return null;
+    	throw new UnsupportedOperationException();
+    	/*
+    	String tmp = getPrefix(namespaceURI);
+    	Iterator<String> result = tmp == null
+    			? Collections.emptyIterator()
+    			: Collections.singleton(tmp).iterator();
+
+    	return result;
+    	*/
     }
 }

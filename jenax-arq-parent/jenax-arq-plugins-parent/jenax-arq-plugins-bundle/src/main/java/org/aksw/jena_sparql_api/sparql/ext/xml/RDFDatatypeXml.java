@@ -1,21 +1,11 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
@@ -29,11 +19,13 @@ import org.xml.sax.SAXException;
 public class RDFDatatypeXml
 	extends BaseDatatype
 {
+	public static final RDFDatatypeXml INSTANCE = new RDFDatatypeXml();
+
 	public static final String IRI = XSD.NS + "xml";
-	
+
     protected DocumentBuilder documentBuilder;
 
-    
+
     public static DocumentBuilder createDefaultDocumentBuilder() {
     	DocumentBuilder result;
 		try {
@@ -58,11 +50,11 @@ public class RDFDatatypeXml
 
     	return result;
     }
-    
+
     public RDFDatatypeXml() {
         this(createDefaultDocumentBuilder());
     }
-    
+
     public RDFDatatypeXml(DocumentBuilder documentBuilder) {
         this(IRI, documentBuilder);
     }
@@ -82,6 +74,12 @@ public class RDFDatatypeXml
         return Node.class;
     }
 
+    @Override
+    public boolean isValidValue(Object valueForm) {
+    	boolean isValid = valueForm instanceof Node;
+    	return isValid;
+    }
+
     /**
      * Convert a value of this datatype out
      * to lexical form.
@@ -89,7 +87,7 @@ public class RDFDatatypeXml
     @Override
     public String unparse(Object value) {
     	Node node = (Node)value;
-    	String result = toString(node);
+    	String result = JenaXmlUtils.toString(node);
     	return result;
     }
 
@@ -108,36 +106,9 @@ public class RDFDatatypeXml
 
         return result;
     }
-    
-    
-    public static String toString(Node node)
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        try {
-            toText(node, baos);
-        }
-        catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+    public DocumentBuilder getDocumentBuilder() {
+		return documentBuilder;
+	}
 
-        String result = baos.toString();
-        return result;
-    }
-
-//    public static Document createFromString(String text)
-//        throws Exception
-//    {
-//        return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse
-//            (new InputSource(new StringReader(text)));
-//    }
-
-    public static void toText(Node node, OutputStream out)
-        throws TransformerFactoryConfigurationError, TransformerException
-    {
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        Source source = new DOMSource(node);
-        Result output = new StreamResult(out);
-        transformer.transform(source, output);
-    }    
 }

@@ -4,6 +4,7 @@ cache.core;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.cache.extra.CacheResource;
 import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
@@ -57,7 +58,11 @@ public class QueryExecutionCacheEx
             result = true;
         }
         else if(resource.isOutdated()) {
-            resource.close();
+        	try {
+        		resource.close();
+        	} catch (Exception e) {
+        		throw new RuntimeException(e);
+        	}
             result = true;
         }
         else {
@@ -305,7 +310,7 @@ public class QueryExecutionCacheEx
      @Override
      public void close() {
          if(currentResource != null) {
-             currentResource.close();
+        	 AutoCloseables.close(currentResource);
          }
 
          QueryExecution dec = getDelegate();

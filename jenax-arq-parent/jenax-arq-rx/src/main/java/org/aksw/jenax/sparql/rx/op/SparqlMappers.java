@@ -107,7 +107,7 @@ public class SparqlMappers {
      * @throws Exception
      */
     public static <T> Flowable<T> fallbackToVisitor(RDFConnection conn, SparqlStmt stmt, SPARQLResultExVisitor<?> sparqlResultVisitor) throws Exception {
-        try (SPARQLResultEx sr = SparqlStmtUtils.execAny(conn, stmt)) {
+        try (SPARQLResultEx sr = SparqlStmtUtils.execAny(conn, stmt, null)) {
             if (sparqlResultVisitor != null) {
                 sparqlResultVisitor.forwardEx(sr);
             }

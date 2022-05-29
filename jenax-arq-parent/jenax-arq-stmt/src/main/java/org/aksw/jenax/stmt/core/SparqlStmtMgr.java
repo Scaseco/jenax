@@ -195,7 +195,7 @@ public class SparqlStmtMgr {
                 SparqlStmt stmt2 = envLookup == null
                     ? stmt
                     : SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, envLookup));
-                SparqlStmtUtils.process(conn, stmt2, new SPARQLResultSinkQuads(quadConsumer));
+                SparqlStmtUtils.process(conn, stmt2, null, new SPARQLResultSinkQuads(quadConsumer));
             }
 
         } catch (IOException | ParseException e) {
@@ -215,8 +215,8 @@ public class SparqlStmtMgr {
                 q -> result.add(ModelUtils.tripleToStatement(result, q.asTriple())));
         return result;
     }
-    
-    
+
+
     public static List<SparqlStmt> loadSparqlStmts(Path path) {
     	return loadSparqlStmts(path, SparqlStmtParserImpl.create());
     }
@@ -230,7 +230,7 @@ public class SparqlStmtMgr {
     	} catch (IOException e) {
     		throw new RuntimeException(e);
 		}
-    	
+
         return result;
     }
 
@@ -252,7 +252,7 @@ public class SparqlStmtMgr {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-            
+
             result = Streams.stream(it).collect(Collectors.toList());
         }
 
@@ -284,30 +284,25 @@ public class SparqlStmtMgr {
             it = SparqlStmtUtils.readStmts(filenameOrStr, sparqlParser);
         } catch(IOException e) {
 
-            try {
+        	try {
                 SparqlStmt sparqlStmt = sparqlParser.apply(filenameOrStr);
                 it = Collections.singletonList(sparqlStmt).iterator();
-            } catch(ARQException f) {
-                // Possibly not a sparql query
+        	} catch (QueryParseException f) {
                 Throwable c = f.getCause();
-                if(c instanceof QueryParseException) {
-                    QueryParseException qpe = (QueryParseException)c;
-                    boolean mentionsEncounteredSlash = Optional.ofNullable(qpe.getMessage())
-                            .orElse("").contains("Encountered: \"/\"");
 
-                    // Note: Jena throws query parse exceptions for certain semantic issues, such as if the
-                    // same variable is assigned to in two different BINDs.
-                    // For this reason parse errors can occur at invalid char positions such as
-                    // line=-1 and/or column=-1 it
-                    // qpe.getLine() > 1 ||
-                    // && qpe.getColumn() > 1)
-                    if  (!mentionsEncounteredSlash) {
-                        throw new RuntimeException(filenameOrStr + " could not be openend and failed to parse as SPARQL query", f);
-                    }
+
+                // Note: Jena throws query parse exceptions for certain semantic issues, such as if the
+                // same variable is assigned to in two different BINDs.
+                // For this reason parse errors can occur at invalid char positions such as
+                // line=-1 and/or column=-1 it
+                // qpe.getLine() > 1 ||
+                // && qpe.getColumn() > 1)
+                if  (!SparqlStmtUtils.isEncounteredSlashException(c)) {
+                	throw new RuntimeException("Could not parse " + filenameOrStr, f);
                 }
+        	}
 
-                throw new IOException("Could not open " + filenameOrStr, e);
-            }
+        	throw new IOException("Could not open " + filenameOrStr, e);
         }
 
         return it;
