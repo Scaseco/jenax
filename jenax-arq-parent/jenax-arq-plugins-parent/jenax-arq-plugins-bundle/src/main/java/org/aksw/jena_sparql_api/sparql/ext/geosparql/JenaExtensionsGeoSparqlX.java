@@ -5,6 +5,7 @@ import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.datatype.GMLDatatype;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
@@ -33,6 +34,8 @@ public class JenaExtensionsGeoSparqlX {
         // TODO Our plugin should be loaded after geosparql; but I couldn't find whether the geosparql module
         //   is loaded with JenaSubsystemLifecycle and if so what level it uses.
         WKTDatatype.registerDatatypes();
+        GMLDatatype.registerDatatypes();
+        RDFDatatypeGeoJSON.registerDatatypes();
 
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
