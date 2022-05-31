@@ -1,9 +1,11 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.stream.IntStream;
 
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -20,6 +22,7 @@ import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
+import org.rdfhdt.hdt.iterator.utils.Iter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -48,6 +51,8 @@ public class PropertyFunctionFactoryJsonUnnest
         this.gson = gson;
     }
 
+
+
     @Override
     public PropertyFunction create(final String uri)
     {
@@ -60,9 +65,7 @@ public class PropertyFunctionFactoryJsonUnnest
                     ExecutionContext execCxt) {
 
                 // Get the subject's value
-                Node node = subject.isVariable()
-                        ? binding.get((Var)subject)
-                        : subject;
+                Node node = BindingUtils.getValue(binding, subject);
 
                 Node object = objects.getArg(0);
 
@@ -71,20 +74,29 @@ public class PropertyFunctionFactoryJsonUnnest
                 }
                 Var outputVar = (Var)object;
 
-                Node index = objects.getArgListSize() > 1 ? objects.getArg(1) : null;
-                Var indexVar = null;
+                Node indexKey = objects.getArgListSize() > 1 ? objects.getArg(1) : null;
+                Node index = BindingUtils.getValue(binding, indexKey, indexKey);
+
+
+                Var indexVarTmp = null;
                 Integer indexVal = null;
 
-                if(index != null && index.isVariable()) {
-                    indexVar = (Var)index;
-//                    throw new RuntimeException("Index of json array unnesting must be a variable");
-                } else if(index.isLiteral()) {
-                    Object obj = NodeMapperFromRdfDatatype.toJavaCore(index, index.getLiteralDatatype());
-                    if(obj instanceof Number) {
-                        indexVal = ((Number)obj).intValue();
-                    }
+                if (index != null) {
+	                if(index.isVariable()) {
+	                    indexVarTmp = (Var)index;
+	//                    throw new RuntimeException("Index of json array unnesting must be a variable");
+	                } else if(index.isLiteral()) {
+	                    Object obj = NodeMapperFromRdfDatatype.toJavaCore(index, index.getLiteralDatatype());
+	                    if(obj instanceof Number) {
+	                        indexVal = ((Number)obj).intValue();
+	                    } else {
+	                    	throw new ExprEvalException("Index into json array is a literal but not a number: " + index);
+	                    }
+	                } else {
+                    	throw new ExprEvalException("Index into json array is not a number " + index);
+	                }
                 }
-
+                Var indexVar = indexVarTmp;
 
 
                 QueryIterator result = null;
@@ -94,19 +106,18 @@ public class PropertyFunctionFactoryJsonUnnest
                     JsonElement data = (JsonElement)node.getLiteralValue();
                     if(data != null && data.isJsonArray()) {
                         JsonArray arr = data.getAsJsonArray();
-                        List<Binding> bindings = new ArrayList<Binding>(arr.size());
 
-                        //for(JsonElement item : arr) {
+                        Iterator<Binding> it;
                         if(indexVal != null) {
-                            Binding b = itemToBinding(binding, arr, indexVal, gson, indexVar, outputVar);
-                            bindings.add(b);
+                        	Binding b = itemToBinding(binding, arr, indexVal, gson, indexVar, outputVar);
+                            it = Collections.singleton(b).iterator();
                         } else {
-                            for(int i = 0; i < arr.size(); ++i) {
-                                Binding b = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
-                                bindings.add(b);
-                            }
+                            it = IntStream.range(0, arr.size()).mapToObj(i -> {
+                                Binding r = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
+                                return r;
+                            }).iterator();
                         }
-                        result = QueryIterPlainWrapper.create(bindings.iterator());
+                        result = QueryIterPlainWrapper.create(it, execCxt);
                     }
                 }
 
