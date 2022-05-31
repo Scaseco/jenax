@@ -40,7 +40,10 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
             // next line necessary because Jena GeoSPARQL does make hard-coded cast to custom coordinate factory used
             // for e.g. WKT serialization ...
             geom = CustomGeometryFactory.theInstance().createGeometry(geom);
-            GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, "http://www.opengis.net/def/crs/EPSG/0/" + geom.getSRID(), RDFDatatypeGeoJSON.URI);
+
+            String srid = SRS_URI.DEFAULT_WKT_CRS84;
+            
+            GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, srid, RDFDatatypeGeoJSON.URI);
             return wrapper;
         } catch (ParseException e) {
             throw new DatatypeFormatException("Not a GeoJSON literal: " + geometryLiteral, e);
