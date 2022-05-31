@@ -4,6 +4,7 @@ import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
+import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.sparql.ARQInternalErrorException;
@@ -36,7 +37,10 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
         try {
             GeoJsonReader reader = new GeoJsonReader();
             Geometry geom = reader.read(geometryLiteral);
-            GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, "<http://www.opengis.net/def/crs/EPSG/0/" + geom.getSRID() + ">", RDFDatatypeGeoJSON.URI);
+            // next line necessary because Jena GeoSPARQL does make hard-coded cast to custom coordinate factory used
+            // for e.g. WKT serialization ...
+            geom = CustomGeometryFactory.theInstance().createGeometry(geom);
+            GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, "http://www.opengis.net/def/crs/EPSG/0/" + geom.getSRID(), RDFDatatypeGeoJSON.URI);
             return wrapper;
         } catch (ParseException e) {
             throw new DatatypeFormatException("Not a GeoJSON literal: " + geometryLiteral, e);
