@@ -25,6 +25,7 @@ public class JenaExtensionsGeoSparqlX {
 
     public static void loadDefs(FunctionRegistry registry) {
         TypeMapper.getInstance().registerDatatype(RDFDatatypeWkbLiteral.INSTANCE);
+        TypeMapper.getInstance().registerDatatype(RDFDatatypeGeoJSON.INSTANCE);
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "wkb2wkt", F_Wkb2Wkt.class);
         registry.put(GeoSPARQL_URI.GEOF_URI + "parsePolyline", F_ParsePolyline.class);
@@ -34,8 +35,7 @@ public class JenaExtensionsGeoSparqlX {
         // TODO Our plugin should be loaded after geosparql; but I couldn't find whether the geosparql module
         //   is loaded with JenaSubsystemLifecycle and if so what level it uses.
         WKTDatatype.registerDatatypes();
-        GMLDatatype.registerDatatypes();
-        RDFDatatypeGeoJSON.registerDatatypes();
+
 
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();

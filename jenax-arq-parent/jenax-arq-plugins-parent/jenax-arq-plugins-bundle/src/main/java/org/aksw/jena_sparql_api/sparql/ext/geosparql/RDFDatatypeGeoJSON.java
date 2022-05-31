@@ -17,7 +17,7 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
     /**
      * The default GeoJSON type URI.
      */
-    public static final String URI = GeoSPARQL_URI.GEO_URI + "geoJSON";
+    public static final String URI = GeoSPARQL_URI.GEO_URI + "geoJSONLiteral";
 
     /**
      * A static instance of WKTDatatype.
@@ -39,7 +39,7 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
             GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, "<http://www.opengis.net/def/crs/EPSG/0/" + geom.getSRID() + ">", RDFDatatypeGeoJSON.URI);
             return wrapper;
         } catch (ParseException e) {
-            throw new DatatypeFormatException("Not a GeoJSON literal: " + geometryLiteral);
+            throw new DatatypeFormatException("Not a GeoJSON literal: " + geometryLiteral, e);
         }
     }
 
