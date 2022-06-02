@@ -1,6 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.ext.com.google.common.base.Ascii;
+import org.apache.jena.ext.com.google.common.io.BaseEncoding;
 import org.apache.jena.geosparql.implementation.DimensionInfo;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
@@ -13,22 +15,17 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.WKTWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.io.BaseEncoding;
 
 /** Datatype for Well Known Binary Literals */
 public class RDFDatatypeWkbLiteral extends GeometryDatatype {
-	
-    private static final Logger LOGGER = LoggerFactory.getLogger(RDFDatatypeWkbLiteral.class);
 
     protected WKBReader wkbReader;
     protected WKBWriter wkbWriter;
-    
+
     // Writer for intermediate WKT representation in order to reuse Jena's WKT machinery
     protected WKTWriter wktWriter;
-    
+
     /**
      * The default WKT type URI.
      */
@@ -51,15 +48,12 @@ public class RDFDatatypeWkbLiteral extends GeometryDatatype {
         this(uri, wkbReader, wkbWriter, new WKTWriter());
     }
 
-    
     public RDFDatatypeWkbLiteral(String uri, WKBReader wkbReader, WKBWriter wkbWriter, WKTWriter wktWriter) {
         super(uri);
         this.wkbReader = wkbReader;
         this.wkbWriter = wkbWriter;
         this.wktWriter = wktWriter;
     }
-    
-    
 
     /**
      * This method Un-parses the JTS Geometry to the WKT literal
@@ -96,13 +90,13 @@ public class RDFDatatypeWkbLiteral extends GeometryDatatype {
 
 	        return new GeometryWrapper(geometry, srsURI, WKTDatatype.URI, dimensionInfo, tmpGeoStr);
 		} catch (ParseException e) {
-			throw new RuntimeException(e);
-		}    	
+			throw new DatatypeFormatException("Failed to parse geometry literal " + Ascii.truncate(geometryLiteral, 124, "..."), e);
+		}
     }
 
     @Override
     public String toString() {
-        return "WKTDatatype{" + URI + '}';
+        return "WKBDatatype{" + URI + '}';
     }
 
 }
