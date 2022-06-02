@@ -10,7 +10,7 @@ import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.sparql.ARQInternalErrorException;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.locationtech.jts.io.geojson.fork.GeoJsonReader;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 
 public class RDFDatatypeGeoJSON extends GeometryDatatype {
@@ -42,7 +42,7 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
             geom = CustomGeometryFactory.theInstance().createGeometry(geom);
 
             String srid = SRS_URI.DEFAULT_WKT_CRS84;
-            
+
             GeometryWrapper wrapper = GeometryWrapperFactory.createGeometry(geom, srid, RDFDatatypeGeoJSON.URI);
             return wrapper;
         } catch (ParseException e) {
