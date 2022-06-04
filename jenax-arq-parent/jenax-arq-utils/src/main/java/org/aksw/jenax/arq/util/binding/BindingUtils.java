@@ -2,11 +2,13 @@ package org.aksw.jenax.arq.util.binding;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.apache.jena.graph.Node;
@@ -20,17 +22,21 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
 
-//    public static Binding clone(Binding binding) {
-//        Binding result = new BindingHashMap();
-//    }
     public static Binding project(Binding binding, Iterable<Var> vars) {
+    	return project(binding, vars.iterator(), Collections.emptySet());
+    }
+
+    public static Binding project(Binding binding, Iterator<Var> vars, Set<Var> blacklist) {
         BindingBuilder builder = BindingBuilder.create();
 
-        for(Var var : vars) {
-            Node node = binding.get(var);
-            if (node != null) {
-                builder.add(var, node);
-            }
+        while (vars.hasNext()) {
+        	Var var = vars.next();
+        	if (!blacklist.contains(var)) {
+	            Node node = binding.get(var);
+	            if (node != null) {
+	                builder.add(var, node);
+	            }
+        	}
         }
 
         return builder.build();
