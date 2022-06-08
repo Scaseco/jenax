@@ -19,6 +19,10 @@
 
 	<packaging>pom</packaging>
 
+	<modules>
+		<module>..</module>
+	</modules>
+
 	<properties>
 		<jena.version>4.5.0</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
