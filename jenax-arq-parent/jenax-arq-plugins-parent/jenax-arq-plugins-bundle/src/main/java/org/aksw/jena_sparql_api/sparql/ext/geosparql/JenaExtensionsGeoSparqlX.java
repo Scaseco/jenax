@@ -19,11 +19,11 @@ public class JenaExtensionsGeoSparqlX {
 
         AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "collect",
-                AggregatorsJena.wrap1(AggregatorsJena::aggGeometryWrapperCollection));
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
 
         AggregateRegistry.register(
-                GeoSPARQL_URI.GEOF_URI + "union",
-                AggregatorsJena.wrap1(AggregatorsJena::aggUnionGeometryWrapperCollection));
+                GeoSPARQL_URI.GEOF_URI + "aggUnion",
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggUnionGeometryWrapperCollection));
 
     }
 
@@ -60,7 +60,7 @@ public class JenaExtensionsGeoSparqlX {
         // WKTDatatype.getJavaClass() in Jena4 incorrectly returns null instead of GeometryWrapper.class
         generator.getTypeByClassOverrides().put(GeometryWrapper.class, WKTDatatype.URI);
 
-        binder.registerAll(GeoFunctionsJena.class);
+        binder.registerAll(GeoSparqlExFunctions.class);
 //			binder.register(GeoFunctionsJena.class.getMethod("simplifyDp", Geometry.class, double.class, boolean.class));
 //			binder.register(GeoFunctionsJena.class.getMethod("centroid", Geometry.class));
 

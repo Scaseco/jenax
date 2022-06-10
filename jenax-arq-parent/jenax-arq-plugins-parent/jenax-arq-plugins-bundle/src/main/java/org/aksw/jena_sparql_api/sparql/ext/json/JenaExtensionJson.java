@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccumulatorFactories;
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.AggregatorsJena;
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.GeoSparqlExAggregators;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.apache.jena.datatypes.TypeMapper;

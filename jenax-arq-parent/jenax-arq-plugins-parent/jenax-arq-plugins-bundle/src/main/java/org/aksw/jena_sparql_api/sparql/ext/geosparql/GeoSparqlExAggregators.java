@@ -29,7 +29,7 @@ import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 import com.google.common.collect.Iterables;
 
-public class AggregatorsJena {
+public class GeoSparqlExAggregators {
 
     public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, GeometryWrapper>> ctor) {
         return (aggCustom, distinct) -> {
