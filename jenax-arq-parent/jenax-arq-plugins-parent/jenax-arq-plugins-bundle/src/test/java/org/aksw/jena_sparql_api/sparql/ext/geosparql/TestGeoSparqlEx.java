@@ -123,6 +123,12 @@ public class TestGeoSparqlEx {
     }
 
     @Test
+    public void testLineMerge03() {
+        String actual = evalToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
+    }
+
+    @Test
     public void testUnion01() {
         String actual = evalToLexicalForm("geof:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
