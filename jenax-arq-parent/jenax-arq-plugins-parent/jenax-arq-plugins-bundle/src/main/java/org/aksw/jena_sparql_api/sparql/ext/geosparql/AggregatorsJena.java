@@ -2,8 +2,11 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collector.core.AggBuilder;
@@ -16,72 +19,152 @@ import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 import com.google.common.collect.Iterables;
 
 public class AggregatorsJena {
 
-	public static Aggregator<Binding, NodeValue> aggGeometryCollection(Expr geomExpr, boolean distinct) {
-		return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
-	}
-	
-	public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
-		return aggGeometryWrapperCollection(geomExpr, distinct, CustomGeometryFactory.theInstance());
-	}
-	
-	public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(
-			Expr geomExpr,
-			boolean distinct,
-			GeometryFactory geomFactory) {
-		
-		// TODO This approach silently ignores invalid input
-		// We should probably instead yield effectively 'null'
-		return
-			AggBuilder.inputTransform(
-				(Binding binding) -> {
-					NodeValue nv = geomExpr.eval(binding, null);
-					return GeometryWrapperUtils.extractGeometryWrapperOrNull(nv);
-				},
-				AggBuilder.inputFilter(input -> input != null,
-					aggGeometryWrapperCollection(distinct, geomFactory)));
-	}
-	
-	/**
-	 * Creates an aggregator that collects geometries into a geometry collection
-	 * All geometries must have the same spatial reference system (SRS).
-	 * The resulting geometry will be in the same SRS.
-	 * 
-	 * @param distinct Whether to collect geometries in a set or a list
-	 * @param geomFactory The geometry factory. If null then jena's default one is used.
-	 */
-	public static ParallelAggregator<GeometryWrapper, GeometryWrapper, ?> aggGeometryWrapperCollection(boolean distinct, GeometryFactory geomFactory) {
-		
-		GeometryFactory gf = geomFactory == null ? CustomGeometryFactory.theInstance() : geomFactory;
-		
-		SerializableSupplier<Collection<GeometryWrapper>> collectionSupplier = distinct
-				? LinkedHashSet::new
-				: ArrayList::new; // LinkedList?
-		
-		return AggBuilder.outputTransform(
-			AggBuilder.collectionSupplier(collectionSupplier),
-			col -> {
-				GeometryWrapper r;
-				if (col.isEmpty()) {
-					r = GeometryWrapper.getEmptyWKT();
-				} else {				
-					Set<String> srsUris = col.stream().map(GeometryWrapper::getSrsURI).collect(Collectors.toSet());
-					Collection<Geometry> geoms = col.stream().map(GeometryWrapper::getParsingGeometry).collect(Collectors.toList());
-					Geometry geom = gf.createGeometryCollection(geoms.toArray(new Geometry[0]));
-					
-					// Mixing SRS not allowed here; convert before aggregation
-					String srsUri = Iterables.getOnlyElement(srsUris);
-					
-					r = new GeometryWrapper(geom, srsUri, WKTDatatype.URI);
-				}
-				return r;
-			});
-	}
+    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, GeometryWrapper>> ctor) {
+        return (aggCustom, distinct) -> {
+            Expr expr = aggCustom.getExpr();
+            Aggregator<Binding, NodeValue> coreAgg = ctor.apply(expr, distinct).finish(GeometryWrapper::asNodeValue);
+
+            return new AccAdapterJena(coreAgg.createAccumulator());
+        };
+    }
+
+
+    /**
+     * Return the common item type.
+     * If there is no (non-null) item in the input then the result is the given emptyFallback (may be null),
+     * otherwise the result will be either Object or a more specific class.
+     * Null values in the input are ignored.
+     */
+    public static Class<?> getCommonItemType(Iterator<?> it, Class<?> emptyFallback) {
+        Class<?> result = null;
+
+        while (it.hasNext()) {
+            Object obj = it.next();
+            if (obj != null) {
+                Class<?> clz = obj.getClass();
+
+                if (result == null) {
+                    result = clz;
+                } else if (clz.isAssignableFrom(result)) {
+                    result = clz;
+                } else {
+                    result = Object.class;
+                    break;
+                }
+            }
+        }
+
+        if (result == null) {
+            result = emptyFallback;
+        }
+
+        return result;
+    }
+
+    public static Geometry mostSpecificGeometry(Collection<Geometry> geoms, GeometryFactory geomFactory) {
+        Geometry result;
+        Class<?> type = getCommonItemType(geoms.iterator(), null);
+
+        if (geoms.isEmpty() || type == null) {
+            result = geomFactory.createGeometryCollection();
+        } else if (geoms.size() == 1) {
+            result = geoms.iterator().next();
+        } else if (Polygon.class.isAssignableFrom(type)) {
+            result = geomFactory.createMultiPolygon(geoms.toArray(new Polygon[0]));
+        } else if (LineString.class.isAssignableFrom(type)) {
+            result = geomFactory.createMultiLineString(geoms.toArray(new LineString[0]));
+        } else if (Point.class.isAssignableFrom(type)) {
+            result = geomFactory.createMultiPoint(geoms.toArray(new Point[0]));
+        } else {
+            result = geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
+        }
+
+        return result;
+    }
+
+    public static Aggregator<Binding, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+        GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
+        Function<Collection<Geometry>, Geometry> finisher = geoms -> UnaryUnionOp.union(geoms, geomFactory);
+
+        return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
+    }
+
+//
+//    public static Aggregator<Binding, NodeValue> aggGeometryCollection(Expr geomExpr, boolean distinct) {
+//        return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
+//    }
+
+    public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+        GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
+        Function<Collection<Geometry>, Geometry> finisher = geoms -> geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
+
+
+        return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
+    }
+
+    public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(
+            Expr geomExpr,
+            boolean distinct,
+            Function<Collection<Geometry>, Geometry> finisher) {
+
+        // TODO This approach silently ignores invalid input
+        // We should probably instead yield effectively 'null'
+        return
+            AggBuilder.inputTransform(
+                (Binding binding) -> {
+                    NodeValue nv = geomExpr.eval(binding, null);
+                    return GeometryWrapperUtils.extractGeometryWrapperOrNull(nv);
+                },
+                AggBuilder.inputFilter(input -> input != null,
+                    aggGeometryWrapperCollection(distinct, finisher)));
+    }
+
+    /**
+     * Creates an aggregator that collects geometries into a geometry collection
+     * All geometries must have the same spatial reference system (SRS).
+     * The resulting geometry will be in the same SRS.
+     *
+     * @param distinct Whether to collect geometries in a set or a list
+     * @param geomFactory The geometry factory. If null then jena's default one is used.
+     */
+    public static ParallelAggregator<GeometryWrapper, GeometryWrapper, ?> aggGeometryWrapperCollection(
+            boolean distinct,
+            Function<Collection<Geometry>, Geometry> finisher
+    ) {
+        SerializableSupplier<Collection<GeometryWrapper>> collectionSupplier = distinct
+                ? LinkedHashSet::new
+                : ArrayList::new; // LinkedList?
+
+        return AggBuilder.outputTransform(
+            AggBuilder.collectionSupplier(collectionSupplier),
+            col -> {
+                GeometryWrapper r;
+                if (col.isEmpty()) {
+                    r = GeometryWrapper.getEmptyWKT();
+                } else {
+                    Set<String> srsUris = col.stream().map(GeometryWrapper::getSrsURI).collect(Collectors.toSet());
+                    Collection<Geometry> geoms = col.stream().map(GeometryWrapper::getParsingGeometry).collect(Collectors.toList());
+                    Geometry geom = finisher.apply(geoms);
+
+                    // Mixing SRS not allowed here; convert before aggregation
+                    String srsUri = Iterables.getOnlyElement(srsUris);
+
+                    r = new GeometryWrapper(geom, srsUri, WKTDatatype.URI);
+                }
+                return r;
+            });
+    }
 
 }

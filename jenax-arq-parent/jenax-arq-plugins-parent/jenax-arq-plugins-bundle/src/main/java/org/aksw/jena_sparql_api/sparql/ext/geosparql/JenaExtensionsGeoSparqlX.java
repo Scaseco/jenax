@@ -5,7 +5,6 @@ import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
-import org.apache.jena.geosparql.implementation.datatype.GMLDatatype;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
@@ -20,7 +19,12 @@ public class JenaExtensionsGeoSparqlX {
 
         AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "collect",
-                AccumulatorFactories.wrap1(AggregatorsJena::aggGeometryCollection));
+                AggregatorsJena.wrap1(AggregatorsJena::aggGeometryWrapperCollection));
+
+        AggregateRegistry.register(
+                GeoSPARQL_URI.GEOF_URI + "union",
+                AggregatorsJena.wrap1(AggregatorsJena::aggUnionGeometryWrapperCollection));
+
     }
 
     public static void loadDefs(FunctionRegistry registry) {
