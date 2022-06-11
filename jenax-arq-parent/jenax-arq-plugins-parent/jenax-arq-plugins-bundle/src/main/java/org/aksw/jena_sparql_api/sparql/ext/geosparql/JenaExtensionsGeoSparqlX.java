@@ -25,6 +25,10 @@ public class JenaExtensionsGeoSparqlX {
                 GeoSPARQL_URI.GEOF_URI + "aggUnion",
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggUnionGeometryWrapperCollection));
 
+        AggregateRegistry.register(
+                GeoSPARQL_URI.GEOF_URI + "aggIntersection",
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggIntersectionGeometryWrapperCollection));
+
     }
 
     public static void loadDefs(FunctionRegistry registry) {

@@ -101,6 +101,24 @@ public class GeoSparqlExAggregators {
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
+    public static Aggregator<Binding, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+        GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
+        Function<Collection<Geometry>, Geometry> finisher = geoms -> {
+            Iterator<Geometry> it = geoms.iterator();
+            if(it.hasNext()) {
+                Geometry intersection = it.next(); // take first
+                while (it.hasNext()) {
+                    intersection = intersection.intersection(it.next());
+                }
+                return intersection;
+            } else {
+                return geomFactory.createGeometryCollection();
+            }
+        };
+
+        return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
+    }
+
 //
 //    public static Aggregator<Binding, NodeValue> aggGeometryCollection(Expr geomExpr, boolean distinct) {
 //        return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
