@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.locationtech.jts.geom.Geometry;
@@ -14,6 +15,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.locationtech.jts.simplify.VWSimplifier;
 
 public class GeoSparqlExFunctions {
 
@@ -23,7 +25,7 @@ public class GeoSparqlExFunctions {
         if (geom instanceof GeometryCollection) {
             GeometryCollection c = ((GeometryCollection)geom);
             result = IntStream.range(0, c.getNumGeometries())
-                .mapToObj(i -> c.getGeometryN(i));
+                .mapToObj(c::getGeometryN);
         } else {
             result = Stream.of(geom);
         }
@@ -45,10 +47,37 @@ public class GeoSparqlExFunctions {
     }
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper simplifyVW(
+            GeometryWrapper geom,
+            @DefaultValue("0") double tolerance,
+            @DefaultValue("true") boolean ensureValid) {
+        VWSimplifier simplifier = new VWSimplifier(geom.getParsingGeometry());
+        simplifier.setDistanceTolerance(tolerance);
+        simplifier.setEnsureValid(ensureValid);
+        Geometry tmp = simplifier.getResultGeometry();
+
+        return GeometryWrapperUtils.createFromPrototype(geom, tmp);
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper union(GeometryWrapper geom) {
         // List<Geometry> list = expandCollection(geom.getParsingGeometry()).collect(Collectors.toList());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
                 UnaryUnionOp.union(geom.getParsingGeometry()));
+        return result;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper intersection(GeometryWrapper geom1, GeometryWrapper geom2) {
+        Geometry intersection = geom1.getParsingGeometry().intersection(geom2.getParsingGeometry());
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom1, intersection);
+        return result;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper difference(GeometryWrapper geom1, GeometryWrapper geom2) {
+        Geometry difference = geom1.getParsingGeometry().difference(geom2.getParsingGeometry());
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom1, difference);
         return result;
     }
 
