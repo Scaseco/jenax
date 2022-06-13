@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
+import java.util.Collection;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -12,7 +13,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.linemerge.LineMerger;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 
 public class GeoSparqlExFunctions {
@@ -48,7 +49,7 @@ public class GeoSparqlExFunctions {
     public static GeometryWrapper union(GeometryWrapper geom) {
         // List<Geometry> list = expandCollection(geom.getParsingGeometry()).collect(Collectors.toList());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
-                UnaryUnionOp.union(geom.getParsingGeometry()));
+                OverlayNGRobust.union(geom.getParsingGeometry()));
         return result;
     }
 
@@ -56,8 +57,10 @@ public class GeoSparqlExFunctions {
     public static GeometryWrapper lineMerge(GeometryWrapper geom) {
         LineMerger merger = new LineMerger();
         expandCollection(geom.getParsingGeometry()).forEach(merger::add);
+        @SuppressWarnings("unchecked")
+        Collection<Geometry> tmp = (Collection<Geometry>)merger.getMergedLineStrings();
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
-                UnaryUnionOp.union(merger.getMergedLineStrings()));
+                OverlayNGRobust.union(tmp));
         return result;
     }
 
