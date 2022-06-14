@@ -224,18 +224,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.commons</groupId>
-				<artifactId>aksw-commons-objectstore</artifactId>
-				<version>${aksw.commons.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.aksw.commons</groupId>
-				<artifactId>aksw-commons-models-csvw-domain</artifactId>
-				<version>${aksw.commons.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-entityinfo</artifactId>
 				<version>${project.version}</version>
@@ -859,17 +847,29 @@
 			<!-- AKSW Commons -->
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-bom</artifactId>
+				<version>${aksw.commons.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+<!--
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-objectstore</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-models-csvw-domain</artifactId>
+				<version>${aksw.commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-utils</artifactId>
 				<version>${aksw.commons.version}</version>
-
-				<!-- Jena pulls in jcl-over-slf4j, so we don't need to add it ourselves -->
-				<!-- <exclusions> -->
-				<!-- <exclusion> -->
-				<!-- <groupId>commons-logging</groupId> -->
-				<!-- <artifactId>commons-logging</artifactId> -->
-				<!-- </exclusion> -->
-				<!-- </exclusions> -->
-
 			</dependency>
 
 			<dependency>
@@ -932,6 +932,7 @@
 				<artifactId>aksw-commons-io-syscalls</artifactId>
 				<version>${aksw.commons.version}</version>
 			</dependency>
+			-->
 
 			<dependency>
 				<groupId>org.apache.commons</groupId>

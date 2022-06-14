@@ -163,7 +163,7 @@ public class ClassDescriptor {
                     Predicate<Statement> predicate = pd.getAllowDescendPredicate();
                     boolean allowDescend = isIriType
                             ? false
-                            : predicate == null ? false : predicate.test(stmt);
+                            : predicate == null ? true : predicate.test(stmt);
 
 
                     // If the property is marked as iriType then IRIs are treated as strings
