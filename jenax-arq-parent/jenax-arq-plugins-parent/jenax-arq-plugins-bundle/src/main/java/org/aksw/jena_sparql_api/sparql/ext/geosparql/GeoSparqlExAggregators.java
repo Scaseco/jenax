@@ -38,7 +38,13 @@ public class GeoSparqlExAggregators {
     public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, GeometryWrapper>> ctor) {
         return (aggCustom, distinct) -> {
             Expr expr = aggCustom.getExpr();
-            Aggregator<Binding, NodeValue> coreAgg = ctor.apply(expr, distinct).finish(GeometryWrapper::asNodeValue);
+            Aggregator<Binding, NodeValue> coreAgg = ctor.apply(expr, distinct)
+                    .finish(geometryWrapper -> {
+                        NodeValue r = geometryWrapper == null
+                                ? null
+                                : geometryWrapper.asNodeValue();
+                        return r;
+                    });
 
             return new AccAdapterJena(coreAgg.createAccumulator());
         };
@@ -146,14 +152,13 @@ public class GeoSparqlExAggregators {
                 AggBuilder.inputTransform(
                     (Binding binding) -> {
                         NodeValue nv = geomExpr.eval(binding, null);
-                        return GeometryWrapperUtils.extractGeometryWrapperOrNull(nv);
+                        return GeometryWrapper.extract(nv);
                     },
                     AggBuilder.inputFilter(input -> input != null,
                         aggGeometryWrapperCollection(distinct, finisher))),
-                    false,
-                    ex -> logger.warn("Error while aggregating a collection of geometries", ex),
-                    null
-                    );
+                false,
+                ex -> logger.warn("Error while aggregating a collection of geometries", ex),
+                null);
     }
 
     /**

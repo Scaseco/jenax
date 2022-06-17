@@ -4,13 +4,19 @@ import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.sparql.util.QueryExecUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -103,35 +109,59 @@ public class TestGeoSparqlEx {
         Assert.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
     }
 
-    public static String evalToLexicalForm(String exprStr) {
+    public static String evalExprToLexicalForm(String exprStr) {
         PrefixMapping pm = new PrefixMappingImpl();
         pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
         String result = ExprUtils.eval(ExprUtils.parse(exprStr, pm)).asNode().getLiteralLexicalForm();
         return result;
     }
 
+    public static String evalQueryToLexicalForm(String queryStr) {
+        Query query = new Query();
+        query.getPrefixMapping().setNsPrefixes(GeoSPARQL_URI.getPrefixes());
+        QueryFactory.parse(query, queryStr, null, Syntax.syntaxARQ);
+        RDFNode rdfNode = QueryExecUtils.getExactlyOne(query.toString(), DatasetFactory.empty());
+
+        String result = rdfNode == null ? null :
+            rdfNode.isLiteral() ? rdfNode.asLiteral().getLexicalForm() : rdfNode.toString();
+        return result;
+    }
+
     @Test
     public void testLineMerge01() {
-        String actual = evalToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge02() {
-        String actual = evalToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
+        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge03() {
-        String actual = evalToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
     }
 
     @Test
     public void testUnion01() {
-        String actual = evalToLexicalForm("geof:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = evalExprToLexicalForm("geof:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
+    }
+
+
+    @Test
+    public void testCollectSuccess01() {
+        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
+        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+    }
+
+    @Test
+    public void testCollectError01() {
+        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
+        Assert.assertEquals(null, actual);
     }
 
 //	@Test
