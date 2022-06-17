@@ -26,10 +26,14 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
 public class GeoSparqlExAggregators {
+
+    private static final Logger logger = LoggerFactory.getLogger(GeoSparqlExAggregators.class);
 
     public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, GeometryWrapper>> ctor) {
         return (aggCustom, distinct) -> {
@@ -137,16 +141,19 @@ public class GeoSparqlExAggregators {
             boolean distinct,
             Function<Collection<Geometry>, Geometry> finisher) {
 
-        // TODO This approach silently ignores invalid input
-        // We should probably instead yield effectively 'null'
         return
-            AggBuilder.inputTransform(
-                (Binding binding) -> {
-                    NodeValue nv = geomExpr.eval(binding, null);
-                    return GeometryWrapperUtils.extractGeometryWrapperOrNull(nv);
-                },
-                AggBuilder.inputFilter(input -> input != null,
-                    aggGeometryWrapperCollection(distinct, finisher)));
+            AggBuilder.errorHandler(
+                AggBuilder.inputTransform(
+                    (Binding binding) -> {
+                        NodeValue nv = geomExpr.eval(binding, null);
+                        return GeometryWrapperUtils.extractGeometryWrapperOrNull(nv);
+                    },
+                    AggBuilder.inputFilter(input -> input != null,
+                        aggGeometryWrapperCollection(distinct, finisher))),
+                    false,
+                    ex -> logger.warn("Error while aggregating a collection of geometries", ex),
+                    null
+                    );
     }
 
     /**
