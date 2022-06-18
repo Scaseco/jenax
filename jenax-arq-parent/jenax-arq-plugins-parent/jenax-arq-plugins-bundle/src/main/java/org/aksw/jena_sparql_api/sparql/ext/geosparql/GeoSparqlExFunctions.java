@@ -88,13 +88,14 @@ public class GeoSparqlExFunctions {
         expandCollection(geom.getParsingGeometry()).forEach(merger::add);
         @SuppressWarnings("unchecked")
         Collection<Geometry> tmp = (Collection<Geometry>)merger.getMergedLineStrings();
+        if (tmp.isEmpty()) {
+            throw new ExprEvalException("No line strings have been input of geof:lineMerge function. Can't make union of empty line strings after merge step.");
+        }
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
                 OverlayNGRobust.union(tmp));
         return result;
     }
-
-
-
+    
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
 //	public static Geometry centroid(
 //			Geometry geom) {
