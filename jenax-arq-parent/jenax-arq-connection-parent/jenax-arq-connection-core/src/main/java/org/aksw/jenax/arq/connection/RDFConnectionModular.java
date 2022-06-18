@@ -91,7 +91,8 @@ public class RDFConnectionModular implements RDFConnection {
 
     @Override
     public UpdateExecutionBuilder newUpdate() {
-        throw new UnsupportedOperationException();
+        return updateConnection.newUpdate();
+        // throw new UnsupportedOperationException();
     }
 
     @Override
