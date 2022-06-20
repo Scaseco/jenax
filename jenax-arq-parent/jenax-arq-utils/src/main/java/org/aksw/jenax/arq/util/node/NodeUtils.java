@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.node;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -11,6 +12,11 @@ import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.RiotException;
+import org.apache.jena.riot.lang.LabelToNode;
+import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.NodeValue;
 
@@ -159,6 +165,29 @@ public class NodeUtils {
     }
 
     public static List<Node> createLiteralNodes(Iterable<String> strings) {
-		return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+        return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+    }
+
+    /** Parse a sequence of nodes into the provided collection */
+    public static <C extends Collection<? super Node>> C parseNodes(String str, C segments) {
+        // NodeFmtLib.strNodes encodes labels - so we need to decode them
+        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
+
+        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
+        while (tokenizer.hasNext()) {
+            Token token = tokenizer.next() ;
+            Node node = token.asNode() ;
+            if ( node == null )
+                throw new RiotException("Bad RDF Term: " + str) ;
+
+            if (node.isBlank()) {
+                String label = node.getBlankNodeLabel();
+                node = decoder.get(null, label);
+            }
+
+            segments.add(node);
+        }
+
+        return segments;
     }
 }

@@ -2,7 +2,6 @@ package org.aksw.jenax.path.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -13,12 +12,7 @@ import org.aksw.commons.path.core.PathOps;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.riot.RiotException;
-import org.apache.jena.riot.lang.LabelToNode;
 import org.apache.jena.riot.out.NodeFmtLib;
-import org.apache.jena.riot.tokens.Token;
-import org.apache.jena.riot.tokens.Tokenizer;
-import org.apache.jena.riot.tokens.TokenizerText;
 
 
 /**
@@ -31,17 +25,17 @@ import org.apache.jena.riot.tokens.TokenizerText;
 public class PathOpsNode
     implements PathOps<Node, PathNode>, Serializable
 {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static final Node PARENT = NodeFactory.createURI("..");
+    public static final Node PARENT = NodeFactory.createURI("..");
     public static final Node SELF = NodeFactory.createURI(".");
 
     private static PathOpsNode INSTANCE = null;
 
     private Object readResolve() {
-    	return get();
+        return get();
     }
-    
+
     public static PathOpsNode get() {
         if (INSTANCE == null) {
             synchronized (PathOpsNode.class) {
@@ -97,10 +91,10 @@ public class PathOpsNode
     public Node getParentToken() {
         return PARENT;
     }
-    
+
     @Override
     public String toStringRaw(Object path) {
-    	return toString((PathNode)path);
+        return toString((PathNode)path);
     }
 
     @Override
@@ -108,7 +102,7 @@ public class PathOpsNode
         Node[] nodes = path.getSegments().stream()
                 .collect(Collectors.toList()).toArray(new Node[0]);
 
-        String result = (path.isAbsolute() ? "/" : "") + NodeFmtLib.strNodes(nodes);
+        String result = (path.isAbsolute() ? "/" : "") + NodeFmtLib.strNodesNT(nodes);
 
         return result;
     }
@@ -126,34 +120,9 @@ public class PathOpsNode
 
         // Code below adapted from NodeFactoryExtra.parseNode(str)
 
-        List<Node> segments = parseNodes(str, new ArrayList<>());
+        List<Node> segments = NodeUtils.parseNodes(str, new ArrayList<>());
 
         return newPath(isAbsolute, segments);
     }
 
-
-    public static <C extends Collection<? super Node>> C parseNodes(String str, C segments) {
-        // NodeFmtLib.strNodes encodes labels - so we need to decode them
-        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
-
-        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
-        while (tokenizer.hasNext()) {
-            Token token = tokenizer.next() ;
-            Node node = token.asNode() ;
-            if ( node == null )
-                throw new RiotException("Bad RDF Term: " + str) ;
-
-            if (node.isBlank()) {
-                String label = node.getBlankNodeLabel();
-                node = decoder.get(null, label);
-            }
-
-            segments.add(node);
-        }
-
-        return segments;
-    }
-
-
-    
 }

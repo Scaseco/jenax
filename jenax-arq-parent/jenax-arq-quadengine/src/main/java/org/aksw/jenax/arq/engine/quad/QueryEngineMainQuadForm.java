@@ -11,6 +11,8 @@ import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.engine.main.QueryEngineMain;
 import org.apache.jena.sparql.util.Context;
 
+// There is already QueryEngineMainQuad - Not sure why I created a copy of it
+// Probably it can be removed
 public class QueryEngineMainQuadForm
     extends QueryEngineMain
 {
