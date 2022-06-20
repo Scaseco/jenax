@@ -9,13 +9,13 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.graph.Node;
-import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.vocabulary.RDF;
 
 /** Datatype for 'arrays' of RDF terms */
 public class RDFDatatypeNodeList
     extends BaseDatatype
 {
-    public static final String IRI = "http://jsa.aksw.org/dt/sparql/array";
+    public static final String IRI = RDF.uri + "array";
     public static final RDFDatatypeNodeList INSTANCE = new RDFDatatypeNodeList();
 
     public RDFDatatypeNodeList() {
@@ -37,7 +37,7 @@ public class RDFDatatypeNodeList
         String result;
         if (nodes instanceof NodeList) {
             NodeList nl = (NodeList)nodes;
-            result = NodeFmtLib.strNodesNT(nl.toArray(new Node[0]));
+            result = NodeUtils.strNodesWithUndef(NodeUtils.ntFormatter::format, nl.toArray(new Node[0]));
         } else {
             throw new DatatypeFormatException("Not a NodeList datatype");
         }

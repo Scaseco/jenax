@@ -1,19 +1,21 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
 import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
-import org.apache.jena.query.*;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
-import org.apache.jena.sparql.util.QueryExecUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -22,10 +24,6 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 import com.google.common.math.DoubleMath;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 
 public class TestGeoSparqlEx {
@@ -110,76 +108,58 @@ public class TestGeoSparqlEx {
         Assert.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
     }
 
-    public static String evalExprToLexicalForm(String exprStr) {
-        PrefixMapping pm = new PrefixMappingImpl();
-        pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
-        String result = ExprUtils.eval(ExprUtils.parse(exprStr, pm)).asNode().getLiteralLexicalForm();
-        return result;
-    }
-
-    public static String evalQueryToLexicalForm(String queryStr) {
-        Query query = new Query();
-        query.getPrefixMapping().setNsPrefixes(GeoSPARQL_URI.getPrefixes());
-        QueryFactory.parse(query, queryStr, null, Syntax.syntaxARQ);
-        RDFNode rdfNode = QueryExecUtils.getExactlyOne(query.toString(), DatasetFactory.empty());
-
-        String result = rdfNode == null ? null :
-            rdfNode.isLiteral() ? rdfNode.asLiteral().getLexicalForm() : rdfNode.toString();
-        return result;
-    }
-
     @Test
     public void testLineMerge01() {
-        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge02() {
-        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge03() {
-        String actual = evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
     }
 
     @Test
     public void testLineMerge04() {
-        String actual = evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
         Assert.fail("No line strings have been input of geof:lineMerge function. Can't make union of empty line strings after merge step.");
     }
 
     @Test
     public void testUnion01() {
-        String actual = evalExprToLexicalForm("geof:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
     }
 
 
     @Test
     public void testCollectSuccess01() {
-        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectError01() {
-        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
         Assert.assertEquals(null, actual);
     }
 
     @Test
     public void testCollectUnbound() {
-        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> 'POINT(0 0)'^^geo:wktLiteral ) (<s1> UNDEF) }  } group by ?s");
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> 'POINT(0 0)'^^geo:wktLiteral ) (<s1> UNDEF) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectEmpty() {
-        String actual = evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> UNDEF) }  } group by ?s");
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> UNDEF) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
     }
 
@@ -198,13 +178,13 @@ public class TestGeoSparqlEx {
     @Test
     public void testLineMergeBuffer() throws IOException {
         String literal = Files.readString(Path.of("/tmp/linestrings.txt")).replace("\n", "");
-        String actual = evalExprToLexicalForm("geof:buffer(geof:lineMerge('" + literal + "'^^geo:wktLiteral), 10.0, <http://www.opengis.net/def/uom/OGC/1.0/metre>)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:buffer(geof:lineMerge('" + literal + "'^^geo:wktLiteral), 10.0, <http://www.opengis.net/def/uom/OGC/1.0/metre>)");
     }
 
     @Test
     public void testGeoJSONFeatureCollection() throws IOException {
         String literal = Files.readString(Path.of("/tmp/contures.txt")).replace("\n", "");
-        String actual = evalExprToLexicalForm("spatial-f:transformDatatype('" + literal + "'^^geo:geoJSONLiteral, geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.evalExprToLexicalForm("spatial-f:transformDatatype('" + literal + "'^^geo:geoJSONLiteral, geo:wktLiteral)");
 
     }
 }

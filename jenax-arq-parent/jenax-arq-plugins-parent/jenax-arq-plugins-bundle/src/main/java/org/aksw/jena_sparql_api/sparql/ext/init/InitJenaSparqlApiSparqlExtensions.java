@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.init;
 
+import org.aksw.jena_sparql_api.sparql.ext.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.JenaExtensionDuration;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
@@ -33,6 +34,7 @@ public class InitJenaSparqlApiSparqlExtensions
         JenaExtensionsGeoSparqlX.register();
         JenaExtensionDuration.register();
         JenaExtensionOsrm.register();
+        JenaExtensionArray.register();
 
         JenaExtensionsMvn.register();
         //JenaExtensionsGeoSparql.loadDefs(registry);
