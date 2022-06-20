@@ -16,9 +16,11 @@ import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
+import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.VariableNotBoundException;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -151,8 +153,11 @@ public class GeoSparqlExAggregators {
             AggBuilder.errorHandler(
                 AggBuilder.inputTransform(
                     (Binding binding) -> {
-                        NodeValue nv = geomExpr.eval(binding, null);
-                        return GeometryWrapper.extract(nv);
+                        try {
+                            NodeValue nv = geomExpr.eval(binding, null);
+                            return GeometryWrapper.extract(nv);
+                        } catch (VariableNotBoundException e) {}
+                        return null;
                     },
                     AggBuilder.inputFilter(input -> input != null,
                         aggGeometryWrapperCollection(distinct, finisher))),
@@ -181,18 +186,19 @@ public class GeoSparqlExAggregators {
             AggBuilder.collectionSupplier(collectionSupplier),
             col -> {
                 GeometryWrapper r;
-                if (col.isEmpty()) {
-                    r = GeometryWrapper.getEmptyWKT();
-                } else {
+//                if (col.isEmpty()) {
+//                    r = GeometryWrapper.getEmptyWKT();
+//                } else {
                     Set<String> srsUris = col.stream().map(GeometryWrapper::getSrsURI).collect(Collectors.toSet());
                     Collection<Geometry> geoms = col.stream().map(GeometryWrapper::getParsingGeometry).collect(Collectors.toList());
                     Geometry geom = finisher.apply(geoms);
 
+
                     // Mixing SRS not allowed here; convert before aggregation
-                    String srsUri = Iterables.getOnlyElement(srsUris);
+                    String srsUri = Iterables.getOnlyElement(srsUris, SRS_URI.DEFAULT_WKT_CRS84);
 
                     r = new GeometryWrapper(geom, srsUri, WKTDatatype.URI);
-                }
+//                }
                 return r;
             });
     }
