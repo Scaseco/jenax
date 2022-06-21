@@ -14,6 +14,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Assert;
@@ -126,11 +127,14 @@ public class TestGeoSparqlEx {
         Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
     }
 
-    // @Test
-    // @Ignore
+    @Test
     public void testLineMerge04() {
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
-        Assert.fail("No line strings have been input of geof:lineMerge function. Can't make union of empty line strings after merge step.");
+        Exception exception = Assert.assertThrows(ExprEvalException.class, () -> {
+            MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
+        });
+
+        String expectedMessage = "No line strings have been input of geof:lineMerge function. Can't make union of empty line strings after merge step.";
+        String actualMessage = exception.getMessage();
     }
 
     @Test
@@ -176,18 +180,6 @@ public class TestGeoSparqlEx {
 //		Assert.assertEquals(expected, actual);
 //	}
 
-    // @Test
-    public void testLineMergeBuffer() throws IOException {
-        String literal = Files.readString(Path.of("/tmp/linestrings.txt")).replace("\n", "");
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:buffer(geof:lineMerge('" + literal + "'^^geo:wktLiteral), 10.0, <http://www.opengis.net/def/uom/OGC/1.0/metre>)");
-    }
-
-    // @Test
-    public void testGeoJSONFeatureCollection() throws IOException {
-        String literal = Files.readString(Path.of("/tmp/contures.txt")).replace("\n", "");
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("spatial-f:transformDatatype('" + literal + "'^^geo:geoJSONLiteral, geo:wktLiteral)");
-
-    }
 }
 
 
