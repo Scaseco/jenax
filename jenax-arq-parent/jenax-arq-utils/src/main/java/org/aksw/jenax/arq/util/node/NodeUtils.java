@@ -1,16 +1,27 @@
 package org.aksw.jenax.arq.util.node;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.jena.atlas.io.IndentedLineBuffer;
+import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.lang.LabelToNode;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.riot.out.NodeFormatter;
+import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -180,5 +191,49 @@ public class NodeUtils {
         Number number = getNumberNullable(node);
         Objects.requireNonNull(number, "Number expected but got null");
         return number;
+    }
+
+    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
+
+    /** Variant of {@link NodeFmtLib#strNodesNT(Node...)} that yield nul as UNDEF */
+    public static String strNodesWithUndef(BiConsumer<IndentedWriter, Node> output, Node...nodes) {
+        IndentedLineBuffer sw = new IndentedLineBuffer();
+        boolean first = true;
+        for ( Node n : nodes ) {
+            if ( !first )
+                sw.append(" ");
+            first = false;
+            if ( n == null ) {
+                sw.append("UNDEF");
+                continue;
+            }
+            output.accept(sw, n);
+        }
+        return sw.toString();
+    }
+
+    /** Parse a sequence of nodes into the provided collection */
+    public static <C extends Collection<? super Node>> C parseNodes(String str, C segments) {
+        // NodeFmtLib.strNodes encodes labels - so we need to decode them
+        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
+
+        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
+        while (tokenizer.hasNext()) {
+            Token token = tokenizer.next() ;
+            Node node = token.asNode() ;
+//            if ( node == null )
+//                throw new RiotException("Bad RDF Term: " + str) ;
+
+            if (node != null) {
+                if (node.isBlank()) {
+                    String label = node.getBlankNodeLabel();
+                    node = decoder.get(null, label);
+                }
+            }
+
+            segments.add(node);
+        }
+
+        return segments;
     }
 }

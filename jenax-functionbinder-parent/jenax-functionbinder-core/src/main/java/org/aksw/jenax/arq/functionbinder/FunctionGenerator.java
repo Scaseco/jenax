@@ -143,7 +143,7 @@ public class FunctionGenerator {
         {
             ConvertFunctionRaw resultConverter;
             Class<?> targetJavaType = method.getReturnType();
-            AnnotatedType art = method.getAnnotatedReturnType();
+            // AnnotatedType art = method.getAnnotatedReturnType();
 
             // TODO Check for an @IriType annotation that would turn Strings into IRIs
 
@@ -163,7 +163,7 @@ public class FunctionGenerator {
                 ? internalTypeToNodeValue
                 : preConvert.andThen(internalTypeToNodeValue);
 
-            returnValueConverter = in -> (NodeValue)resultConverter.convertRaw(in);
+            returnValueConverter = in -> in == null ? null : (NodeValue)resultConverter.convertRaw(in);
         }
 
         // Set up parameter conversions and default values

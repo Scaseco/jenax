@@ -93,6 +93,7 @@ import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.path.P_ReverseLink;
 import org.apache.jena.sparql.util.PrefixMapping2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1634,6 +1635,10 @@ public class MapperProxyUtils {
             // However, there are some exceptions such as custom hashid functions
             P_Path0 path = paths.get(beanPropertyName);
 
+            // Property descriptors use the effective path (no extra isFwd flag)
+            P_Path0 effectivePath = isFwd ? path :
+                path.isForward() ? new P_ReverseLink(path.getNode()) : new P_Link(path.getNode());
+
             if(path == null) {
 
                 // The signatures of basic read methods and custom hash functions are the same
@@ -1772,7 +1777,7 @@ public class MapperProxyUtils {
                             methodImplMap.put(readMethod, readImpl);
 
 
-                                classDescriptor.getOrCreatePropertyDescriptor(path)
+                                classDescriptor.getOrCreatePropertyDescriptor(effectivePath)
                                     .setIncludedInHashId(isHashId)
                                     .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
                                     .setTargetType(targetDataType)
@@ -1819,7 +1824,7 @@ public class MapperProxyUtils {
                         readImpl = (s, args) -> raw.apply((Resource)s).getJavaView();
                         methodImplMap.put(readMethod, readImpl);
 
-                        classDescriptor.getOrCreatePropertyDescriptor(path)
+                        classDescriptor.getOrCreatePropertyDescriptor(effectivePath)
                             .setTargetType(targetDataType)
                             .setIncludedInHashId(isHashId)
                             .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
@@ -1904,7 +1909,7 @@ public class MapperProxyUtils {
                     Function<Resource, ViewBundle> g = getter.apply(p);
                         methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o).getJavaView());
 
-                    classDescriptor.getOrCreatePropertyDescriptor(path)
+                    classDescriptor.getOrCreatePropertyDescriptor(effectivePath)
                         .setTargetType(targetDataType)
                         .setIncludedInHashId(isHashId)
                         .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)
@@ -1930,7 +1935,7 @@ public class MapperProxyUtils {
                         Function<Resource, ViewBundle> g = getter.apply(p, isFwd);
                         methodImplMap.put(readMethod, (o, args) -> g.apply((Resource)o).getJavaView());
 
-                            classDescriptor.getOrCreatePropertyDescriptor(path)
+                            classDescriptor.getOrCreatePropertyDescriptor(effectivePath)
                             .setTargetType(targetDataType)
                                 .setIncludedInHashId(isHashId)
                                 .setRdfPropertyExcludedFromHashId(isHashIdWithoutProperty)

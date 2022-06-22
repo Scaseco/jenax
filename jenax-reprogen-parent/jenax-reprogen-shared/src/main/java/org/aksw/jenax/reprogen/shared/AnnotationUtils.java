@@ -90,7 +90,17 @@ public class AnnotationUtils {
                 .findAny()
                 .orElse(null);
 
-        String result = usedPrefix != null ? methodName.substring(usedPrefix.length()) : methodName;
+        String result;
+        if (usedPrefix != null) {
+            result = methodName.substring(usedPrefix.length());
+
+            // If the method is simply named after the prefix then use the prefix as given
+            if (result.isEmpty()) {
+                result = usedPrefix;
+            }
+        } else {
+            result = methodName;
+        }
 
         // TODO We may want to use the Introspector's public decapitalize method
         result = Introspector.decapitalize(result);

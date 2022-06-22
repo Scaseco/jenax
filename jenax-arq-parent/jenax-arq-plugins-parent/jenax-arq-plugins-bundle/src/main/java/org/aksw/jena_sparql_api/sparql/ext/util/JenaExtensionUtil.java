@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.util;
 
 import java.math.BigDecimal;
 
+import org.aksw.jena_sparql_api.sparql.ext.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
@@ -30,6 +31,8 @@ public class JenaExtensionUtil {
         JenaExtensionUrl.addPrefixes(pm);
         JenaExtensionFs.addPrefixes(pm);
         JenaExtensionSys.addPrefixes(pm);
+        JenaExtensionArray.addPrefixes(pm);
+        JenaExtensionJson.addPrefixes(pm);
     }
 
 

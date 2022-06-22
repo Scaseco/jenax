@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class TestSparqlExtOsrm {
 	
-	@Test
+	// @Test
 	public void testOsrm() {
 		PrefixMapping pm = new PrefixMappingImpl();
 		pm.setNsPrefixes(PrefixMapping.Standard.getNsPrefixMap());
