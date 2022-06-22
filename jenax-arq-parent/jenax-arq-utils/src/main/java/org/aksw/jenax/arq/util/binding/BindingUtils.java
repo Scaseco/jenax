@@ -7,14 +7,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
@@ -23,20 +26,20 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 public class BindingUtils {
 
     public static Binding project(Binding binding, Iterable<Var> vars) {
-    	return project(binding, vars.iterator(), Collections.emptySet());
+        return project(binding, vars.iterator(), Collections.emptySet());
     }
 
     public static Binding project(Binding binding, Iterator<Var> vars, Set<Var> blacklist) {
         BindingBuilder builder = BindingBuilder.create();
 
         while (vars.hasNext()) {
-        	Var var = vars.next();
-        	if (!blacklist.contains(var)) {
-	            Node node = binding.get(var);
-	            if (node != null) {
-	                builder.add(var, node);
-	            }
-        	}
+            Var var = vars.next();
+            if (!blacklist.contains(var)) {
+                Node node = binding.get(var);
+                if (node != null) {
+                    builder.add(var, node);
+                }
+            }
         }
 
         return builder.build();
@@ -102,5 +105,18 @@ public class BindingUtils {
         return new NodeTransformSubst(new MapFromBinding(binding));
     }
 
+
+    public static Number getNumberNullable(Binding binding, Var var) {
+        Node node = binding.get(var);
+        Number result = NodeUtils.getNumberNullable(node);
+        return result;
+    }
+
+    /** Get a binding's values for var as a number. Raises an NPE if no number can be obtained */
+    public static Number getNumber(Binding binding, Var var) {
+        Node node = binding.get(var);
+        Number result = NodeUtils.getNumber(node);
+        return result;
+    }
 
 }
