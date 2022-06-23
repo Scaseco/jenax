@@ -13,6 +13,7 @@ import org.aksw.commons.collector.core.AggBuilder;
 import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
+import org.aksw.jenax.arq.util.binding.BindingEnv;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
@@ -22,6 +23,7 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.VariableNotBoundException;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -37,10 +39,10 @@ public class GeoSparqlExAggregators {
 
     private static final Logger logger = LoggerFactory.getLogger(GeoSparqlExAggregators.class);
 
-    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, GeometryWrapper>> ctor) {
+    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<BindingEnv, GeometryWrapper>> ctor) {
         return (aggCustom, distinct) -> {
             Expr expr = aggCustom.getExpr();
-            Aggregator<Binding, NodeValue> coreAgg = ctor.apply(expr, distinct)
+            Aggregator<BindingEnv, NodeValue> coreAgg = ctor.apply(expr, distinct)
                     .finish(geometryWrapper -> {
                         NodeValue r = geometryWrapper == null
                                 ? null
@@ -106,14 +108,14 @@ public class GeoSparqlExAggregators {
         return result;
     }
 
-    public static Aggregator<Binding, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<BindingEnv, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> UnaryUnionOp.union(geoms, geomFactory);
 
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<Binding, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<BindingEnv, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> {
             Iterator<Geometry> it = geoms.iterator();
@@ -136,7 +138,7 @@ public class GeoSparqlExAggregators {
 //        return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
 //    }
 
-    public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<BindingEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
 
@@ -144,7 +146,7 @@ public class GeoSparqlExAggregators {
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<Binding, GeometryWrapper> aggGeometryWrapperCollection(
+    public static Aggregator<BindingEnv, GeometryWrapper> aggGeometryWrapperCollection(
             Expr geomExpr,
             boolean distinct,
             Function<Collection<Geometry>, Geometry> finisher) {
@@ -152,9 +154,11 @@ public class GeoSparqlExAggregators {
         return
             AggBuilder.errorHandler(
                 AggBuilder.inputTransform(
-                    (Binding binding) -> {
+                    (BindingEnv benv) -> {
                         try {
-                            NodeValue nv = geomExpr.eval(binding, null);
+                            Binding b = benv.getBinding();
+                            FunctionEnv env = benv.getFunctionEnv();
+                            NodeValue nv = geomExpr.eval(b, env);
                             return GeometryWrapper.extract(nv);
                         } catch (VariableNotBoundException e) {}
                         return null;

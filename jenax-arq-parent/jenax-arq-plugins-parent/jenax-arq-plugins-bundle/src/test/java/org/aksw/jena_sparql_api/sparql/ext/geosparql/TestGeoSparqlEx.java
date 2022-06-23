@@ -168,6 +168,12 @@ public class TestGeoSparqlEx {
         Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
     }
 
+    @Test
+    public void testCollectExprEmpty() {
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(geof:centroid(?geom)) AS ?c) { VALUES (?s ?geom) { (<urn:s> 'POINT(0 0)'^^geo:wktLiteral) }  } group by ?s");
+        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+    }
+
 //	@Test
 //	public void testNearestPoints() {
 //		String queryStr = "PREFIX fn: <http://www.opengis.net/ont/geosparql#> SELECT ?g { BIND(fn:nearestPoints('POINT (0 0)', 'POINT (1 1)') AS ?g) }";

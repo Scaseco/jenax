@@ -12,6 +12,7 @@ import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccAdapterJena;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
+import org.aksw.jenax.arq.util.binding.BindingEnv;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.apache.jena.graph.Node;
@@ -21,16 +22,17 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.VariableNotBoundException;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SparqlLibArrayAgg {
     private static final Logger logger = LoggerFactory.getLogger(SparqlLibArrayAgg.class);
 
-    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, NodeList>> ctor) {
+    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<BindingEnv, NodeList>> ctor) {
         return (aggCustom, distinct) -> {
             Expr expr = aggCustom.getExpr();
-            Aggregator<Binding, NodeValue> coreAgg = ctor.apply(expr, distinct)
+            Aggregator<BindingEnv, NodeValue> coreAgg = ctor.apply(expr, distinct)
                     .finish(nodeList -> {
                         Node node = nodeList == null
                                 ? null
@@ -50,17 +52,19 @@ public class SparqlLibArrayAgg {
     }
 
 
-    public static Aggregator<Binding, NodeList> aggNodeList(
+    public static Aggregator<BindingEnv, NodeList> aggNodeList(
             Expr expr,
             boolean distinct) {
 
         return
             AggBuilder.errorHandler(
                 AggBuilder.inputTransform(
-                    (Binding binding) -> {
+                    (BindingEnv benv) -> {
                         Node node = null;
                         try {
-                            NodeValue nv = expr.eval(binding, null);
+                            Binding b = benv.getBinding();
+                            FunctionEnv env = benv.getFunctionEnv();
+                            NodeValue nv = expr.eval(b, env);
                             node = nv == null ? null : nv.asNode();
                         } catch (VariableNotBoundException e) {
                             // Ignored
