@@ -22,8 +22,8 @@ import org.apache.jena.riot.out.NodeFormatterNT;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerText;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 
 import com.google.common.collect.Iterables;
@@ -235,5 +235,15 @@ public class NodeUtils {
         }
 
         return segments;
+    }
+
+
+    /** Returns the default graph for null or a blank string or 'default' (inoring case),
+     * otherwise creates an IRI from the argument */
+    public static Node createGraphNode(String graphName) {
+        Node result = graphName == null || graphName.isBlank() || graphName.equalsIgnoreCase("default")
+                ? Quad.defaultGraphIRI
+                : NodeFactory.createURI(graphName);
+        return result;
     }
 }

@@ -25,25 +25,25 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
 
-	/** If key is null then return null.
-	 *  If key is a variable then return the value in the binding - otherwise return the key itself */
-	public static Node getValue(Binding binding, Node key) {
-		Node result = key == null
-				? null
-				: key.isVariable()
-					? binding.get((Var)key)
-					: key;
-		return result;
-	}
+    /** If key is null then return null.
+     *  If key is a variable then return the value in the binding - otherwise return the key itself */
+    public static Node getValue(Binding binding, Node key) {
+        Node result = key == null
+                ? null
+                : key.isVariable()
+                    ? binding.get((Var)key)
+                    : key;
+        return result;
+    }
 
-	/** Extends {@link #getValue(Binding, Node)} such that if it returns null then a default value is returned instead */
-	public static Node getValue(Binding binding, Node key, Node defaultWhenNull) {
-		Node result = getValue(binding, key);
-		if (result == null) {
-			result = defaultWhenNull;
-		}
-		return result;
-	}
+    /** Extends {@link #getValue(Binding, Node)} such that if it returns null then a default value is returned instead */
+    public static Node getValue(Binding binding, Node key, Node defaultWhenNull) {
+        Node result = getValue(binding, key);
+        if (result == null) {
+            result = defaultWhenNull;
+        }
+        return result;
+    }
 
 //    public static Binding clone(Binding binding) {
 //        Binding result = new BindingHashMap();
