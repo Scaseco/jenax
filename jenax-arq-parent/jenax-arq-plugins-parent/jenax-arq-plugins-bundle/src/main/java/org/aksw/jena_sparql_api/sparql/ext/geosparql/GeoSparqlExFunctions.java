@@ -10,9 +10,7 @@ import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -95,7 +93,7 @@ public class GeoSparqlExFunctions {
                 OverlayNGRobust.union(tmp));
         return result;
     }
-    
+
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
 //	public static Geometry centroid(
 //			Geometry geom) {
@@ -131,6 +129,33 @@ public class GeoSparqlExFunctions {
     public static double lat(GeometryWrapper geom) {
         return y(GeometryWrapperUtils.toWgs84(geom).getParsingGeometry());
     }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double length(GeometryWrapper geom) {
+        Geometry g = geom.getParsingGeometry();
+        if (g instanceof LineString || g instanceof MultiLineString) {
+            return g.getLength();
+        } else {
+            return 0;
+        }
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double perimeter(GeometryWrapper geom) {
+        Geometry g = geom.getParsingGeometry();
+        if (g instanceof Polygon || g instanceof MultiPolygon) {
+            return g.getLength();
+        } else {
+            return 0;
+        }
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double area(GeometryWrapper geom) {
+        Geometry g = geom.getParsingGeometry();
+        return g.getArea();
+    }
+
 
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
 //	public static double lat(Geometry geom) {
