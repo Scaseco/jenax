@@ -10,6 +10,8 @@ import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.locationtech.jts.algorithm.hull.ConcaveHull;
+import org.locationtech.jts.algorithm.hull.ConcaveHullOfPolygons;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
@@ -155,6 +157,36 @@ public class GeoSparqlExFunctions {
         Geometry g = geom.getParsingGeometry();
         return g.getArea();
     }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static boolean isCollection(GeometryWrapper geom) {
+        Geometry g = geom.getParsingGeometry();
+        String type = g.getGeometryType();
+        return "GEOMETRYCOLLECTION".equalsIgnoreCase(type)
+                || "COMPOUNDCURVE".equalsIgnoreCase(type)
+                || type.startsWith("MULTI");
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper concaveHull(GeometryWrapper geom,
+                                      double lengthRatio,
+                                      @DefaultValue("false") boolean allowHoles) {
+        Geometry g = geom.getParsingGeometry();
+        Geometry hull = ConcaveHull.concaveHullByLengthRatio(g, lengthRatio, allowHoles);
+        return GeometryWrapperUtils.createFromPrototype(geom, hull);
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper concaveHullOfPolygons(GeometryWrapper geom,
+                                                        double lengthRatio,
+                                                        @DefaultValue("false") boolean isTight,
+                                                        @DefaultValue("false") boolean allowHoles) {
+        Geometry g = geom.getParsingGeometry();
+        Geometry hull = ConcaveHullOfPolygons.concaveHullByLengthRatio(g, lengthRatio, isTight, allowHoles);
+        return GeometryWrapperUtils.createFromPrototype(geom, hull);
+    }
+
+
 
 
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)

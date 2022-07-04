@@ -57,7 +57,7 @@
 
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
-		<jts.version>1.18.1</jts.version>
+		<jts.version>1.19.0</jts.version>
 
 		<gson.version>2.9.0</gson.version>
 
