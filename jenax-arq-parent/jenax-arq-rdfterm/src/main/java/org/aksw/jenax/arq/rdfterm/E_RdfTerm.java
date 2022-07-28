@@ -22,15 +22,15 @@ import org.apache.jena.sparql.sse.Tags;
 
 /**
  * A four-argument SPARQL extension function for building RDF terms.
- * 
+ *
  * @author raven
  *
  */
 public class E_RdfTerm
     extends ExprFunctionN
 {
-	public static final String tagRdfTerm = "http://aksw.org/jena/rdfTerm";
-	
+    public static final String tagRdfTerm = "http://aksw.org/jena/rdfTerm";
+
     public static final NodeValue typeVar = NodeValue.makeInteger(-1);
     public static final NodeValue typeBlank = NodeValue.makeInteger(0);
     public static final NodeValue typeUri = NodeValue.makeInteger(1);
@@ -174,67 +174,67 @@ public class E_RdfTerm
         return new E_RdfTerm(args.get(0), args.get(1), args.get(2), args.get(3));
     }
 
-    
+
     public static E_RdfTerm expand(Expr expr) {
-    	E_RdfTerm result;
-    	if(expr.isFunction()) {
-    		ExprFunction fn = expr.getFunction();
-    		result = expand(fn);
-    	} else {
-    		result = null;
-    	}
-    	
-    	return result;
+        E_RdfTerm result;
+        if(expr.isFunction()) {
+            ExprFunction fn = expr.getFunction();
+            result = expand(fn);
+        } else {
+            result = null;
+        }
+
+        return result;
     }
 
-    public static E_RdfTerm expand(ExprFunction fn) {    	
-    	E_RdfTerm result;
+    public static E_RdfTerm expand(ExprFunction fn) {
+        E_RdfTerm result;
 
-		String symbol = Optional.ofNullable(fn.getFunctionSymbol())
-				.map(FunctionLabel::getSymbol)
-				.orElse(null);
-		
+        String symbol = Optional.ofNullable(fn.getFunctionSymbol())
+                .map(FunctionLabel::getSymbol)
+                .orElse(null);
+
         if(Tags.tagUri.equals(symbol) ||
            Tags.tagIri.equals(symbol)) {
             result = createUri(fn.getArg(1));
         } else if (Tags.tagStrLang.equals(symbol)) {
-        	result = createPlainLiteral(fn.getArg(1), fn.getArg(2));
-        } else if (Tags.tagStrDatatype.equals(symbol)) { 
-        	result = createTypedLiteral(fn.getArg(1), fn.getArg(2));
+            result = createPlainLiteral(fn.getArg(1), fn.getArg(2));
+        } else if (Tags.tagStrDatatype.equals(symbol)) {
+            result = createTypedLiteral(fn.getArg(1), fn.getArg(2));
         } else if (Tags.tagBNode.equals(symbol)) {
-        	result = createBlankNode(fn.getArg(1));
+            result = createBlankNode(fn.getArg(1));
         } else if(tagRdfTerm.equals(symbol)) {
             result = new E_RdfTerm(
                     fn.getArg(1), fn.getArg(2), fn.getArg(3), fn.getArg(4));
-    	} else {
-    		result = null;
-    	}
+        } else {
+            result = null;
+        }
 
         return result;
     }
-    
-    
-	public static ExprFunction normalize(E_RdfTerm rdfTerm) {
-		int termTypeId = rdfTerm.getType().getConstant().getDecimal().intValue();
 
-		ExprFunction result;
-		switch(termTypeId) {
-		case 0: // blank node
-			result = new E_BNode(rdfTerm.getLexicalValue());
-			break;
-		case 1: // uri
-			result = new E_URI(rdfTerm.getLexicalValue());
-			break;
-		case 2: // plain literal
-			result = new E_StrLang(rdfTerm.getLexicalValue(), rdfTerm.getLanguageTag());
-			break;
-		case 3: // typed literal
-			result = new E_StrDatatype(rdfTerm.getLexicalValue(), rdfTerm.getDatatype());
-			break;
-		default:
-			throw new RuntimeException("Unsupported term type: " + rdfTerm);
-		}
-	
-		return result;
-	}
+
+    public static ExprFunction normalize(E_RdfTerm rdfTerm) {
+        int termTypeId = rdfTerm.getType().getConstant().getDecimal().intValue();
+
+        ExprFunction result;
+        switch(termTypeId) {
+        case 0: // blank node
+            result = (ExprFunction)E_BNode.create(rdfTerm.getLexicalValue());
+            break;
+        case 1: // uri
+            result = new E_URI(rdfTerm.getLexicalValue());
+            break;
+        case 2: // plain literal
+            result = new E_StrLang(rdfTerm.getLexicalValue(), rdfTerm.getLanguageTag());
+            break;
+        case 3: // typed literal
+            result = new E_StrDatatype(rdfTerm.getLexicalValue(), rdfTerm.getDatatype());
+            break;
+        default:
+            throw new RuntimeException("Unsupported term type: " + rdfTerm);
+        }
+
+        return result;
+    }
 }
