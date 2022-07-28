@@ -25,6 +25,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 
 
+/** Use PathPP from the datapath module - it has all the java.nio.Path methods
+ * The static method s though need porting */
+@Deprecated
 public class SimplePath
     implements Comparable<SimplePath>
 {
@@ -76,9 +79,11 @@ public class SimplePath
     }
 
     public static Path toPropertyPath(SimplePath path) {
-        org.apache.jena.sparql.path.Path result = null;
+        return toPropertyPath(path.getSteps());
+    }
 
-        List<P_Path0> steps = path.getSteps();
+    public static Path toPropertyPath(List<P_Path0> steps) {
+        org.apache.jena.sparql.path.Path result = null;
         for(int i = 0; i < steps.size(); ++i) {
             P_Path0 contrib = steps.get(i);
             //org.apache.jena.sparql.path.Path contrib = step;//toJena(step);

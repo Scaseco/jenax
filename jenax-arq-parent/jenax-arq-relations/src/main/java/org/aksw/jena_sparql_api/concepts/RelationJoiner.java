@@ -131,6 +131,10 @@ public class RelationJoiner {
         //return this;
     }
 
+    public Relation with(UnaryRelation ur) {
+        return with(ur, ur.getVar());
+    }
+
 
     // This API for this method is somewhat hacky as it conflates joining with renaming; it should be revised.
     // Maybe introduce some generic operation class?

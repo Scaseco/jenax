@@ -22,7 +22,7 @@ import org.apache.jena.sparql.util.ExprUtils;
 
 /**
  * Implementation of {@link PathOps} which allows for using the path machinery
- *e used should be "?x".
+ * By convention, the single variable used in constraint expressions should be "?x".
  *
  * Allows paths of the form
  * / ?x IN (a b c) / REGEX(?x, "foo") / ?x = TRUE / ...
@@ -99,10 +99,10 @@ public class PathOpsPE
     public UnaryXExpr getParentToken() {
         return PARENT;
     }
-    
+
     @Override
     public String toStringRaw(Object path) {
-    	return toString((PathPE)path);
+        return toString((PathPE)path);
     }
 
     @Override

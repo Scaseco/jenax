@@ -8,10 +8,31 @@ import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.connection.datasource.RdfDataSourceDelegateBase;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
+import org.apache.jena.system.Txn;
 
 public class RdfDataSources {
+
+    /** Execute a query and invoke a function on the response.
+     * Upon returning the internally freshly obtained connection and query execution are closed so
+     * the result must be detached from those resources.
+     */
+    public static <T> T exec(RdfDataSource dataSource, Query query, Function<? super QueryExecution, T> qeToResult) {
+        Object[] tmp = new Object[] { null };
+        try (RDFConnection conn = dataSource.getConnection()) {
+            Txn.executeRead(conn, () -> {
+                try (QueryExecution qe = conn.query(query)) {
+                    tmp[0] = qeToResult.apply(qe);
+                }
+            });
+        }
+        @SuppressWarnings("unchecked")
+        T result = (T)tmp[0];
+        return result;
+    }
 
     /** Reads the 'engine' attribute from the options (if absent defaults to 'mem')
      *  and instantiates the appropriate data source - if possible */
