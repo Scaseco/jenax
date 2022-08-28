@@ -64,7 +64,7 @@
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-process-pipes</artifactId>
 		</dependency>
-
+	
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>
