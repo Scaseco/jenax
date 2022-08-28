@@ -21,6 +21,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.primitives.Ints;
 
 /**
+ * FIXME This class should be removed because it is superseded by BufferOverReadableChannel in aksw-commons-io!
+ *
  * Implementation of a byte array that caches data in buckets from
  * an InputStream.
  *
