@@ -224,7 +224,6 @@ public class RDFLinkDelegateWithWorkerThread
         }
     }
 
-
     class UpdateExecDelegate
         implements UpdateExec {
 
@@ -328,7 +327,6 @@ public class RDFLinkDelegateWithWorkerThread
         }
     }
 
-
     class QueryExecDelegate
         implements QueryExec
     {
@@ -429,8 +427,6 @@ public class RDFLinkDelegateWithWorkerThread
         }
     }
 
-
-
     static class RowSetDelegate
         extends IteratorDelegateWithWorkerThread<Binding, RowSet>
         implements RowSet
@@ -456,9 +452,4 @@ public class RDFLinkDelegateWithWorkerThread
             return helper.submit(() -> getDelegate().getRowNumber());
         }
     }
-
-
 }
-
-
-
