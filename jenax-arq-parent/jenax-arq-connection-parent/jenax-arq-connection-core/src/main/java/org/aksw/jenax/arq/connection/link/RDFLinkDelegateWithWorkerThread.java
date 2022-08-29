@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.connection.link;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
@@ -11,6 +12,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -20,9 +22,12 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.QueryExecMod;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateRequest;
 
 public class RDFLinkDelegateWithWorkerThread
@@ -99,6 +104,7 @@ public class RDFLinkDelegateWithWorkerThread
         return submit(() -> new QueryExecDelegate(getDelegate().query(query)));
     }
 
+    // TODO The builder needs to be wrapped!
     @Override
     public QueryExecBuilder newQuery() {
         return submit(() -> getDelegate().newQuery());
@@ -106,12 +112,13 @@ public class RDFLinkDelegateWithWorkerThread
 
     @Override
     public UpdateExecBuilder newUpdate() {
-    	return new UpdateExecBuilderDelegateBase(getDelegate().newUpdate()) {
-    		@Override
-    		public void execute() {
-    			submit(() -> delegate.execute());
-    		}
-    	};
+        return new UpdateExecBuilderDelegateBase(getDelegate().newUpdate()) {
+            @Override
+            public UpdateExec build() {
+                UpdateExec tmp = submit(() -> delegate.build());
+                return new UpdateExecDelegate(tmp);
+            }
+        };
     }
 
     @Override
@@ -218,7 +225,108 @@ public class RDFLinkDelegateWithWorkerThread
     }
 
 
+    class UpdateExecDelegate
+        implements UpdateExec {
 
+        protected UpdateExec delegate;
+
+        public UpdateExecDelegate(UpdateExec delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void execute() {
+            submit(() -> delegate.execute());
+        }
+    }
+
+    class QueryExecBuilderDelegate
+        implements QueryExecBuilder {
+
+        protected QueryExecBuilder delegate;
+
+        public QueryExecBuilderDelegate(QueryExecBuilder delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public QueryExecMod initialTimeout(long timeout, TimeUnit timeUnit) {
+            submit(() -> delegate.initialTimeout(timeout, timeUnit));
+            return this;
+        }
+
+        @Override
+        public QueryExecMod overallTimeout(long timeout, TimeUnit timeUnit) {
+            submit(() -> delegate.overallTimeout(timeout, timeUnit));
+            return this;
+        }
+
+        @Override
+        public Context getContext() {
+            return submit(() -> delegate.getContext());
+        }
+
+        @Override
+        public QueryExecBuilder query(Query query) {
+            submit(() -> delegate.query(query));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder query(String queryString) {
+            submit(() -> delegate.query(queryString));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder query(String queryString, Syntax syntax) {
+            submit(() -> delegate.query(queryString, syntax));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder set(Symbol symbol, Object value) {
+            submit(() -> delegate.set(symbol, value));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder set(Symbol symbol, boolean value) {
+            submit(() -> delegate.set(symbol, value));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder context(Context context) {
+            submit(() -> delegate.context(context));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder substitution(Binding binding) {
+            submit(() -> delegate.substitution(binding));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder substitution(Var var, Node value) {
+            submit(() -> delegate.substitution(var, value));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder timeout(long value, TimeUnit timeUnit) {
+            submit(() -> delegate.timeout(value, timeUnit));
+            return this;
+        }
+
+        @Override
+        public QueryExec build() {
+            return submit(() -> new QueryExecDelegate(delegate.build()));
+        }
+    }
 
 
     class QueryExecDelegate
@@ -319,7 +427,6 @@ public class RDFLinkDelegateWithWorkerThread
         public boolean isClosed() {
             return submit(() -> getDelegate().isClosed());
         }
-
     }
 
 

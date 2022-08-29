@@ -100,16 +100,16 @@ public class SparqlStmtUtils {
     }
 
     /** Check for this specific QueryParseException - often occurs when attempting to parse a file name */
-	public static boolean isEncounteredSlashException(Throwable t) {
+    public static boolean isEncounteredSlashException(Throwable t) {
         boolean result = false;
-		if(t instanceof QueryParseException) {
+        if(t instanceof QueryParseException) {
             QueryParseException qpe = (QueryParseException)t;
             result = Optional.ofNullable(qpe.getMessage())
                     .orElse("").contains("Encountered: \"/\"");
         }
 
-		return result;
-	}
+        return result;
+    }
 
 
     /**
@@ -161,11 +161,11 @@ public class SparqlStmtUtils {
      */
     public static SparqlStmt optimizePrefixes(SparqlStmt stmt, PrefixMapping globalPm) {
         if (stmt.isParsed()) {
-	    	if(stmt.isQuery()) {
-	            QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
-	        } else if(stmt.isUpdateRequest()) {
-	            UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
-	        }
+            if(stmt.isQuery()) {
+                QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
+            } else if(stmt.isUpdateRequest()) {
+                UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
+            }
         }
         return stmt;
     }
@@ -407,11 +407,11 @@ public class SparqlStmtUtils {
 
 
     public static SPARQLResultEx execAny(QueryExecution qe, Query q) {
-    	SPARQLResultEx result;
+        SPARQLResultEx result;
 
-    	if (q == null) {
-    		q = qe.getQuery();
-    	}
+        if (q == null) {
+            q = qe.getQuery();
+        }
 
         if (q.isConstructQuad()) {
             Iterator<Quad> it = qe.execConstructQuads();
@@ -429,8 +429,8 @@ public class SparqlStmtUtils {
             Iterator<JsonObject> it = qe.execJsonItems();
             result = new SPARQLResultEx(it, qe::close);
         } else if (q.isAskType()) {
-        	boolean v = qe.execAsk();
-        	result = new SPARQLResultEx(v);
+            boolean v = qe.execAsk();
+            result = new SPARQLResultEx(v);
         } else {
             throw new RuntimeException("Unsupported query type");
         }
@@ -455,9 +455,9 @@ public class SparqlStmtUtils {
             QueryExecution qe = conn.query(q);
             Context cxt = qe.getContext();
             if(cxt != null) {
-            	if (cxtMutator != null) {
-            		cxtMutator.accept(cxt);
-            	}
+                if (cxtMutator != null) {
+                    cxtMutator.accept(cxt);
+                }
 
                 cxt.set(symConnection, conn);
             }
@@ -467,9 +467,9 @@ public class SparqlStmtUtils {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 
             // conn.update(u);
-        	Context cxt = ARQ.getContext().copy();
-        	cxtMutator.accept(cxt);
-        	conn.newUpdate().update(u).context(cxt).execute();
+            Context cxt = ARQ.getContext().copy();
+            cxtMutator.accept(cxt);
+            conn.newUpdate().update(u).context(cxt).execute();
 
             result = SPARQLResultEx.createUpdateType();
         }
