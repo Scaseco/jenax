@@ -28,29 +28,26 @@ public class PF_ArrayExplode
     @Override
     public QueryIterator exec(Binding binding, PropFuncArg argSubject, Node predicate, PropFuncArg argObject,
             ExecutionContext execCxt) {
-        Optional<BindingBuilder> bb;
+        BindingBuilder bb = null;
 
         // This pf's subject component must evaluate concrete array
         Node s = BindingUtils.getValue(binding, argSubject.getArg());
         if (s != null && s.isLiteral() && s.getLiteralValue() instanceof NodeList) {
-            bb = Optional.of(BindingBuilder.create(binding));
+            bb = BindingBuilder.create(binding);
             NodeList nodes = (NodeList)s.getLiteralValue();
             List<Node> os = PropFuncArgUtils.getAsList(argObject);
-            bb = Optional.of(BindingBuilder.create(binding));
             int n = nodes.size();
             for (int i = 0; i < n; ++i) {
                 final int index = i;
-                bb = BindingUtils.processArg(bb, os, i, () -> {
+                bb = BindingUtils.add(bb, os, i, () -> {
                     Node r = index < n ? nodes.get(index) : null;
                     return r;
                 });
             }
-        } else {
-            bb = Optional.empty();
         }
 
-        QueryIterator result = bb.isPresent()
-                ? IterLib.result(bb.get().build(), execCxt)
+        QueryIterator result = bb != null
+                ? IterLib.result(bb.build(), execCxt)
                 : IterLib.noResults(execCxt);
         return result;
     }

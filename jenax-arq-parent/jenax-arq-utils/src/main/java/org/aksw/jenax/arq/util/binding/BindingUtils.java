@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -26,20 +25,32 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
 
-    public static Optional<BindingBuilder> processArg(Optional<BindingBuilder> builderOpt, List<Node> nodes, int i, Supplier<Node> valueSupplier) {
-        Optional<BindingBuilder> result = builderOpt;
-        if (builderOpt.isPresent()) {
-            BindingBuilder builder = builderOpt.get();
+    /**
+     * Add a mapping to the given binding builder based on the i-th entry in a list of nodes
+     * and a supplier of values.
+     * If adding a binding on that basis fails then the result is null.
+     * If the builder is null then the value supplier will never be invoked.
+     * If the i-th node is a concrete value then the result is only non-null if the value supplier
+     * yields an equivalent node.
+     *
+     * @param builder The binding builder. May be null.
+     * @param nodes A list of non-null nodes which may be variables or concrete values.
+     * @param i The index of the node/variable to use from the list of nodes
+     * @param valueSupplier
+     * @return
+     */
+    public static BindingBuilder add(BindingBuilder builder, List<Node> nodes, int i, Supplier<Node> valueSupplier) {
+        BindingBuilder result = builder;
+        if (builder != null) {
             int n = nodes.size();
             if (i < n) {
                 Node key = nodes.get(i);
-
                 Node value = valueSupplier.get();
                 if (value != null) {
                     if (key.isVariable()) {
                         builder.add((Var)key, value);
                     } else if (!Objects.equals(key, value)) {
-                        result = Optional.empty();
+                        result = null;
                     }
                 }
             }
@@ -153,17 +164,30 @@ public class BindingUtils {
     }
 
 
-    public static Number getNumberNullable(Binding binding, Var var) {
-        Node node = binding.get(var);
+    public static Number getNumberNullable(Binding binding, Node key) {
+        Node node = BindingUtils.getValue(binding, key);
         Number result = NodeUtils.getNumberNullable(node);
         return result;
     }
 
     /** Get a binding's values for var as a number. Raises an NPE if no number can be obtained */
-    public static Number getNumber(Binding binding, Var var) {
-        Node node = binding.get(var);
+    public static Number getNumber(Binding binding, Node key) {
+        Node node = BindingUtils.getValue(binding, key);
         Number result = NodeUtils.getNumber(node);
         return result;
     }
 
+//    public static Number getNumberNullable(Binding binding, Var var) {
+//        Node node = binding.get(var);
+//        Number result = NodeUtils.getNumberNullable(node);
+//        return result;
+//    }
+//
+//    /** Get a binding's values for var as a number. Raises an NPE if no number can be obtained */
+//    public static Number getNumber(Binding binding, Var var) {
+//        Node node = binding.get(var);
+//        Number result = NodeUtils.getNumber(node);
+//        return result;
+//    }
+//
 }

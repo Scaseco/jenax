@@ -176,6 +176,19 @@ public class TestGeoSparqlEx {
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
+    @Test
+    public void testDbScan() {
+        String actual = MoreQueryExecUtils.evalQueryToLexicalForm(String.join("\n",
+                "SELECT DISTINCT ?clusterId {",
+                "  BIND(array:of(",
+                "    array:of('x', spatial-f:convertLatLon(1, 1)),",
+                "    array:of('y', spatial-f:convertLatLon(2, 2))",
+                "  ) AS ?arr)",
+                "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?member)",
+                "}"));
+        Assert.assertEquals("0", actual);
+    }
+
 //	@Test
 //	public void testNearestPoints() {
 //		String queryStr = "PREFIX fn: <http://www.opengis.net/ont/geosparql#> SELECT ?g { BIND(fn:nearestPoints('POINT (0 0)', 'POINT (1 1)') AS ?g) }";
