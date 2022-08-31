@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.functionbinder;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -92,22 +93,39 @@ public class FunctionAdapter
 
     @Override
     public NodeValue exec(Binding binding, ExprList args, String uri, FunctionEnv env) {
-        Object[] javaArgs = new Object[params.length];
+        int argCount = args.size();
+        int paramCount = params.length;
+        Object[] javaArgs = new Object[paramCount];
+        boolean isVarArgs = method.isVarArgs();
+        int varArgOffset = paramCount - 1;
 
-        int n = args.size();
-        if (n < mandatoryArgsCount || n > params.length) {
+        if (argCount < mandatoryArgsCount || (argCount > paramCount && !isVarArgs)) {
             throw new SSE_ExprBuildException(
                     String.format("at least %d and at most %d args expected but %d provided",
-                                mandatoryArgsCount, params.length, n));
+                                mandatoryArgsCount, params.length, argCount));
         }
 
-        for (int i = 0; i < params.length; ++i) {
+        Param lastParam = paramCount > 0 ? params[varArgOffset] : null;
+        Object javaVarArgsArr = null;
+        int varArgCount = 0;
+        if (isVarArgs) {
+            varArgCount = Math.max(0, argCount - paramCount + 1);
+            javaVarArgsArr = Array.newInstance(lastParam.getParamClass().getComponentType(), varArgCount);
+            javaArgs[paramCount - 1] = javaVarArgsArr;
+        }
+
+        for (int i = 0; i < Math.max(argCount, paramCount); ++i) {
             Object javaArg;
-            Param param = params[i];
+
+            Param param = i < paramCount ? params[i] : lastParam;
             Class<?> inputClass = param.getInputClass();
             Class<?> paramType = param.getParamClass();
+            boolean isInVarArgs = isVarArgs && i >= varArgOffset;
+            if (isInVarArgs) {
+                paramType = paramType.getComponentType();
+            }
 
-            if (i < n) {
+            if (i < argCount) {
                 Expr expr = args.get(i);
 
                 // Attempt to convert the NodeValue's java object if its type does not match the
@@ -139,7 +157,11 @@ public class FunctionAdapter
                 javaArg = param.defaultValue;
             }
 
-            javaArgs[i] = javaArg;
+            if (isInVarArgs) {
+                Array.set(javaVarArgsArr, i - varArgOffset, javaArg);
+            } else {
+                javaArgs[i] = javaArg;
+            }
         }
 
         Object val;

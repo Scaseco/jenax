@@ -6,6 +6,7 @@ import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sys.JenaSystem;
 import org.junit.Assert;
@@ -14,6 +15,21 @@ import org.junit.Test;
 public class TestSparqlLibArray {
 
     static { JenaSystem.init(); }
+
+    @Test
+    public void testArrayOf() {
+        Node actual = MoreQueryExecUtils.evalQueryToNode("SELECT (array:of(1, 'hi') AS ?x) { }");
+        Node expected = NodeFactory.createLiteralByValue(RDFDatatypeNodeList.INSTANCE.parse("1 'hi'"), RDFDatatypeNodeList.INSTANCE);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testArrayExplode() {
+        Binding actual = MoreQueryExecUtils.evalQueryToBinding("SELECT ?a ?b { BIND(array:of(1, 'hi') AS ?x) ?x array:explode(?a ?b) }");
+        Binding expected = MoreQueryExecUtils.evalQueryToBinding("SELECT (1 AS ?a) ('hi' AS ?b) { }");
+        Assert.assertEquals(expected, actual);
+    }
+
 
     @Test
     public void testArrayAggCollectNonNull() {

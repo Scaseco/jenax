@@ -7,9 +7,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeUtils;
@@ -17,13 +19,34 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
-import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
+
+    public static Optional<BindingBuilder> processArg(Optional<BindingBuilder> builderOpt, List<Node> nodes, int i, Supplier<Node> valueSupplier) {
+        Optional<BindingBuilder> result = builderOpt;
+        if (builderOpt.isPresent()) {
+            BindingBuilder builder = builderOpt.get();
+            int n = nodes.size();
+            if (i < n) {
+                Node key = nodes.get(i);
+
+                Node value = valueSupplier.get();
+                if (value != null) {
+                    if (key.isVariable()) {
+                        builder.add((Var)key, value);
+                    } else if (!Objects.equals(key, value)) {
+                        result = Optional.empty();
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
 
     /** If key is null then return null.
      *  If key is a variable then return the value in the binding - otherwise return the key itself */

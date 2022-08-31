@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aksw.commons.collections.IteratorUtils;
 import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.graph.Node;
@@ -16,6 +17,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -55,6 +57,18 @@ public class MoreQueryExecUtils {
         RDFNode rdfNode = QueryExecUtils.getExactlyOne(query.toString(), DatasetFactory.empty());
 
         Node result = rdfNode == null ? null : rdfNode.asNode();
+        return result;
+    }
+
+    public static Binding evalQueryToBinding(String queryStr) {
+        Query query = new Query();
+        query.getPrefixMapping().setNsPrefixes(createTestPrefixMapping());
+        QueryFactory.parse(query, queryStr, null, Syntax.syntaxARQ);
+        Binding result = null;
+        try (QueryExecution qe = QueryExecutionFactory.create(query, DatasetFactory.empty())) {
+            RowSet rs = RowSet.adapt(qe.execSelect());
+            result = IteratorUtils.expectZeroOrOneItems(rs);
+        }
         return result;
     }
 

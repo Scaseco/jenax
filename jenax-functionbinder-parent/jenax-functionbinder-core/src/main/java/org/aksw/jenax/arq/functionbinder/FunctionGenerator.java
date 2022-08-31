@@ -1,10 +1,11 @@
 package org.aksw.jenax.arq.functionbinder;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.aksw.commons.collections.IterableUtils;
@@ -13,6 +14,7 @@ import org.aksw.commons.util.convert.ConvertFunctionRawImpl;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.aksw.commons.util.convert.ConverterRegistryImpl;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
+import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -180,14 +182,19 @@ public class FunctionGenerator {
         for (int i = 0; i < n; ++i) {
             Annotation[] as = pas[i];
 
-
-            DefaultValue defaultValueAnnotation = IterableUtils.expectZeroOrOneItems(
-                    Iterables.filter(Arrays.asList(as), DefaultValue.class));
             Class<?> paramClass = pts[i];
 
-            Class<?> inputClass = javaToRdfTypeMap.get(paramClass);
-            Class<?> rdfClass = inputClass != null ? inputClass : paramClass;
-            ConvertFunctionRaw inputConverter = inputClass == null ? null : getPreConvert(inputClass, paramClass);
+            Class<?> componentClass;
+            if (paramClass.isArray()) {
+                // Assignment expressed using 'if' in order to ease debugging of the array case
+                componentClass = paramClass.getComponentType();
+            } else {
+                componentClass = paramClass;
+            }
+
+            Class<?> internalJavaType = javaToRdfTypeMap.get(componentClass);
+            Class<?> rdfClass = internalJavaType != null ? internalJavaType : componentClass;
+            ConvertFunctionRaw inputConverter = internalJavaType == null ? null : getPreConvert(internalJavaType, componentClass);
 
             // Consult override map first because some datatypes may lack appropriate metadata
             String datatypeIri = typeByClassOverrides.get(rdfClass);
@@ -199,14 +206,39 @@ public class FunctionGenerator {
             // RDFDatatype dtype = typeMapper.getTypeByClass(rdfClass);
 
             // If the pre-conversion already yields Node then we don't need an rdf datatype
-            boolean isNodeType = inputClass != null && Node.class.isAssignableFrom(inputClass);
+            boolean isNodeType = rdfClass != null && Node.class.isAssignableFrom(rdfClass);
 
             if (dtype == null) {
                 if (!isNodeType) {
-                    throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s derived from %2$s", inputClass, paramClass));
+                    throw new RuntimeException(String.format("TypeMapper does not contain an entry for the java class %1$s derived from %2$s", internalJavaType, paramClass));
                 }
             }
 
+            // TODO This part would have to be finished for generic NodeList to array conversion
+            if (false && paramClass.isArray()) {
+                // Set up an input converter from NodeList to the java array
+                new ConvertFunctionRawImpl(NodeList.class, paramClass, in -> {
+                    NodeList nodeList = (NodeList)in;
+                    Object xr = null; // 'r' is an array
+                    if (nodeList != null) {
+                        int xn = nodeList.size();
+                        xr = Array.newInstance(componentClass, n);
+                        int xi = 0;
+                        Iterator<Node> it = nodeList.iterator();
+                        while (it.hasNext()) {
+                            Node node = it.next();
+                            Object value = FunctionAdapter.convert(node, componentClass, converterRegistry);
+                            Array.set(xr, xi, value);
+                            ++xi;
+                        }
+                    }
+                    return paramClass.cast(xr);
+                });
+            }
+
+
+            DefaultValue defaultValueAnnotation = IterableUtils.expectZeroOrOneItems(
+                    Iterables.filter(Arrays.asList(as), DefaultValue.class));
             Object defaultValue = null;
             if (defaultValueAnnotation != null) {
                 if (firstDefaultValueIdx < 0) {
@@ -228,7 +260,7 @@ public class FunctionGenerator {
                 }
             }
 
-            Param param = new Param(paramClass, inputClass, inputConverter, defaultValue);
+            Param param = new Param(paramClass, rdfClass, inputConverter, defaultValue);
             params[i] = param;
         }
 

@@ -19,7 +19,6 @@ import java.util.function.Function;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
-import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
@@ -38,7 +37,6 @@ import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -126,22 +124,22 @@ public class SparqlScriptProcessor {
         }
 
         public String getSourceNamespace() {
-        	return sourceNamespace;
+            return sourceNamespace;
         }
 
         public void setSourceNamespace(String sourceNamespace) {
-        	this.sourceNamespace = sourceNamespace;
+            this.sourceNamespace = sourceNamespace;
         }
 
         public String getSourceLocalName() {
-			return sourceLocalName;
-		}
+            return sourceLocalName;
+        }
 
-		public void setSourceLocalName(String sourceLocalName) {
-			this.sourceLocalName = sourceLocalName;
-		}
+        public void setSourceLocalName(String sourceLocalName) {
+            this.sourceLocalName = sourceLocalName;
+        }
 
-		@Override
+        @Override
         public String toString() {
             String result = argStr +
                     (line == null ? (column == null ? "" : ":") : ":" + line) +
@@ -192,9 +190,11 @@ public class SparqlScriptProcessor {
     }
 
     public SparqlStmtParser getSparqlParser() {
-        return sparqlParserFactory.apply(PrologueUtils.newPrologueAsGiven(globalPrefixes));
-        // return sparqlParserFactory.apply(new Prologue(globalPrefixes));
-//        return sparqlParser;
+        // return sparqlParserFactory.apply(PrologueUtils.newPrologueAsGiven(globalPrefixes));
+
+        // With Jena 4.6.0 the E_IRI function no longer works with relative base IRIs
+        // due to explicit checks
+        return sparqlParserFactory.apply(new Prologue(globalPrefixes));
     }
 
     public static SparqlStmtParser createParserPlain(Prologue prologue) {
@@ -320,30 +320,30 @@ public class SparqlScriptProcessor {
                     TypedInputStream tmpIn = null;
                     Iterator<SparqlStmt> it;
                     try {
-                    	// On NPE we enter the catch block with the fallback strategy
+                        // On NPE we enter the catch block with the fallback strategy
                         tmpIn = Objects.requireNonNull(SparqlStmtUtils.openInputStream(filename));
 
-                    	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
-                    	it.hasNext();
+                        it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
+                        it.hasNext();
 
-                    	logger.debug("Attempting to interpret argument as a file containing sparql statements");
+                        logger.debug("Attempting to interpret argument as a file containing sparql statements");
                     } catch (Exception e) {
-                    	try {
-                    		if (tmpIn != null) {
-                    			tmpIn.close();
-                    		}
-
-	                    	tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
-	                    	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
-	                    	it.hasNext();
-                    	} catch (Exception f) {
-                    		Throwable cause = f.getCause();
-                    		if (!SparqlStmtUtils.isEncounteredSlashException(cause)) {
-                    			throw new RuntimeException(filename + " could not be openend and failed to parse as SPARQL query", f);
-                            } else {
-                            	throw new RuntimeException("Could not parse " + filename, e);
+                        try {
+                            if (tmpIn != null) {
+                                tmpIn.close();
                             }
-                    	}
+
+                            tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
+                            it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
+                            it.hasNext();
+                        } catch (Exception f) {
+                            Throwable cause = f.getCause();
+                            if (!SparqlStmtUtils.isEncounteredSlashException(cause)) {
+                                throw new RuntimeException(filename + " could not be openend and failed to parse as SPARQL query", f);
+                            } else {
+                                throw new RuntimeException("Could not parse " + filename, e);
+                            }
+                        }
                     }
 
                     try (TypedInputStream in = tmpIn) {

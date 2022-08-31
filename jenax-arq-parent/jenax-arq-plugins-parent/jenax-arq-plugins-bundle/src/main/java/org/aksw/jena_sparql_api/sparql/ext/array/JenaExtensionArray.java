@@ -38,6 +38,7 @@ public class JenaExtensionArray {
         binder.registerAll(SparqlLibArrayFn.class);
 
         PropertyFunctionRegistry.get().put(NS + "unnest", new PFF_ArrayUnnest());
+        PropertyFunctionRegistry.get().put(NS + "explode", PF_ArrayExplode.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {

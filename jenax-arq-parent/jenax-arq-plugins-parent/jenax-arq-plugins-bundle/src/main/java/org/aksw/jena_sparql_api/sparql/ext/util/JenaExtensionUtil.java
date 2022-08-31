@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.util;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import org.aksw.jena_sparql_api.sparql.ext.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
@@ -12,6 +13,8 @@ import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
+import org.aksw.jenax.arq.util.node.NodeList;
+import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -73,6 +76,8 @@ public class JenaExtensionUtil {
                     NodeValue::makeNode, NodeValue::asNode)
             .register(Node.class, JsonElement.class,
                     RDFDatatypeJson::extract, RDFDatatypeJson::jsonToNode)
+            .register(Node[].class, NodeList.class,
+                    arr -> new NodeListImpl(Arrays.asList(arr)), list -> list.toArray(new Node[0]))
             ;
 
 
