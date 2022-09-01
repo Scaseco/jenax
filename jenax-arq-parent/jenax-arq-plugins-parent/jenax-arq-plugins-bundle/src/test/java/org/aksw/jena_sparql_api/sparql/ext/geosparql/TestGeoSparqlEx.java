@@ -184,7 +184,7 @@ public class TestGeoSparqlEx {
                 "    array:of('x', spatial-f:convertLatLon(1, 1)),",
                 "    array:of('y', spatial-f:convertLatLon(2, 2))",
                 "  ) AS ?arr)",
-                "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?member)",
+                "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?members)",
                 "}"));
         Assert.assertEquals("0", actual);
     }

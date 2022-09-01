@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.node.NodeList;
+import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
@@ -21,9 +22,9 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
-import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunctionBase;
+import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.FactoryException;
@@ -89,7 +90,7 @@ public class DbscanPf
         int oLength = oList.size();
         if (oLength > 2) {
             // TODO Raise during build
-            throw new QueryExecException("At most 2 output arguments expected");
+            throw new QueryExecException("At most 2 output argument expected");
         }
 
         NodeList arr = (NodeList)BindingUtils.getValue(binding, sList.get(0)).getLiteralValue();
@@ -133,25 +134,56 @@ public class DbscanPf
 
         List<Cluster<CustomClusterable>> clusters = clusterer.cluster(clusterables);
 
+        // Output is a tuple (?clusterId:long ?members:Array)
+
         long idx[] = {0};
         Iterator<Binding> it = clusters.stream().flatMap(cluster -> {
-            long clusterIdx = idx[0]++;
-            BindingBuilder ybb = BindingBuilder.create(binding);
-            ybb = BindingUtils.add(ybb, oList, 0, () -> {
-                return NodeValue.makeInteger(clusterIdx).asNode();
+            long clusterId = idx[0]++;
+
+            BindingBuilder bb = BindingBuilder.create(binding);
+
+            bb = BindingUtils.add(bb, oList, 0, () -> {
+                return NodeFactoryExtra.intToNode(clusterId);
             });
 
-            return Optional.ofNullable(ybb).map(BindingBuilder::build).stream().flatMap(clusterParent -> {
-                return cluster.getPoints().stream().flatMap(member -> {
-                    BindingBuilder xbb = BindingBuilder.create(clusterParent);
-                    xbb = BindingUtils.add(xbb, oList, 1, () -> {
-                        NodeList nl = member.getValue();
-                        return NodeFactory.createLiteralByValue(nl, RDFDatatypeNodeList.INSTANCE);
-                    });
-                    return Optional.ofNullable(xbb).map(BindingBuilder::build).stream();
-                });
+            bb = BindingUtils.add(bb, oList, 1, () -> {
+                List<CustomClusterable> members = cluster.getPoints();
+                NodeList memberList = new NodeListImpl(new ArrayList<>(members.size()));
+
+                for (CustomClusterable member : members) {
+                    memberList.add(NodeFactory.createLiteralByValue(member.getValue(), RDFDatatypeNodeList.INSTANCE));
+                }
+
+                return NodeFactory.createLiteralByValue(memberList, RDFDatatypeNodeList.INSTANCE);
             });
+
+            return Optional.ofNullable(bb).map(BindingBuilder::build).stream();
         }).iterator();
+
+
+        // Old result style returned one binding for each cluster member
+        // However, storing the whole cluster in a single rdf term is easier to work with
+//        if (false) {
+//            long idx[] = {0};
+//            Iterator<Binding> it = clusters.stream().flatMap(cluster -> {
+//                long clusterIdx = idx[0]++;
+//                BindingBuilder ybb = BindingBuilder.create(binding);
+//                ybb = BindingUtils.add(ybb, oList, 0, () -> {
+//                    return NodeValue.makeInteger(clusterIdx).asNode();
+//                });
+//
+//                return Optional.ofNullable(ybb).map(BindingBuilder::build).stream().flatMap(clusterParent -> {
+//                    return cluster.getPoints().stream().flatMap(member -> {
+//                        BindingBuilder xbb = BindingBuilder.create(clusterParent);
+//                        xbb = BindingUtils.add(xbb, oList, 1, () -> {
+//                            NodeList nl = member.getValue();
+//                            return NodeFactory.createLiteralByValue(nl, RDFDatatypeNodeList.INSTANCE);
+//                        });
+//                        return Optional.ofNullable(xbb).map(BindingBuilder::build).stream();
+//                    });
+//                });
+//            }).iterator();
+//        }
 
         QueryIterator result = QueryIterPlainWrapper.create(it, execCxt);
         return result;

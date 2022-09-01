@@ -20,6 +20,12 @@
 			<artifactId>google-maps-services</artifactId>
 		</dependency>
 
+		<!-- dbscan -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
+
 		<!-- Override version of tika -->
 		<dependency>
 			<groupId>org.ow2.asm</groupId>

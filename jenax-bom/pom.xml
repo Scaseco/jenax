@@ -44,10 +44,12 @@
 		<guava.version>31.0.1-jre</guava.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-vfs2.version>2.9.0</commons-vfs2.version>
+		<ver.commons-math>3.6.1</ver.commons-math>
 
-		<slf4j.version>1.8.0-beta4</slf4j.version>
-		<log4j.version>2.17.2</log4j.version>
-		<hadoop.version>3.3.1</hadoop.version>
+		<slf4j.version>1.7.36</slf4j.version>
+		<log4j.version>2.18.0</log4j.version>
+
+		<hadoop.version>3.3.4</hadoop.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.1.0</tika.version>
 
@@ -82,6 +84,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-math3</artifactId>
+			    <version>${ver.commons-math}</version>
+			</dependency>
 
 			<!-- resolves conflicts between jersey, tika and hadoop -->
 			<dependency>
@@ -486,8 +493,11 @@
 				<version>${project.version}</version>
 			</dependency>
 
-
-
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-rx-ops-syscall</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
 
 			<dependency>
 				<groupId>org.topbraid</groupId>
@@ -1142,8 +1152,20 @@
 						<groupId>com.sun.jersey</groupId>
 						<artifactId>jersey-server</artifactId>
 					</exclusion>
-					<!-- <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId>
-						</exclusion> -->
+					<exclusion>
+                                                <groupId>ch.qos.reload4j</groupId>
+                                                <artifactId>reload4j</artifactId>
+                                        </exclusion>
+
+					<exclusion>
+					        <groupId>org.slf4j</groupId>
+                                                <artifactId>slf4j-reload4j</artifactId>
+                                        </exclusion>
+
+					<!--
+					<exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId>
+						</exclusion>
+					-->
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-log4j12</artifactId>

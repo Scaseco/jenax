@@ -2,10 +2,12 @@ package org.aksw.jena_sparql_api.sparql.ext.array;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.PropFuncArgUtils;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.node.NodeList;
@@ -19,9 +21,9 @@ import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
+import org.apache.jena.sparql.pfunction.PropertyFunctionBase;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 
 public class PFF_ArrayUnnest
@@ -33,22 +35,23 @@ public class PFF_ArrayUnnest
     }
 
     public static class PF_ArrayUnnest
-        extends PFuncSimpleAndList {
+        extends PropertyFunctionBase {
         @Override
-        public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg objects,
+        public QueryIterator exec(Binding binding, PropFuncArg argSubject, Node predicate, PropFuncArg argObject,
                 ExecutionContext execCxt) {
 
             // Get the subject's value
-            Node node = BindingUtils.getValue(binding, subject);
+            Node node = BindingUtils.getValue(binding, argSubject.getArg());
 
-            Node object = objects.getArg(0);
+            List<Node> objects = PropFuncArgUtils.getAsList(argObject);
+            Node object = objects.get(0);
 
     //                if(!object.isVariable()) {
     //                    throw new RuntimeException("Object position of array unnesting must be a variable");
     //                }
             // Var outputVar = (Var)object;
 
-            Node indexKey = objects.getArgListSize() > 1 ? objects.getArg(1) : null;
+            Node indexKey = objects.size() > 1 ? objects.get(1) : null;
             Node index = BindingUtils.getValue(binding, indexKey, indexKey);
 
 

@@ -35,6 +35,7 @@ import org.aksw.jenax.stmt.util.SparqlStmtIterator;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Syntax;
@@ -304,15 +305,17 @@ public class SparqlScriptProcessor {
                 logger.debug("Probing " + filename + " as RDF data file failed", e);
             }
 
-            if(!isProcessed) {
+            if (!isProcessed) {
 
                 String baseIri = cwd == null ? null : cwd.toUri().toString();
                 try {
 //                    Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, globalPrefixes, sparqlParser, baseIri);
                     // globalPrefixes,
+                    IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
+                    // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
                     Prologue prologue = new Prologue(
                             globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
-                            IRIxResolverUtils.newIRIxResolverAsGiven(baseIri));
+                            resolver);
                             // IRIxResolver.create(baseIri).build());
                     SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
 
