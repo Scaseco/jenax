@@ -1,10 +1,10 @@
-package org.aksw.jena_sparql_api.sparql.ext.array;
+package org.aksw.jena_sparql_api.sparql.ext.collection.base;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.PropFuncArgUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
+import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -22,7 +22,7 @@ import org.apache.jena.sparql.util.IterLib;
  *
  *
  */
-public class PF_ArrayExplode
+public class PF_CollectionExplode
     extends PropertyFunctionBase
 {
     @Override
@@ -32,7 +32,7 @@ public class PF_ArrayExplode
 
         // This pf's subject component must evaluate concrete array
         Node s = BindingUtils.getValue(binding, argSubject.getArg());
-        if (s != null && s.isLiteral() && s.getLiteralValue() instanceof NodeList) {
+        if (s != null && s.isLiteral() && s.getLiteralValue() instanceof NodeCollection) {
             bb = BindingBuilder.create(binding);
             NodeList nodes = (NodeList)s.getLiteralValue();
             List<Node> os = PropFuncArgUtils.getAsList(argObject);

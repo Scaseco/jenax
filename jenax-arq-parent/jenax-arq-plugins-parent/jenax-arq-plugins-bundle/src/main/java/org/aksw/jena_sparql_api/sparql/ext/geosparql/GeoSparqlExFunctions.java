@@ -6,11 +6,17 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
-import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -156,6 +162,11 @@ public class GeoSparqlExFunctions {
         return g.getArea();
     }
 
+
+    @IriNs(GeoSPARQL_URI.SPATIAL_FUNCTION_URI)
+    public static NodeList dbscan(NodeList arr, int geoIdx, double eps, int minPts) {
+        return DbscanPf.dbscan(arr, geoIdx, eps, minPts);
+    }
 
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
 //	public static double lat(Geometry geom) {

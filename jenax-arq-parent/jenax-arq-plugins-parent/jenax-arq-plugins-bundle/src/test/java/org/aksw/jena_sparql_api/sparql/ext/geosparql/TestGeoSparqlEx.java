@@ -179,14 +179,15 @@ public class TestGeoSparqlEx {
     @Test
     public void testDbScan() {
         String actual = MoreQueryExecUtils.evalQueryToLexicalForm(String.join("\n",
-                "SELECT DISTINCT ?clusterId {",
+                "SELECT (array:size(?clusters) AS ?clusterCount) {",
                 "  BIND(array:of(",
                 "    array:of('x', spatial-f:convertLatLon(1, 1)),",
                 "    array:of('y', spatial-f:convertLatLon(2, 2))",
                 "  ) AS ?arr)",
-                "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?members)",
+                // "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?members)",
+                "  BIND(spatial-f:dbscan(?arr, 1, 1000000, 1) AS ?clusters)",
                 "}"));
-        Assert.assertEquals("0", actual);
+        Assert.assertEquals("1", actual);
     }
 
 //	@Test

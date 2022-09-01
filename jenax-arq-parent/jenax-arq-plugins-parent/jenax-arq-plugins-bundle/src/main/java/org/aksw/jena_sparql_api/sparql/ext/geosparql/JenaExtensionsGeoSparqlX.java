@@ -65,6 +65,9 @@ public class JenaExtensionsGeoSparqlX {
         generator.getTypeByClassOverrides().put(GeometryWrapper.class, WKTDatatype.URI);
 
         binder.registerAll(GeoSparqlExFunctions.class);
+
+
+
 //			binder.register(GeoFunctionsJena.class.getMethod("simplifyDp", Geometry.class, double.class, boolean.class));
 //			binder.register(GeoFunctionsJena.class.getMethod("centroid", Geometry.class));
 
@@ -72,7 +75,7 @@ public class JenaExtensionsGeoSparqlX {
 
         PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
         PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
+        // PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
 
 
         registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.sparql.ext.array;
+package org.aksw.jena_sparql_api.sparql.ext.collection.array;
 
 import java.util.List;
 

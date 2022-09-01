@@ -1,10 +1,13 @@
-package org.aksw.jena_sparql_api.sparql.ext.array;
+package org.aksw.jena_sparql_api.sparql.ext.collection.array;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
+import org.aksw.jenax.arq.util.node.NodeSet;
+import org.aksw.jenax.arq.util.node.NodeSetImpl;
 import org.apache.jena.graph.Node;
 
 public class SparqlLibArrayFn {
@@ -19,4 +22,13 @@ public class SparqlLibArrayFn {
         return new NodeListImpl(Arrays.asList(nodes));
     }
 
+    @IriNs(JenaExtensionArray.NS)
+    public static int size(NodeList nodes) {
+        return nodes.size();
+    }
+
+    @IriNs(JenaExtensionArray.NS)
+    public static NodeSet toSet(NodeList nodes) {
+        return new NodeSetImpl(new LinkedHashSet<>(nodes));
+    }
 }

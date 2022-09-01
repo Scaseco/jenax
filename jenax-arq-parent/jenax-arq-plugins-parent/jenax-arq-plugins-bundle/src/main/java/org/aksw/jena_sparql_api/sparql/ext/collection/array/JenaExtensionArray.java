@@ -1,5 +1,7 @@
-package org.aksw.jena_sparql_api.sparql.ext.array;
+package org.aksw.jena_sparql_api.sparql.ext.collection.array;
 
+import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionExplode;
+import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
@@ -37,8 +39,8 @@ public class JenaExtensionArray {
 
         binder.registerAll(SparqlLibArrayFn.class);
 
-        PropertyFunctionRegistry.get().put(NS + "unnest", new PFF_ArrayUnnest());
-        PropertyFunctionRegistry.get().put(NS + "explode", PF_ArrayExplode.class);
+        PropertyFunctionRegistry.get().put(NS + "unnest", PF_CollectionUnnest.class);
+        PropertyFunctionRegistry.get().put(NS + "explode", PF_CollectionExplode.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {
