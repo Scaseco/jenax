@@ -14,9 +14,15 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.main.StageBuilder;
+import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.QueryExecUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryExecutionUtils {
+    private static final Logger logger = LoggerFactory.getLogger(QueryExecutionUtils.class);
+
     public static Integer fetchInteger(QueryExecution qe, Var v) {
         return Optional.ofNullable(fetchNumber(qe, v)).map(Number::intValue).orElse(null);
     }
@@ -102,6 +108,26 @@ public class QueryExecutionUtils {
 
         return result;
     }
+
+    public static boolean wrapWithAutoDisableReorder(Query query, Context cxt) {
+        boolean result = false;
+        if (query == null) {
+            logger.warn("Could not obtain query from query execution.");
+        } else if (cxt != null) {
+
+            boolean disableTpReorder = QueryUtils.shouldDisablePatternReorder(query);
+            if (disableTpReorder) {
+                logger.info("Pattern reorder disabled due to presence of property functions and/or service clauses");
+            }
+
+            if (disableTpReorder) {
+                StageBuilder.setGenerator(cxt, StageBuilder.executeInline);
+                result = true;
+            }
+        }
+        return result;
+    }
+
 
 
 }

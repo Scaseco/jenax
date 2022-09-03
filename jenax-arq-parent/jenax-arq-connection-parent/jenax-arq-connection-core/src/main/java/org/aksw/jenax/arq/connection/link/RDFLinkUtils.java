@@ -330,4 +330,8 @@ public class RDFLinkUtils {
 
     }
 
+    public static RDFLink wrapWithQueryOnly(RDFLink link) {
+        LinkSparqlQuery queryLink = unwrapQueryConnection(link);
+        return new RDFLinkModular(queryLink, null, null);
+    }
 }

@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.algebra.transform;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import org.aksw.jenax.arq.util.query.TransformCopyAdapter;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.Op;

@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
+import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -227,5 +228,16 @@ public class RDFConnectionUtils {
 
     public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
         return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+    }
+
+    public static RDFConnection wrapWithQueryOnly(RDFConnection conn) {
+        return wrapWithLinkDecorator(conn, RDFLinkUtils::wrapWithQueryOnly);
+    }
+
+    public static RDFConnection wrapWithAutoDisableReorder(RDFConnection conn) {
+        return RDFConnectionUtils.wrapWithQueryTransform(conn, null, qe -> {
+            QueryExecutionUtils.wrapWithAutoDisableReorder(qe.getQuery(), qe.getContext());
+            return qe;
+        });
     }
 }

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.algebra.transform;
+package org.aksw.jenax.arq.util.query;
 
 import java.util.List;
 import java.util.function.BiFunction;
