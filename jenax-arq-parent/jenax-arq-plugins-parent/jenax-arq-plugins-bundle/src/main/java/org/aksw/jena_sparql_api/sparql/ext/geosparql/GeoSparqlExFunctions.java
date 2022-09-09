@@ -64,7 +64,7 @@ public class GeoSparqlExFunctions {
         return GeometryWrapperUtils.createFromPrototype(geom, tmp);
     }
 
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    @IriNs(GeoSPARQL_URI.SPATIAL_FUNCTION_URI)
     public static GeometryWrapper union(GeometryWrapper geom) {
         // List<Geometry> list = expandCollection(geom.getParsingGeometry()).collect(Collectors.toList());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
