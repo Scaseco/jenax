@@ -8,10 +8,13 @@ import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
@@ -166,6 +169,22 @@ public class GeoSparqlExFunctions {
     @IriNs(GeoSPARQL_URI.SPATIAL_FUNCTION_URI)
     public static NodeList dbscan(NodeList arr, int geoIdx, double eps, int minPts) {
         return DbscanPf.dbscan(arr, geoIdx, eps, minPts);
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper makeLine(GeometryWrapper geomWrapper) {
+        GeometryFactory f = CustomGeometryFactory.theInstance();
+
+        Geometry inGeom = geomWrapper.getParsingGeometry();
+        GeometryCollection c = inGeom instanceof GeometryCollection
+            ? (GeometryCollection)inGeom
+            : f.createGeometryCollection(new Geometry[] { inGeom });
+
+        Coordinate[] coords = c.getCoordinates();
+
+        Geometry outGeom = CustomGeometryFactory.theInstance().createLineString(coords);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
+        return result;
     }
 
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
