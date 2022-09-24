@@ -1281,7 +1281,12 @@
                                         <exclusion>
                                                 <groupId>xerces</groupId>
                                                 <artifactId>xercesImpl</artifactId>
-                                        </exclusion>
+					</exclusion>
+					<exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+
                                 </exclusions>
 			</dependency>
 
