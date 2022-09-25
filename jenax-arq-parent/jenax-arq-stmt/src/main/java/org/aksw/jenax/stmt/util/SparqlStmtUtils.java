@@ -468,7 +468,9 @@ public class SparqlStmtUtils {
 
             // conn.update(u);
             Context cxt = ARQ.getContext().copy();
-            cxtMutator.accept(cxt);
+            if (cxtMutator != null) {
+                cxtMutator.accept(cxt);
+            }
             conn.newUpdate().update(u).context(cxt).execute();
 
             result = SPARQLResultEx.createUpdateType();
