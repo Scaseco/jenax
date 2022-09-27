@@ -25,7 +25,7 @@ public class TestDatasetAssemblerFromAsFilter {
 
     @Test
     public void testAssemblerFromAsFilter01() throws IOException {
-        Path tdb2TmpFolder = Files.createTempDirectory("jena-service-enhancer-tdb2").toAbsolutePath();
+        Path tdb2TmpFolder = Files.createTempDirectory("jena_from-as-filter_tdb2").toAbsolutePath();
         try {
             String assemblerStr = String.join("\n",
                     "PREFIX ja: <http://jena.hpl.hp.com/2005/11/Assembler#>",
@@ -70,16 +70,4 @@ public class TestDatasetAssemblerFromAsFilter {
             MoreFiles.deleteRecursively(tdb2TmpFolder);
         }
     }
-
-//    @Test
-//    public void testFromClause() {
-//        Model spec = ModelFactory.createDefaultModel();
-//        RDFDataMgr.read(spec, new StringReader(SPEC_STR_01), null, Lang.TURTLE);
-//        Dataset dataset = DatasetFactory.assemble(spec.getResource("urn:example:root"));
-//
-//        try (QueryExecution qe = QueryExecutionFactory.create("SELECT * FROM <urn:example:first> FROM <urn:example:second> { ?s ?p ?o }", dataset)) {
-//            ResultSetFormatter.consume(qe.execSelect());
-//        }
-//    }
-
 }
