@@ -18,6 +18,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TestDatasetAssemblerFromAsFilter {
@@ -36,10 +37,10 @@ public class TestDatasetAssemblerFromAsFilter {
 
             String dataStr = String.join("\n",
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
-                    "<urn:example:g1> { <urn:example:s1> a <urn:example:class1> ; rdfs:label \"s1\" }",
-                    "<urn:example:g2> { <urn:example:s2> a <urn:example:class2> ; rdfs:label \"s2\" }");
+                    "<urn:example:g1> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }",
+                    "<urn:example:g2> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }");
 
-            String queryStr = "SELECT (COUNT(*) AS ?c) FROM <urn:example:g1> { ?s ?p ?o }";
+            String queryStr = "SELECT * FROM <urn:example:g1> FROM <urn:example:g2> { ?s ?p ?o }";
 
             Model confModel = ModelFactory.createDefaultModel();
             RDFDataMgr.read(confModel, new StringReader(assemblerStr), null, Lang.TURTLE);
@@ -47,17 +48,24 @@ public class TestDatasetAssemblerFromAsFilter {
             tdb2Conf.addProperty(VocabTDB2.pLocation, tdb2TmpFolder.toString());
 
             Dataset dataset = DatasetFactory.assemble(confModel.getResource("urn:example:root"));
+            try {
+                Txn.executeWrite(dataset, () -> RDFDataMgr.read(dataset, new StringReader(dataStr), null, Lang.TRIG));
 
-            Txn.executeWrite(dataset, () -> RDFDataMgr.read(dataset, new StringReader(dataStr), null, Lang.TRIG));
+                int actualRowCount = Txn.calculateRead(dataset, () -> {
+                    try (QueryExecution qe = QueryExecution.create(queryStr, dataset)) {
+                        ResultSet rs = qe.execSelect();
+                        return ResultSetFormatter.consume(rs);
+                    }
+                });
 
-            int actualRowCount = Txn.calculateRead(dataset, () -> {
-                try (QueryExecution qe = QueryExecution.create(queryStr, dataset)) {
-                    ResultSet rs = qe.execSelect();
-                    return ResultSetFormatter.consume(rs);
-                }
-            });
+                // From-as-filter's (faf) non-standard semantics leads to 4 bindings because it does not compute an
+                // RDF merge and/or apply distinct
+                // Without faf this test case would return 2 bindings.
+                Assert.assertEquals(4, actualRowCount);
+            } finally {
+                dataset.close();
+            }
 
-            // Assert.assertEquals(4, actualRowCount);
         } finally {
             MoreFiles.deleteRecursively(tdb2TmpFolder);
         }
