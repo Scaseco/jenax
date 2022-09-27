@@ -74,6 +74,11 @@
 			<artifactId>jenax-arq-plugins-service-vfs</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-fromasfilter/artifactId>
+		</dependency>
+
 		<!-- Used for binary search via the service clause -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
