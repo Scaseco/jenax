@@ -18,13 +18,12 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class TestDatasetAssemblerFromAsFilter {
 
     @Test
-    public void testAssemblerTdbUnionDefaultGraph() throws IOException {
+    public void testAssemblerFromAsFilter01() throws IOException {
         Path tdb2TmpFolder = Files.createTempDirectory("jena-service-enhancer-tdb2").toAbsolutePath();
         try {
             String assemblerStr = String.join("\n",
