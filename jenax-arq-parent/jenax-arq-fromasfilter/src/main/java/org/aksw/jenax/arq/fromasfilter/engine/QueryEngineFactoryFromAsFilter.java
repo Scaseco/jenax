@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.fromasfilter.engine;
 
+import org.aksw.jenax.arq.fromasfilter.dataset.DatasetGraphFromAsFilter;
 import org.aksw.jenax.arq.util.syntax.ElementTransformDatasetDescription;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Op;
@@ -29,11 +30,10 @@ public class QueryEngineFactoryFromAsFilter
 
         Query rewrittenQuery = ElementTransformDatasetDescription.rewrite(query);
 
-        System.err.println("Rewritten Query: " + rewrittenQuery);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Rewrote from/named clauses: " + rewrittenQuery);
+        // Switch to debug?
+        if (logger.isInfoEnabled()) {
+            logger.info("Transformed FROM (NAMED) clauses to filters: " + rewrittenQuery);
         }
-
 
         QueryEngineFactory qef = QueryEngineRegistry.findFactory(rewrittenQuery, base, context);
         return qef.create(rewrittenQuery, base, inputBinding, context);

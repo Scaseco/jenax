@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.fromasfilter.assembler;
 
 import java.util.Objects;
 
-import org.aksw.jenax.arq.fromasfilter.engine.DatasetGraphFromAsFilter;
+import org.aksw.jenax.arq.fromasfilter.dataset.DatasetGraphFromAsFilter;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.exceptions.AssemblerException;
 import org.apache.jena.query.Dataset;

@@ -29,11 +29,7 @@ public class FromAsFilterInit
         registerWith(Assembler.general);
     }
 
-    static void registerWith(AssemblerGroup g)
-    {
+    static void registerWith(AssemblerGroup g) {
         AssemblerUtils.register(g, FromAsFilterVocab.DatasetFromAsFilter, new DatasetAssemblerFromAsFilter(), DatasetAssembler.getType());
-
-        // Note: We can't install the plugin on graphs because they don't have a context
     }
-
 }
