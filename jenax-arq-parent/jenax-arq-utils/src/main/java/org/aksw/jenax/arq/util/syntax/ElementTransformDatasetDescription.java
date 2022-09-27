@@ -18,6 +18,7 @@ import org.apache.jena.sparql.algebra.optimize.TransformFilterPlacement;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_OneOf;
+import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
@@ -81,13 +82,22 @@ public class ElementTransformDatasetDescription
     }
 
     public Element applyDefaultGraphs(Element el) {
-        Element result;
+        Element result = null;
 
         // If there are no graphs, inject a graph block constrained to
         // the default graphs
         if(graphs.isEmpty() && !defaultGraphExprs.isEmpty()) {
-            Var v = varGen.next();
-            result = applyGraphs(varGen, v, el, defaultGraphExprs);
+            if (defaultGraphExprs.size() == 1) {
+                Expr expr = defaultGraphExprs.iterator().next();
+                if (expr.isConstant()) {
+                    result = applyGraphs(varGen, expr.getConstant().asNode(), el, ExprList.emptyList);
+                }
+            }
+
+            if (result == null) {
+                Var v = varGen.next();
+                result = applyGraphs(varGen, v, el, defaultGraphExprs);
+            }
         } else {
             result = el;
         }
@@ -136,6 +146,8 @@ public class ElementTransformDatasetDescription
 
     @Override
     public Element transform(ElementNamedGraph el, Node gn, Element elt1) {
+        // TODO If gn is concrete then we can filter away all constant namedGraphExprs that differ
+        // If gn is a variable and nameGraphExprs is just one concrete node we can just substitute it
         Element result = applyGraphs(varGen, gn, elt1, namedGraphExprs);
         return result;
     }
@@ -148,6 +160,8 @@ public class ElementTransformDatasetDescription
             Element before = result.getQueryPattern();
             Element after = rewrite(before, dd);
             result.setQueryPattern(after);
+            result.getGraphURIs().clear();
+            result.getNamedGraphURIs().clear();
         } else {
             result = query;
         }
@@ -156,7 +170,7 @@ public class ElementTransformDatasetDescription
     }
 
     public static Element rewrite(Element element, DatasetDescription dd) {
-        final Stack<Node> graphs = new Stack<Node>();
+        final Stack<Node> graphs = new Stack<>();
 
         ExprTransform exprTransform = new ExprTransformCopy();
         ElementTransform elementTransform = ElementTransformDatasetDescription.create(graphs, element, dd);
@@ -183,7 +197,7 @@ public class ElementTransformDatasetDescription
     public static void main(String[] args) {
         //Query query = QueryFactory.create("SELECT * { { ?s ?p ?o } Union { Graph ?g { ?s ?p ?o } } }");
         //Query query = QueryFactory.create("SELECT * { { { Select * { ?s ?p ?o . Filter(?p = <p>) } } } Union { Graph ?g { ?s ?p ?o } } }");
-        Query query = QueryFactory.create("SELECT * { { ?s ?p ?o . Graph ?x { ?a ?b ?c } } Union { Graph ?g { ?s ?p ?o } } }");
+        Query query = QueryFactory.create("SELECT * { { ?s ?p ?o . Graph ?x { ?a ?b ?c } } Union { Graph <cng> { ?s ?p ?o } } }");
         query.addGraphURI("dg1");
         query.addGraphURI("dg2");
         query.addNamedGraphURI("ng1");
