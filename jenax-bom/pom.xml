@@ -177,10 +177,8 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-fromasfilter/artifactId>
-				<version>
-					${project.version}
-				</version>
+				<artifactId>jenax-arq-fromasfilter</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>

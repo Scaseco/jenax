@@ -76,7 +76,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-fromasfilter/artifactId>
+			<artifactId>jenax-arq-fromasfilter</artifactId>
 		</dependency>
 
 		<!-- Used for binary search via the service clause -->
