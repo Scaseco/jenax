@@ -13,6 +13,8 @@ import org.apache.jena.sys.JenaSubsystemLifecycle;
 public class FromAsFilterInit
     implements JenaSubsystemLifecycle
 {
+    public static final int LEVEL = 2345;
+
     @Override
     public void start() {
         init();
@@ -21,6 +23,13 @@ public class FromAsFilterInit
     @Override
     public void stop() {
         // Nothing to do
+    }
+
+    /** The plugin is loaded late with level {@value #LEVEL} so that the query engine factory
+     * is added closer to the front of the registry */
+    @Override
+    public int level() {
+        return LEVEL;
     }
 
     public static void init() {
