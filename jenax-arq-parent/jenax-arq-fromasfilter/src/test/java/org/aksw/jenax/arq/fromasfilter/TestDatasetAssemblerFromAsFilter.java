@@ -25,13 +25,13 @@ public class TestDatasetAssemblerFromAsFilter {
 
     @Test
     public void testAssemblerFromAsFilter01() throws IOException {
-        Path tdb2TmpFolder = Files.createTempDirectory("jena_from-as-filter_tdb2").toAbsolutePath();
+        Path tdb2TmpFolder = Files.createTempDirectory("jena_from-enhancer_tdb2").toAbsolutePath();
         try {
             String assemblerStr = String.join("\n",
                     "PREFIX ja: <http://jena.hpl.hp.com/2005/11/Assembler#>",
-                    "PREFIX faf: <http://jena.apache.org/from-as-filter#>",
+                    "PREFIX fe: <http://jena.apache.org/from-enhancer#>",
                     "PREFIX tdb2: <http://jena.apache.org/2016/tdb#>",
-                    "<urn:example:root> a faf:DatasetFromAsFilter ; ja:baseDataset <urn:example:base> .",
+                    "<urn:example:root> a fe:DatasetFromAsFilter ; ja:baseDataset <urn:example:base> .",
                     "<urn:example:base> a tdb2:DatasetTDB2 ."
                 );
 

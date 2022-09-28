@@ -6,7 +6,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 public class FromAsFilterVocab {
-    public static final String NS = "http://jena.apache.org/from-as-filter#";
+    public static final String NS = "http://jena.apache.org/from-enhancer#";
 
     public static String getURI() { return NS; }
 
