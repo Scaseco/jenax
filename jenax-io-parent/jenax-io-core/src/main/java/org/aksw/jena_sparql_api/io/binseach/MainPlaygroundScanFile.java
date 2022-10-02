@@ -17,23 +17,26 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.io.binseach.BinSearchScanState;
+import org.aksw.commons.io.binseach.BinarySearchOnSortedFile;
+import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.block.impl.BlockSources;
+import org.aksw.commons.io.block.impl.BlockIterState;
 import org.aksw.commons.io.block.impl.PageManagerForByteBuffer;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
 import org.aksw.commons.io.block.impl.PageNavigator;
+import org.aksw.commons.io.deprecated.BoyerMooreMatcherFactory;
+import org.aksw.commons.io.deprecated.SeekableMatcher;
+import org.aksw.commons.io.hadoop.binseach.bz2.BlockSourceBzip2;
+import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.impl.SeekableFromBlock;
 import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
 import org.aksw.commons.util.ref.Ref;
-import org.aksw.jena_sparql_api.io.binseach.bz2.BlockSourceBzip2;
-import org.aksw.jena_sparql_api.io.deprecated.BoyerMooreMatcherFactory;
-import org.aksw.jena_sparql_api.io.deprecated.SeekableMatcher;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.collect.Maps;
-import org.apache.jena.query.QueryExecutionFactory;
 
 import com.github.jsonldjava.shaded.com.google.common.primitives.Ints;
 

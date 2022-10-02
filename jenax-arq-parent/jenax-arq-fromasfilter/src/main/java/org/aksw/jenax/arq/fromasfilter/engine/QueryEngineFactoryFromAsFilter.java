@@ -22,7 +22,7 @@ public class QueryEngineFactoryFromAsFilter
 
     public static DatasetGraph unwrapDynamicDataset(DatasetGraph dataset) {
         return dataset instanceof DynamicDatasetGraph
-                ? ((DynamicDatasetGraph)dataset).getProjectedDataset()
+                ? ((DynamicDatasetGraph)dataset).getProjected()
                 : dataset;
     }
 
@@ -41,13 +41,12 @@ public class QueryEngineFactoryFromAsFilter
             ddg.getDefaultGraphs().forEach(n -> copy.getGraphURIs().add(n.getURI()));
             ddg.getNamedGraphs().forEach(n -> copy.getNamedGraphURIs().add(n.getURI()));
 
-            result = Pair.create(copy, ddg.getProjectedDataset());
+            result = Pair.create(copy, ddg.getProjected());
         } else {
             result = Pair.create(query, dataset);
         }
         return result;
     }
-
 
     @Override
     public Plan create(Query query, DatasetGraph dataset, Binding inputBinding, Context context) {

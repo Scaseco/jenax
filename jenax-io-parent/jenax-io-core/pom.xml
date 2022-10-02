@@ -62,6 +62,11 @@
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-hadoop</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-process-pipes</artifactId>
 		</dependency>
 	
