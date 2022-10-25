@@ -22,13 +22,13 @@ public class TrackingWalkerTests {
          Query query = QueryFactory.create(String.join("\n",
                  "SELECT * {",
                  "  ?s ?p ?o",
-                 "  FILTER(STR(?p) = 'foobar')",
+                 "  FILTER(STR(?p) = 'urn:example:foobar')",
                  "}"));
 
          Query expected = QueryFactory.create(String.join("\n",
                  "SELECT * {",
                  "  ?s ?p ?o",
-                 "  FILTER(?p = <foobar>)",
+                 "  FILTER(?p = <urn:example:foobar>)",
                  "}"));
 
         Op op = Algebra.compile(query);
