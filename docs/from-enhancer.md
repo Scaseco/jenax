@@ -44,9 +44,8 @@ It is possible to map specific graph IRIs to custom SPARQL expressions using `fe
   # Expressions can mention a single variable which during query rewriting will be bound to graph names
   ; fe:alias [ fe:graph <urn:exmaple:regex> ; fe:expr "regex(str(?g), '')"^^xdt:expr ]
   .
-
-
-<urn:example:base> a a ja:MemoryDataset .
+  
+<urn:example:base> a ja:MemoryDataset .
 ```
 
 ### Implementation
