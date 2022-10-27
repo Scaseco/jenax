@@ -3,6 +3,9 @@ package org.aksw.jenax.arq.fromasfilter.init;
 import org.aksw.jenax.arq.fromasfilter.assembler.DatasetAssemblerFromAsFilter;
 import org.aksw.jenax.arq.fromasfilter.assembler.FromAsFilterVocab;
 import org.aksw.jenax.arq.fromasfilter.engine.QueryEngineFactoryFromAsFilter;
+import org.aksw.jenax.arq.fromasfilter.model.FromAsFilterRes;
+import org.aksw.jenax.arq.fromasfilter.model.GraphAlias;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.assemblers.AssemblerGroup;
 import org.apache.jena.sparql.core.assembler.AssemblerUtils;
@@ -35,6 +38,7 @@ public class FromAsFilterInit
     public static void init() {
         QueryEngineRegistry.addFactory(new QueryEngineFactoryFromAsFilter());
 
+        JenaPluginUtils.registerResourceClasses(GraphAlias.class, FromAsFilterRes.class);
         registerWith(Assembler.general);
     }
 

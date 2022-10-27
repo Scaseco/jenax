@@ -1,5 +1,7 @@
 package org.aksw.jenax.arq.fromasfilter.engine;
 
+import java.util.Map;
+
 import org.aksw.jenax.arq.fromasfilter.dataset.DatasetGraphFromAsFilter;
 import org.aksw.jenax.arq.util.dataset.DynamicDatasetUtils;
 import org.aksw.jenax.arq.util.syntax.ElementTransformDatasetDescription;
@@ -11,6 +13,7 @@ import org.apache.jena.sparql.engine.Plan;
 import org.apache.jena.sparql.engine.QueryEngineFactory;
 import org.apache.jena.sparql.engine.QueryEngineRegistry;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +36,9 @@ public class QueryEngineFactoryFromAsFilter
 
         DatasetGraphFromAsFilter wrapper = (DatasetGraphFromAsFilter)affectiveDataset;
         DatasetGraph base = wrapper.getBase();
+        Map<String, Expr> remap = wrapper.getGraphToExpr();
 
-        Query rewrittenQuery = ElementTransformDatasetDescription.rewrite(effectiveQuery);
+        Query rewrittenQuery = ElementTransformDatasetDescription.rewrite(effectiveQuery, remap);
 
         // Switch to debug?
         if (logger.isInfoEnabled()) {

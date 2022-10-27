@@ -30,8 +30,10 @@ public class TestDatasetAssemblerFromAsFilter {
             String assemblerStr = String.join("\n",
                     "PREFIX ja: <http://jena.hpl.hp.com/2005/11/Assembler#>",
                     "PREFIX fe: <http://jena.apache.org/from-enhancer#>",
+                    "PREFIX xdt: <http://jsa.aksw.org/dt/sparql/>",
                     "PREFIX tdb2: <http://jena.apache.org/2016/tdb#>",
                     "<urn:example:root> a fe:DatasetFromAsFilter ; ja:baseDataset <urn:example:base> .",
+                    "<urn:example:root> fe:alias [ fe:graph <urn:example:all> ; fe:expr 'true'^^xdt:expr] .",
                     "<urn:example:base> a tdb2:DatasetTDB2 ."
                 );
 
@@ -40,7 +42,8 @@ public class TestDatasetAssemblerFromAsFilter {
                     "<urn:example:g1> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }",
                     "<urn:example:g2> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }");
 
-            String queryStr = "SELECT * FROM <urn:example:g1> FROM <urn:example:g2> { ?s ?p ?o }";
+            // String queryStr = "SELECT * FROM <urn:example:g1> FROM <urn:example:g2> { ?s ?p ?o }";
+            String queryStr = "SELECT * FROM <urn:example:all> { ?s ?p ?o }";
 
             Model confModel = ModelFactory.createDefaultModel();
             RDFDataMgr.read(confModel, new StringReader(assemblerStr), null, Lang.TURTLE);

@@ -2,12 +2,13 @@ package org.aksw.jenax.arq.util.syntax;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.util.backport.syntaxtransform.ElementTransformer;
 import org.apache.jena.graph.Node;
@@ -24,8 +25,6 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalOr;
 import org.apache.jena.sparql.expr.E_OneOf;
-import org.apache.jena.sparql.expr.E_Regex;
-import org.apache.jena.sparql.expr.E_Str;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprList;
@@ -70,12 +69,27 @@ public class ElementTransformDatasetDescription
         this.namedGraphExprs = namedGraphExprs;
     }
 
-    public static ElementTransformDatasetDescription create(Stack<Node> graphs, Element e, DatasetDescription dd) {
+    public static ExprList toExprs(Collection<String> iris, Map<String, Expr> graphToExpr) {
+        ExprList result = new ExprList();
+        for (String iri : iris) {
+            Expr expr = graphToExpr == null ? null : graphToExpr.get(iri);
+            if (expr == null) {
+                expr = ExprLib.nodeToExpr(NodeFactory.createURI(iri));
+            }
+            result.add(expr);
+        }
+        return result;
+    }
+
+    public static ElementTransformDatasetDescription create(Stack<Node> graphs, Element e, DatasetDescription dd, Map<String, Expr> graphToExpr) {
         Collection<Var> vars = PatternVars.vars(e);
         Generator<Var> varGen = VarGeneratorBlacklist.create("__dg_", vars);
 
-        ExprList defaultGraphExprs = ExprListUtils.fromUris(dd.getDefaultGraphURIs());
-        ExprList namedGraphExprs = ExprListUtils.fromUris(dd.getNamedGraphURIs());
+
+        // ExprList defaultGraphExprs = ExprListUtils.fromUris(dd.getDefaultGraphURIs());
+        // ExprList namedGraphExprs = ExprListUtils.fromUris(dd.getNamedGraphURIs());
+        ExprList defaultGraphExprs = toExprs(dd.getDefaultGraphURIs(), graphToExpr);
+        ExprList namedGraphExprs = toExprs(dd.getNamedGraphURIs(), graphToExpr);
 
 //        namedGraphExprs.add(NodeValue.makeNode(NodeFactory.createURI("ng1")));
 //        namedGraphExprs.add(new E_Regex(new E_Str(new ExprVar("x")), NodeValue.makeString(".*cng.*"), null));
@@ -105,7 +119,7 @@ public class ElementTransformDatasetDescription
         if(graphs.isEmpty() && !defaultGraphExprs.isEmpty()) {
             if (defaultGraphExprs.size() == 1) {
                 Expr expr = defaultGraphExprs.iterator().next();
-                if (expr.isConstant()) {
+                if (expr.isConstant() && !expr.getConstant().isBoolean()) {
                     result = applyGraphs(varGen, expr.getConstant().asNode(), el, ExprList.emptyList);
                 }
             }
@@ -130,7 +144,7 @@ public class ElementTransformDatasetDescription
      * (for constants and variable free function calls)
      * and substituted expressions (for single-variable expressions).
      *
-     * The semantics of expressions differ dependending on the number of variables:
+     * The semantics of expressions differ depending on the number of variables:
      * <ul>
      *   <li>0: Effective constants that are matched against the base expressions by value.</li>
      *   <li>1: Boolean expressions that are evaluated by substituting their variable with the base expression.</li>
@@ -198,7 +212,14 @@ public class ElementTransformDatasetDescription
             }
 
             if (constant != null) {
-                if (base.isConstant()) {
+                if (constant.isBoolean()) {
+                    if (constant.getBoolean()) {
+                        result = NodeValue.TRUE;
+                        break;
+                    } else {
+                        falseSeen = true;
+                    }
+                } else if (base.isConstant()) {
                     if (base.equals(constant)) {
                         result = NodeValue.TRUE;
                         break;
@@ -284,7 +305,7 @@ public class ElementTransformDatasetDescription
         return result;
     }
 
-    public static Query rewrite(Query query) {
+    public static Query rewrite(Query query, Map<String, Expr> graphToExpr) {
         DatasetDescription dd = query.getDatasetDescription();
         Query result;
         if(dd != null) {
@@ -296,7 +317,10 @@ public class ElementTransformDatasetDescription
             }
 
             Element before = result.getQueryPattern();
-            Element after = rewrite(before, dd);
+
+            // The actual rewrite
+            Element after = rewrite(before, dd, graphToExpr);
+
             result.setQueryPattern(after);
             result.getGraphURIs().clear();
             result.getNamedGraphURIs().clear();
@@ -322,11 +346,11 @@ public class ElementTransformDatasetDescription
         return result;
     }
 
-    public static Element rewrite(Element element, DatasetDescription dd) {
+    public static Element rewrite(Element element, DatasetDescription dd, Map<String, Expr> graphToExpr) {
         final Stack<Node> graphs = new Stack<>();
 
         ExprTransform exprTransform = new ExprTransformCopy();
-        ElementTransform elementTransform = ElementTransformDatasetDescription.create(graphs, element, dd);
+        ElementTransform elementTransform = ElementTransformDatasetDescription.create(graphs, element, dd, graphToExpr);
         ElementVisitor beforeVisitor = new ElementVisitorBase() {
             @Override
             public void visit(ElementNamedGraph el) {
@@ -357,7 +381,10 @@ public class ElementTransformDatasetDescription
         query.addNamedGraphURI("ng2");
         // query.addNamedGraphURI("urn:example:cng");
 
-        Query tmp = rewrite(query);
+        Map<String, Expr> remap = new HashMap<>();
+        remap.put("dg1", org.apache.jena.sparql.util.ExprUtils.parse("true"));
+
+        Query tmp = rewrite(query, remap);
 
         Op op = Algebra.compile(tmp);
         //Op op2 = Transformer.transformSkipService(new TransformFilterPlacement(), op) ;
