@@ -42,8 +42,8 @@ public class TestDatasetAssemblerFromAsFilter {
                     "<urn:example:g1> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }",
                     "<urn:example:g2> { <urn:example:s> a <urn:example:class> ; rdfs:label \"s\" }");
 
-            // String queryStr = "SELECT * FROM <urn:example:g1> FROM <urn:example:g2> { ?s ?p ?o }";
-            String queryStr = "SELECT * FROM <urn:example:all> { ?s ?p ?o }";
+            String queryStr = "SELECT * FROM <urn:example:g1> FROM <urn:example:g2> { ?s ?p ?o }";
+            // String queryStr = "SELECT * FROM <urn:example:all> { ?s ?p ?o }";
 
             Model confModel = ModelFactory.createDefaultModel();
             RDFDataMgr.read(confModel, new StringReader(assemblerStr), null, Lang.TURTLE);

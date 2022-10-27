@@ -305,6 +305,18 @@ public class ElementTransformDatasetDescription
         return result;
     }
 
+    public static Query rewrite(Query query) {
+        return rewrite(query, null);
+    }
+
+    /**
+     * Rewrite a query's from / from named clauses to filter expressions.
+     * Thereby, specific iris can be optionally remapped to alternative expressions.
+     *
+     * @param query
+     * @param graphToExpr An optional mapping of graph names to expressions. May be null.
+     * @return
+     */
     public static Query rewrite(Query query, Map<String, Expr> graphToExpr) {
         DatasetDescription dd = query.getDatasetDescription();
         Query result;
