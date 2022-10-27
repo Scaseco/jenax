@@ -18,7 +18,7 @@ The datatype is implemented in the class `RDFDatatypeExpr`.
 
 ### Assembler Configuration
 
-The main dataset wrapper to rewrite FROM clauses as filter statements in `fe:DatasetFromAsFilter`.
+The type `fe:DatasetFromAsFilter` refers to the main dataset wrapper to rewrite FROM clauses as filter statements in.
 For example, given the initial query
 ```sparql
 SELECT * FROM <x> { ?s ?p ?o }
