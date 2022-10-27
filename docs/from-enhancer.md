@@ -32,6 +32,10 @@ before being sent to the actual query evaluation engine.
 It is possible to map specific graph IRIs to custom SPARQL expressions using `fe:alias` as demonstrated below.
 
 ```turtle
+PREFIX ja:        <http://jena.hpl.hp.com/2005/11/Assembler#>
+PREFIX fe:        <http://jena.apache.org/from-enhancer#>
+PREFIX xdt:       <http://jsa.aksw.org/dt/sparql/>
+
 <urn:example:root> a fe:DatasetFromAsFilter
   ; ja:baseDataset <urn:example:base>
 
