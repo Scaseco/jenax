@@ -23,9 +23,10 @@ For example, given the initial query
 ```sparql
 SELECT * FROM <x> { ?s ?p ?o }
 ```
-it will be rewritten into
+it will be rewritten to
 ```sparql
 SELECT * { GRAPH ?g { ?s ?p ?o } FILTER (?g = <x>) }
+```
 before being sent to the actual query evaluation engine.
 
 It is possible to map specific graph IRIs to custom SPARQL expressions using `fe:alias` as demonstrated below.
