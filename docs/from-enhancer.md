@@ -13,7 +13,7 @@ PREFIX fe:        <http://jena.apache.org/from-enhancer#>
 PREFIX xdt:       <http://jsa.aksw.org/dt/sparql/>
 ```
 
-Note that the FE plugin loads jenax's datatype extensions for jena. Most importantly this includes the `xdt:expr` datatype which is used to capture SPARQL expressions and detect syntax errors.
+Note that the FE plugin loads jenax's datatype extensions for jena. Most importantly this includes the `xdt:expr` datatype which is used to capture SPARQL expressions and get warnings about syntax errors (if any) during RDF parsing.
 The datatype is implemented in the class `RDFDatatypeExpr`.
 
 ### Assembler Configuration
