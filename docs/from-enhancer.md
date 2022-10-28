@@ -46,7 +46,7 @@ PREFIX xdt:       <http://jsa.aksw.org/dt/sparql/>
   ; fe:alias [ fe:graph <urn:example:dbpedia> ; fe:expr "<http://dbpedia.org/>"^^xdt:expr ]
 
   # Expressions can mention a single variable which during query rewriting will be bound to graph names
-  ; fe:alias [ fe:graph <urn:exmaple:regex> ; fe:expr "regex(str(?g), '')"^^xdt:expr ]
+  ; fe:alias [ fe:graph <urn:exmaple:regex> ; fe:expr "regex(str(?g), '.*[0-9]+$')"^^xdt:expr ]
   .
   
 <urn:example:base> a ja:MemoryDataset .
