@@ -73,7 +73,6 @@ import com.google.common.collect.Range;
 
 public class QueryUtils {
 
-
     public static Query applyOpTransform(Query beforeQuery, Function<? super Op, ? extends Op> transform) {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOpTmp = transform.apply(beforeOp);

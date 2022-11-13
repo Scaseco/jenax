@@ -293,4 +293,8 @@ public class QuadUtils {
         }
         return targetAcc;
     }
+    
+    public static boolean isDefaultGraph(Quad quad) {
+    	return Quad.isDefaultGraph(quad.getGraph());
+    }
 }

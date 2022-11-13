@@ -26,6 +26,7 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryParseException;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -233,11 +234,11 @@ public class SparqlStmtMgr {
     }
 
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI) {
-    	return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create());
+    	return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create(Syntax.syntaxARQ, true));
     }
 
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, PrefixMapping prefixes) {
-    	SparqlStmtParser parser = SparqlStmtParserImpl.create(prefixes);
+    	SparqlStmtParser parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, prefixes, true);
     	return loadSparqlStmts(filenameOrURI, parser);
     }
     

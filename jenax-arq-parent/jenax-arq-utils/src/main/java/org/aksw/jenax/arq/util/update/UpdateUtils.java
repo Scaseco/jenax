@@ -18,11 +18,20 @@ import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.QuadDataAcc;
+import org.apache.jena.sparql.modify.request.UpdateAdd;
+import org.apache.jena.sparql.modify.request.UpdateClear;
+import org.apache.jena.sparql.modify.request.UpdateCopy;
+import org.apache.jena.sparql.modify.request.UpdateCreate;
 import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateDataDelete;
 import org.apache.jena.sparql.modify.request.UpdateDataInsert;
 import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
+import org.apache.jena.sparql.modify.request.UpdateDeleteWhere;
+import org.apache.jena.sparql.modify.request.UpdateDrop;
+import org.apache.jena.sparql.modify.request.UpdateLoad;
 import org.apache.jena.sparql.modify.request.UpdateModify;
+import org.apache.jena.sparql.modify.request.UpdateMove;
+import org.apache.jena.sparql.modify.request.UpdateVisitor;
 import org.apache.jena.sparql.modify.request.UpdateWithUsing;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
@@ -290,5 +299,4 @@ public class UpdateUtils {
     	
     	return result;
     }
-
 }
