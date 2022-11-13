@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,7 +32,6 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.ARQException;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
@@ -238,6 +236,11 @@ public class SparqlStmtMgr {
     	return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create());
     }
 
+    public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, PrefixMapping prefixes) {
+    	SparqlStmtParser parser = SparqlStmtParserImpl.create(prefixes);
+    	return loadSparqlStmts(filenameOrURI, parser);
+    }
+    
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, SparqlStmtParser parser) {
 
     	List<SparqlStmt> result;

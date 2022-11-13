@@ -1,18 +1,42 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import java.io.InputStream;
+
+import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
+import org.aksw.jena_sparql_api.sparql.ext.xml.JenaXmlUtils;
+import org.aksw.jena_sparql_api.sparql.ext.xml.RDFDatatypeXml;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
 public class JenaJsonUtils {
+	
+	public static NodeValue resolve(NodeValue nv, FunctionEnv env) throws Exception {
+		RDFDatatypeXml dtype = (RDFDatatypeXml)TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
+		NodeValue result;
+		try (InputStream in = JenaUrlUtils.openInputStream(nv, env)) {
+	    	if (in != null) {
+	    		Gson gson = new GsonBuilder().setLenient().create();
+	    		
+	    		result = JenaXmlUtils.parse(in, dtype);
+	    	} else {
+	        	throw new ExprEvalException("Failed to obtain text from node " + nv);
+	        }
+		}
+	    return result;
+	}
+
+	
     public static JsonElement extractJsonElement(NodeValue nv) {
         JsonElement result = null;
         if (nv != null) {

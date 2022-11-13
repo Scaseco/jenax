@@ -415,7 +415,7 @@ public class SparqlScriptProcessor {
 //        String str = StreamManager.get().mapURI(filename);
 
         // Try as RDF file
-        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS, Lang.RDFXML))) {
+        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS, Lang.JSONLD, Lang.RDFXML))) {
 //            if(tmpIn == null) {
 //                throw new FileNotFoundException(filename);
 //            }

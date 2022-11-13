@@ -87,6 +87,25 @@ public class SparqlStmtUtils {
     // TODO Duplicate symbol definition; exists in E_Benchmark
     public static final Symbol symConnection = Symbol.create("http://jsa.aksw.org/connection");
 
+    public static Set<Node> mentionedNodes(SparqlStmt stmt) {
+        NodeTransformCollectNodes xform = new NodeTransformCollectNodes();
+        applyNodeTransform(stmt, xform);
+        Set<Node> result = xform.getNodes();
+        return result;
+    }
+    
+    public static PrefixMapping getPrefixMapping(SparqlStmt stmt) {
+    	PrefixMapping result = null;
+    	if (stmt.isParsed()) {
+	    	if (stmt.isQuery()) {
+	    		result = stmt.getQuery().getPrefixMapping();
+	    	} else if (stmt.isUpdateRequest()) {
+	    		result = stmt.getUpdateRequest().getPrefixMapping();
+	    	}
+    	}
+    	return result;
+    }
+    
     public static Map<String, Boolean> mentionedEnvVars(SparqlStmt stmt) {
         NodeTransformCollectNodes xform = new NodeTransformCollectNodes();
         applyNodeTransform(stmt, xform);

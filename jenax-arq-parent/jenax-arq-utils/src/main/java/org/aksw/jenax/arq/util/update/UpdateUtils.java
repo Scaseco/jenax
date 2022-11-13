@@ -7,13 +7,16 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.syntax.ElementTransformSubst2;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.QuadDataAcc;
 import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateDataDelete;
@@ -22,10 +25,13 @@ import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
 import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.modify.request.UpdateWithUsing;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 import org.apache.jena.update.Update;
+
+import com.google.common.base.Preconditions;
 
 public class UpdateUtils {
 
@@ -258,5 +264,31 @@ public class UpdateUtils {
 //    }
 //
 
+    /** Convert a construct query into an insert query */
+    public static Update constructToInsert(Query query) {
+    	Preconditions.checkArgument(query.isConstructType(), "Expected a CONSTRUCT query");
+    	
+    	boolean applyWrapping =
+    			query.hasLimit() || query.hasOffset() || query.hasOrderBy() || query.hasValues()
+    			// Omit features not supported by construct queries: 
+    			// hasGroupBy() / hasHaving() / query.hasAggregators()
+    			;
+    	
+    	Element elt = applyWrapping
+    			? new ElementSubQuery(query)
+    			: query.getQueryPattern();
+    	
+    	UpdateModify result = new UpdateModify();
+    	result.setHasInsertClause(true);
+    	result.setElement(elt);
+    	
+    	// Copy the construct template
+    	query.getGraphURIs().forEach(iri -> result.addUsing(NodeFactory.createURI(iri)));
+    	query.getNamedGraphURIs().forEach(iri -> result.addUsingNamed(NodeFactory.createURI(iri)));
+    	QuadAcc acc = result.getInsertAcc();
+    	query.getConstructTemplate().getQuads().forEach(acc::addQuad);
+    	
+    	return result;
+    }
 
 }

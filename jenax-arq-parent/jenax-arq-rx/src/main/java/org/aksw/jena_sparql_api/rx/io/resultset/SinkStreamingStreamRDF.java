@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.rx.io.resultset;
 
+import java.util.Objects;
+
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.sparql.core.Quad;
@@ -13,6 +15,7 @@ public class SinkStreamingStreamRDF
 
     public SinkStreamingStreamRDF(StreamRDF streamRDF) {
         super();
+        Objects.requireNonNull(streamRDF);
         this.streamRDF = streamRDF;
     }
 

@@ -51,6 +51,7 @@ public class StreamRDFDeferred
             long remainingQuadDeferrals,
             String base) {
         super();
+        Objects.requireNonNull(delegate);
         this.delegate = delegate;
         this.allowExtendBasePrefixes = allowExtendBasePrefixes;
         this.basePrefixes = basePrefixes;
