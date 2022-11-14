@@ -198,18 +198,21 @@ public class SparqlScriptProcessor {
         return sparqlParserFactory.apply(new Prologue(globalPrefixes));
     }
 
-    public static SparqlStmtParser createParserPlain(Prologue prologue) {
+    public static SparqlStmtParser createParserPlain(Prologue prologue, String base) {
         SparqlQueryParser queryParser = SparqlQueryParserWrapperSelectShortForm.wrap(
-                SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue));
+                // SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue));
+                SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue, base, null));
+
 
         SparqlUpdateParser updateParser = SparqlUpdateParserImpl
-                .create(Syntax.syntaxARQ, prologue);
+                // .create(Syntax.syntaxARQ, prologue);
+                .create(Syntax.syntaxARQ, prologue, base, null);
 
-        return new SparqlStmtParserImpl(queryParser, updateParser, true);
+        return new SparqlStmtParserImpl(queryParser, updateParser, base, true);
     }
 
     public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
-        SparqlStmtParser core = createParserPlain(prologue);
+        SparqlStmtParser core = createParserPlain(prologue, prologue.getBaseURI());
         SparqlStmtParser sparqlParser =
                 SparqlStmtParser.wrapWithTransform(
                        core,
@@ -233,9 +236,9 @@ public class SparqlScriptProcessor {
         return result;
     }
 
-    public static SparqlScriptProcessor createPlain(PrefixMapping globalPrefixes) {
+    public static SparqlScriptProcessor createPlain(PrefixMapping globalPrefixes, String base) {
         SparqlScriptProcessor result = new SparqlScriptProcessor(
-                SparqlScriptProcessor::createParserPlain,
+                prologue -> SparqlScriptProcessor.createParserPlain(prologue, base),
                 globalPrefixes);
         return result;
     }
