@@ -10,7 +10,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 
 /**
  * Util method to process a SPARQL 1.1 Property Path into an NFA using Thompson's Construction.
- * 
+ *
  * @author raven
  *
  */
@@ -22,7 +22,7 @@ public class PathCompiler {
         path = PathVisitorTopDown.apply(path, new PathVisitorRewriteInvert());
 
         //DefaultDirectedGraph.createBuilder(Triple.class).
-        
+
         /*
          * Some ugly set up of graph related stuff
          */

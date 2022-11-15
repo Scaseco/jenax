@@ -1,7 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.url;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -18,8 +16,10 @@ public class JenaExtensionUrl {
 
         PropertyFunctionRegistry.get().put(ns + "text", new PropertyFunctionFactoryUrlText());
 
-        JenaExtensionUtil.getDefaultFunctionBinder()
-            .register(ns2 + "asGiven", NodeFactory.class, "createURI", String.class);
+        FunctionRegistry.get().put(ns2 + "asGiven", E_IriAsGiven.class);
+
+        // JenaExtensionUtil.getDefaultFunctionBinder()
+         //   .register(ns2 + "asGiven", NodeFactory.class, "createURI", String.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {

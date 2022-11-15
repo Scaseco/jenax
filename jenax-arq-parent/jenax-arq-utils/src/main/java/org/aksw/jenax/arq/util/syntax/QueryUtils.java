@@ -63,6 +63,7 @@ import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryShallowCopyWithPresetPrefixes;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
@@ -72,6 +73,16 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
 public class QueryUtils {
+
+    public static Query applyElementTransform(Query beforeQuery, Function<? super Element, ? extends Element> transform) {
+        Query result = QueryTransformOps.shallowCopy(beforeQuery);
+        Element beforePattern = result.getQueryPattern();
+        if (beforePattern != null) {
+            Element afterPattern = transform.apply(beforePattern);
+            result.setQueryPattern(afterPattern);
+        }
+        return result;
+    }
 
     public static Query applyOpTransform(Query beforeQuery, Function<? super Op, ? extends Op> transform) {
         Op beforeOp = Algebra.compile(beforeQuery);

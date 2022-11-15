@@ -189,6 +189,22 @@ public class SparqlStmtUtils {
         return stmt;
     }
 
+    public static SparqlStmt applyElementTransform(SparqlStmt stmt, Function<? super Element, ? extends Element> transform) {
+        SparqlStmt result;
+        if(stmt.isQuery()) {
+            Query tmp = stmt.getAsQueryStmt().getQuery();
+            Query query = QueryUtils.applyElementTransform(tmp, transform);
+            result = new SparqlStmtQuery(query);
+        } else if(stmt.isUpdateRequest()) {
+            UpdateRequest tmp = stmt.getAsUpdateStmt().getUpdateRequest();
+            UpdateRequest updateRequest = UpdateRequestUtils.applyTransformElt(tmp, transform);
+            result = new SparqlStmtUpdate(updateRequest);
+        } else {
+            result = stmt;
+        }
+
+        return result;
+    }
 
     public static SparqlStmt applyOpTransform(SparqlStmt stmt, Function<? super Op, ? extends Op> transform) {
         SparqlStmt result;
