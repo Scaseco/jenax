@@ -39,6 +39,7 @@ import org.apache.jena.sparql.syntax.ElementDataset;
 import org.apache.jena.sparql.syntax.ElementExists;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementMinus;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
@@ -304,6 +305,11 @@ public class ElementTransformer {
         public void visit(ElementSubQuery el) {
             Query newQuery = QueryTransformOps.transform(el.getQuery(), transform, exprTransform) ;
             push(new ElementSubQuery(newQuery)) ;
+        }
+
+        @Override
+        public void visit(ElementLateral el) {
+            throw new UnsupportedOperationException("This class should no longer be used");
         }
 
         private Node transformNode(Node n) {

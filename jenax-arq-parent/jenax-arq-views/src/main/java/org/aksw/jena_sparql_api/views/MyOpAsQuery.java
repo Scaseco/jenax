@@ -53,6 +53,7 @@ import org.apache.jena.sparql.algebra.op.OpGraph;
 import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.algebra.op.OpJoin;
 import org.apache.jena.sparql.algebra.op.OpLabel;
+import org.apache.jena.sparql.algebra.op.OpLateral;
 import org.apache.jena.sparql.algebra.op.OpLeftJoin;
 import org.apache.jena.sparql.algebra.op.OpList;
 import org.apache.jena.sparql.algebra.op.OpMinus;
@@ -89,6 +90,7 @@ import org.apache.jena.sparql.syntax.ElementAssign;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
@@ -691,6 +693,21 @@ public class MyOpAsQuery
         @Override
         public void visit(OpQuadBlock op) {
             throw new RuntimeException("Not implemented");
+        }
+
+        @Override
+        public void visit(OpLateral opLateral) {
+            Element eLeft = asElement(opLateral.getLeft()) ;
+            ElementGroup eRight = asElementGroup(opLateral.getRight()) ;
+            ElementGroup g = currentGroup() ;
+            if ( !emptyGroup(eLeft) ) {
+                if ( eLeft instanceof ElementGroup )
+                    g.getElements().addAll(((ElementGroup)eLeft).getElements()) ;
+                else
+                    g.addElement(eLeft) ;
+            }
+            ElementLateral eltLateral = new ElementLateral(eRight) ;
+            g.addElement(eltLateral) ;
         }
 
 //        @Override

@@ -85,6 +85,20 @@ public class QueryExecutionUtils {
         return result;
     }
 
+    public static List<Binding> execListBinding(Function<? super Query, ? extends QueryExecution> qef, Query query) {
+        List<Binding> result = new ArrayList<>();
+        try (QueryExecution qe = qef.apply(query)) {
+            ResultSet rs = qe.execSelect();
+            while(rs.hasNext()) {
+                Binding binding = rs.nextBinding();
+                result.add(binding);
+            }
+        }
+
+        return result;
+    }
+
+
     public static <T extends RDFNode> List<T> executeRdfList(Function<? super Query, ? extends QueryExecution> qef, Query query, Class<T> viewClass) {
         Var var = QueryUtils.extractSoleProjectVar(query);
 

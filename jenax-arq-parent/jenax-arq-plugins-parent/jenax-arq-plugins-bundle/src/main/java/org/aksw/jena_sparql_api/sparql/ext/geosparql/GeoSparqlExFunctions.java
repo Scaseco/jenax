@@ -10,6 +10,7 @@ import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
+import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -183,6 +184,44 @@ public class GeoSparqlExFunctions {
         Coordinate[] coords = c.getCoordinates();
 
         Geometry outGeom = CustomGeometryFactory.theInstance().createLineString(coords);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
+        return result;
+    }
+
+
+//    public static void main(String[] args) {
+//        GeometryWrapper start = GeometryWrapper.fromPoint(0, 0, SRS_URI.DEFAULT_WKT_CRS84);
+//        System.out.println(project(start, 1000, 1 * Math.PI));
+//    }
+
+    /**
+     * https://postgis.net/docs/ST_Project.html - azimuth
+     * Source: https://stackoverflow.com/questions/44419722/calculate-coordinates-from-coordinates-distance-and-an-angle
+     */
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper project(GeometryWrapper geomWrapper, double distanceInMeters, double azimuthInRadians) {
+        double earthRadius = 6371e3;
+        double srcLonDeg = lon(geomWrapper);
+        double srcLatDeg = lat(geomWrapper);
+
+        double srcLonRad = Math.toRadians(srcLonDeg);
+        double srcLatRad = Math.toRadians(srcLatDeg);
+
+        double angularDistance = distanceInMeters / earthRadius;
+
+        double destLatRad = Math.asin(Math.sin(srcLatRad) * Math.cos(angularDistance) +
+                Math.cos(srcLatRad) * Math.sin(angularDistance) * Math.cos(azimuthInRadians));
+
+        double destLonRad = srcLonRad + Math.atan2(Math.sin(azimuthInRadians) * Math.sin(angularDistance) * Math.cos(srcLatRad),
+                Math.cos(angularDistance) - Math.sin(srcLatRad) * Math.sin(destLatRad));
+
+        // Normalize longitudo to [-PI..+PI)
+        destLonRad = (destLonRad + 3 * Math.PI) % (2.0 * Math.PI) - Math.PI;
+
+        double destLonDeg = Math.toDegrees(destLonRad);
+        double destLatDeg = Math.toDegrees(destLatRad);
+
+        Geometry outGeom = CustomGeometryFactory.theInstance().createPoint(new Coordinate(destLonDeg, destLatDeg));
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
         return result;
     }
