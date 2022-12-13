@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -15,8 +16,14 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.system.PrefixMap;
+import org.apache.jena.riot.system.PrefixMapAdapter;
+import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
 public class PrefixUtils {
