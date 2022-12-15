@@ -1,14 +1,10 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccumulatorFactories;
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.GeoSparqlExAggregators;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
-import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 
@@ -20,27 +16,27 @@ public class JenaExtensionJson {
 //                ns + "collect",
 //                AccumulatorFactories.wrap1(AggregatorsJena::aggGeometryCollection));
 
+        FunctionRegistry fnReg = FunctionRegistry.get();
+        fnReg.put(ns + "object", E_JsonObject.class);
+        fnReg.put(ns + "array", E_JsonArray.class);
+        fnReg.put(ns + "convert", E_JsonConvert.class);
 
-        FunctionRegistry.get().put(ns + "object", E_JsonObject.class);
-        FunctionRegistry.get().put(ns + "array", E_JsonArray.class);
-        FunctionRegistry.get().put(ns + "convert", E_JsonConvert.class);
+//		fnReg.put(ns + "parse", E_JsonParse.class);
+        fnReg.put(ns + "path", E_JsonPath.class);
+        fnReg.put(ns + "entries", E_JsonEntries.class);
+        fnReg.put(ns + "js", E_JsonNashorn.class);
 
-
-//		FunctionRegistry.get().put(ns + "parse", E_JsonParse.class);
-        FunctionRegistry.get().put(ns + "path", E_JsonPath.class);
-        FunctionRegistry.get().put(ns + "entries", E_JsonEntries.class);
-        FunctionRegistry.get().put(ns + "js", E_JsonNashorn.class);
-
-        FunctionRegistry.get().put(ns + "split", E_JsonStrSplit.class);
-        FunctionRegistry.get().put(ns + "reverse", E_JsonReverse.class);
+        fnReg.put(ns + "split", E_JsonStrSplit.class);
+        fnReg.put(ns + "reverse", E_JsonReverse.class);
 
         // TODO Move to a different namespace
-        FunctionRegistry.get().put(ns + "binaryString", E_BinaryString.class);
+        fnReg.put(ns + "binaryString", E_BinaryString.class);
 
         TypeMapper.getInstance().registerDatatype(new RDFDatatypeJson());
 
-        PropertyFunctionRegistry.get().put(ns + "unnest", new PropertyFunctionFactoryJsonUnnest());
-        PropertyFunctionRegistry.get().put(ns + "explode", new PropertyFunctionFactoryJsonExplode());
+        PropertyFunctionRegistry pfnReg = PropertyFunctionRegistry.get();
+        pfnReg.put(ns + "unnest", new PropertyFunctionFactoryJsonUnnest());
+        pfnReg.put(ns + "explode", new PropertyFunctionFactoryJsonExplode());
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
         binder.registerAll(SparqlFnLibJson.class);

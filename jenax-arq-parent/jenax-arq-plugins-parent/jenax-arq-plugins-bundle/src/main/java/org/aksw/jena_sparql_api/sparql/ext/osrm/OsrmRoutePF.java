@@ -105,7 +105,7 @@ public class OsrmRoutePF extends PropertyFunctionBase {
         try {
             NodeValue result = JenaUrlUtils.resolve(NodeValue.makeNode(NodeFactory.createURI(request)), execCxt);
 
-            JsonObject json = RDFDatatypeJson.INSTANCE.getGson().fromJson(result.asNode().getLiteral().getLexicalForm(), JsonObject.class);
+            JsonObject json = RDFDatatypeJson.get().getGson().fromJson(result.asNode().getLiteral().getLexicalForm(), JsonObject.class);
             JsonArray routes = json.getAsJsonObject().get("routes").getAsJsonArray();
 
             Function<JsonElement, Binding> converter = (JsonElement elt) -> {

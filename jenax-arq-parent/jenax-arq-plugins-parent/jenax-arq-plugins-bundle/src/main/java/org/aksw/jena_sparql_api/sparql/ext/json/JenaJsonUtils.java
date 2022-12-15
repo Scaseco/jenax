@@ -1,42 +1,49 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import java.io.InputStream;
-
-import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
-import org.aksw.jena_sparql_api.sparql.ext.xml.JenaXmlUtils;
-import org.aksw.jena_sparql_api.sparql.ext.xml.RDFDatatypeXml;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionEnv;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
 public class JenaJsonUtils {
-	
-	public static NodeValue resolve(NodeValue nv, FunctionEnv env) throws Exception {
-		RDFDatatypeXml dtype = (RDFDatatypeXml)TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
-		NodeValue result;
-		try (InputStream in = JenaUrlUtils.openInputStream(nv, env)) {
-	    	if (in != null) {
-	    		Gson gson = new GsonBuilder().setLenient().create();
-	    		
-	    		result = JenaXmlUtils.parse(in, dtype);
-	    	} else {
-	        	throw new ExprEvalException("Failed to obtain text from node " + nv);
-	        }
-		}
-	    return result;
-	}
 
-	
+    public static NodeValue fromString(String jsonStr) {
+        Node node = NodeFactory.createLiteral(jsonStr, RDFDatatypeJson.get());
+        NodeValue result = NodeValue.makeNode(node);
+        return result;
+    }
+
+//    TODO Needs adaption (copyied from XML)
+//    public static NodeValue resolve(NodeValue nv, FunctionEnv env) throws Exception {
+//        RDFDatatypeXml dtype = (RDFDatatypeXml)TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
+//        NodeValue result;
+//        try (InputStream in = JenaUrlUtils.openInputStream(nv, env)) {
+//            if (in != null) {
+//                Gson gson = new GsonBuilder().setLenient().create();
+//
+//                result = JenaXmlUtils.parse(in, dtype);
+//            } else {
+//                throw new ExprEvalException("Failed to obtain text from node " + nv);
+//            }
+//        }
+//        return result;
+//    }
+
+    public static boolean isJsonElement(NodeValue nv) {
+        boolean result = false;
+        if (nv != null) {
+            Node asNode = nv.asNode();
+            result = asNode.getLiteralDatatype() instanceof RDFDatatypeJson;
+        }
+        return result;
+    }
+
     public static JsonElement extractJsonElement(NodeValue nv) {
         JsonElement result = null;
         if (nv != null) {
@@ -51,12 +58,11 @@ public class JenaJsonUtils {
 
     /** Extract or convert */
     public static JsonElement enforceJsonElement(NodeValue nv) {
-    	JsonElement result = extractJsonElement(nv);
-    	if (result == null) {
-    		Node node = nv.asNode();
-    		result = nodeToJsonElement(node);
-    	}
-
+        JsonElement result = extractJsonElement(nv);
+        if (result == null) {
+            Node node = nv.asNode();
+            result = nodeToJsonElement(node);
+        }
         return result;
     }
 
@@ -68,44 +74,44 @@ public class JenaJsonUtils {
 
 
     public static JsonElement nodeToJsonElement(Node node) {
-    	JsonElement result;
-    	if (node == null) {
-    		result = JsonNull.INSTANCE;
-    	} else if (node.isLiteral()) {
-    		result = nodeLiteralToJsonElement(node);
-    	} else if (node.isURI()) {
-    		result = new JsonPrimitive(node.getURI());
-    	} else if (node.isBlank()) {
-    		result = new JsonPrimitive(node.getBlankNodeLabel());
-    	} else {
-    		throw new IllegalArgumentException("Unknown term type - Neither literal, iri nor blank node: " + node);
-    	}
+        JsonElement result;
+        if (node == null) {
+            result = JsonNull.INSTANCE;
+        } else if (node.isLiteral()) {
+            result = nodeLiteralToJsonElement(node);
+        } else if (node.isURI()) {
+            result = new JsonPrimitive(node.getURI());
+        } else if (node.isBlank()) {
+            result = new JsonPrimitive(node.getBlankNodeLabel());
+        } else {
+            throw new IllegalArgumentException("Unknown term type - Neither literal, iri nor blank node: " + node);
+        }
 
-    	return result;
+        return result;
     }
 
     public static JsonElement nodeLiteralToJsonElement(Node node) {
-    	JsonElement result;
-    	if (!node.isLiteral()) {
-    		throw new IllegalArgumentException("Not a literal");
-    	} else {
-    		Object obj = node.getLiteralValue();
-	        if(obj instanceof String) {
-	            String value = (String)obj;
-	            result = new JsonPrimitive(value);
-	        } else if(obj instanceof Number) {
-	            Number value = (Number)obj;
-	            result = new JsonPrimitive(value);
-	        } else if(obj instanceof Boolean) {
-	            Boolean value = (Boolean) obj;
-	            result = new JsonPrimitive(value);
-	        } else {
-	        	// Fallback: Just emit the lexical form
+        JsonElement result;
+        if (!node.isLiteral()) {
+            throw new IllegalArgumentException("Not a literal");
+        } else {
+            Object obj = node.getLiteralValue();
+            if(obj instanceof String) {
+                String value = (String)obj;
+                result = new JsonPrimitive(value);
+            } else if(obj instanceof Number) {
+                Number value = (Number)obj;
+                result = new JsonPrimitive(value);
+            } else if(obj instanceof Boolean) {
+                Boolean value = (Boolean) obj;
+                result = new JsonPrimitive(value);
+            } else {
+                // Fallback: Just emit the lexical form
                 String value = node.getLiteralLexicalForm();
                 result = new JsonPrimitive(value);
-	        }
-    	}
-    	return result;
+            }
+        }
+        return result;
     }
 
     public static Node jsonToNode(Object o) {

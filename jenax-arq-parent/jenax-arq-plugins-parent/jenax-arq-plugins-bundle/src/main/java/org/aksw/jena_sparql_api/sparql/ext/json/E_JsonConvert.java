@@ -14,7 +14,7 @@ public class E_JsonConvert
     @Override
     public NodeValue exec(NodeValue v) {
         Node node = v == null ? null : v.asNode();
-        JsonElement jsonElement = convert(node, RDFDatatypeJson.INSTANCE.getGson());
+        JsonElement jsonElement = convert(node, RDFDatatypeJson.get().getGson());
         NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonElement);
         return result;
     }

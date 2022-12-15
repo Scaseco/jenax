@@ -28,7 +28,7 @@ public class E_JsonPath
     private Gson gson;
 
     public E_JsonPath() {
-        this(RDFDatatypeJson.INSTANCE.getGson());
+        this(RDFDatatypeJson.get().getGson());
     }
 
     public E_JsonPath(Gson gson) {

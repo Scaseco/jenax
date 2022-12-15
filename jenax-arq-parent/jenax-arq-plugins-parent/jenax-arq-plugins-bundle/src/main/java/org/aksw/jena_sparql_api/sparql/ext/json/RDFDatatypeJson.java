@@ -25,7 +25,11 @@ public class RDFDatatypeJson
     private static final Logger logger = LoggerFactory.getLogger(RDFDatatypeJson.class);
 
     public static final String IRI = XSD.getURI() + "json";
-    public static final RDFDatatypeJson INSTANCE = new RDFDatatypeJson();
+    private static final RDFDatatypeJson INSTANCE = new RDFDatatypeJson();
+
+    public static RDFDatatypeJson get() {
+        return INSTANCE;
+    }
 
     private Gson gson;
 
