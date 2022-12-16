@@ -1,5 +1,6 @@
 ---
 title: Datatype Extensions
+parent: ARQ Plugins
 nav_order: 10
 ---
 
