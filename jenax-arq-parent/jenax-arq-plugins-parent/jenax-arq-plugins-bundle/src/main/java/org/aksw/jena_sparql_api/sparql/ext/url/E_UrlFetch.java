@@ -27,9 +27,10 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -52,14 +53,14 @@ import com.google.gson.JsonPrimitive;
 public class E_UrlFetch
     extends FunctionBase
 {
-    protected Gson gson = RDFDatatypeJson.get().getGson();
+    private static final Logger logger = LoggerFactory.getLogger(E_UrlFetch.class);
 
     public static final Pattern jsonContentTypePattern = Pattern.compile("^application/(.+\\+)?json$");
 
     @Override
     public NodeValue exec(List<NodeValue> args) {
         JsonObject obj = assemble(args);
-        UrlFetchSpec conf = gson.fromJson(obj, UrlFetchSpec.class);
+        UrlFetchSpec conf = RDFDatatypeJson.get().getGson().fromJson(obj, UrlFetchSpec.class);
         NodeValue result;
 
         try {
@@ -90,9 +91,9 @@ public class E_UrlFetch
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.warn("Exception during evaluation of url:fetch with effective spec " + obj, e);
+            throw new ExprEvalException(e);
         }
-        // System.out.println(result);
         return result;
     }
 
@@ -123,7 +124,7 @@ public class E_UrlFetch
                     ++i;
                 }
             } else if (JenaJsonUtils.isJsonElement(k)) {
-                JsonElement elt = JenaJsonUtils.extractJsonElement(v);
+                JsonElement elt = JenaJsonUtils.extractJsonElement(k);
                 GsonUtils.merge(result, elt);
             } else {
                 throw new ExprTypeException("Either JSON or string type expected for argument " + i);
@@ -134,13 +135,23 @@ public class E_UrlFetch
     }
 
     public static void expandShortcuts(List<String> key) {
-        if (key.size() >= 1) {
+        int n = key.size();
+        if (n >= 1) {
             String first = key.get(0);
-            if (key.size() > 1 && first.equals("h")) {
-                // Expand h.foo to headers.foo
-                key.set(0, "headers");
-            } else if (first.equals("m")) {
-                key.set(0, "method");
+            if (n > 1) {
+                if (first.equals("h")) {
+                    key.set(0, "headers");
+                }
+            } else if (n == 1) {
+                if (first.equals("m")) {
+                    key.set(0, "method");
+                } else if (first.equals("b")) {
+                    key.set(0, "body");
+                } else if (first.equals("cto")) {
+                    key.set(0, "connectTimeout");
+                } else if (first.equals("rto")) {
+                    key.set(0, "readTimeout");
+                }
             }
         }
     }
@@ -156,7 +167,11 @@ public class E_UrlFetch
     public static void configure(URLConnection conn, UrlFetchSpec conf) {
         if (conn instanceof HttpURLConnection) {
             HttpURLConnection c = (HttpURLConnection)conn;
+
             PropertyUtils.applyIfPresent(c::setRequestMethod, conf::getMethod);
+            PropertyUtils.applyIfPresent(c::setConnectTimeout, conf::getConnectTimeout);
+            PropertyUtils.applyIfPresent(c::setReadTimeout, conf::getReadTimeout);
+
             for (Entry<String, String> e : conf.getHeaders().entrySet()) {
                 c.setRequestProperty(e.getKey(), e.getValue());
             }
@@ -169,6 +184,9 @@ class UrlFetchSpec {
     String method;
     Map<String, String> headers;
     String body;
+    Integer connectTimeout;
+    Integer readTimeout;
+
     public String getUrl() {
         return url;
     }
@@ -180,6 +198,17 @@ class UrlFetchSpec {
     }
     public String getBody() {
         return body;
+    }
+    public Integer getConnectTimeout() {
+        return connectTimeout;
+    }
+    public Integer getReadTimeout() {
+        return readTimeout;
+    }
+    @Override
+    public String toString() {
+        return "UrlFetchSpec [url=" + url + ", method=" + method + ", headers=" + headers + ", body=" + body
+                + ", connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout + "]";
     }
 }
 
@@ -237,7 +266,11 @@ class GsonUtils {
 
     public static JsonElement merge(JsonElement a, JsonElement b) {
         JsonElement result;
-        if (a.isJsonArray() && b.isJsonArray()) {
+        if (a == null) {
+            result = b == null ? null : b.deepCopy();
+        } else if (b == null) {
+            result = a;
+        } else if (a.isJsonArray() && b.isJsonArray()) {
             result = merge(a.getAsJsonArray(), b.getAsJsonArray());
         } else if (a.isJsonObject() && b.isJsonObject()) {
             result = merge(a.getAsJsonObject(), b.getAsJsonObject());
