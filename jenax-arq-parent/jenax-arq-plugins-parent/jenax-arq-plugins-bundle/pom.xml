@@ -61,6 +61,11 @@
 			<artifactId>aksw-commons-collectors</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-utils-gson</artifactId>
+		</dependency>
+
 		<!-- Used for ResultSet comparison -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
