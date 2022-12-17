@@ -1,7 +1,7 @@
 ---
 title: ARQ Plugins
-parent: ARQ Extensions
+#parent: ARQ Extensions
 has_children: true
-nav_order: 10
+nav_order: 20
 ---
 
