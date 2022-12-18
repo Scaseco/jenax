@@ -5,11 +5,13 @@ import java.util.Set;
 import org.aksw.commons.collector.domain.Aggregator;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 
 public interface Agg<T>
-    extends Aggregator<Binding, T>
+    extends Aggregator<Binding, FunctionEnv, T>
 {
+    @Override
     Acc<T> createAccumulator();
 
     /**

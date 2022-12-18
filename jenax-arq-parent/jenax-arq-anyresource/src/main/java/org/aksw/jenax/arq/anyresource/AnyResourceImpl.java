@@ -1,4 +1,4 @@
-package org.aksw.jenax.rdf.model;
+package org.aksw.jenax.arq.anyresource;
 
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.enhanced.EnhNode;
@@ -6,6 +6,7 @@ import org.apache.jena.enhanced.Implementation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 
+/** Implementation of {@link AnyResource}. */
 public class AnyResourceImpl
     extends ResourceImpl
     implements AnyResource
@@ -14,7 +15,7 @@ public class AnyResourceImpl
         super(n, m);
     }
 
-    public static final Implementation factory = new Implementation() {
+    public static final Implementation FACTORY = new Implementation() {
         @Override
         public boolean canWrap(Node n, EnhGraph eg) {
             return true;

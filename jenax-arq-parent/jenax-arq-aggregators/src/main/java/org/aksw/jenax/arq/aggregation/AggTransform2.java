@@ -5,8 +5,8 @@ import java.util.function.Function;
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
 
-public class AggTransform2<B, I, O, C extends Aggregator<B, I>>
-    implements Aggregator<B, O>
+public class AggTransform2<B, E, I, O, C extends Aggregator<B, E, I>>
+    implements Aggregator<B, E, O>
 {
     private C subAgg;
     private Function<? super I, O> transform;
@@ -23,14 +23,14 @@ public class AggTransform2<B, I, O, C extends Aggregator<B, I>>
     }
 
     @Override
-    public Accumulator<B, O> createAccumulator() {
-        Accumulator<B, I> baseAcc = subAgg.createAccumulator();
-        Accumulator<B, O> result = new AccTransform2<>(baseAcc, transform);
+    public Accumulator<B, E, O> createAccumulator() {
+        Accumulator<B, E, I> baseAcc = subAgg.createAccumulator();
+        Accumulator<B, E, O> result = new AccTransform2<>(baseAcc, transform);
         return result;
     }
 
-    public static <B, I, O, C extends Aggregator<B, I>> AggTransform2<B, I, O, C> create(C subAgg, Function<? super I, O> transform) {
-        AggTransform2<B, I, O, C> result = new AggTransform2<>(subAgg, transform);
+    public static <B, E, I, O, C extends Aggregator<B, E, I>> AggTransform2<B, E, I, O, C> create(C subAgg, Function<? super I, O> transform) {
+        AggTransform2<B, E, I, O, C> result = new AggTransform2<>(subAgg, transform);
         return result;
     }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 
 /**
@@ -23,9 +24,9 @@ public class AccList<T> implements Acc<List<T>> {
     }
 
     @Override
-    public void accumulate(Binding binding) {
+    public void accumulate(Binding binding, FunctionEnv env) {
         Acc<T> acc = subAgg.createAccumulator();
-        acc.accumulate(binding);
+        acc.accumulate(binding, env);
         state.add(acc);
     }
 

@@ -1,4 +1,4 @@
-package org.aksw.jenax.rdf.model;
+package org.aksw.jenax.arq.anyresource;
 
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
@@ -16,6 +16,6 @@ public class JenaPluginAnyResource
     }
 
     public static void init() {
-        BuiltinPersonalities.model.add(AnyResource.class, AnyResourceImpl.factory);
+        BuiltinPersonalities.model.add(AnyResource.class, AnyResourceImpl.FACTORY);
     }
 }

@@ -1,3 +1,10 @@
+---
+title: Function Extensions
+parent: ARQ Plugins
+has_children: false
+nav_order: 20
+---
+
 ## SPARQL extensions for heterogeneous data
 
 This module enhances Jena's SPARQL engine with additional datatypes, functions and property functions for accessing and processing JSON, CSV and XML data.

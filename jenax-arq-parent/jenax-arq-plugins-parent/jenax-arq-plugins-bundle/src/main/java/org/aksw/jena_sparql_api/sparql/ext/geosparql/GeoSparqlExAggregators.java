@@ -39,10 +39,10 @@ public class GeoSparqlExAggregators {
 
     private static final Logger logger = LoggerFactory.getLogger(GeoSparqlExAggregators.class);
 
-    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<BindingEnv, GeometryWrapper>> ctor) {
+    public static AccumulatorFactory wrap1(BiFunction<? super Expr, ? super Boolean, ? extends Aggregator<Binding, FunctionEnv, GeometryWrapper>> ctor) {
         return (aggCustom, distinct) -> {
             Expr expr = aggCustom.getExpr();
-            Aggregator<BindingEnv, NodeValue> coreAgg = ctor.apply(expr, distinct)
+            Aggregator<Binding, FunctionEnv, NodeValue> coreAgg = ctor.apply(expr, distinct)
                     .finish(geometryWrapper -> {
                         NodeValue r = geometryWrapper == null
                                 ? null
@@ -108,14 +108,14 @@ public class GeoSparqlExAggregators {
         return result;
     }
 
-    public static Aggregator<BindingEnv, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> UnaryUnionOp.union(geoms, geomFactory);
 
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<BindingEnv, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> {
             Iterator<Geometry> it = geoms.iterator();
@@ -138,7 +138,7 @@ public class GeoSparqlExAggregators {
 //        return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
 //    }
 
-    public static Aggregator<BindingEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
 
@@ -146,18 +146,16 @@ public class GeoSparqlExAggregators {
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<BindingEnv, GeometryWrapper> aggGeometryWrapperCollection(
+    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(
             Expr geomExpr,
             boolean distinct,
             Function<Collection<Geometry>, Geometry> finisher) {
 
         return
             AggBuilder.errorHandler(
-                AggBuilder.inputTransform(
-                    (BindingEnv benv) -> {
+                AggBuilder.inputTransform2(
+                    (Binding b, FunctionEnv env) -> {
                         try {
-                            Binding b = benv.getBinding();
-                            FunctionEnv env = benv.getFunctionEnv();
                             NodeValue nv = geomExpr.eval(b, env);
                             return GeometryWrapper.extract(nv);
                         } catch (VariableNotBoundException e) {}
@@ -178,7 +176,7 @@ public class GeoSparqlExAggregators {
      * @param distinct Whether to collect geometries in a set or a list
      * @param geomFactory The geometry factory. If null then jena's default one is used.
      */
-    public static ParallelAggregator<GeometryWrapper, GeometryWrapper, ?> aggGeometryWrapperCollection(
+    public static ParallelAggregator<GeometryWrapper, FunctionEnv, GeometryWrapper, ?> aggGeometryWrapperCollection(
             boolean distinct,
             Function<Collection<Geometry>, Geometry> finisher
     ) {

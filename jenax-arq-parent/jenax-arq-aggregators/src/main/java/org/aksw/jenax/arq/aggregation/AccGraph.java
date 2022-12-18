@@ -1,7 +1,6 @@
 package org.aksw.jenax.arq.aggregation;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +12,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.Template;
@@ -45,7 +45,7 @@ public class AccGraph
     }
 
     @Override
-    public void accumulate(Binding binding) {
+    public void accumulate(Binding binding, FunctionEnv env) {
         Map<Node, Node> bNodeMap = new HashMap<Node, Node>();
         Set<Triple> triples = template.getTriples().stream()
                 .map(t -> TemplateLib.subst(t, binding, bNodeMap))

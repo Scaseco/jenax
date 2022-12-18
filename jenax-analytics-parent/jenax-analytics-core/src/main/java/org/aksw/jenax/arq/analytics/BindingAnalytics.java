@@ -12,6 +12,7 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 public class BindingAnalytics {
 
@@ -27,7 +28,7 @@ public class BindingAnalytics {
      * @param nodeAgg
      * @return
      */
-    public static <O> ParallelAggregator<Binding, Map<Var, O>, ?> aggPerVar(ParallelAggregator<Node, O, ?> nodeAgg) {
+    public static <O> ParallelAggregator<Binding, ?, Map<Var, O>, ?> aggPerVar(ParallelAggregator<Node, ?, O, ?> nodeAgg) {
         return AggBuilder.inputSplit((Binding b) -> SetUtils.newLinkedHashSet(b.vars()), Binding::get,
                 nodeAgg);
 //		return AggBuilder.inputSplit((Binding b) -> Sets.newHashSet(b.vars()), (Binding b, Var v) -> b.get(v),
@@ -36,13 +37,13 @@ public class BindingAnalytics {
 
 
     /** Treat a result set as a set of nodes */
-    public static <O> ParallelAggregator<Binding, O, ?> aggNodes(ParallelAggregator<Node, O, ?> nodeAgg) {
+    public static <O> ParallelAggregator<Binding, FunctionEnv, O, ?> aggNodes(ParallelAggregator<Node, FunctionEnv, O, ?> nodeAgg) {
         // Shortening to Binding::get in the line below doesn't work
         // probably because of overlead get(String) and get(Var)
         return AggBuilder.inputFlatMap((Binding b) -> Iter.map(b.vars(), v -> b.get(v)), nodeAgg);
     }
 
-    public static <O> ParallelAggregator<Binding, Map<Var, O>, ?> aggPerVar(Set<Var> staticVars, ParallelAggregator<Node, O, ?> nodeAgg) {
+    public static <O> ParallelAggregator<Binding, FunctionEnv, Map<Var, O>, ?> aggPerVar(Set<Var> staticVars, ParallelAggregator<Node, FunctionEnv, O, ?> nodeAgg) {
         // Create a copy of the set to avoid serialization issues
         // For example, passing a immutable set from scala makes the lambda non-serializable
         Set<Var> staticVarCopy = new LinkedHashSet<>(staticVars);
@@ -63,21 +64,21 @@ public class BindingAnalytics {
     }
 
 
-    public static ParallelAggregator<Binding, Map<Var, Set<String>>, ?> usedPrefixes(int targetSize) {
+    public static ParallelAggregator<Binding, ?, Map<Var, Set<String>>, ?> usedPrefixes(int targetSize) {
         return aggPerVar(NodeAnalytics.usedPrefixes(targetSize));
     }
 
-    public static ParallelAggregator<Binding, Map<String, String>, ?> usedPrefixes(Map<String, String> prefixMap) {
+    public static ParallelAggregator<Binding, ?, Map<String, String>, ?> usedPrefixes(Map<String, String> prefixMap) {
         return aggNodes(NodeAnalytics.usedPrefixes(prefixMap));
     }
 
-    public static ParallelAggregator<Binding, Map<Var, Set<String>>, ?> usedDatatypes() {
+    public static ParallelAggregator<Binding, ?, Map<Var, Set<String>>, ?> usedDatatypes() {
         return aggPerVar(NodeAnalytics.usedDatatypes());
     }
 
 
     // Null counting only makes sense for a-priori provided variables!
-    public static ParallelAggregator<Binding, Map<Var, Entry<Set<String>, Long>>, ?> usedDatatypesAndNullCounts(Set<Var> staticVars) {
+    public static ParallelAggregator<Binding, FunctionEnv, Map<Var, Entry<Set<String>, Long>>, ?> usedDatatypesAndNullCounts(Set<Var> staticVars) {
         return aggPerVar(staticVars,
                 NodeAnalytics.usedDatatypesAndNullCounts());
     }

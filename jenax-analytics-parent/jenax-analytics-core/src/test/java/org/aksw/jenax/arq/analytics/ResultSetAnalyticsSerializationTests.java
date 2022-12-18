@@ -33,7 +33,7 @@ public class ResultSetAnalyticsSerializationTests {
      */
     @Test
     public void testSerialization1() throws IOException, ClassNotFoundException {
-        ParallelAggregator<Binding, Map<Var, Entry<Set<String>, Long>>, ?> expectedAgg = BindingAnalytics.aggPerVar(
+        ParallelAggregator<Binding, ?, Map<Var, Entry<Set<String>, Long>>, ?> expectedAgg = BindingAnalytics.aggPerVar(
                 Sets.newHashSet(Vars.s, Vars.p, Vars.o), NodeAnalytics.usedDatatypesAndNullCounts());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -42,19 +42,19 @@ public class ResultSetAnalyticsSerializationTests {
 
         ObjectInputStream oin = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
         @SuppressWarnings("unchecked")
-        ParallelAggregator<Binding, Map<Var, Entry<Multiset<String>, Long>>, ?> actualAgg =
-                (ParallelAggregator<Binding, Map<Var, Entry<Multiset<String>, Long>>, ?>)oin.readObject();
+        ParallelAggregator<Binding, ?, Map<Var, Entry<Multiset<String>, Long>>, ?> actualAgg =
+                (ParallelAggregator<Binding, ?, Map<Var, Entry<Multiset<String>, Long>>, ?>)oin.readObject();
 
         Binding b = BindingFactory.builder()
                 .add(Vars.s, NodeFactory.createURI("http://www.example.org/Foo"))
                 .add(Vars.p, NodeFactory.createLiteral("bar"))
                 .build();
 
-        Accumulator<Binding, Map<Var, Entry<Multiset<String>, Long>>> actualAcc = actualAgg.createAccumulator();
+        Accumulator<Binding, ?, Map<Var, Entry<Multiset<String>, Long>>> actualAcc = actualAgg.createAccumulator();
         actualAcc.accumulate(b);
         Map<Var, Entry<Multiset<String>, Long>> actualValue = actualAcc.getValue();
 
-        Accumulator<Binding, Map<Var, Entry<Multiset<String>, Long>>> expectedAcc = actualAgg.createAccumulator();
+        Accumulator<Binding, ?, Map<Var, Entry<Multiset<String>, Long>>> expectedAcc = actualAgg.createAccumulator();
         expectedAcc.accumulate(b);
         Map<Var, Entry<Multiset<String>, Long>> expectedValue = actualAcc.getValue();
 

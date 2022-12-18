@@ -6,6 +6,7 @@ import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 
@@ -26,7 +27,7 @@ public class AccDatasetGraph
     }
 
     @Override
-    public void accumulate(Binding binding) {
+    public void accumulate(Binding binding, FunctionEnv env) {
         NodeTransform transform = BindingUtils.asNodeTransform(binding);
         QuadPattern inst = NodeTransformLib.transform(transform, quadPattern);
 

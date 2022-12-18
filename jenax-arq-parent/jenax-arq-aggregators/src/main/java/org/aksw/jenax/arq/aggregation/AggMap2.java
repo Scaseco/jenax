@@ -18,8 +18,8 @@ import org.aksw.commons.collector.domain.Aggregator;
  * @param <V>
  * @param <C>
  */
-public class AggMap2<B, K, V, C extends Aggregator<B, V>>
-    implements Aggregator<B, Map<K,V>>
+public class AggMap2<B, E, K, V, C extends Aggregator<B, E, V>>
+    implements Aggregator<B, E, Map<K,V>>
 {
     private BiFunction<B, Long, K> mapper;
     private C subAgg;
@@ -30,19 +30,19 @@ public class AggMap2<B, K, V, C extends Aggregator<B, V>>
     }
 
     @Override
-    public Accumulator<B, Map<K, V>> createAccumulator() {
-        Accumulator<B, Map<K, V>> result = new AccMap2<B, K, V, C>(mapper, subAgg);
+    public Accumulator<B, E, Map<K, V>> createAccumulator() {
+        Accumulator<B, E, Map<K, V>> result = new AccMap2<B, E, K, V, C>(mapper, subAgg);
         return result;
     }
 
-    public static <B, K, V, C extends Aggregator<B, V>> AggMap2<B, K, V, C> create(Function<B, K> mapper, C subAgg) {
+    public static <B, E, K, V, C extends Aggregator<B, E, V>> AggMap2<B, E, K, V, C> create(Function<B, K> mapper, C subAgg) {
         BiFunction<B, Long, K> fn = (binding, rowNum) -> mapper.apply(binding);
-        AggMap2<B, K, V, C> result = create(fn, subAgg);
+        AggMap2<B, E, K, V, C> result = create(fn, subAgg);
         return result;
     }
 
-    public static <B, K, V, C extends Aggregator<B, V>> AggMap2<B, K, V, C> create(BiFunction<B, Long, K> mapper, C subAgg) {
-        AggMap2<B, K, V, C> result = new AggMap2<B, K, V, C>(mapper, subAgg);
+    public static <B, E, K, V, C extends Aggregator<B, E, V>> AggMap2<B, E, K, V, C> create(BiFunction<B, Long, K> mapper, C subAgg) {
+        AggMap2<B, E, K, V, C> result = new AggMap2<B, E, K, V, C>(mapper, subAgg);
         return result;
     }
 }

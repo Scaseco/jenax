@@ -12,6 +12,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.Template;
 
@@ -49,7 +50,7 @@ public class AccSinkTriples<T extends Sink<Triple>>
     }
 
     @Override
-    public void accumulate(Binding binding) {
+    public void accumulate(Binding binding, FunctionEnv env) {
 //        Set<Triple> triples = new HashSet<Triple>();
 //        template.subst(triples, bNodeMap, binding);
 

@@ -4,22 +4,22 @@ import java.util.function.Function;
 
 import org.aksw.commons.collector.domain.Accumulator;
 
-public class AccBindingTransform<B, V, U>
-    implements Accumulator<B, V>
+public class AccBindingTransform<B, E, V, U>
+    implements Accumulator<B, E, V>
 {
     protected Function<? super B, U> transform;
-    protected Accumulator<? super U, V> subAcc;
+    protected Accumulator<? super U, E, V> subAcc;
 
-    public AccBindingTransform(Function<? super B, U> transform, Accumulator<? super U, V> subAcc) {
+    public AccBindingTransform(Function<? super B, U> transform, Accumulator<? super U, E, V> subAcc) {
         super();
         this.transform = transform;
         this.subAcc = subAcc;
     }
 
     @Override
-    public void accumulate(B binding) {
+    public void accumulate(B binding, E env) {
         U u = transform.apply(binding);
-        subAcc.accumulate(u);;
+        subAcc.accumulate(u, env);
     }
 
     @Override
@@ -28,8 +28,8 @@ public class AccBindingTransform<B, V, U>
         return result;
     }
 
-    public static <B, V, U> Accumulator<B, V> create(Function<? super B, U> transform, Accumulator<? super U, V> subAcc) {
-        Accumulator<B, V>  result = new AccBindingTransform<>(transform, subAcc);
+    public static <B, E, V, U> Accumulator<B, E, V> create(Function<? super B, U> transform, Accumulator<? super U, E, V> subAcc) {
+        Accumulator<B, E, V>  result = new AccBindingTransform<>(transform, subAcc);
         return result;
     }
 

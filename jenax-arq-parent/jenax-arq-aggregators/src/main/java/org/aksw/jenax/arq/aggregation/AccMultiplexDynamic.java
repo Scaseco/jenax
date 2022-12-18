@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 
 /**
@@ -25,8 +26,8 @@ import org.aksw.commons.collector.domain.Aggregator;
  * @param <V>
  * @param <C>
  */
-public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
-    implements Accumulator<B, Map<K, W>>
+public class AccMultiplexDynamic<B, E, K, V, W, C extends Aggregator<V, E, W>>
+    implements Accumulator<B, E, Map<K, W>>
 {
     // Map a binding to a set of keys; only unique items are used from the iterable
     protected Function<? super B, ? extends Iterator<? extends K>> keyMapper;
@@ -39,7 +40,7 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
 
     protected C subAgg;
 
-    protected Map<K, Accumulator<V, W>> state = new HashMap<>();
+    protected Map<K, Accumulator<V, E, W>> state = new HashMap<>();
 
 //    public AccMultiplexDynamic(Function<? super B, ? extends Iterable<? extends K>> mapper, C subAgg) {
 //        this((binding, rowNum) -> mapper.apply(binding), subAgg);
@@ -55,7 +56,7 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
     }
 
     @Override
-    public void accumulate(B binding) {
+    public void accumulate(B binding, E env) {
         // TODO Keep track of the relative binding index
         Iterator<? extends K> ks = keyMapper.apply(binding);
 
@@ -63,12 +64,12 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
             K k = ks.next();
             V v = valueMapper.apply(binding, k);
 
-             Accumulator<V, W> subAcc = state.get(k);
+             Accumulator<V, E, W> subAcc = state.get(k);
             if(subAcc == null) {
                 subAcc = subAgg.createAccumulator();
                 state.put(k, subAcc);
             }
-            subAcc.accumulate(v);
+            subAcc.accumulate(v, env);
         }
     }
 
@@ -76,7 +77,7 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
     public Map<K, W> getValue() {
         Map<K, W> result = new HashMap<K, W>();
 
-        for(Entry<K, Accumulator<V, W>> entry : state.entrySet()) {
+        for(Entry<K, Accumulator<V, E, W>> entry : state.entrySet()) {
             K k = entry.getKey();
             W v = entry.getValue().getValue();
 
@@ -86,11 +87,11 @@ public class AccMultiplexDynamic<B, K, V, W, C extends Aggregator<V, W>>
         return result;
     }
 
-    public static <B, K, V, W, C extends Aggregator<V, W>> AccMultiplexDynamic<B, K, V, W, C> create(
+    public static <B, E, K, V, W, C extends Aggregator<V, E, W>> AccMultiplexDynamic<B, E, K, V, W, C> create(
             Function<? super B, ? extends Iterator<? extends K>> keyMapper,
             BiFunction<? super B, ? super K, ? extends V> valueMapper,
             C subAgg) {
-        AccMultiplexDynamic<B, K, V, W, C> result = new AccMultiplexDynamic<>(keyMapper, valueMapper, subAgg);
+        AccMultiplexDynamic<B, E, K, V, W, C> result = new AccMultiplexDynamic<>(keyMapper, valueMapper, subAgg);
         return result;
     }
 

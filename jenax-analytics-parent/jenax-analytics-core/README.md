@@ -1,6 +1,13 @@
-## jena-sparql-api-analytics
+---
+title: Analytics
+parent: ARQ Extensions
+has_children: true
+nav_order: 20
+---
 
-A dedicated package for analytics such that their dependencies can be separated from the rest of the jena-sparql-api project.
+## ARQ Extensions: Analytics
+
+A package for analytics that adds aggregate function builders for analyzing SPARQL result sets. These allow e.g. to obtain the set of used prefixes (for each variable or overall), used datatypes and corresponding frequency counts.
 
 
 ### PrefixAccumulator
