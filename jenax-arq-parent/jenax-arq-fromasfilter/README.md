@@ -1,10 +1,18 @@
-## JenaX From-Enhancer
+---
+title: From Enhancer
+parent: RDF/SPARQL Plugins
+nav_order: 30
+---
+
+
+## From-Enhancer
 
 The From-Enhancer (FE) plugin features:
 
 * Rewriting of FROM clauses as FILTER statements.
 * Remapping graph names to custom filter expressions.
 
+This plugin is designed for use with Jena assemblers.
 
 ## Maven
 
@@ -12,11 +20,8 @@ The From-Enhancer (FE) plugin features:
 <dependency>
     <groupId>org.aksw.jenax</groupId>
     <artifactId>jenax-arq-plugins-bundle</artifactId>
-    <version><!-- Check maven repo --></version>
 </dependency>>
 ```
-
-[Click here to view published versions](https://search.maven.org/artifact/org.aksw.jenax/jenax-arq-plugins-bundle)
 
 ### Relevant Namespaces
 
