@@ -5,7 +5,12 @@ nav_order: 10
 ---
 
 This module adds RDF datatype extensions for ARQ constructs, such as queries, expressions and bindings.
+The main benefits are:
 
+* Syntax validation of appropriately typed RDF literals when parsing RDF data
+* Automatic mapping of RDF literals to the appropriate Java objects, e.g. `Query query = (Query)rdfNode.asLiteral().getValue();`
+
+## Maven Dependency
 ```xml
 <dependency>
   <groupId>org.aksw.jenax</groupId>
@@ -13,32 +18,21 @@ This module adds RDF datatype extensions for ARQ constructs, such as queries, ex
 </dependency>
 ```
 
-## Query
+## Table
 
-`org.aksw.jenax.arq.datatype.RDFDatatypeQuery`
+| Type | Implementation | RDF Datatype IRI |
+|---|---|---|
+| Query<br /><sub>`org.apache.jena.query.Query`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeQuery`</sub> | `http://jsa.aksw.org/dt/sparql/query` |
+| Binding<br /><sub>`org.apache.jena.sparql.engine.binding.Binding`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeBinding`</sub> | `http://jsa.aksw.org/dt/sparql/binding` |
+| Expr<br /><sub>`org.apache.jena.sparql.expr.Expr`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeExpr`</sub> | `http://jsa.aksw.org/dt/sparql/expr` |
+| ExprList<br /><sub>`org.apache.jena.sparql.expr.ExprList`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeExprList`</sub> | Used internally for the `Binding` datatype. No public IRI yet. |
+| NodeList<br /><sub>`org.aksw.jenax.arq.util.node.NodeList`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeNodeList`</sub> | `http://jsa.aksw.org/dt/sparql/array` |
+| Query<br /><sub>`org.aksw.jenax.arq.util.node.NodeSet`</sub> | <sub>`org.aksw.jenax.arq.datatype.RDFDatatypeNodeSet`</sub> | `http://jsa.aksw.org/dt/sparql/set` |
+
+## Example
 
 ```turtle
-
+PREFIX xdt: <http://jsa.aksw.org/dt/sparql/>
+<urn:example:query-spo>
+  <urn:example:hasString> "SELECT * { ?s ?p ?o }"^^xdt:query .
 ```
-
-## Binding
-`http://jsa.aksw.org/dt/sparql/binding`
-`org.aksw.jenax.arq.datatype.RDFDatatypeBinding`
-
-## Expr
-`http://jsa.aksw.org/dt/sparql/expr`
-`org.aksw.jenax.arq.datatype.RDFDatatypeExpr`
-
-## ExprList
-Used internally for the `Binding` datatype. No public IRI yet.
-`org.aksw.jenax.arq.datatype.RDFDatatypeExprList`
-
-## NodeList
-`http://jsa.aksw.org/dt/sparql/array`
-`org.aksw.jenax.arq.datatype.RDFDatatypeNodeList`
-
-## NodeSet
-`http://jsa.aksw.org/dt/sparql/set`
-`org.aksw.jenax.arq.datatype.RDFDatatypeNodeSet`
-
-
