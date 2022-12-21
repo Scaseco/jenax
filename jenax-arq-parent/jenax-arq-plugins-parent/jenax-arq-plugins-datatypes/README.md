@@ -1,6 +1,6 @@
 ---
 title: Datatype Extensions
-parent: ARQ Plugins
+parent: RDF/SPARQL Plugins
 nav_order: 10
 ---
 
