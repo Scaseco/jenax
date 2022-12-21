@@ -41,6 +41,7 @@ Note, that while there is streaming support for the CSV format, at present there
 Please refer to the [JsonPath](https://github.com/json-path/JsonPath) project GitHub page for path expression examples and the specification.
 
 #### JSON <-> SPARQL datatype mapping
+
 | JSON        | RDF         |
 | ----------- | ----------- |
 | string      | xsd:string  |
