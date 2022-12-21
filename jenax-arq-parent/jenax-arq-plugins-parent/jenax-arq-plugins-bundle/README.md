@@ -1,6 +1,6 @@
 ---
 title: Function Extensions
-parent: ARQ Plugins
+parent: RDF/SPARQL Plugins
 has_children: false
 nav_order: 20
 ---
