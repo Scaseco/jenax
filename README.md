@@ -8,7 +8,7 @@ That project has grown over a decade and its time to separate the good parts fro
 
 We recommend to import the jenax `bom` file in order to ensure consistent versions among the dependencies:
 
-```
+```xml
 <dependency>
     <groupId>org.aksw.jenax</groupId>
     <artifactId>jenax-bom</artifactId>
