@@ -1,7 +1,6 @@
 ---
-title: JenaX
-has_children: false
-nav_order: 10
+title: Features
+nav_order: 20
 ---
 
 
