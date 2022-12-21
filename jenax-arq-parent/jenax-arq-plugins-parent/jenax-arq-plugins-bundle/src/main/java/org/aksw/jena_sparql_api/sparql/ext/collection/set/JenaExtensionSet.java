@@ -2,9 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.collection.set;
 
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
-import org.aksw.jenax.arq.datatype.RDFDatatypeNodeSet;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
-import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
@@ -23,7 +21,8 @@ public class JenaExtensionSet {
     }
 
     public static void loadDefs(FunctionRegistry registry) {
-        TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeSet.INSTANCE);
+        // Datatype is registered in the jenax-arq-datatype module!
+        // TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeSet.get());
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
 //        FunctionGenerator generator = binder.getFunctionGenerator();

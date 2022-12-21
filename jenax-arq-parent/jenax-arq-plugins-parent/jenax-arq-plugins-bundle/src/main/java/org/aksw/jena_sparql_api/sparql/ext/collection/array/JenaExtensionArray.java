@@ -24,7 +24,8 @@ public class JenaExtensionArray {
     }
 
     public static void loadDefs(FunctionRegistry registry) {
-        TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeList.INSTANCE);
+        // Datatype is registered in the jenax-arq-datatype module!
+        // TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeList.get());
 
         FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
 //        FunctionGenerator generator = binder.getFunctionGenerator();

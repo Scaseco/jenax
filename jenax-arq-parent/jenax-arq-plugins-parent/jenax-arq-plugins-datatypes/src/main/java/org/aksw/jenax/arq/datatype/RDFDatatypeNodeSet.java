@@ -8,6 +8,7 @@ import org.aksw.jenax.arq.util.node.NodeSetImpl;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.vocabulary.RDF;
 
@@ -18,7 +19,7 @@ public class RDFDatatypeNodeSet
     public static final String IRI = RDF.uri + "set";
     public static final RDFDatatypeNodeSet INSTANCE = new RDFDatatypeNodeSet();
 
-    public static RDFDatatypeNodeSet get() {
+    public static RDFDatatype get() {
         return INSTANCE;
     }
 

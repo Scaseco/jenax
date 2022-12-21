@@ -1,11 +1,12 @@
 package org.aksw.jenax.connection.update;
 
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
 
 public interface UpdateProcessorDecorator
-    extends UpdateProcessor
+    extends UpdateExec
 {
     UpdateProcessor getDelegate();
 

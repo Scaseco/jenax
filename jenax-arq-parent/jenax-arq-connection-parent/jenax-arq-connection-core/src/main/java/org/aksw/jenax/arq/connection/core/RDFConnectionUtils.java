@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.connection.core;
 
 import java.lang.reflect.Field;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -225,6 +226,15 @@ public class RDFConnectionUtils {
         return RDFConnectionAdapter.adapt(newLink);
     }
 
+    public static RDFConnection wrapWithUpdateTransform(
+            RDFConnection conn,
+            Function<? super UpdateRequest, ? extends UpdateRequest> updateTransform,
+            BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> updateExecTransform
+            ) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink newLink = RDFLinkUtils.wrapWithUpdateTransform(oldLink, updateTransform, updateExecTransform);
+        return RDFConnectionAdapter.adapt(newLink);
+    }
 
     public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
         return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
