@@ -32,7 +32,16 @@ The main benefits are:
 ## Example
 
 ```turtle
-PREFIX xdt: <http://jsa.aksw.org/dt/sparql/>
-<urn:example:query-spo>
-  <urn:example:hasString> "SELECT * { ?s ?p ?o }"^^xdt:query .
+@prefix eg:  <http://www.example.org/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xdt: <http://jsa.aksw.org/dt/sparql/> .
+
+<urn:example:s>  eg:hasArray  "<http://www.w3.org/2000/01/rdf-schema#Class> <http://www.w3.org/2002/07/owl#Class>"^^rdf:array ;
+        eg:hasBinding  "coalesce(( ?s = rdf:type ))"^^xdt:binding ;
+        eg:hasExpr     "concat(\"foo\", ?bar)"^^xdt:expr ;
+        eg:hasQuery    "SELECT  *\nWHERE\n  { ?s  ?p  ?o }\n"^^xdt:query ;
+        eg:hasSet      "<http://www.w3.org/2000/01/rdf-schema#comment> <http://www.w3.org/2000/01/rdf-schema#label>"^^rdf:set .
+
 ```
+
+Note: Currently `array` and `set` are in the `rdf` namespace. However, eventually they will be moved to the `xdt` namespace.
