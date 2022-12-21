@@ -14,13 +14,10 @@ provides appropriate metadata which gets picked up by Jena's plugin system.
 
 ```xml
 <dependency>
-    <artifactId>org.aksw.jena-sparql-api</artifactId>
-    <groupId>jena-sparql-api-sparql-ext</groupId>
-    <version><!-- Check link below for latest version--></version>
+    <artifactId>org.aksw.jenax</artifactId>
+    <groupId>jenax-arq-plugins-bundle</groupId>
 </dependency>
 ```
-Check [here](http://search.maven.org/#search|ga|1|a%3A%22jena-sparql-api-sparql-ext%22) for the latest artifact version.
-
 
 ## Data formats
 
