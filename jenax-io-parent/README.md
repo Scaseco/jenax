@@ -1,6 +1,6 @@
 ---
 title: IO Extensions
-has_childre: true
+has_children: true
 nav_order: 60
 ---
 
