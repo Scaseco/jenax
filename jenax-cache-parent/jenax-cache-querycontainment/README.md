@@ -1,3 +1,9 @@
+---
+title: Query Containment
+parent: Experimental
+nav_order: 20
+---
+
 # Query Containment Module
 
 This module contains interfaces and abstract and concrete algorithms for query containment (QC).
