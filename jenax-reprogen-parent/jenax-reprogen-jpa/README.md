@@ -1,3 +1,9 @@
+---
+title: Java-RDF Mapper
+parent: Deprecated
+nav_order: 10
+---
+
 # The Java-RDF Mapper module
 
 This Apache-Jena based module enables mapping Java classes to RDF data managed in a SPARQL endpoint and vice versa.
