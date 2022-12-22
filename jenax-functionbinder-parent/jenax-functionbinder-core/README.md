@@ -4,7 +4,7 @@ nav_order: 50
 ---
 
 ## Function Binder
-The function binder utility makes it easy to expose methods as SPARQL functions.
+The function binder utility makes it easy to expose Java methods as SPARQL functions.
 
 ### Limitations
 * Multi-methods are not yet supported - i.e. it is not possible to define multiple Java methods (with varying parameter type lists) as implementations of the same SPARQL function IRI.
@@ -37,12 +37,14 @@ public class InitMyJenaPlugin
 {
     public void start() {
         FunctionBinder binder = JenaExtensionUtil.createFunctionBinder(FunctionRegistry.get());
-
-        // bindAll() registers all appropriately annotated functions with the configured function registry 
-        binder.bindAll(SparqlFnLib.class);
+        binder.registerAll(SparqlFnLib.class);
     }
 }
 ```
+
+The `registerAll(Class<?>)` method registers all appropriately annotated *static* methods with the configured function registry.
+Use the overload `registerAll(Class<?>, Object)` to register all appropriately annotated methods of an object. The object must be
+an instance of the given class.
 
 ### Default Values
 
@@ -85,7 +87,7 @@ generator.getConverterRegistry()
             GeometryWrapper::getParsingGeometry)
     ;
 
-binder.bindAll(SparqlFnLibGeo.class);
+binder.registerAll(SparqlFnLibGeo.class);
  
 class SparqlFnLibGeo {    
 	@IriNs(GeoSPARQL_URI.GEOF_URI)
