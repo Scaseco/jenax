@@ -6,6 +6,9 @@ nav_order: 50
 ## Function Binder
 The function binder utility makes it easy to expose methods as SPARQL functions.
 
+### Limitations
+* Multi-methods are not yet supported - i.e. it is not possible to define multiple Java methods (with varying parameter type lists) as implementations of the same SPARQL function IRI.
+
 ### Basic Usage
 
 The code below shows how to register a custom "reverse string" function with Jena's `FunctionRegistry`.
@@ -14,12 +17,14 @@ The code below shows how to register a custom "reverse string" function with Jen
 /* A class with methods annotated with IRIs via @Iri and/or @IriNs */
 public class SparqlFnLibString {
     /**
-     * Definition of the SPARQL function <http://www.example.org/reverse>
+     * Definition of the "string-reverse" SPARQL function for use as in:
+     *
+     * SELECT * { BIND(<http://www.example.org/reverse>("hello") AS ?x) }
      */
     @IriNs("http://www.example.org/")
     public static String reverse(String str) {
         return new StringBuilder(str).reverse().toString()
-    }
+    }    
 }
 
 /**
@@ -37,7 +42,26 @@ public class InitMyJenaPlugin
         binder.bindAll(SparqlFnLib.class);
     }
 }
+```
 
+### Default Values
+
+The `@DefaultValue("lexicalValue")` annotation can be used to annotate parameters.
+Once a parameter is annotated with a default value then all remaining parameters must have default value annotations as well.
+
+```java
+    /**
+     * A function that increments a value by a given amount. The amount defaults to 1.
+     *
+     * SELECT * {
+     *   BIND(eg:inc(1) AS ?x) // uses default value of 1
+     *   BIND(eg:inc(1, 2) AS ?y)
+     * }
+     */
+    @IriNs("http://www.example.org/")
+    public static long inc(long value, @DefaultValue("1") int amount) {
+        return value + amount;
+    }    
 ```
 
 ### Registering Custom Type Conversions
