@@ -83,7 +83,7 @@ class SparqlFnLibGeo {
 Variable argument lists are supported. Thereby, the type `Node` accepts any RDF type.
 The following example shows an excerpt of `array` function implementations.
 
-```
+```java
 public class SparqlLibArrayFn {
     /** SELECT * { BIND(array:of(1, 'string', true) AS ?arr) }*/
     @IriNs(JenaExtensionArray.NS)
