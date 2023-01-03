@@ -1,6 +1,7 @@
 ---
 title: Service Description Probing
 parent: Resources
+nav_order: 30
 ---
 
 ## Resources for creating service descriptions
