@@ -18,13 +18,13 @@ public class JenaExtensionString {
         pm.setNsPrefix("str", NS);
     }
 
-    /** Convert a string using hyphens to upper camel case */
+    /** Convert a string using underscores (snake case) to upper camel case */
     @IriNs(NS)
     public static String upperCamel(String str) {
         return StringUtils.toUpperCamelCase(str);
     }
 
-    /** Convert a string using hyphens to lower camel case */
+    /** Convert a string using underscores (snake case) to lower camel case */
     @IriNs(NS)
     public static String lowerCamel(String str) {
         return StringUtils.toLowerCamelCase(str);
