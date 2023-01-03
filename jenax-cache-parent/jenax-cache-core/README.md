@@ -1,3 +1,8 @@
+---
+title: Cache System
+parent: IO Extensions
+nav_order: 20
+---
 
 ## Background Caching Tooling
 The purpose is to stream a query's response data simultaneously to the cache and to the client.

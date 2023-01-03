@@ -1,3 +1,9 @@
+---
+title: Resource-to-Json
+parent: IO Extensions
+nav_order: 30
+---
+
 ## RDF->JSON Interoperability Utilities
 
 This small module features facilities for generic JSON export of RDF such that it can be used in conjunction with e.g. bash scripting.

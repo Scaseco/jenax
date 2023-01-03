@@ -1,3 +1,9 @@
+---
+title: Conjure
+parent: IO Extensions
+nav_order: 20
+---
+
 # Conjure - Conjuring data from data
 
 ### Dev Status
