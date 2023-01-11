@@ -7,8 +7,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Optional;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
@@ -146,6 +150,24 @@ public class JenaUrlUtils {
         }
 
         return result;
+    }
+
+    public static Iterator<NodeValue> resolveAsLines(NodeValue nv, FunctionEnv env) throws Exception {
+
+        LineIterator lineIterator = IOUtils.lineIterator(JenaUrlUtils.openInputStream(nv, env), StandardCharsets.UTF_8);
+        return Iter.map(lineIterator, NodeValue::makeString);
+//        List<NodeValue> result = new ArrayList<>();
+//        try (BufferedReader reader = new BufferedReader(
+//                new InputStreamReader(JenaUrlUtils.openInputStream(nv, env), StandardCharsets.UTF_8))) {
+//            while (reader.ready()) {
+//                String line = reader.readLine();
+//                result.add(NodeValue.makeString(line));
+//            }
+//        } catch (Exception e) {
+//            throw new ExprEvalException("Failed to obtain text from node " + nv, e);
+//        }
+//
+//        return result;
     }
 
 }

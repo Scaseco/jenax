@@ -18,6 +18,7 @@ public class JenaExtensionUrl {
         FunctionRegistry.get().put(ns + "fetchSpec", E_UrlFetchSpec.class);
 
         PropertyFunctionRegistry.get().put(ns + "text", new PropertyFunctionFactoryUrlText());
+        PropertyFunctionRegistry.get().put(ns + "textLines", new PropertyFunctionFactoryUrlTextAsLines());
 
         FunctionRegistry.get().put(ns2 + "asGiven", E_IriAsGiven.class);
 
