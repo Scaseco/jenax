@@ -9,7 +9,7 @@
 
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>4.7.0-1-SNAPSHOT</version>
+	<version>4.8.0-1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -18,7 +18,7 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.7.0-SNAPSHOT</jena.version>
+		<jena.version>4.8.0-SNAPSHOT</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
