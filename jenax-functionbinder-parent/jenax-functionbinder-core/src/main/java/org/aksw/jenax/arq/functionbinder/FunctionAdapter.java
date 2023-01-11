@@ -216,5 +216,11 @@ public class FunctionAdapter
 //		return null;
     }
 
+    public Object getInvocationTarget() {
+        return invocationTarget;
+    }
 
+    public Method getMethod() {
+        return method;
+    }
 }
