@@ -20,25 +20,25 @@ public class RdfTermProfiles {
     /** Only open the IRI value space*/
     public static ValueSpace newIriProfile() {
         NodeRanges nr = NodeRanges.createClosed();
-        nr.addOpenDimension(NodeRanges.VSC_IRI);
+        nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
         return ValueSpaceImpl.create(nr);
     }
 
     /** Open all spaces other than IRI, BNODE and TRIPLE */
     public static ValueSpace newLiteralProfile() {
         NodeRanges nr = NodeRanges.createOpen();
-        nr.addEmptyDimension(NodeRanges.VSC_IRI);
-        nr.addEmptyDimension(NodeRanges.VSC_BNODE);
-        nr.addEmptyDimension(NodeRanges.VSC_TRIPLE);
+        nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
+        nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_BLANKNODE);
+        nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_QUOTED_TRIPLE);
         return ValueSpaceImpl.create(nr);
     }
 
     /** Open all spaces other than IRI, BNODE and TRIPLE */
     public static ValueSpace newNonLiteralProfile() {
         NodeRanges nr = NodeRanges.createClosed();
-        nr.addOpenDimension(NodeRanges.VSC_IRI);
-        nr.addOpenDimension(NodeRanges.VSC_BNODE);
-        nr.addOpenDimension(NodeRanges.VSC_TRIPLE);
+        nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
+        nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_BLANKNODE);
+        nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_QUOTED_TRIPLE);
         return ValueSpaceImpl.create(nr);
     }
 

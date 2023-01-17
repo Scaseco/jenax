@@ -15,7 +15,7 @@ import org.aksw.jenax.constraint.api.Contradictable;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.expr.ValueSpaceClassification;
+import org.apache.jena.sparql.expr.ValueSpace;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
@@ -46,9 +46,10 @@ public class NodeRanges
     implements Contradictable, Cloneable
 {
     // Additional (pseudo) value space classifications for uniform handing of IRIs and bnodes
-    public static final String VSC_IRI = "xVSPACE_IRI";
-    public static final String VSC_BNODE = "xVSPACE_BNODE";
-    public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
+    // No longer needed since Jena 4.8.0-SNAPSHOT
+//    public static final String VSC_IRI = "xVSPACE_IRI";
+//    public static final String VSC_BNODE = "xVSPACE_BNODE";
+//    public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
 
 
     public NodeRanges(boolean isVscExhaustive) {
@@ -63,7 +64,7 @@ public class NodeRanges
     public RangeSet<ComparableNodeValue> getIriRanges() {
         return vscToRangeSets == null
                 ? ImmutableRangeSet.of()
-                : vscToRangeSets.getOrDefault(VSC_IRI, ImmutableRangeSet.of());
+                : vscToRangeSets.getOrDefault(ValueSpace.VSPACE_URI, ImmutableRangeSet.of());
     }
 
     /**
@@ -259,20 +260,20 @@ public class NodeRanges
         return (isVscExhaustive ? "closed" : "open") + vscToRangeSets;
     }
 
-    public static Object classifyNodeValueSubSpace(Node node) {
-        Object result;
-        if (node.isURI()) {
-            result = VSC_IRI;
-        } else if (node.isBlank()) {
-            result = VSC_BNODE;
-        } else if (node.isNodeTriple()) {
-            result = VSC_TRIPLE;
-        } else {
-            throw new RuntimeException("Unknown term type: " + node);
-        }
-
-        return result;
-    }
+//    public static Object classifyNodeValueSubSpace(Node node) {
+//        Object result;
+//        if (node.isURI()) {
+//            result = VSC_IRI;
+//        } else if (node.isBlank()) {
+//            result = VSC_BNODE;
+//        } else if (node.isNodeTriple()) {
+//            result = VSC_TRIPLE;
+//        } else {
+//            throw new RuntimeException("Unknown term type: " + node);
+//        }
+//
+//        return result;
+//    }
 
     @Override
     protected Object classifyValueSpace(Range<ComparableNodeValue> range) {
@@ -288,27 +289,27 @@ public class NodeRanges
         if (lb != null && ub != null) {
             result = NodeValue.classifyValueOp(lb, ub);
 
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                Object a = classifyNodeValueSubSpace(lb.asNode());
-                Object b = classifyNodeValueSubSpace(ub.asNode());
-
-                if (!Objects.equals(a, b)) {
-                    result = ValueSpaceClassification.VSPACE_DIFFERENT;
-                } else {
-                    result = a;
-                }
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                Object a = classifyNodeValueSubSpace(lb.asNode());
+//                Object b = classifyNodeValueSubSpace(ub.asNode());
+//
+//                if (!Objects.equals(a, b)) {
+//                    result = ValueSpace.VSPACE_DIFFERENT;
+//                } else {
+//                    result = a;
+//                }
+//            }
 
         } else if (lb != null) {
             result = lb.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(lb.asNode());
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                result = classifyNodeValueSubSpace(lb.asNode());
+//            }
         } else if (ub != null) {
             result = ub.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(ub.asNode());
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                result = classifyNodeValueSubSpace(ub.asNode());
+//            }
         }
 
         return result;

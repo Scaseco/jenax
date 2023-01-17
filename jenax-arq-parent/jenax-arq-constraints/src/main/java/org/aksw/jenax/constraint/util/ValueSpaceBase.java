@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.jena.sparql.expr.ValueSpaceClassification;
+import org.apache.jena.sparql.expr.ValueSpace;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
@@ -56,7 +56,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
     public void add(Range<T> range) {
         D vsc = classifyValueSpace(range);
 
-        if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
+        if (ValueSpace.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
             // Inconsistent range - go into conflicting state
             vscToRangeSets.clear();
             this.isVscExhaustive = true;
@@ -74,7 +74,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
         if (vsc == null) {
             // null means substracting all possible ranges
             vscToRangeSets.clear();
-        } else if (ValueSpaceClassification.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
+        } else if (ValueSpace.VSPACE_DIFFERENT.equals(vsc) && vscToRangeSets != null) {
             // substracting a contradicting range does nothing
             // raise exception?
         } else {

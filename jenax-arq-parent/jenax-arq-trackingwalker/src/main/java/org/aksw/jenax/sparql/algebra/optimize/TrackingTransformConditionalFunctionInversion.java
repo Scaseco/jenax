@@ -177,7 +177,7 @@ public class TrackingTransformConditionalFunctionInversion
 
             if (fn instanceof E_Str) {
                 ValueSpace vs = exprToValueSpace.get(arg);
-                if (vs.isLimitedTo(NodeRanges.VSC_IRI)) {
+                if (vs.isLimitedTo(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI)) {
                     result = new SimpleEntry<>(
                             org.apache.jena.sparql.util.ExprUtils.eval(new E_IRI(e.getKey())),
                             arg);
