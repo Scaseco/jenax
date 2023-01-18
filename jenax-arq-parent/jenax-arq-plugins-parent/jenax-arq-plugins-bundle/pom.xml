@@ -36,6 +36,12 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
+		<!-- javascript -->
+		<dependency>
+			<groupId>org.openjdk.nashorn</groupId>
+			<artifactId>nashorn-core</artifactId>
+			<version>15.4</version>
+		</dependency>
 
 		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
 			rid of this dep -->

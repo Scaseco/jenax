@@ -34,9 +34,9 @@ public class RdfDataEngines {
 
         @Override
         public void close() throws Exception {
-        	if (closeAction != null) {
-        		closeAction.close();
-        	}
+            if (closeAction != null) {
+                closeAction.close();
+            }
         }
     }
 
@@ -58,36 +58,36 @@ public class RdfDataEngines {
     }
 
     public static class RdfDataEngineOverQueryExecutionFactory
-		implements RdfDataEngine
-	{
-		protected QueryExecutionFactory qef;
+        implements RdfDataEngine
+    {
+        protected QueryExecutionFactory qef;
 
-		public RdfDataEngineOverQueryExecutionFactory(QueryExecutionFactory qef) {
-			super();
-			this.qef = qef;
-		}
+        public RdfDataEngineOverQueryExecutionFactory(QueryExecutionFactory qef) {
+            super();
+            this.qef = qef;
+        }
 
-		@Override
-		public RDFConnection getConnection() {
-			SparqlQueryConnection core = new SparqlQueryConnectionJsa(qef);
-			RDFConnection result = new RDFConnectionModular(core, null, null);
-			return result;
-		}
+        @Override
+        public RDFConnection getConnection() {
+            SparqlQueryConnection core = new SparqlQueryConnectionJsa(qef);
+            RDFConnection result = new RDFConnectionModular(core, null, null);
+            return result;
+        }
 
-		@Override
-		public void close() throws Exception {
-			qef.close();
-		}
-	}
+        @Override
+        public void close() throws Exception {
+            qef.close();
+        }
+    }
 
-	public static RdfDataEngine adapt(QueryExecutionFactory qef) {
-		return new RdfDataEngineOverQueryExecutionFactory(qef);
-	}
+    public static RdfDataEngine adapt(QueryExecutionFactory qef) {
+        return new RdfDataEngineOverQueryExecutionFactory(qef);
+    }
 
 
     /** Wrap an RdfDataSource as an RdfDataEngine */
     public static RdfDataEngine of(RdfDataSource rdfDataSource) {
-    	return of(rdfDataSource, null);
+        return of(rdfDataSource, null);
     }
 
     public static RdfDataEngine of(RdfDataSource rdfDataSource, AutoCloseable closeAction) {
@@ -112,13 +112,13 @@ public class RdfDataEngines {
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform
             ) {
 
-    	return new RdfDataEngineDecoratorBase<RdfDataEngine>(dataEngine) {
-    		@Override
-    		public RDFConnection getConnection() {
-    			RDFConnection raw = decoratee.getConnection();
-    			RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(raw, queryTransform, queryExecTransform);
-    			return result;
-    		}
-    	};
+        return new RdfDataEngineDecoratorBase<RdfDataEngine>(dataEngine) {
+            @Override
+            public RDFConnection getConnection() {
+                RDFConnection raw = decoratee.getConnection();
+                RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(raw, queryTransform, queryExecTransform);
+                return result;
+            }
+        };
     }
 }
