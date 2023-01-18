@@ -26,4 +26,8 @@ public class AccAdapterJena
         NodeValue result = accDelegate.getValue();
         return result;
     }
+
+    public org.aksw.commons.collector.domain.Accumulator<Binding, FunctionEnv, NodeValue> getAccDelegate() {
+        return accDelegate;
+    }
 }

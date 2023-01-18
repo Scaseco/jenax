@@ -20,6 +20,9 @@ public class JenaExtensionSys {
 
         pfRegistry.put(ns + "benchmark", new PropertyFunctionFactoryBenchmark());
         pfRegistry.put(ns + "execSelect", new PropertyFunctionFactoryExecSelect());
+        pfRegistry.put(ns + "listFunctions", new PropertyFunctionFactoryListFunctions());
+        pfRegistry.put(ns + "listPropertyFunctions", new PropertyFunctionFactoryListPropertyFunctions());
+        pfRegistry.put(ns + "listAggregateFunctions", new PropertyFunctionFactoryListAggregateFunctions());
 
 
 
