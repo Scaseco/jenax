@@ -58,6 +58,11 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-pathfinding</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-models-dcat-api</artifactId>
 		</dependency>
 

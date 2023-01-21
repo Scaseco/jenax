@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.sparql.ext.gml.JenaExtensionGml;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
 import org.aksw.jena_sparql_api.sparql.ext.mvn.JenaExtensionsMvn;
 import org.aksw.jena_sparql_api.sparql.ext.osrm.JenaExtensionOsrm;
+import org.aksw.jena_sparql_api.sparql.ext.path.JenaExtensionsPath;
 import org.aksw.jena_sparql_api.sparql.ext.prefix.JenaExtensionPrefix;
 import org.aksw.jena_sparql_api.sparql.ext.str.JenaExtensionString;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
@@ -25,6 +26,7 @@ public class InitJenaSparqlApiSparqlExtensions
 {
     private static final Logger logger = LoggerFactory.getLogger(InitJenaSparqlApiSparqlExtensions.class);
 
+    @Override
     public void start() {
         logger.debug("JenaSparqlAPI SPARQL extension initialization");
 
@@ -45,6 +47,7 @@ public class InitJenaSparqlApiSparqlExtensions
         JenaExtensionString.register();
 
         JenaExtensionsMvn.register();
+        JenaExtensionsPath.register();
         //JenaExtensionsGeoSparql.loadDefs(registry);
     }
 

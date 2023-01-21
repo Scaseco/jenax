@@ -129,7 +129,7 @@ public class MainSparqlPath2 {
                 .create();
 
 
-        context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
+        // context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
         context.put(PropertyFunctionKShortestPaths.SPARQL_SERVICE, coreSparqlService);
 
         return result;
