@@ -7,9 +7,13 @@ import org.aksw.jena_sparql_api.sparql.ext.collection.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.JenaExtensionCollection;
 import org.aksw.jena_sparql_api.sparql.ext.collection.set.JenaExtensionSet;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
+import org.aksw.jena_sparql_api.sparql.ext.datatypes.JenaExtensionDuration;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
+import org.aksw.jena_sparql_api.sparql.ext.number.JenaExtensionNumber;
+import org.aksw.jena_sparql_api.sparql.ext.prefix.JenaExtensionPrefix;
+import org.aksw.jena_sparql_api.sparql.ext.str.JenaExtensionString;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
@@ -29,6 +33,7 @@ public class JenaExtensionUtil {
 //        throw new RuntimeException("Not yet implemented, because we need to support configuration options");
 //    }
 
+
     public static void addPrefixes(PrefixMapping pm) {
         JenaExtensionJson.addPrefixes(pm);
         JenaExtensionCsv.addPrefixes(pm);
@@ -40,6 +45,18 @@ public class JenaExtensionUtil {
         JenaExtensionArray.addPrefixes(pm);
         JenaExtensionSet.addPrefixes(pm);
         JenaExtensionJson.addPrefixes(pm);
+
+
+        JenaExtensionDuration.addPrefixes(pm);
+        // JenaExtensionOsrm.
+        JenaExtensionArray.addPrefixes(pm);
+        JenaExtensionSet.addPrefixes(pm);
+        JenaExtensionCollection.addPrefixes(pm);
+        JenaExtensionPrefix.addPrefixes(pm);
+        JenaExtensionString.addPrefixes(pm);
+        JenaExtensionNumber.addPrefixes(pm);
+
+        // JenaExtensionsMvn
     }
 
 

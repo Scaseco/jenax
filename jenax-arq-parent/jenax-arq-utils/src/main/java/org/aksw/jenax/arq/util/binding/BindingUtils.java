@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -163,11 +164,14 @@ public class BindingUtils {
         return new NodeTransformSubst(new MapFromBinding(binding));
     }
 
-
     public static Number getNumberNullable(Binding binding, Node key) {
         Node node = BindingUtils.getValue(binding, key);
         Number result = NodeUtils.getNumberNullable(node);
         return result;
+    }
+
+    public static Optional<Number> tryGetNumber(Binding binding, Node key) {
+        return Optional.ofNullable(getNumberNullable(binding, key));
     }
 
     /** Get a binding's values for var as a number. Raises an NPE if no number can be obtained */
