@@ -198,21 +198,35 @@ public class PropertyFunctionKShortestPaths
         return result;
     }
 
+    /**
+     * The result array for a path is always: [ start, end, (property, direction, target)* ]
+     * This way, the edges of a path can be iterated using
+     * <pre>
+     *   BIND(array:size(?path) AS n)
+     *   (2 ?n 3) number:range ?idx
+     *   BIND(array:get(?path, ?idx) AS ?property)
+     *   BIND(array:get(?path, ?idx + 1) AS ?direction)
+     *   BIND(array:get(?path, ?idx + 2) AS ?target)
+     * </pre>
+     *
+     * @param path
+     * @return
+     */
     public static NodeList pathToNodeList(TripletPath<Node, Directed<Node>> path) {
         List<Node> list = new ArrayList<>();
         list.add(path.getStart());
+        list.add(path.getEnd());
 
-        int lastTripletIdx = path.getTriplets().size() - 1;
-        int i = 0;
+        // int lastTripletIdx = path.getTriplets().size() - 1;
+        // int i = 0;
         for (Triplet<Node, Directed<Node>> triplet : path.getTriplets()) {
             list.add(triplet.getPredicate().getValue());
             list.add(NodeValue.makeBoolean(triplet.getPredicate().isForward()).asNode());
-            if (i < lastTripletIdx) {
+            // if (i < lastTripletIdx) {
                 list.add(triplet.getObject());
-            }
-            ++i;
+            //}
+            // ++i;
         }
-        list.add(path.getEnd());
         return new NodeListImpl(list);
     }
 }

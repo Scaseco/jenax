@@ -22,6 +22,7 @@ import org.apache.jena.sparql.util.IterLib;
 /**
  * Generate (big) integer numbers for the specified range start (inclusive) and end (exclusive). The default increment is 1 but can be optionally set
  * to a different value.
+ * The forth argument is a displacement which is added to the start. It is a convenience feature to ease array access with certain offsets.
  *
  * Stepping must always be a positive value - 0 or negative values return a QueryIterNull.
  *
@@ -43,8 +44,8 @@ public class PF_Range
         // Validate the subject's value
         List<Node> subjects = PropFuncArgUtils.getAsList(argSubject);
         int sn = subjects.size();
-        if (sn < 2 || sn > 3) {
-            throw new ExprEvalException("Expected 2 or 3 arguments (start, end [, increment], got: " + subjects);
+        if (sn < 2 || sn > 4) {
+            throw new ExprEvalException("Expected at least 2 and up to 4 arguments (start, end [, increment [, displacement]]), got: " + subjects);
         }
 
         // Validate the object's value
@@ -54,10 +55,13 @@ public class PF_Range
             throw new ExprEvalException("Expected only 1 argument, got: " + objects);
         }
 
-        // TODO Enhance with some generic arithmetic framework so that we can dynamically deal with int / float math
-        long start = BindingUtils.getNumber(binding, subjects.get(0)).longValue();
-        long end = BindingUtils.getNumber(binding, subjects.get(1)).longValue();
+        // TODO Make use of NodeValue and NodeValueOps for arithmetic
+        long displacement = BindingUtils.tryGetNumber(binding, sn > 3 ? subjects.get(3) : null).map(Number::longValue).orElse(0l);
+
+        long start = BindingUtils.getNumber(binding, subjects.get(0)).longValue() + displacement;
+        long end = BindingUtils.getNumber(binding, subjects.get(1)).longValue() + displacement;
         long step = BindingUtils.tryGetNumber(binding, sn > 2 ? subjects.get(2) : null).map(Number::longValue).orElse(1l);
+
 
         long rangeDelta = end - start;
 
