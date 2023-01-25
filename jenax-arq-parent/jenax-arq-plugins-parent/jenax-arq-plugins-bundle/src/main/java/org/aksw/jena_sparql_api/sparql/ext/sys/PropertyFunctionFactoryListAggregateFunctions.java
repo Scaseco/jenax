@@ -59,7 +59,7 @@ public class PropertyFunctionFactoryListAggregateFunctions extends PropertyFunct
         return null;
     }
 
-    private class RegWrapperAggregates extends RegWrapper {
+    public static class RegWrapperAggregates extends RegWrapper {
         private final HashMap<String, AccumulatorFactory> reg;
         private final boolean distinct;
 

@@ -63,7 +63,7 @@ public abstract class PropertyFunctionFactoryListFunctionsBase implements Proper
                 ).iterator();
     }
 
-    protected abstract static class RegWrapper {
+     public abstract static class RegWrapper {
 
         public abstract Object get(String uri);
 
