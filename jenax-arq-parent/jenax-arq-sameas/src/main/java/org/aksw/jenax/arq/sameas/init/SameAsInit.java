@@ -3,6 +3,8 @@ package org.aksw.jenax.arq.sameas.init;
 import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerSameAs;
 import org.aksw.jenax.arq.sameas.assembler.SameAsVocab;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
+import org.aksw.jenax.arq.uniondefaultgraph.assembler.DatasetAssemblerUnionDefaultGraph;
+import org.aksw.jenax.arq.uniondefaultgraph.assembler.UnionDefaultGraphVocab;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.assemblers.AssemblerGroup;
@@ -30,5 +32,8 @@ public class SameAsInit
 
     static void registerWith(AssemblerGroup g) {
         AssemblerUtils.register(g, SameAsVocab.DatasetSameAs, new DatasetAssemblerSameAs(), DatasetAssembler.getType());
+
+        AssemblerUtils.register(g, UnionDefaultGraphVocab.DatasetUnionDefaultGraph, new DatasetAssemblerUnionDefaultGraph(), DatasetAssembler.getType());
+
     }
 }
