@@ -93,6 +93,10 @@ public class NodeUtils {
         return n == null ? Node.ANY : n;
     }
 
+    public static Node anyToNull(Node n) {
+        return Node.ANY.equals(n) ? null : n;
+    }
+
     /**
      * Create a logical conjunction of two nodes:
      * - Node.ANY, null or a variable matches everything
