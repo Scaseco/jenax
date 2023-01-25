@@ -44,7 +44,7 @@ public class DatasetGraphSameAs
     protected LoadingCache<Entry<Node, Node>, Set<Node>> directClusters;
     protected Set<Node> sameAsPredicates;
 
-    public static int DFT_MAX_CACHE_SIZE = 1000;
+    public static final int DFT_MAX_CACHE_SIZE = 1000;
 
     public static DatasetGraph wrap(DatasetGraph base) {
         return wrap(base, OWL.sameAs.asNode(), DFT_MAX_CACHE_SIZE);
@@ -122,6 +122,8 @@ public class DatasetGraphSameAs
 
         // Note: resolveSameAs only actually resolves the given start node if both it and the graph are concrete;
         // Otherwise the start node is returned as-is.
+
+        // Set up the tuple stream (quads)
         Stream<Quad> ts =
             resolveSameAs(g, ms).flatMap(s ->
                 resolveSameAs(g, mo).flatMap(o ->
@@ -130,13 +132,13 @@ public class DatasetGraphSameAs
         // ts = StreamUtils.println(ts);
 
         if (ms == null || g == null) {
-            // If the initial graph of subject were null then resolve sameAs based on the
+            // If the initial graph or subject were null then resolve sameAs based on the
             // concrete graph and subject components of the obtained quads
             ts = ts.flatMap(t -> resolveSameAs(t.getGraph(), t.getSubject()).map(s -> Quad.create(t.getGraph(), s, t.getPredicate(), t.getObject())));
         } else {
             // If the initial graph or subject were concrete then sameAs resolution already happened
             // However, replace any sameAs'd subject with the concrete one
-            ts = ts.map(t -> t.getSubject().equals(ms) ? t : Quad.create(g, ms, t.getPredicate(), t.getObject()));
+            ts = ts.map(t -> t.getSubject().equals(ms) ? t : Quad.create(t.getGraph(), ms, t.getPredicate(), t.getObject()));
         }
 
         if (mo == null || g == null) {
