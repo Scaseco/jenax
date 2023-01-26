@@ -179,10 +179,20 @@ public class DatasetGraphSameAs
         // Note: resolveSameAs only actually resolves the given start node if both it and the graph are concrete;
         // Otherwise the start node is returned as-is.
 
+
         // Set up the tuple stream (quads)
+        List<Node> initialSubjects;
+        List<Node> initialObjects;
+        try {
+            initialSubjects = resolveSameAsSortedCached(mg, ms, sameAsCache);
+            initialObjects = resolveSameAsSortedCached(mg, mo, sameAsCache);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         Stream<Quad> ts =
-            resolveSameAs(mg, ms).flatMap(s ->
-                resolveSameAs(mg, mo).flatMap(o ->
+            initialSubjects.stream().flatMap(s ->
+                initialObjects.stream().flatMap(o ->
                     getR().stream(mg, s, mp, o)));
 
         ts = ts.flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo, sameAsCache, leastInferredToPhysicalQuadCache));
@@ -206,7 +216,7 @@ public class DatasetGraphSameAs
         List<Node> sortedObjects = resolveSameAsSortedCached(g, quad.getObject(), sameAsCache);
 
         // The quad and the same-as closures of the subjects and objects
-        // are the basis to create the set of inferenced quads
+        // are the basis to create the set of inferred quads
         // However, inferences should only be emitted on the 'least' quad that is contained in the graph
         // For performance it is crucial to minimize lookups via contains()
 
@@ -234,7 +244,6 @@ public class DatasetGraphSameAs
         return result;
     }
 
-
     protected Quad computeLeastPhysicalQuad(Quad quad, List<Node> sortedSubjects, List<Node> sortedObjects) {
         Quad result = null;
         Node g = quad.getGraph();
@@ -255,24 +264,29 @@ public class DatasetGraphSameAs
     }
 
     public List<Node> resolveSameAsSortedCached(Node g, Node start, Cache<Entry<Node, Node>, List<Node>> sameAsCache) throws ExecutionException {
-        boolean[] wasComputed = { false };
-        Entry<Node, Node> startKey = Map.entry(g, start);
-        List<Node> result = sameAsCache.get(startKey, () -> { wasComputed[0] = true; return resolveSameAsSorted(g, start); });
+        List<Node> result;
+        if (!g.isConcrete() || !start.isConcrete() || start.isLiteral()) {
+            result = Collections.singletonList(start);
+        } else {
+            boolean[] wasComputed = { false };
+            Entry<Node, Node> startKey = Map.entry(g, start);
+            result = sameAsCache.get(startKey, () -> { wasComputed[0] = true; return resolveSameAsSorted(g, start); });
 
-        // Add cache entries for all nodes in the closure
-        if (wasComputed[0]) {
-            for (Node node : result) {
-                if (!node.equals(start)) {
-                    sameAsCache.put(Map.entry(g, node), result);
+            // Add cache entries for all nodes in the closure
+            if (wasComputed[0]) {
+                for (Node node : result) {
+                    if (!node.equals(start)) {
+                        sameAsCache.put(Map.entry(g, node), result);
+                    }
                 }
+                // Ensure that the startKey is marked as recently used
+                sameAsCache.put(startKey, result);
             }
-            // Ensure that the startKey is marked as recently used
-            sameAsCache.put(startKey, result);
         }
         return result;
     }
 
-    /** Collect the same as close into a sorted list (non-cached) */
+    /** Collect the same as closure into a sorted list (non-cached) */
     protected List<Node> resolveSameAsSorted(Node g, Node start) {
         List<Node> result = resolveSameAs(g, start).distinct().collect(Collectors.toList());
         Collections.sort(result, NodeCmp::compareRDFTerms);
@@ -283,18 +297,12 @@ public class DatasetGraphSameAs
      *
      * @param g
      * @param start
-     * @param greaterOrEqual Only return the nodes that are greater-or-equal than the starting node
      * @return
      */
     protected Stream<Node> resolveSameAs(Node g, Node start) {
-        Stream<Node> result;
-        if (NodeUtils.isNullOrAny(g) || NodeUtils.isNullOrAny(start)) {
-            result = Stream.of(start);
-        } else {
-            Traverser<Node> traverser = Traverser.forGraph(n -> getDirectNodes(g, n));
-            // Note: Traverser always includes the start node in its result
-            result = Streams.stream(traverser.breadthFirst(start));
-        }
+        Traverser<Node> traverser = Traverser.forGraph(n -> getDirectNodes(g, n));
+        // Note: Traverser always includes the start node in its result
+        Stream<Node> result = Streams.stream(traverser.depthFirstPreOrder(start));
         // result = StreamUtils.viaList(result, list -> System.out.println("resolveSameAs [greaterOrEqual=" + greaterOrEqual + "]: " + start + " -> " + list));
         return result;
     }
