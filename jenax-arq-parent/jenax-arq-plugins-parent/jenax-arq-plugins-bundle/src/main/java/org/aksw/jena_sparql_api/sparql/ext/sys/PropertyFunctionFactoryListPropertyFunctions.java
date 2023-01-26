@@ -12,7 +12,7 @@ public class PropertyFunctionFactoryListPropertyFunctions extends PropertyFuncti
         return new RegWrapperPropertyFunctions(execCxt);
     }
 
-    private class RegWrapperPropertyFunctions extends RegWrapper {
+    public static class RegWrapperPropertyFunctions extends RegWrapper {
         private final PropertyFunctionRegistry reg;
         public RegWrapperPropertyFunctions(ExecutionContext execCxt) {
             PropertyFunctionRegistry registry1 = PropertyFunctionRegistry.get(execCxt.getContext());
