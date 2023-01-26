@@ -61,6 +61,17 @@ public class QuadUtils {
         }
     }
 
+    /** Return a new quad by setting the specified index to the given value */
+    public static Quad setNode(Quad quad, int idx, Node node) {
+        switch (idx) {
+        case 0: return Quad.create(           node, quad.getSubject(), quad.getPredicate(), quad.getObject());
+        case 1: return Quad.create(quad.getGraph(),              node, quad.getPredicate(), quad.getObject());
+        case 2: return Quad.create(quad.getGraph(), quad.getSubject(),                node, quad.getObject());
+        case 3: return Quad.create(quad.getGraph(), quad.getSubject(), quad.getPredicate(),             node);
+        default: throw new IndexOutOfBoundsException("Cannot access index " + idx + " of a quad");
+        }
+    }
+
     public static TupleSlot idxToSlot(int idx) {
         return SLOTS[idx];
     }
@@ -293,8 +304,8 @@ public class QuadUtils {
         }
         return targetAcc;
     }
-    
+
     public static boolean isDefaultGraph(Quad quad) {
-    	return Quad.isDefaultGraph(quad.getGraph());
+        return quad != null && Quad.isDefaultGraph(quad.getGraph());
     }
 }

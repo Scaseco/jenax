@@ -12,14 +12,14 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
 import org.junit.AfterClass;
@@ -38,12 +38,15 @@ public class TestDatasetAssemblerSameAs {
     public void test01() {
         // runTest("SELECT * { ?s ?p ?o }", 8);
         // In union default graph  mode without deduplication we expect alot of triples
-        runTest("SELECT * { ?s ?p ?o }", 27);
+        // runTest("SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o", 27);
+
+        // This test now assumes deduplication
+        runTest("SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o", 18);
     }
 
     @Test
     public void test02() {
-        runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } }", 8);
+        runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 8);
     }
 
     public void runTest(String queryStr, int expectedResult) {
@@ -57,8 +60,8 @@ public class TestDatasetAssemblerSameAs {
             try (QueryExecution qe = QueryExecution.create(query, dataset)) {
                 int r;
                 if (query.isSelectType()) {
-                    ResultSet rs = qe.execSelect();
-                    // ResultSetFormatter.outputAsTSV(System.out, rs);
+                    ResultSetRewindable rs = ResultSetFactory.makeRewindable(qe.execSelect());
+                    // ResultSetFormatter.outputAsTSV(System.out, rs); rs.reset();
                     r = ResultSetFormatter.consume(rs);
                 } else if (query.isConstructType()) {
                     r = Iterators.size(qe.execConstructQuads());
@@ -80,7 +83,7 @@ public class TestDatasetAssemblerSameAs {
                 "PREFIX tdb2: <http://jena.apache.org/2016/tdb#>",
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
                 "PREFIX jxp: <http://jenax.aksw.org/plugin#>",
-                "<urn:example:root> a jxp:DatasetSameAs ; jxp:cacheMaxSize 1000 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
+                "<urn:example:root> a jxp:DatasetSameAs ; jxp:cacheMaxSize 1000 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
                 "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph true ."
                 // "<urn:example:base> a ja:MemoryDataset ."
             );

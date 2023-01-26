@@ -18,10 +18,10 @@ import org.apache.jena.sparql.util.Symbol;
  * Mainly intended for wrapping TDB2 datasets which have the defaultUnionGraph context symbol set to true
  * such that {@code find(Quad.defaultGraph, ...)} is transparently redirected to the union graph.
  */
-public class DatasetGraphWrapperUnionDefaultGraph
+public class DatasetGraphUnionDefaultGraph
     extends DatasetGraphWrapperFindBase
 {
-    protected DatasetGraphWrapperUnionDefaultGraph(DatasetGraph dsg) {
+    public DatasetGraphUnionDefaultGraph(DatasetGraph dsg) {
         super(dsg);
     }
 
@@ -29,17 +29,23 @@ public class DatasetGraphWrapperUnionDefaultGraph
     protected Iterator<Quad> actionFind(Node g, Node s, Node p, Node o) {
         Iterator<Quad> result;
         if (Quad.isDefaultGraph(g)) {
-            result = Iter.iter(getR().find(Quad.unionGraph, s, p, o)); // .map(q -> Quad.create(g, q.getSubject(), q.getPredicate(), q.getObject()));
+            result = Iter.iter(getR().find(Quad.unionGraph, s, p, o))
+                        .map(q -> Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
         } else {
             result = getR().find(g, s, p, o);
         }
         return result;
     }
 
-    /** Wrap a given dataset if it is known to be in union default graph mode and not already wrapped by this class */
+    /** Wrap a given dataset if it is not already wrapped by this class */
+    public static DatasetGraph wrap(DatasetGraph dsg) {
+        DatasetGraph result = dsg instanceof DatasetGraphUnionDefaultGraph ? dsg : new DatasetGraphUnionDefaultGraph(dsg);
+        return result;
+    }
+    /** Wrap a given dataset <b>only if it is known to be in union default graph mode</b> and not already wrapped by this class */
     public static DatasetGraph wrapIfNeeded(DatasetGraph dsg) {
-        DatasetGraph result = !(dsg instanceof DatasetGraphWrapperUnionDefaultGraph) && isKnownUnionDefaultGraphMode(dsg)
-                ? new DatasetGraphWrapperUnionDefaultGraph(dsg)
+        DatasetGraph result = !(dsg instanceof DatasetGraphUnionDefaultGraph) && isKnownUnionDefaultGraphMode(dsg)
+                ? new DatasetGraphUnionDefaultGraph(dsg)
                 : dsg;
         return result;
     }
@@ -52,11 +58,11 @@ public class DatasetGraphWrapperUnionDefaultGraph
 
     /**
      * The set of predicates returned by this method is synchronized. Plugins may modify the elements.
-     * Modifications only affect future {@link DatasetGraphWrapperUnionDefaultGraph} instances.
+     * Modifications only affect future {@link DatasetGraphUnionDefaultGraph} instances.
      */
     public static Set<Predicate<DatasetGraph>> getUnionDefaultGraphCheckers() {
         if (knownUnionDefaultGraphCheckers == null) {
-            synchronized (DatasetGraphWrapperUnionDefaultGraph.class) {
+            synchronized (DatasetGraphUnionDefaultGraph.class) {
                 if (knownUnionDefaultGraphCheckers == null) {
                     knownUnionDefaultGraphCheckers = Collections.synchronizedSet(new LinkedHashSet<>());
                     knownUnionDefaultGraphCheckers.add(dsg -> isTdbUnionDefaultGraph(dsg.getContext()));

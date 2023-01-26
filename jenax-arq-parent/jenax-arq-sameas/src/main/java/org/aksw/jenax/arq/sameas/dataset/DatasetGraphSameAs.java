@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.sameas.dataset;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -13,7 +14,6 @@ import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.collect.Streams;
-import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
@@ -27,8 +27,8 @@ import org.apache.jena.shared.Lock;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.DatasetGraphWrapperView;
-import org.apache.jena.sparql.core.GraphView;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.util.NodeCmp;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDFS;
 
@@ -81,16 +81,6 @@ public class DatasetGraphSameAs
         this.sameAsPredicates = sameAsPredicates;
     }
 
-    @Override
-    public Graph getDefaultGraph() {
-        return GraphView.createDefaultGraph(this);
-    }
-
-    @Override
-    public Graph getGraph(Node graphNode) {
-        return GraphView.createNamedGraph(this, graphNode);
-    }
-
     @Override public void add(Node g, Node s, Node p, Node o) { add(new Quad(g, s, p, o)); }
     @Override public void delete(Node g, Node s, Node p, Node o) { delete(new Quad(g, s, p, o)); }
 
@@ -108,16 +98,14 @@ public class DatasetGraphSameAs
 
     @Override
     public void deleteAny(Node g, Node s, Node p, Node o) {
-//        if (NodeUtils.isNullOrAny(p) || sameAsPredicates.contains(p)) {
-//        	if (NodeUtils.isNullOrAny(s)) {
-//
-//        	}
-//
-//        }
         // TODO For simplicity we just invalidate everything
         getLock().enterCriticalSection(Lock.WRITE);
         try {
             cache.invalidateAll();
+//          if (NodeUtils.isNullOrAny(p) || sameAsPredicates.contains(p)) {
+//        	if (NodeUtils.isNullOrAny(s)) {
+//        	}
+//        }
             super.deleteAny(g, s, p, o);
         } finally {
             getLock().leaveCriticalSection();
@@ -172,14 +160,16 @@ public class DatasetGraphSameAs
 
     @Override
     protected Iterator<Quad> actionFind(Node gg, Node ss, Node pp, Node oo) {
-        // If s or o is concrete then resolve their sameAs clusters before the lookup
-        // Otherwise, resolve the sameAs clusters of that component based on the obtained triple's concrete values
+        // TODO We could add a method-local cache here to memoize resolveSameAs(Sorted) results
+
+        // If s or o is concrete then resolve their sameAs closure before the lookup
+        // Otherwise, resolve the sameAs closures of that component based on the obtained triple's concrete values
 
         // gx = "given x"; mx = "match x" analogous to Triple.getMatchX()
-        Node mg = NodeUtils.anyToNull(gg);
-        Node ms = NodeUtils.anyToNull(ss);
-        Node mp = NodeUtils.anyToNull(pp);
-        Node mo = NodeUtils.anyToNull(oo);
+        Node mg = NodeUtils.nullToAny(gg);
+        Node ms = NodeUtils.nullToAny(ss);
+        Node mp = NodeUtils.nullToAny(pp);
+        Node mo = NodeUtils.nullToAny(oo);
 
         // Note: resolveSameAs only actually resolves the given start node if both it and the graph are concrete;
         // Otherwise the start node is returned as-is.
@@ -190,37 +180,82 @@ public class DatasetGraphSameAs
                 resolveSameAs(mg, mo).flatMap(o ->
                     getR().stream(mg, s, mp, o)));
 
-        // ts = StreamUtils.println(ts);
-        if (ms == null || mg == null) {
-            // If the initial graph or subject were null then resolve sameAs based on the
-            // concrete graph and subject components of the obtained quads
-            ts = ts.flatMap(t -> resolveSameAs(t.getGraph(), t.getSubject()).map(s -> Quad.create(t.getGraph(), s, t.getPredicate(), t.getObject())));
-        } else {
-            // If the initial graph or subject were concrete then sameAs resolution already happened
-            // However, replace any sameAs'd subject with the concrete one
-            // (i.e. pretend all obtained triples belonged to the subject we used for the lookup)
-            ts = ts.map(t -> t.getSubject().equals(ms) ? t : Quad.create(t.getGraph(), ms, t.getPredicate(), t.getObject()));
-        }
-
-        if (mo == null || mg == null) {
-            ts = ts.flatMap(t -> resolveSameAs(t.getGraph(), t.getObject()).map(o -> Quad.create(t.getGraph(), t.getSubject(), t.getPredicate(), o)));
-        } else {
-            ts = ts.map(t -> t.getObject().equals(mo) ? t : Quad.create(t.getGraph(), t.getSubject(), t.getPredicate(), mo));
-        }
+        ts = ts.flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo));
 
         return Iter.onClose(ts.iterator(), ts::close);
     }
 
+    protected List<Node> resolveSameAsSorted(Node g, Node start) {
+        List<Node> result = resolveSameAs(g, start).distinct().collect(Collectors.toList());
+        Collections.sort(result, NodeCmp::compareRDFTerms);
+        return result;
+    }
+
+    /** For a given (phisical) quad, find the least quad among those of its sameas closure */
+    protected Stream<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo) {
+        Stream<Quad> result;
+
+        Node g = quad.getGraph();
+        Node p = quad.getPredicate();
+        List<Node> subjects = resolveSameAsSorted(g, quad.getSubject());
+        List<Node> objects = resolveSameAsSorted(g, quad.getObject());
+
+        // The quad and the same-as closures of the subjects and objects
+        // are the basis to create the set of inferenced quads
+        // However, inferences should only be emitted on the 'least' quad that is contained in the graph
+        // For performance it is crucial to minimize lookups via contains()
+
+        boolean isLeastQuad;
+        if (subjects.size() == 1 && objects.size() == 1) {
+            // Don't call contains if there is there are no same-as'd alternatives of it
+            result = Stream.of(quad);
+        } else {
+            // Note: Even if either the subjects or objects array has a size of 1
+            // we need to perform the contains check which inferrable quad is in the graph
+            Quad leastQuad = null;
+            outer: for (Node s : subjects) {
+                for (Node o : objects) {
+                    // Note: We can either create the cross product between subjects and objects
+                    // Or we e.g. lookup the os for a subjects and find the least one within the objects
+                    if (getR().contains(g, s, p, o)) {
+                        leastQuad = Quad.create(g, s, p, o);
+                        break outer;
+                    }
+                }
+            }
+            isLeastQuad = quad.equals(leastQuad);
+
+            // If there were concrete subjects/objects for matching then restrict the cross-join
+            // only to those
+            List<Node> ss = ms.isConcrete() ? Collections.singletonList(ms) : subjects;
+            List<Node> oo = mo.isConcrete() ? Collections.singletonList(mo) : objects;
+
+            // System.out.println(quad + (isLeastQuad ? " is least quad " : " hasLeastQuad: " + leastQuad));
+            result = isLeastQuad
+                    ? ss.stream().flatMap(s -> oo.stream().map(o -> Quad.create(g, s, p, o)))
+                    : Stream.empty();
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param g
+     * @param start
+     * @param greaterOrEqual Only return the nodes that are greater-or-equal than the starting node
+     * @return
+     */
     protected Stream<Node> resolveSameAs(Node g, Node start) {
         Stream<Node> result;
-        if (g == null || start == null) {
+        if (NodeUtils.isNullOrAny(g) || NodeUtils.isNullOrAny(start)) {
             result = Stream.of(start);
         } else {
             Traverser<Node> traverser = Traverser.forGraph(n -> getDirectNodes(g, n));
             // Note: Traverser always includes the start node in its result
             result = Streams.stream(traverser.breadthFirst(start));
         }
-        // result = StreamUtils.viaList(result, list -> System.out.println("resolveSameAs: " + start + " -> " + list));
+        // result = StreamUtils.viaList(result, list -> System.out.println("resolveSameAs [greaterOrEqual=" + greaterOrEqual + "]: " + start + " -> " + list));
         return result;
     }
 
@@ -233,7 +268,7 @@ public class DatasetGraphSameAs
     }
 
     /**
-     * Get the set of all direct ingoing and outgoing triplesfor a given graph and node.
+     * Get the set of all direct ingoing and outgoing triples for a given graph and node.
      * Lookup for literals immediately return an empty set - any other lookups go through the cache.
      *
      * @param g The graph for the starting node. Never null.

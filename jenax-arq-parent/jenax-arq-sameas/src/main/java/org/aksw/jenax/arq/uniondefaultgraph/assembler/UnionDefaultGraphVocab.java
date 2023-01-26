@@ -11,5 +11,6 @@ public class UnionDefaultGraphVocab {
     public static String getURI() { return NS; }
 
     public static final Resource DatasetUnionDefaultGraph = ResourceFactory.createResource(NS + "DatasetUnionDefaultGraph");
+    public static final Resource DatasetAutoUnionDefaultGraph = ResourceFactory.createResource(NS + "DatasetAutoUnionDefaultGraph");
     public static final Property baseDataset = ResourceFactory.createProperty(SameAsTerms.baseDataset);
 }
