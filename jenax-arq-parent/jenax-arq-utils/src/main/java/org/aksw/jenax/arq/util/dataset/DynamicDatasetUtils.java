@@ -7,20 +7,50 @@ import org.apache.jena.sparql.core.DynamicDatasets.DynamicDatasetGraph;
 
 public class DynamicDatasetUtils {
 
-    /**
-     * Returns true iff the argument's original default and named graphs are non-null.
-     * Typically, this shouldn't happen. This method mainly exists for robustness.
-     */
-    public static boolean isUnwrappable(DynamicDatasetGraph ddg) {
-        boolean result = ddg.getOriginalDefaultGraphs() != null && ddg.getOriginalNamedGraphs() != null;
-        return result;
-    }
-
     /** Returns the argument unless it is a DynamicDataset for which
      * {@link #isUnwrappable(DynamicDatasetGraph)} is true. In that case
      * {@link DynamicDatasetGraph#getOriginal()} is returned.
      **/
     public static DatasetGraph unwrap(DatasetGraph dg) {
+        DatasetGraph result = dg;
+        if (dg instanceof DynamicDatasetGraph) {
+            DynamicDatasetGraph ddg = (DynamicDatasetGraph)dg;
+            if (isUnwrappable(ddg)) {
+                result = ddg.getOriginal();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns true iff the argument's original default and named graphs are non-null.
+     * Typically, this shouldn't happen. This method mainly exists for robustness as to
+     * avoid null pointer exceptions.
+     */
+    public static boolean isUnwrappable(DynamicDatasetGraph ddg) {
+        boolean result = ddg.getOriginal() != null &&
+                ddg.getOriginalDefaultGraphs() != null && ddg.getOriginalNamedGraphs() != null;
+        return result;
+    }
+
+    /** Convenience method to cast the argument as a DynamicDatasetGraph if it is an unwrappable one. */
+    public static DynamicDatasetGraph asUnwrappableDynamicDatasetOrNull(DatasetGraph dg) {
+        DynamicDatasetGraph result = null;
+        if (dg instanceof DynamicDatasetGraph) {
+            DynamicDatasetGraph ddg = (DynamicDatasetGraph)dg;
+            if (isUnwrappable(ddg)) {
+                result = ddg;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the argument unless it is a DynamicDataset for which
+     * {@link #isUnwrappable(DynamicDatasetGraph)} is true. In that case
+     * {@link DynamicDatasetGraph#getOriginal()} is returned.
+     */
+    public static DatasetGraph unwrapOriginal(DatasetGraph dg) {
         DatasetGraph result = dg;
         if (dg instanceof DynamicDatasetGraph) {
             DynamicDatasetGraph ddg = (DynamicDatasetGraph)dg;
@@ -49,7 +79,6 @@ public class DynamicDatasetUtils {
                 result = Pair.create(query, ddg.getOriginal());
             }
         }
-
         if (result == null) {
             result = Pair.create(query, dataset);
         }

@@ -90,7 +90,7 @@ public class CachePattern {
     }
 
     /**
-     * Mark fields as IN in order to partition cache entries
+     * Marking components as IN only matches concrete values.
      *
      * create(IN, IN, owl:sameAs, OUT)
      *
