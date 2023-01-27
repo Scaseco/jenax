@@ -1,18 +1,19 @@
 package org.aksw.jenax.arq.sameas.dataset;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.aksw.commons.util.cache.CacheUtils;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.collect.Streams;
@@ -38,17 +39,18 @@ import org.apache.jena.vocabulary.RDFS;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.graph.Traverser;
 
 public class DatasetGraphSameAs
     extends DatasetGraphWrapperFindBase
     implements DatasetGraphWrapperView
 {
-    // private static final Logger logger = LoggerFactory.getLogger(GraphWithSameAsInference.class);
+    protected boolean logCacheStats = false;
 
-    protected LoadingCache<Entry<Node, Node>, Set<Triple>> tripleCache;
+    /** Allowing duplicates disables certain checks which may increase performance */
+    protected boolean allowDuplicates = false;
+
+    protected Cache<Entry<Node, Node>, Set<Triple>> tripleCache;
     protected Set<Node> sameAsPredicates;
 
     public static final int DFT_MAX_CACHE_SIZE = 10_000;
@@ -75,14 +77,12 @@ public class DatasetGraphSameAs
 
     protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates, int maxCacheSize) {
         super(base);
-        this.tripleCache = CacheBuilder.newBuilder()
+        this.tripleCache =
+                CacheUtils.recordStats(CacheBuilder.newBuilder(), logCacheStats)
                 .maximumSize(maxCacheSize)
-                .build(new CacheLoader<Entry<Node, Node>, Set<Triple>>() {
-                    @Override
-                    public Set<Triple> load(Entry<Node, Node> graphAndNode) throws Exception {
-                        return loadDirectTriples(graphAndNode.getKey(), graphAndNode.getValue());
-                    }
-                });
+                .build();
+
+        this.tripleCache = null;
         this.sameAsPredicates = sameAsPredicates;
     }
 
@@ -106,11 +106,7 @@ public class DatasetGraphSameAs
         // TODO For simplicity we just invalidate everything
         getLock().enterCriticalSection(Lock.WRITE);
         try {
-            tripleCache.invalidateAll();
-//          if (NodeUtils.isNullOrAny(p) || sameAsPredicates.contains(p)) {
-//        	if (NodeUtils.isNullOrAny(s)) {
-//        	}
-//        }
+            CacheUtils.invalidateAll(tripleCache);
             super.deleteAny(g, s, p, o);
         } finally {
             getLock().leaveCriticalSection();
@@ -133,12 +129,12 @@ public class DatasetGraphSameAs
             if (doLocking) { getLock().enterCriticalSection(Lock.WRITE); }
             try {
                 Triple t = quad.asTriple();
-                ts = tripleCache.getIfPresent(Map.entry(quad.getGraph(), quad.getSubject()));
+                ts = CacheUtils.getIfPresent(tripleCache, Map.entry(quad.getGraph(), quad.getSubject()));
                 if (ts != null) {
                     tripleAction.accept(ts, t);
                 }
 
-                ts = tripleCache.getIfPresent(Map.entry(quad.getGraph(), quad.getObject()));
+                ts = CacheUtils.getIfPresent(tripleCache, Map.entry(quad.getGraph(), quad.getObject()));
                 if (ts != null) {
                     tripleAction.accept(ts, t);
                 }
@@ -156,7 +152,7 @@ public class DatasetGraphSameAs
         // Note: Requesting a readLock if the write lock is already held should simply increment the lock count on the write lock
         getLock().enterCriticalSection(Lock.READ);
         try {
-            tripleCache.invalidateAll();
+            CacheUtils.invalidateAll(tripleCache);
             super.abort();
         } finally {
             getLock().leaveCriticalSection();
@@ -167,8 +163,12 @@ public class DatasetGraphSameAs
     protected Iterator<Quad> actionFind(boolean ng, Node mg, Node ms, Node mp, Node mo) {
         // These caches are local to the find() call in order to avoid complex synchronization w.r.t. updates
         // Cache sizes could be made configurable.
-        Cache<Entry<Node, Node>, List<Node>> sameAsCache = CacheBuilder.newBuilder().maximumSize(100).build();
-        Cache<Quad, Quad> leastInferredToPhysicalQuadCache = CacheBuilder.newBuilder().maximumSize(100).build();
+        Cache<Entry<Node, Node>, List<Node>> sameAsCache =
+                CacheUtils.recordStats(CacheBuilder.newBuilder(), logCacheStats)
+                .concurrencyLevel(1).maximumSize(10).build();
+
+        // This cache on our load did not generate sufficient hits - therefore disabled
+        Cache<Quad, Quad> leastInferredToPhysicalQuadCache = null; // CacheBuilder.newBuilder().recordStats().concurrencyLevel(1).maximumSize(100).build();
 
         // If s or o is concrete then resolve their sameAs closure before the lookup
         // Otherwise, resolve the sameAs closures of that component based on the obtained triple's concrete values
@@ -177,34 +177,29 @@ public class DatasetGraphSameAs
         // Otherwise the start node is returned as-is.
 
         // Set up the tuple stream (quads)
-        List<Node> initialSubjects;
-        List<Node> initialObjects;
-        try {
-            initialSubjects = resolveSameAsSortedCached(mg, ms, sameAsCache);
-            initialObjects = resolveSameAsSortedCached(mg, mo, sameAsCache);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        List<Node> initialSubjects = resolveSameAsSortedCached(mg, ms, sameAsCache);
+        List<Node> initialObjects = resolveSameAsSortedCached(mg, mo, sameAsCache);
 
-        Iterator<Quad> result =
+        Iter<Quad> result =
             Iter.iter(initialSubjects).flatMap(s ->
                 Iter.iter(initialObjects).flatMap(o ->
                     Iter.iter(delegateFind(ng, mg, s, mp, o))
                         .flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo, sameAsCache, leastInferredToPhysicalQuadCache))
                 ));
 
+        if (logCacheStats) {
+            result = result.append(Iter.of(Quad.ANY).filter(x -> {
+                System.out.println("TripleCache: "+ CacheUtils.stats(tripleCache));
+                System.out.println("SameAsCache: "+ CacheUtils.stats(sameAsCache));
+                System.out.println("LeastQuadCache: "+ CacheUtils.stats(leastInferredToPhysicalQuadCache));
+                return false;
+            }));
+        }
+
         return result;
     }
 
     protected Iterator<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) {
-        try {
-            return streamInferencesOnLeastQuadCore(quad, ms, mo, sameAsCache, leastQuadCache);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected Iterator<Quad> streamInferencesOnLeastQuadCore(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) throws ExecutionException {
         Iterator<Quad> result;
         Node g = quad.getGraph();
         Node p = quad.getPredicate();
@@ -224,9 +219,14 @@ public class DatasetGraphSameAs
             Node leastO = sortedObjects.get(0);
             Quad leastInferrableQuad = Quad.create(g, leastS, p, leastO);
             Quad leastPhysicalQuad;
-            leastPhysicalQuad = leastQuadCache.get(leastInferrableQuad, () -> computeLeastPhysicalQuad(leastInferrableQuad, sortedSubjects, sortedObjects));
-            boolean isLeastQuad = quad.equals(leastPhysicalQuad);
 
+            boolean isLeastQuad;
+            if (!allowDuplicates) {
+                leastPhysicalQuad = CacheUtils.get(leastQuadCache, leastInferrableQuad, () -> computeLeastPhysicalQuad(leastInferrableQuad, sortedSubjects, sortedObjects));
+                isLeastQuad = quad.equals(leastPhysicalQuad);
+            } else {
+                isLeastQuad = true;
+            }
             // If there were concrete subjects/objects for matching then restrict the cross-join
             // only to those
             List<Node> ss = ms.isConcrete() ? Collections.singletonList(ms) : sortedSubjects;
@@ -245,7 +245,7 @@ public class DatasetGraphSameAs
     }
 
     protected Quad computeLeastPhysicalQuad(Quad quad, List<Node> sortedSubjects, List<Node> sortedObjects) {
-        // Note: This method can unexpectedly return null (leading to a NPE)
+        // Note: This method can unexpectedly return null (leading to an NPE)
         // if the backing dataset's find() method returns quads for which contains() returns false
 
         Quad result = null;
@@ -253,12 +253,14 @@ public class DatasetGraphSameAs
         Node p = quad.getPredicate();
         // Note: Even if either the subjects or objects array has a size of 1
         // we need to perform the contains check to determine which inferrable quad is in the graph
+
         outer: for (Node s : sortedSubjects) {
             for (Node o : sortedObjects) {
                 // System.out.println("Lookup: " + s + " - " + o);
 
                 // Note: We can either create the cross product between subjects and objects
                 // Or we e.g. lookup the os for a subjects and find the least one within the objects
+                // We could add a threshold to the cross product size as when to resort to graph lookups instead.
                 if (getR().contains(g, s, p, o)) {
                     result = Quad.create(g, s, p, o);
                     break outer;
@@ -268,16 +270,16 @@ public class DatasetGraphSameAs
         return result;
     }
 
-    public List<Node> resolveSameAsSortedCached(Node g, Node start, Cache<Entry<Node, Node>, List<Node>> sameAsCache) throws ExecutionException {
+    public List<Node> resolveSameAsSortedCached(Node g, Node start, Cache<Entry<Node, Node>, List<Node>> sameAsCache) {
         List<Node> result;
         if (!g.isConcrete() || !start.isConcrete() || start.isLiteral()) {
             result = Collections.singletonList(start);
         } else {
             boolean[] wasComputed = { false };
             Entry<Node, Node> startKey = Map.entry(g, start);
-            result = sameAsCache.get(startKey, () -> { wasComputed[0] = true; return resolveSameAsSorted(g, start); });
+            result = CacheUtils.get(sameAsCache, startKey, () -> { wasComputed[0] = true; return resolveSameAsSorted(g, start); });
 
-            // From experiments it is cheaper to compute the closure for every resource
+            // From experiments it is cheaper to compute the closure for resources
             // only when needed - rather than spending time on preemptively adding cache entries
             boolean cacheClosureForAllMembers = false;
             if (cacheClosureForAllMembers) {
@@ -296,9 +298,12 @@ public class DatasetGraphSameAs
         return result;
     }
 
-    /** Collect the same as closure into a sorted list (non-cached) */
+    /**
+     * Collect the same as closure into a sorted list (non-cached).
+     * Always returns an ArrayList. to e.g.
+     */
     protected List<Node> resolveSameAsSorted(Node g, Node start) {
-        List<Node> result = resolveSameAs(g, start).distinct().collect(Collectors.toList());
+        List<Node> result = resolveSameAs(g, start).distinct().collect(Collectors.toCollection(ArrayList::new));
         Collections.sort(result, NodeCmp::compareRDFTerms);
         return result;
     }
@@ -335,15 +340,12 @@ public class DatasetGraphSameAs
      */
     private Set<Triple> getDirectTriples(Node g, Node start) {
         Set<Triple> result;
-        try {
-             result = start.isLiteral()
-                     ? Collections.emptySet()
-                     : tripleCache.get(Map.entry(g, start));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        result = start.isLiteral()
+            ? Collections.emptySet()
+            : CacheUtils.get(tripleCache, Map.entry(g, start), () -> loadDirectTriples(g, start));
         return result;
     }
+
 
     /** This method should only be invoked by the cache callback */
     private Set<Triple> loadDirectTriples(Node g, Node s) {

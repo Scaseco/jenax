@@ -57,7 +57,7 @@ public class TestDatasetAssemblerSameAs {
     }
 
 
-    // @Test
+    // @Test // Note: Currently requires unionDefaultGraph to be disabled - otherwise the data will be shadowed by named graphs
     public void experiment01() {
         Stopwatch sw = Stopwatch.createStarted();
 
