@@ -6,6 +6,7 @@ import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
 import org.aksw.jenax.arq.uniondefaultgraph.assembler.DatasetAssemblerUnionDefaultGraph;
 import org.aksw.jenax.arq.uniondefaultgraph.assembler.UnionDefaultGraphVocab;
+import org.aksw.jenax.arq.util.dataset.DatasetGraphUnionDefaultGraph;
 import org.aksw.jenax.arq.util.exec.QueryExecUtils;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.assembler.Assembler;
@@ -38,8 +39,10 @@ public class SameAsInit
             (opExec, opOrig, binding, execCxt, chain) -> {
                 QueryIterator r;
                 if (opExec.getService().getURI().startsWith("sameAs")) {
-                    DatasetGraph dsg = DatasetGraphSameAs.wrap(execCxt.getDataset());
-                    r = QueryExecUtils.execute(opExec.getSubOp(), dsg, binding, execCxt.getContext());
+                    // Inherit union default graph if backed by tdb
+                    DatasetGraph adhocDs = DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset());
+                    adhocDs = DatasetGraphSameAs.wrap(adhocDs);
+                    r = QueryExecUtils.execute(opExec.getSubOp(), adhocDs, binding, execCxt.getContext());
                 } else {
                     r = chain.createExecution(opExec, opOrig, binding, execCxt);
                 }

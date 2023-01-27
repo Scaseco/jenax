@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphWrapperView;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
@@ -20,6 +21,7 @@ import org.apache.jena.sparql.util.Symbol;
  */
 public class DatasetGraphUnionDefaultGraph
     extends DatasetGraphWrapperFindBase
+    implements DatasetGraphWrapperView
 {
     public DatasetGraphUnionDefaultGraph(DatasetGraph dsg) {
         super(dsg);
