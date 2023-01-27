@@ -97,6 +97,11 @@ public class NodeUtils {
         return Node.ANY.equals(n) ? null : n;
     }
 
+    /** Method to canonicalize variables to Node.ANY */
+    public static Node nullOrFluentToAny(Node n) {
+        return n == null || !n.isConcrete() ? Node.ANY : n;
+    }
+
     /**
      * Create a logical conjunction of two nodes:
      * - Node.ANY, null or a variable matches everything

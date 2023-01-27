@@ -45,7 +45,7 @@ public class TupleAccessorTriple
     public <T> Triple restore(T obj, TupleAccessorCore<? super T, ? extends Node> accessor) {
 //        validateRestoreArg(accessor);
 
-        return new Triple(
+        return Triple.create(
                 accessor.get(obj, 0),
                 accessor.get(obj, 1),
                 accessor.get(obj, 2));

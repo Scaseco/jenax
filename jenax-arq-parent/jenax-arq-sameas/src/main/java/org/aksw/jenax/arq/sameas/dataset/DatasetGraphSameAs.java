@@ -7,40 +7,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.aksw.commons.util.cache.CacheUtils;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.shared.Lock;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.DatasetGraphWrapperView;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.NodeCmp;
-import org.apache.jena.system.Txn;
 import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.RDFS;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.graph.Traverser;
 
+
+/**
+ * A stateless DatasetGraph wrapper whose find() methods apply same-as inferences for the configured
+ * predicates.
+ */
 public class DatasetGraphSameAs
     extends DatasetGraphWrapperFindBase
     implements DatasetGraphWrapperView
@@ -50,113 +37,23 @@ public class DatasetGraphSameAs
     /** Allowing duplicates disables certain checks which may increase performance */
     protected boolean allowDuplicates = false;
 
-    protected Cache<Entry<Node, Node>, Set<Triple>> tripleCache;
     protected Set<Node> sameAsPredicates;
 
-    public static final int DFT_MAX_CACHE_SIZE = 10_000;
-
     public static DatasetGraph wrap(DatasetGraph base) {
-        return wrap(base, OWL.sameAs.asNode(), DFT_MAX_CACHE_SIZE);
-    }
-
-    public static DatasetGraph wrap(DatasetGraph base, int maxCacheSize) {
-        return wrap(base, OWL.sameAs.asNode(), maxCacheSize);
+        return wrap(base, OWL.sameAs.asNode());
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Node sameAsPredicate) {
-        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate), DFT_MAX_CACHE_SIZE);
+        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate));
     }
 
-    public static DatasetGraph wrap(DatasetGraph base, Node sameAsPredicate, int maxCacheSize) {
-        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate), maxCacheSize);
+    public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates) {
+        return new DatasetGraphSameAs(base, sameAsPredicates);
     }
 
-    public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates, int maxCacheSize) {
-        return new DatasetGraphSameAs(base, sameAsPredicates, maxCacheSize);
-    }
-
-    protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates, int maxCacheSize) {
+    protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates) {
         super(base);
-        this.tripleCache =
-                CacheUtils.recordStats(CacheBuilder.newBuilder(), logCacheStats)
-                .maximumSize(maxCacheSize)
-                .build();
-
-        this.tripleCache = null;
         this.sameAsPredicates = sameAsPredicates;
-    }
-
-    @Override public void add(Node g, Node s, Node p, Node o) { add(new Quad(g, s, p, o)); }
-    @Override public void delete(Node g, Node s, Node p, Node o) { delete(new Quad(g, s, p, o)); }
-
-    @Override
-    public void addAll(DatasetGraph src) {
-        try {
-            getLock().enterCriticalSection(Lock.WRITE);
-            try (Stream<Quad> stream = src.stream()) {
-                stream.forEach(quad -> performUpdateAction(quad, false, (ts, t) -> ts.add(t), () -> super.add(quad)));
-            }
-        } finally {
-            getLock().leaveCriticalSection();
-        }
-    }
-
-    @Override
-    public void deleteAny(Node g, Node s, Node p, Node o) {
-        // TODO For simplicity we just invalidate everything
-        getLock().enterCriticalSection(Lock.WRITE);
-        try {
-            CacheUtils.invalidateAll(tripleCache);
-            super.deleteAny(g, s, p, o);
-        } finally {
-            getLock().leaveCriticalSection();
-        }
-    }
-
-    @Override
-    public void add(Quad quad) {
-        performUpdateAction(quad, true, (ts, t) -> ts.add(t), () -> super.add(quad));
-    }
-
-    @Override
-    public void delete(Quad quad) {
-        performUpdateAction(quad, true, (ts, t) -> ts.remove(t), () -> super.delete(quad));
-    }
-
-    public void performUpdateAction(Quad quad, boolean doLocking, BiConsumer<Set<Triple>, Triple> tripleAction, Runnable graphAction) {
-        Set<Triple> ts;
-        if (sameAsPredicates.contains(quad.getPredicate())) {
-            if (doLocking) { getLock().enterCriticalSection(Lock.WRITE); }
-            try {
-                Triple t = quad.asTriple();
-                ts = CacheUtils.getIfPresent(tripleCache, Map.entry(quad.getGraph(), quad.getSubject()));
-                if (ts != null) {
-                    tripleAction.accept(ts, t);
-                }
-
-                ts = CacheUtils.getIfPresent(tripleCache, Map.entry(quad.getGraph(), quad.getObject()));
-                if (ts != null) {
-                    tripleAction.accept(ts, t);
-                }
-                graphAction.run();
-            } finally {
-                if (doLocking) { getLock().leaveCriticalSection(); }
-            }
-        } else {
-            graphAction.run();
-        }
-    }
-
-    @Override
-    public void abort() {
-        // Note: Requesting a readLock if the write lock is already held should simply increment the lock count on the write lock
-        getLock().enterCriticalSection(Lock.READ);
-        try {
-            CacheUtils.invalidateAll(tripleCache);
-            super.abort();
-        } finally {
-            getLock().leaveCriticalSection();
-        }
     }
 
     @Override
@@ -180,26 +77,25 @@ public class DatasetGraphSameAs
         List<Node> initialSubjects = resolveSameAsSortedCached(mg, ms, sameAsCache);
         List<Node> initialObjects = resolveSameAsSortedCached(mg, mo, sameAsCache);
 
-        Iter<Quad> result =
+        Iterator<Quad> result =
             Iter.iter(initialSubjects).flatMap(s ->
                 Iter.iter(initialObjects).flatMap(o ->
                     Iter.iter(delegateFind(ng, mg, s, mp, o))
                         .flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo, sameAsCache, leastInferredToPhysicalQuadCache))
                 ));
 
+        // Log cache stats once the iterator is closed
         if (logCacheStats) {
-            result = result.append(Iter.of(Quad.ANY).filter(x -> {
-                System.out.println("TripleCache: "+ CacheUtils.stats(tripleCache));
+            result = Iter.onClose(result, () -> {
                 System.out.println("SameAsCache: "+ CacheUtils.stats(sameAsCache));
                 System.out.println("LeastQuadCache: "+ CacheUtils.stats(leastInferredToPhysicalQuadCache));
-                return false;
-            }));
+            });
         }
 
         return result;
     }
 
-    protected Iterator<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) {
+    private Iterator<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) {
         Iterator<Quad> result;
         Node g = quad.getGraph();
         Node p = quad.getPredicate();
@@ -244,7 +140,7 @@ public class DatasetGraphSameAs
         return result;
     }
 
-    protected Quad computeLeastPhysicalQuad(Quad quad, List<Node> sortedSubjects, List<Node> sortedObjects) {
+    private Quad computeLeastPhysicalQuad(Quad quad, List<Node> sortedSubjects, List<Node> sortedObjects) {
         // Note: This method can unexpectedly return null (leading to an NPE)
         // if the backing dataset's find() method returns quads for which contains() returns false
 
@@ -270,7 +166,7 @@ public class DatasetGraphSameAs
         return result;
     }
 
-    public List<Node> resolveSameAsSortedCached(Node g, Node start, Cache<Entry<Node, Node>, List<Node>> sameAsCache) {
+    private List<Node> resolveSameAsSortedCached(Node g, Node start, Cache<Entry<Node, Node>, List<Node>> sameAsCache) {
         List<Node> result;
         if (!g.isConcrete() || !start.isConcrete() || start.isLiteral()) {
             result = Collections.singletonList(start);
@@ -302,8 +198,8 @@ public class DatasetGraphSameAs
      * Collect the same as closure into a sorted list (non-cached).
      * Always returns an ArrayList. to e.g.
      */
-    protected List<Node> resolveSameAsSorted(Node g, Node start) {
-        List<Node> result = resolveSameAs(g, start).distinct().collect(Collectors.toCollection(ArrayList::new));
+    private List<Node> resolveSameAsSorted(Node g, Node start) {
+        List<Node> result = resolveSameAs(g, start).collect(Collectors.toCollection(ArrayList::new));
         Collections.sort(result, NodeCmp::compareRDFTerms);
         return result;
     }
@@ -312,151 +208,43 @@ public class DatasetGraphSameAs
      *
      * @param g
      * @param start
-     * @return
+     * @return A stream of unique start's same-as reachable nodes.
      */
-    protected Stream<Node> resolveSameAs(Node g, Node start) {
+    private Iter<Node> resolveSameAs(Node g, Node start) {
         Traverser<Node> traverser = Traverser.forGraph(n -> getDirectNodes(g, n));
         // Note: Traverser always includes the start node in its result
-        Stream<Node> result = Streams.stream(traverser.depthFirstPreOrder(start));
+        Iter<Node> result = Iter.iter(traverser.depthFirstPreOrder(start).iterator());
         // result = StreamUtils.viaList(result, list -> System.out.println("resolveSameAs [greaterOrEqual=" + greaterOrEqual + "]: " + start + " -> " + list));
         return result;
     }
 
-    public Set<Node> getDirectNodes(Node g, Node start) {
-        Set<Node> triples = getDirectTriples(g, start).stream()
-            .map(t -> t.getSubject().equals(start) ? t.getObject() : t.getSubject())
-            .collect(Collectors.toSet());
-        // System.out.println("Cluster for graph " + g + ": " + start + " -> " + triples);
-        return triples;
-    }
-
-    /**
-     * Get the set of all direct ingoing and outgoing triples for a given graph and node.
-     * Lookup for literals immediately return an empty set - any other lookups go through the cache.
-     *
-     * @param g The graph for the starting node. Never null.
-     * @param start The start node for which to compute the cluster. Never null.
-     * @return
-     */
-    private Set<Triple> getDirectTriples(Node g, Node start) {
-        Set<Triple> result;
+    private Set<Node> getDirectNodes(Node g, Node start) {
+        Set<Node> result;
         result = start.isLiteral()
             ? Collections.emptySet()
-            : CacheUtils.get(tripleCache, Map.entry(g, start), () -> loadDirectTriples(g, start));
+            : loadDirectNodes(g, start);
         return result;
     }
 
 
     /** This method should only be invoked by the cache callback */
-    private Set<Triple> loadDirectTriples(Node g, Node s) {
-        Set<Triple> result = streamDirectTriples(g, s).collect(Collectors.toSet());
+    private Set<Node> loadDirectNodes(Node g, Node s) {
+        Set<Node> result = findDirectTriples(g, s).toSet();
         return result;
     }
 
     /** Stream direct triples in both directions */
-    private Stream<Triple> streamDirectTriples(Node g, Node s) {
-        return Stream.concat(
-            sameAsPredicates.stream().flatMap(p -> streamDirectTriples(g, s, p, true)),
-            sameAsPredicates.stream().flatMap(p -> streamDirectTriples(g, s, p, false)));
+    private Iter<Node> findDirectTriples(Node g, Node s) {
+        return Iter.concat(
+            Iter.iter(sameAsPredicates).flatMap(p -> findDirectNodes(g, s, p, true)),
+            Iter.iter(sameAsPredicates).flatMap(p -> findDirectNodes(g, s, p, false)));
     }
 
     /** Stream direct triples in a specific direction (ingoing or outgoing) */
-    private Stream<Triple> streamDirectTriples(Node g, Node s, Node p, boolean isForward) {
-        Stream<Triple> result = isForward
-                ? getR().stream(g, s, p, Node.ANY).map(Quad::asTriple)
-                : getR().stream(g, Node.ANY, p, s).map(Quad::asTriple);
+    private Iter<Node> findDirectNodes(Node g, Node s, Node p, boolean isForward) {
+        Iter<Node> result = isForward
+                ? Iter.iter(getR().find(g, s, p, Node.ANY)).map(Quad::getObject)
+                : Iter.iter(getR().find(g, Node.ANY, p, s)).map(Quad::getSubject);
         return result;
-    }
-
-    /** Experiment to see the how many items are being buffered when turning a stream to an iterator */
-    public static void main3(String[] args) {
-        List<Integer> values = IntStream.range(0, 1000).boxed().collect(Collectors.toList());
-
-        Stream<Entry<String, Integer>> stream;
-
-        if (false) {
-            stream =
-                values.stream().flatMap(x ->
-                    values.stream().flatMap(y ->
-                        IntStream.range(0, 10).boxed().map(z -> Map.entry(x + "x" + y, z))
-                            .peek(e -> System.out.println(Thread.currentThread() + " Got value"))
-                ));
-        } else {
-            stream =
-                values.stream().flatMap(x ->
-                    values.stream().map(y -> Map.entry(x, y)))
-                .flatMap(e ->
-                        IntStream.range(0, 10).boxed().map(z -> Map.entry(e.getKey() + "x" + e.getValue(), z)))
-                .peek(e -> System.out.println(Thread.currentThread() + " Got value"));
-        }
-
-        Iterator<?> it = stream.iterator();
-        while (it.hasNext()) {
-            System.err.println(Thread.currentThread() + " Result Item: " + it.next());
-        }
-
-    }
-
-    public static void main(String[] args) {
-        Stopwatch sw = Stopwatch.createStarted();
-
-        DatasetGraph base = DatasetGraphFactory.createTxnMem();
-        Txn.executeWrite(base, () -> {
-            RDFDataMgr.read(base, "/home/raven/Datasets/coypu/countries-deu.nt");
-            RDFDataMgr.read(base, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
-        });
-        System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
-        sw.reset().start();
-        DatasetGraph dsg = DatasetGraphSameAs.wrap(base);
-        Txn.executeRead(dsg,() -> {
-            Iterator<Quad> it = dsg.find();
-            //it.forEachRemaining(x -> System.out.println("Seen: " + x));
-            int i = 0;
-            while (it.hasNext()) {
-                it.next();
-                ++i;
-
-                if (i % 100000 == 0) {
-                    System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
-                }
-            }
-            System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
-            Iter.close(it);
-        });
-        System.out.println("Finished action in " + sw.elapsed(TimeUnit.SECONDS));
-    }
-
-    public static void main2(String[] args) {
-        DatasetGraph base = DatasetGraphFactory.createTxnMem();
-        DatasetGraph datasetGraph = DatasetGraphSameAs.wrap(base);
-
-        Dataset dataset = DatasetFactory.wrap(datasetGraph);
-        Model model = dataset.getDefaultModel();
-
-        Resource s = model.createResource("urn:example:s");
-        Resource o = model.createResource("urn:example:o");
-
-        s
-            .addProperty(RDFS.label, "s")
-            .addProperty(OWL.sameAs, o);
-
-        o
-            .addProperty(RDFS.label, "o")
-            .addProperty(RDFS.label, "s");
-
-        System.out.println("trig:");
-        RDFDataMgr.write(System.out, dataset, RDFFormat.TRIG_PRETTY);
-
-        System.out.println("find:");
-        dataset.asDatasetGraph().find().forEachRemaining(System.out::println);
-
-        System.out.println("s:");
-        s.listProperties().forEachRemaining(System.out::println);
-
-        System.out.println("o:");
-        o.listProperties().forEachRemaining(System.out::println);
-
-        System.out.println("labels:");
-        model.listStatements(null, RDFS.label, (RDFNode)null).forEachRemaining(System.out::println);
     }
 }

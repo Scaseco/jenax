@@ -57,7 +57,7 @@ public class TestDatasetAssemblerSameAs {
     }
 
 
-    // @Test // Note: Currently requires unionDefaultGraph to be disabled - otherwise the data will be shadowed by named graphs
+    @Test // Note: Currently requires unionDefaultGraph to be disabled - otherwise the data will be shadowed by named graphs
     public void experiment01() {
         Stopwatch sw = Stopwatch.createStarted();
 
@@ -67,23 +67,27 @@ public class TestDatasetAssemblerSameAs {
             RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
         });
         System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
-        sw.reset().start();
-        DatasetGraph dsg = dataset.asDatasetGraph(); // DatasetGraphSameAs.wrap(base);
-        Txn.executeRead(dsg,() -> {
-            Iterator<Quad> it = dsg.find();
-            //it.forEachRemaining(x -> System.out.println("Seen: " + x));
-            int i = 0;
-            while (it.hasNext()) {
-                it.next();
-                ++i;
 
-                if (i % 100000 == 0) {
-                    System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+        for (int x = 0; x < 2; ++x) {
+            System.out.println("Starting retrieval...");
+            sw.reset().start();
+            DatasetGraph dsg = dataset.asDatasetGraph(); // DatasetGraphSameAs.wrap(base);
+            Txn.executeRead(dsg,() -> {
+                Iterator<Quad> it = dsg.find();
+                //it.forEachRemaining(x -> System.out.println("Seen: " + x));
+                int i = 0;
+                while (it.hasNext()) {
+                    it.next();
+                    ++i;
+
+                    if (i % 100000 == 0) {
+                        System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+                    }
                 }
-            }
-            System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
-            Iter.close(it);
-        });
+                System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+                Iter.close(it);
+            });
+        }
         System.out.println("Finished action in " + sw.elapsed(TimeUnit.SECONDS));
     }
 
@@ -121,8 +125,8 @@ public class TestDatasetAssemblerSameAs {
                 "PREFIX tdb2: <http://jena.apache.org/2016/tdb#>",
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
                 "PREFIX jxp: <http://jenax.aksw.org/plugin#>",
-                "<urn:example:root> a jxp:DatasetSameAs ; jxp:cacheMaxSize 1000 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
-                "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph true ."
+                "<urn:example:root> a jxp:DatasetSameAs ; jxp:cacheMaxSize 10000000 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
+                "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph false ."
                 // "<urn:example:base> a ja:MemoryDataset ."
             );
 

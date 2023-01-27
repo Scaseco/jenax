@@ -33,7 +33,7 @@ public class TupleAccessorQuad
 
     @Override
     public int getDimension() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TupleAccessorQuad
     public <T> Quad restore(T obj, TupleAccessorCore<? super T, ? extends Node> accessor) {
 //        validateRestoreArg(accessor);
 
-        return new Quad(
+        return Quad.create(
                 accessor.get(obj, 0),
                 accessor.get(obj, 1),
                 accessor.get(obj, 2),

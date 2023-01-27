@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.aksw.jenax.arq.dataset.cache.DatasetGraphCache;
 import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
 import org.apache.jena.assembler.Assembler;
@@ -28,7 +29,8 @@ public class DatasetAssemblerSameAs
         Objects.requireNonNull(baseDatasetRes, "No ja:baseDataset specified on " + root);
         Object obj = a.open(baseDatasetRes);
 
-        int cacheMaxSize = Optional.ofNullable(res.getCacheMaxSize()).orElse(DatasetGraphSameAs.DFT_MAX_CACHE_SIZE);
+        int cacheMaxSize = Optional.ofNullable(res.getCacheMaxSize()).orElse(0);
+
         Set<Node> predicates = new LinkedHashSet<>(res.getPredicates());
         if (predicates.isEmpty()) {
             predicates.add(OWL.sameAs.asNode());
@@ -37,7 +39,13 @@ public class DatasetAssemblerSameAs
         DatasetGraph result;
         if (obj instanceof Dataset) {
             Dataset baseDataset = (Dataset)obj;
-            result = DatasetGraphSameAs.wrap(baseDataset.asDatasetGraph(), predicates, cacheMaxSize);
+            DatasetGraph base = baseDataset.asDatasetGraph();
+
+            if (cacheMaxSize > 0) {
+                base = DatasetGraphCache.cacheByPredicates(base, predicates, cacheMaxSize);
+            }
+
+            result = DatasetGraphSameAs.wrap(base, predicates);
         } else {
             Class<?> cls = obj == null ? null : obj.getClass();
             throw new AssemblerException(root, "Expected ja:baseDataset to be a Dataset but instead got " + Objects.toString(cls));
