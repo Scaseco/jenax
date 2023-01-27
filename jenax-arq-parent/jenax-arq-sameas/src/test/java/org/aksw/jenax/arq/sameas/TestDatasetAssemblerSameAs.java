@@ -3,9 +3,12 @@ package org.aksw.jenax.arq.sameas;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.io.MoreFiles;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -20,6 +23,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
 import org.junit.AfterClass;
@@ -27,10 +32,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterators;
 
 public class TestDatasetAssemblerSameAs {
     // Initialized/destroyed by beforeClass/afterClass methods
+    // static DatasetGraph base;
     static Dataset dataset;
     static Path tdb2TmpFolder;
 
@@ -47,6 +54,37 @@ public class TestDatasetAssemblerSameAs {
     @Test
     public void test02() {
         runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 8);
+    }
+
+
+    // @Test
+    public void experiment01() {
+        Stopwatch sw = Stopwatch.createStarted();
+
+        // DatasetGraph base = DatasetGraphFactory.create();
+        Txn.executeWrite(dataset, () -> {
+            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu.nt");
+            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
+        });
+        System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
+        sw.reset().start();
+        DatasetGraph dsg = dataset.asDatasetGraph(); // DatasetGraphSameAs.wrap(base);
+        Txn.executeRead(dsg,() -> {
+            Iterator<Quad> it = dsg.find();
+            //it.forEachRemaining(x -> System.out.println("Seen: " + x));
+            int i = 0;
+            while (it.hasNext()) {
+                it.next();
+                ++i;
+
+                if (i % 100000 == 0) {
+                    System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+                }
+            }
+            System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+            Iter.close(it);
+        });
+        System.out.println("Finished action in " + sw.elapsed(TimeUnit.SECONDS));
     }
 
     public void runTest(String queryStr, int expectedResult) {
@@ -104,6 +142,9 @@ public class TestDatasetAssemblerSameAs {
         dataset = DatasetFactory.assemble(confModel.getResource("urn:example:root"));
         Txn.executeWrite(dataset, () -> RDFDataMgr.read(dataset, new StringReader(dataStr), null, Lang.TRIG));
 
+        // base = dataset.asDatasetGraph();
+        // base = ((DatasetGraphWrapper)base).getWrapped();
+        // base = ((DatasetGraphWrapper)base).getWrapped();
         // Txn.executeRead(dataset, () -> RDFDataMgr.write(System.out, dataset, RDFFormat.TRIG_PRETTY));
     }
 

@@ -9,6 +9,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphWrapper;
 import org.apache.jena.sparql.core.GraphView;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.util.NodeUtils;
 
 /** A DatasetGraphWrapper that delegates all find calls to {@link #actionFind(Node, Node, Node, Node)} */
 public abstract class DatasetGraphWrapperFindBase
@@ -19,14 +20,44 @@ public abstract class DatasetGraphWrapperFindBase
     }
 
     /**
-     * @param ngOnly Whether to restrict matching to named graphs only
+     * The primary find method that needs to be implemented.
+     * All arguments are guaranteed to be non-null. Node.ANY is the canonical placeholder.
      */
-    protected abstract Iterator<Quad> actionFind(Node g, Node s, Node p, Node o);
+    protected abstract Iterator<Quad> actionFind(boolean ng, Node g, Node s, Node p, Node o);
 
-    @Override public Iterator<Quad> find() { return find(Node.ANY, Node.ANY, Node.ANY, Node.ANY); }
-    @Override public Iterator<Quad> find(Node g, Node s, Node p, Node o) { return actionFind(g, s, p, o); }
-    @Override public Iterator<Quad> find(Quad quad) { return actionFind(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject()); }
-    @Override public Iterator<Quad> findNG(Node g, Node s, Node p, Node o) { return actionFind(g, s, p, o); }
+    protected Iterator<Quad> delegateFind(boolean ng, Node g, Node s, Node p, Node o) {
+        return ng
+            ? getR().findNG(g, s, p, o)
+            : getR().find(g, s, p, o);
+    }
+
+    public Iterator<Quad> find(boolean ng, Node g, Node s, Node p, Node o) {
+        Node gg = NodeUtils.nullToAny(g);
+        Node ss = NodeUtils.nullToAny(s);
+        Node pp = NodeUtils.nullToAny(p);
+        Node oo = NodeUtils.nullToAny(o);
+        return actionFind(ng, gg, ss, pp, oo);
+    }
+
+    @Override
+    public Iterator<Quad> find() {
+        return find(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
+    }
+
+    @Override
+    public Iterator<Quad> find(Node g, Node s, Node p, Node o) {
+        return find(false, g, s, p, o);
+    }
+
+    @Override
+    public Iterator<Quad> find(Quad quad) {
+        return find(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject());
+    }
+
+    @Override
+    public Iterator<Quad> findNG(Node g, Node s, Node p, Node o) {
+        return find(true, g, s, p, o);
+    }
 
     @Override
     public boolean contains(Node g, Node s, Node p, Node o) {

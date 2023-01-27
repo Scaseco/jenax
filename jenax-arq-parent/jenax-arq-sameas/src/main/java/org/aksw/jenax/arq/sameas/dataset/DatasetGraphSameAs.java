@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
@@ -30,9 +31,11 @@ import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.DatasetGraphWrapperView;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.NodeCmp;
+import org.apache.jena.system.Txn;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDFS;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -161,24 +164,17 @@ public class DatasetGraphSameAs
     }
 
     @Override
-    protected Iterator<Quad> actionFind(Node gg, Node ss, Node pp, Node oo) {
+    protected Iterator<Quad> actionFind(boolean ng, Node mg, Node ms, Node mp, Node mo) {
+        // These caches are local to the find() call in order to avoid complex synchronization w.r.t. updates
+        // Cache sizes could be made configurable.
+        Cache<Entry<Node, Node>, List<Node>> sameAsCache = CacheBuilder.newBuilder().maximumSize(100).build();
+        Cache<Quad, Quad> leastInferredToPhysicalQuadCache = CacheBuilder.newBuilder().maximumSize(100).build();
+
         // If s or o is concrete then resolve their sameAs closure before the lookup
         // Otherwise, resolve the sameAs closures of that component based on the obtained triple's concrete values
 
-        // gx = "given x"; mx = "match x" analogous to Triple.getMatchX()
-        Node mg = NodeUtils.nullToAny(gg);
-        Node ms = NodeUtils.nullToAny(ss);
-        Node mp = NodeUtils.nullToAny(pp);
-        Node mo = NodeUtils.nullToAny(oo);
-
-        // These caches are local to the find() call in order to avoid complex synchronization w.r.t. updates
-        // Cache sizes could be made configurable...
-        Cache<Entry<Node, Node>, List<Node>> sameAsCache = CacheBuilder.newBuilder().maximumSize(10000).build();
-        Cache<Quad, Quad> leastInferredToPhysicalQuadCache = CacheBuilder.newBuilder().maximumSize(10000).build();
-
         // Note: resolveSameAs only actually resolves the given start node if both it and the graph are concrete;
         // Otherwise the start node is returned as-is.
-
 
         // Set up the tuple stream (quads)
         List<Node> initialSubjects;
@@ -190,17 +186,17 @@ public class DatasetGraphSameAs
             throw new RuntimeException(e);
         }
 
-        Stream<Quad> ts =
-            initialSubjects.stream().flatMap(s ->
-                initialObjects.stream().flatMap(o ->
-                    getR().stream(mg, s, mp, o)));
+        Iterator<Quad> result =
+            Iter.iter(initialSubjects).flatMap(s ->
+                Iter.iter(initialObjects).flatMap(o ->
+                    Iter.iter(delegateFind(ng, mg, s, mp, o))
+                        .flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo, sameAsCache, leastInferredToPhysicalQuadCache))
+                ));
 
-        ts = ts.flatMap(t -> streamInferencesOnLeastQuad(t, ms, mo, sameAsCache, leastInferredToPhysicalQuadCache));
-
-        return Iter.onClose(ts.iterator(), ts::close);
+        return result;
     }
 
-    protected Stream<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) {
+    protected Iterator<Quad> streamInferencesOnLeastQuad(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) {
         try {
             return streamInferencesOnLeastQuadCore(quad, ms, mo, sameAsCache, leastQuadCache);
         } catch (ExecutionException e) {
@@ -208,8 +204,8 @@ public class DatasetGraphSameAs
         }
     }
 
-    protected Stream<Quad> streamInferencesOnLeastQuadCore(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) throws ExecutionException {
-        Stream<Quad> result;
+    protected Iterator<Quad> streamInferencesOnLeastQuadCore(Quad quad, Node ms, Node mo, Cache<Entry<Node, Node>, List<Node>> sameAsCache, Cache<Quad, Quad> leastQuadCache) throws ExecutionException {
+        Iterator<Quad> result;
         Node g = quad.getGraph();
         Node p = quad.getPredicate();
         List<Node> sortedSubjects = resolveSameAsSortedCached(g, quad.getSubject(), sameAsCache);
@@ -222,7 +218,7 @@ public class DatasetGraphSameAs
 
         if (sortedSubjects.size() == 1 && sortedObjects.size() == 1) {
             // Don't call contains if there is there are no same-as'd alternatives of it
-            result = Stream.of(quad);
+            result = Iter.of(quad);
         } else {
             Node leastS = sortedSubjects.get(0);
             Node leastO = sortedObjects.get(0);
@@ -238,13 +234,20 @@ public class DatasetGraphSameAs
 
             // System.out.println(quad + (isLeastQuad ? " is least quad " : " hasLeastQuad: " + leastQuad));
             result = isLeastQuad
-                    ? ss.stream().flatMap(s -> oo.stream().map(o -> Quad.create(g, s, p, o)))
-                    : Stream.empty();
+                    ? Iter.iter(ss).flatMap(s -> Iter.iter(oo).map(o -> Quad.create(g, s, p, o)))
+                    : Iter.empty();
+
+//            if (!isLeastQuad) {
+//                System.out.println("IsLeast: " + isLeastQuad + " " + quad);
+//            }
         }
         return result;
     }
 
     protected Quad computeLeastPhysicalQuad(Quad quad, List<Node> sortedSubjects, List<Node> sortedObjects) {
+        // Note: This method can unexpectedly return null (leading to a NPE)
+        // if the backing dataset's find() method returns quads for which contains() returns false
+
         Quad result = null;
         Node g = quad.getGraph();
         Node p = quad.getPredicate();
@@ -252,6 +255,8 @@ public class DatasetGraphSameAs
         // we need to perform the contains check to determine which inferrable quad is in the graph
         outer: for (Node s : sortedSubjects) {
             for (Node o : sortedObjects) {
+                // System.out.println("Lookup: " + s + " - " + o);
+
                 // Note: We can either create the cross product between subjects and objects
                 // Or we e.g. lookup the os for a subjects and find the least one within the objects
                 if (getR().contains(g, s, p, o)) {
@@ -272,15 +277,20 @@ public class DatasetGraphSameAs
             Entry<Node, Node> startKey = Map.entry(g, start);
             result = sameAsCache.get(startKey, () -> { wasComputed[0] = true; return resolveSameAsSorted(g, start); });
 
-            // Add cache entries for all nodes in the closure
-            if (wasComputed[0]) {
-                for (Node node : result) {
-                    if (!node.equals(start)) {
-                        sameAsCache.put(Map.entry(g, node), result);
+            // From experiments it is cheaper to compute the closure for every resource
+            // only when needed - rather than spending time on preemptively adding cache entries
+            boolean cacheClosureForAllMembers = false;
+            if (cacheClosureForAllMembers) {
+                // Add cache entries for all nodes in the closure
+                if (wasComputed[0]) {
+                    for (Node node : result) {
+                        if (!node.equals(start)) {
+                            sameAsCache.put(Map.entry(g, node), result);
+                        }
                     }
+                    // Ensure that the startKey is marked as recently used
+                    sameAsCache.put(startKey, result);
                 }
-                // Ensure that the startKey is marked as recently used
-                sameAsCache.put(startKey, result);
             }
         }
         return result;
@@ -356,8 +366,66 @@ public class DatasetGraphSameAs
         return result;
     }
 
+    /** Experiment to see the how many items are being buffered when turning a stream to an iterator */
+    public static void main3(String[] args) {
+        List<Integer> values = IntStream.range(0, 1000).boxed().collect(Collectors.toList());
+
+        Stream<Entry<String, Integer>> stream;
+
+        if (false) {
+            stream =
+                values.stream().flatMap(x ->
+                    values.stream().flatMap(y ->
+                        IntStream.range(0, 10).boxed().map(z -> Map.entry(x + "x" + y, z))
+                            .peek(e -> System.out.println(Thread.currentThread() + " Got value"))
+                ));
+        } else {
+            stream =
+                values.stream().flatMap(x ->
+                    values.stream().map(y -> Map.entry(x, y)))
+                .flatMap(e ->
+                        IntStream.range(0, 10).boxed().map(z -> Map.entry(e.getKey() + "x" + e.getValue(), z)))
+                .peek(e -> System.out.println(Thread.currentThread() + " Got value"));
+        }
+
+        Iterator<?> it = stream.iterator();
+        while (it.hasNext()) {
+            System.err.println(Thread.currentThread() + " Result Item: " + it.next());
+        }
+
+    }
+
     public static void main(String[] args) {
-        DatasetGraph base = DatasetGraphFactory.create();
+        Stopwatch sw = Stopwatch.createStarted();
+
+        DatasetGraph base = DatasetGraphFactory.createTxnMem();
+        Txn.executeWrite(base, () -> {
+            RDFDataMgr.read(base, "/home/raven/Datasets/coypu/countries-deu.nt");
+            RDFDataMgr.read(base, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
+        });
+        System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
+        sw.reset().start();
+        DatasetGraph dsg = DatasetGraphSameAs.wrap(base);
+        Txn.executeRead(dsg,() -> {
+            Iterator<Quad> it = dsg.find();
+            //it.forEachRemaining(x -> System.out.println("Seen: " + x));
+            int i = 0;
+            while (it.hasNext()) {
+                it.next();
+                ++i;
+
+                if (i % 100000 == 0) {
+                    System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+                }
+            }
+            System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
+            Iter.close(it);
+        });
+        System.out.println("Finished action in " + sw.elapsed(TimeUnit.SECONDS));
+    }
+
+    public static void main2(String[] args) {
+        DatasetGraph base = DatasetGraphFactory.createTxnMem();
         DatasetGraph datasetGraph = DatasetGraphSameAs.wrap(base);
 
         Dataset dataset = DatasetFactory.wrap(datasetGraph);

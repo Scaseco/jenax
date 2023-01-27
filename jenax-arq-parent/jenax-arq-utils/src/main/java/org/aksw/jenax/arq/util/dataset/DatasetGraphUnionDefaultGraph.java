@@ -26,13 +26,14 @@ public class DatasetGraphUnionDefaultGraph
     }
 
     @Override
-    protected Iterator<Quad> actionFind(Node g, Node s, Node p, Node o) {
+    protected Iterator<Quad> actionFind(boolean ng, Node g, Node s, Node p, Node o) {
+        // Named graph flag is not considered because _all_ find requests only go to the named graphs
         Iterator<Quad> result;
         if (Quad.isDefaultGraph(g)) {
-            result = Iter.iter(getR().find(Quad.unionGraph, s, p, o))
+            result = Iter.iter(getR().findNG(Quad.unionGraph, s, p, o))
                         .map(q -> Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
         } else {
-            result = getR().find(g, s, p, o);
+            result = getR().findNG(g, s, p, o);
         }
         return result;
     }
@@ -88,6 +89,6 @@ public class DatasetGraphUnionDefaultGraph
                 break;
             }
         }
-        return true;
+        return result;
     }
 }
