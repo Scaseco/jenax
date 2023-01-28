@@ -29,15 +29,28 @@ public class DatasetGraphUnionDefaultGraph
 
     @Override
     protected Iterator<Quad> actionFind(boolean ng, Node g, Node s, Node p, Node o) {
-        // Named graph flag is not considered because _all_ find requests only go to the named graphs
+        // All find requests affect the named graphs
         Iterator<Quad> result;
-        if (Quad.isDefaultGraph(g)) {
-            result = Iter.iter(getR().findNG(Quad.unionGraph, s, p, o))
-                        .map(q -> Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
+        if (Quad.isDefaultGraph(g) || Quad.isUnionGraph(g)) {
+            result = findInUdf(s, p, o);
         } else {
-            result = getR().findNG(g, s, p, o);
+            // A response for ng=false and g=Node.ANY must include the union default graph
+            Iter<Boolean> emitUdf = Node.ANY.equals(g) && !ng
+                    ? Iter.of(true, false)
+                    : Iter.of(false);
+
+            result = emitUdf.flatMap(udf -> udf
+                    ? findInUdf(s, p, o)
+                    : getR().findNG(g, s, p, o));
         }
         return result;
+    }
+
+    private Iterator<Quad> findInUdf(Node s, Node p, Node o) {
+        return Iter.iter(getR().findNG(Quad.unionGraph, s, p, o))
+                .map(q -> Quad.defaultGraphIRI.equals(q.getGraph())
+                        ? q
+                        : Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
     }
 
     /** Wrap a given dataset if it is not already wrapped by this class */

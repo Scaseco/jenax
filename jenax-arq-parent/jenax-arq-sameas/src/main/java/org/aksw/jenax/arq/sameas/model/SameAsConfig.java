@@ -21,6 +21,9 @@ public interface SameAsConfig
     Integer getCacheMaxSize();
     SameAsConfig setCacheMaxSize(Integer value);
 
+    @Iri(SameAsTerms.NS + "allowDuplicates")
+    Boolean getAllowDuplicates();
+    SameAsConfig setAllowDuplicates(Boolean value);
 
     // @Iri(FromAsFilterTerms.NS + "alias")
     // @IriType

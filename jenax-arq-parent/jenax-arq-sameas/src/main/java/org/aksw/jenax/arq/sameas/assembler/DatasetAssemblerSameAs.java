@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.aksw.jenax.arq.dataset.cache.CachePatterns;
 import org.aksw.jenax.arq.dataset.cache.DatasetGraphCache;
 import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
@@ -30,6 +31,7 @@ public class DatasetAssemblerSameAs
         Object obj = a.open(baseDatasetRes);
 
         int cacheMaxSize = Optional.ofNullable(res.getCacheMaxSize()).orElse(0);
+        boolean allowDuplicates = Optional.ofNullable(res.getAllowDuplicates()).orElse(false);
 
         Set<Node> predicates = new LinkedHashSet<>(res.getPredicates());
         if (predicates.isEmpty()) {
@@ -41,16 +43,21 @@ public class DatasetAssemblerSameAs
             Dataset baseDataset = (Dataset)obj;
             DatasetGraph base = baseDataset.asDatasetGraph();
 
+            // A negative value for caching loads all patterns into the cache
+            // The idea is that if we know that e.g. all outgoing/incoming sameAs links are cached
+            // then whenever there is a cache miss we know that there is no data and can skip the request
+            // to the backing graph
             if (cacheMaxSize > 0) {
-                base = DatasetGraphCache.cacheByPredicates(base, predicates, cacheMaxSize);
+                base = DatasetGraphCache.cache(base, CachePatterns.forNeigborsByPredicates(predicates), cacheMaxSize);
+            } else if (cacheMaxSize < 0) {
+                base = DatasetGraphCache.table(base, CachePatterns.forNeigborsByPredicates(predicates));
             }
 
-            result = DatasetGraphSameAs.wrap(base, predicates);
+            result = DatasetGraphSameAs.wrap(base, predicates, allowDuplicates);
         } else {
             Class<?> cls = obj == null ? null : obj.getClass();
             throw new AssemblerException(root, "Expected ja:baseDataset to be a Dataset but instead got " + Objects.toString(cls));
         }
         return result;
     }
-
 }

@@ -3,13 +3,18 @@ package org.aksw.jenax.arq.sameas;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.io.MoreFiles;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -23,6 +28,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.system.Txn;
@@ -56,31 +62,49 @@ public class TestDatasetAssemblerSameAs {
         runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 8);
     }
 
+    @Test
+    public void test03() {
+        runTest("SELECT * { SERVICE <sameAs:> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 18);
+    }
 
-    @Test // Note: Currently requires unionDefaultGraph to be disabled - otherwise the data will be shadowed by named graphs
+    // @Test
     public void experiment01() {
         Stopwatch sw = Stopwatch.createStarted();
 
         // DatasetGraph base = DatasetGraphFactory.create();
         Txn.executeWrite(dataset, () -> {
-            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu.nt");
-            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
+            List<String> sources = Arrays.asList(
+                    "/home/raven/Datasets/coypu/countries-deu.nt",
+                    "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
+            for (String source : sources) {
+                Node g = NodeFactory.createURI(source);
+//            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu.nt");
+//            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu-wikidata.nt");
+//            RDFDataMgr.read(dataset, "/home/raven/Datasets/coypu/countries-deu-link.nt");
+                try (Stream<Quad> stream = AsyncParser.of(source).streamQuads()) {
+                    stream
+                        // .limit(10000)
+                        .map(q -> Quad.create(g, q.asTriple()))
+                        .forEach(dataset.asDatasetGraph()::add);
+                }
+            }
         });
         System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
 
-        for (int x = 0; x < 2; ++x) {
+        for (int x = 0; x < 3; ++x) {
             System.out.println("Starting retrieval...");
             sw.reset().start();
             DatasetGraph dsg = dataset.asDatasetGraph(); // DatasetGraphSameAs.wrap(base);
             Txn.executeRead(dsg,() -> {
                 Iterator<Quad> it = dsg.find();
-                //it.forEachRemaining(x -> System.out.println("Seen: " + x));
+                // it.forEachRemaining(x -> System.out.println("Seen: " + x));
                 int i = 0;
                 while (it.hasNext()) {
-                    it.next();
+                    Quad quad = it.next();
+                    // System.out.println(quad);
                     ++i;
 
-                    if (i % 100000 == 0) {
+                    if (i % 1000000 == 0) {
                         System.out.println("Current count: " + i + " elapsed: " + sw.elapsed(TimeUnit.SECONDS));
                     }
                 }
@@ -125,8 +149,8 @@ public class TestDatasetAssemblerSameAs {
                 "PREFIX tdb2: <http://jena.apache.org/2016/tdb#>",
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
                 "PREFIX jxp: <http://jenax.aksw.org/plugin#>",
-                "<urn:example:root> a jxp:DatasetSameAs ; jxp:cacheMaxSize 10000000 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
-                "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph false ."
+                "<urn:example:root> a jxp:DatasetSameAs ; jxp:allowDuplicates false ; jxp:cacheMaxSize -1 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
+                "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph true ."
                 // "<urn:example:base> a ja:MemoryDataset ."
             );
 

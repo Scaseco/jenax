@@ -1,5 +1,8 @@
 package org.aksw.jenax.arq.sameas.init;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerSameAs;
 import org.aksw.jenax.arq.sameas.assembler.SameAsVocab;
 import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
@@ -35,10 +38,18 @@ public class SameAsInit
         JenaPluginUtils.registerResourceClasses(SameAsConfig.class);
         registerWith(Assembler.general);
 
+        String serviceName = "sameAs";
+        Pattern sameAsPrefix = Pattern.compile("^" + Pattern.quote(serviceName) + "($|:)");
         ServiceExecutorRegistry.get().addSingleLink(
             (opExec, opOrig, binding, execCxt, chain) -> {
                 QueryIterator r;
-                if (opExec.getService().getURI().startsWith("sameAs")) {
+                String uri = opExec.getService().getURI();
+                Matcher m = sameAsPrefix.matcher(uri);
+
+                if (m.find()) {
+                    if (m.end() < uri.length()) {
+                        throw new RuntimeException("Trailing characters found after '" + m.group() + "': " + uri.substring(m.end()));
+                    }
                     // Inherit union default graph if backed by tdb
                     DatasetGraph adhocDs = DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset());
                     adhocDs = DatasetGraphSameAs.wrap(adhocDs);

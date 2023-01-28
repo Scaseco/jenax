@@ -35,7 +35,7 @@ public class DatasetGraphSameAs
     protected boolean logCacheStats = false;
 
     /** Allowing duplicates disables certain checks which may increase performance */
-    protected boolean allowDuplicates = false;
+    protected boolean allowDuplicates;
 
     protected Set<Node> sameAsPredicates;
 
@@ -44,16 +44,21 @@ public class DatasetGraphSameAs
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Node sameAsPredicate) {
-        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate));
+        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate), false);
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates) {
-        return new DatasetGraphSameAs(base, sameAsPredicates);
+        return new DatasetGraphSameAs(base, sameAsPredicates, false);
     }
 
-    protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates) {
+    public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates, boolean allowDuplicates) {
+        return new DatasetGraphSameAs(base, sameAsPredicates, allowDuplicates);
+    }
+
+    protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates, boolean allowDuplicates) {
         super(base);
         this.sameAsPredicates = sameAsPredicates;
+        this.allowDuplicates = allowDuplicates;
     }
 
     @Override

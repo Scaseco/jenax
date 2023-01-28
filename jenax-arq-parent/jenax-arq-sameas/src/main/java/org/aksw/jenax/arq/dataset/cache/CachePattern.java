@@ -30,16 +30,27 @@ import org.apache.jena.sparql.core.Var;
 public class CachePattern {
     public static final Var IN = Var.alloc("IN");
 
-    protected Quad pattern;
+    /** The specified pattern - may make use of IN */
+    protected Quad specPattern;
+
+    /** The pattern to retrieve all matching quads - effectively all IN's are substitude with Node.ANY */
+    protected Quad findPattern;
+
+    /** The indices of the INs in the spec pattern */
     protected int[] inputs;
 
-    protected CachePattern(Quad pattern, int[] inputs) {
-        this.pattern = pattern;
+    protected CachePattern(Quad specPattern, Quad findPattern, int[] inputs) {
+        this.specPattern = specPattern;
+        this.findPattern = findPattern;
         this.inputs = inputs;
     }
 
-    public Quad getPattern() {
-        return pattern;
+    public Quad getSpecPattern() {
+        return specPattern;
+    }
+
+    public Quad getFindPattern() {
+        return findPattern;
     }
 
     /** Do not modify the returned array */
@@ -71,7 +82,7 @@ public class CachePattern {
     public boolean matchesPattern(Node mg, Node ms, Node mp, Node mo) {
         Node[] argNodes = new Node[] { mg, ms, mp, mo };
         boolean result = IntStream.range(0, argNodes.length).allMatch(i -> {
-            Node pn = QuadUtils.getNode(pattern, i);
+            Node pn = QuadUtils.getNode(specPattern, i);
             Node argNode = argNodes[i];
             boolean r = matchesPatternNode(pn, argNode);
             return r;
@@ -100,10 +111,10 @@ public class CachePattern {
      * @param o
      */
     public static CachePattern create(Node g, Node s, Node p, Node o) {
-        Quad pattern = QuadUtils.createMatch(g, s, p, o);
-        int[] inputs = IntStream.range(0, 4).filter(i -> IN.equals(QuadUtils.getNode(pattern, i))).toArray();
-
-        return new CachePattern(pattern, inputs);
+        Quad specPattern = QuadUtils.createMatch(g, s, p, o);
+        int[] inputs = IntStream.range(0, 4).filter(i -> IN.equals(QuadUtils.getNode(specPattern, i))).toArray();
+        Quad findPattern = QuadUtils.create(QuadUtils.streamNodes(specPattern).map(n -> IN.equals(n) ? Node.ANY : n).toArray(Node[]::new));
+        return new CachePattern(specPattern, findPattern, inputs);
     }
 
     @Override
@@ -111,7 +122,7 @@ public class CachePattern {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(inputs);
-        result = prime * result + Objects.hash(pattern);
+        result = prime * result + Objects.hash(specPattern);
         return result;
     }
 
@@ -124,11 +135,11 @@ public class CachePattern {
         if (getClass() != obj.getClass())
             return false;
         CachePattern other = (CachePattern) obj;
-        return Arrays.equals(inputs, other.inputs) && Objects.equals(pattern, other.pattern);
+        return Arrays.equals(inputs, other.inputs) && Objects.equals(specPattern, other.specPattern);
     }
 
     @Override
     public String toString() {
-        return "CachePattern [pattern=" + pattern + ", inputs=" + Arrays.toString(inputs) + "]";
+        return "CachePattern [pattern=" + specPattern + ", inputs=" + Arrays.toString(inputs) + "]";
     }
 }
