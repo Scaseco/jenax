@@ -169,10 +169,13 @@ public class UpdateExecDatasetBuilderEx implements UpdateExecBuilder {
     //    return result;
         // UpdateEngine updateEngine = f.create(dsg, null, context);
 
+        // Merge the contexts
+        Context cxt = Context.setupContextForDataset(context, dataset);
+
         Binding initialBinding = BindingRoot.create();
 
         // UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dataset, initialBinding, context, f);
-        UpdateExec tmp = new UpdateExecDataset(updateRequest, dataset, initialBinding, context, f) {};
+        UpdateExec tmp = new UpdateExecDataset(updateRequest, dataset, initialBinding, cxt, f) {};
         // UpdateProcessor result = UpdateProcessorDecoratorTxn.wrap(tmp, dataset);
         UpdateExec result = new DatasetExecDecoratorTxn<>(tmp, dataset);
 

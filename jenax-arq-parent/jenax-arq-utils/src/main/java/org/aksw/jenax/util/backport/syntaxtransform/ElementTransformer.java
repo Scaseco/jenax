@@ -309,7 +309,9 @@ public class ElementTransformer {
 
         @Override
         public void visit(ElementLateral el) {
-            throw new UnsupportedOperationException("This class should no longer be used");
+            Element elSub = pop() ;
+            Element el2 = transform.transform(el, elSub) ;
+            push(el2) ;
         }
 
         private Node transformNode(Node n) {

@@ -22,6 +22,7 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +52,13 @@ public class E_UrlFetch
     public static final Pattern jsonContentTypePattern = Pattern.compile("^application/(.+\\+)?json$");
 
     @Override
-    public NodeValue exec(List<NodeValue> args) {
+    public NodeValue exec(List<NodeValue> args, FunctionEnv env) {
         JsonObject obj = assemble(args);
         UrlFetchSpec conf = RDFDatatypeJson.get().getGson().fromJson(obj, UrlFetchSpec.class);
         NodeValue result;
 
         try {
-            URLConnection conn = configure(conf);
+            URLConnection conn = configure(conf, env);
 
             String body = conf.getBody();
             if (body != null) {
@@ -89,6 +90,12 @@ public class E_UrlFetch
         }
         return result;
     }
+
+    @Override
+    public NodeValue exec(List<NodeValue> args) {
+        throw new IllegalStateException("should never be called");
+    }
+
 
     @Override
     public void checkBuild(String uri, ExprList args) {
@@ -149,9 +156,10 @@ public class E_UrlFetch
         }
     }
 
-    public static URLConnection configure(UrlFetchSpec conf) throws IOException {
+    public static URLConnection configure(UrlFetchSpec conf, FunctionEnv env) throws IOException {
         String urlStr = conf.getUrl();
         URL url = new URL(urlStr);
+        JenaUrlUtils.validate(url, env.getContext());
         URLConnection result = url.openConnection();
         configure(result, conf);
         return result;

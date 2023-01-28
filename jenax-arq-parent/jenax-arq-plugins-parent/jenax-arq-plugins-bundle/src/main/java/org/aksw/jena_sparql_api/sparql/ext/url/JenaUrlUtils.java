@@ -17,6 +17,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.irix.IRIxResolver.Builder;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.SystemARQ;
 import org.apache.jena.sparql.core.Prologue;
@@ -36,6 +37,34 @@ public class JenaUrlUtils {
     /** Base IRI to use to form URLs for resolving content */
     public static final Symbol symContentBaseIriX = SystemARQ.allocSymbol("contentBaseIriX");
 
+    /**
+     * Context symbol to allow access to the file:// protocol in URLs.
+     * File access is disabled by default and must be explicitly enabled.
+     */
+    public static final Symbol symAllowFileAccess = SystemARQ.allocSymbol("allowFileAccess");
+
+
+
+    /** Currently this is the central point for jenax URL validation; we may later need our own SecurityManager though */
+    public static void validate(URL url, Context cxt) {
+        if (url != null) {
+            if (url.getProtocol().equals("file")) {
+                requireFileAccess(cxt);
+            }
+        }
+    }
+
+    public static boolean isFileAccessEnabled(Context cxt) {
+        Context effectiveCxt = cxt == null ? ARQ.getContext() : cxt;
+        boolean result = effectiveCxt.isTrue(symAllowFileAccess);
+        return result;
+    }
+
+    public static void requireFileAccess(Context cxt) {
+        if (!isFileAccessEnabled(cxt)) {
+            throw new SecurityException("Access to files is disallowed");
+        }
+    }
 
     public static Prologue getCurrentPrologue(Context cxt) {
         Prologue result = cxt.get(ARQConstants.sysCurrentQuery);
@@ -121,6 +150,9 @@ public class JenaUrlUtils {
             URL u;
             try {
                 u = uri.toURL();
+
+                validate(u, env.getContext());
+
             } catch (Exception e) {
                 String msg = "Failed to create URL from " + uri;
                 logger.warn(msg, e);

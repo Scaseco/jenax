@@ -101,6 +101,9 @@ public class PropertyFunctionFactoryFsFind
         @Override
         public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object,
                 org.apache.jena.sparql.engine.ExecutionContext execCtx) {
+
+            JenaUrlUtils.requireFileAccess(execCtx.getContext());
+
             // Get the subject's value
             Node node = subject.isVariable()
                     ? binding.get((Var)subject)

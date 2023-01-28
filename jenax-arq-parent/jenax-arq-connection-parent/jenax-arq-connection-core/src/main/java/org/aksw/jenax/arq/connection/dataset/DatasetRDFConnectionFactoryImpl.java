@@ -43,7 +43,9 @@ public class DatasetRDFConnectionFactoryImpl
     public RDFConnection connect(Dataset dataset) {
 
         Supplier<UpdateExecBuilder> updateExecBuilderSupp =
-                () -> new UpdateExecDatasetBuilderEx(updateEngineFactoryProvider).dataset(dataset.asDatasetGraph()).context(context);
+                () -> new UpdateExecDatasetBuilderEx(updateEngineFactoryProvider)
+                    .dataset(dataset.asDatasetGraph())
+                    .context(context);
 
         // The update link/connection almost uses the new API
         LinkSparqlUpdate updateLink = new LinkSparqlUpdateOverBuilder(updateExecBuilderSupp);
