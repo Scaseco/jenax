@@ -41,7 +41,7 @@
 		<ver.commons-math>3.6.1</ver.commons-math>
 
 		<slf4j.version>1.7.36</slf4j.version>
-		<log4j.version>2.18.0</log4j.version>
+		<log4j.version>2.19.0</log4j.version>
 
 		<hadoop.version>3.3.4</hadoop.version>
 		<junit.version>4.13.2</junit.version>
