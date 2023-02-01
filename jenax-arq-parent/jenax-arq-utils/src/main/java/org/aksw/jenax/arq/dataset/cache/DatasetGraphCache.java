@@ -61,6 +61,8 @@ public class DatasetGraphCache
      */
     protected boolean isTablingMode = false;
 
+    // protected boolean isBaseInUdfMode;
+
     /**
      * Whether the cache patterns have been tabeled.
      * This flag could be maintained on a per-pattern bases */
@@ -100,6 +102,9 @@ public class DatasetGraphCache
         this.cachePatterns = cachePatterns;
         this.cache = cache;
         this.isTablingMode = isTablingMode;
+
+        // We need to know if the backend adds 'virtual' triples
+        // this.isBaseInUdfMode = DatasetGraphUnionDefaultGraph.isKnownUnionDefaultGraphMode(getR());
     }
 
     public boolean isTablingMode() {
@@ -115,10 +120,10 @@ public class DatasetGraphCache
      * If false then the wrapped dataset does not contain this quad.
      * If the argument quad contains placeholders only a check is made for whether the partition key exists in the cache. The set of cached entries is NOT iterated.
      */
-    public boolean mayContainQuad(Quad rawQuad) {
+    public boolean mayContainQuad(Quad quad) {
         boolean result = true;
         if (isTablingMode) {
-            Quad quad = getEffectiveQuad(rawQuad);
+            // Quad quad = getEffectiveQuad(rawQuad);
             ensureFilledTables();
             for (CachePattern pattern : cachePatterns) {
                 if (pattern.subsumes(quad)) {
@@ -139,6 +144,7 @@ public class DatasetGraphCache
                 }
             }
         }
+        // System.err.println("May contain quad " + quad + " -> " + result);
         return result;
     }
 
@@ -168,7 +174,9 @@ public class DatasetGraphCache
         try {
             lock.enterCriticalSection(Lock.WRITE);
             try (Stream<Quad> stream = streamFactory.get()) {
-                stream.forEach(quad -> performUpdateAction(quad, false, (ts, t) -> ts.add(t), () -> super.add(quad)));
+                CacheUtils.invalidateAll(cache);
+                isTabled = false;
+                stream.forEach(quad -> performUpdateAction(quad, false, true, (ts, t) -> ts.add(t), () -> super.add(quad)));
             }
         } finally {
             lock.leaveCriticalSection();
@@ -191,15 +199,35 @@ public class DatasetGraphCache
 
     @Override
     public void add(Quad quad) {
-        performUpdateAction(quad, true, Collection::add, () -> super.add(quad));
+        performUpdateAction(quad, true, true, Collection::add, () -> super.add(quad));
     }
 
     @Override
     public void delete(Quad quad) {
-        performUpdateAction(quad, true, Collection::remove, () -> super.delete(quad));
+        performUpdateAction(quad, true, true, Collection::remove, () -> super.delete(quad));
     }
 
-    public void performUpdateAction(Quad quad, boolean doLocking, BiConsumer<Set<Quad>, Quad> cacheAction, Runnable graphAction) {
+
+    public void performUpdateAction(Quad quad, boolean doLocking, boolean doInvalidate, BiConsumer<Set<Quad>, Quad> cacheAction, Runnable graphAction) {
+        List<CachePattern> patterns = getMatchingCachePatterns(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject()).collect(Collectors.toList());
+        if (!patterns.isEmpty()) {
+            Lock lock = getLock();
+            if (doLocking) { lock.enterCriticalSection(Lock.WRITE); }
+            try {
+                if (doInvalidate) {
+                    CacheUtils.invalidateAll(cache);
+                    isTabled = false;
+                }
+                graphAction.run();
+            } finally {
+                if (doLocking) { lock.leaveCriticalSection(); }
+            }
+        } else {
+            graphAction.run();
+        }
+    }
+
+    public void performUpdateActionOld(Quad quad, boolean doLocking, BiConsumer<Set<Quad>, Quad> cacheAction, Runnable graphAction) {
         List<CachePattern> patterns = getMatchingCachePatterns(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject()).collect(Collectors.toList());
         if (!patterns.isEmpty()) {
             Lock lock = getLock();
@@ -251,22 +279,21 @@ public class DatasetGraphCache
         return cachePatterns.stream().filter(pattern -> pattern.subsumes(mg, ms, mp, mo));
     }
 
-
-    protected Quad getEffectiveQuad(Quad quad) {
-        Node g = quad.getGraph();
-        Node eg = getEffectiveGraph(g);
-
-        return g.equals(eg) ? quad : Quad.create(eg, quad.asTriple());
-    }
-
-    protected Node getEffectiveGraph(Node mg) {
-        // Effective match graph
-        boolean isUdfMode = DatasetGraphUnionDefaultGraph.isKnownUnionDefaultGraphMode(getR());
-        Node emg = Quad.isDefaultGraph(mg) && isUdfMode
-                ? Quad.unionGraph
-                : mg;
-        return emg;
-    }
+//
+//    protected Quad getEffectiveQuad(Quad quad) {
+//        Node g = quad.getGraph();
+//        Node eg = getEffectiveGraph(g);
+//
+//        return g.equals(eg) ? quad : Quad.create(eg, quad.asTriple());
+//    }
+//
+//    protected Node getEffectiveGraph(Node mg) {
+//        // Effective match graph
+//        Node emg = isBaseInUdfMode && Quad.isDefaultGraph(mg)
+//                ? Quad.unionGraph
+//                : mg;
+//        return emg;
+//    }
 
     @Override
     protected Iterator<Quad> actionFind(boolean ng, Node mg, Node ms, Node mp, Node mo) {
@@ -280,55 +307,59 @@ public class DatasetGraphCache
         }
 
         // Effective match graph
-        Node emg = getEffectiveGraph(mg);
-
+        // Node emg = getEffectiveGraph(mg);
 
         // System.out.println("Find action");
         // If tabeling is enabled then ensure all data is prefetched prior to find
-        ensureFilledTables();
-        CachePattern cachePattern = getMatchingCachePatterns(emg, ms, mp, mo).findFirst().orElse(null);
+        CachePattern cachePattern = getMatchingCachePatterns(mg, ms, mp, mo).findFirst().orElse(null);
 
         if (cachePattern != null) {
-            Tuple<Node> partitionKey = cachePattern.createPartitionKey(emg, ms, mp, mo);
+            Tuple<Node> partitionKey = cachePattern.createPartitionKey(mg, ms, mp, mo);
             Entry<Quad, Tuple<Node>> key = Map.entry(cachePattern.getSpecPattern(), partitionKey);
 
             if (isTablingMode) {
-                Lock lock = getLock();
-                lock.enterCriticalSection(Lock.READ);
-                try {
-                    Collection<Quad> bucket = CacheUtils.getIfPresent(cache , key);
+//                Lock lock = getLock();
+//                lock.enterCriticalSection(Lock.READ);
+//                try {
+                    ensureFilledTables();
+                    Collection<Quad> bucket = CacheUtils.getIfPresent(cache, key);
+
+                    result = bucket == null
+                            ? Collections.emptyIterator()
+                            : bucket.iterator();
+
 //                    if (bucket == null) {
 //                        System.out.println("Cache miss on: " + key);
 //                    }
-                    result = bucket == null ? Collections.emptyIterator() : bucket.iterator();
-                } finally {
-                    lock.leaveCriticalSection();
-                }
+//                } finally {
+//                    lock.leaveCriticalSection();
+//                }
             } else {
-                result = CacheUtils.get(cache, key, () -> Iter.iter(delegateFind(ng, emg, ms, mp, mo))
+                result = CacheUtils.get(cache, key, () -> Iter.iter(delegateFind(ng, mg, ms, mp, mo))
                             .collect(Collectors.toCollection(LinkedHashSet::new))).iterator();
             }
         } else {
-            result = delegateFind(ng, emg, ms, mp, mo);
+            result = delegateFind(ng, mg, ms, mp, mo);
         }
         return result;
     }
 
     public void ensureFilledTables() {
         // isTabled = false;
-        if (isTablingMode && !isTabled) {
+        if (isTablingMode) {
             Lock lock = getLock();
+            // TODO Ideally we'd like to check 'isTabled' with a read lock and if false then promote it to write
             lock.enterCriticalSection(Lock.WRITE); // Block other reads
-            isTabled = false;
-            try {
-                if (!isTabled) {
+            if (!isTabled) {
+                isTabled = false;
+                try {
                     // System.out.println("Refresh by " + Thread.currentThread());
                     refreshTables();
                     // System.out.println("Tabled " + StackTraceUtils.toString(Thread.currentThread().getStackTrace()));
                     isTabled = true;
+                } finally {
+                    lock.leaveCriticalSection();
                 }
-            } finally {
-                lock.leaveCriticalSection();
             }
         }
     }
@@ -348,13 +379,13 @@ public class DatasetGraphCache
                     bucket.add(quad);
 
                     // Also cache for graph views
-                    // for (Node ug : Arrays.asList(Quad.defaultGraphIRI, Quad.unionGraph)) {
-                        Node ug = Quad.unionGraph;
-                        Quad ugQuad = Quad.create(ug, quad.asTriple());
-                        Tuple<Node> ugKey = cachePattern.createPartitionKey(ugQuad);
-                        Set<Quad> ugBucket = CacheUtils.get(cache, Map.entry(cachePattern.getSpecPattern(), ugKey), LinkedHashSet::new);
-                        ugBucket.add(quad);
-                    //}
+//                    if (isBaseInUdfMode) {
+//                        Node ug = Quad.unionGraph;
+//                        Quad ugQuad = Quad.create(ug, quad.asTriple());
+//                        Tuple<Node> ugKey = cachePattern.createPartitionKey(ugQuad);
+//                        Set<Quad> ugBucket = CacheUtils.get(cache, Map.entry(cachePattern.getSpecPattern(), ugKey), LinkedHashSet::new);
+//                        ugBucket.add(quad);
+//                    }
                 }
             } finally {
                 Iter.close(it);

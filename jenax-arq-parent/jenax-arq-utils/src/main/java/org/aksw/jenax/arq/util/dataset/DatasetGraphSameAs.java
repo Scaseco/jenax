@@ -35,6 +35,9 @@ public class DatasetGraphSameAs {
                 SparqlCxtNode.get(), sameAsPredicates, allowDuplicates));
     }
 
+    public static DatasetGraph wrapWithTable(DatasetGraph base) {
+        return wrapWithTable(base, OWL.sameAs.asNode(), false);
+    }
 
     public static DatasetGraph wrapWithTable(DatasetGraph base, Node sameAsPredicate) {
         return wrapWithTable(base, Collections.singleton(sameAsPredicate), false);

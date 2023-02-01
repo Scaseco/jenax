@@ -168,32 +168,35 @@ public class TupleFinderSameAs<D, C>
             List<C> result;
             if (!sparqlCxt.isConcrete(g) || !sparqlCxt.isConcrete(start) || sparqlCxt.isLiteral(start)) {
                 result = Collections.singletonList(start);
-            } else if (mayHaveSameAsLinks != null && !mayHaveSameAsLinks.test(g, start)) {
-                // Shortcut which does not have to write to cache
-                result = Collections.singletonList(start);
             } else {
-                // TODO Shortcut if (g, start) is known to not have any sameAs links
-
-                boolean[] wasComputed = { false };
                 Entry<C, C> startKey = Map.entry(g, start);
-                result = CacheUtils.get(sameAsCache, startKey, () -> {
-                    wasComputed[0] = true;
-                    return resolveSameAsSorted(g, start);
-                });
 
-                // From experiments it is cheaper to compute the closure for resources
-                // only when needed - rather than spending time on preemptively adding cache entries
-                boolean updateClosureForAllMembers = false;
-                if (updateClosureForAllMembers) {
-                    // Add cache entries for all nodes in the closure
-                    if (wasComputed[0]) {
-                        for (C node : result) {
-                            if (!node.equals(start)) {
-                                sameAsCache.put(Map.entry(g, node), result);
+                result = CacheUtils.getIfPresent(sameAsCache, startKey);
+                if (result == null && mayHaveSameAsLinks != null && !mayHaveSameAsLinks.test(g, start)) {
+                    // Shortcut which does not write to cache
+                    result = Collections.singletonList(start);
+                } else {
+
+                    boolean[] wasComputed = { false };
+                    result = CacheUtils.get(sameAsCache, startKey, () -> {
+                        wasComputed[0] = true;
+                        return resolveSameAsSorted(g, start);
+                    });
+
+                    // From experiments it is cheaper to compute the closure for resources
+                    // only when needed - rather than spending time on preemptively adding cache entries
+                    boolean updateClosureForAllMembers = false;
+                    if (updateClosureForAllMembers) {
+                        // Add cache entries for all nodes in the closure
+                        if (wasComputed[0]) {
+                            for (C node : result) {
+                                if (!node.equals(start)) {
+                                    sameAsCache.put(Map.entry(g, node), result);
+                                }
                             }
+                            // Ensure that the startKey is marked as recently used
+                            sameAsCache.put(startKey, result);
                         }
-                        // Ensure that the startKey is marked as recently used
-                        sameAsCache.put(startKey, result);
                     }
                 }
             }
