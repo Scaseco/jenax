@@ -268,8 +268,8 @@ public class TestDatasetAssemblerSameAs {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
                 "PREFIX jxp: <http://jenax.aksw.org/plugin#>",
                 // "<urn:example:root> a ja:DatasetRDFS ; ja:rdfsSchema \"/home/raven/Datasets/coypu/coy-ontology.ttl\" ; ja:dataset <urn:example:rootu> .",
-                "<urn:example:root> a jxp:DatasetRDFS ; ja:rdfsSchema '/home/raven/Datasets/coypu/coy-ontology.ttl' ; ja:dataset <urn:example:rootu> .",
-                "<urn:example:rootu> a jxp:DatasetSameAs ; jxp:allowDuplicates false ; jxp:cacheMaxSize -1 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
+                // "<urn:example:root> a jxp:DatasetRDFS ; ja:rdfsSchema '/home/raven/Datasets/coypu/coy-ontology.ttl' ; ja:dataset <urn:example:rootu> .",
+                "<urn:example:root> a jxp:DatasetSameAs ; jxp:allowDuplicates false ; jxp:cacheMaxSize -1 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
                 "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph true ."
                 // "<urn:example:base> a ja:MemoryDataset ."
             );
