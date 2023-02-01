@@ -7,8 +7,9 @@ import java.util.Set;
 
 import org.aksw.jenax.arq.dataset.cache.CachePatterns;
 import org.aksw.jenax.arq.dataset.cache.DatasetGraphCache;
-import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
+import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAsOld;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
+import org.aksw.jenax.arq.util.dataset.DatasetGraphSameAs;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.exceptions.AssemblerException;
 import org.apache.jena.graph.Node;
@@ -48,12 +49,17 @@ public class DatasetAssemblerSameAs
             // then whenever there is a cache miss we know that there is no data and can skip the request
             // to the backing graph
             if (cacheMaxSize > 0) {
-                base = DatasetGraphCache.cache(base, CachePatterns.forNeigborsByPredicates(predicates), cacheMaxSize);
+                DatasetGraph cache = DatasetGraphCache.cache(base, CachePatterns.forNeigborsByPredicates(predicates), cacheMaxSize);
+                result = DatasetGraphSameAs.wrap(cache, predicates, allowDuplicates);
             } else if (cacheMaxSize < 0) {
-                base = DatasetGraphCache.table(base, CachePatterns.forNeigborsByPredicates(predicates));
+                // base = DatasetGraphCache.table(base, CachePatterns.forNeigborsByPredicates(predicates));
+                result = DatasetGraphSameAs.wrapWithTable(base, predicates, allowDuplicates);
+            } else {
+                result = DatasetGraphSameAs.wrap(base, predicates, allowDuplicates);
             }
 
-            result = DatasetGraphSameAs.wrap(base, predicates, allowDuplicates);
+           // result = DatasetGraphSameAs.wrap(base, predicates, allowDuplicates);
+           // result = DatasetGraphSameAsOld.wrap(base, predicates, allowDuplicates);
         } else {
             Class<?> cls = obj == null ? null : obj.getClass();
             throw new AssemblerException(root, "Expected ja:baseDataset to be a Dataset but instead got " + Objects.toString(cls));

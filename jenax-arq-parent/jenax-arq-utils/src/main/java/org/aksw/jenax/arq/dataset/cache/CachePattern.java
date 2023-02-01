@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import org.aksw.commons.tuple.accessor.TupleAccessor;
+import org.aksw.commons.tuple.util.TupleCmp;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeQuad;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
@@ -80,22 +83,50 @@ public class CachePattern {
      * <ul>
      */
     public boolean matchesPattern(Node mg, Node ms, Node mp, Node mo) {
-        Node[] argNodes = new Node[] { mg, ms, mp, mo };
-        boolean result = IntStream.range(0, argNodes.length).allMatch(i -> {
-            Node pn = QuadUtils.getNode(specPattern, i);
-            Node argNode = argNodes[i];
-            boolean r = matchesPatternNode(pn, argNode);
-            return r;
-        });
+        return matchesPattern(new Node[] { mg, ms, mp, mo }, (arr, i) -> arr[i]);
+    }
+
+    public boolean subsumes(Quad quad) {
+        return subsumes(quad, TupleBridgeQuad.get());
+    }
+
+    public boolean subsumes(Node mg, Node ms, Node mp, Node mo) {
+        return subsumes(new Node[] { mg, ms, mp, mo }, (arr, i) -> arr[i]);
+    }
+
+    public  <D> boolean matchesPattern(D argPattern, TupleAccessor<D, Node> accessor) {
+        boolean result = TupleCmp.matches(4, CachePattern::matchesPatternNode,
+                specPattern, TupleBridgeQuad.get(),
+                argPattern, accessor);
         return result;
     }
 
+    /** lhs.subsumes(rhs) == true means lhs is more generic and rhs is more specific (i.e. same or fewer ANYs) */
+    public  <D> boolean subsumes(D argPattern, TupleAccessor<D, Node> accessor) {
+        boolean result = TupleCmp.matches(4, CachePattern::subsumes,
+                specPattern, TupleBridgeQuad.get(),
+                argPattern, accessor);
+        return result;
+    }
+
+    /** ANY only matches ANY */
     public static boolean matchesPatternNode(Node patternNode, Node argNode) {
         boolean result =
                 IN.equals(patternNode)
                     ? argNode.isConcrete()
                     : Node.ANY.equals(patternNode)
                         ? Node.ANY.equals(argNode)
+                        : patternNode.equals(argNode);
+        return result;
+    }
+
+    /** ANY always matches (can be ANY or concrete) */
+    public static boolean subsumes(Node patternNode, Node argNode) {
+        boolean result =
+                IN.equals(patternNode)
+                    ? argNode.isConcrete()
+                    : Node.ANY.equals(patternNode)
+                        ? true
                         : patternNode.equals(argNode);
         return result;
     }
@@ -122,7 +153,7 @@ public class CachePattern {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(inputs);
-        result = prime * result + Objects.hash(specPattern);
+        result = prime * result + Objects.hash(findPattern, specPattern);
         return result;
     }
 
@@ -135,11 +166,13 @@ public class CachePattern {
         if (getClass() != obj.getClass())
             return false;
         CachePattern other = (CachePattern) obj;
-        return Arrays.equals(inputs, other.inputs) && Objects.equals(specPattern, other.specPattern);
+        return Objects.equals(findPattern, other.findPattern) && Arrays.equals(inputs, other.inputs)
+                && Objects.equals(specPattern, other.specPattern);
     }
 
     @Override
     public String toString() {
-        return "CachePattern [pattern=" + specPattern + ", inputs=" + Arrays.toString(inputs) + "]";
+        return "CachePattern [specPattern=" + specPattern + ", findPattern=" + findPattern + ", inputs="
+                + Arrays.toString(inputs) + "]";
     }
 }

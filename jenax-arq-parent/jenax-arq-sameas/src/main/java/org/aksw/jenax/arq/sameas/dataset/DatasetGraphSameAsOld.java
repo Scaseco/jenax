@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.cache.CacheUtils;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
+import org.aksw.jenax.arq.util.tuple.impl.TupleFinderSameAs;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -27,8 +28,13 @@ import com.google.common.graph.Traverser;
 /**
  * A stateless DatasetGraph wrapper whose find() methods apply same-as inferences for the configured
  * predicates.
+ *
+ * @deprecated
+ *   This implementation is superseded by the more general {@link TupleFinderSameAs}.
+ *   Use {DatasetGraphsSameAs{@link #wrap(DatasetGraph)} utility class.
  */
-public class DatasetGraphSameAs
+@Deprecated
+public class DatasetGraphSameAsOld
     extends DatasetGraphWrapperFindBase
     implements DatasetGraphWrapperView
 {
@@ -44,18 +50,18 @@ public class DatasetGraphSameAs
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Node sameAsPredicate) {
-        return new DatasetGraphSameAs(base, Collections.singleton(sameAsPredicate), false);
+        return new DatasetGraphSameAsOld(base, Collections.singleton(sameAsPredicate), false);
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates) {
-        return new DatasetGraphSameAs(base, sameAsPredicates, false);
+        return new DatasetGraphSameAsOld(base, sameAsPredicates, false);
     }
 
     public static DatasetGraph wrap(DatasetGraph base, Set<Node> sameAsPredicates, boolean allowDuplicates) {
-        return new DatasetGraphSameAs(base, sameAsPredicates, allowDuplicates);
+        return new DatasetGraphSameAsOld(base, sameAsPredicates, allowDuplicates);
     }
 
-    protected DatasetGraphSameAs(DatasetGraph base, Set<Node> sameAsPredicates, boolean allowDuplicates) {
+    protected DatasetGraphSameAsOld(DatasetGraph base, Set<Node> sameAsPredicates, boolean allowDuplicates) {
         super(base);
         this.sameAsPredicates = sameAsPredicates;
         this.allowDuplicates = allowDuplicates;
@@ -168,6 +174,11 @@ public class DatasetGraphSameAs
                 }
             }
         }
+
+        if (result == null) {
+            throw new IllegalStateException("Tuple [" + quad + "] was unexpectedly reported to not be contained in the backend");
+        }
+
         return result;
     }
 

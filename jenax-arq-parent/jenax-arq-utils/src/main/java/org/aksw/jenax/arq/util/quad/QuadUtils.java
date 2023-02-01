@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.arq.util.tuple.TupleAccessorQuad;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
+import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeQuad;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -258,7 +258,7 @@ public class QuadUtils {
 
 
     public static Binding quadToBinding(Quad pattern, Quad assignment) {
-        return TupleUtils.tupleToBinding(TupleAccessorQuad.INSTANCE, pattern, assignment);
+        return TupleUtils.tupleToBinding(TupleBridgeQuad.INSTANCE, pattern, assignment);
     }
 
 

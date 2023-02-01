@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.dataset.cache;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,10 +10,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.util.cache.CacheUtils;
+import org.aksw.commons.util.stack_trace.StackTraceUtils;
+import org.aksw.jenax.arq.util.dataset.DatasetGraphUnionDefaultGraph;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphWrapperFindBase;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.tuple.Tuple;
@@ -44,6 +48,8 @@ public class DatasetGraphCache
     // Just a best effort counter - probably not worth making it volatile
     protected long findCounter = 0;
 
+
+    /** (CachePattern, In-Tuple) -&gt; Quad */
     protected Cache<Entry<Quad, Tuple<Node>>, Set<Quad>> cache;
 
     /**
@@ -64,23 +70,23 @@ public class DatasetGraphCache
 
     public static final int DFT_MAX_CACHE_SIZE = 10_000;
 
-    public static DatasetGraph cache(DatasetGraph base, Collection<CachePattern> cachePatterns) {
+    public static DatasetGraphCache cache(DatasetGraph base, Collection<CachePattern> cachePatterns) {
         return cache(base, cachePatterns, DFT_MAX_CACHE_SIZE);
     }
 
-    public static DatasetGraph cache(DatasetGraph base, Collection<CachePattern> cachePatterns, int maxCacheSize) {
+    public static DatasetGraphCache cache(DatasetGraph base, Collection<CachePattern> cachePatterns, int maxCacheSize) {
         return create(base, cachePatterns, maxCacheSize, false);
     }
 
-    public static DatasetGraph table(DatasetGraph base, CachePattern cachePatterns) {
+    public static DatasetGraphCache table(DatasetGraph base, CachePattern cachePatterns) {
         return table(base, Collections.singletonList(cachePatterns));
     }
 
-    public static DatasetGraph table(DatasetGraph base, Collection<CachePattern> cachePatterns) {
+    public static DatasetGraphCache table(DatasetGraph base, Collection<CachePattern> cachePatterns) {
         return create(base, cachePatterns, Long.MAX_VALUE, true);
     }
 
-    public static DatasetGraph create(DatasetGraph base, Collection<CachePattern> cachePatterns, long maxCacheSize, boolean isTablingMode) {
+    public static DatasetGraphCache create(DatasetGraph base, Collection<CachePattern> cachePatterns, long maxCacheSize, boolean isTablingMode) {
         Cache<Entry<Quad, Tuple<Node>>, Set<Quad>> cache =
                 CacheUtils.recordStats(CacheBuilder.newBuilder(), logCacheStats)
                 .maximumSize(maxCacheSize)
@@ -96,19 +102,76 @@ public class DatasetGraphCache
         this.isTablingMode = isTablingMode;
     }
 
+    public boolean isTablingMode() {
+        return isTablingMode;
+    }
+
+    public boolean mayContainQuad(Node g, Node s, Node p, Node o) {
+        return mayContainQuad(Quad.create(g, s, p, o));
+    }
+
+    /**
+     * This method always returns true unless in tabeling mode.
+     * If false then the wrapped dataset does not contain this quad.
+     * If the argument quad contains placeholders only a check is made for whether the partition key exists in the cache. The set of cached entries is NOT iterated.
+     */
+    public boolean mayContainQuad(Quad rawQuad) {
+        boolean result = true;
+        if (isTablingMode) {
+            Quad quad = getEffectiveQuad(rawQuad);
+            ensureFilledTables();
+            for (CachePattern pattern : cachePatterns) {
+                if (pattern.subsumes(quad)) {
+                    Tuple<Node> key = pattern.createPartitionKey(quad);
+                    Set<Quad> partition = CacheUtils.getIfPresent(cache, Map.entry(pattern.getSpecPattern(), key));
+
+                    if (partition == null || partition.isEmpty()) {
+                        result = false;
+                        break;
+                    }
+
+                    if (quad.isConcrete()) {
+                        result = partition.contains(quad);
+                        if (!result) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+//    public Set<Quad> getCacheEntry(Entry<Quad, Tuple<Node>> key) {
+//        return CacheUtils.getIfPresent(cache, key);
+//    }
+
     @Override public void add(Node g, Node s, Node p, Node o) { add(new Quad(g, s, p, o)); }
     @Override public void delete(Node g, Node s, Node p, Node o) { delete(new Quad(g, s, p, o)); }
 
     @Override
     public void addAll(DatasetGraph src) {
+        addAll(() -> src.stream());
+//        try {
+//            Lock lock = getLock();
+//            lock.enterCriticalSection(Lock.WRITE);
+//            try (Stream<Quad> stream = src.stream()) {
+//                stream.forEach(quad -> performUpdateAction(quad, false, (ts, t) -> ts.add(t), () -> super.add(quad)));
+//            }
+//        } finally {
+//            getLock().leaveCriticalSection();
+//        }
+    }
+
+    public void addAll(Supplier<Stream<Quad>> streamFactory) {
+        Lock lock = getLock();
         try {
-            Lock lock = getLock();
             lock.enterCriticalSection(Lock.WRITE);
-            try (Stream<Quad> stream = src.stream()) {
+            try (Stream<Quad> stream = streamFactory.get()) {
                 stream.forEach(quad -> performUpdateAction(quad, false, (ts, t) -> ts.add(t), () -> super.add(quad)));
             }
         } finally {
-            getLock().leaveCriticalSection();
+            lock.leaveCriticalSection();
         }
     }
 
@@ -137,22 +200,30 @@ public class DatasetGraphCache
     }
 
     public void performUpdateAction(Quad quad, boolean doLocking, BiConsumer<Set<Quad>, Quad> cacheAction, Runnable graphAction) {
-        Set<Quad> ts;
-
         List<CachePattern> patterns = getMatchingCachePatterns(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject()).collect(Collectors.toList());
         if (!patterns.isEmpty()) {
-            if (doLocking) { getLock().enterCriticalSection(Lock.WRITE); }
+            Lock lock = getLock();
+            if (doLocking) { lock.enterCriticalSection(Lock.WRITE); }
             try {
                 for (CachePattern cachePattern : cachePatterns) {
                     Tuple<Node> partitionKey = cachePattern.createPartitionKey(quad);
-                    ts = CacheUtils.getIfPresent(cache, Map.entry(cachePattern.getSpecPattern(), partitionKey));
-                    if (ts != null) {
-                        cacheAction.accept(ts, quad);
+                    Set<Quad> bucket = CacheUtils.getIfPresent(cache, Map.entry(cachePattern.getSpecPattern(), partitionKey));
+                    if (bucket != null) {
+                        cacheAction.accept(bucket, quad);
+
+                        // Also cache for graph views
+                        // for (Node g : Arrays.asList(Quad.defaultGraphIRI, Quad.unionGraph)) {
+                            Node ug = Quad.unionGraph;
+                            Quad ugQuad = Quad.create(ug, quad.asTriple());
+                            Tuple<Node> ugKey = cachePattern.createPartitionKey(ugQuad);
+                            Set<Quad> ugBucket = CacheUtils.get(cache, Map.entry(cachePattern.getSpecPattern(), ugKey), LinkedHashSet::new);
+                            cacheAction.accept(ugBucket, quad);
+                        // }
                     }
                 }
                 graphAction.run();
             } finally {
-                if (doLocking) { getLock().leaveCriticalSection(); }
+                if (doLocking) { lock.leaveCriticalSection(); }
             }
         } else {
             graphAction.run();
@@ -176,6 +247,27 @@ public class DatasetGraphCache
         return cachePatterns.stream().filter(pattern -> pattern.matchesPattern(mg, ms, mp, mo));
     }
 
+    protected Stream<CachePattern> getSuperPatterns(Node mg, Node ms, Node mp, Node mo) {
+        return cachePatterns.stream().filter(pattern -> pattern.subsumes(mg, ms, mp, mo));
+    }
+
+
+    protected Quad getEffectiveQuad(Quad quad) {
+        Node g = quad.getGraph();
+        Node eg = getEffectiveGraph(g);
+
+        return g.equals(eg) ? quad : Quad.create(eg, quad.asTriple());
+    }
+
+    protected Node getEffectiveGraph(Node mg) {
+        // Effective match graph
+        boolean isUdfMode = DatasetGraphUnionDefaultGraph.isKnownUnionDefaultGraphMode(getR());
+        Node emg = Quad.isDefaultGraph(mg) && isUdfMode
+                ? Quad.unionGraph
+                : mg;
+        return emg;
+    }
+
     @Override
     protected Iterator<Quad> actionFind(boolean ng, Node mg, Node ms, Node mp, Node mo) {
         Iterator<Quad> result;
@@ -183,19 +275,25 @@ public class DatasetGraphCache
         if (logCacheStats) {
             ++findCounter;
             if (findCounter % 100000 == 0) {
-                System.out.println(CacheUtils.stats(cache));
+                System.err.println(CacheUtils.stats(cache));
             }
         }
 
-        ensureReady();
-        CachePattern cachePattern = getMatchingCachePatterns(mg, ms, mp, mo).findFirst().orElse(null);
+        // Effective match graph
+        Node emg = getEffectiveGraph(mg);
+
+
+        // System.out.println("Find action");
+        // If tabeling is enabled then ensure all data is prefetched prior to find
+        ensureFilledTables();
+        CachePattern cachePattern = getMatchingCachePatterns(emg, ms, mp, mo).findFirst().orElse(null);
 
         if (cachePattern != null) {
-            Tuple<Node> partitionKey = cachePattern.createPartitionKey(mg, ms, mp, mo);
+            Tuple<Node> partitionKey = cachePattern.createPartitionKey(emg, ms, mp, mo);
             Entry<Quad, Tuple<Node>> key = Map.entry(cachePattern.getSpecPattern(), partitionKey);
 
             if (isTablingMode) {
-                Lock lock = getR().getLock();
+                Lock lock = getLock();
                 lock.enterCriticalSection(Lock.READ);
                 try {
                     Collection<Quad> bucket = CacheUtils.getIfPresent(cache , key);
@@ -207,22 +305,26 @@ public class DatasetGraphCache
                     lock.leaveCriticalSection();
                 }
             } else {
-                result = CacheUtils.get(cache, key, () -> Iter.iter(delegateFind(ng, mg, ms, mp, mo)).toSet()).iterator();
+                result = CacheUtils.get(cache, key, () -> Iter.iter(delegateFind(ng, emg, ms, mp, mo))
+                            .collect(Collectors.toCollection(LinkedHashSet::new))).iterator();
             }
         } else {
-            result = delegateFind(ng, mg, ms, mp, mo);
+            result = delegateFind(ng, emg, ms, mp, mo);
         }
         return result;
     }
 
-    public void ensureReady() {
+    public void ensureFilledTables() {
+        // isTabled = false;
         if (isTablingMode && !isTabled) {
-            Lock lock = getR().getLock();
+            Lock lock = getLock();
             lock.enterCriticalSection(Lock.WRITE); // Block other reads
+            isTabled = false;
             try {
                 if (!isTabled) {
                     // System.out.println("Refresh by " + Thread.currentThread());
                     refreshTables();
+                    // System.out.println("Tabled " + StackTraceUtils.toString(Thread.currentThread().getStackTrace()));
                     isTabled = true;
                 }
             } finally {
@@ -234,7 +336,6 @@ public class DatasetGraphCache
     private void refreshTables() {
         // Idea: We could add a sanity check that no data gets evicted in the process
         // long expectedCacheSize = 0;
-
         for (CachePattern cachePattern : cachePatterns) {
             Quad sp = cachePattern.getSpecPattern();
             Quad fp = cachePattern.getFindPattern();
@@ -245,6 +346,15 @@ public class DatasetGraphCache
                     Tuple<Node> key = cachePattern.createPartitionKey(quad);
                     Collection<Quad> bucket = CacheUtils.get(cache, Map.entry(sp, key), LinkedHashSet::new);
                     bucket.add(quad);
+
+                    // Also cache for graph views
+                    // for (Node ug : Arrays.asList(Quad.defaultGraphIRI, Quad.unionGraph)) {
+                        Node ug = Quad.unionGraph;
+                        Quad ugQuad = Quad.create(ug, quad.asTriple());
+                        Tuple<Node> ugKey = cachePattern.createPartitionKey(ugQuad);
+                        Set<Quad> ugBucket = CacheUtils.get(cache, Map.entry(cachePattern.getSpecPattern(), ugKey), LinkedHashSet::new);
+                        ugBucket.add(quad);
+                    //}
                 }
             } finally {
                 Iter.close(it);

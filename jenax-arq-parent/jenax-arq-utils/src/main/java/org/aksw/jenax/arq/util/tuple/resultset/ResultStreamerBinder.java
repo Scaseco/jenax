@@ -15,18 +15,23 @@
  *  information regarding copyright ownership.
  */
 
-package org.aksw.jenax.arq.util.tuple;
+package org.aksw.jenax.arq.util.tuple.resultset;
+
+import org.apache.jena.atlas.lib.tuple.Tuple;
 
 /**
- * Functional interface for accessing components of a tuple
+ * Helper interface for use as a return type and in lambdas
+ * for creating a
+ * {@link ResultStreamer} instance from typically a store object
+ * obtained via {@link StorageNodeMutable#newStore()}
  *
  * @author Claus Stadler 11/09/2020
  *
- * @param <TUPLE>
- * @param <COMPONENT>
+ * @param <D> The domain tuple type
+ * @param <C> The component type
+ * @param <T> The tuple type such as {@link Tuple}
  */
-@FunctionalInterface
-public interface TupleAccessorCore<TUPLE, COMPONENT>
+public interface ResultStreamerBinder<D, C, T>
 {
-    COMPONENT get(TUPLE tupleLike, int componentIdx);
+    ResultStreamer<D, C, T> bind(Object store);
 }

@@ -3,9 +3,10 @@ package org.aksw.jenax.arq.sameas.init;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerRdfsReduced;
 import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerSameAs;
 import org.aksw.jenax.arq.sameas.assembler.SameAsVocab;
-import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAs;
+import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAsOld;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
 import org.aksw.jenax.arq.uniondefaultgraph.assembler.DatasetAssemblerUnionDefaultGraph;
 import org.aksw.jenax.arq.uniondefaultgraph.assembler.UnionDefaultGraphVocab;
@@ -52,7 +53,7 @@ public class SameAsInit
                     }
                     // Inherit union default graph if backed by tdb
                     DatasetGraph adhocDs = DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset());
-                    adhocDs = DatasetGraphSameAs.wrap(adhocDs);
+                    adhocDs = DatasetGraphSameAsOld.wrap(adhocDs);
                     r = QueryExecUtils.execute(opExec.getSubOp(), adhocDs, binding, execCxt.getContext());
                 } else {
                     r = chain.createExecution(opExec, opOrig, binding, execCxt);
@@ -63,6 +64,8 @@ public class SameAsInit
 
     static void registerWith(AssemblerGroup g) {
         AssemblerUtils.register(g, SameAsVocab.DatasetSameAs, new DatasetAssemblerSameAs(), DatasetAssembler.getType());
+
+        AssemblerUtils.register(g, DatasetAssemblerRdfsReduced.getType(), new DatasetAssemblerRdfsReduced(), DatasetAssembler.getType());
 
         AssemblerUtils.register(g, UnionDefaultGraphVocab.DatasetUnionDefaultGraph, new DatasetAssemblerUnionDefaultGraph(false), DatasetAssembler.getType());
         AssemblerUtils.register(g, UnionDefaultGraphVocab.DatasetAutoUnionDefaultGraph, new DatasetAssemblerUnionDefaultGraph(true), DatasetAssembler.getType());

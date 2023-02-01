@@ -15,41 +15,39 @@
  *  information regarding copyright ownership.
  */
 
-package org.aksw.jenax.arq.util.tuple;
+package org.aksw.jenax.arq.util.tuple.adapter;
 
-import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.commons.tuple.bridge.TupleBridge3;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.graph.Triple;
 
 /**
  *
  * @author Claus Stadler 11/09/2020
  *
  */
-public class TupleAccessorQuad
-    implements TupleAccessor<Quad, Node>
+public class TupleBridgeTriple
+    implements TupleBridge3<Triple, Node>
 {
-    public static final TupleAccessorQuad INSTANCE = new TupleAccessorQuad();
+    public static final TupleBridgeTriple INSTANCE = new TupleBridgeTriple();
+
+    public static TupleBridgeTriple get() {
+        return INSTANCE;
+    }
 
     @Override
     public int getDimension() {
-        return 4;
+        return 3;
     }
 
     @Override
-    public Node get(Quad quad, int idx) {
-        return QuadUtils.getNode(quad, idx);
+    public Node get(Triple triple, int idx) {
+        return TripleUtils.getNode(triple, idx);
     }
 
     @Override
-    public <T> Quad restore(T obj, TupleAccessorCore<? super T, ? extends Node> accessor) {
-//        validateRestoreArg(accessor);
-
-        return Quad.create(
-                accessor.get(obj, 0),
-                accessor.get(obj, 1),
-                accessor.get(obj, 2),
-                accessor.get(obj, 3));
+    public Triple build(Node s, Node p, Node o) {
+        return Triple.create(s, p, o);
     }
-
 }

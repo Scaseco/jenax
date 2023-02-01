@@ -20,11 +20,18 @@ public abstract class DatasetGraphWrapperFindBase
     }
 
     /**
-     * The primary find method that needs to be implemented.
-     * All arguments are guaranteed to be non-null. Node.ANY is the canonical placeholder.
+     * @implNote
+     * The decision not to use Quad as the parameter type is to allow for more
+     * succinct implementations by avoiding the need to call quad.getX() for the components.
+     *
+     * @param ng Controls the meaning of Node.ANY for g: If false then it matches
+     *           all graphs including the default graph.
+     *           When true it only matches within named graphs (and not the default graph).
      */
     protected abstract Iterator<Quad> actionFind(boolean ng, Node g, Node s, Node p, Node o);
 
+
+    /** Use this method to delegate find calls to the wrapped dataset */
     protected Iterator<Quad> delegateFind(boolean ng, Node g, Node s, Node p, Node o) {
         return ng
             ? getR().findNG(g, s, p, o)

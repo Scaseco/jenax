@@ -68,7 +68,7 @@ public class DatasetSameAsExperiments {
         });
         System.out.println("Finished loading in " + sw.elapsed(TimeUnit.SECONDS));
         sw.reset().start();
-        DatasetGraph dsg = DatasetGraphSameAs.wrap(base);
+        DatasetGraph dsg = DatasetGraphSameAsOld.wrap(base);
         Txn.executeRead(dsg,() -> {
             Iterator<Quad> it = dsg.find();
             //it.forEachRemaining(x -> System.out.println("Seen: " + x));
@@ -89,7 +89,7 @@ public class DatasetSameAsExperiments {
 
     public static void main2(String[] args) {
         DatasetGraph base = DatasetGraphFactory.createTxnMem();
-        DatasetGraph datasetGraph = DatasetGraphSameAs.wrap(base);
+        DatasetGraph datasetGraph = DatasetGraphSameAsOld.wrap(base);
 
         Dataset dataset = DatasetFactory.wrap(datasetGraph);
         Model model = dataset.getDefaultModel();

@@ -16,6 +16,10 @@ import org.apache.jena.sparql.util.Symbol;
 
 /**
  * A dataset wrapper that redirects find requests on the default graph to the union graph.
+ * All named graphs of quads are remapped to the default graph to make them appear as real default graph quads.
+ * Usually, a lookup with Quad.unionGraph retains the named graphs.
+ *
+ *
  * Mainly intended for wrapping TDB2 datasets which have the defaultUnionGraph context symbol set to true
  * such that {@code find(Quad.defaultGraph, ...)} is transparently redirected to the union graph.
  */
