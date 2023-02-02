@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -34,6 +35,9 @@ public class TupleFinderSameAs<D, C>
 
     protected SparqlCxt<C> sparqlCxt;
     protected Set<C> sameAsPredicates;
+
+    /** If true then drop (x sameAs x) triples */
+    protected boolean dropReflexive = true;
 
     // Optional predicate used to prune computations if if resources are known not to have any sameAs links
     protected BiPredicate<C, C> mayHaveSameAsLinks;
@@ -151,9 +155,15 @@ public class TupleFinderSameAs<D, C>
                 List<C> ss = sparqlCxt.isConcrete(ms) ? Collections.singletonList(ms) : sortedSubjects;
                 List<C> oo = sparqlCxt.isConcrete(mo) ? Collections.singletonList(mo) : sortedObjects;
 
+                // Drop o's that are already in ss (when dropReflexive is enabled)
+                List<C> ooo = dropReflexive && sameAsPredicates.contains(p)
+                        ? oo.stream().filter(o -> Collections.binarySearch(ss, o, sparqlCxt.comparator()) < 0).collect(Collectors.toList())
+                        : oo;
+
                 // System.out.println(quad + (isLeastQuad ? " is least quad " : " hasLeastQuad: " + leastQuad));
                 result = isLeastQuad
-                        ? Iter.iter(ss).flatMap(s -> Iter.iter(oo).map(o -> getTupleBridge().build(g, s, p, o)))
+                        ? Iter.iter(ss).flatMap(s -> Iter.iter(ooo)
+                                .map(o -> getTupleBridge().build(g, s, p, o)))
                         : Iter.empty();
 
     //            if (!isLeastQuad) {

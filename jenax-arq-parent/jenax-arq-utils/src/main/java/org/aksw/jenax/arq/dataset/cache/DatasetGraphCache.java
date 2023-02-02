@@ -198,7 +198,7 @@ public class DatasetGraphCache
 //        }
 //      	System.err.println("Cache: " + cacheVersion + " generation: " + cacheGeneration + " request: " + quad);
 
-//        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
+        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         return result;
     }
 
