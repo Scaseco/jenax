@@ -192,7 +192,7 @@ public class MatchRDFSReduced<D, C>
             // Newly inferred types derived from this triple
             Set<C> newInfTypes = null;
 
-            Set<C> superPropertiesInc; // May may have p subPropertyOf rdf:type
+            Set<C> superPropertiesInc; // We may have p subPropertyOf rdf:type
             Iterator<D> inferences = null;
 
             // Expansion from rdfs:subPropertyOf
