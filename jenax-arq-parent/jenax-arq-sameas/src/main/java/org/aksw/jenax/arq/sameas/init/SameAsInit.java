@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerRdfsReduced;
+import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerRdfsReducedEnable;
 import org.aksw.jenax.arq.sameas.assembler.DatasetAssemblerSameAs;
 import org.aksw.jenax.arq.sameas.assembler.SameAsVocab;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
@@ -84,6 +85,7 @@ public class SameAsInit
         AssemblerUtils.register(g, SameAsVocab.DatasetSameAs, new DatasetAssemblerSameAs(), DatasetAssembler.getType());
 
         AssemblerUtils.register(g, DatasetAssemblerRdfsReduced.getType(), new DatasetAssemblerRdfsReduced(), DatasetAssembler.getType());
+        AssemblerUtils.register(g, DatasetAssemblerRdfsReducedEnable.getType(), new DatasetAssemblerRdfsReducedEnable(), DatasetAssembler.getType());
 
         AssemblerUtils.register(g, UnionDefaultGraphVocab.DatasetUnionDefaultGraph, new DatasetAssemblerUnionDefaultGraph(false), DatasetAssembler.getType());
         AssemblerUtils.register(g, UnionDefaultGraphVocab.DatasetAutoUnionDefaultGraph, new DatasetAssemblerUnionDefaultGraph(true), DatasetAssembler.getType());
