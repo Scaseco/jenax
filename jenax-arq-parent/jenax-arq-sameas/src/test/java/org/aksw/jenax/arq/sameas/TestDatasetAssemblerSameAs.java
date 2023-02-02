@@ -33,6 +33,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfs.RDFSFactory;
+import org.apache.jena.rdfs.SetupRDFS;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -82,26 +83,18 @@ public class TestDatasetAssemblerSameAs {
     // domain/range indirectly reachable via supPropertyOf
     @Test
     public void testRdfs03() {
-        Graph vocab = SSE.parseGraph("(graph (:p1 rdfs:subPropertyOf :p2) (:p2 rdfs:range :R) (:p2 rdfs:domain :D) )");
+        Graph vocab = SSE.parseGraph("(graph (:p1 rdfs:subPropertyOf :p2) (:p2 rdfs:range :R) (:p2 rdfs:domain :D) (:D rdfs:subClassOf :DD) )");
         DatasetGraph dsg0 = DatasetGraphFactory.createTxnMem();
 
-        // DatasetGraph dsg = RDFSFactory.datasetRDFS(dsg0, vocab);
-        DatasetGraph dsg = DatasetGraphRDFSReduced.wrap(dsg0, vocab);
+        SetupRDFS setup = RDFSFactory.setupRDFS(vocab);
+        // DatasetGraph dsg = RDFSFactory.datasetRDFS(dsg0, setup);
+        DatasetGraph dsg = DatasetGraphRDFSReduced.wrap(dsg0, setup);
         dsg.executeWrite(() -> {
             dsg.add(SSE.parseQuad("(:g1 :x :p2 :y)"));
         });
 
-        // dsg.find(null, null, null, null).forEachRemaining(System.out::println);
-        // Named graphs, duplicates.
-//        {
-//            String qs2 = "SELECT * { GRAPH <" + Quad.unionGraph.getURI() + "> { ?s ?p ?o } }";
-//            Query query2 = QueryFactory.create(qs2);
-//
-//            try (QueryExecution qExec = QueryExecutionFactory.create(query2, dsg)) {
-//                ResultSet rs = qExec.execSelect();
-//                ResultSetFormatter.out(rs);
-//            }
-//        }
+        long actual = dsg.stream(null, null, null, null).count();
+        Assert.assertEquals(4, actual);
     }
 
 

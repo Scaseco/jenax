@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -175,7 +176,7 @@ public class MatchRDFSReduced<D, C>
 
         protected Iterator<D> inf(D tuple) {
             C s = getTupleBridge().get(tuple, 0);
-            C ip = getTupleBridge().get(tuple, 1); // initial predicate
+            C p = getTupleBridge().get(tuple, 1); // initial predicate
             C o = getTupleBridge().get(tuple, 2);
 
             boolean hasSeenSubject = CacheUtils.getIfPresent(seenTypesCache, s) != null;
@@ -183,157 +184,54 @@ public class MatchRDFSReduced<D, C>
             Set<C> seenTypes = CacheUtils.get(seenTypesCache, s, () -> new HashSet<>());
             Set<C> seenOutPredicates = CacheUtils.get(seenOutPredicatesCache, s, () -> new HashSet<>());
 
-            boolean isNewOutPredicate = !seenOutPredicates.contains(ip);
+            boolean isNewOutPredicate = !seenOutPredicates.contains(p);
             if (isNewOutPredicate) {
-                seenOutPredicates.add(ip);
+                seenOutPredicates.add(p);
             }
 
-            Set<C> superPropertiesInc;
-            Set<C> ps;
+            // Newly inferred types derived from this triple
+            Set<C> newInfTypes = null;
 
+            Set<C> superPropertiesInc; // May may have p subPropertyOf rdf:type
             Iterator<D> inferences = null;
 
             // Expansion from rdfs:subPropertyOf
             if (setup.hasPropertyDeclarations()) {
-                superPropertiesInc = setup.getSuperPropertiesInc(ip);
+                superPropertiesInc = setup.getSuperPropertiesInc(p);
                 if (superPropertiesInc.isEmpty()) {
-                    superPropertiesInc = Collections.singleton(ip);
+                    superPropertiesInc = Collections.singleton(p);
                 }
-
-                // Infer super properties (s p2 o) <- (s p1 o) (p1 subPropertyOf p2)
-                if (!(superPropertiesInc.size() == 1 && superPropertiesInc.contains(ip))) {
-                    Set<C> seenLinks = CacheUtils.get(seenLinksCache, TupleFactory.create2(s, o), HashSet::new);
-                    if (!seenLinks.contains(ip)) {
-                        seenLinks.add(ip); // Marking this property seen suppresses inference of the current triple
-                        Set<C> newlyInferredPreds = addAndGetNew(null, seenLinks, superPropertiesInc);
-                        if (newlyInferredPreds != null) {
-                            inferences = IterUtils.getOrConcat(inferences,
-                                  Iter.iter(newlyInferredPreds).map(p2 -> tuple(s, p2, o)));
-                        }
-                    }
-                }
-
-                ps = isNewOutPredicate ? superPropertiesInc : Collections.singleton(ip);
-
+                inferences = withSuperProperties(inferences, superPropertiesInc, s, p, o);
             } else {
-                ps = Collections.singleton(ip);
-                superPropertiesInc = Collections.singleton(ip);
+                superPropertiesInc = Collections.singleton(p);
             }
 
             // Expansion for incoming predicates based on rdfs:range (based on the subject)
             if (setup.hasRangeDeclarations()) {
-                // If the subject is concrete we have to check incoming edges immediately
-                if (alwaysFetchRangeTypesBySubject || isTerm(s)) {
-                    if (!hasSeenSubject) {
-                        // System.out.println(s);
-
-                        Set<C> inPredicates;
-                        if (enumerateRanges) {
-                            // TODO Expand with sub-properties
-                            inPredicates = inPredicateCands.stream()
-                                    .filter(inP -> backend.contains(cxtInf.ANY, inP, s))
-                                    .collect(Collectors.toCollection(LinkedHashSet::new));
-                        } else {
-                            // The "getInPredicates" method may reject the request for certain subject resources, such
-                            // as ones that appear as the objects of rdf:type (i.e. classes)
-                            inPredicates = getInPredicates(s);
-                        }
-
-                        Set<C> newlyInferredTypes = null;
-                        for (C directInP : inPredicates) {
-                            Set<C> inPs = setup.getSuperPropertiesInc(directInP);
-                            for (C inP : inPs) {
-                                // FIXME Needs to include super properties
-                                Set<C> rangeTypes = setup.getRange(inP);
-                                for (C rangeType : rangeTypes) {
-                                    if (!seenTypes.contains(rangeType)) {
-                                        Set<C> rangeTypeClosure = setup.getSuperClassesInc(rangeType);
-                                        newlyInferredTypes = addAndGetNew(newlyInferredTypes, seenTypes, rangeTypeClosure);
-                                    }
-                                }
-                            }
-                        }
-                        if (newlyInferredTypes != null) {
-                            inferences = IterUtils.getOrConcat(inferences,
-                                    Iter.iter(newlyInferredTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
-                        }
-                    }
+                if (!hasSeenSubject) {
+                    newInfTypes = accRangeTypesForSubject(newInfTypes, s, seenTypes);
                 }
 
-                // The object may not appear as a subject so this might be the last time that we see it
-                // In the rare case that o == s and alwaysFetchRangeTypesBySubject the work was already done
-                if (isAny(ms) || (Objects.equals(o, s) && !alwaysFetchRangeTypesBySubject)) {
-                    Node oNode = cxtInf.mapper.toNode(o); // Not ideal forcing materialization to node here
-                    if (!oNode.isLiteral()) {
-                        boolean emitObjectRangeTypesNow = true;
-                        if (alwaysFetchRangeTypesBySubject) {
-                            // If the object appears as a subject we don't have to produce the inferences now
-                            boolean appearsAsSubject = backend.contains(o, cxtInf.ANY, cxtInf.ANY);
-                            emitObjectRangeTypesNow = !appearsAsSubject;
-                        }
-
-                        if (emitObjectRangeTypesNow) {
-                            Set<C> newlyInferredObjectTypes = null;
-                            Set<C> seenObjectTypes = null;
-                            for (C p : superPropertiesInc) {
-                                Set<C> rangeTypes = setup.getRange(p);
-                                if (!rangeTypes.isEmpty()) {
-                                    seenObjectTypes = seenObjectTypes != null
-                                            ? seenObjectTypes
-                                            : CacheUtils.get(seenTypesCache, o, HashSet::new);
-                                    for (C rangeType : rangeTypes) {
-                                        if (!seenObjectTypes.contains(rangeType)) {
-                                            newlyInferredObjectTypes = addAndGetNew(newlyInferredObjectTypes, seenObjectTypes, rangeType);
-                                            Set<C> rangeTypeClosure = setup.getSuperClassesInc(rangeType);
-                                            newlyInferredObjectTypes = addAndGetNew(newlyInferredObjectTypes, seenObjectTypes, rangeTypeClosure);
-                                        }
-                                    }
-                                }
-                            }
-                            if (newlyInferredObjectTypes != null) {
-                                inferences = IterUtils.getOrConcat(inferences,
-                                        Iter.iter(newlyInferredObjectTypes).map(t -> tuple(o, cxtInf.rdfType, t)));
-                            }
-                        }
-                    }
-                }
+                inferences = withRangeTypesForObject(inferences, s, p, o);
             }
 
             if (setup.hasClassDeclarations()) {
                 // Expansion for rdf:type based on rdfs:subClassOf
                 if (superPropertiesInc.contains(cxtInf.rdfType) && !seenTypes.contains(o)) {
-                    Set<C> superClasses = setup.getSuperClassesInc(o);
-                    Set<C> newlyInferredTypes = addAndGetNew(null, seenTypes, superClasses);
-                    if (newlyInferredTypes != null) {
-                        if (!newlyInferredTypes.isEmpty()) {
-                            inferences = IterUtils.getOrConcat(inferences,
-                                    Iter.iter(newlyInferredTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
-                        }
-                    }
+                    newInfTypes = accTypes(newInfTypes, o, seenTypes);
                 }
             }
 
             if (setup.hasDomainDeclarations()) {
                 // Expansion for any newly seen predicate based on domain of the property
-                Set<C> newlyInferredTypes = null;
-                for (C p : ps) {
-                    Set<C> domainTypes = setup.getDomain(p);
-                    for (C domainType : domainTypes) {
-                        newlyInferredTypes = addAndGetNew(newlyInferredTypes, seenTypes, domainType);
-                        if (!seenTypes.contains(domainType)) {
-                            Set<C> domainTypeClosure = setup.getSuperClassesInc(domainType);
-                            newlyInferredTypes = addAndGetNew(newlyInferredTypes, seenTypes, domainTypeClosure);
-                        }
-                    }
-                }
-                if (newlyInferredTypes != null) {
-                    inferences = IterUtils.getOrConcat(inferences,
-                            Iter.iter(newlyInferredTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
-                }
+                Set<C> domainTypes = setup.getDomain(p);
+                newInfTypes = accTypes(newInfTypes, domainTypes, seenTypes);
             }
 
+            inferences = withTypeInfs(inferences, s, newInfTypes);
+
             // Suppress rdf:type triples when the type has already been seen
-            boolean isSuppressedTriple = cxtInf.rdfType.equals(ip) && seenTypes.contains(o);
+            boolean isSuppressedTriple = cxtInf.rdfType.equals(p) && seenTypes.contains(o);
 
             Iterator<D> result;
             if (isSuppressedTriple) {
@@ -345,6 +243,98 @@ public class MatchRDFSReduced<D, C>
                     : Iter.concat(self, inferences);
             }
 
+            return result;
+        }
+
+        protected Iterator<D> withTypeInfs(Iterator<D> result, C s, Set<C> newTypes) {
+            if (newTypes != null) {
+                result = IterUtils.getOrConcat(result, Iter.iter(newTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
+            }
+            return result;
+        }
+
+        public Iterator<D> withSuperProperties(Iterator<D> inferences, Set<C> superPropertiesInc, C s, C p, C o) {
+            // Infer super properties (s p2 o) <- (s p1 o) (p1 subPropertyOf p2)
+            if (!(superPropertiesInc.size() == 1 && superPropertiesInc.contains(p))) {
+                Set<C> seenLinks = CacheUtils.get(seenLinksCache, TupleFactory.create2(s, o), HashSet::new);
+                if (!seenLinks.contains(p)) {
+                    seenLinks.add(p); // Marking this property seen suppresses inference of the current triple; we will output it at the end
+                    Set<C> newlyInferredPreds = addAndGetNew(null, seenLinks, superPropertiesInc);
+                    if (newlyInferredPreds != null) {
+                        inferences = IterUtils.getOrConcat(inferences,
+                              Iter.iter(newlyInferredPreds).map(p2 -> tuple(s, p2, o)));
+                    }
+                }
+            }
+            return inferences;
+        }
+
+        public Iterator<D> withRangeTypesForObject(Iterator<D> inferences, C s, C p, C o) {
+            // The object may not appear as a subject so this might be the last time that we see it
+            // In the rare case that o == s and alwaysFetchRangeTypesBySubject the work was already done
+            if (isAny(ms) || (Objects.equals(o, s) && !alwaysFetchRangeTypesBySubject)) {
+                Node oNode = cxtInf.mapper.toNode(o); // Not ideal forcing materialization to node here
+                if (!oNode.isLiteral()) {
+                    boolean emitObjectRangeTypesNow = true;
+                    if (alwaysFetchRangeTypesBySubject) {
+                        // If the object appears as a subject we don't have to produce the inferences now
+                        boolean appearsAsSubject = backend.contains(o, cxtInf.ANY, cxtInf.ANY);
+                        emitObjectRangeTypesNow = !appearsAsSubject;
+                    }
+
+                    if (emitObjectRangeTypesNow) {
+                        Set<C> rangeTypes = setup.getRange(p);
+                        if (!rangeTypes.isEmpty()) {
+                            Set<C> seenObjectTypes = CacheUtils.get(seenTypesCache, o, HashSet::new);
+                            Set<C> newlyInferredObjectTypes = accTypes(null, rangeTypes, seenObjectTypes);
+                            inferences = withTypeInfs(inferences, o, newlyInferredObjectTypes);
+                        }
+                    }
+                }
+            }
+            return inferences;
+        }
+
+        public Set<C> accRangeTypesForSubject(Set<C> newInfTypes, C s, Set<C> seenTypes) {
+            // If the subject is concrete we have to check incoming edges immediately
+            if (alwaysFetchRangeTypesBySubject || isTerm(s)) {
+                // System.out.println(s);
+
+                Set<C> inPredicates;
+                if (enumerateRanges) {
+                    inPredicates = inPredicateCands.stream()
+                            // Remove properties where the ranges are already seen
+                            // .filter(inP -> seenTypes.stream().noneMatch(st -> setup.getRange(p).contains(st)))
+                            .filter(inP -> backend.contains(cxtInf.ANY, inP, s))
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
+                } else {
+                    // The "getInPredicates" method may reject the request for certain subject resources, such
+                    // as ones that appear as the objects of rdf:type (i.e. classes)
+                    inPredicates = getInPredicates(s);
+                }
+
+                // Set<C> newlyInferredTypes = null;
+                for (C inP : inPredicates) {
+                    Set<C> rangeTypes = setup.getRange(inP);
+                    newInfTypes = accTypes(newInfTypes, rangeTypes, seenTypes);
+                }
+            }
+            return newInfTypes;
+        }
+
+
+        protected Set<C> accTypes(Set<C> result, C directType, Set<C> seenTypes) {
+            return accTypes(result, Collections.singleton(directType), seenTypes);
+        }
+
+        protected Set<C> accTypes(Set<C> result, Set<C> directTypes, Set<C> seenTypes) {
+            for (C directType : directTypes) {
+                if (!seenTypes.contains(directType)) {
+                    result = addAndGetNew(result, seenTypes, directType);
+                    Set<C> typeClosure = setup.getSuperClasses(directType);
+                    result = addAndGetNew(result, seenTypes, typeClosure);
+                }
+            }
             return result;
         }
 
