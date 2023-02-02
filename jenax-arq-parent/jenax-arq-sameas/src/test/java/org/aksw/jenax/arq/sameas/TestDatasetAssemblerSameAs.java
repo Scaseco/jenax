@@ -76,7 +76,7 @@ public class TestDatasetAssemblerSameAs {
 
     @Test
     public void test03() {
-        runTest("SELECT * { SERVICE <sameAs:> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 18);
+        runTest("SELECT * { SERVICE <sameAs:> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 15); // 18 with reflexive
     }
 
     // domain/range indirectly reachable via supPropertyOf
