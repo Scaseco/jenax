@@ -78,14 +78,17 @@ public class TestDatasetAssemblerSameAs {
         runTest("SELECT * { SERVICE <sameAs:> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 18);
     }
 
+
+    // domain/range indirectly reachable via supPropertyOf
     @Test
-    public void sparql4() {
-        Graph vocab = SSE.parseGraph("(graph (:p rdfs:range :R) (:p rdfs:domain :D) )");
+    public void testRdfs03() {
+        Graph vocab = SSE.parseGraph("(graph (:p1 rdfs:subPropertyOf :p2) (:p2 rdfs:range :R) (:p2 rdfs:domain :D) )");
         DatasetGraph dsg0 = DatasetGraphFactory.createTxnMem();
 
-        DatasetGraph dsg = RDFSFactory.datasetRDFS(dsg0, vocab);
+        // DatasetGraph dsg = RDFSFactory.datasetRDFS(dsg0, vocab);
+        DatasetGraph dsg = DatasetGraphRDFSReduced.wrap(dsg0, vocab);
         dsg.executeWrite(() -> {
-            dsg.add(SSE.parseQuad("(:g1 :x :p :y)"));
+            dsg.add(SSE.parseQuad("(:g1 :x :p2 :y)"));
         });
 
         // dsg.find(null, null, null, null).forEachRemaining(System.out::println);

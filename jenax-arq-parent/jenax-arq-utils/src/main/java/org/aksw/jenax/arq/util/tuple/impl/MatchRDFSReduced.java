@@ -87,6 +87,10 @@ public class MatchRDFSReduced<D, C>
     }
 
 
+    public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, T addition) {
+        return addAndGetNew(acc, base, Collections.singleton(addition));
+    }
+
     public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, Set<T> additions) {
         Set<T> result = acc;
         List<T> newItems = new ArrayList<>(Sets.difference(additions, base));
@@ -279,6 +283,7 @@ public class MatchRDFSReduced<D, C>
                                             : CacheUtils.get(seenTypesCache, o, HashSet::new);
                                     for (C rangeType : rangeTypes) {
                                         if (!seenObjectTypes.contains(rangeType)) {
+                                            newlyInferredObjectTypes = addAndGetNew(newlyInferredObjectTypes, seenObjectTypes, rangeType);
                                             Set<C> rangeTypeClosure = setup.getSuperClassesInc(rangeType);
                                             newlyInferredObjectTypes = addAndGetNew(newlyInferredObjectTypes, seenObjectTypes, rangeTypeClosure);
                                         }
@@ -310,19 +315,20 @@ public class MatchRDFSReduced<D, C>
 
             if (setup.hasDomainDeclarations()) {
                 // Expansion for any newly seen predicate based on domain of the property
+                Set<C> newlyInferredTypes = null;
                 for (C p : ps) {
                     Set<C> domainTypes = setup.getDomain(p);
-                    Set<C> newlyInferredTypes = null;
                     for (C domainType : domainTypes) {
+                        newlyInferredTypes = addAndGetNew(newlyInferredTypes, seenTypes, domainType);
                         if (!seenTypes.contains(domainType)) {
                             Set<C> domainTypeClosure = setup.getSuperClassesInc(domainType);
                             newlyInferredTypes = addAndGetNew(newlyInferredTypes, seenTypes, domainTypeClosure);
                         }
                     }
-                    if (newlyInferredTypes != null) {
-                        inferences = IterUtils.getOrConcat(inferences,
-                                Iter.iter(newlyInferredTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
-                    }
+                }
+                if (newlyInferredTypes != null) {
+                    inferences = IterUtils.getOrConcat(inferences,
+                            Iter.iter(newlyInferredTypes).map(t -> tuple(s, cxtInf.rdfType, t)));
                 }
             }
 
