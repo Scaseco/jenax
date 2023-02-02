@@ -172,11 +172,14 @@ public class TupleFinderSameAs<D, C>
                 Entry<C, C> startKey = Map.entry(g, start);
 
                 result = CacheUtils.getIfPresent(sameAsCache, startKey);
-                if (result == null && mayHaveSameAsLinks != null && !mayHaveSameAsLinks.test(g, start)) {
-                    // Shortcut which does not write to cache
-                    result = Collections.singletonList(start);
-                } else {
+                if (result == null) {
+                    if (mayHaveSameAsLinks != null && !mayHaveSameAsLinks.test(g, start)) {
+                        // Shortcut which does not write to cache
+                        result = Collections.singletonList(start);
+                    }
+                }
 
+                if (result == null) {
                     boolean[] wasComputed = { false };
                     result = CacheUtils.get(sameAsCache, startKey, () -> {
                         wasComputed[0] = true;

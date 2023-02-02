@@ -21,9 +21,12 @@ import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Iterables;
 
 
 /**
@@ -40,6 +43,8 @@ import com.google.common.cache.CacheBuilder;
 public class DatasetGraphCache
     extends DatasetGraphWrapperFindBase
 {
+    private static final Logger logger = LoggerFactory.getLogger(DatasetGraphCache.class);
+
     public static boolean logCacheStats = false;
 
     // Just a best effort counter - probably not worth making it volatile
@@ -193,7 +198,7 @@ public class DatasetGraphCache
 //        }
 //      	System.err.println("Cache: " + cacheVersion + " generation: " + cacheGeneration + " request: " + quad);
 
-        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
+//        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         return result;
     }
 
@@ -324,8 +329,8 @@ public class DatasetGraphCache
                         bucket.add(quad);
                         seenGraphs.add(quad.getGraph());
                     }
-                    System.err.println(this.getClass().getSimpleName() + ": " + fp + " indexed " + counter + " quads");
-                    System.err.println("Tabling; seen graphs: " + seenGraphs);
+                    logger.info("Tabeling: " + fp + " indexed " + counter + " quads in " + seenGraphs.size() + " graphs, first 100: " + Iterables.limit(seenGraphs, 100));
+                    // System.err.println("Tabling; seen graphs: " + seenGraphs);
                 } finally {
                     Iter.close(it);
                 }
