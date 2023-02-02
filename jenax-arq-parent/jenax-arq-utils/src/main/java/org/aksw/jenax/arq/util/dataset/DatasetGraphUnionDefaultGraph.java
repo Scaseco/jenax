@@ -35,7 +35,7 @@ public class DatasetGraphUnionDefaultGraph
     protected Iterator<Quad> actionFind(boolean ng, Node g, Node s, Node p, Node o) {
         // All find requests affect the named graphs
         Iterator<Quad> result;
-        if (Quad.isDefaultGraph(g) || Quad.isUnionGraph(g)) {
+        if (Quad.isDefaultGraph(g)) { // || Quad.isUnionGraph(g)) {
             result = findInUdf(s, p, o);
         } else {
             // A response for ng=false and g=Node.ANY must include the union default graph

@@ -164,7 +164,7 @@ public class TestDatasetAssemblerSameAs {
             List<String> sources = Arrays.asList(
                     "/home/raven/Datasets/coypu/countries-deu.nt",
                     "/home/raven/Datasets/coypu/countries-deu-wikidata.nt"
-                    // "/home/raven/Datasets/coypu/countries-deu-link.nt"
+                    ,"/home/raven/Datasets/coypu/countries-deu-link.nt"
                     );
             DatasetGraph dsg = dataset.asDatasetGraph();
             long quadCount = 0;
@@ -173,7 +173,7 @@ public class TestDatasetAssemblerSameAs {
                 Node g = NodeFactory.createURI("http://foo.bar/baz");
                 try (Stream<Quad> stream = AsyncParser.of(source).streamQuads()) {
                     Iterator<Quad> it = stream
-                            // .limit(1000)
+                            // .limit(10000)
                             .iterator();
                     while (it.hasNext()) {
                         Quad raw = it.next();
@@ -203,7 +203,7 @@ public class TestDatasetAssemblerSameAs {
             sw.reset().start();
             DatasetGraph dsg = dataset.asDatasetGraph(); // DatasetGraphSameAs.wrap(base);
             Txn.executeRead(dsg,() -> {
-                Iterator<Quad> it = dsg.find();
+                Iterator<Quad> it = dsg.find(Node.ANY, Node.ANY, Node.ANY, Node.ANY);
                 // it.forEachRemaining(x -> System.out.println("Seen: " + x));
                 int i = 0;
                 Set<Quad> seenQuads = new HashSet<>();
@@ -268,8 +268,8 @@ public class TestDatasetAssemblerSameAs {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>",
                 "PREFIX jxp: <http://jenax.aksw.org/plugin#>",
                 // "<urn:example:root> a ja:DatasetRDFS ; ja:rdfsSchema \"/home/raven/Datasets/coypu/coy-ontology.ttl\" ; ja:dataset <urn:example:rootu> .",
-                "<urn:example:root> a jxp:DatasetRDFS ; ja:rdfsSchema '/home/raven/Datasets/coypu/coy-ontology.ttl' ; ja:dataset <urn:example:rootu> .",
-                "<urn:example:rootu> a jxp:DatasetSameAs ; jxp:allowDuplicates false ; jxp:cacheMaxSize -1 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
+                // "<urn:example:root> a jxp:DatasetRDFS ; ja:rdfsSchema '/home/raven/Datasets/coypu/coy-ontology.ttl' ; ja:dataset <urn:example:rootu> .",
+                "<urn:example:root> a jxp:DatasetSameAs ; jxp:allowDuplicates false ; jxp:cacheMaxSize -1 ; jxp:predicate owl:sameAs ; ja:baseDataset [ a jxp:DatasetAutoUnionDefaultGraph ; ja:baseDataset <urn:example:base> ] .",
                 "<urn:example:base> a tdb2:DatasetTDB2 ; tdb2:unionDefaultGraph true ."
                 // "<urn:example:base> a ja:MemoryDataset ."
             );

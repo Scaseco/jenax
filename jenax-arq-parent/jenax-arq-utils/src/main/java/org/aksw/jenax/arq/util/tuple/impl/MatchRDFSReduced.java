@@ -67,6 +67,7 @@ public class MatchRDFSReduced<D, C>
 
         // If we ask for RDF type and there are domain/range declarations then
         // we need to look at all properties
+        //if (cxtInf.setup.hasRDFS() && (isAny(p) || isRdfType) && isAny(o)) {
         if (cxtInf.setup.hasRDFS() && (isAny(p) || isRdfType) && isAny(o)) {
             // Handle X_??_?? and ??_??_??
             // Create a worker for the find request. The worker uses request-scoped caches in a best-effort attempt
