@@ -169,11 +169,16 @@ public class DatasetGraphCache
      * If false then the wrapped dataset does not contain this quad.
      * If the argument quad contains placeholders only a check is made for whether the partition key exists in the cache. The set of cached entries is NOT iterated.
      */
-    public boolean mayContainQuad(Quad quad) {
+    public boolean mayContainQuad(Quad rawQuad) {
         boolean result = true;
         if (isTablingMode) {
             // Quad quad = getEffectiveQuad(rawQuad);
             Cache<Entry<Quad, Tuple<Node>>, Set<Quad>> currentCache = ensureFilledTables();
+
+            Quad quad = Quad.isDefaultGraphGenerated(rawQuad.getGraph())
+                    ? Quad.create(Quad.defaultGraphIRI, rawQuad.asTriple())
+                    : rawQuad;
+
             for (CachePattern pattern : cachePatterns) {
                 if (pattern.subsumes(quad)) {
                     Tuple<Node> key = pattern.createPartitionKey(quad);
@@ -198,7 +203,7 @@ public class DatasetGraphCache
 //        }
 //      	System.err.println("Cache: " + cacheVersion + " generation: " + cacheGeneration + " request: " + quad);
 
-        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
+        // System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         return result;
     }
 
@@ -242,15 +247,18 @@ public class DatasetGraphCache
             }
         }
 
+        // The cache indexes the default graph using the physical default graph IRI
+        Node lookupGraph = Quad.isDefaultGraphGenerated(mg) ? Quad.defaultGraphIRI : mg;
+
         // Effective match graph
         // Node emg = getEffectiveGraph(mg);
 
         // System.out.println("Find action");
         // If tabeling is enabled then ensure all data is prefetched prior to find
-        CachePattern cachePattern = getMatchingCachePatterns(mg, ms, mp, mo).findFirst().orElse(null);
+        CachePattern cachePattern = getMatchingCachePatterns(lookupGraph, ms, mp, mo).findFirst().orElse(null);
 
         if (cachePattern != null) {
-            Tuple<Node> partitionKey = cachePattern.createPartitionKey(mg, ms, mp, mo);
+            Tuple<Node> partitionKey = cachePattern.createPartitionKey(lookupGraph, ms, mp, mo);
             Entry<Quad, Tuple<Node>> key = Map.entry(cachePattern.getSpecPattern(), partitionKey);
 
             Cache<Entry<Quad, Tuple<Node>>, Set<Quad>> currentCache = ensureFilledTables();
