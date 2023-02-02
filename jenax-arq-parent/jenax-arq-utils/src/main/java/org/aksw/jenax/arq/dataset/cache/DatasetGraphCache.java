@@ -191,8 +191,9 @@ public class DatasetGraphCache
 //        if (quad.getGraph().toString().contains("UnionGraph")) {
 //            System.err.println("UnionGraph Request");
 //        }
-//
-        // System.err.println("May contain quad " + quad + " -> " + result);
+//      	System.err.println("Cache: " + cacheVersion + " generation: " + cacheGeneration + " request: " + quad);
+
+        System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         return result;
     }
 
@@ -308,7 +309,7 @@ public class DatasetGraphCache
             for (Quad fp : lookups) {
                 Iterator<Quad> it = delegateFind(false, fp.getGraph(), fp.getSubject(), fp.getPredicate(), fp.getObject());
                 try {
-                    // Set<Node> seenGraphs = new LinkedHashSet<>();
+                    Set<Node> seenGraphs = new LinkedHashSet<>();
                     long counter = 0;
                     while (it.hasNext()) {
                         Quad quad = it.next();
@@ -321,10 +322,10 @@ public class DatasetGraphCache
                         Tuple<Node> key = cachePattern.createPartitionKey(quad);
                         Collection<Quad> bucket = CacheUtils.get(result, Map.entry(sp, key), LinkedHashSet::new);
                         bucket.add(quad);
-                        // seenGraphs.add(quad.getGraph());
+                        seenGraphs.add(quad.getGraph());
                     }
-                    // System.err.println(this.getClass().getSimpleName() + ": " + fp + " indexed " + counter + " quads");
-                    // System.err.println("Tabling; seen graphs: " + seenGraphs);
+                    System.err.println(this.getClass().getSimpleName() + ": " + fp + " indexed " + counter + " quads");
+                    System.err.println("Tabling; seen graphs: " + seenGraphs);
                 } finally {
                     Iter.close(it);
                 }
