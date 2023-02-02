@@ -79,7 +79,6 @@ public class TestDatasetAssemblerSameAs {
         runTest("SELECT * { SERVICE <sameAs:> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 18);
     }
 
-
     // domain/range indirectly reachable via supPropertyOf
     @Test
     public void testRdfs03() {
@@ -92,11 +91,10 @@ public class TestDatasetAssemblerSameAs {
         dsg.executeWrite(() -> {
             dsg.add(SSE.parseQuad("(:g1 :x :p2 :y)"));
         });
-
+        // dsg.stream(null, null, null, null).forEach(System.out::println);
         long actual = dsg.stream(null, null, null, null).count();
         Assert.assertEquals(4, actual);
     }
-
 
     @Test
     public void test04() {

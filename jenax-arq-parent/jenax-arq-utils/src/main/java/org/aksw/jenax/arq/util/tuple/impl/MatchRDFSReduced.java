@@ -27,6 +27,7 @@ import org.apache.jena.rdfs.engine.MapperX;
 import org.apache.jena.rdfs.engine.MatchRDFS;
 import org.apache.jena.rdfs.setup.ConfigRDFS;
 
+import com.github.jsonldjava.shaded.com.google.common.math.LongMath;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
@@ -39,6 +40,20 @@ public class MatchRDFSReduced<D, C>
 
     /** The non-inferencing backend. Note that the delegate of this wrapper backs the backend with RDFS inferences */
     protected TupleFinder3<D, C> backend;
+
+
+    /**
+     * In principle we could handle ranges for ANY_ANY_ANY in a fully streaming way
+     * based on the object position. However, if the base stream was grouped by subject
+     * then we would break that grouping.
+     * Grouping by subject however requires separate requests
+     *
+     * Recommended: 'false'
+     */
+    boolean alwaysFetchRangeTypesBySubject = false;
+
+    /** Fall back to enumeration strategy as soon as (factor * #properties_with_ranges_in_ontology) have been retrieved. */
+    float enumerateRatio = 30;
 
     protected MatchRDFSReduced(TupleFinder3<D, C> matchRDFS, TupleFinder3<D, C> backend, CxtInf<C, D> cxtInf) {
         super(matchRDFS);
@@ -124,15 +139,6 @@ public class MatchRDFSReduced<D, C>
         // Cache<C, Set<C>> seenInPredicatesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
         Cache<Tuple2<C>, Set<C>> seenLinksCache = CacheBuilder.newBuilder().maximumSize(100_000).build();;
 
-        /**
-         * In principle we could handle ranges for ANY_ANY_ANY in a fully streaming way
-         * based on the object position. However, if the base stream was grouped by subject
-         * then we would break that grouping.
-         * Grouping by subject however requires separate requests
-         *
-         * Recommended: 'false'
-         */
-        boolean alwaysFetchRangeTypesBySubject = false;
 
         /**
          * Control the strategy for generating a resource's set of incoming properties.
@@ -147,9 +153,12 @@ public class MatchRDFSReduced<D, C>
          *
          * With 'false' more consistent response times can be expected however at the cost of less overall performance.
          */
-        boolean enumerateRanges = true;
+        // boolean enumerateRanges = false;
+
 
         protected Set<C> inPredicateCands;
+
+        public long enumerationThreshold;
 
         public Worker_S_ANY_ANY(C ms) {
             super();
@@ -160,7 +169,7 @@ public class MatchRDFSReduced<D, C>
                     Traverser.forGraph(setup::getSubProperties)
                     .depthFirstPreOrder(directInPredicateCands)).collect(Collectors.toSet());
 
-            // System.err.println("Lookup with " + inPredicateCands.size());
+            enumerationThreshold = (long)(inPredicateCands.size() * enumerateRatio);
         }
 
         public Stream<D> find() {
@@ -298,23 +307,49 @@ public class MatchRDFSReduced<D, C>
         public Set<C> accRangeTypesForSubject(Set<C> newInfTypes, C s, Set<C> seenTypes) {
             // If the subject is concrete we have to check incoming edges immediately
             if (alwaysFetchRangeTypesBySubject || isTerm(s)) {
-                // System.out.println(s);
+                Set<C> seenInPredicates = new LinkedHashSet<>();
+                boolean seenAll = false;
 
-                Set<C> inPredicates;
-                if (enumerateRanges) {
-                    inPredicates = inPredicateCands.stream()
-                            // Remove properties where the ranges are already seen
-                            // .filter(inP -> seenTypes.stream().noneMatch(st -> setup.getRange(p).contains(st)))
-                            .filter(inP -> backend.contains(cxtInf.ANY, inP, s))
-                            .collect(Collectors.toCollection(LinkedHashSet::new));
-                } else {
-                    // The "getInPredicates" method may reject the request for certain subject resources, such
-                    // as ones that appear as the objects of rdf:type (i.e. classes)
-                    inPredicates = getInPredicates(s);
+                // The maximum number of predicates we can expect based on the ontology
+                int maxSeeableSize = inPredicateCands.size();
+
+                if (enumerationThreshold > 0) {
+                    Iterator<C> it = getInPredicates(s);
+                    long counter = 0;
+                    try {
+                        boolean aborted = false;
+                        while (it.hasNext()) {
+                            C inP = it.next();
+                            seenInPredicates.add(inP);
+                            ++counter;
+                            if (counter > enumerationThreshold) {
+                                aborted = true;
+                                break;
+                            }
+
+                            if (seenInPredicates.size() >= maxSeeableSize) {
+                                // This case may trigger for ontologies with very few range declarations
+                                seenAll = true;
+                                break;
+                            }
+                        }
+                        seenAll = !aborted;
+                    } finally {
+                        Iter.close(it);
+                    }
                 }
 
-                // Set<C> newlyInferredTypes = null;
-                for (C inP : inPredicates) {
+                if (!seenAll) {
+                    // Don't check predicates we have already seen
+                    Set<C> remainingCands = new HashSet<>(Sets.difference(inPredicateCands, seenInPredicates));
+                    for (C candP : remainingCands) {
+                        if (backend.contains(cxtInf.ANY, candP, s)) {
+                            seenInPredicates.add(candP);
+                        }
+                    }
+                }
+
+                for (C inP : seenInPredicates) {
                     Set<C> rangeTypes = setup.getRange(inP);
                     newInfTypes = accTypes(newInfTypes, rangeTypes, seenTypes);
                 }
@@ -338,17 +373,17 @@ public class MatchRDFSReduced<D, C>
             return result;
         }
 
-        protected Set<C> getInPredicates(C s) {
-            Set<C> result;
-
+        protected Iterator<C> getInPredicates(C s) {
+            Iterator<C> result;
             if (backend.contains(cxtInf.ANY, cxtInf.rdfType, s)) {
                 // Do not fetch incoming predicates for things that are probably classes - i.e. x which appear as ?_type_x
                 // Classes may have millions+ incoming properties
-                result = Collections.emptySet();
+                result = Collections.emptyIterator();
             } else {
-                result = backend.find(s, cxtInf.ANY, cxtInf.ANY).map(tuple -> base.getTupleBridge().get(tuple, 1)).collect(Collectors.toSet());
+                result = backend.find(cxtInf.ANY, cxtInf.ANY, s)
+                            .map(tuple -> base.getTupleBridge().get(tuple, 1))
+                            .iterator();
             }
-
             return result;
         }
     }
