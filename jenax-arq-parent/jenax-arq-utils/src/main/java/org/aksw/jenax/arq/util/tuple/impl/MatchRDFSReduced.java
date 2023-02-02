@@ -8,8 +8,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.tuple.bridge.TupleBridge3;
@@ -20,27 +18,29 @@ import org.aksw.jenax.arq.util.tuple.IterUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.tuple.Tuple2;
 import org.apache.jena.atlas.lib.tuple.TupleFactory;
-import org.apache.jena.ext.com.google.common.graph.Traverser;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdfs.engine.CxtInf;
 import org.apache.jena.rdfs.engine.MapperX;
 import org.apache.jena.rdfs.engine.MatchRDFS;
 import org.apache.jena.rdfs.setup.ConfigRDFS;
 
-import com.github.jsonldjava.shaded.com.google.common.math.LongMath;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 
+/**
+ * RDFS stream reasoner engine that builds upon Jena's {@link MatchRDFS} but handles
+ * the X_ANY_ANY and ANY_ANY_ANY cases differently in order to produce fewer duplicates.
+ */
 public class MatchRDFSReduced<D, C>
     extends TupleFinder3Wrapper<D, C, TupleFinder3<D, C>>
 {
     protected CxtInf<C, D> cxtInf;
 
-    /** The non-inferencing backend. Note that the delegate of this wrapper backs the backend with RDFS inferences */
+    /** The non-inferencing backend. Should be the base's base.
+     * Note that the delegate of this wrapper backs the backend with RDFS inferences.
+     * */
     protected TupleFinder3<D, C> backend;
-
 
     /**
      * In principle we could handle ranges for ANY_ANY_ANY in a fully streaming way
@@ -52,8 +52,15 @@ public class MatchRDFSReduced<D, C>
      */
     boolean alwaysFetchRangeTypesBySubject = false;
 
-    /** Fall back to enumeration strategy as soon as (factor * #properties_with_ranges_in_ontology) have been retrieved. */
-    float enumerateRatio = 30;
+    /**
+     * This attribute controls the strategy for retrieval of a resource's unique set of properties that is relevant
+     * for the RDFS T-BOX.
+     * Initially, an attempt is made to iterate all of a resource's triples.
+     * Once more than (enumerateThresholdFactor * #properties_with_ranges_in_ontology) triples have been iterated,
+     * the strategy is changed to enumeration of the remaining ontology's properties and testing for which of them are linked to
+     * the resource.
+     */
+    float enumerationThresholdFactor = 30;
 
     protected MatchRDFSReduced(TupleFinder3<D, C> matchRDFS, TupleFinder3<D, C> backend, CxtInf<C, D> cxtInf) {
         super(matchRDFS);
@@ -67,11 +74,12 @@ public class MatchRDFSReduced<D, C>
         return new MatchRDFSReduced<>(matchRDFS, backend, matchRDFS);
     }
 
-    private boolean isTerm(C c) {
+    // Ideally these methods would be part of some context
+    protected boolean isTerm(C c) {
         return !isAny(c);
     }
 
-    private boolean isAny(C c) {
+    protected boolean isAny(C c) {
         return c == null || cxtInf.ANY.equals(c);
     }
 
@@ -102,74 +110,26 @@ public class MatchRDFSReduced<D, C>
         return result;
     }
 
+    public class Worker_S_ANY_ANY {
+        protected ConfigRDFS<C> setup = cxtInf.setup;
 
-    public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, T addition) {
-        return addAndGetNew(acc, base, Collections.singleton(addition));
-    }
-
-    public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, Set<T> additions) {
-        Set<T> result = acc;
-        List<T> newItems = new ArrayList<>(Sets.difference(additions, base));
-        base.addAll(newItems);
-        if (!newItems.isEmpty()) {
-            if (result == null) {
-                result = new LinkedHashSet<>();
-            }
-            result.addAll(newItems);
-        }
-        return result;
-    }
-
-//    public static <C, X> Set<C> addAndGetNew(Set<C> acc, Set<C> base, Iterable<X> items, Function<X, Set<C>> itemToAdditions) {
-//        for (X item : items) {
-//            Set<C> additions = itemToAdditions.apply(item);
-//            addAndGetNew(acc, base, additions);
-//        }
-//        return acc;
-//    }
-
-    class Worker_S_ANY_ANY {
-        ConfigRDFS<C> setup = cxtInf.setup;
-
-        C ms, mp, mo;
+        /** The components of the match-pattern */
+        protected C ms, mp, mo;
 
         // The cache of tuples that were inferred for a given subject
-        Cache<C, Set<C>> seenTypesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
-        Cache<C, Set<C>> seenOutPredicatesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
-        // Cache<C, Set<C>> seenInPredicatesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
-        Cache<Tuple2<C>, Set<C>> seenLinksCache = CacheBuilder.newBuilder().maximumSize(100_000).build();;
-
-
-        /**
-         * Control the strategy for generating a resource's set of incoming properties.
-         * This is needed to infer types based on the ranges.
-         * If false, all incoming properties of a subject will be queried. This is slow if there are many resources with incoming properties in data.
-         * If true, all properties with range declarations will be enumerated. This is slow if there are many such properties in the ontology.
-         *
-         * A setting of 'true' has a fixed small (but noticeable) overhead per subject
-         * A setting of 'false' has a large overhead for subjects with lots of triples.
-         *   Even e.g. a LIMIT 10 may take seconds because of the need to scan all incoming edges.
-         *   For this reason the recommended setting is 'true'.
-         *
-         * With 'false' more consistent response times can be expected however at the cost of less overall performance.
-         */
-        // boolean enumerateRanges = false;
-
+        protected Cache<C, Set<C>> seenTypesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
+        protected Cache<C, Set<C>> seenOutPredicatesCache = CacheBuilder.newBuilder().maximumSize(10_000).build();
+        protected Cache<Tuple2<C>, Set<C>> seenLinksCache = CacheBuilder.newBuilder().maximumSize(100_000).build();
 
         protected Set<C> inPredicateCands;
-
         public long enumerationThreshold;
 
         public Worker_S_ANY_ANY(C ms) {
             super();
             this.ms = ms;
 
-            Set<C> directInPredicateCands = setup.getPropertyRanges().keySet();
-            inPredicateCands = Streams.stream(
-                    Traverser.forGraph(setup::getSubProperties)
-                    .depthFirstPreOrder(directInPredicateCands)).collect(Collectors.toSet());
-
-            enumerationThreshold = (long)(inPredicateCands.size() * enumerateRatio);
+            inPredicateCands = setup.getPropertyRanges().keySet();
+            enumerationThreshold = (long)(inPredicateCands.size() * enumerationThresholdFactor);
         }
 
         public Stream<D> find() {
@@ -183,6 +143,7 @@ public class MatchRDFSReduced<D, C>
             return getTupleBridge().build(s, p, o);
         }
 
+        /** Resulting iterator typically includes the input tuple - unless it is known to have already been produced */
         protected Iterator<D> inf(D tuple) {
             C s = getTupleBridge().get(tuple, 0);
             C p = getTupleBridge().get(tuple, 1); // initial predicate
@@ -218,12 +179,12 @@ public class MatchRDFSReduced<D, C>
             // Expansion for incoming predicates based on rdfs:range (based on the subject)
             if (setup.hasRangeDeclarations()) {
                 if (!hasSeenSubject) {
-                    // Only do work if the match subject (ms) is a term or alwaysFetchRangeTypesBySubject
+                    // If the match subject (ms) is concrete we have to check incoming edges immediately
+                    // Otherwise, only do the work if alwaysFetchRangeTypesBySubject is enabled
                     if (alwaysFetchRangeTypesBySubject || isTerm(ms)) {
                         newInfTypes = accRangeTypesForSubject(newInfTypes, s, seenTypes);
                     }
                 }
-
                 inferences = withRangeTypesForObject(inferences, s, p, o);
             }
 
@@ -308,56 +269,13 @@ public class MatchRDFSReduced<D, C>
         }
 
         public Set<C> accRangeTypesForSubject(Set<C> newInfTypes, C s, Set<C> seenTypes) {
-            // If the subject is concrete we have to check incoming edges immediately
-            Set<C> seenInPredicates = new LinkedHashSet<>();
-            boolean seenAll = false;
-
-            // The maximum number of predicates we can expect based on the ontology
-            int maxSeeableSize = inPredicateCands.size();
-
-            if (enumerationThreshold > 0) {
-                Iterator<C> it = getInPredicates(s);
-                long counter = 0;
-                try {
-                    boolean aborted = false;
-                    while (it.hasNext()) {
-                        C inP = it.next();
-                        seenInPredicates.add(inP);
-                        ++counter;
-                        if (counter > enumerationThreshold) {
-                            aborted = true;
-                            break;
-                        }
-
-                        if (seenInPredicates.size() >= maxSeeableSize) {
-                            // This case may trigger for ontologies with very few range declarations
-                            seenAll = true;
-                            break;
-                        }
-                    }
-                    seenAll = !aborted;
-                } finally {
-                    Iter.close(it);
-                }
-            }
-
-            if (!seenAll) {
-                // Don't check predicates we have already seen
-                Set<C> remainingCands = new HashSet<>(Sets.difference(inPredicateCands, seenInPredicates));
-                for (C candP : remainingCands) {
-                    if (backend.contains(cxtInf.ANY, candP, s)) {
-                        seenInPredicates.add(candP);
-                    }
-                }
-            }
-
+            Set<C> seenInPredicates = getInPredicates(s);
             for (C inP : seenInPredicates) {
                 Set<C> rangeTypes = setup.getRange(inP);
                 newInfTypes = accTypes(newInfTypes, rangeTypes, seenTypes);
             }
             return newInfTypes;
         }
-
 
         protected Set<C> accTypes(Set<C> result, C directType, Set<C> seenTypes) {
             return accTypes(result, Collections.singleton(directType), seenTypes);
@@ -374,19 +292,98 @@ public class MatchRDFSReduced<D, C>
             return result;
         }
 
-        protected Iterator<C> getInPredicates(C s) {
-            Iterator<C> result;
+        protected Set<C> getInPredicates(C s) {
+            Set<C> result;
             if (backend.contains(cxtInf.ANY, cxtInf.rdfType, s)) {
                 // Do not fetch incoming predicates for things that are probably classes - i.e. x which appear as ?_type_x
                 // Classes may have millions+ incoming properties
-                result = Collections.emptyIterator();
+                result = Collections.emptySet();
             } else {
-                result = backend.find(cxtInf.ANY, cxtInf.ANY, s)
-                            .map(tuple -> base.getTupleBridge().get(tuple, 1))
-                            .iterator();
+                result = getPredicates(backend, s, false, cxtInf.ANY, enumerationThreshold, inPredicateCands);
             }
             return result;
         }
+    }
+
+    public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, T addition) {
+        return addAndGetNew(acc, base, Collections.singleton(addition));
+    }
+
+    /**
+     * Add every item in 'additions' that is not in 'base' both to 'base' and 'acc'.
+     * If there is a change and 'acc' is null then a fresh linked hash set is allocated.
+     * Returns the latest state of 'acc'.
+     */
+    public static <T> Set<T> addAndGetNew(Set<T> acc, Set<T> base, Set<T> additions) {
+        Set<T> result = acc;
+        List<T> newItems = new ArrayList<>(Sets.difference(additions, base));
+        base.addAll(newItems);
+        if (!newItems.isEmpty()) {
+            if (result == null) {
+                result = new LinkedHashSet<>();
+            }
+            result.addAll(newItems);
+        }
+        return result;
+    }
+
+    /**
+     * Generic method to get a listing of a resource's predicates w.r.t. a given set of relevant predicates.
+     * Starts off with iterating the resource's triples (in or out). Once more then 'threshold' triples are seen that way,
+     * the presence of the remaining predicates in 'enumeration' is checked directly with contains checks.
+     */
+    public static <D, C> Set<C> getPredicates(
+            TupleFinder3<D, C> backend,
+            C s, boolean isForward, C any, long enumerationThreshold, Set<C> enumeration) {
+        Set<C> result = new LinkedHashSet<>();
+        boolean seenAll = false;
+
+        // The maximum number of predicates we can expect based on the ontology
+        int maxSeeableSize = enumeration.size();
+
+        if (enumerationThreshold > 0) {
+            Iterator<C> it = (isForward
+                        ? backend.find(s, any, any)
+                        : backend.find(any, any, s))
+                    .map(tuple -> backend.getTupleBridge().get(tuple, 1))
+                    .iterator();
+
+            long counter = 0;
+            try {
+                boolean aborted = false;
+                while (it.hasNext()) {
+                    C p = it.next();
+                    result.add(p);
+                    ++counter;
+                    if (counter > enumerationThreshold) {
+                        aborted = true;
+                        break;
+                    }
+                    if (result.size() >= maxSeeableSize) {
+                        // This case may trigger for ontologies with very few range declarations
+                        seenAll = true;
+                        break;
+                    }
+                }
+                seenAll = !aborted;
+            } finally {
+                Iter.close(it);
+            }
+        }
+
+        if (!seenAll) {
+            // Don't re-check predicates which we have already seen
+            Set<C> remainingCands = new HashSet<>(Sets.difference(enumeration, result));
+            for (C candP : remainingCands) {
+                boolean isPresent = isForward
+                        ? backend.contains(s, candP, any)
+                        : backend.contains(any, candP, s);
+                if (isPresent) {
+                    result.add(candP);
+                }
+            }
+        }
+        return result;
     }
 
     /** Bridge between TupleFinder and MatchRDF - this class inherits both */
