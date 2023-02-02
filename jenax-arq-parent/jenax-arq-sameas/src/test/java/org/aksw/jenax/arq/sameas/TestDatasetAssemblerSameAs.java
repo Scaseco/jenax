@@ -65,13 +65,13 @@ public class TestDatasetAssemblerSameAs {
         // In union default graph  mode without deduplication we expect alot of triples
         // runTest("SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o", 27);
 
-        // This test now assumes deduplication
-        runTest("SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o", 18);
+        // This test now assumes deduplication and no reflexive
+        runTest("SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o", 15); // 18 with reflexive
     }
 
     @Test
     public void test02() {
-        runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 8);
+        runTest("SELECT * { GRAPH <urn:example:g1> { ?s ?p ?o } } ORDER BY ?s ?p ?o", 6); // 8 with reflexive
     }
 
     @Test

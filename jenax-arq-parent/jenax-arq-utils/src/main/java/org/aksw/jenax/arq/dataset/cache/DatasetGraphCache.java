@@ -197,13 +197,13 @@ public class DatasetGraphCache
                     }
                 }
             }
+            // System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         }
 //        if (quad.getGraph().toString().contains("UnionGraph")) {
 //            System.err.println("UnionGraph Request");
 //        }
 //      	System.err.println("Cache: " + cacheVersion + " generation: " + cacheGeneration + " request: " + quad);
 
-        // System.err.println("May contain quad " + quad + " -> " + result + "; cache version: " + cacheVersion + ", generation: " + cacheGeneration);
         return result;
     }
 

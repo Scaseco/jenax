@@ -218,7 +218,10 @@ public class MatchRDFSReduced<D, C>
             // Expansion for incoming predicates based on rdfs:range (based on the subject)
             if (setup.hasRangeDeclarations()) {
                 if (!hasSeenSubject) {
-                    newInfTypes = accRangeTypesForSubject(newInfTypes, s, seenTypes);
+                    // Only do work if the match subject (ms) is a term or alwaysFetchRangeTypesBySubject
+                    if (alwaysFetchRangeTypesBySubject || isTerm(ms)) {
+                        newInfTypes = accRangeTypesForSubject(newInfTypes, s, seenTypes);
+                    }
                 }
 
                 inferences = withRangeTypesForObject(inferences, s, p, o);
@@ -306,53 +309,51 @@ public class MatchRDFSReduced<D, C>
 
         public Set<C> accRangeTypesForSubject(Set<C> newInfTypes, C s, Set<C> seenTypes) {
             // If the subject is concrete we have to check incoming edges immediately
-            if (alwaysFetchRangeTypesBySubject || isTerm(s)) {
-                Set<C> seenInPredicates = new LinkedHashSet<>();
-                boolean seenAll = false;
+            Set<C> seenInPredicates = new LinkedHashSet<>();
+            boolean seenAll = false;
 
-                // The maximum number of predicates we can expect based on the ontology
-                int maxSeeableSize = inPredicateCands.size();
+            // The maximum number of predicates we can expect based on the ontology
+            int maxSeeableSize = inPredicateCands.size();
 
-                if (enumerationThreshold > 0) {
-                    Iterator<C> it = getInPredicates(s);
-                    long counter = 0;
-                    try {
-                        boolean aborted = false;
-                        while (it.hasNext()) {
-                            C inP = it.next();
-                            seenInPredicates.add(inP);
-                            ++counter;
-                            if (counter > enumerationThreshold) {
-                                aborted = true;
-                                break;
-                            }
-
-                            if (seenInPredicates.size() >= maxSeeableSize) {
-                                // This case may trigger for ontologies with very few range declarations
-                                seenAll = true;
-                                break;
-                            }
+            if (enumerationThreshold > 0) {
+                Iterator<C> it = getInPredicates(s);
+                long counter = 0;
+                try {
+                    boolean aborted = false;
+                    while (it.hasNext()) {
+                        C inP = it.next();
+                        seenInPredicates.add(inP);
+                        ++counter;
+                        if (counter > enumerationThreshold) {
+                            aborted = true;
+                            break;
                         }
-                        seenAll = !aborted;
-                    } finally {
-                        Iter.close(it);
-                    }
-                }
 
-                if (!seenAll) {
-                    // Don't check predicates we have already seen
-                    Set<C> remainingCands = new HashSet<>(Sets.difference(inPredicateCands, seenInPredicates));
-                    for (C candP : remainingCands) {
-                        if (backend.contains(cxtInf.ANY, candP, s)) {
-                            seenInPredicates.add(candP);
+                        if (seenInPredicates.size() >= maxSeeableSize) {
+                            // This case may trigger for ontologies with very few range declarations
+                            seenAll = true;
+                            break;
                         }
                     }
+                    seenAll = !aborted;
+                } finally {
+                    Iter.close(it);
                 }
+            }
 
-                for (C inP : seenInPredicates) {
-                    Set<C> rangeTypes = setup.getRange(inP);
-                    newInfTypes = accTypes(newInfTypes, rangeTypes, seenTypes);
+            if (!seenAll) {
+                // Don't check predicates we have already seen
+                Set<C> remainingCands = new HashSet<>(Sets.difference(inPredicateCands, seenInPredicates));
+                for (C candP : remainingCands) {
+                    if (backend.contains(cxtInf.ANY, candP, s)) {
+                        seenInPredicates.add(candP);
+                    }
                 }
+            }
+
+            for (C inP : seenInPredicates) {
+                Set<C> rangeTypes = setup.getRange(inP);
+                newInfTypes = accTypes(newInfTypes, rangeTypes, seenTypes);
             }
             return newInfTypes;
         }

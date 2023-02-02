@@ -155,14 +155,10 @@ public class TupleFinderSameAs<D, C>
                 List<C> ss = sparqlCxt.isConcrete(ms) ? Collections.singletonList(ms) : sortedSubjects;
                 List<C> oo = sparqlCxt.isConcrete(mo) ? Collections.singletonList(mo) : sortedObjects;
 
-                // Drop o's that are already in ss (when dropReflexive is enabled)
-                List<C> ooo = dropReflexive && sameAsPredicates.contains(p)
-                        ? oo.stream().filter(o -> Collections.binarySearch(ss, o, sparqlCxt.comparator()) < 0).collect(Collectors.toList())
-                        : oo;
-
                 // System.out.println(quad + (isLeastQuad ? " is least quad " : " hasLeastQuad: " + leastQuad));
                 result = isLeastQuad
-                        ? Iter.iter(ss).flatMap(s -> Iter.iter(ooo)
+                        ? Iter.iter(ss).flatMap(s -> Iter.iter(oo)
+                                .filter(o -> !(dropReflexive && sameAsPredicates.contains(p) && Objects.equals(s, o)))
                                 .map(o -> getTupleBridge().build(g, s, p, o)))
                         : Iter.empty();
 
