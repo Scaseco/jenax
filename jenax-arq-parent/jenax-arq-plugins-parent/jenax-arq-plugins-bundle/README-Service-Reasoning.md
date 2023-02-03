@@ -80,7 +80,7 @@ It is designed as a drop in replacement for Jena's existing RDFS engine.
 This assembler enables the use of `SERVICE <rdfs:>` and `SERVICE <sameAs+rdfs:>`. Inferencing is only performed with the respective `SERVICE` use; SPARQL statements will otherwise be executed conventionally.
 Technically, the specified RDFS file is processed into a `ConfigRDFS<Node>` instance and put into the base dataset's context and the result is the base dataset.
 Making use of the respective `SERVICE` then executes the request against the configured context.
-Note, that because this assembler modifies the base dataset's context, it is not possible to create multiple inferencing 'view' on the same dataset directly with this assembler.
+Note, that because this assembler modifies the base dataset's context, it is not possible to create multiple inferencing 'views' on the same dataset directly with this assembler.
 Another wrapper that adds an independent copy of the context would be needed.
 
 ```turtle
