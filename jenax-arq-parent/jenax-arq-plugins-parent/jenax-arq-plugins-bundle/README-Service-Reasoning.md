@@ -46,7 +46,7 @@ DatasetGraph dsg = DatasetGraphSameAs.wrapWithTable(DatasetGraphFactory.createTx
 The `jxp:DatasetSameAs` assembler enables wrapping of a base dataset to add sameAs inferencing capabilities.
 The set of predicates which to treat as 'sameAs' can be configured.
 
-```
+```turtle
 <#datasetWithSameAs> a jxp:DatasetSameAs ;
     jxp:cacheSize 10000 ; # 0 = disable caching, -1 = prefetch all sameAs statements
     jxp:predicate owl:sameAs ;
@@ -67,7 +67,7 @@ Our reasoner contains improvements aimed at providing better general performance
 It is designed as a drop in replacement for Jena's existing RDFS engine.
 
 
-```ttl
+```turtle
 @prefix jxp: <http://jenax.aksw.org/plugin#> .
 
 <#datasetRDFS>
@@ -83,7 +83,7 @@ Making use of the respective `SERVICE` then executes the request against the con
 Note, that because this assembler modifies the base dataset's context, it is not possible to create multiple inferencing 'view' on the same dataset directly with this assembler.
 Another wrapper that adds an independent copy of the context would be needed.
 
-```ttl
+```turtle
 @prefix jxp: <http://jenax.aksw.org/plugin#> .
 
 <#datasetRDFS>
