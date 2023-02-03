@@ -29,7 +29,7 @@ DatasetGraph dsg = DatasetGraphSameAs.wrap(DatasetGraphFactory.createTxnMem());
 ```
 We recommend use of `createTxnMem` because it seems it can in general answer `contains()` checks much faster than `DatasetGraphFactory.create()` (as of jena-4.7.0) - which is important when duplicates are not allowed (default).
 
-Optionally, a cache size can be configured. For that many accessed resources, their sameAs links will be stored in the cache in order to reduce lookups on the underlying dataset.
+Optionally, a cache size can be configured. For up to that many accessed resources, their sameAs links will be stored in the cache in order to reduce lookups on the underlying dataset.
 Any modification of the dataset invalidates the cache. If there can be changes to the base dataset then caching should be disabled as chances will not be reflected.
 
 
