@@ -24,7 +24,7 @@ SameAs reasoning is implemented as an independent `DatasetGraph` wrapper. As a c
 
 The class `DatasetGraphSameAs` contains the various static methods for wrapping a base dataset with one that performs this inferencing.
 The simplest form is:
-```
+```java
 DatasetGraph dsg = DatasetGraphSameAs.wrap(DatasetGraphFactory.createTxnMem());
 ```
 We recommend use of `createTxnMem` because it seems it can in general answer `contains()` checks much faster than `DatasetGraphFactory.create()` (as of jena-4.7.0) - which is important when duplicates are not allowed (default).
@@ -38,7 +38,7 @@ Because in this mode *all* sameAs links are known, any check for whether a resou
 (without a request to the underlying dataset).
 Any update to the dataset "unsets" the cache, and any request against an "cache" index will first attempt to fill it.
 
-```
+```java
 DatasetGraph dsg = DatasetGraphSameAs.wrapWithTable(DatasetGraphFactory.createTxnMem());
 ```
 
