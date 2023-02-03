@@ -58,7 +58,7 @@ The set of predicates which to treat as 'sameAs' can be configured.
 ## RDFS Reasoning
 
 ### Programmatic Use
-The main class is `DatasetGraphRDFSReduced`:
+Our improved RDFS reasoner wrapper class is `DatasetGraphRDFSReduced`:
 ```sparql
 DatasetGraph dsg = DatasetGraphRDFSReduced.wrap(baseDataset, RDFDataMgr.loadGraph("/path/to/rdfs.ttl"));
 ```
