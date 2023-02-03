@@ -1,7 +1,7 @@
 ---
 title: Reasoning
-parent: Service Plugins
-nav_order: 10
+parent: RDF/SPARQL Plugins
+nav_order: 30
 ---
 
 # Reasoning Plugin
