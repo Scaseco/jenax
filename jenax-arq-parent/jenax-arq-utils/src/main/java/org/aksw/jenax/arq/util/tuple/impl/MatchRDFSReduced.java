@@ -110,6 +110,18 @@ public class MatchRDFSReduced<D, C>
         return result;
     }
 
+
+    public class Worker_ANY_ANY_O {
+        // If p=rdf:type then we need to check which ranges and domain imply O - and which of these properties are present
+
+        public Iterator<D> find() {
+            // TODO Implement
+            return null;
+        }
+    }
+
+
+
     public class Worker_S_ANY_ANY {
         protected ConfigRDFS<C> setup = cxtInf.setup;
 

@@ -31,7 +31,7 @@ public class DatasetAssemblerSameAs
         Objects.requireNonNull(baseDatasetRes, "No ja:baseDataset specified on " + root);
         Object obj = a.open(baseDatasetRes);
 
-        int cacheMaxSize = Optional.ofNullable(res.getCacheMaxSize()).orElse(0);
+        int cacheMaxSize = Optional.ofNullable(res.getCacheSize()).orElse(0);
         boolean allowDuplicates = Optional.ofNullable(res.getAllowDuplicates()).orElse(false);
 
         Set<Node> predicates = new LinkedHashSet<>(res.getPredicates());

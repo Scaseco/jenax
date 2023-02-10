@@ -17,9 +17,9 @@ public interface SameAsConfig
     @Iri(SameAsTerms.NS + "predicate")
     Set<Node> getPredicates();
 
-    @Iri(SameAsTerms.NS + "cacheMaxSize")
-    Integer getCacheMaxSize();
-    SameAsConfig setCacheMaxSize(Integer value);
+    @Iri(SameAsTerms.NS + "cacheSize")
+    Integer getCacheSize();
+    SameAsConfig setCacheSize(Integer value);
 
     @Iri(SameAsTerms.NS + "allowDuplicates")
     Boolean getAllowDuplicates();
