@@ -158,7 +158,10 @@ public class SparqlStmtUtils {
     }
 
     /**
-     * Removes all unused prefixes from a stmt
+     * Removes all unused prefixes from a stmt.
+     *
+     * Currently the change happens in-place.
+     * TODO optimizePrefixes should not modify in-place because it desyncs with the stmts's original string
      *
      * @param stmt
      * @return
