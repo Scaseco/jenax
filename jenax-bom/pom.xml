@@ -160,6 +160,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-langtag-validator</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jena</artifactId>
 				<version>1.5.1-1</version>
