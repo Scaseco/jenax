@@ -1,6 +1,7 @@
-package org.aksw.jena_sparql_api.sparql.ext.geosparql;
+package org.aksw.jena_sparql_api.sparql.ext.util;
 
 import org.aksw.commons.collector.domain.Aggregator;
+import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;

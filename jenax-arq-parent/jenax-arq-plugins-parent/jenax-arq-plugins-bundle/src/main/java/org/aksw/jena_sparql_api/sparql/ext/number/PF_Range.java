@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.LongStream;
 
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.PropFuncArgUtils;
+import org.aksw.jena_sparql_api.sparql.ext.util.PropFuncArgUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.sparql.ext.geosparql;
+package org.aksw.jena_sparql_api.sparql.ext.util;
 
 import java.util.Collections;
 import java.util.List;

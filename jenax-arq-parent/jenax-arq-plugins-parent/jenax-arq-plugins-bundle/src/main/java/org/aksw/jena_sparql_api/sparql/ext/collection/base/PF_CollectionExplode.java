@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.collection.base;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.PropFuncArgUtils;
+import org.aksw.jena_sparql_api.sparql.ext.util.PropFuncArgUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.node.NodeList;

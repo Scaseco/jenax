@@ -6,7 +6,7 @@ import org.aksw.commons.collector.core.AggBuilder;
 import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.jena_sparql_api.sparql.ext.collection.array.SparqlLibArrayAgg;
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccAdapterJena;
+import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
