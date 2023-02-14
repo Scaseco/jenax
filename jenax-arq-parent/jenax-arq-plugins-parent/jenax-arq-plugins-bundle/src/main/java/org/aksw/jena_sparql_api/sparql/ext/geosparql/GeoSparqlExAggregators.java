@@ -13,7 +13,7 @@ import org.aksw.commons.collector.core.AggBuilder;
 import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
-import org.aksw.jenax.arq.util.binding.BindingEnv;
+import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;

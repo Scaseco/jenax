@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.PropFuncArgUtils;
+import org.aksw.jena_sparql_api.sparql.ext.util.PropFuncArgUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.apache.jena.graph.Node;
@@ -24,7 +24,6 @@ import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunctionBase;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 
 public class PF_CollectionUnnest
     extends PropertyFunctionBase {

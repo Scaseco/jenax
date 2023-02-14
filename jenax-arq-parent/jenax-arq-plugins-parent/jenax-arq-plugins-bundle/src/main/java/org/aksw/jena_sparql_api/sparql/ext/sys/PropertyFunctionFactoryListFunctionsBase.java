@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
 import org.aksw.commons.collector.domain.Accumulator;
-import org.aksw.jena_sparql_api.sparql.ext.geosparql.AccAdapterJena;
+import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
 import org.aksw.jenax.arq.functionbinder.FunctionAdapter;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;

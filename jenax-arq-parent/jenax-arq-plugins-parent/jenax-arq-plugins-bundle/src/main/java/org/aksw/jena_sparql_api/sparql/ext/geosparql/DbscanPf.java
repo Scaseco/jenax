@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.sparql.ext.util.PropFuncArgUtils;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.node.NodeCollection;
