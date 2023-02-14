@@ -37,7 +37,7 @@ public class TestGeoSparqlEx {
         PrefixMapping pm = new PrefixMappingImpl();
         pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
 
-        NodeValue nv = ExprUtils.eval(ExprUtils.parse("geof:simplifyDp('POINT (0 0)'^^geo:wktLiteral)", pm));
+        NodeValue nv = ExprUtils.eval(ExprUtils.parse("geof:simplifyDp('POINT (0 0)'^^geo:wktLiteral, 0.1)", pm));
         // System.out.println(nv);
         Assert.assertNotNull(nv);
     }

@@ -30,7 +30,6 @@ import com.google.common.collect.Iterables;
  * {@link Function}s in Jena's SPARQL engine.
  *
  * @author raven
- *
  */
 public class FunctionGenerator {
 
@@ -95,11 +94,11 @@ public class FunctionGenerator {
         return javaToRdfTypeMap;
     }
 
-
     public ConvertFunctionRaw getPreConvert(Class<?> targetJavaType, Class<?> internalJavaType) {
         ConvertFunctionRaw preConvert = null;
         if (internalJavaType != null) {
             preConvert = converterRegistry.getConverter(targetJavaType, internalJavaType);
+            // preConvert = ConverterRegistries.getConverterBoxed(converterRegistry, targetJavaType, internalJavaType);
 
             if (preConvert == null) {
                 throw new RuntimeException(String.format("Conversion from %1$s to %2$s declared but no converter found",
@@ -113,7 +112,6 @@ public class FunctionGenerator {
     public Function wrap(Method method) {
         return wrap(method, null);
     }
-
 
     /**
      * Pendant counterpart to Guava's:
@@ -137,7 +135,6 @@ public class FunctionGenerator {
 //
 //		return result;
 //	}
-
 
     public Function wrap(Method method, Object invocationTarget) {
         // Set up conversion of the result value
