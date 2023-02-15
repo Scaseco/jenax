@@ -6,18 +6,16 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
-import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
-import org.locationtech.jts.geom.Geometry;
 
 import com.google.common.hash.Funnels;
 import com.google.common.hash.HashCode;
@@ -58,7 +56,7 @@ public class JenaExtensionFs {
         PropertyFunctionRegistry.get().put(ns + "parents", new PropertyFunctionFactoryFsFind(PropertyFunctionFactoryFsFind::parents));
 
 
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         FunctionGenerator generator = binder.getFunctionGenerator();
 
         // Define two-way Geometry - GeometryWrapper coercions

@@ -566,7 +566,7 @@ public class QueryUtils {
      * In-place optimize a query's prefixes to only used prefixes
      *
      * @param query
-     * @param pm
+     * @param prefixMapping
      * @return
      */
     public static Query optimizePrefixes(Query query, PrefixMapping globalPm) {

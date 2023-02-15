@@ -18,6 +18,11 @@ import org.aksw.jena_sparql_api.sparql.ext.str.JenaExtensionString;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
+import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.arq.functionbinder.FunctionRegistry2;
+import org.apache.jena.query.ARQ;
+import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +56,15 @@ public class InitJenaSparqlApiSparqlExtensions
         JenaExtensionsMvn.register();
         JenaExtensionsPath.register();
         //JenaExtensionsGeoSparql.loadDefs(registry);
+
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
+        binder.getFunctionGenerator().getConverterRegistry();
+
+
+        FunctionRegistry original = FunctionRegistry.get(ARQ.getContext());
+        FunctionRegistry2 replacement = new FunctionRegistry2();
+        original.keys().forEachRemaining(k -> replacement.put(k, original.get(k)));
+        FunctionRegistry.set(ARQ.getContext(), replacement);
     }
 
     @Override

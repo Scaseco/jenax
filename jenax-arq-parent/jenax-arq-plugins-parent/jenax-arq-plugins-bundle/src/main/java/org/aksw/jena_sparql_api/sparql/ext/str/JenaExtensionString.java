@@ -1,16 +1,16 @@
 package org.aksw.jena_sparql_api.sparql.ext.str;
 
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.shared.PrefixMapping;
 
 public class JenaExtensionString {
     public static final String NS = "http://jsa.aksw.org/fn/str/";
 
     public static void register() {
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.registerAll(JenaExtensionString.class);
     }
 

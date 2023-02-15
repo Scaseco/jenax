@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.arq.datatype.RDFDatatypeBinding;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -18,7 +18,6 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
@@ -49,7 +48,7 @@ public class PropertyFunctionFactoryJsonExplode
 
     static {
         try {
-            FN_EXPLODE = JenaExtensionUtil.getDefaultFunctionBinder().getFunctionGenerator()
+            FN_EXPLODE = FunctionBinders.getDefaultFunctionBinder().getFunctionGenerator()
                     .wrap(PropertyFunctionFactoryJsonExplode.class.getDeclaredMethod(
                             "explode", JsonElement.class, String.class, Integer.TYPE));
         } catch (NoSuchMethodException | SecurityException e) {

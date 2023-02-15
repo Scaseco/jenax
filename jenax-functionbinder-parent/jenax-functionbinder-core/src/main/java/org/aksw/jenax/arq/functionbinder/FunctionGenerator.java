@@ -11,6 +11,7 @@ import java.util.Map;
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.util.convert.ConvertFunctionRaw;
 import org.aksw.commons.util.convert.ConvertFunctionRawImpl;
+import org.aksw.commons.util.convert.ConverterRegistries;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.aksw.commons.util.convert.ConverterRegistryImpl;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
@@ -109,7 +110,7 @@ public class FunctionGenerator {
         return preConvert;
     }
 
-    public Function wrap(Method method) {
+    public FunctionAdapter wrap(Method method) {
         return wrap(method, null);
     }
 
@@ -136,7 +137,7 @@ public class FunctionGenerator {
 //		return result;
 //	}
 
-    public Function wrap(Method method, Object invocationTarget) {
+    public FunctionAdapter wrap(Method method, Object invocationTarget) {
         // Set up conversion of the result value
         java.util.function.Function<Object, NodeValue> returnValueConverter;
         {
@@ -224,7 +225,7 @@ public class FunctionGenerator {
                         Iterator<Node> it = nodeList.iterator();
                         while (it.hasNext()) {
                             Node node = it.next();
-                            Object value = FunctionAdapter.convert(node, componentClass, converterRegistry);
+                            Object value = ConverterRegistries.convert(converterRegistry, node, componentClass);
                             Array.set(xr, xi, value);
                             ++xi;
                         }
@@ -245,7 +246,7 @@ public class FunctionGenerator {
 
                 if (str != null) {
                     Object internalObj = dtype.parse(str);
-                    defaultValue = FunctionAdapter.convert(internalObj, paramClass, converterRegistry);
+                    defaultValue = ConverterRegistries.convert(converterRegistry, internalObj, paramClass);
                 } else {
                     defaultValue = null;
                 }

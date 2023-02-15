@@ -2,10 +2,8 @@ package org.aksw.jena_sparql_api.sparql.ext.collection.array;
 
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionExplode;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
-import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
-import org.apache.jena.datatypes.TypeMapper;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
@@ -27,7 +25,7 @@ public class JenaExtensionArray {
         // Datatype is registered in the jenax-arq-datatype module!
         // TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeList.get());
 
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
 //        FunctionGenerator generator = binder.getFunctionGenerator();
 //
 //        // Define two-way Geometry - GeometryWrapper coercions
