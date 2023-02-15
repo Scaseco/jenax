@@ -20,7 +20,7 @@ import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
-import org.aksw.jenax.arq.functionbinder.FunctionRegistry2;
+import org.aksw.jenax.arq.functionbinder.FunctionRegistryWithAutoProxying;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
@@ -62,7 +62,7 @@ public class InitJenaSparqlApiSparqlExtensions
 
 
         FunctionRegistry original = FunctionRegistry.get(ARQ.getContext());
-        FunctionRegistry2 replacement = new FunctionRegistry2();
+        FunctionRegistryWithAutoProxying replacement = new FunctionRegistryWithAutoProxying();
         original.keys().forEachRemaining(k -> replacement.put(k, original.get(k)));
         FunctionRegistry.set(ARQ.getContext(), replacement);
     }

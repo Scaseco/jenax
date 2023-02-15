@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
+import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.irix.IRIx;
@@ -102,7 +103,7 @@ public class PropertyFunctionFactoryFsFind
         public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object,
                 org.apache.jena.sparql.engine.ExecutionContext execCtx) {
 
-            JenaUrlUtils.requireFileAccess(execCtx.getContext());
+            ArqSecurity.requireFileAccess(execCtx.getContext());
 
             // Get the subject's value
             Node node = subject.isVariable()

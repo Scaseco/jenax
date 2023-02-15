@@ -31,7 +31,6 @@ import com.google.common.collect.Iterables;
  * value from the result set.
  */
 public class QueryExecSimple {
-
     protected PrefixMapping prefixMapping;
 
     protected QueryExecSimple(PrefixMapping prefixMapping) {

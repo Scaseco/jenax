@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.fs;
 
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
-import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
+import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.QueryExecution;
@@ -59,11 +59,12 @@ public class TestSparqlFs {
     String queryStr = queryStr2;
 
 
+    // TODO Move to jenax-utils
     @Test
     public void testSparqlFs() {
 
         Dataset dataset = DatasetFactory.wrap(ModelFactory.createDefaultModel());//DatasetFactory.create();
-        dataset.getContext().setTrue(JenaUrlUtils.symAllowFileAccess);
+        dataset.getContext().setTrue(ArqSecurity.symAllowFileAccess);
         try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
 
 
@@ -85,7 +86,6 @@ public class TestSparqlFs {
             }
         }
     }
-
 
 //	@Test
 //	public void testSparqlFs2() {
