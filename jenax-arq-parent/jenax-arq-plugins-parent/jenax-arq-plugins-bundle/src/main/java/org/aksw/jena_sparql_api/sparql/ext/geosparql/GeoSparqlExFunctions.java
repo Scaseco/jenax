@@ -215,7 +215,7 @@ public class GeoSparqlExFunctions {
         double destLonRad = srcLonRad + Math.atan2(Math.sin(azimuthInRadians) * Math.sin(angularDistance) * Math.cos(srcLatRad),
                 Math.cos(angularDistance) - Math.sin(srcLatRad) * Math.sin(destLatRad));
 
-        // Normalize longitudo to [-PI..+PI)
+        // Normalize longitude to [-PI..+PI)
         destLonRad = (destLonRad + 3 * Math.PI) % (2.0 * Math.PI) - Math.PI;
 
         double destLonDeg = Math.toDegrees(destLonRad);

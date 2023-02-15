@@ -1,9 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
 import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
