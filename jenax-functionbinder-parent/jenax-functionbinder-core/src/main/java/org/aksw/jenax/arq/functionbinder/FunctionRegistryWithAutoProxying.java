@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.functionbinder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -52,9 +53,16 @@ public class FunctionRegistryWithAutoProxying
                     if (cls != null) {
                         List<FunctionAdapter> methods = Arrays.asList(cls.getMethods()).stream()
                             .filter(m -> m.getName().equals(methodName))
-                            .map(method -> {
-                                FunctionAdapter adapter = generator.wrap(method);
-                                return adapter;
+                            .flatMap(method -> {
+                                Stream<FunctionAdapter> r;
+                                try {
+                                    FunctionAdapter adapter = generator.wrap(method);
+                                    r = Stream.of(adapter);
+                                } catch (Exception e) {
+                                    // Ignore whatever we couldn't proxy
+                                    r = Stream.empty();
+                                }
+                                return r;
                             })
                             .collect(Collectors.toList());
                         Function fn  = methods.size() == 1
