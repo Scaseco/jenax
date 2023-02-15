@@ -5,8 +5,8 @@ import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_CompareResultSet;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_NextLong;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryBenchmark;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryExecSelect;
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -33,7 +33,7 @@ public class JenaExtensionSys {
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
 
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
     }

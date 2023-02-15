@@ -51,7 +51,7 @@ public class UpdateRequestUtils {
      * The global prefix map may be null.
      *
      * @param query
-     * @param pm
+     * @param prefixMapping
      * @return
      */
     public static UpdateRequest optimizePrefixes(UpdateRequest updateRequest, PrefixMapping globalPm) {

@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
@@ -38,7 +38,7 @@ public class JenaExtensionJson {
         pfnReg.put(ns + "unnest", new PropertyFunctionFactoryJsonUnnest());
         pfnReg.put(ns + "explode", new PropertyFunctionFactoryJsonExplode());
 
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.registerAll(SparqlFnLibJson.class);
 
     }

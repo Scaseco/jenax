@@ -4,7 +4,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.aksw.commons.util.convert.ConvertFunctionRaw;
 import org.aksw.commons.util.convert.ConverterRegistries;
 import org.aksw.commons.util.convert.ConverterRegistry;
 import org.apache.jena.datatypes.TypeMapper;
@@ -21,15 +20,13 @@ import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 /**
  * Jena function implementation that delegates to a backing Java method.
  *
- * Instances of this class are usually generated using the {@link FunctionGenerator}.
+ * Instances of this class are usually generated using the {@link FunctionGenerator#wrap(Method)}.
  * Use the {@link FunctionBinder} for creating function bindings and registration of them with Jena.
- *
- * @author raven
- *
  */
 public class FunctionAdapter
     implements Function
 {
+    // TODO Add support for deriving the invocation target from the first argument
     protected Object invocationTarget;
     protected Method method;
 
@@ -38,8 +35,6 @@ public class FunctionAdapter
     protected TypeMapper typeMapper;
 
     protected Param[] params;
-
-
     protected int mandatoryArgsCount;
 
     public FunctionAdapter(
@@ -67,34 +62,68 @@ public class FunctionAdapter
 //		register(GeometryWrapper.class, Geometry.class, GeometryWrapper::getParsingGeometry, g -> new GeometryWrapper(WKTDatatype.URI, g));
 //	}
 
+    @Override
+    public NodeValue exec(Binding binding, ExprList args, String uri, FunctionEnv env) {
+        Object[] javaArgs = buildJavaArgs(binding, args, env);
+        NodeValue result = invokeWithJavaArgs(javaArgs);
+        return result;
+//
+//		Object targetReturnVal = resultValueConverter == null
+//				? val
+//				: resultValueConverter.getFunction().apply(val);
+//
+//		Node node = NodeFactory.createLiteralByValue(val, resultRdfDatatype);
+//		NodeValue nv = NodeValue.makeNode(node);
+//
+//		Class<?> returnType = method.getReturnType();
+//
+//		RDFDatatype dtype = typeMapper.getTypeByValue(val);
+//		if (dtype == null) {
+//			Class<?> targetReturnType = returnTypeConversionMap.get(returnType);
+//
+//			if (targetReturnType == null) {
+//				throw new RuntimeException(String.format("Could not find a mapping from %s to an RDF datatype", returnType));
+//			}
+//
+//			dtype = typeMapper.getTypeByClass(targetReturnType);
+//
+//
+//			Converter converter = converterRegistry.getConverter(returnType, targetReturnType)
+//			if (converter == null) {
+//				throw new RuntimeException(String.format("No converter found from %s to %s", returnType, targetReturnType));
+//			}
+//
+//			Object obj = converter.getFunction().apply(val);
+//			Node node = NodeFactory.createLiteralByValue(obj, dtype);
+//			NodeValue nv = NodeValue.makeNode(node);
+//
+//		}
+//
+//
+//
+//		// TODO Auto-generated method stub
+//		return null;
+    }
 
-    public static Object convert(Object input, Class<?> target, ConverterRegistry converterRegistry) {
-        Object result;
-
-        if (input == null) {
-            result = null;
-        } else {
-            Class<?> inputClass = input.getClass();
-
-            if (org.apache.commons.lang3.ClassUtils.isAssignable(inputClass, target)) {
-                result = input;
-            } else {
-                // ConvertFunctionRaw converter = converterRegistry.getConverter(inputClass, target);
-                ConvertFunctionRaw converter = ConverterRegistries.getConverterBoxed(converterRegistry, inputClass, target);
-
-                if (converter == null) {
-                    throw new RuntimeException(String.format("No converter registered from %1$s to %2$s", inputClass, target));
-                }
-
-                result = converter.convertRaw(input);
-            }
+    /**
+     * Invoke the wrapped method with prior built java arguments and
+     * return the result as a NodeValue.
+     */
+    public NodeValue invokeWithJavaArgs(Object[] javaArgs) {
+        Object val;
+        try {
+            val = method.invoke(invocationTarget, javaArgs);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            throw new ExprEvalException(e);
         }
-
+        NodeValue result = returnValueConverter.apply(val);
+        if (result == null) {
+            throw new ExprEvalException(String.format("Null returned from %s for arguments %s", method, javaArgs));
+        }
         return result;
     }
 
-    @Override
-    public NodeValue exec(Binding binding, ExprList args, String uri, FunctionEnv env) {
+    public Object[] buildJavaArgs(Binding binding, ExprList args, FunctionEnv env) {
         int argCount = args.size();
         int paramCount = params.length;
         Object[] javaArgs = new Object[paramCount];
@@ -133,9 +162,9 @@ public class FunctionAdapter
                 // Attempt to convert the NodeValue's java object if its type does not match the
                 // expected parameter type
 
-//				if (Expr.NONE.equals(expr)) {
-//					javaArg = null;
-//				} else {
+    //				if (Expr.NONE.equals(expr)) {
+    //					javaArg = null;
+    //				} else {
                 NodeValue arg = expr.eval(binding, env);
 
                 NodeValue nv = arg.getConstant();
@@ -147,14 +176,14 @@ public class FunctionAdapter
                     intermediateObj = node.getLiteralValue();
                 }
 
-//				try {
-                    javaArg = convert(intermediateObj, paramType, converterRegistry);
-//				} catch (Exception e) {
-//					throw new ExprEvalException(e);
-//				}
-//				else {
-//					throw new IllegalArgumentException("Constant expression expected, got: " + expr);
-//				}
+    //				try {
+                    javaArg = ConverterRegistries.convert(converterRegistry, intermediateObj, paramType);
+    //				} catch (Exception e) {
+    //					throw new ExprEvalException(e);
+    //				}
+    //				else {
+    //					throw new IllegalArgumentException("Constant expression expected, got: " + expr);
+    //				}
             } else {
                 javaArg = param.defaultValue;
             }
@@ -165,57 +194,7 @@ public class FunctionAdapter
                 javaArgs[i] = javaArg;
             }
         }
-
-        Object val;
-        try {
-            val = method.invoke(invocationTarget, javaArgs);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new ExprEvalException(e);
-        }
-
-        NodeValue result = returnValueConverter.apply(val);
-
-        if (result == null) {
-            throw new ExprEvalException(String.format("Null returned from %s for arguments %s", method, javaArgs));
-        }
-
-        return result;
-//
-//		Object targetReturnVal = resultValueConverter == null
-//				? val
-//				: resultValueConverter.getFunction().apply(val);
-//
-//		Node node = NodeFactory.createLiteralByValue(val, resultRdfDatatype);
-//		NodeValue nv = NodeValue.makeNode(node);
-//
-//		Class<?> returnType = method.getReturnType();
-//
-//		RDFDatatype dtype = typeMapper.getTypeByValue(val);
-//		if (dtype == null) {
-//			Class<?> targetReturnType = returnTypeConversionMap.get(returnType);
-//
-//			if (targetReturnType == null) {
-//				throw new RuntimeException(String.format("Could not find a mapping from %s to an RDF datatype", returnType));
-//			}
-//
-//			dtype = typeMapper.getTypeByClass(targetReturnType);
-//
-//
-//			Converter converter = converterRegistry.getConverter(returnType, targetReturnType)
-//			if (converter == null) {
-//				throw new RuntimeException(String.format("No converter found from %s to %s", returnType, targetReturnType));
-//			}
-//
-//			Object obj = converter.getFunction().apply(val);
-//			Node node = NodeFactory.createLiteralByValue(obj, dtype);
-//			NodeValue nv = NodeValue.makeNode(node);
-//
-//		}
-//
-//
-//
-//		// TODO Auto-generated method stub
-//		return null;
+        return javaArgs;
     }
 
     public Object getInvocationTarget() {

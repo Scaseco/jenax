@@ -109,26 +109,26 @@ public class TestGeoSparqlEx {
 
     @Test
     public void testLineMerge01() {
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge02() {
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
         Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge03() {
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
     }
 
     @Test
     public void testLineMerge04() {
         Exception exception = Assert.assertThrows(ExprEvalException.class, () -> {
-            MoreQueryExecUtils.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
+            MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
         });
 
         String expectedMessage = "No line strings have been input of geof:lineMerge function. Can't make union of empty line strings after merge step.";
@@ -137,44 +137,44 @@ public class TestGeoSparqlEx {
 
     @Test
     public void testUnion01() {
-        String actual = MoreQueryExecUtils.evalExprToLexicalForm("spatial-f:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
+        String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("spatial-f:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
     }
 
 
     @Test
     public void testCollectSuccess01() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectError01() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
         Assert.assertEquals(null, actual);
     }
 
     @Test
     public void testCollectUnbound() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> 'POINT(0 0)'^^geo:wktLiteral ) (<s1> UNDEF) }  } group by ?s");
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> 'POINT(0 0)'^^geo:wktLiteral ) (<s1> UNDEF) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectEmpty() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> UNDEF) }  } group by ?s");
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> UNDEF) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
     }
 
     @Test
     public void testCollectExprEmpty() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm("SELECT (geof:collect(geof:centroid(?geom)) AS ?c) { VALUES (?s ?geom) { (<urn:s> 'POINT(0 0)'^^geo:wktLiteral) }  } group by ?s");
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(geof:centroid(?geom)) AS ?c) { VALUES (?s ?geom) { (<urn:s> 'POINT(0 0)'^^geo:wktLiteral) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testDbScan() {
-        String actual = MoreQueryExecUtils.evalQueryToLexicalForm(String.join("\n",
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm(String.join("\n",
                 "SELECT (array:size(?clusters) AS ?clusterCount) {",
                 "  BIND(array:of(",
                 "    array:of('x', spatial-f:convertLatLon(1, 1)),",

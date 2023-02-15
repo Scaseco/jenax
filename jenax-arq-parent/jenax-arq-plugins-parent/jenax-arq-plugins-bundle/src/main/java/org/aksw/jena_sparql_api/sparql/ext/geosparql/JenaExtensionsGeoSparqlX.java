@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
@@ -46,7 +46,7 @@ public class JenaExtensionsGeoSparqlX {
 
 
 
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         FunctionGenerator generator = binder.getFunctionGenerator();
 
         // Define two-way Geometry - GeometryWrapper coercions

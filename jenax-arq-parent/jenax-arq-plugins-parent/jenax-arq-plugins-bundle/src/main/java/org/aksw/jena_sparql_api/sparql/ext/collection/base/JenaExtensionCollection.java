@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.collection.base;
 
-import org.aksw.jena_sparql_api.sparql.ext.util.JenaExtensionUtil;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
+import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -15,7 +15,7 @@ public class JenaExtensionCollection {
     }
 
     public static void loadDefs(FunctionRegistry registry) {
-        FunctionBinder binder = JenaExtensionUtil.getDefaultFunctionBinder();
+        FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
 
         binder.registerAll(SparqlLibCollectionFn.class);
 
