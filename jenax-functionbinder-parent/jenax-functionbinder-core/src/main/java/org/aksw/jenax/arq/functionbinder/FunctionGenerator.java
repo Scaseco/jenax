@@ -16,6 +16,7 @@ import org.aksw.commons.util.convert.ConverterRegistry;
 import org.aksw.commons.util.convert.ConverterRegistryImpl;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.arq.util.node.NodeList;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
@@ -98,12 +99,18 @@ public class FunctionGenerator {
     public ConvertFunctionRaw getPreConvert(Class<?> targetJavaType, Class<?> internalJavaType) {
         ConvertFunctionRaw preConvert = null;
         if (internalJavaType != null) {
-            preConvert = converterRegistry.getConverter(targetJavaType, internalJavaType);
-            // preConvert = ConverterRegistries.getConverterBoxed(converterRegistry, targetJavaType, internalJavaType);
+            // Case when the target type is a subClass of the input type
+            // e.g. convert String to CharSequence whereas String already is-a CharSequence.
+            if (ClassUtils.isAssignable(targetJavaType, internalJavaType)) {
+                // Nothing to do
+            } else {
+                preConvert = converterRegistry.getConverter(targetJavaType, internalJavaType);
+                // preConvert = ConverterRegistries.getConverterBoxed(converterRegistry, targetJavaType, internalJavaType);
 
-            if (preConvert == null) {
-                throw new RuntimeException(String.format("Conversion from %1$s to %2$s declared but no converter found",
-                        targetJavaType, internalJavaType));
+                if (preConvert == null) {
+                    throw new RuntimeException(String.format("Conversion from %1$s to %2$s declared but no converter found",
+                            targetJavaType, internalJavaType));
+                }
             }
         }
 
@@ -158,7 +165,6 @@ public class FunctionGenerator {
                     typeMapper,
                     typeByClassOverrides);
 
-
             resultConverter = preConvert == null
                 ? internalTypeToNodeValue
                 : preConvert.andThen(internalTypeToNodeValue);
@@ -197,9 +203,14 @@ public class FunctionGenerator {
             // Consult override map first because some datatypes may lack appropriate metadata
             String datatypeIri = typeByClassOverrides.get(rdfClass);
 
+            // Note: If we e.g. wanted to detect that a parameter of type CharSequence.class
+            // can accept String.class then we can NOT rely on e.g.
+            // TypeMapperUtils.getSubTypeByClass (see the comment on that method)
             RDFDatatype dtype = datatypeIri != null
                     ? typeMapper.getTypeByName(datatypeIri)
                     : typeMapper.getTypeByClass(rdfClass);
+
+
 
             // RDFDatatype dtype = typeMapper.getTypeByClass(rdfClass);
 

@@ -73,9 +73,7 @@ public class JenaExtensionFs {
                         r = Path.of(str);
                     }
                     return r;
-                })
-            ;
-
+                });
         generator.getJavaToRdfTypeMap().put(Path.class, Node.class);
 
         binder.registerAll(JenaExtensionFs.class);

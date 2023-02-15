@@ -28,6 +28,10 @@ public class FunctionBinders {
         FunctionBinder binder = new FunctionBinder(functionRegistry);
         FunctionGenerator generator = binder.getFunctionGenerator();
 
+        // This declaration states that whenever CharSequence is demanded (e.g. as a method  parameter)
+        // then any RDF Datatype backed by a Java String class qualifies
+        generator.getJavaToRdfTypeMap().put(CharSequence.class, String.class);
+
         ConverterRegistry converterRegistry = generator.getConverterRegistry();
         ConverterRegistries.addDefaultConversions(converterRegistry);
         addNodeConversions(converterRegistry);
