@@ -391,8 +391,8 @@ public class SparqlScriptProcessor {
                                 }
                             }
 
-                            // Move optimizePrefixes to transformers?
-                            SparqlStmtUtils.optimizePrefixes(stmt);
+                            // TODO: Move optimizePrefixes to transformers?
+                            //SparqlStmtUtils.optimizePrefixes(stmt);
 
                             for (Function<? super SparqlStmt, ? extends SparqlStmt> postTransformer : postTransformers) {
                                 SparqlStmt tmp = postTransformer.apply(stmt);
