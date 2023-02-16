@@ -10,13 +10,8 @@ import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
@@ -30,6 +25,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
@@ -242,10 +238,13 @@ public class RDFDataMgrEx {
         return result;
     }
 
-    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
-        return probeLang(in, candidates, true);
+    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates, Collection<Entry<Lang, Throwable>> errorCollector) {
+        return probeLang(in, candidates, true, errorCollector);
     }
 
+    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
+        return probeLang(in, candidates, null);
+    }
 
     /**
      * Probe the content of the input stream against a given set of candidate languages.
@@ -265,7 +264,8 @@ public class RDFDataMgrEx {
     public static TypedInputStream probeLang(
             InputStream in,
             Iterable<Lang> candidates,
-            boolean tryAllCandidates) {
+            boolean tryAllCandidates,
+            Collection<Entry<Lang, Throwable>> errorCollector) {
         if (!in.markSupported()) {
             throw new IllegalArgumentException("Language probing requires an input stream with mark support");
         }
@@ -318,6 +318,9 @@ public class RDFDataMgrEx {
                 logger.debug("Number of items parsed by content type probing for " + cand + ": " + count);
             } catch(Exception e) {
                 logger.debug("Failed to probe with format " + cand, e);
+                if (errorCollector != null) {
+                    errorCollector.add(Pair.of(cand, e));
+                }
                 continue;
             } finally {
                 // logger.debug("Probing format " + cand + " took " + sw.elapsed(TimeUnit.MILLISECONDS));
@@ -345,6 +348,12 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static TypedInputStream probeLang(
+            InputStream in,
+            Iterable<Lang> candidates,
+            boolean tryAllCandidates) {
+        return probeLang(in, candidates, tryAllCandidates, null);
+    }
 //    public static TypedInputStream probeLang(
 //            InputStream in,
 //            Iterable<Lang> candidates,
@@ -445,7 +454,7 @@ public class RDFDataMgrEx {
      * @param probeLangs
      * @return
      */
-    public static TypedInputStream open(String src, Iterable<Lang> probeLangs) {
+    public static TypedInputStream open(String src, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
         Objects.requireNonNull(src);
 
         boolean useStdIn = isStdIn(src);
@@ -467,8 +476,12 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static TypedInputStream open(String src, Iterable<Lang> probeLangs) {
+        return open(src, probeLangs, null);
+    }
+
     /** open via nio */
-    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs) {
+    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
         InputStream in;
         try {
             in = Files.newInputStream(path);
@@ -476,10 +489,14 @@ public class RDFDataMgrEx {
             throw new RuntimeException(e);
         }
 
-        return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs);
+        return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs, errorCollector);
     }
 
-    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
+    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs) {
+        return open(path, probeLangs, null);
+    }
+
+    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
         // TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
         // rather than the actual content - so we may be fooled here
         ContentType mediaType = result.getMediaType();
@@ -496,11 +513,14 @@ public class RDFDataMgrEx {
         }
 
         if(mediaType == null) {
-            result = probeLang(forceBuffered(result.getInputStream()), probeLangs);
+            result = probeLang(forceBuffered(result.getInputStream()), probeLangs, errorCollector);
         }
         return result;
     }
 
+    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
+        return probeForSpecificLang(result, probeLangs, null);
+    }
 
     public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
         InputStream combined = prependWithPrefixes(in, prefixMapping);

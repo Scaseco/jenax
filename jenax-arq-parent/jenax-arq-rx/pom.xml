@@ -91,6 +91,10 @@
 			<artifactId>rxjava</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.codepoetics</groupId>
+			<artifactId>protonpack</artifactId>
+		</dependency>
 
 		<!-- Unit Testing -->
 		<dependency>
