@@ -2,10 +2,11 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.jena.atlas.json.JsonException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
@@ -55,7 +56,7 @@ public class E_JsonNashorn extends FunctionBase {
             try {
                 fn = (JSObject)engine.eval(str);
             } catch (ScriptException e) {
-                throw new ExprEvalException(e);
+                throw new JsonException(ExceptionUtils.getRootCauseMessage(e));
             }
 
             List<NodeValue> fnArgs = args.subList(1, args.size());
