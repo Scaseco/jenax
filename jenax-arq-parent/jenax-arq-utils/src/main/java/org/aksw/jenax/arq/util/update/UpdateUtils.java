@@ -39,7 +39,21 @@ import com.google.common.base.Preconditions;
 
 public class UpdateUtils {
 
-    private static final UpdateRequest RENAME_PROPERTY_RU = UpdateFactory.create("DELETE { ?s ?pFrom ?o } INSERT { ?s ?pTo ?o } WHERE { ?s ?pFrom ?o }");
+    private static final UpdateRequest RENAME_PROPERTY_RU = UpdateFactory.create("DELETE { ?s ?from ?o } INSERT { ?s ?to ?o } WHERE { ?s ?from ?o }");
+    private static final UpdateRequest RENAME_NAMESPACE_RU = UpdateFactory.create(String.join("\n",
+            "DELETE { ?s ?p ?o }",
+            "INSERT { ?ss ?pp ?oo }",
+            "WHERE {",
+            "  BIND(STRLEN(?from) + 1 AS ?l)",
+            "  ?s ?p ?o",
+            "  BIND(isIRI(?s) && STRSTARTS(STR(?s), ?from) AS ?cs)",
+            "  BIND(isIRI(?p) && STRSTARTS(STR(?p), ?from) AS ?cp)",
+            "  BIND(isIRI(?o) && STRSTARTS(STR(?o), ?from) AS ?co)",
+            "  FILTER(?cs || ?cp || ?co)",
+            "  BIND(IF(?cs, IRI(CONCAT(?to, SUBSTR(STR(?s), ?l))), ?s) AS ?ss)",
+            "  BIND(IF(?cp, IRI(CONCAT(?to, SUBSTR(STR(?p), ?l))), ?p) AS ?pp)",
+            "  BIND(IF(?co, IRI(CONCAT(?to, SUBSTR(STR(?o), ?l))), ?o) AS ?oo)",
+            "}"));
 
     /**
      * Rename a property in a graph (via SPARQL Update)
@@ -50,12 +64,22 @@ public class UpdateUtils {
     public static void renameProperty(Graph graph, String from, String to) {
         Node fromNode = NodeFactory.createURI(from);
         Node toNode = NodeFactory.createURI(to);
+        execRename(graph, RENAME_PROPERTY_RU, fromNode, toNode);
+    }
 
+
+    public static void renameNamespace(Graph graph, String from, String to) {
+        Node fromNode = NodeFactory.createLiteral(from);
+        Node toNode = NodeFactory.createLiteral(to);
+        execRename(graph, RENAME_NAMESPACE_RU, fromNode, toNode);
+    }
+
+    public static void execRename(Graph graph, UpdateRequest template, Node from, Node to) {
         UpdateExec
             .dataset(DatasetGraphFactory.wrap(graph))
-            .update(RENAME_PROPERTY_RU)
-             .substitution("pFrom", fromNode)
-             .substitution("pTo", toNode)
+            .update(template)
+             .substitution("from", from)
+             .substitution("to", to)
             .execute();
     }
 
