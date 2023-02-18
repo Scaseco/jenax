@@ -35,10 +35,17 @@ public class FunctionRegistryWithAutoProxying
             String prefix = "java:";
             if (uri.startsWith(prefix)) {
                 // fully qualified method name my.package.MyClass#myMethod
-                int split = uri.lastIndexOf("#");
-                if (split >= 0) {
-                    String fqcn = uri.substring(prefix.length(), split);
-                    String methodName = uri.substring(split + 1);
+                int methodNameSplit = uri.lastIndexOf("#");
+                if (methodNameSplit >= 0) {
+                    String fqcn = uri.substring(prefix.length(), methodNameSplit);
+                    String methodName = uri.substring(methodNameSplit + 1);
+                    String source = null;
+                    int sourceSplit = methodName.indexOf('@');
+                    if (sourceSplit >= 0) {
+                        String tmp = methodName.substring(0, sourceSplit);
+                        source = methodName.substring(sourceSplit + 1);
+                        methodName = tmp;
+                    }
 
                     FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
                     FunctionGenerator generator = binder.getFunctionGenerator();
@@ -50,9 +57,10 @@ public class FunctionRegistryWithAutoProxying
                         // Nothing to do here
                     }
 
+                    String finalMethodName = methodName;
                     if (cls != null) {
                         List<FunctionAdapter> methods = Arrays.asList(cls.getMethods()).stream()
-                            .filter(m -> m.getName().equals(methodName))
+                            .filter(m -> m.getName().equals(finalMethodName))
                             .flatMap(method -> {
                                 Stream<FunctionAdapter> r;
                                 try {
