@@ -26,7 +26,7 @@ public class ElementVisitorDatasetGraph
     }
 
     @Override
-    public void onVisit(Element el) {
+    protected void onVisit(Element el) {
         throw new UnsupportedOperationException();
     }
 

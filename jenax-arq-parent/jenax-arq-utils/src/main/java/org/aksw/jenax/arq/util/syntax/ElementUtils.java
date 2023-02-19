@@ -214,8 +214,7 @@ public class ElementUtils {
     public static DatasetGraph toDataset(Element elt, DatasetGraph acc) {
         ElementVisitorDatasetGraph visitor = new ElementVisitorDatasetGraph(acc);
         ElementWalker.walk(elt, visitor);
-        DatasetGraph result = visitor.getDatasetGraph();
-        return result;
+        return acc;
     }
 
     public static Graph toGraph(Element elt) {
@@ -225,8 +224,7 @@ public class ElementUtils {
     public static Graph toGraph(Element elt, Graph acc) {
         ElementVisitorGraph visitor = new ElementVisitorGraph(acc);
         ElementWalker.walk(elt, visitor);
-        Graph result = visitor.getGraph();
-        return result;
+        return acc;
     }
 
     public static Map<Node, Var> createMapFixVarNames(Element element) {
