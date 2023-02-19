@@ -39,6 +39,7 @@ import com.google.common.base.Preconditions;
 
 public class UpdateUtils {
 
+    // RU = rdf update (file extension foo.ru)
     private static final UpdateRequest RENAME_PROPERTY_RU = UpdateFactory.create("DELETE { ?s ?from ?o } INSERT { ?s ?to ?o } WHERE { ?s ?from ?o }");
     private static final UpdateRequest RENAME_NAMESPACE_RU = UpdateFactory.create(String.join("\n",
             "DELETE { ?s ?p ?o }",

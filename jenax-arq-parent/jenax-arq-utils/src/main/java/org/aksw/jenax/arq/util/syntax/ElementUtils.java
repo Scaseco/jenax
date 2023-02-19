@@ -17,6 +17,7 @@ import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -24,12 +25,15 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
+import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
@@ -40,6 +44,7 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.ElementUnion;
+import org.apache.jena.sparql.syntax.ElementWalker;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
@@ -186,6 +191,8 @@ public class ElementUtils {
         return result;
     }
 
+    /** Use toGraph() which uses proper visitors to extract triples */
+    @Deprecated
     public static void extractTriples(Element e, List<Triple> result) {
 
         if(e instanceof ElementGroup) {
@@ -200,13 +207,34 @@ public class ElementUtils {
         }
     }
 
+    public static DatasetGraph toDataset(Element elt) {
+        return toDataset(elt, DatasetGraphFactory.create());
+    }
+
+    public static DatasetGraph toDataset(Element elt, DatasetGraph acc) {
+        ElementVisitorDatasetGraph visitor = new ElementVisitorDatasetGraph(acc);
+        ElementWalker.walk(elt, visitor);
+        DatasetGraph result = visitor.getDatasetGraph();
+        return result;
+    }
+
+    public static Graph toGraph(Element elt) {
+        return toGraph(elt, GraphFactory.createDefaultGraph());
+    }
+
+    public static Graph toGraph(Element elt, Graph acc) {
+        ElementVisitorGraph visitor = new ElementVisitorGraph(acc);
+        ElementWalker.walk(elt, visitor);
+        Graph result = visitor.getGraph();
+        return result;
+    }
+
     public static Map<Node, Var> createMapFixVarNames(Element element) {
         Collection<Var> vars = PatternVars.vars(element);
         Map<Node, Var> result = createMapFixVarNames(vars);
 
         return result;
     }
-
 
     public static Map<Node, Var> createMapFixVarNames(Collection<Var> vars) {
         //Set<Var> vars = NodeUtils.getVarsMentioned(nodes);
