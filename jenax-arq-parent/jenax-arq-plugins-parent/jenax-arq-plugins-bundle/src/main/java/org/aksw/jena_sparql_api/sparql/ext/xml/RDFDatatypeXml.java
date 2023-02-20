@@ -17,38 +17,42 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class RDFDatatypeXml
-	extends BaseDatatype
+    extends BaseDatatype
 {
-	public static final RDFDatatypeXml INSTANCE = new RDFDatatypeXml();
+    public static final RDFDatatypeXml INSTANCE = new RDFDatatypeXml();
 
-	public static final String IRI = XSD.NS + "xml";
+    public static RDFDatatypeXml get() {
+        return INSTANCE;
+    }
+
+    public static final String IRI = XSD.NS + "xml";
 
     protected DocumentBuilder documentBuilder;
 
 
     public static DocumentBuilder createDefaultDocumentBuilder() {
-    	DocumentBuilder result;
-		try {
+        DocumentBuilder result;
+        try {
 //			result = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-	        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	        factory.setValidating(false);
-	        factory.setNamespaceAware(true);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setValidating(false);
+            factory.setNamespaceAware(true);
 
-	        result = factory.newDocumentBuilder();
-	        result.setEntityResolver(new EntityResolver() {
+            result = factory.newDocumentBuilder();
+            result.setEntityResolver(new EntityResolver() {
 
-	            @Override
-	            public InputSource resolveEntity(String publicId, String systemId)
-	                    throws SAXException, IOException {
-	                //System.out.println("Ignoring " + publicId + ", " + systemId);
-	                return new InputSource(new StringReader(""));
-	            }
-	        });
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
+                @Override
+                public InputSource resolveEntity(String publicId, String systemId)
+                        throws SAXException, IOException {
+                    //System.out.println("Ignoring " + publicId + ", " + systemId);
+                    return new InputSource(new StringReader(""));
+                }
+            });
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
 
-    	return result;
+        return result;
     }
 
     public RDFDatatypeXml() {
@@ -61,7 +65,7 @@ public class RDFDatatypeXml
 
     public RDFDatatypeXml(String uri, DocumentBuilder documentBuilder) {
         super(uri);
-    	this.documentBuilder = documentBuilder;
+        this.documentBuilder = documentBuilder;
     }
 
 //    public RDFDatatypeXml(String uri, Gson gson) {
@@ -76,8 +80,8 @@ public class RDFDatatypeXml
 
     @Override
     public boolean isValidValue(Object valueForm) {
-    	boolean isValid = valueForm instanceof Node;
-    	return isValid;
+        boolean isValid = valueForm instanceof Node;
+        return isValid;
     }
 
     /**
@@ -86,9 +90,9 @@ public class RDFDatatypeXml
      */
     @Override
     public String unparse(Object value) {
-    	Node node = (Node)value;
-    	String result = JenaXmlUtils.toString(node);
-    	return result;
+        Node node = (Node)value;
+        String result = JenaXmlUtils.toString(node);
+        return result;
     }
 
     /**
@@ -98,17 +102,17 @@ public class RDFDatatypeXml
     @Override
     public synchronized Node parse(String lexicalForm) throws DatatypeFormatException {
         Document result;
-		try {
-			result = documentBuilder.parse(new InputSource(new StringReader(lexicalForm)));
-		} catch (SAXException | IOException e) {
-			throw new RuntimeException(e);
-		}
+        try {
+            result = documentBuilder.parse(new InputSource(new StringReader(lexicalForm)));
+        } catch (SAXException | IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return result;
     }
 
     public DocumentBuilder getDocumentBuilder() {
-		return documentBuilder;
-	}
+        return documentBuilder;
+    }
 
 }

@@ -1,17 +1,37 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.stream.IntStream;
+
+import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
+import org.apache.jena.sparql.engine.QueryIterator;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
+import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
+import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
+import com.jayway.jsonpath.JsonPath;
 
 public class JenaJsonUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(JenaJsonUtils.class);
 
     public static NodeValue fromString(String jsonStr) {
         Node node = NodeFactory.createLiteral(jsonStr, RDFDatatypeJson.get());
@@ -170,6 +190,110 @@ public class JenaJsonUtils {
         return result;
     }
 
+    public static NodeValue evalJsonPath(Gson gson, NodeValue nv, NodeValue query) {
+        RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+
+        JsonElement json = JenaJsonUtils.extractJsonElement(nv);
+
+        NodeValue result;
+        if(query.isString() && json != null) {
+            Object tmp = gson.fromJson(json, Object.class); //JsonTransformerObject.toJava.apply(json);
+            String queryStr = query.getString();
+
+            try {
+                // If parsing the JSON fails, we return nothing, yet we log an error
+                Object o = JsonPath.read(tmp, queryStr);
+
+                Node node = JenaJsonUtils.jsonToNode(o, gson, jsonDatatype);
+                result = NodeValue.makeNode(node);
+            } catch(Exception e) {
+                logger.warn(e.getLocalizedMessage());
+                NodeValue.raise(new ExprTypeException("Error evaluating json path", e));
+                result = null;
+                //result = NodeValue.nvNothing;
+            }
+
+        } else {
+            NodeValue.raise(new ExprTypeException("Invalid arguments to json path"));
+            result = null; //NodeValue.nvNothing;
+        }
+
+        return result;
+    }
+
+    public static QueryIterator unnestJsonArray(Gson gson, Binding binding, Node index, ExecutionContext execCxt, Node node, Var outputVar) {
+        Var indexVarTmp = null;
+        Integer indexVal = null;
+
+        if (index != null) {
+            if(index.isVariable()) {
+                indexVarTmp = (Var)index;
+//                    throw new RuntimeException("Index of json array unnesting must be a variable");
+            } else if(index.isLiteral()) {
+                Object obj = NodeMapperFromRdfDatatype.toJavaCore(index, index.getLiteralDatatype());
+                if(obj instanceof Number) {
+                    indexVal = ((Number)obj).intValue();
+                } else {
+                    throw new ExprEvalException("Index into json array is a literal but not a number: " + index);
+                }
+            } else {
+                throw new ExprEvalException("Index into json array is not a number " + index);
+            }
+        }
+        Var indexVar = indexVarTmp;
+
+
+        QueryIterator result = null;
+
+        boolean isJson = node != null && node.isLiteral() && node.getLiteralDatatype() instanceof RDFDatatypeJson;
+        if(isJson) {
+            JsonElement data = (JsonElement)node.getLiteralValue();
+            if(data != null && data.isJsonArray()) {
+                JsonArray arr = data.getAsJsonArray();
+
+                Iterator<Binding> it;
+                if(indexVal != null) {
+                    Binding b = itemToBinding(binding, arr, indexVal, gson, indexVar, outputVar);
+                    it = Collections.singleton(b).iterator();
+                } else {
+                    it = IntStream.range(0, arr.size()).mapToObj(i -> {
+                        Binding r = itemToBinding(binding, arr, i, gson, indexVar, outputVar);
+                        return r;
+                    }).iterator();
+                }
+                result = QueryIterPlainWrapper.create(it, execCxt);
+            }
+        }
+
+        if(result == null) {
+            result = QueryIterNullIterator.create(execCxt);
+        }
+        return result;
+    }
+
+    public static Binding itemToBinding(Binding binding, JsonArray arr, int i, Gson gson, Var indexVar, Var outputVar) {
+        JsonElement item;
+
+        try {
+            item = arr.get(i);
+        } catch(Exception e) {
+            throw new ExprEvalException(e);
+        }
+        RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+
+        Node n = JenaJsonUtils.jsonToNode(item, gson, jsonDatatype);
+        // NodeValue nv = n == null ? null : NodeValue.makeNode(n);
+
+        if (n != null) {
+            binding = BindingFactory.binding(binding, outputVar, n);
+        }
+
+        if(indexVar != null) {
+            binding = BindingFactory.binding(binding, indexVar, NodeValue.makeInteger(i).asNode());
+        }
+
+        return binding;
+    }
 //    public static NodeValue jsonToNodeValue(Object o) {
 //    	NodeValue result;
 //    	if(o == null) {
