@@ -211,7 +211,7 @@ public class ElementUtils {
         return toDataset(elt, DatasetGraphFactory.create());
     }
 
-    public static DatasetGraph toDataset(Element elt, DatasetGraph acc) {
+    public static <T extends DatasetGraph> T toDataset(Element elt, T acc) {
         ElementVisitorDatasetGraph visitor = new ElementVisitorDatasetGraph(acc);
         ElementWalker.walk(elt, visitor);
         return acc;
@@ -221,7 +221,7 @@ public class ElementUtils {
         return toGraph(elt, GraphFactory.createDefaultGraph());
     }
 
-    public static Graph toGraph(Element elt, Graph acc) {
+    public static <T extends Graph> T toGraph(Element elt, T acc) {
         ElementVisitorGraph visitor = new ElementVisitorGraph(acc);
         ElementWalker.walk(elt, visitor);
         return acc;

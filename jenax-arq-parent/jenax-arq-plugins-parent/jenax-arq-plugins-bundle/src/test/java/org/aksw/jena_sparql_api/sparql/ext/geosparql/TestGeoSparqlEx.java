@@ -23,7 +23,6 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 import com.google.common.math.DoubleMath;
 
-
 public class TestGeoSparqlEx {
 
     private static final double TOLERANCE = 0.001;
