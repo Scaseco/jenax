@@ -22,16 +22,28 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ParseContext;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 
 public class JenaJsonUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaJsonUtils.class);
+
+    private static final Cache<String, JsonPath> pathCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+    private static final ParseContext parseContext = JsonPath.using(Configuration.builder()
+            .jsonProvider(new GsonJsonProvider())
+            //.options(Option.ALWAYS_RETURN_LIST, Option.SUPPRESS_EXCEPTIONS)
+            .build());
+
 
     public static NodeValue fromString(String jsonStr) {
         Node node = NodeFactory.createLiteral(jsonStr, RDFDatatypeJson.get());
@@ -195,27 +207,34 @@ public class JenaJsonUtils {
 
         JsonElement json = JenaJsonUtils.extractJsonElement(nv);
 
-        NodeValue result;
+        NodeValue result = null;
         if(query.isString() && json != null) {
-            Object tmp = gson.fromJson(json, Object.class); //JsonTransformerObject.toJava.apply(json);
+            // Object tmp = gson.fromJson(json, Object.class); //JsonTransformerObject.toJava.apply(json);
             String queryStr = query.getString();
-
+            Object o = null;
             try {
                 // If parsing the JSON fails, we return nothing, yet we log an error
-                Object o = JsonPath.read(tmp, queryStr);
+                JsonPath compiledPath = pathCache.get(queryStr, () -> JsonPath.compile(queryStr));
 
-                Node node = JenaJsonUtils.jsonToNode(o, gson, jsonDatatype);
-                result = NodeValue.makeNode(node);
+                // JsonPath compiledPath = JsonPath.compile(queryStr);
+                o = parseContext.parse(json).read(compiledPath);
             } catch(Exception e) {
                 logger.warn(e.getLocalizedMessage());
                 NodeValue.raise(new ExprTypeException("Error evaluating json path", e));
-                result = null;
                 //result = NodeValue.nvNothing;
             }
 
+            if (o == null) {
+                NodeValue.raise(new ExprTypeException("JsonPath evaluated to null"));
+            } else {
+                Node node = JenaJsonUtils.jsonToNode(o, gson, jsonDatatype);
+                if (node == null) {
+                    NodeValue.raise(new ExprTypeException("Json evaluated to null (probably JsonNull)"));
+                }
+                result = NodeValue.makeNode(node);
+            }
         } else {
             NodeValue.raise(new ExprTypeException("Invalid arguments to json path"));
-            result = null; //NodeValue.nvNothing;
         }
 
         return result;

@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.decisiontree.api;
+package org.aksw.jenax.arq.util.expr;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,46 +11,6 @@ import org.apache.jena.sparql.expr.ExprFunction1;
 import org.apache.jena.sparql.expr.FunctionLabel;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
-
-
-/**
- *
- *  https://stackoverflow.com/questions/32210952/scala-invalidclassexception-no-valid-constructor
- *
- *  To allow subtypes of non-serializable classes to be serialized, the subtype may assume
- *  responsibility for saving and restoring the state of the supertype's public, protected,
- *  and (if accessible) package fields. The subtype may assume this responsibility only if the
- *  class it extends has an accessible no-arg constructor to initialize the class's state.
- *  It is an error to declare a class Serializable if this is not the case.
- *  The error will be detected at runtime.
- *
- */
-class E_SerializableIdentityBase extends ExprFunction1 {
-    public E_SerializableIdentityBase() {
-        super(null, null);
-    }
-
-    public E_SerializableIdentityBase(Expr expr, String fName, String opSign) {
-        super(expr, fName, opSign);
-        // TODO Auto-generated constructor stub
-    }
-
-    public E_SerializableIdentityBase(Expr expr, String fName) {
-        super(expr, fName);
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public NodeValue eval(NodeValue v) {
-        return null;
-    }
-
-    @Override
-    public Expr copy(Expr expr) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-}
 
 /** An serializable expression that returns its argument */
 public class E_SerializableIdentity extends E_SerializableIdentityBase implements Serializable {
@@ -105,3 +65,41 @@ public class E_SerializableIdentity extends E_SerializableIdentityBase implement
         return new E_SerializableIdentity(expr);
     }
 }
+
+
+/**
+ * Helper base class for {@link E_SerializableIdentity}
+ *
+ * https://stackoverflow.com/questions/32210952/scala-invalidclassexception-no-valid-constructor
+ *
+ * To allow subtypes of non-serializable classes to be serialized, the subtype may assume
+ * responsibility for saving and restoring the state of the supertype's public, protected,
+ * and (if accessible) package fields. The subtype may assume this responsibility only if the
+ * class it extends has an accessible no-arg constructor to initialize the class's state.
+ * It is an error to declare a class Serializable if this is not the case.
+ * The error will be detected at runtime.
+ */
+class E_SerializableIdentityBase extends ExprFunction1 {
+    public E_SerializableIdentityBase() {
+        super(null, null);
+    }
+
+    public E_SerializableIdentityBase(Expr expr, String fName, String opSign) {
+        super(expr, fName, opSign);
+    }
+
+    public E_SerializableIdentityBase(Expr expr, String fName) {
+        super(expr, fName);
+    }
+
+    @Override
+    public NodeValue eval(NodeValue v) {
+        return null;
+    }
+
+    @Override
+    public Expr copy(Expr expr) {
+        return null;
+    }
+}
+

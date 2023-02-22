@@ -110,7 +110,7 @@ public class ElementUtils {
     }
 
     public static ElementTriplesBlock createElementTriple(Node s, Node p, Node o) {
-        return createElement(new Triple(s, p, o));
+        return createElement(Triple.create(s, p, o));
     }
 
 
