@@ -67,28 +67,28 @@ public class ExprUtils {
 
 
     public static class ContainsExprAggregator
-		extends ExprTransformCopy
-	{
-		protected boolean seenExprAggregator = false;
+        extends ExprTransformCopy
+    {
+        protected boolean seenExprAggregator = false;
 
-		@Override
-		public Expr transform(ExprAggregator eAgg) {
-			seenExprAggregator = true;
-			return super.transform(eAgg);
-		}
+        @Override
+        public Expr transform(ExprAggregator eAgg) {
+            seenExprAggregator = true;
+            return super.transform(eAgg);
+        }
 
-		public boolean seenExprAggregator() {
-			return seenExprAggregator;
-		}
-	}
+        public boolean seenExprAggregator() {
+            return seenExprAggregator;
+        }
+    }
 
     /** Return true iff expr makes use of at least one ExprAggregator */
-	public static boolean containsExprAggregator(Expr expr) {
-		ContainsExprAggregator xform = new ContainsExprAggregator();
-		ExprTransformer.transform(xform, expr);
-		boolean result = xform.seenExprAggregator();
-		return result;
-	}
+    public static boolean containsExprAggregator(Expr expr) {
+        ContainsExprAggregator xform = new ContainsExprAggregator();
+        ExprTransformer.transform(xform, expr);
+        boolean result = xform.seenExprAggregator();
+        return result;
+    }
 
 
 
@@ -674,4 +674,36 @@ public class ExprUtils {
     public static Expr copy(ExprFunctionN func, ExprList args) {
         return func.copy(args);
     }
+
+
+    /**
+     * Perform a depth-first-in-order traversal and substitute children w.r.t. the given
+     * replacement function.
+     *
+     * @param expr
+     * @param fn
+     * @return
+     */
+    public static Expr replace(Expr expr, Function<? super Expr, ? extends Expr> fn) {
+        Expr result = fn.apply(expr);
+        if (result == expr) { // No change yet
+            List<Expr> subExprs = getSubExprs(expr);
+            List<Expr> newSubExprs = new ArrayList<>();
+            boolean change = false;
+            for (Expr subExpr : subExprs) {
+                Expr newSubExpr = replace(subExpr, fn);
+                if (newSubExpr != subExpr) {
+                    change = true;
+                }
+                newSubExprs.add(newSubExpr);
+            }
+
+            if (change) {
+                ExprList el = ExprList.create(newSubExprs);
+                result = result = copy(expr, el);
+            }
+        }
+        return result;
+    }
+
 }
