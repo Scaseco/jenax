@@ -1,13 +1,16 @@
 package org.aksw.jenax.arq.util.syntax;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
@@ -25,17 +28,23 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.expr.aggregate.AggCountDistinct;
 import org.apache.jena.sparql.expr.aggregate.AggCountVarDistinct;
 import org.apache.jena.sparql.expr.aggregate.Aggregator;
+import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementBind;
+import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
+
+import com.google.common.base.Preconditions;
 
 public class QueryGenerationUtils {
 
@@ -970,5 +979,108 @@ public class QueryGenerationUtils {
 //        return result;
 //    }
 
+    /**
+     * Convert a construct query with multiple quads in the template into one with single
+     * ?g ?s ?p ?o quad.
+     *
+     * <pre>
+     * CONSTRUCT {
+     *   ?a ?b ?c .
+     *   ?d ?e ?f .
+     * } WHERE {
+     *   pattern
+     * }
+     * </pre>
+     * becomes
+     * <pre>
+     * CONSTRUCT {
+     *   ?s ?p ?o
+     * }
+     * WHERE {
+     *   SELECT DISTINCT ?s ?p ?o } # Only if distinct == true
+     *     pattern
+     *     LATERAL {
+     *       { BIND(?a AS ?s) BIND(?b AS ?p) BIND(?c AS ?o) }
+     *       UNION { BIND(?d AS ?s) BIND(?e AS ?p) BIND(?f AS ?o) }
+     *     }
+     *   }
+     * }
+     * </pre>
+     *
+     */
+    public static Query constructToLateral(Query query, Quad quadVars, boolean distinct) {
+        Preconditions.checkArgument(query.isConstructType(), "Query must be of CONSTRUCT type");
 
+        // Always copy
+        Query copy = query.cloneQuery();
+
+        Template template = query.getConstructTemplate();
+        List<Quad> quads = template.getQuads();
+
+        // If the template is already of size 1 (or less) then there is nothing to do
+        if (quads.size() <= 1) {
+            return copy;
+        }
+
+        boolean includeGraph = template.containsRealQuad();
+
+        // Turns the quads into BINDs
+        List<Element> groups = quads.stream()
+                .map(q -> ElementUtils.createElementGroup(quadToBinds(quadVars, q, includeGraph)))
+                .collect(Collectors.toList());
+
+        // Create a LATERAL-UNION
+        Element union = ElementUtils.unionIfNeeded(groups);
+        List<Element> elts = ElementUtils.toElementList(copy.getQueryPattern());
+        elts.add(new ElementLateral(union));
+        Element newElt = ElementUtils.groupIfNeeded(elts);
+
+        if (distinct) {
+            Query subQuery = new Query();
+            subQuery.setQuerySelectType();
+            subQuery.setDistinct(true);
+            VarExprList proj = subQuery.getProject();
+            if (includeGraph) {
+                proj.add((Var)quadVars.getGraph());
+            }
+            proj.add((Var)quadVars.getSubject());
+            proj.add((Var)quadVars.getPredicate());
+            proj.add((Var)quadVars.getObject());
+            subQuery.setQueryPattern(newElt);
+            newElt = new ElementSubQuery(subQuery);
+        }
+
+        copy.setQueryPattern(newElt);
+
+        QuadAcc quadAcc = new QuadAcc();
+        if (includeGraph) {
+            quadAcc.addQuad(quadVars);
+        } else {
+            quadAcc.addTriple(quadVars.asTriple());
+        }
+
+        // Update the template to gspo
+        copy.setConstructTemplate(new Template(quadAcc));
+        return copy;
+    }
+
+    /**
+     * Create BIND(quad[i] AS ?quadVar[i]) statements for the given quads.
+     * Used with {@link #constructToLateral(Query)}.
+     *
+     * @param quadVars A quad with components for use on the rhs of a bind which may thus only use variables
+     * @param quad A quad with components for use on the lhs of a bind
+     * @param includeGraph Whether to create a BIND for the graph component
+     * @return A list of ElementBind's.
+     */
+    public static List<ElementBind> quadToBinds(Quad quadVars, Quad quad, boolean includeGraph) {
+        List<ElementBind> result = new ArrayList<>(4);
+        if (includeGraph) {
+            result.add(new ElementBind((Var)quadVars.getGraph(), ExprLib.nodeToExpr(quad.getGraph())));
+        }
+        result.add(new ElementBind((Var)quadVars.getSubject(), ExprLib.nodeToExpr(quad.getSubject())));
+        result.add(new ElementBind((Var)quadVars.getPredicate(), ExprLib.nodeToExpr(quad.getPredicate())));
+        result.add(new ElementBind((Var)quadVars.getObject(), ExprLib.nodeToExpr(quad.getObject())));
+        return result;
+    }
 }
