@@ -983,6 +983,8 @@ public class QueryGenerationUtils {
      * Convert a construct query with multiple quads in the template into one with single
      * ?g ?s ?p ?o quad.
      *
+     * This operation is NOT indempotent.
+     *
      * <pre>
      * CONSTRUCT {
      *   ?a ?b ?c .
@@ -1016,11 +1018,6 @@ public class QueryGenerationUtils {
 
         Template template = query.getConstructTemplate();
         List<Quad> quads = template.getQuads();
-
-        // If the template is already of size 1 (or less) then there is nothing to do
-        if (quads.size() <= 1) {
-            return copy;
-        }
 
         boolean includeGraph = template.containsRealQuad();
 
