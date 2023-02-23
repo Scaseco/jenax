@@ -463,6 +463,7 @@ public class OpUtils {
      * is independent of a dataset and hence it can be evaluated e.g. against an
      * empty in-memory model.
      *
+     * TODO Maybe rephrase the condition as: An op is pattern free if there is no OpService and all leaf nodes are OpTable.
      *
      * @param op
      * @return
