@@ -13,13 +13,14 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.aksw.commons.util.algebra.GenericFactorizer;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
-import org.apache.jena.ext.com.google.common.collect.BiMap;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
@@ -40,7 +41,6 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprFunction3;
 import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprList;
-import org.apache.jena.sparql.expr.ExprNode;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -49,6 +49,8 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformExpr;
 import org.apache.jena.sparql.graph.NodeTransformLib;
+
+import com.google.common.collect.BiMap;
 
 
 /**
@@ -67,7 +69,21 @@ public class ExprUtils {
      */
     // public static Expr makeNode(Node node) { }
 
+    public static class ExprOps
+        implements org.aksw.commons.util.algebra.ExprOps<Expr, Var>
+    {
+        @Override public List<Expr> getSubExprs(Expr expr) { return ExprUtils.getSubExprs(expr); }
+        @Override public Expr copy(Expr proto, List<Expr> subExprs) { return ExprUtils.copy(proto, subExprs); }
+        @Override public boolean isFunction(Expr expr) { return expr.isFunction(); }
+        @Override public Var asVar(Expr expr) { return expr.isVariable() ? expr.asVar() : null; }
+        @Override public Expr varToExpr(Var var) { return new ExprVar(var); }
+    }
 
+    private static final ExprOps exprOps = new ExprOps();
+
+    public static ExprOps getExprOps() {
+        return exprOps;
+    }
 
     public static class ContainsExprAggregator
         extends ExprTransformCopy
@@ -626,7 +642,11 @@ public class ExprUtils {
 
 
     public static Expr copy(Expr proto, Expr ... args) {
-        return copy(proto, ExprList.create(Arrays.asList(args)));
+        return copy(proto, Arrays.asList(args));
+    }
+
+    public static Expr copy(Expr proto, List<Expr> args) {
+        return copy(proto, ExprList.create(args));
     }
 
     public static Expr copy(Expr proto, ExprList args) {
@@ -689,52 +709,60 @@ public class ExprUtils {
      * @return
      */
     public static Expr replace(Expr expr, Function<? super Expr, ? extends Expr> fn) {
-        Expr result = fn.apply(expr);
-        if (result == expr) { // No change yet
-            List<Expr> subExprs = getSubExprs(expr);
-            List<Expr> newSubExprs = new ArrayList<>();
-            boolean change = false;
-            for (Expr subExpr : subExprs) {
-                Expr newSubExpr = replace(subExpr, fn);
-                if (newSubExpr != subExpr) {
-                    change = true;
-                }
-                newSubExprs.add(newSubExpr);
-            }
-
-            if (change) {
-                ExprList el = ExprList.create(newSubExprs);
-                result = copy(expr, el);
-            }
-        }
+        Expr result = org.aksw.commons.util.algebra.ExprOps.replace(exprOps, expr, fn);
         return result;
+//        Expr result = fn.apply(expr);
+//        if (result == expr) { // No change yet
+//            List<Expr> subExprs = getSubExprs(expr);
+//            List<Expr> newSubExprs = new ArrayList<>();
+//            boolean change = false;
+//            for (Expr subExpr : subExprs) {
+//                Expr newSubExpr = replace(subExpr, fn);
+//                if (newSubExpr != subExpr) {
+//                    change = true;
+//                }
+//                newSubExprs.add(newSubExpr);
+//            }
+//
+//            if (change) {
+//                ExprList el = ExprList.create(newSubExprs);
+//                result = copy(expr, el);
+//            }
+//        }
+//        return result;
     }
+
 
     /**
      * Allocate a single varible for every unique expression.
      * Main use case is common sub expression elimination.
      */
-    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc) {
-        List<Expr> before = ExprUtils.getSubExprs(expr);
-        List<Expr> after = new ArrayList<>(before.size());
-        for (Expr subExpr : before) {
-            Expr tmp = factorize(subExpr, cxt, varAlloc);
-            after.add(tmp);
-        }
-        ExprList el = new ExprList(after);
-        Expr e = ExprUtils.copy(expr, el);
-        Expr result;
-        if (e.isFunction() && el.size() > 0) {
-            Var var = cxt.inverse().get(e);
-            if (var == null) {
-                var = varAlloc.allocVar();
-                cxt.put(var, e);
-            }
-            result = new ExprVar(var);
-        } else {
-            result = e;
-        }
+    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc, Predicate<Expr> isBlocker) {
+        GenericFactorizer<Expr, Var> factorizer = new GenericFactorizer<>(getExprOps(), isBlocker);
+        Expr result = factorizer.factorize(expr, cxt, varAlloc::allocVar);
         return result;
     }
 
+//    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc) {
+//        List<Expr> before = ExprUtils.getSubExprs(expr);
+//        List<Expr> after = new ArrayList<>(before.size());
+//        for (Expr subExpr : before) {
+//            Expr tmp = factorize(subExpr, cxt, varAlloc);
+//            after.add(tmp);
+//        }
+//        ExprList el = new ExprList(after);
+//        Expr e = ExprUtils.copy(expr, el);
+//        Expr result;
+//        if (e.isFunction() && el.size() > 0) {
+//            Var var = cxt.inverse().get(e);
+//            if (var == null) {
+//                var = varAlloc.allocVar();
+//                cxt.put(var, e);
+//            }
+//            result = new ExprVar(var);
+//        } else {
+//            result = e;
+//        }
+//        return result;
+//    }
 }

@@ -20,6 +20,7 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collections.trees.Tree;
 import org.aksw.commons.collections.trees.TreeImpl;
 import org.aksw.commons.collections.trees.TreeUtils;
+import org.aksw.commons.util.algebra.GenericFactorizer;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsageAnalyzerVisitor;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
@@ -55,14 +56,33 @@ import org.apache.jena.sparql.algebra.table.TableData;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.VarAlloc;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class OpUtils {
+
+    public static class OpOps
+        implements org.aksw.commons.util.algebra.ExprOps<Op, Var>
+    {
+        @Override public List<Op> getSubExprs(Op op) { return OpUtils.getSubOps(op); }
+        @Override public Op copy(Op proto, List<Op> subOps) { return OpUtils.copy(proto, subOps); }
+        @Override public boolean isFunction(Op op) { return !OpUtils.getSubOps(op).isEmpty(); }
+        @Override public Var asVar(Op op) { return op instanceof OpVar ? ((OpVar)op).getVar() : null; }
+        @Override public Op varToExpr(Var var) { return new OpVar(var); }
+    }
+
+    private static final OpOps opOps = new OpOps();
+
+    public static OpOps getOpOps() {
+        return opOps;
+    }
+
     public static OpTable createEmptyTableUnionVars(Op ... subOps) {
         List<Var> vars = Arrays.asList(subOps).stream()
                 .flatMap(op -> OpVars.visibleVars(op).stream())
@@ -654,6 +674,16 @@ public class OpUtils {
         Map<Node, BasicPattern> index = QuadPatternUtils.indexBasicPattern(quads);
         Op result = toOp(index, opFactory);
         return result;
-
     }
+
+    /**
+     * Allocate a single varible for every unique expression.
+     * Main use case is common sub expression elimination.
+     */
+    public Op factorize(Op op, BiMap<Var, Op> cxt, VarAlloc varAlloc, Predicate<Op> isBlocker) {
+        GenericFactorizer<Op, Var> factorizer = new GenericFactorizer<>(getOpOps(), isBlocker);
+        Op result = factorizer.factorize(op, cxt, varAlloc::allocVar);
+        return result;
+    }
+
 }

@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.url;
 
+import org.aksw.jena_sparql_api.sparql.ext.init.SparqlX;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.Expr;
@@ -37,7 +38,7 @@ public class F_BNodeAsGiven extends FunctionBase1 {
     public static class ExprTransformBNodeToBNodeAsGiven extends ExprTransformCopy {
         private static final ExprTransformBNodeToBNodeAsGiven INSTANCE = new ExprTransformBNodeToBNodeAsGiven();
 
-        public static String IRI = "http://jsa.aksw.org/fn/iri/bnodeAsGiven";
+        public static String IRI = SparqlX.NS + "bnode.asGiven";
 
         public static ExprTransform get() {
             return INSTANCE;
