@@ -19,11 +19,13 @@ import java.util.stream.StreamSupport;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
+import org.apache.jena.ext.com.google.common.collect.BiMap;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.VarAlloc;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
 import org.apache.jena.sparql.expr.E_LogicalOr;
@@ -38,6 +40,7 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprFunction3;
 import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprNode;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -632,6 +635,9 @@ public class ExprUtils {
         if (proto == null) {
             throw new NullPointerException();
         }
+        else if (proto instanceof NodeValue || proto instanceof ExprVar) {
+            result = proto; // Constant values are supposed to be immutable
+        }
         else if (proto instanceof ExprFunction0) {
             result = copy((ExprFunction0)proto, args);
         }
@@ -650,7 +656,6 @@ public class ExprUtils {
         else {
             throw new IllegalArgumentException("Don't know how to handle " + proto + " of class " + proto.getClass());
         }
-
         return result;
     }
 
@@ -674,7 +679,6 @@ public class ExprUtils {
     public static Expr copy(ExprFunctionN func, ExprList args) {
         return func.copy(args);
     }
-
 
     /**
      * Perform a depth-first-in-order traversal and substitute children w.r.t. the given
@@ -700,8 +704,35 @@ public class ExprUtils {
 
             if (change) {
                 ExprList el = ExprList.create(newSubExprs);
-                result = result = copy(expr, el);
+                result = copy(expr, el);
             }
+        }
+        return result;
+    }
+
+    /**
+     * Allocate a single varible for every unique expression.
+     * Main use case is common sub expression elimination.
+     */
+    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc) {
+        List<Expr> before = ExprUtils.getSubExprs(expr);
+        List<Expr> after = new ArrayList<>(before.size());
+        for (Expr subExpr : before) {
+            Expr tmp = factorize(subExpr, cxt, varAlloc);
+            after.add(tmp);
+        }
+        ExprList el = new ExprList(after);
+        Expr e = ExprUtils.copy(expr, el);
+        Expr result;
+        if (e.isFunction() && el.size() > 0) {
+            Var var = cxt.inverse().get(e);
+            if (var == null) {
+                var = varAlloc.allocVar();
+                cxt.put(var, e);
+            }
+            result = new ExprVar(var);
+        } else {
+            result = e;
         }
         return result;
     }

@@ -84,6 +84,7 @@ public class QuadUtils {
         return getNode(quad, slotToIdx(slot));
     }
 
+    @Deprecated /* Use NodeTransformLib */
     public static Quad applyNodeTransform(Quad quad,
             NodeTransform nodeTransform) {
         Node g = nodeTransform.apply(quad.getGraph());
@@ -141,6 +142,12 @@ public class QuadUtils {
                 NodeUtils.nullToAny(s),
                 NodeUtils.nullToAny(p),
                 NodeUtils.nullToAny(o));
+    }
+
+    /** A shorted form for {@link Quad#matches(Node, Node, Node, Node)} where the argument is a Quad. */
+    public static boolean matches(Quad pattern, Quad quad) {
+        boolean result = pattern.matches(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject());
+        return result;
     }
 
     public static Node[] quadToArray(Quad quad) {
