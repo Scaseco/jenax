@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.algebra.utils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.jena.atlas.io.IndentedWriter;
@@ -18,6 +20,7 @@ import org.apache.jena.sparql.util.NodeIsomorphismMap;
 // A class with a seemingly similar purpose exists as "OpExtKey" in LSQ - consolidate!
 public class OpVar
     extends OpExt
+    implements OpCopyable
 {
     protected Var var;
 
@@ -56,6 +59,16 @@ public class OpVar
     @Override
     public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
         return other instanceof OpVar && Objects.equals(var, ((OpVar)other).var);
+    }
+
+    @Override
+    public Op copy(List<Op> subOps) {
+        return this;
+    }
+
+    @Override
+    public List<Op> getElements() {
+        return Collections.emptyList();
     }
 
 }
