@@ -16,7 +16,7 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 
-public class E_BNodeAsGiven extends FunctionBase1 {
+public class F_BNodeAsGiven extends FunctionBase1 {
     public static final String tagBNodeAsGiven = "bnodeAsGiven";
 
     @Override
