@@ -13,11 +13,11 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.aksw.commons.util.algebra.ExprFilter;
 import org.aksw.commons.util.algebra.GenericFactorizer;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
@@ -737,7 +737,7 @@ public class ExprUtils {
      * Allocate a single varible for every unique expression.
      * Main use case is common sub expression elimination.
      */
-    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc, Predicate<Expr> isBlocker) {
+    public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc, ExprFilter<Expr> isBlocker) {
         GenericFactorizer<Expr, Var> factorizer = new GenericFactorizer<>(getExprOps(), isBlocker);
         Expr result = factorizer.factorize(expr, cxt, varAlloc::allocVar);
         return result;

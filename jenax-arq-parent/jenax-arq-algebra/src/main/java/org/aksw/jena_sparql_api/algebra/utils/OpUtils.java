@@ -20,6 +20,7 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collections.trees.Tree;
 import org.aksw.commons.collections.trees.TreeImpl;
 import org.aksw.commons.collections.trees.TreeUtils;
+import org.aksw.commons.util.algebra.ExprFilter;
 import org.aksw.commons.util.algebra.GenericFactorizer;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsageAnalyzerVisitor;
@@ -677,10 +678,10 @@ public class OpUtils {
     }
 
     /**
-     * Allocate a single varible for every unique expression.
+     * Allocate a single variable for every unique expression.
      * Main use case is common sub expression elimination.
      */
-    public Op factorize(Op op, BiMap<Var, Op> cxt, VarAlloc varAlloc, Predicate<Op> isBlocker) {
+    public Op factorize(Op op, BiMap<Var, Op> cxt, VarAlloc varAlloc, ExprFilter<Op> isBlocker) {
         GenericFactorizer<Op, Var> factorizer = new GenericFactorizer<>(getOpOps(), isBlocker);
         Op result = factorizer.factorize(op, cxt, varAlloc::allocVar);
         return result;
