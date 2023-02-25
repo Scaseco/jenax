@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -26,11 +27,11 @@ import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsageAnalyzerVisitor;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
-import org.apache.jena.ext.com.google.common.base.Objects;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
@@ -139,7 +140,7 @@ public class OpUtils {
         // Remove identity mappings because they'd result in algebra expressions such as BIND(?x AS ?x)
         // which breaks with Jena
         Map<Var, Var> oldToNewWithoutIdentity = oldToNew.entrySet().stream()
-                .filter(e -> !Objects.equal(e.getKey(), e.getValue()))
+                .filter(e -> !Objects.equals(e.getKey(), e.getValue()))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         List<Var> projVars = oldToNew.values()
@@ -522,6 +523,14 @@ public class OpUtils {
 
     public static boolean isServiceFree(Op op) {
         boolean result = inOrderSearch(op, o -> !(o instanceof OpService)).count() == 0;
+        return result;
+    }
+
+    /** Return true iff op is an OpService with the given iri */
+    public static boolean isServiceWithIri(Op op, String iri) {
+        boolean result = op instanceof OpService &&
+                Objects.equals(iri, NodeUtils.getIriOrNull(((OpService)op).getService()));
+
         return result;
     }
 
