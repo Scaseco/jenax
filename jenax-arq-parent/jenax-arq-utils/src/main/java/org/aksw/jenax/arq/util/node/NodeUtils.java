@@ -131,6 +131,12 @@ public class NodeUtils {
         return result;
     }
 
+    /** If the argument is an IRI-node return the IRI - otherwise return null. Argument may be null. */
+    public static String getIriOrNull(Node node) {
+        return node == null
+            ? null
+            : node.isURI() ? node.getURI() : null;
+    }
 
     /**
      * Return a Node's datatype. Thereby, IRIs are returned as rr:IRI and BlankNodes as rr:BlankNode
