@@ -22,6 +22,7 @@ import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
@@ -999,7 +1000,7 @@ public class QueryGenerationUtils {
      *   ?s ?p ?o
      * }
      * WHERE {
-     *   SELECT DISTINCT ?s ?p ?o } # Only if distinct == true
+     *   SELECT DISTINCT ?s ?p ?o { # sub query is omitted if project and distinct are both false / DISTINCT is only added if distinct == true
      *     pattern
      *     LATERAL {
      *       { BIND(?a AS ?s) BIND(?b AS ?p) BIND(?c AS ?o) }
@@ -1009,9 +1010,20 @@ public class QueryGenerationUtils {
      * }
      * </pre>
      *
+     * @param query    The input query which to transform (remains unchanged)
+     * @param quadVars The variables to use for projecting the (g s p o) components
+     * @param outputQueryType Whether the resulting query is a construct query or a select one. SELECT implies project=true.
+     * @param project  Whether to create a sub query that only projects (g s p o)
+     * @param distinct Whether to apply distinct (implies project=true)
+     * @return
      */
-    public static Query constructToLateral(Query query, Quad quadVars, boolean distinct) {
+    public static Query constructToLateral(Query query, Quad quadVars, QueryType outputQueryType, boolean distinct, boolean project) {
         Preconditions.checkArgument(query.isConstructType(), "Query must be of CONSTRUCT type");
+        Preconditions.checkArgument(Arrays.asList(QueryType.CONSTRUCT, QueryType.SELECT).contains(outputQueryType),
+                "Output query type must be CONSTRUCT OR SELECT");
+        if (QueryType.SELECT.equals(outputQueryType) || distinct) {
+            project = true;
+        }
 
         // Always copy
         Query copy = query.cloneQuery();
@@ -1032,10 +1044,10 @@ public class QueryGenerationUtils {
         elts.add(new ElementLateral(union));
         Element newElt = ElementUtils.groupIfNeeded(elts);
 
-        if (distinct) {
+        if (project) {
             Query subQuery = new Query();
             subQuery.setQuerySelectType();
-            subQuery.setDistinct(true);
+            subQuery.setDistinct(distinct);
             VarExprList proj = subQuery.getProject();
             if (includeGraph) {
                 proj.add((Var)quadVars.getGraph());
@@ -1047,18 +1059,22 @@ public class QueryGenerationUtils {
             newElt = new ElementSubQuery(subQuery);
         }
 
-        copy.setQueryPattern(newElt);
-
-        QuadAcc quadAcc = new QuadAcc();
-        if (includeGraph) {
-            quadAcc.addQuad(quadVars);
+        Query result;
+        if (QueryType.CONSTRUCT.equals(outputQueryType)) {
+            copy.setQueryPattern(newElt);
+            QuadAcc quadAcc = new QuadAcc();
+            if (includeGraph) {
+                quadAcc.addQuad(quadVars);
+            } else {
+                quadAcc.addTriple(quadVars.asTriple());
+            }
+            // Update the template to gspo
+            copy.setConstructTemplate(new Template(quadAcc));
+            result = copy;
         } else {
-            quadAcc.addTriple(quadVars.asTriple());
+            result = ((ElementSubQuery)newElt).getQuery();
         }
-
-        // Update the template to gspo
-        copy.setConstructTemplate(new Template(quadAcc));
-        return copy;
+        return result;
     }
 
     /**

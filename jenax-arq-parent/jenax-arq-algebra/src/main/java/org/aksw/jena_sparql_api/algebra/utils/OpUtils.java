@@ -686,5 +686,4 @@ public class OpUtils {
         Op result = factorizer.factorize(op, cxt, varAlloc::allocVar);
         return result;
     }
-
 }

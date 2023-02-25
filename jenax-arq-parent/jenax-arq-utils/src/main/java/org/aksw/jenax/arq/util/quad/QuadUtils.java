@@ -167,10 +167,8 @@ public class QuadUtils {
                 throw new RuntimeException("Variable " + node + "not bound");
             }
         }
-
         return result;
     }
-
 
     public static Quad copySubstitute(Quad quad, Binding binding) {
         return new Quad(substitute(quad.getGraph(), binding),
@@ -179,11 +177,9 @@ public class QuadUtils {
                 substitute(quad.getObject(), binding));
     }
 
-
     public static Set<Var> getVarsMentioned(Quad quad) {
         return NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
     }
-
 
     public static Map<Node, Set<Quad>> partitionByGraph(Iterable<Quad> quads) {
         Map<Node, Set<Quad>> result = new HashMap<>();
