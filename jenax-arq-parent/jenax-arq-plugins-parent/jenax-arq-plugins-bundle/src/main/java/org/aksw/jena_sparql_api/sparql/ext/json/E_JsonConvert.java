@@ -15,7 +15,7 @@ public class E_JsonConvert
     public NodeValue exec(NodeValue v) {
         Node node = v == null ? null : v.asNode();
         JsonElement jsonElement = convert(node, RDFDatatypeJson.get().getGson());
-        NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonElement);
+        NodeValue result = JenaJsonUtils.makeNodeValue(jsonElement);
         return result;
     }
 

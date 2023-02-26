@@ -2,8 +2,6 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -16,8 +14,6 @@ import com.google.gson.Gson;
 public class E_JsonPath
     extends FunctionBase2
 {
-    private static final Logger logger = LoggerFactory.getLogger(E_JsonPath.class);
-
     private Gson gson;
 
     public E_JsonPath() {

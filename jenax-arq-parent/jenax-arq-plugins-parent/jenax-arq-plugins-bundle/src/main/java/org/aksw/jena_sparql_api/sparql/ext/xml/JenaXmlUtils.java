@@ -176,7 +176,7 @@ public class JenaXmlUtils {
             Text text = (Text)xmlNode;
             result = NodeFactory.createLiteral(text.getData());
         } else {
-            result = NodeFactory.createLiteralByValue(xmlNode, RDFDatatypeXml.INSTANCE);
+            result = NodeFactory.createLiteralByValue(xmlNode, RDFDatatypeXml.get());
         }
         return result;
     }

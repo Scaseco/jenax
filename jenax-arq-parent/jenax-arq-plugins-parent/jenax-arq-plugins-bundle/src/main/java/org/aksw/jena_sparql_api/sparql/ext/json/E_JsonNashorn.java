@@ -78,7 +78,7 @@ public class E_JsonNashorn extends FunctionBase {
             Object raw = fn.call(fn, as);
             String jsonStr = jsonStringify.call(null, raw).toString();
             JsonElement jsonEl = gson.fromJson(jsonStr, JsonElement.class);
-            Node node = JenaJsonUtils.jsonToNode(jsonEl, gson, dtype);
+            Node node = JenaJsonUtils.convertJsonToNode(jsonEl, gson, dtype);
             result = NodeValue.makeNode(node);
         }
         return result;

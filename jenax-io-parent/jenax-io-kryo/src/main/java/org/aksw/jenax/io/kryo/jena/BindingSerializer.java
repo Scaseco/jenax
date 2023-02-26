@@ -33,5 +33,4 @@ public class BindingSerializer
         Binding result = builder.build();
         return result;
     }
-
 }

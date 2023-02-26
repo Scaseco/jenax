@@ -104,7 +104,7 @@ public class PropertyFunctionFactoryJsonExplode
 
 
     public static Binding explode(Node node, Binding parent, String varPrefix, int offset) {
-        JsonElement json = RDFDatatypeJson.extractOrNull(node);
+        JsonElement json = JenaJsonUtils.extractOrNull(node);
         Binding result = explode(json, parent, varPrefix, offset);
         return result;
     }
@@ -140,7 +140,7 @@ public class PropertyFunctionFactoryJsonExplode
             }
 
             Var v = Var.alloc(str);
-            Node n = RDFDatatypeJson.jsonToNode(item);
+            Node n = JenaJsonUtils.createLiteralByValue(item);
 
             builder.add(v, n);
         }
@@ -158,7 +158,7 @@ public class PropertyFunctionFactoryJsonExplode
             }
 
             Var v = Var.alloc(str);
-            Node n = RDFDatatypeJson.jsonToNode(e.getValue());
+            Node n = JenaJsonUtils.createLiteralByValue(e.getValue());
 
             builder.add(v, n);
         }

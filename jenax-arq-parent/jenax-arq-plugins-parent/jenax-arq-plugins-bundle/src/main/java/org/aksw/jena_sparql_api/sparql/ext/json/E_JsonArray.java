@@ -25,7 +25,7 @@ public class E_JsonArray
             jsonArray.add(jsonElement);
         }
 
-        NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonArray);
+        NodeValue result = JenaJsonUtils.makeNodeValue(jsonArray);
         return result;
     }
 

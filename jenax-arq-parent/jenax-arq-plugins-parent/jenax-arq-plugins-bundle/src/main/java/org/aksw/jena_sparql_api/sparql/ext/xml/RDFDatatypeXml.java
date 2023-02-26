@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,8 +28,7 @@ public class RDFDatatypeXml
 
     public static final String IRI = XSD.NS + "xml";
 
-    protected DocumentBuilder documentBuilder;
-
+    protected ThreadLocal<DocumentBuilder> documentBuilder;
 
     public static DocumentBuilder createDefaultDocumentBuilder() {
         DocumentBuilder result;
@@ -56,16 +56,16 @@ public class RDFDatatypeXml
     }
 
     public RDFDatatypeXml() {
-        this(createDefaultDocumentBuilder());
+        this(RDFDatatypeXml::createDefaultDocumentBuilder);
     }
 
-    public RDFDatatypeXml(DocumentBuilder documentBuilder) {
-        this(IRI, documentBuilder);
+    public RDFDatatypeXml(Supplier<DocumentBuilder> documentBuilderSupplier) {
+        this(IRI, documentBuilderSupplier);
     }
 
-    public RDFDatatypeXml(String uri, DocumentBuilder documentBuilder) {
+    public RDFDatatypeXml(String uri, Supplier<DocumentBuilder> documentBuilderSupplier) {
         super(uri);
-        this.documentBuilder = documentBuilder;
+        this.documentBuilder = ThreadLocal.withInitial(documentBuilderSupplier);
     }
 
 //    public RDFDatatypeXml(String uri, Gson gson) {
@@ -100,19 +100,19 @@ public class RDFDatatypeXml
      * @throws DatatypeFormatException if the lexical form is not legal
      */
     @Override
-    public synchronized Node parse(String lexicalForm) throws DatatypeFormatException {
+    public Node parse(String lexicalForm) throws DatatypeFormatException {
         Document result;
         try {
-            result = documentBuilder.parse(new InputSource(new StringReader(lexicalForm)));
+            result = documentBuilder.get().parse(new InputSource(new StringReader(lexicalForm)));
         } catch (SAXException | IOException e) {
-            throw new RuntimeException(e);
+            throw new DatatypeFormatException(lexicalForm, this, e);
         }
 
         return result;
     }
 
     public DocumentBuilder getDocumentBuilder() {
-        return documentBuilder;
+        return documentBuilder.get();
     }
 
 }

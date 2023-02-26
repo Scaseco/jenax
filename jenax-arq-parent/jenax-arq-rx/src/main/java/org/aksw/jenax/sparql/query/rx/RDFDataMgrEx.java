@@ -10,8 +10,14 @@ import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
@@ -743,4 +749,51 @@ public class RDFDataMgrEx {
         // RIOT.multilineLiterals
         // TODO
     }
+
+    /**
+     * Serialize a dataset in memory and return its deserialized version.
+     *
+     * @param dataset The input dataset.
+     * @param rdfFormat The serialization format. Its lang is used for deserialization.
+     * @param result The dataset to write to. If null then a new default dataset is created.
+     * @return The dataset obtained from deserialization.
+     */
+    public static Dataset printParseRoundtrip(Dataset dataset, RDFFormat rdfFormat, Dataset result) {
+        if (result == null) {
+            result = DatasetFactory.create();
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, dataset, rdfFormat);
+            try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                RDFDataMgr.read(result, in, rdfFormat.getLang());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    /**
+     * Serialize a model in memory and return its deserialized version.
+     *
+     * @param model The input model.
+     * @param rdfFormat The serialization format. Its lang is used for deserialization.
+     * @param result The model to write to. If null then a new default model is created.
+     * @return The model obtained from deserialization.
+     */
+    public static Model printParseRoundtrip(Model model, RDFFormat rdfFormat, Model result) {
+        if (result == null) {
+            result = ModelFactory.createDefaultModel();
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, model, rdfFormat);
+            try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                RDFDataMgr.read(result, in, rdfFormat.getLang());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
 }

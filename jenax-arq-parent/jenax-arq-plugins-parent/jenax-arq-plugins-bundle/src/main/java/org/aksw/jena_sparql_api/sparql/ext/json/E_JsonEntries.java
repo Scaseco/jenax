@@ -58,7 +58,7 @@ public class E_JsonEntries
                 JsonArray arr = keysToArray(jo, "key", "value");
 
                 RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-                Node node = JenaJsonUtils.jsonToNode(arr, gson, jsonDatatype);
+                Node node = JenaJsonUtils.convertJsonToNode(arr, gson, jsonDatatype);
                 result = NodeValue.makeNode(node);
             }
         }

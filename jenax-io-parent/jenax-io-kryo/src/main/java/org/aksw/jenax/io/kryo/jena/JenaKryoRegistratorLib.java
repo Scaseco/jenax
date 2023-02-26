@@ -1,6 +1,17 @@
 package org.aksw.jenax.io.kryo.jena;
 
 import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
+import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.apache.jena.atlas.lib.tuple.Tuple0;
+import org.apache.jena.atlas.lib.tuple.Tuple1;
+import org.apache.jena.atlas.lib.tuple.Tuple2;
+import org.apache.jena.atlas.lib.tuple.Tuple3;
+import org.apache.jena.atlas.lib.tuple.Tuple4;
+import org.apache.jena.atlas.lib.tuple.Tuple5;
+import org.apache.jena.atlas.lib.tuple.Tuple6;
+import org.apache.jena.atlas.lib.tuple.Tuple7;
+import org.apache.jena.atlas.lib.tuple.Tuple8;
+import org.apache.jena.atlas.lib.tuple.TupleN;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_ANY;
 import org.apache.jena.graph.Node_Blank;
@@ -120,6 +131,19 @@ public class JenaKryoRegistratorLib {
         kryo.register(Binding4.class, bindingSerializer);
         kryo.register(BindingOverMap.class, bindingSerializer);
         // kryo.register(BindingHashMap.class, bindingSerializer);
+
+        Serializer<Tuple<Node>> tupleOfNodesSerializer = new TupleSerializer<>(Node.class);
+        kryo.register(Tuple.class, tupleOfNodesSerializer);
+        kryo.register(Tuple0.class, tupleOfNodesSerializer);
+        kryo.register(Tuple1.class, tupleOfNodesSerializer);
+        kryo.register(Tuple2.class, tupleOfNodesSerializer);
+        kryo.register(Tuple3.class, tupleOfNodesSerializer);
+        kryo.register(Tuple4.class, tupleOfNodesSerializer);
+        kryo.register(Tuple5.class, tupleOfNodesSerializer);
+        kryo.register(Tuple6.class, tupleOfNodesSerializer);
+        kryo.register(Tuple7.class, tupleOfNodesSerializer);
+        kryo.register(Tuple8.class, tupleOfNodesSerializer);
+        kryo.register(TupleN.class, tupleOfNodesSerializer);
 
         Gson gson = new Gson();
 

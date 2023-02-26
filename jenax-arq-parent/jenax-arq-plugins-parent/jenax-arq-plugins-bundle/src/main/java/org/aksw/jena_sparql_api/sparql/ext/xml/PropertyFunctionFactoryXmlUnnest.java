@@ -1,22 +1,12 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
-import java.util.Iterator;
-import java.util.Objects;
-
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.iterator.QueryIterNullIterator;
-import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
@@ -25,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * <pre>
  * {
  *    Bind("['foo', 'bar']"^^xsd:json As ?json)
  *    ?json json:array ?items.
  * }
+ * </pre>
  *
  * @author raven
  *
@@ -52,7 +44,6 @@ public class PropertyFunctionFactoryXmlUnnest
     @Override
     public PropertyFunction create(final String uri)
     {
-
         return new PFuncSimpleAndList() {
 
             @Override
@@ -82,22 +73,3 @@ public class PropertyFunctionFactoryXmlUnnest
         };
     }
 }
-
-
-//if(tmp instanceof NodeList) {
-//NodeList nodes = (NodeList)tmp;
-//for(int i = 0; i < nodes.getLength(); ++i) {
-//	org.w3c.dom.Node item = nodes.item(i);
-//
-//	// It seems running xpath queries on nodes returned as
-//	// xpaths results is not supported - hence we need to serialize xml Nodes
-//	item = (org.w3c.dom.Node)xmlDatatype.parse(xmlDatatype.unparse(item));
-//
-//	//System.out.println("" + node);
-//
-//	Node xmlNode = NodeFactory.createLiteralByValue(item, xmlDatatype);
-//    Binding b = BindingFactory.binding(binding, outputVar, xmlNode);
-//    bindings.add(b);
-//}
-//}
-// result = QueryIterPlainWrapper.create(bindings.iterator());
