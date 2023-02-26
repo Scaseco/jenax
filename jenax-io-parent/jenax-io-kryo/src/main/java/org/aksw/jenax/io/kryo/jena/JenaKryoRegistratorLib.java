@@ -21,6 +21,7 @@ import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Node_Variable;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.impl.LiteralImpl;
@@ -87,7 +88,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(NodeValueString.class, exprSerializer);
 
         // This list is incomplete - use class path scanning?
-        // However this would probably slows down startup time alot for that number of classes...
+        // However class path scanning would probably slows down startup time alot for that number of classes...
         kryo.register(ExprVar.class, exprSerializer);
         kryo.register(E_Equals.class, exprSerializer);
         kryo.register(E_BNode.class, exprSerializer);
@@ -98,6 +99,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(Expr.class, exprSerializer);
 
         kryo.register(VarExprList.class, new VarExprListSerializer());
+        kryo.register(SortCondition.class, new SortConditionSerializer());
 
         kryo.register(Query.class, new QuerySerializer());
 
