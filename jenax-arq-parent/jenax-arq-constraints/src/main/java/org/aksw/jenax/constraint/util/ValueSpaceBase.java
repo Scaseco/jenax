@@ -13,6 +13,12 @@ import com.google.common.collect.TreeRangeSet;
 
 public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
     protected Map<D, RangeSet<T>> vscToRangeSets;
+
+    /**
+     * Whether the key set of {@link #vscToRangeSets} covers all possible dimensions.
+     * If false then this value space is "open" to all values in any so far unknown dimensions.
+     * If true then this value space is "closed".
+     */
     protected boolean isVscExhaustive;
 
     protected abstract D classifyValueSpace(Range<T> range);
@@ -35,7 +41,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
         }
     }
 
-    /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive*/
+    /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive */
     public void addOpenDimension(D dimension) {
         if (isVscExhaustive) {
             vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.<T>create().complement());
@@ -43,7 +49,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
     }
 
 
-    /** Unconstrained mode means that any valid srange is considered enclosed by this one */
+    /** Unconstrained mode means that any valid range is considered enclosed by this one */
     public boolean isUnconstrained() {
         return !isVscExhaustive && vscToRangeSets.isEmpty();
     }

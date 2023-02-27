@@ -14,7 +14,6 @@ import org.aksw.jenax.constraint.api.ConstraintRow;
 import org.aksw.jenax.constraint.api.ValueSpace;
 import org.aksw.jenax.constraint.impl.ConstraintRowMap;
 import org.aksw.jenax.constraint.util.ConstraintDerivations;
-import org.aksw.jenax.constraint.util.NodeRanges;
 import org.aksw.jenax.sparql.algebra.walker.Tracker;
 import org.aksw.jenax.sparql.algebra.walker.TrackingTransformCopy;
 import org.apache.jena.graph.Triple;
@@ -35,7 +34,7 @@ import org.apache.jena.sparql.expr.NodeValue;
 
 
 /**
- * This class check for expressions of the form
+ * This class checks for expressions of the form
  * [STR(?p) = 'const'] and if valueSpace(?p) is limited to IRI then it rewrites
  * the expression as [?p = &lt;const&gt;].
  *

@@ -17,6 +17,12 @@
 		<!-- <dependency> <groupId>org.aksw.commons</groupId> <artifactId>subgraph-isomorphism-index-jena</artifactId> 
 			</dependency> -->
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-constraints</artifactId>
+			<version>4.8.0-1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>subgraph-isomorphism-index-jena</artifactId>
 		</dependency>
