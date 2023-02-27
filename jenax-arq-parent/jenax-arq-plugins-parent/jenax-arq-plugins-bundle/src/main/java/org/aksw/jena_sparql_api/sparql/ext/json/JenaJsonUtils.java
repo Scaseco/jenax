@@ -284,7 +284,10 @@ public class JenaJsonUtils {
                 // JsonPath compiledPath = JsonPath.compile(queryStr);
                 o = parseContext.get().parse(json).read(compiledPath);
             } catch(Exception e) {
-                logger.warn(e.getLocalizedMessage());
+                // Not sure if tying this warning to NodeValue.VerboseWarnings is a clever idea
+                if (NodeValue.VerboseWarnings) {
+                    logger.warn(e.getLocalizedMessage());
+                }
                 NodeValue.raise(new ExprTypeException("Error evaluating json path", e));
                 //result = NodeValue.nvNothing;
             }
