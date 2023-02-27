@@ -1035,15 +1035,8 @@ public class QueryGenerationUtils {
         // In order to unify templates regardless whether they use triples or quads we _always_ include the graph
         boolean includeGraph = true; // template.containsRealQuad();
 
-        // Turns the triples and quads into BINDs
-        // We need to discriminate between triples and quads because
-        // because quads don't produce output if the graph variable isn't bound
+        // Turns the quads into BINDs
         List<Element> groups = new ArrayList<>();
-        template.getTriples().stream()
-            .map(t -> ElementUtils.createElementGroup(
-                    quadToBinds(quadVars, Quad.create(Quad.defaultGraphNodeGenerated, t), false)))
-            .forEach(groups::add);
-
         template.getQuads().stream()
             .map(q -> ElementUtils.createElementGroup(quadToBinds(quadVars, q, true)))
             .forEach(groups::add);
@@ -1098,17 +1091,7 @@ public class QueryGenerationUtils {
      */
     public static List<ElementBind> quadToBinds(Quad quadVars, Quad quad, boolean isRealQuad) {
         List<ElementBind> result = new ArrayList<>(4);
-
-        // As usual there is an annoying detail in SPARQL: CONSTRUCT { GRAPH ?g  { ... } } does
-        // not produce an result if ?g is unbound. If we still want a result quad we have to use
-        // Jena's specific default graph constant.
-        // Possible future solution: https://github.com/w3c/sparql-12/issues/43
-        // IF(BOUND(?g), ?g, <urn:x-arq:defaultGraphNode>)
-        Expr ge = isRealQuad
-                ? ExprLib.nodeToExpr(quad.getGraph())
-                : ExprLib.nodeToExpr(Quad.defaultGraphNodeGenerated);
-
-        result.add(new ElementBind((Var)quadVars.getGraph(), ge));
+        result.add(new ElementBind((Var)quadVars.getGraph(), ExprLib.nodeToExpr(quad.getGraph())));
         result.add(new ElementBind((Var)quadVars.getSubject(), ExprLib.nodeToExpr(quad.getSubject())));
         result.add(new ElementBind((Var)quadVars.getPredicate(), ExprLib.nodeToExpr(quad.getPredicate())));
         result.add(new ElementBind((Var)quadVars.getObject(), ExprLib.nodeToExpr(quad.getObject())));

@@ -166,10 +166,8 @@ public class VarExprListUtils {
         for(Entry<Var, Expr> e : map.entrySet()) {
             Var v = e.getKey();
             Expr w = e.getValue();
-
             add(result, v, w);
         }
-
         return result;
     }
 
