@@ -49,6 +49,7 @@ import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_IRI;
 import org.apache.jena.sparql.expr.E_StrConcat;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueBoolean;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueDateTime;
@@ -97,6 +98,8 @@ public class JenaKryoRegistratorLib {
         kryo.register(E_Datatype.class, exprSerializer);
         kryo.register(E_StrConcat.class, exprSerializer);
         kryo.register(Expr.class, exprSerializer);
+
+        kryo.register(ExprList.class, new ExprListSerializer());
 
         kryo.register(VarExprList.class, new VarExprListSerializer());
         kryo.register(SortCondition.class, new SortConditionSerializer());
