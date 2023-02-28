@@ -1,7 +1,8 @@
-package org.aksw.jenax.sparql.algebra.evaluate;
+package org.aksw.jenax.sparql.algebra.transform2;
 
 import java.util.List;
 
+import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
@@ -37,13 +38,9 @@ import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
 import org.apache.jena.sparql.algebra.op.OpUnion;
-import org.apache.jena.sparql.engine.main.OpExecutor;
 
 /**
- * A general interface for evaluating Ops to a result type T.
- *
- * This class can be seen as a generalization of e.g. {@link eval} and {@link OpExecutor}:
- * The former evaluates Ops into other Ops, whereas the latter evaluates them to QueryIters.
+ * A generalization of {@link Transform}
  */
  interface Evaluation<T> {
      T eval(OpTable opUnit);

@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.algebra.evaluate;
+package org.aksw.jenax.sparql.algebra.transform2;
 
 import java.util.Objects;
 
@@ -72,7 +72,7 @@ public class Evaluator {
     // down SERVICE
     static class EvaluationSkipService<T> extends EvaluationWrapper<T> {
         public EvaluationSkipService(Evaluation<T> evaluator) {
-            super(evaluator) ;
+            super(evaluator);
         }
 
         @Override

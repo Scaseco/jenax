@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.algebra.evaluate;
+package org.aksw.jenax.sparql.algebra.transform2;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -11,7 +11,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 
-public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
+public abstract class VSpaceBase<T extends Comparable<T>, D> {
     protected Map<D, RangeSet<T>> vscToRangeSets;
 
     /**
@@ -23,11 +23,11 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
 
     protected abstract D classifyValueSpace(Range<T> range);
 
-    protected ValueSpaceBase(boolean isVscExhaustive) {
+    protected VSpaceBase(boolean isVscExhaustive) {
         this(isVscExhaustive, new HashMap<>());
     }
 
-    protected ValueSpaceBase(boolean isVscExhaustive, Map<D, RangeSet<T>> vscToRangeSets) {
+    protected VSpaceBase(boolean isVscExhaustive, Map<D, RangeSet<T>> vscToRangeSets) {
         super();
         this.isVscExhaustive = isVscExhaustive;
         this.vscToRangeSets = vscToRangeSets;
@@ -38,18 +38,18 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
     }
 
     /** Argument is copied */
-    public ValueSpaceBase<T, D> setDimension(Object dimensionKey, RangeSet<T> rangeSet) {
+    public VSpaceBase<T, D> setDimension(Object dimensionKey, RangeSet<T> rangeSet) {
         vscToRangeSets.put((D)dimensionKey, rangeSet == null ? null : TreeRangeSet.create(rangeSet));
         return this;
     }
 
-    public ValueSpaceBase<T, D> removeDimension(Object dimensionKey) {
+    public VSpaceBase<T, D> removeDimension(Object dimensionKey) {
         vscToRangeSets.remove(dimensionKey);
         return this;
     }
 
     /** Add a new empty dimension. Do nothing if it already exists or if the dimensions are exhaustive */
-    public ValueSpaceBase<T, D> addEmptyDimension(D dimension) {
+    public VSpaceBase<T, D> addEmptyDimension(D dimension) {
         if (!isVscExhaustive) {
             vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.create());
         }
@@ -57,7 +57,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
     }
 
     /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive */
-    public ValueSpaceBase<T, D> addOpenDimension(D dimension) {
+    public VSpaceBase<T, D> addOpenDimension(D dimension) {
         if (isVscExhaustive) {
             vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.<T>create().complement());
         }
@@ -116,7 +116,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
      * @param that
      * @return
      */
-    public ValueSpaceBase<T, D> stateIntersection(ValueSpaceBase<T, D> that) {
+    public VSpaceBase<T, D> stateIntersection(VSpaceBase<T, D> that) {
 
         if (!this.isVscExhaustive) {
             for (Iterator<Entry<D, RangeSet<T>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {
@@ -169,7 +169,7 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
      * @param that
      * @return
      */
-    public ValueSpaceBase<T, D> stateUnion(ValueSpaceBase<T, D> that) {
+    public VSpaceBase<T, D> stateUnion(VSpaceBase<T, D> that) {
         this.isVscExhaustive = this.isVscExhaustive && that.isVscExhaustive;
 
         for (Iterator<Entry<D, RangeSet<T>>> it = that.vscToRangeSets.entrySet().iterator(); it.hasNext(); ) {

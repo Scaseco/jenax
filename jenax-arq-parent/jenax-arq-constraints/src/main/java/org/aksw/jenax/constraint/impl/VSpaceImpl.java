@@ -3,7 +3,7 @@ package org.aksw.jenax.constraint.impl;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.node.ComparableNodeValue;
-import org.aksw.jenax.constraint.api.ValueSpace;
+import org.aksw.jenax.constraint.api.VSpace;
 import org.aksw.jenax.constraint.util.NodeRanges;
 
 import com.google.common.collect.RangeSet;
@@ -12,24 +12,24 @@ import com.google.common.collect.TreeRangeSet;
 /**
  * An implementation of value space backed by {@link NodeRanges}.
  *
- * The parameters of the methods {@link #stateIntersection(ValueSpace)} and {@link #stateUnion(ValueSpace)}
- * only accept instances of {@link ValueSpaceImpl}. Any other type yields a {@link ClassCastException}.
+ * The parameters of the methods {@link #stateIntersection(VSpace)} and {@link #stateUnion(VSpace)}
+ * only accept instances of {@link VSpaceImpl}. Any other type yields a {@link ClassCastException}.
  *
  * @author raven
  *
  */
-public class ValueSpaceImpl
-    implements ValueSpace
+public class VSpaceImpl
+    implements VSpace
 {
     protected NodeRanges nodeRanges;
 
-    protected ValueSpaceImpl(NodeRanges nodeRanges) {
+    protected VSpaceImpl(NodeRanges nodeRanges) {
         super();
         this.nodeRanges = nodeRanges;
     }
 
-    public static ValueSpaceImpl create(NodeRanges nodeRanges) {
-        return new ValueSpaceImpl(nodeRanges);
+    public static VSpaceImpl create(NodeRanges nodeRanges) {
+        return new VSpaceImpl(nodeRanges);
     }
 
     public NodeRanges getNodeRanges() {
@@ -38,8 +38,8 @@ public class ValueSpaceImpl
 
 
     @Override
-    public ValueSpaceImpl clone() {
-        return new ValueSpaceImpl(nodeRanges.clone());
+    public VSpaceImpl clone() {
+        return new VSpaceImpl(nodeRanges.clone());
     }
 
     @Override
@@ -51,15 +51,15 @@ public class ValueSpaceImpl
     }
 
     @Override
-    public ValueSpaceImpl stateIntersection(ValueSpace valueSpace) {
-        ValueSpaceImpl that = (ValueSpaceImpl)valueSpace;
+    public VSpaceImpl stateIntersection(VSpace valueSpace) {
+        VSpaceImpl that = (VSpaceImpl)valueSpace;
         nodeRanges.stateIntersection(that.nodeRanges);
         return this;
     }
 
     @Override
-    public ValueSpaceImpl stateUnion(ValueSpace valueSpace) {
-        ValueSpaceImpl that = (ValueSpaceImpl)valueSpace;
+    public VSpaceImpl stateUnion(VSpace valueSpace) {
+        VSpaceImpl that = (VSpaceImpl)valueSpace;
         nodeRanges.stateUnion(that.nodeRanges);
         return this;
     }
@@ -78,16 +78,16 @@ public class ValueSpaceImpl
 
     /** TODO The factory-aspect of creating a new ValueSpace with an open dimension should go to ValueSpaceSchema */
     @Override
-    public ValueSpace forDimension(Object dimensionKey) {
+    public VSpace forDimension(Object dimensionKey) {
         NodeRanges tmp = NodeRanges.createClosed();
         tmp.addOpenDimension(dimensionKey);
-        ValueSpace vc = ValueSpaceImpl.create(tmp);
-        ValueSpace result = vc.stateIntersection(this);
+        VSpace vc = VSpaceImpl.create(tmp);
+        VSpace result = vc.stateIntersection(this);
         return result;
     }
 
     @Override
-    public ValueSpace moveDimension(Object fromDimKey, Object toDimKey) {
+    public VSpace moveDimension(Object fromDimKey, Object toDimKey) {
         RangeSet<ComparableNodeValue> ranges = nodeRanges.getDimension(fromDimKey);
         nodeRanges.removeDimension(fromDimKey); // .setDimension(fromDimKey, null);
         nodeRanges.setDimension(toDimKey, ranges);

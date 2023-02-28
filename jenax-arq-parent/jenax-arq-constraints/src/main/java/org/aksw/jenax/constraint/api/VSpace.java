@@ -6,25 +6,24 @@ package org.aksw.jenax.constraint.api;
  * for emptiness.
  *
  * @author raven
- *
  */
-public interface ValueSpace
+public interface VSpace
     extends Constrainable
 {
     @Override
-    ValueSpace clone();
+    VSpace clone();
 
     @Override
-    ValueSpace stateIntersection(ValueSpace valueSpace);
+    VSpace stateIntersection(VSpace valueSpace);
 
     @Override
-    ValueSpace stateUnion(ValueSpace valueSpace);
+    VSpace stateUnion(VSpace valueSpace);
 
     /**
      * Create a new closed value space, add the full range of the given dimension and
      * intersect it with 'this'.
      */
-    ValueSpace forDimension(Object dimensionKey);
+    VSpace forDimension(Object dimensionKey);
 
     /**
      * Copy the values of the dimension fromDimKey to toDimKey.
@@ -32,7 +31,7 @@ public interface ValueSpace
      * Use with care.
      */
     // TODO Think of a better/safer/validating way
-    ValueSpace moveDimension(Object fromDimKey, Object toDimKey);
+    VSpace moveDimension(Object fromDimKey, Object toDimKey);
 
     /** Whether the value space only has ranges in the dimension with the given key (e.g. numeric, iRI, text, ...) */
     boolean isLimitedTo(Object dimensionKey);

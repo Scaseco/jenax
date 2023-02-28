@@ -1,22 +1,5 @@
 package org.aksw.jenax.constraint.api;
 
-
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.aksw.commons.util.range.RangeUtils;
-import org.aksw.jenax.arq.rdfterm.RdfTermType;
-import org.aksw.jenax.constraint.util.NodeRanges;
-import org.aksw.jenax.constraint.util.PrefixSet;
-import org.apache.jena.graph.Node;
-
-import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
-
-
-
-
 /**
  * This class represents restrictions to be used on variables.
  *

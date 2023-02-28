@@ -1,78 +1,78 @@
 package org.aksw.jenax.constraint.api;
 
-import org.aksw.jenax.constraint.impl.ValueSpaceImpl;
+import org.aksw.jenax.constraint.impl.VSpaceImpl;
 import org.aksw.jenax.constraint.util.NodeRanges;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 
 public class RdfTermProfiles {
 
-    public static boolean stateSlot(ConstraintRow row, TupleSlot slot) {
+    public static boolean stateSlot(CBinding row, TupleSlot slot) {
         return true;
     }
 
     /** Unconstrained */
-    public static ValueSpace newOpenProfile() {
+    public static VSpace newOpenProfile() {
         NodeRanges nr = NodeRanges.createOpen();
-        return ValueSpaceImpl.create(nr);
+        return VSpaceImpl.create(nr);
     }
 
     /** Only open the IRI value space*/
-    public static ValueSpace newIriProfile() {
+    public static VSpace newIriProfile() {
         NodeRanges nr = NodeRanges.createClosed();
         nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
-        return ValueSpaceImpl.create(nr);
+        return VSpaceImpl.create(nr);
     }
 
     /** Open all spaces other than IRI, BNODE and TRIPLE */
-    public static ValueSpace newLiteralProfile() {
+    public static VSpace newLiteralProfile() {
         NodeRanges nr = NodeRanges.createOpen();
         nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
         nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_BLANKNODE);
         nr.addEmptyDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_QUOTED_TRIPLE);
-        return ValueSpaceImpl.create(nr);
+        return VSpaceImpl.create(nr);
     }
 
     /** Open all spaces other than IRI, BNODE and TRIPLE */
-    public static ValueSpace newNonLiteralProfile() {
+    public static VSpace newNonLiteralProfile() {
         NodeRanges nr = NodeRanges.createClosed();
         nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
         nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_BLANKNODE);
         nr.addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_QUOTED_TRIPLE);
-        return ValueSpaceImpl.create(nr);
+        return VSpaceImpl.create(nr);
     }
 
 
     /** Create a restriction for the graph component; only allows for iris */
-    public static ValueSpace forGraph() {
+    public static VSpace forGraph() {
         return newIriProfile();
     }
 
     /** Create a restriction for the graph component; only allows for iris and bnodes */
-    public static ValueSpace forSubject() {
+    public static VSpace forSubject() {
         return newNonLiteralProfile();
     }
 
     /** Create a restriction for the graph component; only allows for iris */
-    public static ValueSpace forPredicate() {
+    public static VSpace forPredicate() {
         return newIriProfile();
     }
 
     /** Create a restriction for the graph component; allows for anything */
-    public static ValueSpace forObject() {
+    public static VSpace forObject() {
         return newOpenProfile();
     }
 
 
     /** Create a restriction for a given node */
-    public static ValueSpace forNode(Node node) {
+    public static VSpace forNode(Node node) {
         NodeRanges nr = NodeRanges.createOpen();
         nr.stateValue(node);
-        return ValueSpaceImpl.create(nr);
+        return VSpaceImpl.create(nr);
     }
 
 
-    public static ValueSpace forSlot(TupleSlot slot) {
+    public static VSpace forSlot(TupleSlot slot) {
         switch (slot) {
         case GRAPH: return forGraph();
         case SUBJECT: return forSubject();
