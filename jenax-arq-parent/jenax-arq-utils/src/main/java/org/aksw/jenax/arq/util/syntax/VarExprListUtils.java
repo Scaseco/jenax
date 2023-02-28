@@ -36,19 +36,23 @@ public class VarExprListUtils {
      * for evaluating OpExtend or creating the group key for OpGroup
      **/
     public static Binding copyProject(VarExprList vars, Binding binding, ExecutionContext execCxt) {
+        BindingBuilder x = BindingBuilder.create();
+        copyProject(x, vars, binding, execCxt);
+        return x.build();
+    }
+
+    /** Variant of copyProject where the results are accumulated in the provided binding builder */
+    public static void copyProject(BindingBuilder x, VarExprList vars, Binding binding, ExecutionContext execCxt) {
         // No group vars (implicit or explicit) => working on whole result set.
         // Still need a BindingMap to assign to later.
-        BindingBuilder x = BindingBuilder.create();
-        for ( Var var : vars.getVars() ) {
+        for (Var var : vars.getVars()) {
             Node node = vars.get(var, binding, execCxt);
             // Null returned for unbound and error.
             if ( node != null ) {
                 x.add(var, node);
             }
         }
-        return x.build();
     }
-
 
     /**
      * Add variables to an {@link VarExprList} if they are not already present in it
