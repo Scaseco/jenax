@@ -2,8 +2,12 @@ package org.aksw.jenax.constraint.impl;
 
 import java.util.Set;
 
+import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.constraint.api.ValueSpace;
 import org.aksw.jenax.constraint.util.NodeRanges;
+
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 
 /**
  * An implementation of value space backed by {@link NodeRanges}.
@@ -68,6 +72,26 @@ public class ValueSpaceImpl
     @Override
     public String toString() {
         return nodeRanges.toString();
+    }
+
+
+
+    /** TODO The factory-aspect of creating a new ValueSpace with an open dimension should go to ValueSpaceSchema */
+    @Override
+    public ValueSpace forDimension(Object dimensionKey) {
+        NodeRanges tmp = NodeRanges.createClosed();
+        tmp.addOpenDimension(dimensionKey);
+        ValueSpace vc = ValueSpaceImpl.create(tmp);
+        ValueSpace result = vc.stateIntersection(this);
+        return result;
+    }
+
+    @Override
+    public ValueSpace moveDimension(Object fromDimKey, Object toDimKey) {
+        RangeSet<ComparableNodeValue> ranges = nodeRanges.getDimension(fromDimKey);
+        nodeRanges.removeDimension(fromDimKey); // .setDimension(fromDimKey, null);
+        nodeRanges.setDimension(toDimKey, ranges);
+        return this;
     }
 
 

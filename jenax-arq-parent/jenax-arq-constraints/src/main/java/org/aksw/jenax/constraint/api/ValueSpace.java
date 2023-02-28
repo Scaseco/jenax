@@ -20,6 +20,19 @@ public interface ValueSpace
     @Override
     ValueSpace stateUnion(ValueSpace valueSpace);
 
+    /**
+     * Create a new closed value space, add the full range of the given dimension and
+     * intersect it with 'this'.
+     */
+    ValueSpace forDimension(Object dimensionKey);
+
+    /**
+     * Copy the values of the dimension fromDimKey to toDimKey.
+     * Replaces the target values. There is no consistency check (e.g. moving a numeric range to the iri dimension)
+     * Use with care.
+     */
+    // TODO Think of a better/safer/validating way
+    ValueSpace moveDimension(Object fromDimKey, Object toDimKey);
 
     /** Whether the value space only has ranges in the dimension with the given key (e.g. numeric, iRI, text, ...) */
     boolean isLimitedTo(Object dimensionKey);

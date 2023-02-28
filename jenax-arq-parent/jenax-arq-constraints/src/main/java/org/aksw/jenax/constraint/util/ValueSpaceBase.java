@@ -33,19 +33,35 @@ public abstract class ValueSpaceBase<T extends Comparable<T>, D> {
         this.vscToRangeSets = vscToRangeSets;
     }
 
+    public RangeSet<T> getDimension(Object dimensionKey) {
+        return vscToRangeSets.get(dimensionKey);
+    }
+
+    /** Argument is copied */
+    public ValueSpaceBase<T, D> setDimension(Object dimensionKey, RangeSet<T> rangeSet) {
+        vscToRangeSets.put((D)dimensionKey, rangeSet == null ? null : TreeRangeSet.create(rangeSet));
+        return this;
+    }
+
+    public ValueSpaceBase<T, D> removeDimension(Object dimensionKey) {
+        vscToRangeSets.remove(dimensionKey);
+        return this;
+    }
 
     /** Add a new empty dimension. Do nothing if it already exists or if the dimensions are exhaustive */
-    public void addEmptyDimension(D dimension) {
+    public ValueSpaceBase<T, D> addEmptyDimension(D dimension) {
         if (!isVscExhaustive) {
             vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.create());
         }
+        return this;
     }
 
     /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive */
-    public void addOpenDimension(D dimension) {
+    public ValueSpaceBase<T, D> addOpenDimension(D dimension) {
         if (isVscExhaustive) {
             vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.<T>create().complement());
         }
+        return this;
     }
 
 

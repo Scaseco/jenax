@@ -3,7 +3,6 @@ package org.aksw.jenax.constraint.util;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +28,9 @@ import com.google.common.collect.TreeRangeSet;
  *
  * FIXME Use of non-singletons in the 'unknown' value space must be handled as effectively
  * unconstrained
+ * FIXME Extend the API with meta-interfaces. e.g. Dimension classes (for numeric, string, iri, etc) could check whether values
+ * are within their range.
+ *
  *
  *      | zzz    999
  *      |
@@ -87,6 +89,18 @@ public class NodeRanges
     /** Create a NodeRange that contains nothing */
     public static NodeRanges createClosed() {
         return new NodeRanges(true);
+    }
+
+    @Override
+    public NodeRanges addEmptyDimension(Object dimension) {
+        super.addEmptyDimension(dimension);
+        return this;
+    }
+
+    @Override
+    public NodeRanges addOpenDimension(Object dimension) {
+        super.addOpenDimension(dimension);
+        return this;
     }
 
 //    protected void ensureConstrainedMode() {

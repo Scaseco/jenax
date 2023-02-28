@@ -1,6 +1,9 @@
 package org.aksw.jenax.sparql.algebra.evaluate;
 
+import java.util.Map.Entry;
+
 import org.aksw.jenax.constraint.api.ConstraintRow;
+import org.aksw.jenax.constraint.api.ValueSpace;
 import org.aksw.jenax.constraint.impl.ConstraintRowMap;
 import org.aksw.jenax.constraint.util.ConstraintDerivations;
 import org.apache.jena.graph.Triple;
@@ -10,6 +13,7 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
+import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpJoin;
 import org.apache.jena.sparql.algebra.op.OpOrder;
@@ -18,13 +22,15 @@ import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.Expr;
 
 public class EvaluationOfConstraints
    extends EvaluationBase<ConstraintRow>
 {
 
     public static void main(String[] args) {
-        Query query = QueryFactory.create("SELECT ?s { { ?s ?p ?o } { SELECT ?x { ?s ?p ?x } } } ORDER By ?p");
+        Query query = QueryFactory.create("SELECT ?x { { ?s ?p ?o } { SELECT ?x { ?s ?p ?o BIND(IRI(STR(CONCAT(STR('http://')))) AS ?x) } } } ORDER By ?p");
         Op op = Algebra.compile(query);
         System.out.println(op);
         // op = TransformScopeRename.transform(op) ;
@@ -86,6 +92,17 @@ public class EvaluationOfConstraints
 
     @Override
     public ConstraintRow eval(OpReduced op, ConstraintRow result) {
+        return result;
+    }
+
+    @Override
+    public ConstraintRow eval(OpExtend opExtend, ConstraintRow result) {
+        for (Entry<Var, Expr> entry : opExtend.getVarExprList().getExprs().entrySet()) {
+            Var v = entry.getKey();
+            Expr e = entry.getValue();
+            ValueSpace vc = ConstraintDerivations.deriveValueSpace(e, result);
+            result.stateIntersection(v, vc);
+        }
         return result;
     }
 

@@ -1,17 +1,26 @@
 package org.aksw.jenax.constraint.util;
 
+import java.util.List;
+
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.constraint.api.ConstraintRow;
 import org.aksw.jenax.constraint.api.RdfTermProfiles;
 import org.aksw.jenax.constraint.api.ValueSpace;
+import org.aksw.jenax.constraint.impl.ValueSpaceImpl;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.core.mem.TupleSlot;
+import org.apache.jena.sparql.expr.E_IRI;
+import org.apache.jena.sparql.expr.E_Str;
+import org.apache.jena.sparql.expr.E_StrConcat;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.NodeValue;
 
 public class ConstraintDerivations {
 
@@ -59,6 +68,7 @@ public class ConstraintDerivations {
         // TODO We need expr utils to extract op(var, constant) expressions - but they are in a higher module...
         // One possible solution is to define an interface at the lower level and provide the implementation in a higher one
 
+        ValueSpace c = row.get(null);
 
         // TODO Recognize term type functions:
         // IRI(x), BNODE(y), STRDT(?, constantDatatype),
@@ -66,5 +76,57 @@ public class ConstraintDerivations {
         // TODO Recognize IRI(concat("const"))
 
     }
+
+
+    /** Attempt to figure out what the expression might return */
+    public static ValueSpace deriveValueSpace(Expr expr, ConstraintRow cxt) {
+        ValueSpace result = null;
+        if (expr.isConstant()) {
+            NodeValue nv = expr.getConstant();
+            result = ValueSpaceImpl.create(NodeRanges.createClosed().addValue(nv.asNode()));
+        } else if (expr.isVariable()) {
+            Var var = expr.asVar();
+            result = cxt.get(var);
+        } else {
+            List<Expr> args = ExprUtils.getSubExprs(expr);
+            if (expr instanceof E_StrConcat) {
+                // Folding consecutive string args into one is a separate task that should be run first
+                if (args.isEmpty()) {
+                    // Empty string
+                    result = ValueSpaceImpl.create(NodeRanges.createClosed().addValue(NodeFactory.createLiteral("")));
+                } else {
+                    // Only look at the first arg
+                    Expr arg = args.get(0);
+                    // FIXME Don't recurse - if arg is a string then create a prefix constraint from it
+                    result = deriveValueSpace(arg, cxt);
+                    result.stateIntersection(ValueSpaceImpl.create(NodeRanges.createClosed()
+                            .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)
+                            .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)));
+                }
+            } else if (expr instanceof E_Str) {
+                Expr arg = args.get(0);
+                result = deriveValueSpace(arg, cxt);
+                result.stateIntersection(ValueSpaceImpl.create(NodeRanges.createClosed()
+                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)
+                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)));
+            } else if (expr instanceof E_IRI) {
+                // TODO Consider the BASE IRI / relative IRIs
+                Expr arg = args.get(0);
+                ValueSpace argSpace = deriveValueSpace(arg, cxt);
+                result = argSpace.forDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING);
+                result.moveDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING, org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
+                if (!argSpace.isLimitedTo(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)) {
+                    result.stateUnion(ValueSpaceImpl.create(NodeRanges.createClosed()
+                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)));
+                }
+            }
+        }
+
+        if (result == null) {
+            result = ValueSpaceImpl.create(NodeRanges.createOpen());
+        }
+        return result;
+    }
+
 
 }
