@@ -2,6 +2,7 @@ package org.aksw.jenax.constraint.util;
 
 import java.util.List;
 
+import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
@@ -22,8 +23,7 @@ import org.apache.jena.sparql.expr.E_Str;
 import org.apache.jena.sparql.expr.E_StrConcat;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
-
-import com.google.common.collect.Range;
+import org.apache.jena.sparql.expr.ValueSpace;
 
 public class ConstraintDerivations {
 
@@ -120,24 +120,26 @@ public class ConstraintDerivations {
                     // If the result has values in the string space then use those as prefixes
 
                     result.stateIntersection(VSpaceImpl.create(NodeRanges.createClosed()
-                            .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)
-                            .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)));
+                            .addOpenDimension(ValueSpace.VSPACE_UNDEF)
+                            .addOpenDimension(ValueSpace.VSPACE_STRING)));
                 }
             } else if (expr instanceof E_Str) {
                 Expr arg = args.get(0);
                 result = deriveValueSpace(arg, cxt);
                 result.stateIntersection(VSpaceImpl.create(NodeRanges.createClosed()
-                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)
-                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)));
+                        .addOpenDimension(ValueSpace.VSPACE_UNDEF)
+                        .addOpenDimension(ValueSpace.VSPACE_STRING)));
             } else if (expr instanceof E_IRI) {
                 // TODO Consider the BASE IRI / relative IRIs
                 Expr arg = args.get(0);
                 VSpace argSpace = deriveValueSpace(arg, cxt);
-                result = argSpace.forDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING);
-                result.moveDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING, org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
-                if (!argSpace.isLimitedTo(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING)) {
+                result = argSpace.forDimension(ValueSpace.VSPACE_STRING);
+                // result.moveDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING, org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
+                result = result.mapDimensionToNewVSpace(argSpace, ComparableNodeValue.class, r ->
+                    RangeUtils.map(r, x -> ComparableNodeValue.wrap(NodeFactory.createURI(x.getNodeValue().getString()))));
+                if (!argSpace.isLimitedTo(ValueSpace.VSPACE_STRING)) {
                     result.stateUnion(VSpaceImpl.create(NodeRanges.createClosed()
-                        .addOpenDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_UNDEF)));
+                        .addOpenDimension(ValueSpace.VSPACE_UNDEF)));
                 }
             }
         }

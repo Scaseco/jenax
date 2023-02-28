@@ -34,7 +34,7 @@ public class EvaluationOfConstraints
 
     public static void main(String[] args) {
         Query query = QueryFactory.create("SELECT ?x { { ?s ?p ?o } UNION {"
-                + "SELECT ?x { ?s ?p ?o BIND(IRI(STR(CONCAT(STR('http://')))) AS ?x) } } } ORDER By ?p");
+                + "SELECT ?x { ?s ?p ?o BIND(5 AS ?x) } } } ORDER By ?p");
         Op op = Algebra.compile(query);
         System.out.println(op);
         // op = TransformScopeRename.transform(op) ;

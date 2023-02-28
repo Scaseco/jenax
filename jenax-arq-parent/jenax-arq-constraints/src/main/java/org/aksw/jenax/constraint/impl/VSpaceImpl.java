@@ -1,13 +1,15 @@
 package org.aksw.jenax.constraint.impl;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.constraint.api.VSpace;
 import org.aksw.jenax.constraint.util.NodeRanges;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
-import com.google.common.collect.TreeRangeSet;
 
 /**
  * An implementation of value space backed by {@link NodeRanges}.
@@ -74,8 +76,6 @@ public class VSpaceImpl
         return nodeRanges.toString();
     }
 
-
-
     /** TODO The factory-aspect of creating a new ValueSpace with an open dimension should go to ValueSpaceSchema */
     @Override
     public VSpace forDimension(Object dimensionKey) {
@@ -87,12 +87,23 @@ public class VSpaceImpl
     }
 
     @Override
-    public VSpace moveDimension(Object fromDimKey, Object toDimKey) {
+    public <X extends Comparable<X>> VSpace mapDimensionToNewVSpace(Object fromDimKey, Class<X> itemType,
+            Function<Range<X>, Range<X>> mapper) {
+        Preconditions.checkArgument(ComparableNodeValue.class.isAssignableFrom(itemType), "Type must be ComparableNodeValue.class");
         RangeSet<ComparableNodeValue> ranges = nodeRanges.getDimension(fromDimKey);
-        nodeRanges.removeDimension(fromDimKey); // .setDimension(fromDimKey, null);
-        nodeRanges.setDimension(toDimKey, ranges);
-        return this;
+        NodeRanges newNodeRanges = NodeRanges.createClosed();
+        for (Range<ComparableNodeValue> range : ranges.asRanges()) {
+            Range<ComparableNodeValue> out = (Range<ComparableNodeValue>) mapper.apply((Range<X>)range);
+            newNodeRanges.add(out);
+        }
+        return VSpaceImpl.create(newNodeRanges);
     }
 
-
+//    @Override
+//    public VSpace moveDimension(Object fromDimKey, Object toDimKey) {
+//        RangeSet<ComparableNodeValue> ranges = nodeRanges.getDimension(fromDimKey);
+//        nodeRanges.removeDimension(fromDimKey); // .setDimension(fromDimKey, null);
+//        nodeRanges.setDimension(toDimKey, ranges);
+//        return this;
+//    }
 }

@@ -329,7 +329,7 @@ public class NodeRanges
         return result;
     }
 
-    public static NodeRanges nodeRangeForPrefix(String prefix) {
+    public static NodeRanges nodeRangesForPrefix(String prefix) {
         Range<ComparableNodeValue> range = rangeForPrefix(prefix);
         NodeRanges result = NodeRanges.createClosed();
         result.add(range);
