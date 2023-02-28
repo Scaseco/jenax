@@ -76,7 +76,7 @@ public class Evaluator {
         }
 
         @Override
-        public T apply(OpService opService, T arg) {
+        public T eval(OpService opService, T arg) {
             return null;
         }
     }

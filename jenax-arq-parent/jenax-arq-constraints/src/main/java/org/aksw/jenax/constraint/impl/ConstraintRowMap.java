@@ -95,4 +95,10 @@ public class ConstraintRowMap
         return this;
     }
 
+    @Override
+    public ConstraintRow project(Collection<Var> vars) {
+        varToProfile.keySet().retainAll(vars);
+        return this;
+    }
+
 }

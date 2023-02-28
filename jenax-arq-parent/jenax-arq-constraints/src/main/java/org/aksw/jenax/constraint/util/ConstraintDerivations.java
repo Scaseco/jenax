@@ -9,6 +9,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.expr.Expr;
 
@@ -49,8 +50,21 @@ public class ConstraintDerivations {
         }
     }
 
+    /** ElementBind */
+    public static void deriveConstraints(ConstraintRow row, VarExprList defs) {
+
+    }
+
     public static void derive(ConstraintRow row, Expr expr) {
-        // TODO We need expr utils to extract op(var, constant) expressions
+        // TODO We need expr utils to extract op(var, constant) expressions - but they are in a higher module...
+        // One possible solution is to define an interface at the lower level and provide the implementation in a higher one
+
+
+        // TODO Recognize term type functions:
+        // IRI(x), BNODE(y), STRDT(?, constantDatatype),
+        //
+        // TODO Recognize IRI(concat("const"))
+
     }
 
 }

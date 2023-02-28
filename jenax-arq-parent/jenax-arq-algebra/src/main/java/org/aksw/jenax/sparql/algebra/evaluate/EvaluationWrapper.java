@@ -49,47 +49,47 @@ public class EvaluationWrapper<T>
         this.evaluator = transform ;
     }
 
-    @Override public T apply(OpTable opTable)                   { return evaluator.apply(opTable) ; }
-    @Override public T apply(OpBGP opBGP)                       { return evaluator.apply(opBGP) ; }
-    @Override public T apply(OpTriple opTriple)                 { return evaluator.apply(opTriple) ; }
-    @Override public T apply(OpQuad opQuad)                     { return evaluator.apply(opQuad) ; }
-    @Override public T apply(OpPath opPath)                     { return evaluator.apply(opPath) ; }
+    @Override public T eval(OpTable opTable)                   { return evaluator.eval(opTable) ; }
+    @Override public T eval(OpBGP opBGP)                       { return evaluator.eval(opBGP) ; }
+    @Override public T eval(OpTriple opTriple)                 { return evaluator.eval(opTriple) ; }
+    @Override public T eval(OpQuad opQuad)                     { return evaluator.eval(opQuad) ; }
+    @Override public T eval(OpPath opPath)                     { return evaluator.eval(opPath) ; }
 
-    @Override public T apply(OpProcedure opProc, T subOp)       { return evaluator.apply(opProc, subOp) ; }
-    @Override public T apply(OpPropFunc opPropFunc, T subOp)    { return evaluator.apply(opPropFunc, subOp) ; }
+    @Override public T eval(OpProcedure opProc, T subOp)       { return evaluator.eval(opProc, subOp) ; }
+    @Override public T eval(OpPropFunc opPropFunc, T subOp)    { return evaluator.eval(opPropFunc, subOp) ; }
 
-    @Override public T apply(OpDatasetNames dsNames)            { return evaluator.apply(dsNames) ; }
-    @Override public T apply(OpQuadPattern quadPattern)         { return evaluator.apply(quadPattern) ; }
-    @Override public T apply(OpQuadBlock quadBlock)             { return evaluator.apply(quadBlock) ; }
+    @Override public T eval(OpDatasetNames dsNames)            { return evaluator.eval(dsNames) ; }
+    @Override public T eval(OpQuadPattern quadPattern)         { return evaluator.eval(quadPattern) ; }
+    @Override public T eval(OpQuadBlock quadBlock)             { return evaluator.eval(quadBlock) ; }
 
-    @Override public T apply(OpFilter opFilter, T subOp)        { return evaluator.apply(opFilter, subOp) ; }
-    @Override public T apply(OpGraph opGraph, T subOp)          { return evaluator.apply(opGraph, subOp) ; }
-    @Override public T apply(OpService opService, T subOp)      { return evaluator.apply(opService, subOp) ; }
+    @Override public T eval(OpFilter opFilter, T subOp)        { return evaluator.eval(opFilter, subOp) ; }
+    @Override public T eval(OpGraph opGraph, T subOp)          { return evaluator.eval(opGraph, subOp) ; }
+    @Override public T eval(OpService opService, T subOp)      { return evaluator.eval(opService, subOp) ; }
 
-    @Override public T apply(OpAssign opAssign, T subOp)        { return evaluator.apply(opAssign, subOp) ; }
-    @Override public T apply(OpExtend opExtend, T subOp)        { return evaluator.apply(opExtend, subOp) ; }
+    @Override public T eval(OpAssign opAssign, T subOp)        { return evaluator.eval(opAssign, subOp) ; }
+    @Override public T eval(OpExtend opExtend, T subOp)        { return evaluator.eval(opExtend, subOp) ; }
 
-    @Override public T apply(OpJoin opJoin, T left, T right)           { return evaluator.apply(opJoin, left, right) ; }
-    @Override public T apply(OpLeftJoin opLeftJoin, T left, T right)   { return evaluator.apply(opLeftJoin, left, right) ; }
-    @Override public T apply(OpDiff opDiff, T left, T right)           { return evaluator.apply(opDiff, left, right) ; }
-    @Override public T apply(OpMinus opMinus, T left, T right)         { return evaluator.apply(opMinus, left, right) ; }
-    @Override public T apply(OpUnion opUnion, T left, T right)         { return evaluator.apply(opUnion, left, right) ; }
-    @Override public T apply(OpLateral opLateral, T left, T right)     { return evaluator.apply(opLateral, left, right) ; }
-    @Override public T apply(OpConditional opCond, T left, T right)    { return evaluator.apply(opCond, left, right) ; }
+    @Override public T eval(OpJoin opJoin, T left, T right)           { return evaluator.eval(opJoin, left, right) ; }
+    @Override public T eval(OpLeftJoin opLeftJoin, T left, T right)   { return evaluator.eval(opLeftJoin, left, right) ; }
+    @Override public T eval(OpDiff opDiff, T left, T right)           { return evaluator.eval(opDiff, left, right) ; }
+    @Override public T eval(OpMinus opMinus, T left, T right)         { return evaluator.eval(opMinus, left, right) ; }
+    @Override public T eval(OpUnion opUnion, T left, T right)         { return evaluator.eval(opUnion, left, right) ; }
+    @Override public T eval(OpLateral opLateral, T left, T right)     { return evaluator.eval(opLateral, left, right) ; }
+    @Override public T eval(OpConditional opCond, T left, T right)    { return evaluator.eval(opCond, left, right) ; }
 
-    @Override public T apply(OpSequence opSequence, List<T> elts)       { return evaluator.apply(opSequence, elts) ; }
-    @Override public T apply(OpDisjunction opDisjunction, List<T> elts) { return evaluator.apply(opDisjunction, elts) ; }
+    @Override public T eval(OpSequence opSequence, List<T> elts)       { return evaluator.eval(opSequence, elts) ; }
+    @Override public T eval(OpDisjunction opDisjunction, List<T> elts) { return evaluator.eval(opDisjunction, elts) ; }
 
-    @Override public T apply(OpExt opExt)                        { return evaluator.apply(opExt) ; }
-    @Override public T apply(OpNull opNull)                      { return evaluator.apply(opNull) ; }
-    @Override public T apply(OpLabel opLabel, T subOp)           { return evaluator.apply(opLabel, subOp) ; }
+    @Override public T eval(OpExt opExt)                        { return evaluator.eval(opExt) ; }
+    @Override public T eval(OpNull opNull)                      { return evaluator.eval(opNull) ; }
+    @Override public T eval(OpLabel opLabel, T subOp)           { return evaluator.eval(opLabel, subOp) ; }
 
-    @Override public T apply(OpList opList, T subOp)             { return evaluator.apply(opList, subOp) ; }
-    @Override public T apply(OpOrder opOrder, T subOp)           { return evaluator.apply(opOrder, subOp) ; }
-    @Override public T apply(OpTopN opTop, T subOp)              { return evaluator.apply(opTop, subOp) ; }
-    @Override public T apply(OpProject opProject, T subOp)       { return evaluator.apply(opProject, subOp) ; }
-    @Override public T apply(OpDistinct opDistinct, T subOp)     { return evaluator.apply(opDistinct, subOp) ; }
-    @Override public T apply(OpReduced opReduced, T subOp)       { return evaluator.apply(opReduced, subOp) ; }
-    @Override public T apply(OpSlice opSlice, T subOp)           { return evaluator.apply(opSlice, subOp) ; }
-    @Override public T apply(OpGroup opGroup, T subOp)           { return evaluator.apply(opGroup, subOp) ; }
+    @Override public T eval(OpList opList, T subOp)             { return evaluator.eval(opList, subOp) ; }
+    @Override public T eval(OpOrder opOrder, T subOp)           { return evaluator.eval(opOrder, subOp) ; }
+    @Override public T eval(OpTopN opTop, T subOp)              { return evaluator.eval(opTop, subOp) ; }
+    @Override public T eval(OpProject opProject, T subOp)       { return evaluator.eval(opProject, subOp) ; }
+    @Override public T eval(OpDistinct opDistinct, T subOp)     { return evaluator.eval(opDistinct, subOp) ; }
+    @Override public T eval(OpReduced opReduced, T subOp)       { return evaluator.eval(opReduced, subOp) ; }
+    @Override public T eval(OpSlice opSlice, T subOp)           { return evaluator.eval(opSlice, subOp) ; }
+    @Override public T eval(OpGroup opGroup, T subOp)           { return evaluator.eval(opGroup, subOp) ; }
 }

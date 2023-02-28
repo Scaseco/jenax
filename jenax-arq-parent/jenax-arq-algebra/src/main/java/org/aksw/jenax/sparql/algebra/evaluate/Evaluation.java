@@ -40,45 +40,45 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.engine.main.OpExecutor;
 
 /**
- * A general interface for applyuating Ops to a result type T.
+ * A general interface for evaluating Ops to a result type T.
  *
- * This class can be seen as a generalization of e.g. {@link apply} and {@link OpExecutor}:
- * The former evaluates Ops into other Ops, whereas the latter applyuates them to QueryIters.
+ * This class can be seen as a generalization of e.g. {@link eval} and {@link OpExecutor}:
+ * The former evaluates Ops into other Ops, whereas the latter evaluates them to QueryIters.
  */
  interface Evaluation<T> {
-     T apply(OpTable opUnit);
-     T apply(OpBGP opBGP);
-     T apply(OpTriple opTriple);
-     T apply(OpQuad opQuad);
-     T apply(OpPath opPath);
-     T apply(OpDatasetNames dsNames);
-     T apply(OpQuadPattern quadPattern);
-     T apply(OpQuadBlock quadBlock);
-     T apply(OpNull opNull);
-     T apply(OpFilter opFilter, T subOp);
-     T apply(OpGraph opGraph, T subOp);
-     T apply(OpService opService, T subOp);
-     T apply(OpProcedure opProcedure, T subOp);
-     T apply(OpPropFunc opPropFunc, T subOp);
-     T apply(OpLabel opLabel, T subOp);
-     T apply(OpAssign opAssign, T subOp);
-     T apply(OpExtend opExtend, T subOp);
-     T apply(OpJoin opJoin, T left, T right);
-     T apply(OpLeftJoin opLeftJoin, T left, T right);
-     T apply(OpDiff opDiff, T left, T right);
-     T apply(OpMinus opMinus, T left, T right);
-     T apply(OpUnion opUnion, T left, T right);
-     T apply(OpLateral opLater, T left, T right);
-     T apply(OpConditional opCondition, T left, T right);
-     T apply(OpSequence opSequence, List<T> elts);
-     T apply(OpDisjunction opDisjunction, List<T> elts);
-     T apply(OpExt opExt);
-     T apply(OpList opList, T subOp);
-     T apply(OpOrder opOrder, T subOp);
-     T apply(OpTopN opTop, T subOp);
-     T apply(OpProject opProject, T subOp);
-     T apply(OpDistinct opDistinct, T subOp);
-     T apply(OpReduced opReduced, T subOp);
-     T apply(OpSlice opSlice, T subOp);
-     T apply(OpGroup opGroup, T subOp);
+     T eval(OpTable opUnit);
+     T eval(OpBGP opBGP);
+     T eval(OpTriple opTriple);
+     T eval(OpQuad opQuad);
+     T eval(OpPath opPath);
+     T eval(OpDatasetNames dsNames);
+     T eval(OpQuadPattern quadPattern);
+     T eval(OpQuadBlock quadBlock);
+     T eval(OpNull opNull);
+     T eval(OpFilter opFilter, T subOp);
+     T eval(OpGraph opGraph, T subOp);
+     T eval(OpService opService, T subOp);
+     T eval(OpProcedure opProcedure, T subOp);
+     T eval(OpPropFunc opPropFunc, T subOp);
+     T eval(OpLabel opLabel, T subOp);
+     T eval(OpAssign opAssign, T subOp);
+     T eval(OpExtend opExtend, T subOp);
+     T eval(OpJoin opJoin, T left, T right);
+     T eval(OpLeftJoin opLeftJoin, T left, T right);
+     T eval(OpDiff opDiff, T left, T right);
+     T eval(OpMinus opMinus, T left, T right);
+     T eval(OpUnion opUnion, T left, T right);
+     T eval(OpLateral opLater, T left, T right);
+     T eval(OpConditional opCondition, T left, T right);
+     T eval(OpSequence opSequence, List<T> elts);
+     T eval(OpDisjunction opDisjunction, List<T> elts);
+     T eval(OpExt opExt);
+     T eval(OpList opList, T subOp);
+     T eval(OpOrder opOrder, T subOp);
+     T eval(OpTopN opTop, T subOp);
+     T eval(OpProject opProject, T subOp);
+     T eval(OpDistinct opDistinct, T subOp);
+     T eval(OpReduced opReduced, T subOp);
+     T eval(OpSlice opSlice, T subOp);
+     T eval(OpGroup opGroup, T subOp);
 }

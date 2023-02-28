@@ -118,83 +118,83 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
 
     @Override
     public void visit(OpBGP op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpQuadPattern op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpQuadBlock op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpTriple op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpQuad op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpPath op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpTable op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpNull op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpProcedure op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpPropFunc op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpGraph op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpDatasetNames op) {
-        T value = evaluator.apply(op);
+        T value = evaluator.eval(op);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpLabel op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
@@ -202,7 +202,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpJoin op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
@@ -210,7 +210,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpUnion op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
@@ -218,7 +218,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpDiff op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
@@ -226,7 +226,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpMinus op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
@@ -234,7 +234,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpLateral op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
@@ -242,91 +242,91 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpConditional op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpSequence op) {
         List<T> values = pop(opStack, op.getElements());
-        T value = evaluator.apply(op, values) ;
+        T value = evaluator.eval(op, values) ;
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpDisjunction op) {
         List<T> values = pop(opStack, op.getElements());
-        T value = evaluator.apply(op, values) ;
+        T value = evaluator.eval(op, values) ;
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpList op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpProject op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpReduced op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpDistinct op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpSlice op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpTopN op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpFilter op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpService op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value);
     }
 
     @Override
     public void visit(OpAssign op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpExtend op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
@@ -334,21 +334,21 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
     public void visit(OpLeftJoin op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
-        T value = evaluator.apply(op, left, right);
+        T value = evaluator.eval(op, left, right);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpOrder op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 
     @Override
     public void visit(OpGroup op) {
         T sub = pop(opStack, op.getSubOp());
-        T value = evaluator.apply(op, sub);
+        T value = evaluator.eval(op, sub);
         push(opStack, value) ;
     }
 }
