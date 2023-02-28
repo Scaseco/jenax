@@ -48,6 +48,8 @@
 		<!-- some parts of algebra depend on udf rather than plain arq -->
 		<module>jenax-arq-algebra</module>
 
+		<module>jenax-arq-cmd</module>
+
 		<module>jenax-arq-datasets-parent</module>
 		<module>jenax-arq-plugins-parent</module>
 	</modules>
