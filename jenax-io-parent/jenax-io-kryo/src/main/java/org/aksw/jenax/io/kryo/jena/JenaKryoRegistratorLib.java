@@ -41,6 +41,7 @@ import org.apache.jena.sparql.engine.binding.Binding2;
 import org.apache.jena.sparql.engine.binding.Binding3;
 import org.apache.jena.sparql.engine.binding.Binding4;
 import org.apache.jena.sparql.engine.binding.BindingOverMap;
+import org.apache.jena.sparql.engine.binding.BindingProject;
 import org.apache.jena.sparql.engine.binding.BindingRoot;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.expr.E_BNode;
@@ -135,6 +136,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(Binding3.class, bindingSerializer);
         kryo.register(Binding4.class, bindingSerializer);
         kryo.register(BindingOverMap.class, bindingSerializer);
+        kryo.register(BindingProject.class, bindingSerializer);
         // kryo.register(BindingHashMap.class, bindingSerializer);
 
         Serializer<Tuple<Node>> tupleOfNodesSerializer = new TupleSerializer<>(Node.class);
