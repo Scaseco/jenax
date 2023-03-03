@@ -111,6 +111,12 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-picocli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-datatypes</artifactId>
 				<version>${project.version}</version>
 			</dependency>

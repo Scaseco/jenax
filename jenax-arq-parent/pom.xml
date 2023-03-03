@@ -52,5 +52,6 @@
 
 		<module>jenax-arq-datasets-parent</module>
 		<module>jenax-arq-plugins-parent</module>
+		<module>jenax-arq-picocli</module>
 	</modules>
 </project>
