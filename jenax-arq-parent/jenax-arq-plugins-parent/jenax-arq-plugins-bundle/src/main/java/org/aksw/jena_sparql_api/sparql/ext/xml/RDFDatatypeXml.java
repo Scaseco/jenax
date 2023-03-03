@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.graph.impl.LiteralLabel;
 import org.apache.jena.vocabulary.XSD;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -108,6 +109,14 @@ public class RDFDatatypeXml
             throw new DatatypeFormatException(lexicalForm, this, e);
         }
 
+        return result;
+    }
+
+    @Override
+    public int getHashCode(LiteralLabel lit) {
+        // FIXME Compute hashCode from xml node directly. hashCode is not implemented on Node.
+        String lexicalForm = lit.getLexicalForm();
+        int result = lexicalForm.hashCode();
         return result;
     }
 

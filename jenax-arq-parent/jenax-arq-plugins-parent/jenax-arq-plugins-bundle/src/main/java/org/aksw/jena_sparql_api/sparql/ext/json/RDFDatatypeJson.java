@@ -45,7 +45,6 @@ public class RDFDatatypeJson
             logger.warn("Gson.setObjectToNumberStrategy and/or Gson.setNumberToNumberStrategy not available");
         }
 
-
         Gson result = builder.create();
         return result;
     }
