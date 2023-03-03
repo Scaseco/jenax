@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.picocli;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,11 @@ import org.apache.jena.sparql.util.Symbol;
 
 import picocli.CommandLine.Option;
 
-public class CmdMixinArq {
+public class CmdMixinArq
+    implements Serializable
+{
+    private static final long serialVersionUID = 1L;
+
     @Option(names = { "--explain" }, description="Enable detailed ARQ log output")
     public boolean explain = false;
 
