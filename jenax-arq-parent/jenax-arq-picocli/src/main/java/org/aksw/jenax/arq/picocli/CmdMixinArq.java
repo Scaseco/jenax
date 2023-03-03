@@ -52,8 +52,8 @@ public class CmdMixinArq
 
     public static void configureCxt(Context cxt, CmdMixinArq cmd) {
         // Automatically load external javascript functions from functions.js unless specified
-        Symbol jsLibrarySym = Symbol.create(MappingRegistry.mapPrefixName("arq:js-library"));
-        cxt.setIfUndef(jsLibrarySym, "functions.js");
+        // Symbol jsLibrarySym =  ARQ.symJavaScriptLibFile; //Symbol.create(MappingRegistry.mapPrefixName("arq:js-library"));
+        cxt.setIfUndef(ARQ.symJavaScriptLibFile, "functions.js");
 
         // Set arq options
         ContextUtils.putAll(cxt, cmd.arqOptions);
