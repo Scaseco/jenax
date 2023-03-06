@@ -10,11 +10,10 @@ import java.util.Map.Entry;
 import org.aksw.commons.path.core.Path;
 import org.aksw.jenax.arq.util.expr.DnfUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
-import org.aksw.jenax.constraint.api.ConstraintRow;
-import org.aksw.jenax.constraint.api.ValueSpace;
-import org.aksw.jenax.constraint.impl.ConstraintRowMap;
+import org.aksw.jenax.constraint.api.CBinding;
+import org.aksw.jenax.constraint.api.VSpace;
+import org.aksw.jenax.constraint.impl.CBindingMap;
 import org.aksw.jenax.constraint.util.ConstraintDerivations;
-import org.aksw.jenax.constraint.util.NodeRanges;
 import org.aksw.jenax.sparql.algebra.walker.Tracker;
 import org.aksw.jenax.sparql.algebra.walker.TrackingTransformCopy;
 import org.apache.jena.graph.Triple;
@@ -35,13 +34,13 @@ import org.apache.jena.sparql.expr.NodeValue;
 
 
 /**
- * This class check for expressions of the form
+ * This class checks for expressions of the form
  * [STR(?p) = 'const'] and if valueSpace(?p) is limited to IRI then it rewrites
  * the expression as [?p = &lt;const&gt;].
  *
  */
 public class TrackingTransformConditionalFunctionInversion
-    extends TrackingTransformCopy<ConstraintRow>
+    extends TrackingTransformCopy<CBinding>
 {
     // We could already derive constraints in a before visitor
     public class BeforeVisitor
@@ -68,11 +67,11 @@ public class TrackingTransformConditionalFunctionInversion
     protected BeforeVisitor beforeVisitor;
 
 
-    protected Map<Path<String>, Map<Expr, ValueSpace>> beforeConditions = new LinkedHashMap<>();
-    protected Map<Path<String>, Map<Expr, ValueSpace>> afterConditions = new LinkedHashMap<>();
+    protected Map<Path<String>, Map<Expr, VSpace>> beforeConditions = new LinkedHashMap<>();
+    protected Map<Path<String>, Map<Expr, VSpace>> afterConditions = new LinkedHashMap<>();
 
 
-    public TrackingTransformConditionalFunctionInversion(Tracker<ConstraintRow> pathState) {
+    public TrackingTransformConditionalFunctionInversion(Tracker<CBinding> pathState) {
         super(pathState);
         this.beforeVisitor = new BeforeVisitor();
     }
@@ -91,7 +90,7 @@ public class TrackingTransformConditionalFunctionInversion
 
     @Override
     public Op transform(OpBGP opBGP) {
-        ConstraintRow crow = tracker.computeIfAbsent(p -> ConstraintRowMap.create());
+        CBinding crow = tracker.computeIfAbsent(p -> CBindingMap.create());
 
         for (Triple triple : opBGP.getPattern()) {
             ConstraintDerivations.deriveConstraints(crow, triple);
@@ -102,7 +101,7 @@ public class TrackingTransformConditionalFunctionInversion
 
 //        System.out.println("Constraints: " + crow);
 
-        Map<Expr, ValueSpace> evsMap = toExprConstraints(crow);
+        Map<Expr, VSpace> evsMap = toExprConstraints(crow);
         afterConditions.put(tracker.getPath(), evsMap);
 
         return super.transform(opBGP);
@@ -121,7 +120,7 @@ public class TrackingTransformConditionalFunctionInversion
 
 
         Path<String> childPath = tracker.getChildPath(0);
-        Map<Expr, ValueSpace> crow = afterConditions.get(childPath);
+        Map<Expr, VSpace> crow = afterConditions.get(childPath);
 
         if (crow != null) {
 
@@ -154,10 +153,10 @@ public class TrackingTransformConditionalFunctionInversion
     }
 
 
-    public static Map<Expr, ValueSpace> toExprConstraints(ConstraintRow crow) {
-        Map<Expr, ValueSpace> result = new HashMap<>();
+    public static Map<Expr, VSpace> toExprConstraints(CBinding crow) {
+        Map<Expr, VSpace> result = new HashMap<>();
         for (Var var : crow.getVars()) {
-            ValueSpace vs = crow.get(var);
+            VSpace vs = crow.get(var);
             result.put(new ExprVar(var), vs);
         }
         return result;
@@ -165,7 +164,7 @@ public class TrackingTransformConditionalFunctionInversion
 
     public static Entry<NodeValue, Expr> applyInverseFunction(
             Entry<NodeValue, Expr> e,
-            Map<Expr, ValueSpace> exprToValueSpace) {
+            Map<Expr, VSpace> exprToValueSpace) {
             //ConstraintRow crow) {
         Entry<NodeValue, Expr> result = e;
 
@@ -176,7 +175,7 @@ public class TrackingTransformConditionalFunctionInversion
             Expr arg = fn.getArg();
 
             if (fn instanceof E_Str) {
-                ValueSpace vs = exprToValueSpace.get(arg);
+                VSpace vs = exprToValueSpace.get(arg);
                 if (vs.isLimitedTo(org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI)) {
                     result = new SimpleEntry<>(
                             org.apache.jena.sparql.util.ExprUtils.eval(new E_IRI(e.getKey())),

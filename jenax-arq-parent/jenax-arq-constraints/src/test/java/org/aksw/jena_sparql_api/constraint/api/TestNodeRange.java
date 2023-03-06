@@ -34,7 +34,7 @@ public class TestNodeRange {
         NodeRanges nr = NodeRanges.createClosed();
         nr.add(Range.closedOpen(
                 ComparableNodeValue.wrap(NodeFactory.createLiteral(RDF.uri)),
-                ComparableNodeValue.wrap(NodeFactory.createLiteral(incrementLastCharacter(RDF.uri)))));
+                ComparableNodeValue.wrap(NodeFactory.createLiteral(NodeRanges.incrementLastCharacter(RDF.uri)))));
 
 //        NodeRanges nr2 = NodeRanges.create();
 //        nr2.add(Range.singleton(NodeWrapper.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
@@ -45,27 +45,6 @@ public class TestNodeRange {
 
         System.out.println(nr);
     }
-
-
-    /**
-     * Increment the last character (todo: should be byte?) of a string.
-     * Useful for defining the upper bound of a range of strings with a certain prefix.
-     */
-    public static String incrementLastCharacter(String str) {
-        int i = str.length() - 1;
-
-        String result;
-        if (i < 0) {
-            result = str;
-        } else {
-            char lastChar = str.charAt(i);
-            char nextChar = (char)(lastChar + 1);
-            result = str.substring(0, i) + nextChar;
-        }
-
-        return result;
-    }
-
 
     @Test
     public void testNegation() {

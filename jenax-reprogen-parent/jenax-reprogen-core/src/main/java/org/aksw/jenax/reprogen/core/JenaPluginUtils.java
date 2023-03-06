@@ -322,7 +322,6 @@ public class JenaPluginUtils {
     }
 
     public static boolean supportsProxying(Class<?> clazz) {
-
         boolean result = false;
         //int mods = clazz.getModifiers();
         //if(Modifier.isInterface(mods) || !Modifier.isAbstract(mods)) {

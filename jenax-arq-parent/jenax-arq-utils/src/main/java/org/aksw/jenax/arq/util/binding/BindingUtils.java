@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.binding;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -141,7 +144,7 @@ public class BindingUtils {
     }
 
     public static List<Binding> addRowIds(Collection<Binding> bindings, Var rowId) {
-        List<Binding> result = new ArrayList<Binding>(bindings.size());
+        List<Binding> result = new ArrayList<>(bindings.size());
         long i = 0;
         BindingBuilder builder = BindingBuilder.create();
         for(Binding parent : bindings) {
@@ -180,6 +183,32 @@ public class BindingUtils {
         Number result = NodeUtils.getNumber(node);
         return result;
     }
+
+    /** Util function for quickly creating arrays that act as join keys */
+    public static void projectIntoArray(Node[] dest, int offset, Binding binding, Var[] projectVars) {
+        int n = projectVars.length;
+        for (int i = 0; i < n; ++i) {
+            Var var = projectVars[i];
+            Node node = binding.get(var);
+            dest[offset + i] = node;
+        }
+    }
+
+    /** Tuple is not serializable - so it doesn't work in spark */
+    public static Tuple<Node> projectAsTuple(Binding binding, Var[] projectVars) {
+        Node[] tmp = new Node[projectVars.length];
+        projectIntoArray(tmp, 0, binding, projectVars);
+        Tuple<Node> result = TupleFactory.create(tmp);
+        return result;
+    }
+
+    public static List<Node> projectAsList(Binding binding, Var[] projectVars) {
+        Node[] tmp = new Node[projectVars.length];
+        projectIntoArray(tmp, 0, binding, projectVars);
+        List<Node> result = Arrays.asList(tmp);
+        return result;
+    }
+
 
 //    public static Number getNumberNullable(Binding binding, Var var) {
 //        Node node = binding.get(var);

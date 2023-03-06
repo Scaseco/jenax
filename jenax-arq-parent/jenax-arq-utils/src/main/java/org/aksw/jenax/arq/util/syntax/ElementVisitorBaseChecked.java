@@ -23,7 +23,7 @@ import org.apache.jena.sparql.syntax.ElementVisitorBase;
 public class ElementVisitorBaseChecked
     extends ElementVisitorBase
 {
-    public void onVisit(Element el) { }
+    protected void onVisit(Element el) { }
 
     @Override
     public void visit(ElementTriplesBlock el)   { onVisit(el); }

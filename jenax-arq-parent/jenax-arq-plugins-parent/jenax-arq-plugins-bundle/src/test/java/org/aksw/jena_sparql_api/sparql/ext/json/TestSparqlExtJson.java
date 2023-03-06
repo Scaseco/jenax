@@ -71,7 +71,7 @@ public class TestSparqlExtJson {
         expected.addProperty("binsearch", true);
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch', true)", pm));
-        JsonElement actual = RDFDatatypeJson.extract(nv);
+        JsonElement actual = JenaJsonUtils.extractChecked(nv);
         Assert.assertEquals(expected, actual);
     }
 
@@ -85,14 +85,14 @@ public class TestSparqlExtJson {
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:array('hi', <urn:test>, true)", pm));
 
-        JsonElement actual = RDFDatatypeJson.extract(nv);
+        JsonElement actual = JenaJsonUtils.extractChecked(nv);
         Assert.assertEquals(expected, actual);
     }
 
     @Test
     public void testJsonConversionBoolean() {
         JsonElement expected = new JsonPrimitive(true);
-        JsonElement actual = RDFDatatypeJson.extract(ExprUtils.eval(ExprUtils.parse("json:convert(true)", pm)));
+        JsonElement actual = JenaJsonUtils.extractChecked(ExprUtils.eval(ExprUtils.parse("json:convert(true)", pm)));
         Assert.assertEquals(expected, actual);
     }
 

@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -20,15 +21,17 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collections.trees.Tree;
 import org.aksw.commons.collections.trees.TreeImpl;
 import org.aksw.commons.collections.trees.TreeUtils;
+import org.aksw.commons.util.algebra.ExprFilter;
+import org.aksw.commons.util.algebra.GenericFactorizer;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsage;
 import org.aksw.jena_sparql_api.algebra.analysis.VarUsageAnalyzerVisitor;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
-import org.apache.jena.ext.com.google.common.base.Objects;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
@@ -55,14 +58,33 @@ import org.apache.jena.sparql.algebra.table.TableData;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.VarAlloc;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class OpUtils {
+
+    public static class OpOps
+        implements org.aksw.commons.util.algebra.ExprOps<Op, Var>
+    {
+        @Override public List<Op> getSubExprs(Op op) { return OpUtils.getSubOps(op); }
+        @Override public Op copy(Op proto, List<Op> subOps) { return OpUtils.copy(proto, subOps); }
+        @Override public boolean isFunction(Op op) { return !OpUtils.getSubOps(op).isEmpty(); }
+        @Override public Var asVar(Op op) { return op instanceof OpVar ? ((OpVar)op).getVar() : null; }
+        @Override public Op varToExpr(Var var) { return new OpVar(var); }
+    }
+
+    private static final OpOps opOps = new OpOps();
+
+    public static OpOps getOpOps() {
+        return opOps;
+    }
+
     public static OpTable createEmptyTableUnionVars(Op ... subOps) {
         List<Var> vars = Arrays.asList(subOps).stream()
                 .flatMap(op -> OpVars.visibleVars(op).stream())
@@ -118,7 +140,7 @@ public class OpUtils {
         // Remove identity mappings because they'd result in algebra expressions such as BIND(?x AS ?x)
         // which breaks with Jena
         Map<Var, Var> oldToNewWithoutIdentity = oldToNew.entrySet().stream()
-                .filter(e -> !Objects.equal(e.getKey(), e.getValue()))
+                .filter(e -> !Objects.equals(e.getKey(), e.getValue()))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         List<Var> projVars = oldToNew.values()
@@ -463,6 +485,7 @@ public class OpUtils {
      * is independent of a dataset and hence it can be evaluated e.g. against an
      * empty in-memory model.
      *
+     * TODO Maybe rephrase the condition as: An op is pattern free if there is no OpService and all leaf nodes are OpTable.
      *
      * @param op
      * @return
@@ -500,6 +523,14 @@ public class OpUtils {
 
     public static boolean isServiceFree(Op op) {
         boolean result = inOrderSearch(op, o -> !(o instanceof OpService)).count() == 0;
+        return result;
+    }
+
+    /** Return true iff op is an OpService with the given iri */
+    public static boolean isServiceWithIri(Op op, String iri) {
+        boolean result = op instanceof OpService &&
+                Objects.equals(iri, NodeUtils.getIriOrNull(((OpService)op).getService()));
+
         return result;
     }
 
@@ -653,6 +684,15 @@ public class OpUtils {
         Map<Node, BasicPattern> index = QuadPatternUtils.indexBasicPattern(quads);
         Op result = toOp(index, opFactory);
         return result;
+    }
 
+    /**
+     * Allocate a single variable for every unique expression.
+     * Main use case is common sub expression elimination.
+     */
+    public Op factorize(Op op, BiMap<Var, Op> cxt, VarAlloc varAlloc, ExprFilter<Op> isBlocker) {
+        GenericFactorizer<Op, Var> factorizer = new GenericFactorizer<>(getOpOps(), isBlocker);
+        Op result = factorizer.factorize(op, cxt, varAlloc::allocVar);
+        return result;
     }
 }

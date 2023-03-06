@@ -12,46 +12,47 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 
 public class NamespaceResolver
-	implements NamespaceContext
+    implements NamespaceContext
 {
-    protected Node xmlNode;
+    protected Node xmlStartNode;
 
     public NamespaceResolver(Node xmlNode) {
-        this.xmlNode = xmlNode;
+        this.xmlStartNode = xmlNode;
     }
 
     //The lookup for the namespace uris is delegated to the stored document.
+    @Override
     public String getNamespaceURI(String prefix) {
-    	Iterable<Node> traverser = Traverser.<Node>forTree(xmlNode -> new ListOverNodeList(xmlNode.getChildNodes()))
-    		.breadthFirst(xmlNode);
+        Iterable<Node> traverser = Traverser.<Node>forTree(xmlNode -> new ListOverNodeList(xmlNode.getChildNodes()))
+            .breadthFirst(xmlStartNode);
 
-    	String key = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? null : prefix;
+        String key = XMLConstants.DEFAULT_NS_PREFIX.equals(prefix) ? null : prefix;
 
-    	String result = Streams.stream(traverser)
-    		.map(xmlNode -> xmlNode.lookupNamespaceURI(key))
-    		.filter(Objects::nonNull)
-    		.findFirst()
-    		.orElse(null);
+        String result = Streams.stream(traverser)
+            .map(xmlNode -> xmlNode.lookupNamespaceURI(key))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
 
-    	// String result = xmlNode.lookupNamespaceURI(key);
-    	return result;
+        // String result = xmlNode.lookupNamespaceURI(key);
+        return result;
     }
 
     @Override
     public String getPrefix(String namespaceURI) {
-        return xmlNode.lookupPrefix(namespaceURI);
+        return xmlStartNode.lookupPrefix(namespaceURI);
     }
 
     @Override
     public Iterator<String> getPrefixes(String namespaceURI) {
-    	throw new UnsupportedOperationException();
-    	/*
-    	String tmp = getPrefix(namespaceURI);
-    	Iterator<String> result = tmp == null
-    			? Collections.emptyIterator()
-    			: Collections.singleton(tmp).iterator();
+        throw new UnsupportedOperationException();
+        /*
+        String tmp = getPrefix(namespaceURI);
+        Iterator<String> result = tmp == null
+                ? Collections.emptyIterator()
+                : Collections.singleton(tmp).iterator();
 
-    	return result;
-    	*/
+        return result;
+        */
     }
 }

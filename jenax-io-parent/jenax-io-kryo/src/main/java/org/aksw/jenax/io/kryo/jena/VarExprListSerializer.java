@@ -1,15 +1,13 @@
 package org.aksw.jenax.io.kryo.jena;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 
-import java.util.List;
-import java.util.Map;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 /**
  * Kryo serializer for {@link VarExprList}.
@@ -18,28 +16,30 @@ import java.util.Map;
  */
 public class VarExprListSerializer extends Serializer<VarExprList> {
     @Override
-    public void write(Kryo kryo, Output output, VarExprList obj) {
-        kryo.writeClassAndObject(output, obj.getVars());
-        kryo.writeClassAndObject(output, obj.getExprs());
+    public void write(Kryo kryo, Output output, VarExprList vel) {
+        int n = vel.size();
+        output.writeInt(n);
+        vel.forEachVarExpr((v, e) -> {
+            // output.writeString(v.getName());
+            kryo.writeClassAndObject(output, v);
+            kryo.writeClassAndObject(output, e);
+        });
     }
 
     @Override
     public VarExprList read(Kryo kryo, Input input, Class<VarExprList> objClass) {
-        @SuppressWarnings("unchecked")
-        List<Var> vars = (List<Var>) kryo.readClassAndObject(input);
-        @SuppressWarnings("unchecked")
-        Map<Var, Expr> map = (Map<Var, Expr>) kryo.readClassAndObject(input);
-
         VarExprList result = new VarExprList();
-        vars.forEach(v -> {
-            Expr e = map.get(v);
-            if (e == null) {
-                result.add(v);
+        int n = input.readInt();
+        for (int i = 0; i < n; ++i) {
+            // Var var = Var.alloc(input.readString());
+            Var var = (Var)kryo.readClassAndObject(input);
+            Expr expr = (Expr)kryo.readClassAndObject(input);
+            if (expr == null) {
+                result.add(var);
             } else {
-                result.add(v, e);
+                result.add(var, expr);
             }
-        });
-
+        }
         return result;
     }
 }

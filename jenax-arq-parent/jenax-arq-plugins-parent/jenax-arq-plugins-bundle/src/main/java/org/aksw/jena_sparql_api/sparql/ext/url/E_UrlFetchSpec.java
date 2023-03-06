@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.url;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
+import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
@@ -17,7 +17,7 @@ public class E_UrlFetchSpec
         JsonObject obj = E_UrlFetch.assemble(args);
         // TODO Also try to map the json to the internal java class?
         // UrlFetchSpec conf = RDFDatatypeJson.get().getGson().fromJson(obj, UrlFetchSpec.class);
-        return RDFDatatypeJson.jsonToNodeValue(obj);
+        return JenaJsonUtils.makeNodeValue(obj);
     }
 
     @Override

@@ -15,11 +15,13 @@ import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.ext.com.google.common.collect.HashMultimap;
 import org.apache.jena.ext.com.google.common.collect.SetMultimap;
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.iterator.QueryIterAssign;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformSubstitute;
@@ -30,25 +32,61 @@ import org.apache.jena.sparql.graph.NodeTransform;
 
 public class VarExprListUtils {
 
+    /** Evaluate an expression list against a binding. Code taken from {@link QueryIterAssign}. */
+    public static Binding eval(VarExprList exprs, Binding binding, ExecutionContext execCxt) {
+        BindingBuilder b = Binding.builder(binding);
+        for ( Var v : exprs.getVars() ) {
+            // if "binding", not "b" used, we get (Lisp) "let"
+            // semantics, not the desired "let*" semantics
+            Node n = exprs.get(v, b.snapshot(), execCxt);
+
+            if ( n == null )
+                // Expression failed to evaluate - no assignment
+                continue;
+
+            // Check is already has a value; if so, must be sameValueAs
+            if ( b.contains(v) ) {
+                // Optimization may linearize to push a stream through an (extend).
+//                if ( false && mustBeNewVar )
+//                    throw new QueryExecException("Already set: " + v);
+                Node n2 = b.get(v);
+                if ( !n2.sameValueAs(n) )
+                    //throw new QueryExecException("Already set: "+v) ;
+                    // Error in single assignment.
+                    return null ;
+                continue ;
+            }
+            try {
+                // Add same.
+                b.add(v, n) ;
+            } catch (ARQInternalErrorException ex) {
+                throw ex;
+            }
+        }
+        return b.build() ;
+    }
+
     /**
-     * Note: Code taken from QueryIterGroup - unfortunately it not public there
-     * Evaluates a VarExprList into a binding - Has many uss such as
-     * for evaluating OpExtend or creating the group key for OpGroup
+     * Code taken from QueryIterGroup (TODO Why? Apparently for converting aggregators to parallel ones)
      **/
     public static Binding copyProject(VarExprList vars, Binding binding, ExecutionContext execCxt) {
+        BindingBuilder x = BindingBuilder.create();
+        copyProject(x, vars, binding, execCxt);
+        return x.build();
+    }
+
+    /** Variant of copyProject where the results are accumulated in the provided binding builder */
+    public static void copyProject(BindingBuilder x, VarExprList vars, Binding binding, ExecutionContext execCxt) {
         // No group vars (implicit or explicit) => working on whole result set.
         // Still need a BindingMap to assign to later.
-        BindingBuilder x = BindingBuilder.create();
-        for ( Var var : vars.getVars() ) {
+        for (Var var : vars.getVars()) {
             Node node = vars.get(var, binding, execCxt);
             // Null returned for unbound and error.
             if ( node != null ) {
                 x.add(var, node);
             }
         }
-        return x.build();
     }
-
 
     /**
      * Add variables to an {@link VarExprList} if they are not already present in it
@@ -166,10 +204,8 @@ public class VarExprListUtils {
         for(Entry<Var, Expr> e : map.entrySet()) {
             Var v = e.getKey();
             Expr w = e.getValue();
-
             add(result, v, w);
         }
-
         return result;
     }
 

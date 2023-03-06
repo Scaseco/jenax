@@ -45,6 +45,12 @@ public class NodeUtils {
     public static final String R2RML_BlankNode 				= R2RML_NS + "BlankNode";
 
 
+    /** Util method for use a sparql function - <pre>{@code<java:org.aksw.jenax.arq.util.node#hashCode>(?x)}</pre> */
+    public static int hashCode(Node node) {
+        int result = node == null ? 0 : node.hashCode();
+        return result;
+    }
+
     /** Compare nodes via {@link NodeValue#compareAlways(NodeValue, NodeValue)} */
     public static int compareAlways(Node o1, Node o2) {
         int result;
@@ -131,6 +137,12 @@ public class NodeUtils {
         return result;
     }
 
+    /** If the argument is an IRI-node return the IRI - otherwise return null. Argument may be null. */
+    public static String getIriOrNull(Node node) {
+        return node == null
+            ? null
+            : node.isURI() ? node.getURI() : null;
+    }
 
     /**
      * Return a Node's datatype. Thereby, IRIs are returned as rr:IRI and BlankNodes as rr:BlankNode

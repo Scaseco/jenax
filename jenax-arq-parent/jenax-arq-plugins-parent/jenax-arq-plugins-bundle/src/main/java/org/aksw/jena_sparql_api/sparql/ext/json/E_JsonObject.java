@@ -46,7 +46,7 @@ public class E_JsonObject
             }
         }
 
-        NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonObject);
+        NodeValue result = JenaJsonUtils.makeNodeValue(jsonObject);
         return result;
     }
 

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
@@ -131,7 +132,7 @@ public class PropertyFunctionFactoryCsvParse
                 QueryIterator result = QueryIterPlainWrapper.create(
                     Iter.onClose(
                             jsonObjStream
-                            .map(RDFDatatypeJson::jsonToNode)
+                            .map(JenaJsonUtils::createLiteralByValue)
                             .map(n -> BindingFactory.binding(parentBinding, outputVar, n))
                             .iterator(),
                             jsonObjStream::close

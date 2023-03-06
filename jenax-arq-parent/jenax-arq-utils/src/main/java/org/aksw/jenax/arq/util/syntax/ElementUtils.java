@@ -110,7 +110,7 @@ public class ElementUtils {
     }
 
     public static ElementTriplesBlock createElementTriple(Node s, Node p, Node o) {
-        return createElement(new Triple(s, p, o));
+        return createElement(Triple.create(s, p, o));
     }
 
 
@@ -211,22 +211,20 @@ public class ElementUtils {
         return toDataset(elt, DatasetGraphFactory.create());
     }
 
-    public static DatasetGraph toDataset(Element elt, DatasetGraph acc) {
+    public static <T extends DatasetGraph> T toDataset(Element elt, T acc) {
         ElementVisitorDatasetGraph visitor = new ElementVisitorDatasetGraph(acc);
         ElementWalker.walk(elt, visitor);
-        DatasetGraph result = visitor.getDatasetGraph();
-        return result;
+        return acc;
     }
 
     public static Graph toGraph(Element elt) {
         return toGraph(elt, GraphFactory.createDefaultGraph());
     }
 
-    public static Graph toGraph(Element elt, Graph acc) {
+    public static <T extends Graph> T toGraph(Element elt, T acc) {
         ElementVisitorGraph visitor = new ElementVisitorGraph(acc);
         ElementWalker.walk(elt, visitor);
-        Graph result = visitor.getGraph();
-        return result;
+        return acc;
     }
 
     public static Map<Node, Var> createMapFixVarNames(Element element) {

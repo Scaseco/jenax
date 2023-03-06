@@ -84,6 +84,7 @@ public class QuadUtils {
         return getNode(quad, slotToIdx(slot));
     }
 
+    @Deprecated /* Use NodeTransformLib */
     public static Quad applyNodeTransform(Quad quad,
             NodeTransform nodeTransform) {
         Node g = nodeTransform.apply(quad.getGraph());
@@ -143,6 +144,12 @@ public class QuadUtils {
                 NodeUtils.nullToAny(o));
     }
 
+    /** A shorted form for {@link Quad#matches(Node, Node, Node, Node)} where the argument is a Quad. */
+    public static boolean matches(Quad pattern, Quad quad) {
+        boolean result = pattern.matches(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject());
+        return result;
+    }
+
     public static Node[] quadToArray(Quad quad) {
         return new Node[] { quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject() };
     }
@@ -160,10 +167,8 @@ public class QuadUtils {
                 throw new RuntimeException("Variable " + node + "not bound");
             }
         }
-
         return result;
     }
-
 
     public static Quad copySubstitute(Quad quad, Binding binding) {
         return new Quad(substitute(quad.getGraph(), binding),
@@ -172,11 +177,9 @@ public class QuadUtils {
                 substitute(quad.getObject(), binding));
     }
 
-
     public static Set<Var> getVarsMentioned(Quad quad) {
         return NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
     }
-
 
     public static Map<Node, Set<Quad>> partitionByGraph(Iterable<Quad> quads) {
         Map<Node, Set<Quad>> result = new HashMap<>();

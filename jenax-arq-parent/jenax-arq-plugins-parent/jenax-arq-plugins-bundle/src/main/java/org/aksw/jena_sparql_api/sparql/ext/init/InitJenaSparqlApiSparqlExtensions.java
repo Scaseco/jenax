@@ -5,6 +5,7 @@ import org.aksw.jena_sparql_api.sparql.ext.collection.base.JenaExtensionCollecti
 import org.aksw.jena_sparql_api.sparql.ext.collection.set.JenaExtensionSet;
 import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.JenaExtensionDuration;
+import org.aksw.jena_sparql_api.sparql.ext.distinct.JenaPluginConditionalDistinct;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.JenaExtensionsGeoSparqlX;
 import org.aksw.jena_sparql_api.sparql.ext.gml.JenaExtensionGml;
@@ -23,6 +24,7 @@ import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.functionbinder.FunctionRegistryWithAutoProxying;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.function.FunctionRegistry;
+import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,8 @@ public class InitJenaSparqlApiSparqlExtensions
         FunctionRegistryWithAutoProxying replacement = new FunctionRegistryWithAutoProxying();
         original.keys().forEachRemaining(k -> replacement.put(k, original.get(k)));
         FunctionRegistry.set(ARQ.getContext(), replacement);
+
+        JenaPluginConditionalDistinct.register(ServiceExecutorRegistry.get());
     }
 
     @Override

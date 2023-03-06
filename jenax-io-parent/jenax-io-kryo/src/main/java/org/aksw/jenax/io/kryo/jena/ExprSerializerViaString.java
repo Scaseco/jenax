@@ -1,18 +1,20 @@
 package org.aksw.jenax.io.kryo.jena;
 
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.util.ExprUtils;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.util.ExprUtils;
 
 /**
- * Serializer for {@link Expr}.
+ * Serializer for {@link Expr} via {@link ExprUtils#fmtSPARQL(Expr)} and {@link ExprUtils#parse(String)}.
+ * Avoid use. Does not preserve any custom expression classes.
  *
  * @author Claus Stadler
  */
-public class ExprSerializer extends Serializer<Expr> {
+public class ExprSerializerViaString extends Serializer<Expr> {
     @Override
     public void write(Kryo kryo, Output output, Expr obj) {
         String str = ExprUtils.fmtSPARQL(obj);
