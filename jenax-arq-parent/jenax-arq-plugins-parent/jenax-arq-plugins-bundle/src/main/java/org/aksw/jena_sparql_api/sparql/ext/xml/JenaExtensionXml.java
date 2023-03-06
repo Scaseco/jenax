@@ -13,7 +13,6 @@ public class JenaExtensionXml {
         FunctionRegistry.get().put(SparqlExtXmlTerms.parse, E_XmlParse.class);
         PropertyFunctionRegistry.get().put(SparqlExtXmlTerms.parse, new PropertyFunctionFactoryXmlParse());
 
-
         FunctionRegistry.get().put(SparqlExtXmlTerms.path, E_XPath.class);
         FunctionRegistry.get().put(SparqlExtXmlTerms.text, E_XmlToText.class);
 
