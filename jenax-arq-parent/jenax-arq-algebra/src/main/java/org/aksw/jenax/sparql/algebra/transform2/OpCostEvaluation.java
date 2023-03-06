@@ -43,7 +43,7 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
 public class OpCostEvaluation
     implements Evaluation<OpCost>
 {
-    protected float UNKNOWN = 10_000_000;
+    protected float UNKNOWN = 1_000_000_000;
 
     @Override
     public OpCost eval(OpTable op) {

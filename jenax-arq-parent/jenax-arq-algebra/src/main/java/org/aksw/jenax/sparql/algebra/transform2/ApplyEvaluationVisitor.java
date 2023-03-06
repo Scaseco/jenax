@@ -1,6 +1,8 @@
 package org.aksw.jenax.sparql.algebra.transform2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
@@ -98,7 +100,8 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
 
     public List<T> pop(Stack<T> stack, List<Op> ops) {
         int n = ops.size();
-        List<T> result = new ArrayList<>(n);
+        @SuppressWarnings("unchecked")
+        List<T> result = (List<T>) Arrays.asList(new Object[n]); // new ArrayList<>(n);
         ListIterator<Op> it = ops.listIterator(n);
         int i = n;
         while (it.hasPrevious()) {
