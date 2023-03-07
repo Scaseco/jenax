@@ -1,5 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import java.util.function.Supplier;
+
+import org.aksw.commons.util.memoize.MemoizedSupplierImpl;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.vocabulary.XSD;
@@ -23,7 +26,9 @@ public class RDFDatatypeJson
         return INSTANCE;
     }
 
-    private Gson gson;
+    /** Gson is initialized lazily because it increased startup time significantly */
+    private Supplier<Gson> gsonSupplier;
+    // private Gson gson = null;
 
     public RDFDatatypeJson() {
         this(IRI);
@@ -50,16 +55,21 @@ public class RDFDatatypeJson
     }
 
     public RDFDatatypeJson(String uri) {
-        this(uri, createGson());
+        this(uri, () -> createGson());
     }
 
-    public RDFDatatypeJson(String uri, Gson gson) {
+//    public RDFDatatypeJson(String uri, Gson gson) {
+//        super(uri);
+//        this.gson = gson;
+//    }
+
+    public RDFDatatypeJson(String uri, Supplier<Gson> gsonSupplier) {
         super(uri);
-        this.gson = gson;
+        this.gsonSupplier = MemoizedSupplierImpl.of(gsonSupplier);
     }
 
     public Gson getGson() {
-        return gson;
+        return gsonSupplier.get();
     }
 
     @Override
@@ -73,7 +83,7 @@ public class RDFDatatypeJson
      */
     @Override
     public String unparse(Object value) {
-        String result = gson.toJson(value);
+        String result = gsonSupplier.get().toJson(value);
         return result;
     }
 
@@ -85,7 +95,7 @@ public class RDFDatatypeJson
     public JsonElement parse(String lexicalForm) throws DatatypeFormatException {
         JsonElement result;
         try {
-            result = gson.fromJson(lexicalForm, JsonElement.class);
+            result = gsonSupplier.get().fromJson(lexicalForm, JsonElement.class);
         } catch(Exception e) {
             throw new DatatypeFormatException(lexicalForm, this, e);
         }

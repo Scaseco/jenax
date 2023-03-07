@@ -79,7 +79,10 @@ public class FunctionBinder {
     }
 
     public void register(boolean lazy, String uri, Method method, Object invocationTarget) {
-        logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+        }
+
         // Stopwatch sw = Stopwatch.createStarted();
         FunctionFactory factory = factory(lazy, method, invocationTarget);
         functionRegistry.put(uri, factory);
