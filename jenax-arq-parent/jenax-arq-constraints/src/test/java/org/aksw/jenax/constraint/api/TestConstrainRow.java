@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.api;
 
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.constraint.api.CBinding;

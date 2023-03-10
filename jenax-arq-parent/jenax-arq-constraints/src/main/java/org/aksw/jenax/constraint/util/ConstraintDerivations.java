@@ -2,14 +2,15 @@ package org.aksw.jenax.constraint.util;
 
 import java.util.List;
 
+import org.aksw.commons.util.range.Endpoint;
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.node.ComparableNodeValue;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.constraint.api.CBinding;
-import org.aksw.jenax.constraint.api.RdfTermProfiles;
 import org.aksw.jenax.constraint.api.VSpace;
+import org.aksw.jenax.constraint.impl.RdfTermProfiles;
 import org.aksw.jenax.constraint.impl.VSpaceImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -24,6 +25,8 @@ import org.apache.jena.sparql.expr.E_StrConcat;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.ValueSpace;
+
+import com.google.common.collect.Range;
 
 public class ConstraintDerivations {
 
@@ -134,9 +137,8 @@ public class ConstraintDerivations {
                 Expr arg = args.get(0);
                 VSpace argSpace = deriveValueSpace(arg, cxt);
                 result = argSpace.forDimension(ValueSpace.VSPACE_STRING);
-                // result.moveDimension(org.apache.jena.sparql.expr.ValueSpace.VSPACE_STRING, org.apache.jena.sparql.expr.ValueSpace.VSPACE_URI);
-                result = result.mapDimensionToNewVSpace(argSpace, ComparableNodeValue.class, r ->
-                    RangeUtils.map(r, x -> ComparableNodeValue.wrap(NodeFactory.createURI(x.getNodeValue().getString()))));
+
+                result = result.mapDimensionToNewVSpace(ValueSpace.VSPACE_STRING, ComparableNodeValue.class, r -> mapRangeToPrefix(r));
                 if (!argSpace.isLimitedTo(ValueSpace.VSPACE_STRING)) {
                     result.stateUnion(VSpaceImpl.create(NodeRanges.createClosed()
                         .addOpenDimension(ValueSpace.VSPACE_UNDEF)));
@@ -151,4 +153,10 @@ public class ConstraintDerivations {
     }
 
 
+    public static Range<ComparableNodeValue> mapRangeToPrefix(Range<ComparableNodeValue> r) {
+        Range<ComparableNodeValue> result = RangeUtils.map(r,
+               (x, bt) -> Endpoint.closed(ComparableNodeValue.wrap(NodeFactory.createURI(x.getNodeValue().getString()))),
+               (x, bt) -> Endpoint.open(ComparableNodeValue.wrap(NodeFactory.createURI(NodeRanges.incrementLastCharacter(x.getNodeValue().getString())))));
+        return result;
+    }
 }

@@ -23,8 +23,6 @@ public interface CBinding
 
     CBinding cloneObject();
 
-
-    // Iterator<Var>
     Collection<Var> getVars();
     VSpace get(Var var);
 }

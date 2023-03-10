@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.aksw.commons.algebra.allen.AllenRelation;
 import org.apache.jena.sparql.expr.ValueSpace;
 
 import com.google.common.collect.Range;
@@ -33,6 +34,8 @@ public abstract class VSpaceBase<T extends Comparable<T>, D> {
         this.vscToRangeSets = vscToRangeSets;
     }
 
+    /** May return null. */
+    // TODO Return empty range set instead?
     public RangeSet<T> getDimension(Object dimensionKey) {
         return vscToRangeSets.get(dimensionKey);
     }

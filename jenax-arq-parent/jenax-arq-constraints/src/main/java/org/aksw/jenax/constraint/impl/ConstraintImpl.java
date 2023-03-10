@@ -1,4 +1,4 @@
-package org.aksw.jenax.constraint.api;
+package org.aksw.jenax.constraint.impl;
 
 /**
  * This class represents restrictions to be used on variables.

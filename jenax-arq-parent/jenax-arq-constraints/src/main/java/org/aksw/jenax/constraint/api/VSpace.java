@@ -2,10 +2,12 @@ package org.aksw.jenax.constraint.api;
 
 import java.util.function.Function;
 
+import org.aksw.commons.algebra.allen.AllenRelation;
+
 import com.google.common.collect.Range;
 
 /**
- * A value space intensionally describes a set of values (possibly across datatypes).
+ * A value space intensionally describes a set of values possibly across multiple datatypes.
  * Because of its set nature, it is possible to form intersections and unions and test
  * for emptiness.
  *
@@ -14,6 +16,8 @@ import com.google.common.collect.Range;
 public interface VSpace
     extends Constrainable
 {
+    Domain<?, ?> getDomain();
+
     @Override
     VSpace clone();
 
@@ -24,10 +28,19 @@ public interface VSpace
     VSpace stateUnion(VSpace valueSpace);
 
     /**
-     * Create a new closed value space, add the full range of the given dimension and
+     * Create a new closed value space, adds the full range of the given dimension and
      * intersect it with 'this'.
      */
     VSpace forDimension(Object dimensionKey);
+
+    /**
+     * Return a relation for how this space relates to another.
+     * In particular, it allows for testing whether e.g. the values of this space appear all before the values in another one
+     * with respect to the domain.
+     *
+     * The returned relation is the bitwise OR of the Allen relation of each dimension.
+     */
+    AllenRelation relateTo(VSpace other);
 
     /**
      * Copy the values of the dimension fromDimKey to toDimKey.

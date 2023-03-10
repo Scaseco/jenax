@@ -295,8 +295,8 @@ public class NodeRanges
     }
 
     /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
-    public static Object classifyValueSpaceCore(Range<ComparableNodeValue> range) {
-        Object result = null;
+    public static ValueSpace classifyValueSpaceCore(Range<ComparableNodeValue> range) {
+        ValueSpace result = null;
         NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
         NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
 
@@ -330,14 +330,14 @@ public class NodeRanges
     }
 
     public static NodeRanges nodeRangesForPrefix(String prefix) {
-        Range<ComparableNodeValue> range = rangeForPrefix(prefix);
+        Range<ComparableNodeValue> range = rangeForStringPrefix(prefix);
         NodeRanges result = NodeRanges.createClosed();
         result.add(range);
         return result;
     }
 
     /** Result is a string range (not IRI) */
-    public static Range<ComparableNodeValue> rangeForPrefix(String prefix) {
+    public static Range<ComparableNodeValue> rangeForStringPrefix(String prefix) {
         return Range.closedOpen(
             ComparableNodeValue.wrap(NodeFactory.createLiteral(prefix)),
             ComparableNodeValue.wrap(NodeFactory.createLiteral(incrementLastCharacter(prefix))));

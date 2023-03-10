@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.constraint.api;
+package org.aksw.jenax.constraint.api;
 
 import org.aksw.jenax.constraint.util.PrefixSet;
 import org.aksw.jenax.constraint.util.PrefixSetImpl;
