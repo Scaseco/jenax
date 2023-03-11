@@ -41,7 +41,7 @@ import org.apache.jena.sparql.engine.main.OpExecutor;
 /**
  * A generalization of the interface of {@link OpExecutor} where the result type is not restricted to QueryIter.
  */
- interface Evaluator<T> {
+ public interface Evaluator<T> {
      T evalOp(Op op, T input);
 
      T eval(OpTable opUnit, T input);

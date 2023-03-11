@@ -66,39 +66,39 @@ public class EvaluatorBase<T>
         return value;
     }
 
-    @Override public T eval(OpTable opUnit, T input) { return null; }
-    @Override public T eval(OpBGP opBGP, T input) { return null; }
-    @Override public T eval(OpTriple opTriple, T input) { return null; }
-    @Override public T eval(OpQuad opQuad, T input) { return null; }
-    @Override public T eval(OpPath opPath, T input) { return null; }
-    @Override public T eval(OpDatasetNames dsNames, T input) { return null; }
-    @Override public T eval(OpQuadPattern quadPattern, T input) { return null; }
-    @Override public T eval(OpQuadBlock quadBlock, T input) { return null; }
-    @Override public T eval(OpNull opNull, T input) { return null; }
-    @Override public T eval(OpFilter opFilter, T input) { return null; }
-    @Override public T eval(OpGraph opGraph, T input) { return null; }
-    @Override public T eval(OpService opService, T input) { return null; }
-    @Override public T eval(OpProcedure opProcedure, T input) { return null; }
-    @Override public T eval(OpPropFunc opPropFunc, T input) { return null; }
-    @Override public T eval(OpLabel opLabel, T input) { return null; }
-    @Override public T eval(OpAssign opAssign, T input) { return null; }
-    @Override public T eval(OpExtend opExtend, T input) { return null; }
-    @Override public T eval(OpJoin opJoin,  T input) { return null; }
-    @Override public T eval(OpLeftJoin opLeftJoin,  T input) { return null; }
-    @Override public T eval(OpDiff opDiff,  T input) { return null; }
-    @Override public T eval(OpMinus opMinus,  T input) { return null; }
-    @Override public T eval(OpUnion opUnion,  T input) { return null; }
-    @Override public T eval(OpLateral opLater,  T input) { return null; }
-    @Override public T eval(OpConditional opCondition,  T input) { return null; }
-    @Override public T eval(OpSequence opSequence, T input) { return null; }
-    @Override public T eval(OpDisjunction opDisjunction, T input) { return null; }
-    @Override public T eval(OpExt opExt, T input) { return null; }
-    @Override public T eval(OpList opList, T input) { return null; }
-    @Override public T eval(OpOrder opOrder, T input) { return null; }
-    @Override public T eval(OpTopN opTop, T input) { return null; }
-    @Override public T eval(OpProject opProject, T input) { return null; }
-    @Override public T eval(OpDistinct opDistinct, T input) { return null; }
-    @Override public T eval(OpReduced opReduced, T input) { return null; }
-    @Override public T eval(OpSlice opSlice, T input) { return null; }
-    @Override public T eval(OpGroup opGroup, T input) { return null; }
+    @Override public T eval(OpTable opUnit, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpBGP opBGP, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpTriple opTriple, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpQuad opQuad, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpPath opPath, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpDatasetNames dsNames, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpQuadPattern quadPattern, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpQuadBlock quadBlock, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpNull opNull, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpFilter opFilter, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpGraph opGraph, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpService opService, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpProcedure opProcedure, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpPropFunc opPropFunc, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpLabel opLabel, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpAssign opAssign, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpExtend opExtend, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpJoin opJoin,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpLeftJoin opLeftJoin,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpDiff opDiff,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpMinus opMinus,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpUnion opUnion,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpLateral opLater,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpConditional opCondition,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpSequence opSequence, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpDisjunction opDisjunction, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpExt opExt, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpList opList, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpOrder opOrder, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpTopN opTop, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpProject opProject, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpDistinct opDistinct, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpReduced opReduced, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpSlice opSlice, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpGroup opGroup, T input) { throw new UnsupportedOperationException(); }
 }

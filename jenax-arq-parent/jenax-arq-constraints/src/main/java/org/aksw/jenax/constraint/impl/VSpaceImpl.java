@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -202,6 +203,7 @@ public class VSpaceImpl
 
 
     public static Range<Cmp<Entry<?, Cmp<ComparableNodeValue>>>> span(VSpace vspace) {
+        Objects.requireNonNull(vspace);
         Comparator<Entry<?, Cmp<ComparableNodeValue>>> cmptor = (x, y) -> {
             // (Object x, ComparableNodeValue y)
 

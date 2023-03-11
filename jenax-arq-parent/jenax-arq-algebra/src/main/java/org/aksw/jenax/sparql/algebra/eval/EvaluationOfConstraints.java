@@ -20,6 +20,8 @@ import org.apache.jena.sparql.algebra.op.OpOrder;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -73,8 +75,10 @@ public class EvaluationOfConstraints
     @Override
     public CBinding eval(OpJoin op, CBinding input) {
         CBinding left = eval(op.getLeft(), input);
-        CBinding result = eval(op.getRight(), left);
-        // CBinding result = lift.cloneObject()
+        CBinding right = eval(op.getRight(), left);
+
+        CBinding result = left.cloneObject();
+        result.stateIntersection(right);
         return result;
     }
 
@@ -83,6 +87,12 @@ public class EvaluationOfConstraints
         CBinding left = eval(op.getLeft(), input);
         CBinding right = eval(op.getRight(), input);
         CBinding result = left.cloneObject().stateUnion(right);
+        return result;
+    }
+
+    @Override
+    public CBinding eval(OpSlice op, CBinding input) {
+        CBinding result = eval(op.getSubOp(), input);
         return result;
     }
 
@@ -111,9 +121,20 @@ public class EvaluationOfConstraints
         return result;
     }
 
+    // FIXME There should be a predicate whether the SERVICE clause can be analyzed as a standard
+    //   graph pattern
+    @Override
+    public CBinding eval(OpService opService, CBinding input) {
+        return CBindingMap.create();
+    }
+
     @Override
     public CBinding eval(OpExtend op, CBinding input) {
-        CBinding result = eval(op.getSubOp(), input).cloneObject();
+        CBinding tmp = eval(op.getSubOp(), input);
+        if (tmp == null) {
+            System.out.println("here");
+        }
+        CBinding result = tmp.cloneObject();
         for (Entry<Var, Expr> entry : op.getVarExprList().getExprs().entrySet()) {
             Var v = entry.getKey();
             Expr e = entry.getValue();
