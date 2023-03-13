@@ -138,7 +138,7 @@ public class ConstraintDerivations {
                 VSpace argSpace = deriveValueSpace(arg, cxt);
                 result = argSpace.forDimension(ValueSpace.VSPACE_STRING);
 
-                result = result.mapDimensionToNewVSpace(ValueSpace.VSPACE_STRING, ComparableNodeValue.class, r -> mapRangeToPrefix(r));
+                result = result.mapDimensionToNewVSpace(ValueSpace.VSPACE_STRING, ComparableNodeValue.class, ValueSpace.VSPACE_URI, r -> mapRangeToPrefix(r));
                 if (!argSpace.isLimitedTo(ValueSpace.VSPACE_STRING)) {
                     result.stateUnion(VSpaceImpl.create(NodeRanges.createClosed()
                         .addOpenDimension(ValueSpace.VSPACE_UNDEF)));

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.commons.algebra.allen.AllenRelation;
 import org.apache.jena.sparql.expr.ValueSpace;
 
 import com.google.common.collect.Range;
@@ -58,6 +57,12 @@ public abstract class VSpaceBase<T extends Comparable<T>, D> {
         }
         return this;
     }
+
+    public RangeSet<T> getOrCreateDimension(D dimension) {
+        RangeSet<T> result = vscToRangeSets.computeIfAbsent(dimension, x -> TreeRangeSet.create());
+        return result;
+    }
+
 
     /** Add a new unconstrained dimension. Do nothing if it already exists or dimensions are non-exhaustive */
     public VSpaceBase<T, D> addOpenDimension(D dimension) {

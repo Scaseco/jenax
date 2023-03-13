@@ -112,7 +112,7 @@ public class VSpaceImpl
 
     @Override
     public <X extends Comparable<X>> VSpace mapDimensionToNewVSpace(Object fromDimKey, Class<X> itemType,
-            Function<Range<X>, Range<X>> mapper) {
+            Object toDimKey, Function<Range<X>, Range<X>> mapper) {
         Preconditions.checkArgument(ComparableNodeValue.class.isAssignableFrom(itemType), "Type must be ComparableNodeValue.class");
         // NodeRanges nr = ((VSpaceImpl)fromDimKey).getNodeRanges();
 
@@ -124,7 +124,12 @@ public class VSpaceImpl
         NodeRanges newNodeRanges = NodeRanges.createClosed();
         for (Range<ComparableNodeValue> range : ranges.asRanges()) {
             Range<ComparableNodeValue> out = (Range<ComparableNodeValue>) mapper.apply((Range<X>)range);
-            newNodeRanges.add(out);
+            Object mappedDimKey = NodeRanges.classifyValueSpaceCore(out);
+            if (mappedDimKey != null && !toDimKey.equals(mappedDimKey)) {
+                throw new IllegalStateException("Declared target dimension was " + toDimKey + " but classified one was " + mappedDimKey);
+            }
+
+            newNodeRanges.getOrCreateDimension(toDimKey).add(out);
         }
         return VSpaceImpl.create(newNodeRanges);
     }
