@@ -77,6 +77,7 @@ public class OpUtils {
         @Override public boolean isFunction(Op op) { return !OpUtils.getSubOps(op).isEmpty(); }
         @Override public Var asVar(Op op) { return op instanceof OpVar ? ((OpVar)op).getVar() : null; }
         @Override public Op varToExpr(Var var) { return new OpVar(var); }
+        @Override public String toString(Op op) { return Objects.toString(op); }
     }
 
     private static final OpOps opOps = new OpOps();

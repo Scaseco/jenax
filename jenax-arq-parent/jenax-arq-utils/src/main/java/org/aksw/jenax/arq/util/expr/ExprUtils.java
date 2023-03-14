@@ -77,6 +77,7 @@ public class ExprUtils {
         @Override public boolean isFunction(Expr expr) { return expr.isFunction(); }
         @Override public Var asVar(Expr expr) { return expr.isVariable() ? expr.asVar() : null; }
         @Override public Expr varToExpr(Var var) { return new ExprVar(var); }
+        @Override public String toString(Expr expr) { return org.apache.jena.sparql.util.ExprUtils.fmtSPARQL(expr); }
     }
 
     private static final ExprOps exprOps = new ExprOps();
