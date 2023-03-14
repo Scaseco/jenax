@@ -79,6 +79,7 @@ public class GenericNodeSerializerCustom
             switch(c) {
             case '#':
             case '/':
+            case ':':
             case '.':
                 // We could add ':' here, it is used as a separator in URNs.
                 // But it is a multiple use character and always present in the scheme name.
@@ -96,9 +97,11 @@ public class GenericNodeSerializerCustom
         String result = iriToPrefix.get(iri);
         if (result == null) {
             String key = getPossibleKey(iri);
-            String prefix = iriToPrefix.get(key);
-            if (prefix != null) {
-                result = prefix + ":" + iri.substring(key.length());
+            if (key != null) {
+                String prefix = iriToPrefix.get(key);
+                if (prefix != null) {
+                    result = prefix + ":" + iri.substring(key.length());
+                }
             }
         }
         return result;
