@@ -66,6 +66,31 @@ public class VarExprListUtils {
         return b.build() ;
     }
 
+    /** Return a new VarExprList that contains all variables of 'var' and any corresponding definition from 'vel' */
+    public static VarExprList projectAllVars(VarExprList vel, Collection<Var> vars) {
+        VarExprList result = new VarExprList();
+        for (Var var : vars) {
+            Expr expr = vel.getExpr(var);
+            if (expr == null) {
+                result.add(var);
+            } else {
+                result.add(var, expr);
+            }
+        }
+        return result;
+    }
+
+    public static VarExprList projectExprsOnly(VarExprList vel, Collection<Var> vars) {
+        VarExprList result = new VarExprList();
+        for (Var var : vars) {
+            Expr expr = vel.getExpr(var);
+            if (expr != null) {
+                result.add(var, expr);
+            }
+        }
+        return result;
+    }
+
     /**
      * Code taken from QueryIterGroup (TODO Why? Apparently for converting aggregators to parallel ones)
      **/

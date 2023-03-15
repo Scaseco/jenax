@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
@@ -28,8 +27,6 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
-import org.apache.jena.sparql.expr.E_Bound;
-import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -1030,6 +1027,9 @@ public class QueryGenerationUtils {
 
         // Always copy
         Query copy = query.cloneQuery();
+
+        //
+        VarExprList commonExpressions = new VarExprList();
 
         Template template = query.getConstructTemplate();
         // In order to unify templates regardless whether they use triples or quads we _always_ include the graph
