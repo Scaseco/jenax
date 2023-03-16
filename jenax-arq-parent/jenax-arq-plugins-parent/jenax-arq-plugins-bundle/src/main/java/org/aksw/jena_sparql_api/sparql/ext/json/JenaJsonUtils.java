@@ -6,7 +6,6 @@ import java.util.stream.IntStream;
 
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
@@ -19,6 +18,7 @@ import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.scripting.NV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,6 @@ public class JenaJsonUtils {
 
     public static JsonObject extractJsonObjectOrNull(Node node) {
         JsonElement tmp = extractOrNull(node);
-
         JsonObject result = tmp == null || !tmp.isJsonObject() ? null : tmp.getAsJsonObject();
         return result;
     }
@@ -119,6 +118,19 @@ public class JenaJsonUtils {
         }
         return result;
     }
+
+    public static JsonElement extractJsonElementOrNull(NodeValue nv) {
+        JsonElement result;
+        if (nv instanceof NodeValueJson) {
+            result = ((NodeValueJson)nv).getJsonElement();
+        } else {
+            // Do we need this fallback?
+            Node node = nv.getNode();
+            result = extractOrNull(node);
+        }
+        return result;
+    }
+
     public static boolean isJsonElement(NodeValue nv) {
         boolean result = false;
         if (nv instanceof NodeValueJson) {
@@ -138,33 +150,15 @@ public class JenaJsonUtils {
         return new NodeValueJson(jsonElement);
     }
 
-    public static JsonElement extractJsonElement(NodeValue nv) {
-        JsonElement result;
-        if (nv instanceof NodeValueJson) {
-            result = ((NodeValueJson)nv).getJsonElement();
-        } else {
-            // Do we need this fallback?
-            Node node = nv.getNode();
-            result = extractOrNull(node);
-        }
-        return result;
-    }
-
     /** Extract or convert */
     public static JsonElement enforceJsonElement(NodeValue nv) {
-        JsonElement result = extractJsonElement(nv);
+        JsonElement result = extractJsonElementOrNull(nv);
         if (result == null) {
             Node node = nv.asNode();
             result = nodeToJsonElement(node);
         }
         return result;
     }
-
-//    public static Node createPrimitiveNodeValue(Object o) {
-//        RDFDatatype dtype = TypeMapper.getInstance().getTypeByValue(o);
-//        Node result = NodeFactory.createLiteralByValue(o, dtype);
-//        return result;
-//    }
 
     public static JsonElement nodeToJsonElement(Node node) {
         JsonElement result;
@@ -207,11 +201,11 @@ public class JenaJsonUtils {
         return result;
     }
 
-    public static Node convertJsonOrValueToNode(Object o) {
-        // Gson gson = new Gson();
-        Gson gson = RDFDatatypeJson.get().getGson();
-        RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-        Node result = convertJsonOrValueToNode(o, gson, dtype);
+    public static NodeValue convertJsonOrValueToNodeValue(Object o) {
+        RDFDatatypeJson dtype = RDFDatatypeJson.get();
+        Gson gson = dtype.getGson();
+        // RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+        NodeValue result = convertJsonOrValueToNodeValue(o, gson);
         return result;
     }
 
@@ -221,45 +215,42 @@ public class JenaJsonUtils {
      * If the argument is non-primitive JSON then return a Node with json type from it
      * In any other case attempt to convert the argument to json (via gson).
      * */
-    public static Node convertJsonOrValueToNode(Object o, Gson gson, RDFDatatype jsonDatatype) {
+    public static NodeValue convertJsonOrValueToNodeValue(Object o, Gson gson) {
         boolean isPrimitive = o instanceof Boolean || o instanceof Number || o instanceof String;
-        Node result;
+        NodeValue result;
         if(o == null) {
             result = null;
         } else if(isPrimitive) {
-            RDFDatatype dtype = TypeMapper.getInstance().getTypeByValue(o);
-            result = NodeFactory.createLiteralByValue(o, dtype);
+            result = NV.toNodeValue(o);
         } else if(o instanceof JsonElement) {
             JsonElement e = (JsonElement)o;
-            result = convertJsonToNode(e, gson, jsonDatatype);
+            result = convertJsonToNodeValue(e);
         } else {
             // Write the object to json and re-read it as a json-element
             String str = gson.toJson(o);
             JsonElement e = gson.fromJson(str, JsonElement.class);
-            result = convertJsonToNode(e, gson, jsonDatatype);
+            result = convertJsonToNodeValue(e);
         }
-//    	else {
-//    		throw new RuntimeException("Unknown type: " + o);
-//    	}
-
         return result;
     }
 
-    public static Node convertJsonToNode(JsonElement e, Gson gson, RDFDatatype jsonDatatype) {
-        Node result;
+    public static NodeValue convertJsonToNodeValue(JsonElement e) {
+        NodeValue result;
         if(e == null) {
             result = null;
         } else if (e.isJsonPrimitive()) {
-            //JsonPrimitive p = e.getAsJsonPrimitive();
-            Object o = gson.fromJson(e, Object.class); //JsonTransformerUtils.toJavaObject(p);
-            if(o != null) {
-                RDFDatatype dtype = TypeMapper.getInstance().getTypeByValue(o);
-                result = NodeFactory.createLiteralByValue(o, dtype);
+            JsonPrimitive p = e.getAsJsonPrimitive();
+            if (p.isString()) {
+                result = NodeValue.makeString(p.getAsString());
+            } else if (p.isNumber()) {
+                result = NV.toNodeValue(p.getAsNumber()); // Calls non-public NV.number2value
+            } else if (p.isBoolean()) {
+                result = NodeValue.makeBoolean(p.getAsBoolean());
             } else {
-                throw new RuntimeException("Datatype not supported " + e);
+                throw new RuntimeException("Unexpected json primitive: " + e);
             }
         } else if (e.isJsonObject() || e.isJsonArray()) { // arrays are json objects / array e.isJsonArray() ||
-            result = NodeFactory.createLiteralByValue(e, jsonDatatype);//new NodeValueJson(e);
+            result = new NodeValueJson(e); // NodeFactory.createLiteralByValue(e, jsonDatatype);//new NodeValueJson(e);
         } else if (e.isJsonNull()) {
             result = null;
         } else {
@@ -269,7 +260,7 @@ public class JenaJsonUtils {
     }
 
     public static NodeValue evalJsonPath(Gson gson, NodeValue nv, NodeValue query) {
-        JsonElement json = extractJsonElement(nv);
+        JsonElement json = extractJsonElementOrNull(nv);
 
         NodeValue result = null;
         if(query.isString() && json != null) {
@@ -295,12 +286,11 @@ public class JenaJsonUtils {
             if (o == null) {
                 NodeValue.raise(new ExprTypeException("JsonPath evaluated to null"));
             } else {
-                RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-                Node node = JenaJsonUtils.convertJsonOrValueToNode(o, gson, jsonDatatype);
-                if (node == null) {
+                // RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+                result = JenaJsonUtils.convertJsonOrValueToNodeValue(o, gson);
+                if (result == null) {
                     NodeValue.raise(new ExprTypeException("Json evaluated to null (probably JsonNull)"));
                 }
-                result = NodeValue.makeNode(node);
             }
         } else {
             NodeValue.raise(new ExprTypeException("Invalid arguments to json path"));
@@ -367,9 +357,11 @@ public class JenaJsonUtils {
         } catch(Exception e) {
             throw new ExprEvalException(e);
         }
-        RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+        // RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+        RDFDatatype jsonDatatype = RDFDatatypeJson.get();
 
-        Node n = JenaJsonUtils.convertJsonToNode(item, gson, jsonDatatype);
+        NodeValue nv = JenaJsonUtils.convertJsonToNodeValue(item);
+        Node n = nv == null ? null : nv.asNode();
         // NodeValue nv = n == null ? null : NodeValue.makeNode(n);
 
         if (n != null) {

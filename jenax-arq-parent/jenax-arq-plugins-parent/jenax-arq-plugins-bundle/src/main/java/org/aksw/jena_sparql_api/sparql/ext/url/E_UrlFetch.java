@@ -124,7 +124,7 @@ public class E_UrlFetch
                     ++i;
                 }
             } else if (JenaJsonUtils.isJsonElement(k)) {
-                JsonElement elt = JenaJsonUtils.extractJsonElement(k);
+                JsonElement elt = JenaJsonUtils.extractJsonElementOrNull(k);
                 GsonUtils.merge(result, elt);
             } else {
                 throw new ExprTypeException("Either JSON or string type expected for argument " + i);

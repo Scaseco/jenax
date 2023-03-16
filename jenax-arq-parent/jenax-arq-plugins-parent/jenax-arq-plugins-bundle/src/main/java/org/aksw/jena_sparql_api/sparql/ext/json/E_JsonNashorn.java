@@ -1,23 +1,23 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
-import org.apache.jena.sparql.function.FunctionEnv;
 import org.openjdk.nashorn.api.scripting.JSObject;
 import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 public class E_JsonNashorn extends FunctionBase {
     protected ScriptEngine engine;
@@ -65,11 +65,11 @@ public class E_JsonNashorn extends FunctionBase {
             List<NodeValue> fnArgs = args.subList(1, args.size());
             List<Object> jsos = new ArrayList<>(fnArgs.size());
             for (NodeValue arg : fnArgs) {
-            	JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
-            	String jsonStr = gson.toJson(jsonElt);
-            	Object engineObj = jsonParse.call(null, jsonStr);
-            	// JSObject jsObj = (JSObject)engineObj;
-            	jsos.add(engineObj);
+                JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
+                String jsonStr = gson.toJson(jsonElt);
+                Object engineObj = jsonParse.call(null, jsonStr);
+                // JSObject jsObj = (JSObject)engineObj;
+                jsos.add(engineObj);
             }
 
             RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
@@ -78,8 +78,7 @@ public class E_JsonNashorn extends FunctionBase {
             Object raw = fn.call(fn, as);
             String jsonStr = jsonStringify.call(null, raw).toString();
             JsonElement jsonEl = gson.fromJson(jsonStr, JsonElement.class);
-            Node node = JenaJsonUtils.convertJsonToNode(jsonEl, gson, dtype);
-            result = NodeValue.makeNode(node);
+            result = JenaJsonUtils.convertJsonToNodeValue(jsonEl);
         }
         return result;
     }
