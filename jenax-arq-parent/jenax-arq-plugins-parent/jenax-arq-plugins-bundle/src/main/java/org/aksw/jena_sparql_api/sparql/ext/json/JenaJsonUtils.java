@@ -119,6 +119,15 @@ public class JenaJsonUtils {
         return result;
     }
 
+    /** Use this method in SPARQL evaluation; Raises an ExprTypeException on incorrect argument. */
+    public static JsonElement requireJsonElement(NodeValue nv) {
+        JsonElement elt = JenaJsonUtils.extractJsonElementOrNull(nv);
+        if (elt == null) {
+            NodeValue.raise(new ExprTypeException("Not a JSON element"));
+        }
+        return elt;
+    }
+
     public static JsonElement extractJsonElementOrNull(NodeValue nv) {
         JsonElement result;
         if (nv instanceof NodeValueJson) {

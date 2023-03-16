@@ -25,11 +25,11 @@ public class E_JsonGet
 
     @Override
     public NodeValue exec(NodeValue nv, NodeValue key) {
-        JsonElement elt = JenaJsonUtils.extractJsonElementOrNull(nv);
+        JsonElement elt = JenaJsonUtils.requireJsonElement(nv);
         NodeValue result = null;
         if (key.isInteger()) {
+            int idx = key.getInteger().intValue();
             if (elt.isJsonArray()) {
-                int idx = key.getInteger().intValue();
                 JsonArray arr = elt.getAsJsonArray();
                 JsonElement item = arr.get(idx);
                 result = JenaJsonUtils.convertJsonToNodeValue(item);
@@ -37,8 +37,8 @@ public class E_JsonGet
                 NodeValue.raise(new ExprTypeException("Integer key type can only be used to access JSON array elements"));
             }
         } else if (key.isString()) {
+            String str = key.getString();
             if (elt.isJsonObject()) {
-                String str = key.getString();
                 JsonElement val = elt.getAsJsonObject().get(str);
                 result = JenaJsonUtils.convertJsonOrValueToNodeValue(val);
             } else {

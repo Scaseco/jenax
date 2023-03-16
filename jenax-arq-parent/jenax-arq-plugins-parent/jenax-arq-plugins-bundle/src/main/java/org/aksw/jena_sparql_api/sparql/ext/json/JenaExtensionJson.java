@@ -23,6 +23,7 @@ public class JenaExtensionJson {
 
 //		fnReg.put(ns + "parse", E_JsonParse.class);
         fnReg.put(ns + "path", E_JsonPath.class);
+        fnReg.put(ns + "get", E_JsonGet.class);
         fnReg.put(ns + "entries", E_JsonEntries.class);
         fnReg.put(ns + "js", E_JsonNashorn.class);
 
