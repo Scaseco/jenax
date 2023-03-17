@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.apache.jena.sparql.expr.ExprTypeException;
+import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprEvalTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase2;
 
@@ -34,7 +35,7 @@ public class E_JsonGet
                 JsonElement item = arr.get(idx);
                 result = JenaJsonUtils.convertJsonToNodeValue(item);
             } else {
-                NodeValue.raise(new ExprTypeException("Integer key type can only be used to access JSON array elements"));
+                NodeValue.raise(new ExprEvalTypeException("Integer key type can only be used to access JSON array elements"));
             }
         } else if (key.isString()) {
             String str = key.getString();
@@ -42,11 +43,16 @@ public class E_JsonGet
                 JsonElement val = elt.getAsJsonObject().get(str);
                 result = JenaJsonUtils.convertJsonOrValueToNodeValue(val);
             } else {
-                NodeValue.raise(new ExprTypeException("String key type can only be used to access members of JSON objects"));
+                NodeValue.raise(new ExprEvalTypeException("String key type can only be used to access members of JSON objects"));
             }
         } else {
-            NodeValue.raise(new ExprTypeException("Json array or object expected"));
+            NodeValue.raise(new ExprEvalTypeException("Json array or object expected"));
         }
+
+        if (result == null) {
+            NodeValue.raise(new ExprEvalException("Access of JSON object by key returned null value"));
+        }
+
         return result;
     }
 }

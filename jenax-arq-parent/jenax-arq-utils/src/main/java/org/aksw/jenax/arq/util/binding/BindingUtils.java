@@ -3,7 +3,6 @@ package org.aksw.jenax.arq.util.binding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +21,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingLib;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
@@ -88,12 +88,23 @@ public class BindingUtils {
 //    }
 
     public static Binding project(Binding binding, Iterable<Var> vars) {
-        return project(binding, vars.iterator(), Collections.emptySet());
+        return project(binding, vars.iterator());
     }
 
-    public static Binding project(Binding binding, Iterator<Var> vars, Set<Var> blacklist) {
+    public static Binding project(Binding binding, Iterator<Var> vars) {
         BindingBuilder builder = BindingBuilder.create();
+        while (vars.hasNext()) {
+            Var var = vars.next();
+            Node node = binding.get(var);
+            if (node != null) {
+                builder.add(var, node);
+            }
+        }
+        return builder.build();
+    }
 
+    public static Binding project(Binding binding, Iterator<Var> vars, Set<Var> blacklist) { // Replace with predicate?
+        BindingBuilder builder = BindingBuilder.create();
         while (vars.hasNext()) {
             Var var = vars.next();
             if (!blacklist.contains(var)) {
@@ -103,7 +114,6 @@ public class BindingUtils {
                 }
             }
         }
-
         return builder.build();
     }
 
@@ -131,15 +141,15 @@ public class BindingUtils {
         return builder.build();
     }
 
+    /** Similar to {@link BindingLib#bindingToMap(Binding)} but does not use a lambda */
     public static Map<Var, Node> toMap(Binding binding) {
-        Map<Var, Node> result = new HashMap<Var, Node>();
+        Map<Var, Node> result = new HashMap<>();
         Iterator<Var> it = binding.vars();
         while(it.hasNext()) {
             Var v = it.next();
             Node n = binding.get(v);
             result.put(v, n);
         }
-
         return result;
     }
 

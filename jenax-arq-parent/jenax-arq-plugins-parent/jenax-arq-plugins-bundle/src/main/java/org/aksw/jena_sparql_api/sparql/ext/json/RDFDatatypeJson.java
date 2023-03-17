@@ -19,21 +19,24 @@ public class RDFDatatypeJson
 {
     private static final Logger logger = LoggerFactory.getLogger(RDFDatatypeJson.class);
 
-    public static final String IRI = XSD.getURI() + "json";
+    public static final String LEGACY_IRI = XSD.getURI() + "json";
     private static final RDFDatatypeJson INSTANCE = new RDFDatatypeJson();
 
     public static RDFDatatypeJson get() {
         return INSTANCE;
     }
 
-    /** Gson is initialized lazily because it increased startup time significantly */
+    /** Gson is initialized lazily because it causes a noticeable startup delay */
     private Supplier<Gson> gsonSupplier;
-    // private Gson gson = null;
 
     public RDFDatatypeJson() {
-        this(IRI);
+        this(SparqlX_Json_Terms.Datatype);
     }
 
+    public RDFDatatypeJson(String uri) {
+        this(uri, () -> createGson());
+    }
+    
     // Workaround for spark's old guava version which may not support setLenient
     public static Gson createGson() {
         GsonBuilder builder = new GsonBuilder();
@@ -47,6 +50,7 @@ public class RDFDatatypeJson
             builder.setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE);
             builder.setNumberToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE);
         } catch(NoSuchMethodError e) {
+        	// May fail in e.g. hadoop environments
             logger.warn("Gson.setObjectToNumberStrategy and/or Gson.setNumberToNumberStrategy not available");
         }
 
@@ -54,14 +58,11 @@ public class RDFDatatypeJson
         return result;
     }
 
-    public RDFDatatypeJson(String uri) {
-        this(uri, () -> createGson());
+    @Override
+    public boolean isValidValue(Object valueForm) {
+        boolean result = valueForm instanceof JsonElement;
+        return result;
     }
-
-//    public RDFDatatypeJson(String uri, Gson gson) {
-//        super(uri);
-//        this.gson = gson;
-//    }
 
     public RDFDatatypeJson(String uri, Supplier<Gson> gsonSupplier) {
         super(uri);
@@ -83,7 +84,7 @@ public class RDFDatatypeJson
      */
     @Override
     public String unparse(Object value) {
-        String result = gsonSupplier.get().toJson(value);
+        String result = JenaJsonUtils.convertJsonOrValueToString(value, getGson());
         return result;
     }
 
@@ -95,7 +96,7 @@ public class RDFDatatypeJson
     public JsonElement parse(String lexicalForm) throws DatatypeFormatException {
         JsonElement result;
         try {
-            result = gsonSupplier.get().fromJson(lexicalForm, JsonElement.class);
+            result = getGson().fromJson(lexicalForm, JsonElement.class);
         } catch(Exception e) {
             throw new DatatypeFormatException(lexicalForm, this, e);
         }

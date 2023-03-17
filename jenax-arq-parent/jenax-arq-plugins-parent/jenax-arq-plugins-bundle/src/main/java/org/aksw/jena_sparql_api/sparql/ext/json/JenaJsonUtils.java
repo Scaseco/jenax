@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
@@ -225,7 +226,7 @@ public class JenaJsonUtils {
      * In any other case attempt to convert the argument to json (via gson).
      * */
     public static NodeValue convertJsonOrValueToNodeValue(Object o, Gson gson) {
-        boolean isPrimitive = o instanceof Boolean || o instanceof Number || o instanceof String;
+        boolean isPrimitive = isJavaJsonPrimitive(o);
         NodeValue result;
         if(o == null) {
             result = null;
@@ -239,6 +240,33 @@ public class JenaJsonUtils {
             String str = gson.toJson(o);
             JsonElement e = gson.fromJson(str, JsonElement.class);
             result = convertJsonToNodeValue(e);
+        }
+        return result;
+    }
+
+//    public static boolean isValidValue(Object valueForm) {
+//        return valueForm instanceof JsonElement || isJavaJsonPrimitive(valueForm);
+//    }
+
+    public static boolean isJavaJsonPrimitive(Object o) {
+        boolean result = o instanceof Boolean || o instanceof Number || o instanceof String;
+        return result;
+    }
+
+    /** toString for primitive Java objects or JsonElements */
+    public static String convertJsonOrValueToString(Object o, Gson gson) {
+        boolean isPrimitive = isJavaJsonPrimitive(o);
+        String result;
+        if(o == null) {
+            result = null;
+        } else if(isPrimitive) {
+            result = Objects.toString(o);
+        } else if(o instanceof JsonElement) {
+            JsonElement e = (JsonElement)o;
+            result = e.toString();
+        } else {
+            // Write the object to json and re-read it as a json-element
+            result = gson.toJson(o);
         }
         return result;
     }

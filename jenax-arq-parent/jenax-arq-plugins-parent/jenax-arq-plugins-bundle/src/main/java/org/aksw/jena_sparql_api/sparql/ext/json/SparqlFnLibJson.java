@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 public class SparqlFnLibJson {
 
     /** Get the length of a json array. Raises {@link IllegalArgumentException} for non array arguments */
-    @IriNs(JenaExtensionJson.ns)
+    @IriNs(JenaExtensionJson.LEGACY_NS)
     public static int length(JsonElement json) {
         int result;
         if (json.isJsonArray()) {
@@ -25,7 +25,7 @@ public class SparqlFnLibJson {
      * Creates a deep copy of the given json object with the given key and
      * value (converted to JSON) appended. Overwrites any prior value for that key.
      */
-    @IriNs(JenaExtensionJson.ns)
+    @IriNs(JenaExtensionJson.LEGACY_NS)
     public static JsonElement set(JsonElement json, String key, Node value) {
         if (!json.isJsonObject()) {
             throw new IllegalArgumentException("json:set() requires a json object as first argument");

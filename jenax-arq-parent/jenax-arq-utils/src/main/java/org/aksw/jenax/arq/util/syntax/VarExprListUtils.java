@@ -28,28 +28,32 @@ import org.apache.jena.sparql.expr.ExprTransformSubstitute;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.ExprVars;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 public class VarExprListUtils {
 
     /** Evaluate an expression list against a binding. Code taken from {@link QueryIterAssign}. */
-    public static Binding eval(VarExprList exprs, Binding binding, ExecutionContext execCxt) {
-        BindingBuilder b = Binding.builder(binding);
+    public static Binding eval(VarExprList exprs, Binding binding, FunctionEnv execCxt) {
+    	
+    	// Profiling suggested that internally using a mutable binding performs better than repeated snapshots 
+    	BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
+        // BindingBuilder b = Binding.builder(binding);
         for ( Var v : exprs.getVars() ) {
             // if "binding", not "b" used, we get (Lisp) "let"
             // semantics, not the desired "let*" semantics
-            Node n = exprs.get(v, b.snapshot(), execCxt);
+            Node n = exprs.get(v, mb, execCxt);
 
             if ( n == null )
                 // Expression failed to evaluate - no assignment
                 continue;
 
             // Check is already has a value; if so, must be sameValueAs
-            if ( b.contains(v) ) {
+            if ( mb.contains(v) ) {
                 // Optimization may linearize to push a stream through an (extend).
 //                if ( false && mustBeNewVar )
 //                    throw new QueryExecException("Already set: " + v);
-                Node n2 = b.get(v);
+                Node n2 = mb.get(v);
                 if ( !n2.sameValueAs(n) )
                     //throw new QueryExecException("Already set: "+v) ;
                     // Error in single assignment.
@@ -58,12 +62,14 @@ public class VarExprListUtils {
             }
             try {
                 // Add same.
-                b.add(v, n) ;
+                mb.add(v, n) ;
             } catch (ARQInternalErrorException ex) {
                 throw ex;
             }
         }
-        return b.build() ;
+        
+        Binding result = BindingBuilder.create().addAll(mb).build();
+        return result;
     }
 
     /** Return a new VarExprList that contains all variables of 'var' and any corresponding definition from 'vel' */

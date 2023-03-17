@@ -150,7 +150,7 @@ public class TestGeoSparqlEx {
     @Test
     public void testCollectError01() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
-        Assert.assertEquals(null, actual);
+        Assert.assertNull(actual);
     }
 
     @Test
