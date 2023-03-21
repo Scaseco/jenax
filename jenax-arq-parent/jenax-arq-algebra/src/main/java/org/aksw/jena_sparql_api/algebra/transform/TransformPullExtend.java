@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -140,6 +141,12 @@ class ProjectExtend {
         ProjectExtend result = vel == null ? null : new ProjectExtend(project, vel, tmp);
         return result;
     }
+    
+    @Override
+    public String toString() {
+    	String result = "" + apply(subOp);
+    	return result;
+    }
 }
 
 /**
@@ -207,19 +214,22 @@ public class TransformPullExtend
 
         List<ProjectExtend> pes = subOps.stream().map(ProjectExtend::collect).collect(Collectors.toList());
 
-        Set<Var> commonPullableVars = pes.stream().map(ProjectExtend::getPullableVars).flatMap(Collection::stream).collect(Collectors.toSet());
+        // The set of variables that are _candidates_ for pulling
+        Set<Var> candidatePullableVars = pes.stream().map(ProjectExtend::getPullableVars).flatMap(Collection::stream).collect(Collectors.toSet());
         VarExprList common = new VarExprList();
 
+        Set<Var> rejectedCandidateVars = new HashSet<>();
         // Iterator<Var> it = commonPullableVars.iterator();
-        nextVar: for (Var var : commonPullableVars) {
+        nextVar: for (Var var : candidatePullableVars) {
+        	boolean isPriorSet = false;
             Expr prior = null;
-
             for (ProjectExtend pe : pes) {
                 Expr expr = pe.getVel().getExpr(var);
-
-                if (prior == null) {
+                if (!isPriorSet) {
+                	isPriorSet = true;
                     prior = expr;
-                } else if (!prior.equals(expr)) {
+                } else if (!Objects.equals(prior, expr)) {
+                	rejectedCandidateVars.add(var);
                     continue nextVar;
                 }
             }
@@ -228,11 +238,16 @@ public class TransformPullExtend
             }
         }
 
+        // Note: We need to add non-pullable vars back
+        
         if (!common.isEmpty()) {
             List<Op> newOps = new ArrayList<>(subOps.size());
             for (ProjectExtend pe : pes) {
-                VarExprList nonPullable = VarExprListUtils.projectAllVars(pe.getVel(), pe.getNonPullableVars());
-                Op newInnerOp = ProjectExtend.applyIfNeeded(pe.getProject() != null, nonPullable, pe.getSubOp());
+            	List<Var> nonPullableVars = new ArrayList<>(pe.getNonPullableVars());
+            	nonPullableVars.addAll(rejectedCandidateVars);
+            	
+                VarExprList nonPullableVel = VarExprListUtils.projectAllVars(pe.getVel(), nonPullableVars);
+                Op newInnerOp = ProjectExtend.applyIfNeeded(pe.getProject() != null, nonPullableVel, pe.getSubOp());
                 // Op newDistinct = OpDistinct.create(newInnerOp);
                 newOps.add(newInnerOp);
             }
