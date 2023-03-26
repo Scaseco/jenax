@@ -1,7 +1,7 @@
 package org.aksw.jenax.io.kryo.jena;
 
-import org.aksw.commons.util.list.ListUtils;
-import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
+import java.util.List;
+
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.atlas.lib.tuple.Tuple0;
 import org.apache.jena.atlas.lib.tuple.Tuple1;
@@ -13,6 +13,7 @@ import org.apache.jena.atlas.lib.tuple.Tuple6;
 import org.apache.jena.atlas.lib.tuple.Tuple7;
 import org.apache.jena.atlas.lib.tuple.Tuple8;
 import org.apache.jena.atlas.lib.tuple.TupleN;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_ANY;
 import org.apache.jena.graph.Node_Blank;
@@ -21,8 +22,12 @@ import org.apache.jena.graph.Node_Triple;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Node_Variable;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.graph.impl.GraphPlain;
+import org.apache.jena.mem.GraphMem;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.impl.LiteralImpl;
@@ -33,6 +38,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.DatasetImpl;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -146,10 +152,10 @@ import org.apache.jena.sparql.expr.nodevalue.NodeValueLang;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueSortKey;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueString;
+import org.apache.jena.sparql.graph.GraphFactory;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
-import com.google.gson.Gson;
 
 /**
  * Note: KryoRegistrator is an interface introduced by spark; hence we cannot use it
@@ -234,7 +240,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(E_OpNumericMod.class, new ExprFunction2Serializer<>(E_OpNumericMod::new));
         kryo.register(E_Random.class);
         kryo.register(E_Regex.class, new ExprFunctionNSerializer<>(args -> new E_Regex(
-                ListUtils.getOrNull(args, 0), ListUtils.getOrNull(args, 1), ListUtils.getOrNull(args, 2))));
+                getOrNull(args, 0), getOrNull(args, 1), getOrNull(args, 2))));
         kryo.register(E_SameTerm.class, new ExprFunction2Serializer<>(E_SameTerm::new));
         kryo.register(E_SHA1.class, new ExprFunction1Serializer<>(E_SHA1::new));
         kryo.register(E_SHA224.class, new ExprFunction1Serializer<>(E_SHA224::new));
@@ -253,10 +259,10 @@ public class JenaKryoRegistratorLib {
         kryo.register(E_StrLength.class, new ExprFunction1Serializer<>(E_StrLength::new));
         kryo.register(E_StrLowerCase.class, new ExprFunction1Serializer<>(E_StrLowerCase::new));
         kryo.register(E_StrReplace.class, new ExprFunctionNSerializer<>(args -> new E_StrReplace(
-                ListUtils.getOrNull(args, 0), ListUtils.getOrNull(args, 1), ListUtils.getOrNull(args, 2), ListUtils.getOrNull(args, 3))));
+                getOrNull(args, 0), getOrNull(args, 1), getOrNull(args, 2), getOrNull(args, 3))));
         kryo.register(E_StrStartsWith.class, new ExprFunction2Serializer<>(E_StrStartsWith::new));
         kryo.register(E_StrSubstring.class, new ExprFunctionNSerializer<>(args -> new E_StrSubstring(
-                ListUtils.getOrNull(args, 0), ListUtils.getOrNull(args, 1), ListUtils.getOrNull(args, 2))));
+                getOrNull(args, 0), getOrNull(args, 1), getOrNull(args, 2))));
         kryo.register(E_StrUpperCase.class, new ExprFunction1Serializer<>(E_StrUpperCase::new));
         kryo.register(E_StrUUID.class);
         kryo.register(E_Subtract.class, new ExprFunction2Serializer<>(E_Subtract::new));
@@ -291,13 +297,26 @@ public class JenaKryoRegistratorLib {
         kryo.register(Node[].class); //, new NodeArraySerializer());
 
         kryo.register(Triple.class, new TripleSerializer());
-        kryo.register(org.apache.jena.graph.Triple[].class);
+        kryo.register(Triple[].class);
+
+        kryo.register(Quad.class, new QuadSerializer());
+        kryo.register(Quad[].class);
 
         kryo.register(PrefixMappingImpl.class, new PrefixMappingSerializer(Lang.TURTLE, RDFFormat.TURTLE_PRETTY));
 
-        kryo.register(ModelCom.class, new ModelSerializer(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));
-        kryo.register(DatasetImpl.class, new DatasetSerializer(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));
-        kryo.register(DatasetOneNgImpl.class, new DatasetOneNgSerializer());
+        kryo.register(ModelCom.class, GenericCollectionSerializer.create(ModelCom.class, Triple.class,
+                m -> m.getGraph().stream(), () -> (ModelCom)ModelFactory.createDefaultModel(), (m, t) -> m.getGraph().add(t)));
+
+        kryo.register(GraphPlain.class, GenericCollectionSerializer.create(GraphPlain.class, Triple.class,
+                Graph::stream, () -> (GraphPlain)GraphFactory.createPlainGraph(), Graph::add));
+
+        kryo.register(GraphMem.class, GenericCollectionSerializer.create(GraphMem.class, Triple.class,
+                Graph::stream, () -> (GraphMem)GraphFactory.createGraphMem(), Graph::add));
+
+        // kryo.register(ModelCom.class, new ModelSerializerViaRiot(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));
+        // kryo.register(DatasetImpl.class, new DatasetSerializer(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));
+        kryo.register(DatasetImpl.class, GenericCollectionSerializer.create(DatasetImpl.class, Quad.class,
+                ds -> ds.asDatasetGraph().stream(), () -> (DatasetImpl)DatasetFactory.create(), (ds, q) -> ds.asDatasetGraph().add(q)));
 
         Serializer<Binding> bindingSerializer = new BindingSerializer();
         kryo.register(BindingRoot.class, bindingSerializer);
@@ -323,14 +342,12 @@ public class JenaKryoRegistratorLib {
         kryo.register(Tuple8.class, tupleOfNodesSerializer);
         kryo.register(TupleN.class, tupleOfNodesSerializer);
 
-        Gson gson = new Gson();
-
         //kryo.register(org.apache.jena.rdf.model.RDFNode.class, new RDFNodeSerializer<>(Function.identity(), gson));
         //kryo.register(org.apache.jena.rdf.model.Resource.class, new RDFNodeSerializer<>(RDFNode::asResource, gson));
         //kryo.register(org.apache.jena.rdf.model.impl.R.class, new RDFNodeSerializer<>(RDFNode::asResource, gson));
-        kryo.register(ResourceImpl.class, new RDFNodeSerializer<>(RDFNode::asResource, gson));
-        kryo.register(PropertyImpl.class, new RDFNodeSerializer<>(n -> ResourceFactory.createProperty(n.asResource().getURI()), gson));
-        kryo.register(LiteralImpl.class, new RDFNodeSerializer<>(RDFNode::asLiteral, gson));
+        kryo.register(ResourceImpl.class, new RDFNodeSerializer<>(RDFNode::asResource));
+        kryo.register(PropertyImpl.class, new RDFNodeSerializer<>(n -> ResourceFactory.createProperty(n.asResource().getURI())));
+        kryo.register(LiteralImpl.class, new RDFNodeSerializer<>(RDFNode::asLiteral));
 
 
         // Serializers for sending encountered exceptions over a wire
@@ -344,5 +361,14 @@ public class JenaKryoRegistratorLib {
         kryo.register(Node_URI.class, nodeSerializer);
         kryo.register(Node_Literal.class, nodeSerializer);
         kryo.register(Node_Triple.class, nodeSerializer);
+    }
+
+    private static <T> T getOrNull(List<T> list, int i) {
+        return getOrDefault(list, i, null);
+    }
+
+    private static <T> T getOrDefault(List<T> list, int i, T dflt) {
+        T result = i >= list.size() ? dflt : list.get(i);
+        return result;
     }
 }

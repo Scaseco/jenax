@@ -14,10 +14,10 @@ import java.io.OutputStream;
  *
  * @author Claus Stadler
  */
-public class ModelSerializer
+public class ModelSerializerViaRiot
         extends RiotSerializerBase<Model> {
 
-    public ModelSerializer(Lang lang, RDFFormat format) {
+    public ModelSerializerViaRiot(Lang lang, RDFFormat format) {
         super(lang, format);
     }
 

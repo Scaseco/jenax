@@ -1,12 +1,12 @@
 package org.aksw.jenax.io.kryo.jena;
 
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.sparql.core.Quad;
 
 /**
  * Kryo serializer for {@link Triple}.
@@ -26,7 +26,7 @@ public class TripleSerializer extends Serializer<Triple> {
         Node s = (Node) kryo.readClassAndObject(input);
         Node p = (Node) kryo.readClassAndObject(input);
         Node o = (Node) kryo.readClassAndObject(input);
-        Triple result = new Triple(s, p, o);
+        Triple result = Triple.create(s, p, o);
         return result;
     }
 }

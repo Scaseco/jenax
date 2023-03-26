@@ -2,10 +2,10 @@ package org.aksw.jenax.io.kryo.jena;
 
 import java.util.Map;
 
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.ext.com.google.common.collect.BiMap;
+import org.apache.jena.ext.com.google.common.collect.HashBiMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -50,7 +50,7 @@ public class GenericNodeSerializerCustom
     public static final int ABBREV_DTYPE      = 0x04; // 0100
 
 
-    public static BidiMap<String, String> prefixToIri = new DualHashBidiMap<>();
+    public static BiMap<String, String> prefixToIri = HashBiMap.create();
 
     static {
         prefixToIri.put("a", RDF.type.getURI());
@@ -133,7 +133,7 @@ public class GenericNodeSerializerCustom
     public void write(Kryo kryo, Output output, Node node) {
         if (node.isURI()) {
             String uri = node.getURI();
-            String curie = encode(prefixToIri.inverseBidiMap(), uri);
+            String curie = encode(prefixToIri.inverse(), uri);
             if (curie != null) {
                 output.writeByte(TYPE_IRI | ABBREV_VALUE);
                 output.writeString(curie);
@@ -151,7 +151,7 @@ public class GenericNodeSerializerCustom
                 output.writeString(lex);
                 output.writeString(lang);
             } else if (dt != null && !dt.isEmpty() && !dt.equals(XSD.xstring.getURI())) {
-                String dtCurie = encode(prefixToIri.inverseBidiMap(), dt);
+                String dtCurie = encode(prefixToIri.inverse(), dt);
                 if (dtCurie != null) {
                     output.writeByte(TYPE_LITERAL | LITERAL_HAS_DTYPE | ABBREV_DTYPE);
                     output.writeString(lex);

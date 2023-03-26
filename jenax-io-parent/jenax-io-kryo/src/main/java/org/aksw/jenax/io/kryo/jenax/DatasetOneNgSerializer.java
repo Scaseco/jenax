@@ -1,4 +1,4 @@
-package org.aksw.jenax.io.kryo.jena;
+package org.aksw.jenax.io.kryo.jenax;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;

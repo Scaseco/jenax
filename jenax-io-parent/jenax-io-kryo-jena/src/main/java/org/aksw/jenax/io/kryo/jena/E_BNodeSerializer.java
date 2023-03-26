@@ -2,6 +2,7 @@ package org.aksw.jenax.io.kryo.jena;
 
 import java.util.List;
 
+import org.apache.jena.ext.com.google.common.base.Preconditions;
 import org.apache.jena.sparql.expr.E_BNode;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprFunction;
@@ -11,7 +12,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.google.common.base.Preconditions;
 
 public class E_BNodeSerializer
     extends Serializer<ExprFunction>

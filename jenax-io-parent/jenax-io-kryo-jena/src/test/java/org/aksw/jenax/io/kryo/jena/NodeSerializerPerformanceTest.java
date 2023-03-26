@@ -1,4 +1,4 @@
-package net.sansa_stack.kryo.jena;
+package org.aksw.jenax.io.kryo.jena;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

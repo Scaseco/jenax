@@ -1,12 +1,12 @@
 package org.aksw.jenax.io.kryo.jena;
 
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Quad;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.Var;
 
 /**
  * Serializer for {@link Quad}.
@@ -24,11 +24,11 @@ public class QuadSerializer extends Serializer<Quad> {
 
     @Override
     public Quad read(Kryo kryo, Input input, Class<Quad> objClass) {
-        Node g = (Node) kryo.readClassAndObject(input);
-        Node s = (Node) kryo.readClassAndObject(input);
-        Node p = (Node) kryo.readClassAndObject(input);
-        Node o = (Node) kryo.readClassAndObject(input);
-        Quad result = new Quad(g, s, p, o);
+        Node g = (Node)kryo.readClassAndObject(input);
+        Node s = (Node)kryo.readClassAndObject(input);
+        Node p = (Node)kryo.readClassAndObject(input);
+        Node o = (Node)kryo.readClassAndObject(input);
+        Quad result = Quad.create(g, s, p, o);
         return result;
     }
 }

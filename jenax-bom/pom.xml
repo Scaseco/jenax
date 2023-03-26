@@ -264,6 +264,12 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-io-kryo-jena</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-entityinfo</artifactId>
 				<version>${project.version}</version>
 			</dependency>
