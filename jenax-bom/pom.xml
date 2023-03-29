@@ -3,20 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<!-- <parent> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-parent</artifactId> 
 		<version>4.5.0-1-SNAPSHOT</version> </parent> <artifactId>jenax-bom</artifactId> -->
-
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
 	<version>4.8.0-1-SNAPSHOT</version>
-
 	<packaging>pom</packaging>
-
 	<modules>
 		<module>..</module>
 	</modules>
-
 	<properties>
 		<jena.version>4.8.0-SNAPSHOT</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
@@ -24,49 +19,36 @@
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
 		<!-- <jetty.version>9.4.35.v20201120</jetty.version> -->
 		<jetty.version>9.4.40.v20210413</jetty.version>
-
 		<kryo.version>4.0.2</kryo.version>
-
 		<jgrapht.version>1.5.1</jgrapht.version>
-
 		<!-- 2.18 could be tried out next -->
 		<!-- <jersey.version>2.26-b03</jersey.version> -->
 		<!-- <jersey.version>2.30</jersey.version> -->
 		<jersey.version>2.35</jersey.version>
 		<asm.version>8.0.1</asm.version>
-
 		<guava.version>31.0.1-jre</guava.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-vfs2.version>2.9.0</commons-vfs2.version>
 		<ver.commons-math>3.6.1</ver.commons-math>
-
 		<slf4j.version>1.7.36</slf4j.version>
 		<log4j.version>2.19.0</log4j.version>
-
 		<hadoop.version>3.3.4</hadoop.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.1.0</tika.version>
-
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
 		<aksw.commons.version>0.9.5-SNAPSHOT</aksw.commons.version>
-
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
 		<jts.version>1.18.1</jts.version>
-
 		<gson.version>2.9.0</gson.version>
-
 		<annotation-api.version>1.3.2</annotation-api.version>
-
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
 		<!-- <jetty-plugin.version>8.1.10.v20130312</jetty-plugin.version> -->
 		<!-- <jersey-spring.version>1.17.1</jersey-spring.version> -->
 		<!-- <jetty.jsp.version>9.2.22.v20170606</jetty.jsp.version> -->
-
 		<javaee-api.version>6.0</javaee-api.version>
-
 		<!-- Project Settings -->
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
@@ -75,9 +57,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<gpg.keyname>AKSW</gpg.keyname>
-
 	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -85,7 +65,6 @@
 				<artifactId>commons-math3</artifactId>
 				<version>${ver.commons-math}</version>
 			</dependency>
-
 			<!-- resolves conflicts between jersey, tika and hadoop -->
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
@@ -102,32 +81,36 @@
 			<!-- <artifactId>jaxb-impl</artifactId> -->
 			<!-- <version>${jaxb.version}</version> -->
 			<!-- </dependency> -->
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-views</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-resources-servicedescription</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection-extra</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-picocli</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-datatypes</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>com.esotericsoftware</groupId>
 				<artifactId>kryo</artifactId>
 				<version>${kryo.version}</version>
 			</dependency>
-
-
 			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
 				and tika -->
 			<dependency>
@@ -135,13 +118,11 @@
 				<artifactId>asm</artifactId>
 				<version>${asm.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm-commons</artifactId>
 				<version>${asm.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm-tree</artifactId>
@@ -152,164 +133,136 @@
 				<artifactId>asm-util</artifactId>
 				<version>${asm.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
 				<artifactId>asm-analysis</artifactId>
 				<version>${asm.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.jgrapht</groupId>
 				<artifactId>jgrapht-core</artifactId>
 				<version>${jgrapht.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-langtag-validator</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jena</artifactId>
 				<version>1.5.1-1</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
 				<version>1.5.1-1</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-service-vfs</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-fromasfilter</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-sameas</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-plugins-bundle</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-dcat-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-foaf</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-prov</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-conjure-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-functionbinder-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-kryo</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-io-kryo-jena</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-entityinfo</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-csvw</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-tika</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-hdt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datashapes</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-rx-dataaccess</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-pathfinding</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-arq-analytics-core</artifactId> 
 				<version>${project.version}</version> </dependency> -->
 			<dependency>
@@ -317,244 +270,201 @@
 				<artifactId>jenax-arq-json</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-analytics-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-virtuoso</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-mods</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-udf</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-server-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-server-frontends</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datasets-diff</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-quadengine</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-server-standalone</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-fsrdfstore-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-fsrdfstore-system</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-fsrdfstore-facade</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-propertypaths</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datapaths</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datasets-oneng</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-datasets-orderaware</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-aggregators</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-reprogen-shared</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-reprogen-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-reprogen-shacl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-reprogen-jpa</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-annotations-reprogen</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-resources-prefixes</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-utils</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-stmt</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-relations</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-algebra</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-collections</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rx</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-entityquery</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-constraints</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rdfterm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-functions</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-facete-vocab</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-csvw</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-facete-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-facete-impl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-rx-ops-syscall</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>shacl</artifactId>
@@ -566,84 +476,67 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>com.google.maps</groupId>
 				<artifactId>google-maps-services</artifactId>
 				<version>0.18.0</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.iana-language-subtag-registry</groupId>
 				<artifactId>iana-language-subtag-registry-resource-rdf-raw</artifactId>
 				<version>2023-02-26</version>
 			</dependency>
-
-
 			<!-- java 9+ for server-standalone -->
 			<dependency>
 				<groupId>javax.xml.bind</groupId>
 				<artifactId>jaxb-api</artifactId>
 				<version>${javax.xml.version}</version>
 			</dependency>
-
 			<!-- <dependency> <groupId>com.sun.xml.bind</groupId> <artifactId>jaxb-impl</artifactId> 
 				<version>${javax.xml.version}</version> </dependency> <dependency> <groupId>com.sun.xml.bind</groupId> 
 				<artifactId>jaxb-core</artifactId> <version>${javax.xml.version}</version> 
 				</dependency> -->
-
 			<!-- <dependency> <groupId>org.glassfish.jaxb</groupId> <artifactId>jaxb-runtime</artifactId> 
 				<version>2.3.1</version> </dependency> -->
-
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-
 			<!-- <dependency> <groupId>javax.xml.bind</groupId> <artifactId>jaxb-core</artifactId> 
 				<version>2.3.0.1</version> </dependency> -->
-
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
 				<version>5.1.4</version>
 			</dependency>
-
 			<!-- Never depend on the logging implementations unless in test cases 
 				or test modules -->
-
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-slf4j-impl</artifactId>
 				<version>${log4j.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jul-to-slf4j</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-ext</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-
-
 			<!-- Modules -->
 			<!-- Make the test configuration available across all modules - especially 
 				the log4j.properties file -->
@@ -653,72 +546,58 @@
 				<version>${project.version}</version>
 				<!-- <scope>test</scope> -->
 			</dependency>
-
 			<dependency>
 				<groupId>com.nurkiewicz.asyncretry</groupId>
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
-
-
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-base</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.rdfhdt</groupId>
 				<artifactId>hdt-jena</artifactId>
 				<version>2.1.2</version>
 			</dependency>
-
 			<!-- <dependency> -->
 			<!-- <groupId>eu.wdaqua</groupId> -->
 			<!-- <artifactId>hdt-jena</artifactId> -->
 			<!-- <version>2.1</version> -->
 			<!-- </dependency> -->
-
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-dboe-storage</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<!-- Needed by some parts of jena since 3.15.0 -->
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>1.15</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-rdfconnection</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-geosparql</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.ini4j</groupId>
 				<artifactId>ini4j</artifactId>
 				<version>0.5.4</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-core</artifactId>
@@ -729,7 +608,6 @@
 				<artifactId>jena-iri</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<!-- <dependency> <groupId>org.apache.jena</groupId> <artifactId>jena-sdb</artifactId> 
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
 				<groupId>com.hp.hpl.jena</groupId> <artifactId>jena</artifactId> </exclusion> 
@@ -744,16 +622,13 @@
 				<artifactId>postgis-jdbc</artifactId>
 				<version>2.5.1</version>
 			</dependency>
-
 			<!-- <dependency> -->
 			<!-- <groupId>code.google.com</groupId> -->
 			<!-- <artifactId>patricia-trie</artifactId> -->
 			<!-- <version>0.6</version> -->
 			<!-- </dependency> -->
-
 			<!-- <dependency> <groupId>org.jgrapht</groupId> <artifactId>jgrapht-core</artifactId> 
 				<version>${jgrapht.version}</version> </dependency> -->
-
 			<!-- Present for playground and potential demos -->
 			<!-- <dependency> <groupId>org.jgrapht</groupId> <artifactId>jgrapht-ext</artifactId> 
 				<version>${jgrapht.version}</version> </dependency> -->
@@ -763,18 +638,15 @@
 				<artifactId>protonpack</artifactId>
 				<version>1.15</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-jgrapht-bindings</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.glassfish.jersey.containers</groupId>
 				<artifactId>jersey-container-servlet</artifactId>
 				<version>${jersey.version}</version>
-
 				<exclusions>
 					<exclusion>
 						<groupId>aopalliance</groupId>
@@ -782,19 +654,15 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.glassfish.jersey.media</groupId>
 				<artifactId>jersey-media-multipart</artifactId>
 				<version>${jersey.version}</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.glassfish.jersey.ext</groupId>
 				<artifactId>jersey-spring5</artifactId>
 				<version>${jersey.version}</version>
-
 				<exclusions>
 					<exclusion>
 						<groupId>javax.validation</groupId>
@@ -818,14 +686,11 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
-
 			<dependency>
 				<groupId>javax.annotation</groupId>
 				<artifactId>javax.annotation-api</artifactId>
 				<version>${annotation-api.version}</version>
 			</dependency>
-
 			<!-- For some reason atmosphere is not finding this class -->
 			<dependency>
 				<groupId>xml-apis</groupId>
@@ -839,20 +704,19 @@
 				<version>3.0.5</version>
 				<scope>runtime</scope>
 			</dependency>
-			<dependency> <!-- Used for @Configuration annotation so we can inject an ApplicationContext 
+			<dependency>
+				<!-- Used for @Configuration annotation so we can inject an ApplicationContext 
 					into servlets -->
 				<!-- Heavily used by mapper-proxy module -->
 				<groupId>cglib</groupId>
 				<artifactId>cglib-nodep</artifactId>
 				<version>3.3.0</version>
 			</dependency>
-
 			<dependency>
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy</artifactId>
 				<version>1.12.3</version>
 			</dependency>
-
 			<!-- Jetty -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -879,7 +743,6 @@
 				<artifactId>apache-jsp</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
-
 			<!-- <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-jsp</artifactId> 
 				<version>${jetty.version}</version> <type>jar</type> <scope>compile</scope> 
 				</dependency> -->
@@ -890,18 +753,13 @@
 			<!-- <type>jar</type> -->
 			<!-- <scope>compile</scope> -->
 			<!-- </dependency> -->
-
 			<!-- <dependency> <groupId>org.hibernate.javax.persistence</groupId> <artifactId>hibernate-jpa-2.0-api</artifactId> 
 				<version>1.0.1.Final</version> </dependency> -->
-
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
 				<version>2.2.0</version>
 			</dependency>
-
-
-
 			<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
 				<version>1.2.17</version> <scope>test</scope> </dependency> -->
 			<!-- <dependency> -->
@@ -924,7 +782,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
 			<!-- <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-objectstore</artifactId> 
 				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
 				<artifactId>aksw-commons-models-csvw-domain</artifactId> <version>${aksw.commons.version}</version> 
@@ -945,14 +802,11 @@
 				<artifactId>aksw-commons-io-utils</artifactId> <version>${aksw.commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-io-syscalls</artifactId> 
 				<version>${aksw.commons.version}</version> </dependency> -->
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>4.4</version>
 			</dependency>
-
-
 			<!-- Java Topology Suite -->
 			<dependency>
 				<groupId>org.locationtech.jts</groupId>
@@ -978,7 +832,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<!-- Embedded Databases (will be moved to separate package) -->
 			<dependency>
 				<groupId>com.h2database</groupId>
@@ -986,49 +839,38 @@
 				<version>1.4.196</version>
 				<!--<scope>runtime</scope> -->
 			</dependency>
-
-
 			<!-- JDBC Connection Pooling -->
 			<!-- <dependency> <groupId>com.jolbox</groupId> <artifactId>bonecp</artifactId> 
 				<version>0.8.0.RELEASE</version> </dependency> -->
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.12.0</version>
 			</dependency>
-
-
 			<!-- Command Line Argument Parsing -->
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
 				<version>1.4</version>
 			</dependency>
-
 			<dependency>
 				<groupId>net.sf.jopt-simple</groupId>
 				<artifactId>jopt-simple</artifactId>
 				<version>5.0.4</version>
 			</dependency>
-
 			<!-- Collection Libraries -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
 			</dependency>
-
-
 			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing 
 				to maintain separately) -->
-
 			<dependency>
 				<groupId>org.aksw.thirdparty.com.sshtools</groupId>
 				<artifactId>vfs2nio</artifactId>
@@ -1044,7 +886,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-vfs2</artifactId>
@@ -1060,7 +901,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-vfs2-jackrabbit1</artifactId>
@@ -1072,41 +912,33 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.httpcomponents.client5</groupId>
 				<artifactId>httpclient5</artifactId>
 				<version>5.1</version>
 			</dependency>
-
-
 			<!-- <dependency> -->
 			<!-- <groupId>commons-httpclient</groupId> -->
 			<!-- <artifactId>commons-httpclient</artifactId> -->
 			<!-- <version>3.1</version> -->
 			<!-- </dependency> -->
-
 			<dependency>
 				<groupId>org.apache.jackrabbit</groupId>
 				<artifactId>jackrabbit-webdav</artifactId>
 				<!-- <version>2.21.5</version> -->
 				<version>2.12.11</version>
 			</dependency>
-
-
 			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
 				stuff would have to go t -->
 			<!-- <dependency> <groupId>net.sansa-stack</groupId> <artifactId>sansa-spark-jena-java_2.12</artifactId> 
 				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
 				<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
 				<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
-
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-tdb2</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-
 			<!-- When commons-compress just isn't enough (e.g. when there is need 
 				for splittable bzip2 decoding) -->
 			<dependency>
@@ -1115,7 +947,6 @@
 				<version>${hadoop.version}</version>
 				<!-- <exclusions> <exclusion> <groupId>*</groupId> <artifactId>*</artifactId> 
 					</exclusion> </exclusions> -->
-
 				<!-- Exclude web stuff (jetty, jersey)from hadoop -->
 				<exclusions>
 					<exclusion>
@@ -1156,12 +987,10 @@
 					</exclusion>
 					<!-- <exclusion> <groupId>ch.qos.reload4j</groupId> <artifactId>reload4j</artifactId> 
 						</exclusion> -->
-
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-reload4j</artifactId>
 					</exclusion>
-
 					<!-- <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
 						</exclusion> -->
 					<exclusion>
@@ -1177,27 +1006,22 @@
 						</exclusion> -->
 				</exclusions>
 			</dependency>
-
-
 			<!-- Servlet APIs -->
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>4.0.1</version>
 			</dependency>
-
 			<!-- <dependency> -->
 			<!-- <groupId>javax.ws.rs</groupId> -->
 			<!-- <artifactId>jsr311-api</artifactId> -->
 			<!-- <version>1.1.1</version> -->
 			<!-- </dependency> -->
-
 			<dependency>
 				<groupId>javax.ws.rs</groupId>
 				<artifactId>javax.ws.rs-api</artifactId>
 				<version>2.1.1</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-beans</artifactId>
@@ -1209,44 +1033,35 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-tx</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-expression</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
-
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-utils</artifactId> -->
 			<!-- <version>${spring.version}</version> -->
 			<!-- </dependency> -->
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
 				<version>${spring.version}</version>
-
 				<!-- Jena pulls in jcl-over-slf4j, so we don't need to add it ourselves -->
 				<exclusions>
 					<exclusion>
@@ -1255,13 +1070,11 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
 				<version>${tika.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-java7</artifactId>
@@ -1275,32 +1088,24 @@
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
-
 				</exclusions>
 			</dependency>
-
-
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-io</artifactId> -->
 			<!-- <version>${spring.version}</version> -->
 			<!-- </dependency> -->
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-jdbc</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
-
 			<!-- Spring Framework -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-webmvc</artifactId>
@@ -1316,7 +1121,6 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework.batch</groupId>
 				<artifactId>spring-batch-core</artifactId>
@@ -1333,7 +1137,6 @@
 				<artifactId>spring-batch-infrastructure</artifactId>
 				<version>${spring.batch.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>fr.dudie</groupId>
 				<artifactId>nominatim-api</artifactId>
@@ -1345,26 +1148,22 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<!-- Gson: Java to Json conversion -->
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.gson</groupId>
 				<artifactId>gson-utils-core</artifactId>
 				<version>1.0.1</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.spring</groupId>
 				<artifactId>spring-json-core</artifactId>
 				<version>1.0.2</version>
 			</dependency>
-
 			<dependency>
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
@@ -1376,50 +1175,42 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<!-- URL Rewriting -->
 			<dependency>
 				<groupId>org.tuckey</groupId>
 				<artifactId>urlrewritefilter</artifactId>
 				<version>4.0.4</version>
 			</dependency>
-
-
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>com.googlecode.combinatoricslib</groupId>
 				<artifactId>combinatoricslib</artifactId>
 				<version>2.1</version>
 			</dependency>
-
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
 				<artifactId>json-path</artifactId>
 				<version>2.7.0</version>
 			</dependency>
-
 			<!-- experimental dependencies -->
 			<!-- <dependency> <groupId>org.quartz-scheduler</groupId> <artifactId>quartz</artifactId> 
 				<version>2.3.0</version> </dependency> -->
-
+			<!--
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot</artifactId>
 				<version>1.5.10.RELEASE</version>
 			</dependency>
-
+			-->
 			<dependency>
 				<groupId>io.reactivex.rxjava3</groupId>
 				<artifactId>rxjava</artifactId>
 				<version>3.1.3</version>
 			</dependency>
-
-
 			<!-- <dependency> -->
 			<!-- <groupId>net.sf.opencsv</groupId> -->
 			<!-- <artifactId>opencsv</artifactId> -->
@@ -1430,17 +1221,14 @@
 			<!-- <artifactId>opencsv</artifactId> -->
 			<!-- <version>4.0</version> -->
 			<!-- </dependency> -->
-
 			<!-- For CommandLineUtils.translateCommandline in sparql-ext csv parsing -->
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-utils</artifactId>
 				<version>3.1.0</version>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
-
 	<distributionManagement>
 		<repository>
 			<id>ossrh</id>
@@ -1452,7 +1240,6 @@
 			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-
 	<repositories>
 		<repository>
 			<id>maven.aksw.snapshots</id>
@@ -1465,7 +1252,6 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-
 		<!-- Repo for latest jena snapshots -->
 		<repository>
 			<id>apache-repo-snapshots</id>
@@ -1477,14 +1263,11 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-
-
 		<!-- <repository> -->
 		<!-- <id>OSGeo</id> -->
 		<!-- <name>OSGeo Repository</name> -->
 		<!-- <url>http://download.osgeo.org/webdav/geotools/</url> -->
 		<!-- </repository> -->
-
 		<repository>
 			<id>locationtech-releases</id>
 			<url>https://repo.eclipse.org/content/groups/releases</url>
@@ -1502,11 +1285,8 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-
 	</repositories>
-
 	<profiles>
-
 		<profile>
 			<id>release</id>
 			<activation>
@@ -1515,7 +1295,6 @@
 					<value>true</value>
 				</property>
 			</activation>
-
 			<build>
 				<plugins>
 					<plugin>
@@ -1536,7 +1315,6 @@
 							</execution>
 						</executions>
 					</plugin>
-
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -1548,11 +1326,8 @@
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
 					</plugin>
-
 				</plugins>
 			</build>
 		</profile>
-
 	</profiles>
-
 </project>
