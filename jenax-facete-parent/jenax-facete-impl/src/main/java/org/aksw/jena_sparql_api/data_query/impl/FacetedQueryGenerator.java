@@ -783,7 +783,7 @@ public class FacetedQueryGenerator<P> {
                 .map(e -> e.project(e.getP(), focusCount ? e.getS() : e.getO()))
                 .map(e -> RelationUtils.rename(e, Arrays.asList(Vars.p, Vars.o)))
                 .map(Relation::toBinaryRelation)
-                .map(e -> e.joinOn(e.getSourceVar()).with(pConstraint))
+                .map(e -> pConstraint == null ? e : e.joinOn(e.getSourceVar()).with(pConstraint))
                 .map(e -> RelationUtils.groupBy(e, Vars.o, countVar, includeAbsent))
                 .map(Relation::getElement)
                 .collect(Collectors.toList());
@@ -1028,7 +1028,7 @@ public class FacetedQueryGenerator<P> {
         List<Element> elements = facetValues.values().stream()
                 .map(e -> RelationUtils.rename(e, Arrays.asList(Vars.s, Vars.p, Vars.o)))
                 .map(Relation::toTernaryRelation)
-                .map(e -> e.joinOn(e.getP()).with(pFilter))
+                .map(e -> pFilter == null ? e : e.joinOn(e.getP()).with(pFilter))
                 .map(e -> RelationUtils.groupBy(e, Vars.s, countVar, includeAbsent))
                 .map(Relation::getElement)
                 .collect(Collectors.toList());
