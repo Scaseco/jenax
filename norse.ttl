@@ -130,3 +130,15 @@ norse:xml.unnest a fnox:PropertyFunction ;
   ) ;
   .
 
+
+##
+# Maven (essentially maven style IRI-to-URN conversion)
+##
+
+norse:mvn.toPath
+  a fno:Function ;
+  .
+
+
+
+

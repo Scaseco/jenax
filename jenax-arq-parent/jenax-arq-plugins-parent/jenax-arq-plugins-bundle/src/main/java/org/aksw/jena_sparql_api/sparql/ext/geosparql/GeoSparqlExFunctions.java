@@ -51,7 +51,6 @@ public class GeoSparqlExFunctions {
         simplifier.setDistanceTolerance(tolerance);
         simplifier.setEnsureValid(ensureValid);
         Geometry tmp = simplifier.getResultGeometry();
-
         return GeometryWrapperUtils.createFromPrototype(geom, tmp);
     }
 

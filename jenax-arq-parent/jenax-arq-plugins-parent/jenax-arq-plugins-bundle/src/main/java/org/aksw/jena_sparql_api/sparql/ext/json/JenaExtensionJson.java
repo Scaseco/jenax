@@ -25,11 +25,11 @@ public class JenaExtensionJson {
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
 
         // If there is more than one datatype for the JsonElement class then use the one with the given IRI
-        binder.getFunctionGenerator().getTypeByClassOverrides().put(JsonElement.class, SparqlX_Json_Terms.Datatype);
+        binder.getFunctionGenerator().getTypeByClassOverrides().put(JsonElement.class, NorseJsonTerms.Datatype);
         
-        typeMapper.registerDatatype(new RDFDatatypeJson(SparqlX_Json_Terms.Datatype));        
-        registerFunctions(fnReg, SparqlX_Json_Terms.NS);
-        registerPropertyFunctions(pfnReg, SparqlX_Json_Terms.NS);
+        typeMapper.registerDatatype(new RDFDatatypeJson(NorseJsonTerms.Datatype));        
+        registerFunctions(fnReg, NorseJsonTerms.NS);
+        registerPropertyFunctions(pfnReg, NorseJsonTerms.NS);
 
         // TODO We yet need to register the legacy functions in the new namespace
         binder.registerAll(SparqlFnLibJson.class);

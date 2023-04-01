@@ -30,7 +30,7 @@ public class RDFDatatypeJson
     private Supplier<Gson> gsonSupplier;
 
     public RDFDatatypeJson() {
-        this(SparqlX_Json_Terms.Datatype);
+        this(NorseJsonTerms.Datatype);
     }
 
     public RDFDatatypeJson(String uri) {
