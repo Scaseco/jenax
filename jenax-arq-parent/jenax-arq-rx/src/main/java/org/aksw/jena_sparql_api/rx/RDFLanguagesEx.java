@@ -1,8 +1,10 @@
 package org.aksw.jena_sparql_api.rx;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +20,12 @@ import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
 import org.apache.jena.sys.JenaSystem;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
+
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
  *
@@ -26,7 +34,38 @@ import org.apache.jena.sys.JenaSystem;
  */
 public class RDFLanguagesEx {
 
-    static { JenaSystem.init(); }
+    // TODO Make this configurable via an RDF dataset?
+    private static Map<Lang, Lang> subLangMap = new HashMap<>();
+
+    static {
+        JenaSystem.init();
+
+        subLangMap.put(Lang.NTRIPLES, Lang.TURTLE);
+        subLangMap.put(Lang.TURTLE, Lang.TRIG);
+        subLangMap.put(Lang.NQUADS, Lang.TRIG);
+    }
+
+    public static Map<Lang, Lang> getSubLangMap() {
+        return subLangMap;
+    }
+
+    public static Stream<Lang> streamSubLangs(Lang lang) {
+        Map<Lang, Lang> subLangMap = getSubLangMap();
+        Multimap<Lang, Lang> mm = Multimaps.invertFrom(Multimaps.forMap(subLangMap), ArrayListMultimap.create());
+        Iterable<Lang> it = Traverser.forTree(mm::get).breadthFirst(lang);
+        return Streams.stream(it);
+    }
+
+//  TODO Turn this into a test case
+//    public static void main(String[] args) {
+//        System.out.println(streamSubLangs(Lang.RDFXML).collect(Collectors.toSet()));
+//    }
+
+    /** Return a set of languages which includes all the input ones and in addition */
+    public static Set<Lang> expandWithSubLangs(Iterable<Lang> langs) {
+        Set<Lang> result = Streams.stream(langs).flatMap(l -> Stream.concat(Stream.of(l), streamSubLangs(l))).collect(Collectors.toCollection(LinkedHashSet::new));
+        return result;
+    }
 
     // public static Collection<Lang> basicQuadLangs = Arrays.asList(Lang.TRIG, Lang.NQUADS)
 

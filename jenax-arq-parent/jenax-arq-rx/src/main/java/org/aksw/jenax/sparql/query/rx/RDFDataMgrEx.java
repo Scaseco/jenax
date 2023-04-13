@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
@@ -36,7 +37,6 @@ import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
-import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
@@ -505,12 +505,15 @@ public class RDFDataMgrEx {
     public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
         // TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
         // rather than the actual content - so we may be fooled here
+
+        // Expand the languages such that when  probing for languages such as turtle or trig then we also accept ntriples or nquads
+        Set<Lang> expandedLangs = RDFLanguagesEx.expandWithSubLangs(probeLangs);
         ContentType mediaType = result.getMediaType();
         if (mediaType != null) {
             // Check if the detected content type matches the ones we are probing for
             // If not then unset the content type and probe the content again
             String mediaTypeStr = mediaType.toHeaderString();
-            boolean mediaTypeInProbeLangs = Streams.stream(probeLangs)
+            boolean mediaTypeInProbeLangs = expandedLangs.stream()
                     .anyMatch(lang -> RDFLanguagesEx.getAllContentTypes(lang).contains(mediaTypeStr));
 
             if (!mediaTypeInProbeLangs) {
