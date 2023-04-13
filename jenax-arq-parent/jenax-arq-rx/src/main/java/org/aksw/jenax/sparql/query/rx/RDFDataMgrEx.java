@@ -249,7 +249,7 @@ public class RDFDataMgrEx {
     }
 
     public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
-        return probeLang(in, candidates, null);
+        return probeLang(in, candidates, new ArrayList<>());
     }
 
     /**
@@ -358,7 +358,7 @@ public class RDFDataMgrEx {
             InputStream in,
             Iterable<Lang> candidates,
             boolean tryAllCandidates) {
-        return probeLang(in, candidates, tryAllCandidates, null);
+        return probeLang(in, candidates, tryAllCandidates, new ArrayList<>());
     }
 //    public static TypedInputStream probeLang(
 //            InputStream in,
@@ -476,14 +476,14 @@ public class RDFDataMgrEx {
         } else {
             result = Objects.requireNonNull(RDFDataMgr.open(src), "Could not create input stream from " + src);
 
-            result = probeForSpecificLang(result, probeLangs);
+            result = probeForSpecificLang(result, probeLangs, errorCollector);
         }
 
         return result;
     }
 
     public static TypedInputStream open(String src, Iterable<Lang> probeLangs) {
-        return open(src, probeLangs, null);
+        return open(src, probeLangs, new ArrayList<>());
     }
 
     /** open via nio */
@@ -525,10 +525,6 @@ public class RDFDataMgrEx {
             result = probeLang(forceBuffered(result.getInputStream()), probeLangs, errorCollector);
         }
         return result;
-    }
-
-    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
-        return probeForSpecificLang(result, probeLangs, null);
     }
 
     public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
