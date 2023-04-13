@@ -1,12 +1,13 @@
 package org.aksw.jena_sparql_api.rx.script;
 
 import com.codepoetics.protonpack.StreamUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.riot.Lang;
 
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MultiException extends Exception {
@@ -32,11 +33,12 @@ public class MultiException extends Exception {
         return stmtParseExceptions;
     }
 
-    static String getEMessage(Throwable e) {
+    public static String getEMessage(Throwable e) {
         //return ExceptionUtils.getRootCauseMessage(e);
         String eMessage = e.getMessage();
-        if (eMessage != null && eMessage.matches("^\\w+(\\.\\w+)+: .*"))
-            return eMessage;
+        Matcher m = eMessage != null ? Pattern.compile("^(\\w+(\\.\\w+)+: )+(.*)$").matcher(eMessage) : null;
+        if (m != null && m.find())
+            return m.group(1) + m.group(3);
         return e.getClass().getName() + (eMessage == null ? "" : ": " + eMessage);
     }
 
