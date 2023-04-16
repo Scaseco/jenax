@@ -24,14 +24,15 @@ public class JenaExtensionSys {
         pfRegistry.put(ns + "listPropertyFunctions", new PropertyFunctionFactoryListPropertyFunctions());
         pfRegistry.put(ns + "listAggregateFunctions", new PropertyFunctionFactoryListAggregateFunctions());
 
-
-
         FunctionRegistry registry = FunctionRegistry.get();
 
         registry.put(ns + "benchmark", E_Benchmark.class);
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
+        registry.put(NorseLambdaTerms.fnOf, F_LambdaOf.class);
+        registry.put(NorseLambdaTerms.fnCall, F_LambdaCall.class);
+        registry.put(NorseLambdaTerms.mapComputeIfAbsent, F_MapComputeIfAbsent.class);
 
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);

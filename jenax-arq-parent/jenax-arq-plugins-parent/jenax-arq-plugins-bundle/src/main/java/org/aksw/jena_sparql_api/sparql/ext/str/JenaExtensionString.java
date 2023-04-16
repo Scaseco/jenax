@@ -29,4 +29,11 @@ public class JenaExtensionString {
     public static String lowerCamel(String str) {
         return StringUtils.toLowerCamelCase(str);
     }
+
+    /** Create a string from an integer value that is interpreted as a code point */
+    @IriNs(NS)
+    public static String ofCodePoint(int codePoint) {
+        String result = new String(Character.toChars(codePoint));
+        return result;
+    }
 }

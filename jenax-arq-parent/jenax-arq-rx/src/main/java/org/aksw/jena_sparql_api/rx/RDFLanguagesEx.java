@@ -39,7 +39,6 @@ public class RDFLanguagesEx {
 
     static {
         JenaSystem.init();
-
         subLangMap.put(Lang.NTRIPLES, Lang.TURTLE);
         subLangMap.put(Lang.TURTLE, Lang.TRIG);
         subLangMap.put(Lang.NQUADS, Lang.TRIG);
