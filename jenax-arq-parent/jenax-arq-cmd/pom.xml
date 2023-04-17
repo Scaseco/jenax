@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-cmds</artifactId>
-            <version>4.8.0-SNAPSHOT</version>
+            <version>${jena.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
