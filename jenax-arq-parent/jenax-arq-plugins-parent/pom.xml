@@ -17,6 +17,7 @@
 		<module>jenax-arq-plugins-bundle</module>
 		<module>jenax-arq-plugins-service-vfs</module>
 		<module>jenax-arq-plugins-datatypes</module>
+		<module>jenax-arq-plugins-generate</module>
 	</modules>
 
 	<profiles>
