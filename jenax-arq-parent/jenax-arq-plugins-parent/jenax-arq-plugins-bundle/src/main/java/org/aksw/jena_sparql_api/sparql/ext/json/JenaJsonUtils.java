@@ -130,13 +130,15 @@ public class JenaJsonUtils {
     }
 
     public static JsonElement extractJsonElementOrNull(NodeValue nv) {
-        JsonElement result;
+        JsonElement result = null;
         if (nv instanceof NodeValueJson) {
             result = ((NodeValueJson)nv).getJsonElement();
         } else {
             // Do we need this fallback?
             Node node = nv.getNode();
-            result = extractOrNull(node);
+            if (node != null) {
+                result = extractOrNull(node);
+            }
         }
         return result;
     }
