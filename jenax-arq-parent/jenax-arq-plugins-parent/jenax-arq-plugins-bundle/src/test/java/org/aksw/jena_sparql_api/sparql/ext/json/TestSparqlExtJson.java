@@ -63,7 +63,15 @@ public class TestSparqlExtJson {
         }
 
     }
+    @Test
+    public void testJsonJs() {
+        Query q = parser.apply("SELECT ?s { BIND(json:js('x => x.k', '{\"k\":\"v\"}'^^xsd:json) AS ?s) }");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            System.out.println(ResultSetFormatter.asText(qe.execSelect()));
+        }
 
+    }
     @Test
     public void testJsonObjectCreation() {
         JsonObject expected = new JsonObject();

@@ -1,11 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
@@ -14,10 +10,12 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
 import org.openjdk.nashorn.api.scripting.JSObject;
-import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class E_JsonNashorn extends FunctionBase {
     protected ScriptEngine engine;
@@ -28,7 +26,7 @@ public class E_JsonNashorn extends FunctionBase {
 
     public E_JsonNashorn() throws ScriptException {
         this(
-                new NashornScriptEngineFactory().getScriptEngine("--language=es6"),
+                new ScriptEngineManager().getEngineByName("js"),
                 new Gson()
         );
     }
