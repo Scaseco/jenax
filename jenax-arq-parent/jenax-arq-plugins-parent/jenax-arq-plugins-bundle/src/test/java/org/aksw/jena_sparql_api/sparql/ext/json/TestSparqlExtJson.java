@@ -2,10 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
@@ -72,6 +69,24 @@ public class TestSparqlExtJson {
         }
 
     }
+
+    @Test
+    public void testJsonJs2() {
+        Query q = parser.apply("SELECT \n" +
+                "*\n" +
+                "WHERE {\n" +
+                "  BIND(1"+("0".repeat(22))+" AS ?v)\n" +
+                "  BIND(json:js('function(x)  {return x;}', ?v) AS ?vv)\n" +
+                "}");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            ResultSet qresults = qe.execSelect();
+
+            System.out.println(ResultSetFormatter.asText(qresults));
+        }
+
+    }
+
     @Test
     public void testJsonObjectCreation() {
         JsonObject expected = new JsonObject();
