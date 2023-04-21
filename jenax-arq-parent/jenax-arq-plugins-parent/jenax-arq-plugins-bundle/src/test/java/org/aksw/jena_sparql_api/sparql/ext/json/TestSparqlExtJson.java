@@ -8,7 +8,10 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.resultset.ResultSetCompare;
+import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Assert;
@@ -65,7 +68,14 @@ public class TestSparqlExtJson {
         Query q = parser.apply("SELECT ?s { BIND(json:js('x => x.k', '{\"k\":\"v\"}'^^xsd:json) AS ?s) }");
         Model m = ModelFactory.createDefaultModel();
         try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
-            System.out.println(ResultSetFormatter.asText(qe.execSelect()));
+            String rs = ResultSetFormatter.asText(qe.execSelect());
+            Assert.assertEquals(
+                    "-------\n" +
+                    "| s   |\n" +
+                    "=======\n" +
+                    "| \"v\" |\n" +
+                    "-------\n", rs);
+            System.out.println(rs);
         }
 
     }
@@ -76,13 +86,28 @@ public class TestSparqlExtJson {
                 "*\n" +
                 "WHERE {\n" +
                 "  BIND(1"+("0".repeat(22))+" AS ?v)\n" +
-                "  BIND(json:js('function(x)  {return x;}', ?v) AS ?vv)\n" +
+                "  BIND(json:je('return $0', ?v) AS ?vv)\n" +
                 "}");
         Model m = ModelFactory.createDefaultModel();
         try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
             ResultSet qresults = qe.execSelect();
-
-            System.out.println(ResultSetFormatter.asText(qresults));
+            Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
+                    "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n" +
+                    "  <head>\n" +
+                    "    <variable name=\"v\"/>\n" +
+                    "    <variable name=\"vv\"/>\n" +
+                    "  </head>\n" +
+                    "  <results>\n" +
+                    "    <result>\n" +
+                    "      <binding name=\"v\">\n" +
+                    "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">10000000000000000000000</literal>\n" +
+                    "      </binding>\n" +
+                    "      <binding name=\"vv\">\n" +
+                    "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">10000000000000000000000</literal>\n" +
+                    "      </binding>\n" +
+                    "    </result>\n" +
+                    "  </results>\n" +
+                    "</sparql>\n", ResultSetFormatter.asXMLString(qresults));
         }
 
     }
