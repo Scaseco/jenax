@@ -1,7 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
@@ -9,8 +8,8 @@ import org.apache.jena.query.QueryParseException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
-import org.openjdk.nashorn.api.scripting.JSObject;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -21,8 +20,8 @@ public class E_JsonNashorn extends FunctionBase {
     protected ScriptEngine engine;
     protected Gson gson;
 
-    protected JSObject jsonParse;
-    protected JSObject jsonStringify;
+    protected Object jsonParse;
+    protected Object jsonStringify;
 
     public E_JsonNashorn() throws ScriptException {
         this(
@@ -36,9 +35,8 @@ public class E_JsonNashorn extends FunctionBase {
         this.engine = engine;
         this.gson = gson;
 
-
-        jsonParse = (JSObject) engine.eval("function(x) { return JSON.parse(x); }");
-        jsonStringify = (JSObject) engine.eval("function(x) { return JSON.stringify(x); }");
+        jsonParse = engine.eval("function(x) { return JSON.parse(x); }");
+        jsonStringify = engine.eval("function(x) { return JSON.stringify(x); }");
     }
 
     public static E_JsonNashorn create() throws ScriptException {
@@ -49,11 +47,11 @@ public class E_JsonNashorn extends FunctionBase {
     public NodeValue exec(List<NodeValue> args) {
         NodeValue result = null;
         NodeValue fnNv = args.get(0);
-        JSObject fn = null;
+        Object fn = null;
         if(fnNv.isString()) {
             String str = fnNv.asUnquotedString();
             try {
-                fn = (JSObject)engine.eval(str);
+                fn = engine.eval(str);
             } catch (ScriptException e) {
                 //throw new ExprException(ExceptionUtils.getRootCauseMessage(e));
 
@@ -65,16 +63,51 @@ public class E_JsonNashorn extends FunctionBase {
             for (NodeValue arg : fnArgs) {
                 JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
                 String jsonStr = gson.toJson(jsonElt);
-                Object engineObj = jsonParse.call(null, jsonStr);
+                //Object engineObj = jsonParse.call(null, jsonStr);
+                Bindings bindings = engine.createBindings();
+                bindings.put("jsonParse", jsonParse);
+                bindings.put("arg", jsonStr);
+                Object engineObj = null;
+                try {
+                    engineObj = engine.eval("jsonParse(arg)", bindings);
+                } catch (ScriptException e) {
+                    throw new RuntimeException(e);
+                }
                 // JSObject jsObj = (JSObject)engineObj;
                 jsos.add(engineObj);
             }
 
             RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
 
-            Object[] as = jsos.toArray(new Object[0]);
-            Object raw = fn.call(fn, as);
-            String jsonStr = jsonStringify.call(null, raw).toString();
+            //Object[] as = jsos.toArray(new Object[0]);
+            Bindings bindings = engine.createBindings();
+            StringBuilder call = new StringBuilder("__(");
+            bindings.put("__", fn);
+            for (int i = 0; i < jsos.size(); i++) {
+                String var = "_" + i;
+                bindings.put(var, jsos.get(i));
+                if (i > 0)
+                    call.append(',');
+                call.append(var);
+            }
+            call.append(')');
+            Object raw = null;
+            try {
+                raw = engine.eval(call.toString(), bindings);
+            } catch (ScriptException e) {
+                throw new RuntimeException(e);
+            }
+            //Object raw = fn.call(fn, as);
+            Bindings parseBindings = engine.createBindings();
+            parseBindings.put("jsonStringify", jsonStringify);
+            parseBindings.put("arg", raw);
+            String jsonStr = null;
+            try {
+                jsonStr = (String) engine.eval("jsonStringify(arg)", parseBindings);
+            } catch (ScriptException e) {
+                throw new RuntimeException(e);
+            }
+            //String jsonStr = jsonStringify.call(null, raw).toString();
             JsonElement jsonEl = gson.fromJson(jsonStr, JsonElement.class);
             result = JenaJsonUtils.convertJsonToNodeValue(jsonEl);
         }
