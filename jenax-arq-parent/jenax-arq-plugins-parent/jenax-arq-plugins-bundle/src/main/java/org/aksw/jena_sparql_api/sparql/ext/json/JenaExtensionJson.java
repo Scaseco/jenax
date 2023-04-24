@@ -56,6 +56,7 @@ public class JenaExtensionJson {
         fnReg.put(ns + "get", E_JsonGet.class);
         fnReg.put(ns + "entries", E_JsonEntries.class);
         fnReg.put(ns + "js", E_JsonNashorn.class);
+        fnReg.put(ns + "je", E_JsonNashorn.class);
 
         fnReg.put(ns + "split", E_JsonStrSplit.class);
         fnReg.put(ns + "reverse", E_JsonReverse.class);

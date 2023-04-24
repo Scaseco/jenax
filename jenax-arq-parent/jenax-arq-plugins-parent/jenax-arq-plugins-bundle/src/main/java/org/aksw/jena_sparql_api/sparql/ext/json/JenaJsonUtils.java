@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import com.google.gson.*;
+import com.google.gson.internal.LazilyParsedNumber;
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
@@ -25,12 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ParseContext;
@@ -282,7 +278,12 @@ public class JenaJsonUtils {
             if (p.isString()) {
                 result = NodeValue.makeString(p.getAsString());
             } else if (p.isNumber()) {
-                result = NV.toNodeValue(p.getAsNumber()); // Calls non-public NV.number2value
+                Number pAsNumber = p.getAsNumber();
+                if (pAsNumber instanceof LazilyParsedNumber) {
+                    pAsNumber = findNearestNumber(p);
+
+                }
+                result = NV.toNodeValue(pAsNumber); // Calls non-public NV.number2value
             } else if (p.isBoolean()) {
                 result = NodeValue.makeBoolean(p.getAsBoolean());
             } else {
@@ -297,6 +298,21 @@ public class JenaJsonUtils {
         }
         return result;
     }
+
+    public static Number findNearestNumber(JsonPrimitive p) {
+        String pAsString = p.getAsNumber().toString();
+        try {
+            return Long.parseLong(pAsString);
+        } catch (NumberFormatException e1) {
+            try {
+                return Double.valueOf(pAsString);
+            } catch (NumberFormatException e2) {
+                return p.getAsBigDecimal();
+            }
+        }
+    }
+
+
 
     public static NodeValue evalJsonPath(Gson gson, NodeValue nv, NodeValue query) {
         JsonElement json = extractJsonElementOrNull(nv);
