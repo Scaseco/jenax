@@ -8,10 +8,16 @@ import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.UnitsOfMeasure;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
+import org.apache.jena.geosparql.implementation.vocabulary.Unit_URI;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.util.FmtUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -237,5 +243,33 @@ public class GeoSparqlExFunctions {
 //		return ((Point)geom).getY();
 //	}
 
+    // GeoSPARQL 1.1
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double area(GeometryWrapper geom, NodeValue areaUnitsURI) {
+
+        if (!areaUnitsURI.isIRI()) {
+            throw new ExprEvalException("Not a IRI for area unit: " + FmtUtils.stringForNode(areaUnitsURI.asNode()));
+        }
+
+        Geometry g = geom.getXYGeometry();
+
+        // according to standard: "Must return zero for all geometry types other than Polygon. "
+        if (!g.getGeometryType().equals("Polygon")) {
+            return 0d;
+        }
+
+        double area = g.getArea();
+
+        String unitsURI = geom.getUnitsOfMeasure().getUnitURI();
+
+        double areaConverted = UnitsOfMeasure.conversion(area, unitsURI, areaUnitsURI.asNode().getURI());
+
+        return areaConverted;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double metricArea(GeometryWrapper geom) {
+        return area(geom, NodeValue.makeNode(NodeFactory.createURI(Unit_URI.METRE_URL)));
+    }
 
 }
