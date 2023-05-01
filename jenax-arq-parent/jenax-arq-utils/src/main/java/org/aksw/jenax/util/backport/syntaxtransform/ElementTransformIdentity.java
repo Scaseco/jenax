@@ -34,6 +34,7 @@ import org.apache.jena.sparql.syntax.ElementDataset;
 import org.apache.jena.sparql.syntax.ElementExists;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementMinus;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
@@ -90,6 +91,8 @@ public final class ElementTransformIdentity implements ElementTransform
     public Element transform(ElementService el, Node service, Element subElt) { return el ; }
     @Override
     public Element transform(ElementSubQuery el, Query query) { return el ; }
+    @Override
+    public Element transform(ElementLateral el, Element subElt) { return el ; }
 
 //    @Override
 //    public Element transform(ElementFind el, Var v, Triple triple2) {

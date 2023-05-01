@@ -3,7 +3,9 @@ package org.aksw.jenax.stmt.core;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.stmt.parser.update.SparqlUpdateParserImpl;
 import org.apache.jena.query.QueryParseException;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
@@ -27,15 +29,15 @@ public class SparqlStmtUpdate
     }
 
     public SparqlStmtUpdate(UpdateRequest updateRequest, String updateRequestStr) {
-        this(updateRequest, updateRequestStr, null);
+        this(updateRequest, updateRequestStr, null, null);
     }
 
     public SparqlStmtUpdate(String updateRequestStr, QueryParseException parseException) {
-        this(null, updateRequestStr, parseException);
+        this(null, updateRequestStr, null, parseException);
     }
 
-    public SparqlStmtUpdate(UpdateRequest updateRequest, String updateRequestStr, QueryParseException parseException) {
-        super(updateRequestStr, parseException);
+    public SparqlStmtUpdate(UpdateRequest updateRequest, String updateRequestStr, String parserBase, QueryParseException parseException) {
+        super(updateRequestStr, parserBase, parseException);
         this.updateRequest = updateRequest;
     }
 
@@ -43,11 +45,16 @@ public class SparqlStmtUpdate
         UpdateRequest update = null;
         QueryParseException parseException = null;
         try {
-            update = SparqlUpdateParserImpl.createAsGiven().apply(originalString);
+            // update = SparqlUpdateParserImpl.createAsGiven().apply(originalString);
+            update = SparqlUpdateParserImpl.create(SparqlParserConfig.newInstance()
+                    .setSyntax(Syntax.syntaxARQ)
+                    .setPrologue(new Prologue())
+                    .setBaseURI(parserBase))
+                    .apply(originalString);
         } catch (QueryParseException e) {
             parseException = e;
         }
-        return new SparqlStmtUpdate(update, originalString, parseException);
+        return new SparqlStmtUpdate(update, originalString, parserBase, parseException);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class SparqlStmtUpdate
                 ? UpdateRequestUtils.clone(updateRequest)
                 : null;
 
-        return new SparqlStmtUpdate(clone, originalString, parseException);
+        return new SparqlStmtUpdate(clone, originalString, parserBase, parseException);
     }
 
 

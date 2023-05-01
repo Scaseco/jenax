@@ -6,7 +6,14 @@ import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.util.ExprUtils;
 
-public class RDFDatatypeExprList {
+public class RDFDatatypeExprList { // Does not inherit from RDFDatatype (yet)
+
+//    public static final String IRI = "http://jsa.aksw.org/dt/sparql/exprlist";
+//    public static final RDFDatatypeExprList INSTANCE = new RDFDatatypeExprList();
+//
+//    public static RDFDatatype get() {
+//        return INSTANCE;
+//    }
 
     /** Unparse an expression list as a string */
     public static String unparse(ExprList el) {

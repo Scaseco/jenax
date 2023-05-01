@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.util.tuple;
 
+import org.aksw.commons.tuple.bridge.TupleBridge;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -22,7 +23,7 @@ public class TupleUtils {
      * @param assignment The tuple used to assign values to the variables (should not contain variables)
      * @return A binding or null.
      */
-    public static <T> Binding tupleToBinding(TupleAccessor<T, Node> accessor, T pattern, T assignment) {
+    public static <T> Binding tupleToBinding(TupleBridge<T, Node> accessor, T pattern, T assignment) {
         BindingBuilder builder = BindingFactory.builder();
         for (int i = 0; i < accessor.getDimension(); ++i) {
             Node nodeOrVar = accessor.get(pattern, i);

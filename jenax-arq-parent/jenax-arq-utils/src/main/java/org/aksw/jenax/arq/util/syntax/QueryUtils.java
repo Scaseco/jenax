@@ -19,6 +19,8 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
+import org.aksw.jenax.arq.util.query.OpVisitorTriplesQuads;
+import org.aksw.jenax.arq.util.query.TransformCollectOps;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
@@ -32,6 +34,7 @@ import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpGraph;
+import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -39,32 +42,28 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.QuadPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
-import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
-import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
+import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
-import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementVisitorBase;
 import org.apache.jena.sparql.syntax.ElementWalker;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
-import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformApplyElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryShallowCopyWithPresetPrefixes;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
@@ -75,6 +74,15 @@ import com.google.common.collect.Range;
 
 public class QueryUtils {
 
+    public static Query applyElementTransform(Query beforeQuery, Function<? super Element, ? extends Element> transform) {
+        Query result = QueryTransformOps.shallowCopy(beforeQuery);
+        Element beforePattern = result.getQueryPattern();
+        if (beforePattern != null) {
+            Element afterPattern = transform.apply(beforePattern);
+            result.setQueryPattern(afterPattern);
+        }
+        return result;
+    }
 
     public static Query applyOpTransform(Query beforeQuery, Function<? super Op, ? extends Op> transform) {
         Op beforeOp = Algebra.compile(beforeQuery);
@@ -558,7 +566,7 @@ public class QueryUtils {
      * In-place optimize a query's prefixes to only used prefixes
      *
      * @param query
-     * @param pm
+     * @param prefixMapping
      * @return
      */
     public static Query optimizePrefixes(Query query, PrefixMapping globalPm) {
@@ -938,6 +946,36 @@ public class QueryUtils {
 
         Var result = vars.get(0);
 
+        return result;
+    }
+
+
+    /**
+     * Triple pattern reordering can give significant performance boosts on SPARQL queries
+     * but when SERVICE clauses and/or user defined property functions are in use it can
+     * lead to unexpected results.
+     *
+     * This method decides whether to disable reordering
+     *
+     */
+    public static boolean shouldDisablePatternReorder(Query query) {
+        Op op = Algebra.toQuadForm(Algebra.compile(query));
+        Set<Op> ops = TransformCollectOps.collect(op, false);
+
+        boolean containsService = ops.stream().anyMatch(x -> x instanceof OpService);
+
+        // udpf = user defined property function
+        Set<String> usedUdpfs = ops.stream()
+            .flatMap(OpVisitorTriplesQuads::streamQuads)
+            .map(quad -> quad.getPredicate())
+            .filter(Node::isURI)
+            .map(Node::getURI)
+            .filter(uri -> PropertyFunctionRegistry.get().get(uri) != null)
+            .collect(Collectors.toSet());
+
+        boolean usesUdpf = !usedUdpfs.isEmpty();
+
+        boolean result = containsService || usesUdpf;
         return result;
     }
 

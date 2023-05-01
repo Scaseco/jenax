@@ -1,12 +1,13 @@
 package org.aksw.jenax.arq.connection.core;
 
 import java.lang.reflect.Field;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
-import org.aksw.jenax.arq.connection.fix.RDFLinkAdapterFix;
 import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
+import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -17,6 +18,7 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
+import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
@@ -200,7 +202,7 @@ public class RDFConnectionUtils {
     }
 
     public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, Function<? super RDFLink, ? extends RDFLink> linkDecorator) {
-        RDFLink oldLink = RDFLinkAdapterFix.adapt(conn);
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
         RDFLink newLink = linkDecorator.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
@@ -219,13 +221,33 @@ public class RDFConnectionUtils {
             Function<? super Query, ? extends Query> queryTransform,
             Function<? super QueryExec, ? extends QueryExec> queryExecTransform
             ) {
-        RDFLink oldLink = RDFLinkAdapterFix.adapt(conn);
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
         RDFLink newLink = RDFLinkUtils.wrapWithQueryTransform(oldLink, queryTransform, queryExecTransform);
         return RDFConnectionAdapter.adapt(newLink);
     }
-        
-    
+
+    public static RDFConnection wrapWithUpdateTransform(
+            RDFConnection conn,
+            Function<? super UpdateRequest, ? extends UpdateRequest> updateTransform,
+            BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> updateExecTransform
+            ) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink newLink = RDFLinkUtils.wrapWithUpdateTransform(oldLink, updateTransform, updateExecTransform);
+        return RDFConnectionAdapter.adapt(newLink);
+    }
+
     public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
-    	return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+        return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+    }
+
+    public static RDFConnection wrapWithQueryOnly(RDFConnection conn) {
+        return wrapWithLinkDecorator(conn, RDFLinkUtils::wrapWithQueryOnly);
+    }
+
+    public static RDFConnection wrapWithAutoDisableReorder(RDFConnection conn) {
+        return RDFConnectionUtils.wrapWithQueryTransform(conn, null, qe -> {
+            QueryExecutionUtils.wrapWithAutoDisableReorder(qe.getQuery(), qe.getContext());
+            return qe;
+        });
     }
 }

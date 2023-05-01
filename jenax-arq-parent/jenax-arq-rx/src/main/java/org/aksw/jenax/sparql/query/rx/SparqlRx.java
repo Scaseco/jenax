@@ -21,7 +21,9 @@ import org.aksw.commons.rx.util.FlowableUtils;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
 import org.aksw.jenax.arq.connection.link.QueryExecFactories;
 import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
@@ -524,16 +526,19 @@ public class SparqlRx {
             QueryExecFactoryQuery qef,
             Query query,
             Var var) {
-        return fetchNumber(() -> qef.create(query), var);
+        Callable<QueryExec> callable = () -> qef.create(query);
+        Single<Number> result = fetchNumber(callable, var);
+        return result;
     }
 
     public static Single<Number> fetchNumber(Callable<? extends QueryExec> queryConnSupp, Var var) {
-        return SparqlRx.select(queryConnSupp)
-                .map(b -> b.get(var))
-                .map(countNode -> ((Number)countNode.getLiteralValue()))
-                .map(Optional::ofNullable)
-                .single(Optional.empty())
-                .map(Optional::get); // Should never be null here
+        Single<Number> result = SparqlRx.select(queryConnSupp)
+                .map(b -> BindingUtils.getNumber(b, var))
+                .singleOrError();
+                // .map(Optional::ofNullable)
+                // .single(Optional.empty())
+                // .map(Optional::get); // Should never be null here
+        return result;
     }
 
 
@@ -571,13 +576,13 @@ public class SparqlRx {
             Collection<Var> partitionVars,
             Long itemLimit,
             Long rowLimit) {
-    	return fetchCountQueryPartition(
-    			QueryExecFactories.adapt(qef),
-    			query,
-    			partitionVars,
-    			itemLimit,
-    			rowLimit
-    	);
+        return fetchCountQueryPartition(
+                QueryExecFactories.adapt(qef),
+                query,
+                partitionVars,
+                itemLimit,
+                rowLimit
+        );
     }
 
     public static Single<Range<Long>> fetchCountQueryPartition(

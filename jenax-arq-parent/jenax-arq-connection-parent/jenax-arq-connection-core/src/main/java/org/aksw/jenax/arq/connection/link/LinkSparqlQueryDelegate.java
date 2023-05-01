@@ -8,7 +8,8 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 public interface LinkSparqlQueryDelegate
     extends LinkSparqlQueryTmp
 {
-    public LinkSparqlQuery getDelegate();
+    @Override
+    LinkSparqlQuery getDelegate();
 
     @Override
     default QueryExecBuilder newQuery() {

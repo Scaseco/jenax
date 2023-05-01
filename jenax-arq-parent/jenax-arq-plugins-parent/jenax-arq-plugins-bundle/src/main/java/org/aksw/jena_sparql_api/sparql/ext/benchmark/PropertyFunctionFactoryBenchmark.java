@@ -83,7 +83,7 @@ public class PropertyFunctionFactoryBenchmark
 //		            && resultSetNode.isVariable()
                 if(resultSetNode != null) {
                     b.add((Var)resultSetNode,
-                    		JenaJsonUtils.jsonToNode(json.get("result")));
+                            JenaJsonUtils.convertJsonOrValueToNodeValue(json.get("result")).asNode());
                 }
 
                 result = QueryIterPlainWrapper.create(Iterators.singletonIterator(b.build()), execCxt) ;

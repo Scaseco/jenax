@@ -6,11 +6,27 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.arq.util.node.NodeList;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
-import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
+import org.apache.jena.geosparql.implementation.UnitsOfMeasure;
+import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
+import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
+import org.apache.jena.geosparql.implementation.vocabulary.Unit_URI;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.locationtech.jts.geom.*;
+import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.util.FmtUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -41,7 +57,6 @@ public class GeoSparqlExFunctions {
         simplifier.setDistanceTolerance(tolerance);
         simplifier.setEnsureValid(ensureValid);
         Geometry tmp = simplifier.getResultGeometry();
-
         return GeometryWrapperUtils.createFromPrototype(geom, tmp);
     }
 
@@ -58,7 +73,7 @@ public class GeoSparqlExFunctions {
         return GeometryWrapperUtils.createFromPrototype(geom, tmp);
     }
 
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    @IriNs(GeoSPARQL_URI.SPATIAL_FUNCTION_URI)
     public static GeometryWrapper union(GeometryWrapper geom) {
         // List<Geometry> list = expandCollection(geom.getParsingGeometry()).collect(Collectors.toList());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom,
@@ -157,6 +172,65 @@ public class GeoSparqlExFunctions {
     }
 
 
+    @IriNs(GeoSPARQL_URI.SPATIAL_FUNCTION_URI)
+    public static NodeList dbscan(NodeList arr, int geoIdx, double eps, int minPts) {
+        return DbscanPf.dbscan(arr, geoIdx, eps, minPts);
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper makeLine(GeometryWrapper geomWrapper) {
+        GeometryFactory f = CustomGeometryFactory.theInstance();
+
+        Geometry inGeom = geomWrapper.getParsingGeometry();
+        GeometryCollection c = inGeom instanceof GeometryCollection
+            ? (GeometryCollection)inGeom
+            : f.createGeometryCollection(new Geometry[] { inGeom });
+
+        Coordinate[] coords = c.getCoordinates();
+
+        Geometry outGeom = CustomGeometryFactory.theInstance().createLineString(coords);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
+        return result;
+    }
+
+
+//    public static void main(String[] args) {
+//        GeometryWrapper start = GeometryWrapper.fromPoint(0, 0, SRS_URI.DEFAULT_WKT_CRS84);
+//        System.out.println(project(start, 1000, 1 * Math.PI));
+//    }
+
+    /**
+     * https://postgis.net/docs/ST_Project.html - azimuth
+     * Source: https://stackoverflow.com/questions/44419722/calculate-coordinates-from-coordinates-distance-and-an-angle
+     */
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper project(GeometryWrapper geomWrapper, double distanceInMeters, double azimuthInRadians) {
+        double earthRadius = 6371e3;
+        double srcLonDeg = lon(geomWrapper);
+        double srcLatDeg = lat(geomWrapper);
+
+        double srcLonRad = Math.toRadians(srcLonDeg);
+        double srcLatRad = Math.toRadians(srcLatDeg);
+
+        double angularDistance = distanceInMeters / earthRadius;
+
+        double destLatRad = Math.asin(Math.sin(srcLatRad) * Math.cos(angularDistance) +
+                Math.cos(srcLatRad) * Math.sin(angularDistance) * Math.cos(azimuthInRadians));
+
+        double destLonRad = srcLonRad + Math.atan2(Math.sin(azimuthInRadians) * Math.sin(angularDistance) * Math.cos(srcLatRad),
+                Math.cos(angularDistance) - Math.sin(srcLatRad) * Math.sin(destLatRad));
+
+        // Normalize longitude to [-PI..+PI)
+        destLonRad = (destLonRad + 3 * Math.PI) % (2.0 * Math.PI) - Math.PI;
+
+        double destLonDeg = Math.toDegrees(destLonRad);
+        double destLatDeg = Math.toDegrees(destLatRad);
+
+        Geometry outGeom = CustomGeometryFactory.theInstance().createPoint(new Coordinate(destLonDeg, destLatDeg));
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
+        return result;
+    }
+
 //	@IriNs(GeoSPARQL_URI.GEOF_URI)
 //	public static double lat(Geometry geom) {
 //		if (!(geom instanceof Point)) throw new ExprEvalException("not a point");
@@ -169,5 +243,33 @@ public class GeoSparqlExFunctions {
 //		return ((Point)geom).getY();
 //	}
 
+    // GeoSPARQL 1.1
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double area(GeometryWrapper geom, NodeValue areaUnitsURI) {
+
+        if (!areaUnitsURI.isIRI()) {
+            throw new ExprEvalException("Not a IRI for area unit: " + FmtUtils.stringForNode(areaUnitsURI.asNode()));
+        }
+
+        Geometry g = geom.getXYGeometry();
+
+        // according to standard: "Must return zero for all geometry types other than Polygon. "
+        if (!g.getGeometryType().equals("Polygon")) {
+            return 0d;
+        }
+
+        double area = g.getArea();
+
+        String unitsURI = geom.getUnitsOfMeasure().getUnitURI();
+
+        double areaConverted = UnitsOfMeasure.conversion(area, unitsURI, areaUnitsURI.asNode().getURI());
+
+        return areaConverted;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static double metricArea(GeometryWrapper geom) {
+        return area(geom, NodeValue.makeNode(NodeFactory.createURI(Unit_URI.METRE_URL)));
+    }
 
 }

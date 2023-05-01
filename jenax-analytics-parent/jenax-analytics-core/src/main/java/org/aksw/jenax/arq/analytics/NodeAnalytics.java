@@ -13,6 +13,7 @@ import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 /**
  * Aggregation utilities for Jena Nodes
@@ -22,23 +23,23 @@ import org.apache.jena.graph.Node;
  */
 public class NodeAnalytics {
 
-    public static ParallelAggregator<Node, Entry<Set<String>, Long>, ?> usedDatatypesAndNullCounts() {
+    public static <E> ParallelAggregator<Node, E, Entry<Set<String>, Long>, ?> usedDatatypesAndNullCounts() {
         return AggBuilder.inputBroadcast(
             usedDatatypes(),
             nullCount());
     }
 
-    public static ParallelAggregator<Node, Long, ?> nullCount() {
-        ParallelAggregator<Node, Long, ?> result =
+    public static <E> ParallelAggregator<Node, E, Long, ?> nullCount() {
+        ParallelAggregator<Node, E, Long, ?> result =
             AggBuilder.inputFilter(x -> x == null,
                 AggBuilder.counting());
 
         return result;
     }
 
-    public static ParallelAggregator<Node, Set<String>, ?> usedDatatypes() {
+    public static <E> ParallelAggregator<Node, E, Set<String>, ?> usedDatatypes() {
 
-        ParallelAggregator<Node, Set<String>, ?> result = AggBuilder.inputTransform(node -> NodeUtils.getDatatypeIri(node),
+        ParallelAggregator<Node, E, Set<String>, ?> result = AggBuilder.inputTransform(node -> NodeUtils.getDatatypeIri(node),
             AggBuilder.inputFilter(Objects::nonNull,
                 AggBuilder.collectionSupplier(() -> (Set<String>)new HashSet<String>())));
 
@@ -55,11 +56,11 @@ public class NodeAnalytics {
 //		return result;
 //	}
 
-    public static ParallelAggregator<Node, Set<String>, ?> usedPrefixes(int targetSize) {
-        ParallelAggregator<Node, Set<String>, ?> result =
+    public static <E> ParallelAggregator<Node, E, Set<String>, ?> usedPrefixes(int targetSize) {
+        ParallelAggregator<Node, E, Set<String>, ?> result =
             AggBuilder.inputFilter(Node::isURI,
                 AggBuilder.inputTransform(Node::getURI,
-                    AggBuilder.naturalAccumulator(() -> new PrefixAccumulator(targetSize))));
+                    AggBuilder.naturalAccumulator(() -> new PrefixAccumulator<E>(targetSize))));
 
         return result;
     }
@@ -72,7 +73,7 @@ public class NodeAnalytics {
      * @param targetSize
      * @return
      */
-    public static ParallelAggregator<Node, Map<String, String>, ?> usedPrefixes(Map<String, String> prefixMap) {
+    public static <E> ParallelAggregator<Node, E, Map<String, String>, ?> usedPrefixes(Map<String, String> prefixMap) {
         // Internally invert the mapping to iri -> prefix
         PatriciaTrie<String> trie = new PatriciaTrie<>();
         prefixMap.forEach((p, i) -> trie.put(i, p));
@@ -85,7 +86,7 @@ public class NodeAnalytics {
 
         // Create an aggregator that returns the subset of the prefix map
         // that is in use w.r.t. the encountered IRIs.
-        ParallelAggregator<Node, SetOverMap<String, String>, ?> tmp =
+        ParallelAggregator<Node, E, SetOverMap<String, String>, ?> tmp =
             AggBuilder.inputFilter((Node n) -> n != null && n.isURI(),
                 AggBuilder.inputTransform((Node node) -> {
                     String uri = node.getURI();
@@ -102,7 +103,7 @@ public class NodeAnalytics {
 
         // Post process the result:
         // Extract the map and invert it again so we end up with prefix -> iri
-        ParallelAggregator<Node, Map<String, String>, ?> result =
+        ParallelAggregator<Node, E, Map<String, String>, ?> result =
             AggBuilder.outputTransform(tmp, (SetOverMap<String, String> som) -> {
                 Map<String, String> r = som.getMap().entrySet()
                         .stream()

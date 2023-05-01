@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.connection.link;
 
 import java.lang.reflect.Field;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,7 +28,6 @@ public class RDFLinkUtils {
 
     /** Symbol for placing a connection (TODO supplier?) into an arq context */
     public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
-
 
     public static LinkSparqlQuery unwrapQueryConnection(LinkSparqlQuery conn) {
         LinkSparqlQuery result;
@@ -121,13 +121,9 @@ public class RDFLinkUtils {
 //        return result;
 //    }
 
-
-
     public static RDFLink wrapWithContextMutator(RDFLink rawConn) {
         return wrapWithContextMutator(rawConn, cxt -> {});
     }
-
-
 
     /**
      * Places the connection object as a symbol into to context,
@@ -174,7 +170,6 @@ public class RDFLinkUtils {
 //			        });
                 }
 
-
                 public UpdateProcessor postProcess(UpdateProcessor qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
@@ -214,6 +209,19 @@ public class RDFLinkUtils {
         return result;
     }
 
+    public static RDFLink wrapWithUpdateTransform(
+            RDFLink conn,
+            Function<? super UpdateRequest, ? extends UpdateRequest> updateTransform,
+            BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> updateExecTransform) {
+        LinkSparqlQuery queryLink = unwrapQueryConnection(conn);
+        LinkSparqlUpdate updateLink = unwrapUpdateConnection(conn);
+        LinkDatasetGraph dgLink = unwrapDatasetConnection(conn);
+
+        RDFLink result = new RDFLinkModular(
+                queryLink, new LinkSparqlUpdateTransform(updateLink, updateTransform, updateExecTransform), dgLink);
+
+        return result;
+    }
 
     public static RDFLink wrapWithLoadViaInsert(RDFLink conn) {
         LinkSparqlQuery lq = unwrapQueryConnection(conn);
@@ -316,7 +324,6 @@ public class RDFLinkUtils {
                 qe -> new QueryExecWithNodeTransform(qe, xform));
     }
 
-
     public static RDFLink apply(RDFLink link, LinkSparqlQueryDecorizer decorizer) {
         LinkSparqlQuery queryLink = unwrapQueryConnection(link);
         LinkSparqlUpdate updateLink = unwrapUpdateConnection(link);
@@ -330,4 +337,8 @@ public class RDFLinkUtils {
 
     }
 
+    public static RDFLink wrapWithQueryOnly(RDFLink link) {
+        LinkSparqlQuery queryLink = unwrapQueryConnection(link);
+        return new RDFLinkModular(queryLink, null, null);
+    }
 }

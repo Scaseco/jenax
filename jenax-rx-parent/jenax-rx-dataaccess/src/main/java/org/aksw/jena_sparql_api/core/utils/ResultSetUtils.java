@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.core.utils;
 
-import java.io.Closeable;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -17,7 +16,6 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 
 import com.google.common.collect.Iterators;
-
 
 public class ResultSetUtils {
 

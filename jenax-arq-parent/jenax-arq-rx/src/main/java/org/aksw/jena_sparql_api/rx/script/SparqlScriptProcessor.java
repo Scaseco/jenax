@@ -1,32 +1,12 @@
 package org.aksw.jena_sparql_api.rx.script;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
+import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.Lists;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
-import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
-import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
-import org.aksw.jenax.stmt.core.SparqlStmt;
-import org.aksw.jenax.stmt.core.SparqlStmtMgr;
-import org.aksw.jenax.stmt.core.SparqlStmtParser;
-import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
-import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
+import org.aksw.jenax.stmt.core.*;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserWrapperSelectShortForm;
@@ -36,9 +16,9 @@ import org.aksw.jenax.stmt.util.SparqlStmtIterator;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -54,8 +34,17 @@ import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.StandardSystemProperty;
-import com.google.common.collect.Lists;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystemException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /**
@@ -126,22 +115,22 @@ public class SparqlScriptProcessor {
         }
 
         public String getSourceNamespace() {
-        	return sourceNamespace;
+            return sourceNamespace;
         }
 
         public void setSourceNamespace(String sourceNamespace) {
-        	this.sourceNamespace = sourceNamespace;
+            this.sourceNamespace = sourceNamespace;
         }
 
         public String getSourceLocalName() {
-			return sourceLocalName;
-		}
+            return sourceLocalName;
+        }
 
-		public void setSourceLocalName(String sourceLocalName) {
-			this.sourceLocalName = sourceLocalName;
-		}
+        public void setSourceLocalName(String sourceLocalName) {
+            this.sourceLocalName = sourceLocalName;
+        }
 
-		@Override
+        @Override
         public String toString() {
             String result = argStr +
                     (line == null ? (column == null ? "" : ":") : ":" + line) +
@@ -192,23 +181,28 @@ public class SparqlScriptProcessor {
     }
 
     public SparqlStmtParser getSparqlParser() {
-        return sparqlParserFactory.apply(PrologueUtils.newPrologueAsGiven(globalPrefixes));
-        // return sparqlParserFactory.apply(new Prologue(globalPrefixes));
-//        return sparqlParser;
+        // return sparqlParserFactory.apply(PrologueUtils.newPrologueAsGiven(globalPrefixes));
+
+        // With Jena 4.6.0 the E_IRI function no longer works with relative base IRIs
+        // due to explicit checks
+        return sparqlParserFactory.apply(new Prologue(globalPrefixes));
     }
 
-    public static SparqlStmtParser createParserPlain(Prologue prologue) {
+    public static SparqlStmtParser createParserPlain(Prologue prologue, String base) {
         SparqlQueryParser queryParser = SparqlQueryParserWrapperSelectShortForm.wrap(
-                SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue));
+                // SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue));
+                SparqlQueryParserImpl.create(Syntax.syntaxARQ, prologue, base, null));
+
 
         SparqlUpdateParser updateParser = SparqlUpdateParserImpl
-                .create(Syntax.syntaxARQ, prologue);
+                // .create(Syntax.syntaxARQ, prologue);
+                .create(Syntax.syntaxARQ, prologue, base, null);
 
-        return new SparqlStmtParserImpl(queryParser, updateParser, true);
+        return new SparqlStmtParserImpl(queryParser, updateParser, base, true);
     }
 
     public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
-        SparqlStmtParser core = createParserPlain(prologue);
+        SparqlStmtParser core = createParserPlain(prologue, prologue.getBaseURI());
         SparqlStmtParser sparqlParser =
                 SparqlStmtParser.wrapWithTransform(
                        core,
@@ -232,9 +226,9 @@ public class SparqlScriptProcessor {
         return result;
     }
 
-    public static SparqlScriptProcessor createPlain(PrefixMapping globalPrefixes) {
+    public static SparqlScriptProcessor createPlain(PrefixMapping globalPrefixes, String base) {
         SparqlScriptProcessor result = new SparqlScriptProcessor(
-                SparqlScriptProcessor::createParserPlain,
+                prologue -> SparqlScriptProcessor.createParserPlain(prologue, base),
                 globalPrefixes);
         return result;
     }
@@ -292,11 +286,14 @@ public class SparqlScriptProcessor {
         } else {
 
             boolean isProcessed = false;
-            try {
+            Collection<Entry<Lang, Throwable>> rdfErrorCollector = new ArrayList<>();
+            loadAsRdf: try {
                 Provenance prov = new Provenance(filename);
-                UpdateRequest ur = tryLoadFileAsUpdateRequest(filename, globalPrefixes);
+                UpdateRequest ur = tryLoadFileAsUpdateRequest(filename, globalPrefixes, rdfErrorCollector);
 
-                // We rely on a NPE if ur is null - this is not optimal
+                if (ur == null)
+                    break loadAsRdf;
+
                 result.add(new SimpleEntry<>(new SparqlStmtUpdate(ur), prov));
 
                 isProcessed = true;
@@ -304,46 +301,55 @@ public class SparqlScriptProcessor {
                 logger.debug("Probing " + filename + " as RDF data file failed", e);
             }
 
-            if(!isProcessed) {
+            Collection<Throwable> stmtErrorCollector = new ArrayList<>();
+            if (!isProcessed) {
 
                 String baseIri = cwd == null ? null : cwd.toUri().toString();
                 try {
 //                    Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, globalPrefixes, sparqlParser, baseIri);
                     // globalPrefixes,
+                    IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
+                    // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
                     Prologue prologue = new Prologue(
                             globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
-                            IRIxResolverUtils.newIRIxResolverAsGiven(baseIri));
+                            resolver);
                             // IRIxResolver.create(baseIri).build());
                     SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
 
 
                     TypedInputStream tmpIn = null;
                     Iterator<SparqlStmt> it;
+
                     try {
-                    	// On NPE we enter the catch block with the fallback strategy
-                        tmpIn = Objects.requireNonNull(SparqlStmtUtils.openInputStream(filename));
+                        // On NPE we enter the catch block with the fallback strategy
+                        tmpIn = SparqlStmtUtils.openInputStream(filename);
+                        if (tmpIn == null) {
+                            throw new FileSystemException(filename);
+                        }
 
-                    	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
-                    	it.hasNext();
+                        it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
+                        it.hasNext();
 
-                    	logger.debug("Attempting to interpret argument as a file containing sparql statements");
+                        logger.debug("Attempting to interpret argument as a file containing sparql statements");
                     } catch (Exception e) {
-                    	try {
-                    		if (tmpIn != null) {
-                    			tmpIn.close();
-                    		}
-
-	                    	tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
-	                    	it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
-	                    	it.hasNext();
-                    	} catch (Exception f) {
-                    		Throwable cause = f.getCause();
-                    		if (!SparqlStmtUtils.isEncounteredSlashException(cause)) {
-                    			throw new RuntimeException(filename + " could not be openend and failed to parse as SPARQL query", f);
-                            } else {
-                            	throw new RuntimeException("Could not parse " + filename, e);
+                        stmtErrorCollector.add(e);
+                        try {
+                            if (tmpIn != null) {
+                                tmpIn.close();
                             }
-                    	}
+
+                            tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
+                            it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
+                            it.hasNext();
+                        } catch (Exception f) {
+                            stmtErrorCollector.add(f);
+                            Throwable cause = f.getCause();
+                            if (!SparqlStmtUtils.isEncounteredSlashException(cause)) {
+                                throw new RuntimeException(filename + " could not be opened and failed to parse as SPARQL query", f);
+                            } else {
+                                throw new RuntimeException("Could not parse " + filename, e);
+                            }
+                        }
                     }
 
                     try (TypedInputStream in = tmpIn) {
@@ -385,8 +391,8 @@ public class SparqlScriptProcessor {
                                 }
                             }
 
-                            // Move optimizePrefixes to transformers?
-                            SparqlStmtUtils.optimizePrefixes(stmt);
+                            // TODO: Move optimizePrefixes to transformers?
+                            //SparqlStmtUtils.optimizePrefixes(stmt);
 
                             for (Function<? super SparqlStmt, ? extends SparqlStmt> postTransformer : postTransformers) {
                                 SparqlStmt tmp = postTransformer.apply(stmt);
@@ -397,7 +403,12 @@ public class SparqlScriptProcessor {
                         }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to process argument" + (index >= 0 ? " #" + index : "") + ": " + filename, e);
+                    if (e.getCause() != null && stmtErrorCollector.contains(e.getCause()))
+                        stmtErrorCollector.remove(e.getCause());
+                    stmtErrorCollector.add(e);
+                    String message = "Failed to process argument" + (index >= 0 ? " #" + index : "") + ": " + filename;
+                    MultiException multiException = new MultiException(message, rdfErrorCollector, stmtErrorCollector);
+                    throw new RuntimeException(message, multiException);
                 }
             }
         }
@@ -405,14 +416,14 @@ public class SparqlScriptProcessor {
     }
 
 
-    public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, PrefixMapping globalPrefixes) throws IOException {
+    public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
         UpdateRequest result = null;
 
         // TODO We should map to filename through the stream manager
 //        String str = StreamManager.get().mapURI(filename);
 
         // Try as RDF file
-        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS, Lang.RDFXML))) {
+        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS, Lang.JSONLD, Lang.RDFXML), errorCollector)) {
 //            if(tmpIn == null) {
 //                throw new FileNotFoundException(filename);
 //            }

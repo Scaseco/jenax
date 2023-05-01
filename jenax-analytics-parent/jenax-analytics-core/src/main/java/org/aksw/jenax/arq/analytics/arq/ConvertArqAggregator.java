@@ -31,18 +31,18 @@ public class ConvertArqAggregator {
      * @param subAgg
      * @return
      */
-    public static <O> ParallelAggregator<Binding, Map<Binding, O>, ?> group(
+    public static <E, O> ParallelAggregator<Binding, E, Map<Binding, O>, ?> group(
             VarExprList vel,
-            ParallelAggregator<Binding, O, ?> subAgg) {
+            ParallelAggregator<Binding, E, O, ?> subAgg) {
         return AggBuilder.inputSplit(b -> Collections.singleton(VarExprListUtils.copyProject(vel, b, null)), (b, key) -> key, subAgg);
     }
 
 
-    public static ParallelAggregator<Binding, Node, ?> convert(AggSum arq) {
+    public static <E> ParallelAggregator<Binding, E, Node, ?> convert(AggSum arq) {
         // The expression for which to sum up its values
         Expr expr = arq.getExprList().get(0);
 
-        ParallelAggregator<Binding, Node, ?> result =
+        ParallelAggregator<Binding, E, Node, ?> result =
             AggBuilder.outputTransform(
                 AggBuilder.inputTransform(b -> expr.eval(b, null),
                     AggBuilder.fold(() -> NodeValue.makeInteger(0l), (a, b) -> NodeValueOps.additionNV(a, b))),
@@ -51,8 +51,8 @@ public class ConvertArqAggregator {
         return result;
     }
 
-    public static ParallelAggregator<Binding, Node, ?> counting() {
-        ParallelAggregator<Binding, Node, ?> result =
+    public static <E> ParallelAggregator<Binding, E, Node, ?> counting() {
+        ParallelAggregator<Binding, E, Node, ?> result =
             AggBuilder.outputTransform(
                 AggBuilder.outputTransform(
                     AggBuilder.counting(),
@@ -62,18 +62,18 @@ public class ConvertArqAggregator {
         return result;
     }
 
-    public static ParallelAggregator<Binding, Node, ?> convert(AggCount arq) {
+    public static <E> ParallelAggregator<Binding, E, Node, ?> convert(AggCount arq) {
         return counting();
     }
 
-    public static ParallelAggregator<Binding, Node, ?> convert(AggCountVar arq) {
+    public static <E> ParallelAggregator<Binding, E, Node, ?> convert(AggCountVar arq) {
         return counting();
     }
 
-    public static ParallelAggregator<Binding, Node, ?> convert(AggCountVarDistinct arq) {
+    public static <E> ParallelAggregator<Binding, E, Node, ?> convert(AggCountVarDistinct arq) {
         Expr expr = arq.getExprList().get(0);
 
-        ParallelAggregator<Binding, Node, ?> result =
+        ParallelAggregator<Binding, E, Node, ?> result =
             AggBuilder.outputTransform(
                 AggBuilder.inputTransform((Binding b) -> expr.eval(b, null),
                     AggBuilder.collectionSupplier(() -> new HashSet<NodeValue>())),
@@ -85,8 +85,8 @@ public class ConvertArqAggregator {
     // TODO Create some kind of converter registry
     // protected static Map<Class<? extends Aggregator>, Function<? super Aggregator, ? extends >> registry = ...
 
-    public static ParallelAggregator<Binding, Node, ?> convert(Aggregator arq) {
-        ParallelAggregator<Binding, Node, ?> result;
+    public static <E> ParallelAggregator<Binding, E, Node, ?> convert(Aggregator arq) {
+        ParallelAggregator<Binding, E, Node, ?> result;
         if (arq instanceof AggCount) {
             result = convert((AggCount)arq);
         } else if (arq instanceof AggCountVar) {

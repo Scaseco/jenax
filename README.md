@@ -1,3 +1,9 @@
+---
+title: Features
+nav_order: 20
+---
+
+
 Unofficial extensions for jena - refactoring of https://github.com/SmartDataAnalytics/jena-sparql-api
 
 ** Status of this project: Currently in transition ~ 2021-10-16 **

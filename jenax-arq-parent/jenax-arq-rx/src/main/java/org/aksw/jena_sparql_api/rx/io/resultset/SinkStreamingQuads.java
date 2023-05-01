@@ -51,18 +51,23 @@ public class SinkStreamingQuads
             Supplier<Dataset> datasetSupp) {
 //        boolean useStreaming = format == null ||
 //                Arrays.asList(Lang.NTRIPLES, Lang.NQUADS).contains(format.getLang());
-        SinkStreaming<Quad> result;
+        SinkStreaming<Quad> result = null;
 
         boolean useStreaming = true;
         if(useStreaming) {
             StreamRDF writer = StreamRDFWriter.getWriterStream(out, format, null);
-            writer = new StreamRDFDeferred(writer, true, pm, prefixAnalysis, 100 * prefixAnalysis, null);
+            if (writer != null) {
+            	writer = new StreamRDFDeferred(writer, true, pm, prefixAnalysis, 100 * prefixAnalysis, null);
 //            Dataset header = DatasetFactory.create();
 //            header.getDefaultModel().setNsPrefixes(pm);
-            result = new SinkStreamingStreamRDF(writer);
+            	result = new SinkStreamingStreamRDF(writer);
+            }
 
             // result = SinkStreamingWrapper.wrap(new SinkQuadOutput(out, null, null));
-        } else {
+        }
+        
+        // Fallback if no streaming writer was found
+        if (result == null) {
             Dataset dataset = datasetSupp.get();
             SinkQuadsToDataset core = new SinkQuadsToDataset(false, dataset.asDatasetGraph());
 

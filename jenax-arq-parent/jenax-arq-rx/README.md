@@ -1,3 +1,9 @@
+---
+title: Rx RDF / SPARQL
+parent: Rx Integration
+nav_order: 10
+---
+
 ## Reactive RDF / SPARQL Stream Processing
 
 This module provides reactive wrappers for reading RDF files and executing SPARQL queries based on RxJava.

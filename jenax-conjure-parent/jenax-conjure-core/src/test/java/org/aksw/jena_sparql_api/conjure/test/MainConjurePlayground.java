@@ -46,7 +46,6 @@ import org.aksw.jena_sparql_api.conjure.job.api.JobParam;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
-import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -202,11 +201,11 @@ public class MainConjurePlayground {
         Op anonymousConjureWorkflow = OpUnion.create(null, countPredicates, reportDate);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String str = RDFNodeJsonUtils.toJsonNodeString(anonymousConjureWorkflow, gson);
-        System.out.println(str);
-        RDFNode tmp = RDFNodeJsonUtils.toRDFNode(str, gson);
+        //String str = RDFNodeJsonUtils.toJsonNodeString(anonymousConjureWorkflow, gson);
+        //System.out.println(str);
+        //RDFNode tmp = RDFNodeJsonUtils.toRDFNode(str, gson);
 
-        anonymousConjureWorkflow = JenaPluginUtils.polymorphicCast(tmp, Op.class);
+        anonymousConjureWorkflow = JenaPluginUtils.polymorphicCast(anonymousConjureWorkflow, Op.class);
 
         /* Example RDF output:
 

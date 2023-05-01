@@ -3,7 +3,7 @@ package org.aksw.jenax.sparql.algebra.walker;
 import java.util.Map.Entry;
 
 import org.aksw.commons.path.core.Path;
-import org.aksw.jenax.constraint.api.ConstraintRow;
+import org.aksw.jenax.constraint.api.CBinding;
 import org.aksw.jenax.sparql.algebra.optimize.TrackingTransformConditionalFunctionInversion;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -22,17 +22,17 @@ public class TrackingWalkerTests {
          Query query = QueryFactory.create(String.join("\n",
                  "SELECT * {",
                  "  ?s ?p ?o",
-                 "  FILTER(STR(?p) = 'foobar')",
+                 "  FILTER(STR(?p) = 'urn:example:foobar')",
                  "}"));
 
          Query expected = QueryFactory.create(String.join("\n",
                  "SELECT * {",
                  "  ?s ?p ?o",
-                 "  FILTER(?p = <foobar>)",
+                 "  FILTER(?p = <urn:example:foobar>)",
                  "}"));
 
         Op op = Algebra.compile(query);
-        Tracker<ConstraintRow> pathState = Tracker.create(op);
+        Tracker<CBinding> pathState = Tracker.create(op);
         Op afterOp = TrackingTransformer.transform(pathState, TrackingTransformConditionalFunctionInversion::new);
 
         Query actual = OpAsQuery.asQuery(afterOp);

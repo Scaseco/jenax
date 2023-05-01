@@ -3,7 +3,9 @@ package org.aksw.jenax.stmt.core;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryParseException;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.Prologue;
 
 public class SparqlStmtQuery
     extends SparqlStmtBase
@@ -21,15 +23,15 @@ public class SparqlStmtQuery
     }
 
     public SparqlStmtQuery(Query query, String queryString) {
-        this(query, queryString, null);
+        this(query, queryString, null, null);
     }
 
     public SparqlStmtQuery(String queryString, QueryParseException parseException) {
-        this(null, queryString, parseException);
+        this(null, queryString, null, parseException);
     }
 
-    public SparqlStmtQuery(Query query, String queryString, QueryParseException parseException) {
-        super(queryString, parseException);
+    public SparqlStmtQuery(Query query, String queryString, String parserBase, QueryParseException parseException) {
+        super(queryString, parserBase, parseException);
         this.query = query;
     }
 
@@ -37,11 +39,16 @@ public class SparqlStmtQuery
         Query query = null;
         QueryParseException parseException = null;
         try {
-            query = SparqlQueryParserImpl.createAsGiven().apply(originalString);
+            // SparqlQueryParserImpl.createAsGiven().apply(originalString)
+            query = SparqlQueryParserImpl.create(SparqlParserConfig.newInstance()
+                    .setSyntax(Syntax.syntaxARQ)
+                    .setPrologue(new Prologue())
+                    .setBaseURI(parserBase))
+                    .apply(originalString);
         } catch (QueryParseException e) {
             parseException = e;
         }
-        return new SparqlStmtQuery(query, originalString, parseException);
+        return new SparqlStmtQuery(query, originalString, parserBase, parseException);
     }
 
 
@@ -51,7 +58,7 @@ public class SparqlStmtQuery
                 ? query.cloneQuery()
                 : null;
 
-        return new SparqlStmtQuery(clone, originalString, parseException);
+        return new SparqlStmtQuery(clone, originalString, parserBase, parseException);
     }
 
     public Query getQuery() {

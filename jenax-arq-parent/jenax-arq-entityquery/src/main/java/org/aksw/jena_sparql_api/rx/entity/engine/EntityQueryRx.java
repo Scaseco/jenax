@@ -101,7 +101,7 @@ public class EntityQueryRx {
 
 
     public static Flowable<Quad> execConstructEntitiesNg(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryImpl query) {
 
         return execConstructEntitiesNg(
@@ -110,7 +110,7 @@ public class EntityQueryRx {
     }
 
     public static Flowable<Quad> execConstructEntitiesNg(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryImpl query,
             Supplier<Graph> graphSupplier) {
 
@@ -136,7 +136,7 @@ public class EntityQueryRx {
     /** Execute a partitioned query.
      * See {@link #execConstructEntities(SparqlQueryConnection, EntityQueryBasic, Supplier, ExprListEval)} */
     public static Flowable<RDFNode> execConstructRooted(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryBasic query) {
         return execConstructRooted(
                 conn, query,
@@ -146,7 +146,7 @@ public class EntityQueryRx {
     /** Execute a partitioned query.
      * See {@link #execConstructEntities(SparqlQueryConnection, EntityQueryBasic, Supplier, ExprListEval)} */
     public static Flowable<RDFNode> execConstructRooted(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryBasic query,
             Supplier<Graph> graphSupplier) {
         return execConstructEntities(
@@ -432,7 +432,7 @@ public class EntityQueryRx {
      * @return
      */
     public static Flowable<Entry<Binding, Table>> execSelectPartitioned(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             Query selectQuery,
             List<Var> partitionVars) {
 
@@ -442,7 +442,7 @@ public class EntityQueryRx {
 
         Function<Binding, Binding> bindingToKey = SparqlRx.createGrouper(partitionVars, false);
 
-        Aggregator<Binding, Table> aggregator = new AggCollection<>(
+        Aggregator<Binding, ?, Table> aggregator = new AggCollection<>(
                 TableFactory::create,
                 Function.identity(),
                 Table::addBinding
@@ -458,7 +458,7 @@ public class EntityQueryRx {
 
 
     public static Flowable<GraphPartitionWithEntities> execConstructPartitionedOld(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryImpl queryEx,
             Supplier<Graph> graphSupplier,
             ExprListEval exprListEval) {
@@ -469,7 +469,7 @@ public class EntityQueryRx {
     }
 
     public static Flowable<GraphPartitionWithEntities> execConstructPartitionedOld(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryBasic queryEx,
             Supplier<Graph> graphSupplier,
             ExprListEval exprListEval) {
@@ -671,7 +671,7 @@ public class EntityQueryRx {
 
 
     public static Flowable<GraphPartitionWithEntities> execQueryActual(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             List<Var> partitionVars,
             Set<Node> trackedTemplateNodes,
             Query selectQuery, Function<Table,
@@ -759,7 +759,7 @@ public class EntityQueryRx {
     }
 
     public static Flowable<Quad> execConstructEntitiesNg(
-    		QueryExecutionFactoryQuery conn,
+            QueryExecutionFactoryQuery conn,
             EntityQueryBasic queryEx) {
         return execConstructEntitiesNg(conn, queryEx, GraphFactory::createDefaultGraph, EntityQueryRx::defaultEvalToNode);
     }
@@ -961,15 +961,15 @@ public class EntityQueryRx {
      */
     public static <ITEM, KEY, VALUE> FlowableTransformer<ITEM, Entry<KEY, VALUE>> aggregateConsecutiveItemsWithSameKey(
             Function<? super ITEM, KEY> itemToKey,
-            Aggregator<? super ITEM, VALUE> aggregator) {
+            Aggregator<? super ITEM, ?, VALUE> aggregator) {
         return upstream -> upstream
-            .lift(FlowableOperatorSequentialGroupBy.<ITEM, KEY, Accumulator<? super ITEM, VALUE>>create(
+            .lift(FlowableOperatorSequentialGroupBy.<ITEM, KEY, Accumulator<? super ITEM, ?, VALUE>>create(
                     itemToKey,
                     groupKey -> aggregator.createAccumulator(),
                     Accumulator::accumulate))
             .map(keyAndAcc -> {
                 KEY groupKey = keyAndAcc.getKey();
-                Accumulator<? super ITEM, VALUE> accGraph = keyAndAcc.getValue();
+                Accumulator<? super ITEM, ?, VALUE> accGraph = keyAndAcc.getValue();
 
                 VALUE g = accGraph.getValue();
                 return Maps.immutableEntry(groupKey, g);

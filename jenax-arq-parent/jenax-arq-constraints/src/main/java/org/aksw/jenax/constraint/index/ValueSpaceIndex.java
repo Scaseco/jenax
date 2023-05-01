@@ -3,7 +3,7 @@ package org.aksw.jenax.constraint.index;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.jenax.constraint.util.ValueSpaceBase;
+import org.aksw.jenax.constraint.util.VSpaceBase;
 
 import com.google.common.collect.RangeMap;
 

@@ -20,6 +20,7 @@ public class TransformJoinToSequence
         return result;
     }
 
+    // TODO Shouldn't this method resolve joins recursively??
     public static void add(OpSequence dest, Op op) {
         if(op instanceof OpSequence) {
             OpSequence o = (OpSequence)op;
@@ -27,9 +28,24 @@ public class TransformJoinToSequence
                 dest.add(subOp);
             }
         } else if(op instanceof OpJoin) {
-        	OpJoin o = (OpJoin)op;
+            OpJoin o = (OpJoin)op;
             dest.add(o.getLeft());
             dest.add(o.getRight());
+        } else {
+            dest.add(op);
+        }
+    }
+
+    public static void addRecursive(OpSequence dest, Op op) {
+        if(op instanceof OpSequence) {
+            OpSequence o = (OpSequence)op;
+            for(Op subOp : o.getElements()) {
+                dest.add(subOp);
+            }
+        } else if(op instanceof OpJoin) {
+            OpJoin o = (OpJoin)op;
+            addRecursive(dest, o.getLeft());
+            addRecursive(dest, o.getRight());
         } else {
             dest.add(op);
         }

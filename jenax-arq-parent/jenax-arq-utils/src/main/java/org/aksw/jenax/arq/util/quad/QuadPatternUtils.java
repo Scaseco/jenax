@@ -214,4 +214,15 @@ public class QuadPatternUtils {
         return result;
     }
 
+    /** Returns true iff all quads in the pattern are in the default graph */
+    public static boolean isDefaultGraphOnly(Iterable<? extends Quad> quadPattern) {
+    	boolean result = true;
+    	for (Quad quad : quadPattern) {
+    		if (!QuadUtils.isDefaultGraph(quad)) {
+    			result = false;
+    			break;
+    		}
+    	}
+    	return result;
+    }
 }

@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.commons.io.binseach.BinarySearchOnSortedFile;
+import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;

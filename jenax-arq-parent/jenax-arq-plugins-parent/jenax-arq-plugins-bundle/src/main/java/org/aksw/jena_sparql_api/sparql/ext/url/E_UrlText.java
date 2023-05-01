@@ -15,7 +15,7 @@ public class E_UrlText
         try {
             result = JenaUrlUtils.resolve(nv, env);
         } catch (Exception e) {
-        	throw new ExprEvalException("Failed to resolve URL from " + nv);//": " + node)) ;
+            throw new ExprEvalException("Failed to resolve URL from " + nv);//": " + node)) ;
             //throw new RuntimeException(e);
         }
 

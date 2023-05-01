@@ -3,7 +3,6 @@ package org.aksw.jenax.constraint.util;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +14,7 @@ import org.aksw.jenax.constraint.api.Contradictable;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.expr.ValueSpaceClassification;
+import org.apache.jena.sparql.expr.ValueSpace;
 
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
@@ -29,6 +28,9 @@ import com.google.common.collect.TreeRangeSet;
  *
  * FIXME Use of non-singletons in the 'unknown' value space must be handled as effectively
  * unconstrained
+ * FIXME Extend the API with meta-interfaces. e.g. Dimension classes (for numeric, string, iri, etc) could check whether values
+ * are within their range.
+ *
  *
  *      | zzz    999
  *      |
@@ -42,13 +44,14 @@ import com.google.common.collect.TreeRangeSet;
  *
  */
 public class NodeRanges
-    extends ValueSpaceBase<ComparableNodeValue, Object>
+    extends VSpaceBase<ComparableNodeValue, Object>
     implements Contradictable, Cloneable
 {
     // Additional (pseudo) value space classifications for uniform handing of IRIs and bnodes
-    public static final String VSC_IRI = "xVSPACE_IRI";
-    public static final String VSC_BNODE = "xVSPACE_BNODE";
-    public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
+    // No longer needed since Jena 4.8.0-SNAPSHOT - We could now replace Object with ValueSpace
+//    public static final String VSC_IRI = "xVSPACE_IRI";
+//    public static final String VSC_BNODE = "xVSPACE_BNODE";
+//    public static final String VSC_TRIPLE = "xVSPACE_TRIPLE";
 
 
     public NodeRanges(boolean isVscExhaustive) {
@@ -63,7 +66,7 @@ public class NodeRanges
     public RangeSet<ComparableNodeValue> getIriRanges() {
         return vscToRangeSets == null
                 ? ImmutableRangeSet.of()
-                : vscToRangeSets.getOrDefault(VSC_IRI, ImmutableRangeSet.of());
+                : vscToRangeSets.getOrDefault(ValueSpace.VSPACE_URI, ImmutableRangeSet.of());
     }
 
     /**
@@ -86,6 +89,18 @@ public class NodeRanges
     /** Create a NodeRange that contains nothing */
     public static NodeRanges createClosed() {
         return new NodeRanges(true);
+    }
+
+    @Override
+    public NodeRanges addEmptyDimension(Object dimension) {
+        super.addEmptyDimension(dimension);
+        return this;
+    }
+
+    @Override
+    public NodeRanges addOpenDimension(Object dimension) {
+        super.addOpenDimension(dimension);
+        return this;
     }
 
 //    protected void ensureConstrainedMode() {
@@ -259,20 +274,20 @@ public class NodeRanges
         return (isVscExhaustive ? "closed" : "open") + vscToRangeSets;
     }
 
-    public static Object classifyNodeValueSubSpace(Node node) {
-        Object result;
-        if (node.isURI()) {
-            result = VSC_IRI;
-        } else if (node.isBlank()) {
-            result = VSC_BNODE;
-        } else if (node.isNodeTriple()) {
-            result = VSC_TRIPLE;
-        } else {
-            throw new RuntimeException("Unknown term type: " + node);
-        }
-
-        return result;
-    }
+//    public static Object classifyNodeValueSubSpace(Node node) {
+//        Object result;
+//        if (node.isURI()) {
+//            result = VSC_IRI;
+//        } else if (node.isBlank()) {
+//            result = VSC_BNODE;
+//        } else if (node.isNodeTriple()) {
+//            result = VSC_TRIPLE;
+//        } else {
+//            throw new RuntimeException("Unknown term type: " + node);
+//        }
+//
+//        return result;
+//    }
 
     @Override
     protected Object classifyValueSpace(Range<ComparableNodeValue> range) {
@@ -280,35 +295,70 @@ public class NodeRanges
     }
 
     /** Return some object that acts as a key for a value space. Different value spaces are assumed to be disjoint. */
-    public static Object classifyValueSpaceCore(Range<ComparableNodeValue> range) {
-        Object result = null;
+    public static ValueSpace classifyValueSpaceCore(Range<ComparableNodeValue> range) {
+        ValueSpace result = null;
         NodeValue lb = range.hasLowerBound() ? range.lowerEndpoint().getNodeValue() : null;
         NodeValue ub = range.hasUpperBound() ? range.upperEndpoint().getNodeValue() : null;
 
         if (lb != null && ub != null) {
             result = NodeValue.classifyValueOp(lb, ub);
 
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                Object a = classifyNodeValueSubSpace(lb.asNode());
-                Object b = classifyNodeValueSubSpace(ub.asNode());
-
-                if (!Objects.equals(a, b)) {
-                    result = ValueSpaceClassification.VSPACE_DIFFERENT;
-                } else {
-                    result = a;
-                }
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                Object a = classifyNodeValueSubSpace(lb.asNode());
+//                Object b = classifyNodeValueSubSpace(ub.asNode());
+//
+//                if (!Objects.equals(a, b)) {
+//                    result = ValueSpace.VSPACE_DIFFERENT;
+//                } else {
+//                    result = a;
+//                }
+//            }
 
         } else if (lb != null) {
             result = lb.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(lb.asNode());
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                result = classifyNodeValueSubSpace(lb.asNode());
+//            }
         } else if (ub != null) {
             result = ub.getValueSpace();
-            if (ValueSpaceClassification.VSPACE_NODE.equals(result)) {
-                result = classifyNodeValueSubSpace(ub.asNode());
-            }
+//            if (ValueSpace.VSPACE_NODE.equals(result)) {
+//                result = classifyNodeValueSubSpace(ub.asNode());
+//            }
+        }
+
+        return result;
+    }
+
+    public static NodeRanges nodeRangesForPrefix(String prefix) {
+        Range<ComparableNodeValue> range = rangeForStringPrefix(prefix);
+        NodeRanges result = NodeRanges.createClosed();
+        result.add(range);
+        return result;
+    }
+
+    /** Result is a string range (not IRI) */
+    public static Range<ComparableNodeValue> rangeForStringPrefix(String prefix) {
+        return Range.closedOpen(
+            ComparableNodeValue.wrap(NodeFactory.createLiteral(prefix)),
+            ComparableNodeValue.wrap(NodeFactory.createLiteral(incrementLastCharacter(prefix))));
+    }
+
+    /**
+     * Increment the last character of a string.
+     * Useful for defining the upper bound of a range of strings with a certain prefix.
+     *
+     * TODO We should better represent string using bytes (or code points)
+     */
+    public static String incrementLastCharacter(String str) {
+        int i = str.length() - 1;
+
+        String result;
+        if (i < 0) {
+            result = str;
+        } else {
+            char lastChar = str.charAt(i);
+            char nextChar = (char)(lastChar + 1);
+            result = str.substring(0, i) + nextChar;
         }
 
         return result;

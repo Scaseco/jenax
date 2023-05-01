@@ -63,9 +63,12 @@ public class UpdateProcessorFactoryDataset
     //    return result;
         // UpdateEngine updateEngine = f.create(dsg, null, context);
 
+        // Merge the contexts
+        Context cxt = Context.setupContextForDataset(context, dsg);
+
         Binding initialBinding = BindingRoot.create();
 
-        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f);
+        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, cxt, f);
         UpdateProcessor result = UpdateProcessorDecoratorTxn.wrap(tmp, dsg);
 
 

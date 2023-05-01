@@ -1,11 +1,14 @@
 package org.aksw.jenax.arq.util.quad;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -13,6 +16,8 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Quad;
 
 
@@ -106,6 +111,18 @@ public class DatasetUtils {
                 .map(model -> !model.isEmpty())
                 .orElse(false);
 
+        return result;
+    }
+
+    public static String toString(Dataset dataset, RDFFormat rdfFormat) {
+        String result;
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, dataset, rdfFormat);
+            out.flush();
+            result = out.toString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return result;
     }
 }

@@ -18,6 +18,7 @@ import org.apache.jena.shared.PrefixMapping;
  * @author raven
  *
  */
+@Deprecated // Jena now has it
 public class PrefixMapAdapter
     extends PrefixMapBase
 {

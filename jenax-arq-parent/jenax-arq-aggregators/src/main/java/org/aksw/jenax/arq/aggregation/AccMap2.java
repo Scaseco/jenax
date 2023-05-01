@@ -20,13 +20,13 @@ import org.aksw.commons.collector.domain.Aggregator;
  * @param <V>
  * @param <C>
  */
-public class AccMap2<B, K, V, C extends Aggregator<B, V>>
-    implements Accumulator<B, Map<K, V>>
+public class AccMap2<B, E, K, V, C extends Aggregator<B, E, V>>
+    implements Accumulator<B, E, Map<K, V>>
 {
     protected BiFunction<B, Long, K> mapper;
     protected C subAgg;
 
-    protected Map<K, Accumulator<B, V>> state = new HashMap<>();
+    protected Map<K, Accumulator<B, E, V>> state = new HashMap<>();
 
     public AccMap2(Function<B, K> mapper, C subAgg) {
         this((binding, rowNum) -> mapper.apply(binding), subAgg);
@@ -38,22 +38,22 @@ public class AccMap2<B, K, V, C extends Aggregator<B, V>>
     }
 
     @Override
-    public void accumulate(B binding) {
+    public void accumulate(B binding, E env) {
         // TODO Keep track of the relative binding index
         K k = mapper.apply(binding, -1l);
-        Accumulator<B, V> subAcc = state.get(k);
+        Accumulator<B, E, V> subAcc = state.get(k);
         if(subAcc == null) {
             subAcc = subAgg.createAccumulator();
             state.put(k, subAcc);
         }
-        subAcc.accumulate(binding);
+        subAcc.accumulate(binding, env);
     }
 
     @Override
     public Map<K, V> getValue() {
         Map<K, V> result = new HashMap<K, V>();
 
-        for(Entry<K, Accumulator<B, V>> entry : state.entrySet()) {
+        for(Entry<K, Accumulator<B, E, V>> entry : state.entrySet()) {
             K k = entry.getKey();
             V v = entry.getValue().getValue();
 
@@ -63,14 +63,14 @@ public class AccMap2<B, K, V, C extends Aggregator<B, V>>
         return result;
     }
 
-    public static <B, K, V, C extends Aggregator<B, V>> AccMap2<B, K, V, C> create(Function<B, K> mapper, C subAgg) {
+    public static <B, E, K, V, C extends Aggregator<B, E, V>> AccMap2<B, E, K, V, C> create(Function<B, K> mapper, C subAgg) {
         BiFunction<B, Long, K> fn = (binding, rowNum) -> mapper.apply(binding);
-        AccMap2<B, K, V, C> result = new AccMap2<>(fn, subAgg);
+        AccMap2<B, E, K, V, C> result = new AccMap2<>(fn, subAgg);
         return result;
     }
 
-    public static <B, K, V, C extends Aggregator<B, V>> AccMap2<B, K, V, C> create(BiFunction<B, Long, K> mapper, C subAgg) {
-        AccMap2<B, K, V, C> result = new AccMap2<>(mapper, subAgg);
+    public static <B, E, K, V, C extends Aggregator<B, E, V>> AccMap2<B, E, K, V, C> create(BiFunction<B, Long, K> mapper, C subAgg) {
+        AccMap2<B, E, K, V, C> result = new AccMap2<>(mapper, subAgg);
         return result;
     }
 

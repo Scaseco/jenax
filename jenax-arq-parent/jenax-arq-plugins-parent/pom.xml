@@ -10,13 +10,14 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>4.5.0-1-SNAPSHOT</version>
+		<version>4.8.0-1-SNAPSHOT</version>
 	</parent>
 
 	<modules>
 		<module>jenax-arq-plugins-bundle</module>
 		<module>jenax-arq-plugins-service-vfs</module>
 		<module>jenax-arq-plugins-datatypes</module>
+		<module>jenax-arq-plugins-generate</module>
 	</modules>
 
 	<profiles>

@@ -16,6 +16,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.Template;
 
@@ -32,7 +33,7 @@ import org.apache.jena.sparql.syntax.Template;
  *
  */
 public class AggObjectGraph
-    implements Aggregator<Binding, Graph>
+    implements Aggregator<Binding, FunctionEnv, Graph>
 // implements Acc<Graph> {
 {
     protected Template template;
@@ -67,7 +68,7 @@ public class AggObjectGraph
 
 
     public class AccObjectGraph
-        implements Accumulator<Binding, Graph>
+        implements Accumulator<Binding, FunctionEnv, Graph>
     {
         protected Graph graph;
         protected SetMultimap<Node, Node> templateNodeToInsts;
@@ -78,7 +79,8 @@ public class AggObjectGraph
             this.templateNodeToInsts = HashMultimap.create();
         }
 
-        public void accumulate(Binding binding) {
+        @Override
+        public void accumulate(Binding binding, FunctionEnv env) {
             Map<Node, Node> bnodeMap = new HashMap<>();
 
             for (Entry<Node, ? extends Function<? super Binding, ? extends Node>> nodeIdGen : nodeIdGenMap.entrySet()) {

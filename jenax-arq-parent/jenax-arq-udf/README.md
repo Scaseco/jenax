@@ -1,3 +1,9 @@
+---
+title: User defined function (UDF) Module
+parent: Reprogen
+nav_order: 30
+---
+
 ## User defined function (UDF) Module
 
 This module provides useful extensions to Jena's built-in function extension system:

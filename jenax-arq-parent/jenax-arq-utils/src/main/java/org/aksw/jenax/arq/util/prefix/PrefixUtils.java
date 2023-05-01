@@ -1,13 +1,29 @@
 package org.aksw.jenax.arq.util.prefix;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.system.PrefixMap;
+import org.apache.jena.riot.system.PrefixMapAdapter;
+import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
 public class PrefixUtils {
@@ -99,6 +115,32 @@ public class PrefixUtils {
         PrefixMapping result = new PrefixMappingImpl();
         Stream<Node> nodeStream = nodes.stream();
         usedPrefixes(pm, nodeStream, result);
+        return result;
+    }
+
+    /**
+     * Convert a prefix mapping to a string
+     */
+    public static String toString(PrefixMapping prefixMapping, RDFFormat rdfFormat) {
+        Model tmp = ModelFactory.createDefaultModel();
+        tmp.setNsPrefixes(prefixMapping);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        RDFDataMgr.write(baos, tmp, rdfFormat);
+        String result = null;
+        try {
+            result = baos.toString("UTF-8").trim();
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    public static PrefixMapping fromString(String str, Lang lang) {
+        Model model = ModelFactory.createDefaultModel();
+        RDFDataMgr.read(model, new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8)), lang);
+        PrefixMapping result = new PrefixMappingImpl();
+        result.setNsPrefixes(model.getNsPrefixMap());
         return result;
     }
 }

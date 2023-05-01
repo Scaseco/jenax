@@ -75,7 +75,7 @@ public class E_CompareResultSet
             json.addProperty("expectedSize", relevantSize);
             json.addProperty("actualSize", retrievedSize);
 
-            result = NodeValue.makeNode(JenaJsonUtils.jsonToNode(json));
+            result = JenaJsonUtils.convertJsonOrValueToNodeValue(json);
 
         } else {
             throw new ExprEvalException("At least one of the arguments could not be parsed as a SPARQL result set");

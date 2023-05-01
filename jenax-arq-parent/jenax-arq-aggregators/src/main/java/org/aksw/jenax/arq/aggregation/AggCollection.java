@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
 
-public class AggCollection<T, COLLECTION, ITEM>
-    implements Aggregator<T, COLLECTION>
+public class AggCollection<T, E, COLLECTION, ITEM>
+    implements Aggregator<T, E, COLLECTION>
 {
 
     protected Supplier<COLLECTION> collectionSupplier;
@@ -27,13 +27,13 @@ public class AggCollection<T, COLLECTION, ITEM>
     }
 
     @Override
-    public Accumulator<T, COLLECTION> createAccumulator() {
+    public Accumulator<T, E, COLLECTION> createAccumulator() {
         COLLECTION collection = collectionSupplier.get();
         return new AccCollection(collection);
     }
 
     public class AccCollection
-        implements Accumulator<T, COLLECTION>
+        implements Accumulator<T, E, COLLECTION>
     {
         protected COLLECTION collection;
 
@@ -43,7 +43,7 @@ public class AggCollection<T, COLLECTION, ITEM>
         }
 
         @Override
-        public void accumulate(T binding) {
+        public void accumulate(T binding, E env) {
             ITEM item = bindingToItem.apply(binding);
             addToCollection.accept(collection, item);
         }

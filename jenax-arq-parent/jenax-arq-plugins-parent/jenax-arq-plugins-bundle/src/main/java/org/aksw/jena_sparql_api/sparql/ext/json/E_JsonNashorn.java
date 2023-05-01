@@ -1,34 +1,36 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
+import com.google.gson.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.graph.Node;
+import org.apache.jena.query.QueryParseException;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-
-import jdk.nashorn.api.scripting.JSObject;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class E_JsonNashorn extends FunctionBase {
     protected ScriptEngine engine;
     protected Gson gson;
 
-    protected JSObject jsonParse;
-    protected JSObject jsonStringify;
+    protected Object jsonParse;
+    protected Object jsonStringify;
+    protected boolean implicit;
 
     public E_JsonNashorn() throws ScriptException {
-        this(new ScriptEngineManager().getEngineByName("nashorn"), new Gson());
+        this(
+                new ScriptEngineManager().getEngineByName("js"),
+                new Gson()
+        );
     }
 
 
@@ -36,50 +38,89 @@ public class E_JsonNashorn extends FunctionBase {
         this.engine = engine;
         this.gson = gson;
 
-
-        jsonParse = (JSObject) engine.eval("function(x) { return JSON.parse(x); }");
-        jsonStringify = (JSObject) engine.eval("function(x) { return JSON.stringify(x); }");
+        jsonParse = engine.eval("function(x) { return JSON.parse(x); }");
+        jsonStringify = engine.eval("function(x) { return JSON.stringify(x); }");
     }
 
     public static E_JsonNashorn create() throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        Gson gson = new Gson();
-        return new E_JsonNashorn(engine, gson);
+        return new E_JsonNashorn();
+    }
+
+    public static Object call(ScriptEngine engine, Object fn, Iterable<Object> args) {
+        Bindings bindings = engine.createBindings();
+        StringBuilder call = new StringBuilder("__(");
+        bindings.put("__", fn);
+        int i = 0;
+        for (Object a : args) {
+            String var = "_" + i;
+            bindings.put(var, a);
+            if (i > 0)
+                call.append(',');
+            call.append(var);
+            i++;
+        }
+        call.append(')');
+        try {
+            return engine.eval(call.toString(), bindings);
+        } catch (ScriptException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Object call(ScriptEngine engine, Object fn, Object... args) {
+        return call(engine, fn, Arrays.asList(args));
     }
 
     @Override
     public NodeValue exec(List<NodeValue> args) {
         NodeValue result = null;
         NodeValue fnNv = args.get(0);
-        JSObject fn = null;
+        Object fn = null;
         if(fnNv.isString()) {
             String str = fnNv.asUnquotedString();
             try {
-                fn = (JSObject)engine.eval(str);
+                fn = engine.eval(functionString(str, args.size() - 1));
             } catch (ScriptException e) {
-                throw new ExprEvalException(e);
+                //throw new ExprException(ExceptionUtils.getRootCauseMessage(e));
+
+                throw new QueryParseException(ExceptionUtils.getRootCauseMessage(e),-1,-1);
             }
 
             List<NodeValue> fnArgs = args.subList(1, args.size());
             List<Object> jsos = new ArrayList<>(fnArgs.size());
             for (NodeValue arg : fnArgs) {
-            	JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
-            	String jsonStr = gson.toJson(jsonElt);
-            	Object engineObj = jsonParse.call(null, jsonStr);
-            	// JSObject jsObj = (JSObject)engineObj;
-            	jsos.add(engineObj);
+                JsonElement jsonElt = JenaJsonUtils.enforceJsonElement(arg);
+                String jsonStr = gson.toJson(jsonElt);
+                Object engineObj = call(engine, jsonParse, jsonStr);
+                jsos.add(engineObj);
             }
 
             RDFDatatype dtype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
 
-            Object[] as = jsos.toArray(new Object[0]);
-            Object raw = fn.call(fn, as);
-            String jsonStr = jsonStringify.call(null, raw).toString();
+            Object raw = call(engine, fn, jsos);
+
+            String jsonStr = (String) call(engine, jsonStringify, raw);;
             JsonElement jsonEl = gson.fromJson(jsonStr, JsonElement.class);
-            Node node = JenaJsonUtils.jsonToNode(jsonEl, gson, dtype);
-            result = NodeValue.makeNode(node);
+            result = JenaJsonUtils.convertJsonToNodeValue(jsonEl);
+            return result;
         }
-        return result;
+        throw new ExprEvalException("json:js: Weird function argument (arg 1): "+fnNv);
+    }
+
+    protected String functionString(String str, int argc) {
+        if (this.implicit) {
+            StringBuilder s = new StringBuilder("function (");
+            for (int i = 0; i < argc; i++) {
+                if (i > 0)
+                    s.append(',');
+                s.append("$").append(i);
+            }
+            s.append(") {");
+            s.append(str);
+            s.append("}");
+            return s.toString();
+        }
+        return str;
     }
 
     @Override
@@ -87,6 +128,7 @@ public class E_JsonNashorn extends FunctionBase {
         if(args.size() < 1) {
             throw new RuntimeException("At least 1 argument required for JavaScript call");
         }
+        this.implicit = uri.endsWith("e");
     }
 
 //    public static void main(String[] args) throws ScriptException, NoSuchMethodException {

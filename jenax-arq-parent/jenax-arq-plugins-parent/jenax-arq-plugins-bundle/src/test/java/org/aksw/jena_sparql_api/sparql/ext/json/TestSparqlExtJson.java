@@ -2,16 +2,16 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.resultset.ResultSetCompare;
+import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.junit.Assert;
@@ -63,6 +63,54 @@ public class TestSparqlExtJson {
         }
 
     }
+    @Test
+    public void testJsonJs() {
+        Query q = parser.apply("SELECT ?s { BIND(json:js('x => x.k', '{\"k\":\"v\"}'^^xsd:json) AS ?s) }");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            String rs = ResultSetFormatter.asText(qe.execSelect());
+            Assert.assertEquals(
+                    "-------\n" +
+                    "| s   |\n" +
+                    "=======\n" +
+                    "| \"v\" |\n" +
+                    "-------\n", rs);
+            System.out.println(rs);
+        }
+
+    }
+
+    @Test
+    public void testJsonJs2() {
+        Query q = parser.apply("SELECT \n" +
+                "*\n" +
+                "WHERE {\n" +
+                "  BIND(1"+("0".repeat(22))+" AS ?v)\n" +
+                "  BIND(json:je('return $0', ?v) AS ?vv)\n" +
+                "}");
+        Model m = ModelFactory.createDefaultModel();
+        try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
+            ResultSet qresults = qe.execSelect();
+            Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
+                    "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n" +
+                    "  <head>\n" +
+                    "    <variable name=\"v\"/>\n" +
+                    "    <variable name=\"vv\"/>\n" +
+                    "  </head>\n" +
+                    "  <results>\n" +
+                    "    <result>\n" +
+                    "      <binding name=\"v\">\n" +
+                    "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">10000000000000000000000</literal>\n" +
+                    "      </binding>\n" +
+                    "      <binding name=\"vv\">\n" +
+                    "        <literal datatype=\"http://www.w3.org/2001/XMLSchema#integer\">10000000000000000000000</literal>\n" +
+                    "      </binding>\n" +
+                    "    </result>\n" +
+                    "  </results>\n" +
+                    "</sparql>\n", ResultSetFormatter.asXMLString(qresults));
+        }
+
+    }
 
     @Test
     public void testJsonObjectCreation() {
@@ -71,7 +119,7 @@ public class TestSparqlExtJson {
         expected.addProperty("binsearch", true);
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch', true)", pm));
-        JsonElement actual = RDFDatatypeJson.extract(nv);
+        JsonElement actual = JenaJsonUtils.extractChecked(nv);
         Assert.assertEquals(expected, actual);
     }
 
@@ -85,14 +133,14 @@ public class TestSparqlExtJson {
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:array('hi', <urn:test>, true)", pm));
 
-        JsonElement actual = RDFDatatypeJson.extract(nv);
+        JsonElement actual = JenaJsonUtils.extractChecked(nv);
         Assert.assertEquals(expected, actual);
     }
 
     @Test
     public void testJsonConversionBoolean() {
         JsonElement expected = new JsonPrimitive(true);
-        JsonElement actual = RDFDatatypeJson.extract(ExprUtils.eval(ExprUtils.parse("json:convert(true)", pm)));
+        JsonElement actual = JenaJsonUtils.extractChecked(ExprUtils.eval(ExprUtils.parse("json:convert(true)", pm)));
         Assert.assertEquals(expected, actual);
     }
 

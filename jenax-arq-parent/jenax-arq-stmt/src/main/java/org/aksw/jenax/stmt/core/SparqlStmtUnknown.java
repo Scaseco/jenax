@@ -8,13 +8,13 @@ public class SparqlStmtUnknown
 {
     private static final long serialVersionUID = 1L;
 
-    public SparqlStmtUnknown(String originalString, QueryParseException parseException) {
-        super(originalString, parseException);
+    public SparqlStmtUnknown(String originalString, String parserBase, QueryParseException parseException) {
+        super(originalString, parserBase, parseException);
     }
 
     private Object readResolve() {
         SparqlStmt tmp = SparqlStmtParserImpl.createAsGiven(true).apply(originalString);
-        return new SparqlStmtUnknown(originalString, tmp.getParseException());
+        return new SparqlStmtUnknown(originalString, parserBase, tmp.getParseException());
     }
 
 
@@ -35,7 +35,7 @@ public class SparqlStmtUnknown
 
     @Override
     public SparqlStmt clone() {
-        return new SparqlStmtUnknown(originalString, parseException);
+        return new SparqlStmtUnknown(originalString, parserBase, parseException);
     }
 
 }

@@ -219,7 +219,7 @@ public class SparqlMappers {
             SPARQLResultExVisitor<?> sparqlResultVisitor,
             Supplier<? extends DatasetGraph> datasetGraphSupplier) {
 
-        ParallelAggregator<Quad, Map<Node, Dataset>, ?> agg = AggBuilderDataset.groupQuadsToDatasetCore(datasetGraphSupplier::get, Quad::getGraph);
+        ParallelAggregator<Quad, ?, Map<Node, Dataset>, ?> agg = AggBuilderDataset.groupQuadsToDatasetCore(datasetGraphSupplier::get, Quad::getGraph);
 
         return createMapperQuad(stmts, sparqlResultVisitor)
                 .andThen(quadFlow -> {

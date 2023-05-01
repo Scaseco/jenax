@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.datatype;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
@@ -17,6 +18,10 @@ public class RDFDatatypeQuery
 {
     public static final String IRI = "http://jsa.aksw.org/dt/sparql/query";
     public static final RDFDatatypeQuery INSTANCE = new RDFDatatypeQuery();
+
+    public static RDFDatatype get() {
+        return INSTANCE;
+    }
 
     public RDFDatatypeQuery() {
         this(IRI);

@@ -9,11 +9,20 @@ import java.util.stream.StreamSupport;
 
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.list.ListUtils;
+import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletPath;
+import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
+import org.aksw.jenax.arq.util.node.NodeList;
+import org.aksw.jenax.arq.util.node.NodeListImpl;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -21,6 +30,7 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
+import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathParser;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
@@ -58,7 +68,7 @@ public class PropertyFunctionKShortestPaths
 
     public static final String DEFAULT_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
 
-    public static final Symbol PROLOGUE = Symbol.create("prologue");
+    // public static final Symbol PROLOGUE = Symbol.create("prologue");
     public static final Symbol SPARQL_SERVICE = Symbol.create("sparqlService");
 
     protected Function<SparqlService, SparqlKShortestPathFinder> serviceToPathFinder;
@@ -79,8 +89,17 @@ public class PropertyFunctionKShortestPaths
         // TODO: Get the currently running query so we can inject the prefixes
         System.out.println("CONTEXT" + ctx);
 
-        Prologue prologue = (Prologue)ctx.get(PROLOGUE);
+        Prologue prologue = (Prologue)ctx.get(ARQConstants.sysCurrentQuery);
+        if (prologue == null) {
+            prologue = new Prologue(PrefixMapping.Extended);
+        }
         SparqlService ss = (SparqlService)ctx.get(SPARQL_SERVICE);
+
+        if (ss == null) {
+            ss = new SparqlServiceImpl(new QueryExecutionFactoryDataset(DatasetFactory.wrap(execCxt.getDataset())), null);
+        }
+
+
         Objects.requireNonNull(ss);
         QueryExecutionFactory qef = ss.getQueryExecutionFactory();
         Objects.requireNonNull(qef);
@@ -143,7 +162,7 @@ public class PropertyFunctionKShortestPaths
             pathFinder = new SparqlKShortestPathFinderMem(ss.getQueryExecutionFactory());
         }
 
-        Iterator<TripletPath<Node, Directed<Node>>> itPaths = pathFinder.findPaths(s, targetNode,path, k);
+        Iterator<TripletPath<Node, Directed<Node>>> itPaths = pathFinder.findPaths(s, targetNode, path, k);
 
 //
 //        PathExecutionUtils.executePath(path, s, targetNode, qef, p -> {
@@ -169,13 +188,45 @@ public class PropertyFunctionKShortestPaths
         //Iterable<NestedPath<Node, Node>> tmp = () -> itPaths;
         Iterable<TripletPath<Node, Directed<Node>>> tmp = () -> itPaths;
         Iterator<Binding> itBindings = StreamSupport.stream(tmp.spliterator(), false).map(p -> {
-          Node pNode = NodeFactory.createLiteral("" + p);
-          Binding r = BindingFactory.binding(binding, outVar, pNode);
-          return r;
+            // Node pNode = NodeFactory.createLiteral("" + p);
+            Node pNode = NodeFactory.createLiteralByValue(pathToNodeList(p), RDFDatatypeNodeList.get());
+            Binding r = BindingFactory.binding(binding, outVar, pNode);
+            return r;
         }).iterator();
 
         QueryIterator result = QueryIterPlainWrapper.create(itBindings);
         return result;
     }
 
+    /**
+     * The result array for a path is always: [ start, end, (property, direction, target)* ]
+     * This way, the edges of a path can be iterated using
+     * <pre>
+     *   BIND(array:size(?path) AS n)
+     *   (2 ?n 3) number:range ?idx
+     *   BIND(array:get(?path, ?idx) AS ?property)
+     *   BIND(array:get(?path, ?idx + 1) AS ?direction)
+     *   BIND(array:get(?path, ?idx + 2) AS ?target)
+     * </pre>
+     *
+     * @param path
+     * @return
+     */
+    public static NodeList pathToNodeList(TripletPath<Node, Directed<Node>> path) {
+        List<Node> list = new ArrayList<>();
+        list.add(path.getStart());
+        list.add(path.getEnd());
+
+        // int lastTripletIdx = path.getTriplets().size() - 1;
+        // int i = 0;
+        for (Triplet<Node, Directed<Node>> triplet : path.getTriplets()) {
+            list.add(triplet.getPredicate().getValue());
+            list.add(NodeValue.makeBoolean(triplet.getPredicate().isForward()).asNode());
+            // if (i < lastTripletIdx) {
+                list.add(triplet.getObject());
+            //}
+            // ++i;
+        }
+        return new NodeListImpl(list);
+    }
 }

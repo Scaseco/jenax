@@ -1,4 +1,4 @@
-# Annotation-aware renaming. Renaming x matches <x> and <x##.*>
+# Annotation-aware renaming. Renaming x matches <x> and <x__.*>
 # Finds and replaces any occurrence of an old namespace (oldNS) with the new namespace (newNS)
 # SELECT (sys:getenv('SOURCE_NS') as ?source) (sys:getenv('TARGET_NS') as ?target) {}
 

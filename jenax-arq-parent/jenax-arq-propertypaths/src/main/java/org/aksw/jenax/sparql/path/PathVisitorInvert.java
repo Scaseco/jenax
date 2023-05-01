@@ -139,7 +139,9 @@ public class PathVisitorInvert
 
     @Override
     public void visit(P_Seq path) {
-        result = new P_Alt(new P_Inverse(path.getLeft()), new P_Inverse(path.getRight()));
+        // result = new P_Seq(path.getRight(), path.getLeft());
+
+        result = new P_Seq(new P_Inverse(path.getRight()), new P_Inverse(path.getLeft()));
 
     }
 }

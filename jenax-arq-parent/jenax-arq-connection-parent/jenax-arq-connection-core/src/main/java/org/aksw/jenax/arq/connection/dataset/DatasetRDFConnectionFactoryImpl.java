@@ -1,15 +1,19 @@
 package org.aksw.jenax.arq.connection.dataset;
 
+import java.util.function.Supplier;
+
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
 import org.aksw.jenax.arq.connection.SparqlQueryConnectionJsaBase;
-import org.aksw.jenax.arq.connection.SparqlUpdateConnectionJsaBase;
 import org.aksw.jenax.connection.query.QueryEngineFactoryProvider;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.connection.update.UpdateEngineFactoryProvider;
-import org.aksw.jenax.connection.update.UpdateProcessorFactoryDataset;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.rdflink.LinkSparqlUpdate;
+import org.apache.jena.rdflink.RDFConnectionAdapter;
+import org.apache.jena.rdflink.RDFLinkModular;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.util.Context;
 
 /**
@@ -38,14 +42,26 @@ public class DatasetRDFConnectionFactoryImpl
     @Override
     public RDFConnection connect(Dataset dataset) {
 
+        Supplier<UpdateExecBuilder> updateExecBuilderSupp =
+                () -> new UpdateExecDatasetBuilderEx(updateEngineFactoryProvider)
+                    .dataset(dataset.asDatasetGraph())
+                    .context(context);
+
+        // The update link/connection almost uses the new API
+        LinkSparqlUpdate updateLink = new LinkSparqlUpdateOverBuilder(updateExecBuilderSupp);
+        RDFLinkModular modularLink = new RDFLinkModular(null, updateLink, null);
+        RDFConnection updateConn = RDFConnectionAdapter.adapt(modularLink);
+
+        // The query one still uses the old one
         RDFConnection result = new RDFConnectionModular(
             new SparqlQueryConnectionJsaBase<>(
                 new QueryExecutionFactoryDataset(dataset, context, queryEngineFactoryProvider),
                 dataset),
 
-            new SparqlUpdateConnectionJsaBase<>(
-                new UpdateProcessorFactoryDataset(dataset, context, updateEngineFactoryProvider),
-                dataset),
+            updateConn,
+//            new SparqlUpdateConnectionJsaBase<>(
+//                new UpdateProcessorFactoryDataset(dataset, context, updateEngineFactoryProvider),
+//                dataset),
 
             RDFConnectionFactory.connect(dataset)
         );

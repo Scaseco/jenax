@@ -24,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.commons.io.block.impl.BlockSources;
+import org.aksw.commons.io.binseach.BinarySearcher;
+import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
 import org.aksw.commons.io.util.UriUtils;
 import org.aksw.commons.util.entity.EntityInfo;
-import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
 import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;

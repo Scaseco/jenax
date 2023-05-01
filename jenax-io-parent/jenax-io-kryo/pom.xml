@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-io-parent</artifactId>
-		<version>4.5.0-1-SNAPSHOT</version>
+		<version>4.8.0-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jenax-io-kryo</artifactId>
@@ -16,28 +16,34 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-io-json</artifactId>
+			<artifactId>jenax-io-kryo-jena</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-rx</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-io-json</artifactId>-->
+<!--		</dependency>-->
+
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-arq-rx</artifactId>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-relations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-datasets-oneng</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collectors</artifactId>
+			<!-- <version>0.9.5-SNAPSHOT</version> -->
 		</dependency>
 
 		<!-- <dependency> -->

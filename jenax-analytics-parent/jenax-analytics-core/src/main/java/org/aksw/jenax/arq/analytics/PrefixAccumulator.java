@@ -32,8 +32,8 @@ import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
  * @author raven
  *
  */
-public class PrefixAccumulator
-    implements Accumulator<String, Set<String>>, Serializable
+public class PrefixAccumulator<E>
+    implements Accumulator<String, E, Set<String>>, Serializable
 {
     private static final long serialVersionUID = -4653863475436646211L;
 
@@ -224,7 +224,8 @@ public class PrefixAccumulator
 //        System.out.println("Removals for [" + prefix + "]: " + superseded);
     }
 
-    public void accumulate(String prefix) {
+    @Override
+    public void accumulate(String prefix, E env) {
         String bestMatch = longestPrefixLookup(prefix, true, prefixes);
 
 //        System.out.println("longest prefix of: " + prefix + ": " + bestMatch);
@@ -253,7 +254,7 @@ public class PrefixAccumulator
         try (QueryExecution qe = QueryExecutionHTTP.create().endpoint("http://dbpedia.org/sparql").query(QueryFactory.create("Select * { ?s a <http://dbpedia.org/ontology/Airport> } Limit 100")).build()) {
             ResultSet rs = qe.execSelect();
 
-            Accumulator<Binding, Map<Var, Set<String>>> acc = BindingAnalytics.usedPrefixes(50).createAccumulator();
+            Accumulator<Binding, ?, Map<Var, Set<String>>> acc = BindingAnalytics.usedPrefixes(50).createAccumulator();
             new QueryIteratorResultSet(rs).forEachRemaining(acc::accumulate);
             Map<Var, Set<String>> ps = acc.getValue();
             System.out.println("Prefixes: " + ps);
@@ -273,7 +274,7 @@ public class PrefixAccumulator
 
         List<String> items = Arrays.asList("dbr:Leipzig", "dbr:London", "dbr:City");
 
-        PrefixAccumulator acc = new PrefixAccumulator(3);
+        PrefixAccumulator<?> acc = new PrefixAccumulator<Void>(3);
         items.stream().forEach(acc::accumulate);
 //        x.add("http://dbpedia.org/resource/Litauen");
         System.out.println(acc.getValue());
@@ -282,7 +283,7 @@ public class PrefixAccumulator
         System.out.println(acc.getValue());
 
         Set<String> result = Stream.concat(items.stream(), Stream.of("lgd:foo"))
-                .collect(AggBuilder.naturalAccumulator(() -> new PrefixAccumulator(3)).asCollector());
+                .collect(AggBuilder.naturalAccumulator(() -> new PrefixAccumulator<Void>(3)).asCollector());
         System.out.println(result);
     }
 

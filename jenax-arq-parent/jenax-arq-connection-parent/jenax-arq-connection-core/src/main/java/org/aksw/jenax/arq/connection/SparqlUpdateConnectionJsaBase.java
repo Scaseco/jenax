@@ -31,6 +31,7 @@ public class SparqlUpdateConnectionJsaBase<T extends UpdateProcessorFactory>
 
     @Override
     public UpdateExecutionBuilder newUpdate() {
+        // UpdateProcessor up = updateProcessorFactory.createUpdateProcessor(null);
         throw new UnsupportedOperationException();
     }
 

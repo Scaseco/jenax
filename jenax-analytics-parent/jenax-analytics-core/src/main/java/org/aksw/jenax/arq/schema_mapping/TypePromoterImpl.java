@@ -31,9 +31,9 @@ import org.apache.jena.vocabulary.XSD;
 public class TypePromoterImpl
     implements TypePromoter
 {
-    protected Aggregator<String, Map<String, String>> typeAggregator;
+    protected Aggregator<String, ?, Map<String, String>> typeAggregator;
 
-    public TypePromoterImpl(Aggregator<String, Map<String, String>> typeAggregator) {
+    public TypePromoterImpl(Aggregator<String, ?, Map<String, String>> typeAggregator) {
         super();
         this.typeAggregator = typeAggregator;
     }
@@ -42,7 +42,7 @@ public class TypePromoterImpl
     @Override
     public Map<String, String> promoteTypes(Set<String> datatypeIris) {
 
-        Accumulator<String, Map<String, String>> acc = typeAggregator.createAccumulator();
+        Accumulator<String, ?, Map<String, String>> acc = typeAggregator.createAccumulator();
 
         for (String datatypeIri : datatypeIris) {
             acc.accumulate(datatypeIri);
@@ -90,7 +90,7 @@ public class TypePromoterImpl
         NaiveLCAFinder lcaFinder = new NaiveLCAFinder(graph, (n, g) -> gsf.apply(n, g).filter(m -> !cappingTypes.contains(m)));
 
         // The core aggregator is based on IRI Nodes - wrap it for String
-        Aggregator<String, Map<String, String>> typeAggregator =
+        Aggregator<String, ?, Map<String, String>> typeAggregator =
         AggBuilder.outputTransform(
             AggBuilder.inputTransform(NodeFactory::createURI,
                 AggLcaMap.create(lcaFinder::getLCA)),

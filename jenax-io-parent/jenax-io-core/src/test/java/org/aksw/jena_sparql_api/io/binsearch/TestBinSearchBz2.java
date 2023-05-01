@@ -17,13 +17,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.commons.cache.async.AsyncClaimingCacheImpl;
-import org.aksw.commons.cache.async.AsyncClaimingCacheImpl.Builder;
-import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.block.impl.BlockSources;
-import org.aksw.commons.io.block.impl.Page;
+import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
-import org.aksw.commons.io.block.impl.PageManagerOverDataStreamSource;
+import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
 import org.aksw.commons.io.input.ReadableChannel;
 import org.aksw.commons.io.input.ReadableChannelSource;
 import org.aksw.commons.io.input.ReadableChannelSources;
@@ -31,9 +27,6 @@ import org.aksw.commons.io.input.ReadableChannels;
 import org.aksw.commons.io.seekable.api.Seekable;
 import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.api.SeekableSources;
-import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
-import org.aksw.commons.io.seekable.impl.SeekableSourceOverDataStreamSource;
-import org.aksw.jena_sparql_api.io.binseach.BinarySearcher;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -45,12 +38,12 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.sys.JenaSystem;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -58,6 +51,9 @@ import com.google.common.primitives.Ints;
 
 
 public class TestBinSearchBz2 {
+
+    // TODO Needed again as of Jena 4.7.0-SNAPSHOT 2022-12-16
+    static { JenaSystem.init(); }
 
     private static Logger logger = LoggerFactory.getLogger(TestBinSearchBz2.class);
 

@@ -129,7 +129,7 @@ public class MainSparqlPath2 {
                 .create();
 
 
-        context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
+        // context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
         context.put(PropertyFunctionKShortestPaths.SPARQL_SERVICE, coreSparqlService);
 
         return result;
@@ -324,7 +324,16 @@ public class MainSparqlPath2 {
         return result;
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) {
+        String pathExprStr = "^<p1>|(^(<p2>/<p3>))";
+        Path path = PathParser.parse(pathExprStr, PrefixMapping.Extended);
+        Nfa<Integer, LabeledEdge<Integer, PredicateClass>> nfa = PathCompiler.compileToNfa(path);
+        System.out.println("FORWARD NFA for " + path);
+        printNfa(nfa);
+
+    }
+
+    public static void mainOld(String[] args) throws InterruptedException, IOException {
 
         PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
 

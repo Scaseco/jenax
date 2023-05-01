@@ -7,6 +7,8 @@ public abstract class SparqlStmtBase
 {
     private static final long serialVersionUID = 1L;
 
+    // The base URL used for parsing the originalString
+    protected String parserBase;
     protected String originalString;
     protected QueryParseException parseException;
 
@@ -18,9 +20,14 @@ public abstract class SparqlStmtBase
         this(originalString, null);
     }
 
-    public SparqlStmtBase(String originalString, QueryParseException parseException) {
+    public SparqlStmtBase(String originalString, String parserBase) {
+        this(originalString, parserBase, null);
+    }
+
+    public SparqlStmtBase(String originalString, String parserBase, QueryParseException parseException) {
         super();
         this.originalString = originalString;
+        this.parserBase = parserBase;
         this.parseException = parseException;
     }
 
@@ -31,7 +38,6 @@ public abstract class SparqlStmtBase
     public String getOriginalString() {
         return originalString;
     }
-
 
     @Override
     public QueryParseException getParseException() {
@@ -70,6 +76,8 @@ public abstract class SparqlStmtBase
                 + ((originalString == null) ? 0 : originalString.hashCode());
         result = prime * result
                 + ((parseException == null) ? 0 : parseException.hashCode());
+        result = prime * result
+                + ((parserBase == null) ? 0 : parserBase.hashCode());
         return result;
     }
 
@@ -92,6 +100,11 @@ public abstract class SparqlStmtBase
                 return false;
         } else if (!parseException.equals(other.parseException))
             return false;
+        if (parserBase == null) {
+            if (other.parserBase != null)
+                return false;
+        } else if (!parserBase.equals(other.parserBase))
+            return false;
         return true;
     }
 
@@ -100,10 +113,9 @@ public abstract class SparqlStmtBase
         String result = parseException == null
                 ? originalString
                 : "SparqlStmtBase [originalString=" + originalString
+                + ", parserBase=" + parserBase
                 + ", parseException=" + parseException + "]";
 
         return result;
     }
-
-
 }

@@ -40,13 +40,13 @@ public class E_JsonObject
                 }
 
                 Node v = value == null ? null : value.asNode();
-                JsonElement jsonValue = E_JsonConvert.convert(v, RDFDatatypeJson.INSTANCE.getGson());
+                JsonElement jsonValue = E_JsonConvert.convert(v, RDFDatatypeJson.get().getGson());
 
                 jsonObject.add(jsonKey, jsonValue);
             }
         }
 
-        NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonObject);
+        NodeValue result = JenaJsonUtils.makeNodeValue(jsonObject);
         return result;
     }
 

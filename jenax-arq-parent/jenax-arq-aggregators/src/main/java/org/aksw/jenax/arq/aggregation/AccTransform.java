@@ -4,12 +4,13 @@ import java.util.function.Function;
 
 import org.aksw.commons.collector.domain.Accumulator;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 public class AccTransform<I, O>
-    extends AccTransform2<Binding, I, O>
+    extends AccTransform2<Binding, FunctionEnv, I, O>
     implements Acc<O>
 {
-    public AccTransform(Accumulator<Binding, I> subAcc, Function<I, O> transform) {
+    public AccTransform(Accumulator<Binding, FunctionEnv, I> subAcc, Function<I, O> transform) {
         super(subAcc, transform);
     }
 }
