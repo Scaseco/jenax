@@ -9,6 +9,41 @@
 	<artifactId>jenax-bom</artifactId>
 	<version>4.8.0-1</version>
 	<packaging>pom</packaging>
+	
+	<name>Jena eXtension Components</name>
+	<description>Modular extensions for Apache Jena</description>
+	<url>https://github.com/Scaseco/jenax</url>
+
+	<issueManagement>
+		<url>https://github.com/Scaseco/jenax/issues</url>
+		<system>GitHub</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/Scaseco/jenax</url>
+		<connection>scm:git:git://github.com/Scaseco/jenax.git</connection>
+		<developerConnection>scm:git:git@github.com:Scaseco/jenax.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>Claus Stadler</name>
+			<url>http://aksw.org/ClausStadler</url>
+			<organization>AKSW</organization>
+			<organizationUrl>http://aksw.org</organizationUrl>
+		</developer>
+	</developers>
+
+	
 	<modules>
 		<module>..</module>
 	</modules>
