@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.algebra.transform.TransformUnionQuery2;
 import org.aksw.jena_sparql_api.algebra.utils.VirtualPartitionedQuery;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
@@ -22,8 +23,8 @@ import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.RdfDataPodBase;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.RdfDataPodHdt;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpCoalesce;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct;
@@ -88,7 +89,6 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.lang.SinkQuadsToDataset;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.algebra.TransformUnionQuery;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -113,6 +113,7 @@ public class OpExecutorDefault
 
 //	protected DataObjectRdfVisitor<RDFConnection> DataObjectRdfToConnection;
 
+    protected Dataset dataset;
     protected HttpResourceRepositoryFromFileSystemImpl repo;
 
     /**
@@ -136,11 +137,13 @@ public class OpExecutorDefault
 
 
     public OpExecutorDefault(
+            Dataset dataset,
             HttpResourceRepositoryFromFileSystem repo,
             TaskContext taskContext,
             Map<String, Node> execCtx,
             RDFFormat persistRdfFormat) {
         super();
+        this.dataset = dataset;
         // TODO HACK Avoid the down cast
         this.repo = (HttpResourceRepositoryFromFileSystemImpl)repo;
         this.taskContext = Objects.requireNonNull(taskContext);
@@ -169,8 +172,8 @@ public class OpExecutorDefault
 
     @Override
     public RdfDataPod visit(OpDataRefResource op) {
-        PlainDataRef dataRef = op.getDataRef();
-        RdfDataPod result = DataPods.fromDataRef(dataRef, repo, this);
+        DataRef dataRef = op.getDataRef();
+        RdfDataPod result = DataPods.fromDataRef(dataRef, dataset, repo, this);
         return result;
     }
 
@@ -195,12 +198,12 @@ public class OpExecutorDefault
 
         Op subOp = op.getSubOp();
         try (RdfDataPod subDataPod = subOp.accept(this)) {
-            try(RDFConnection tmpConn = subDataPod.openConnection()) {
+            try(RDFConnection tmpConn = subDataPod.getConnection()) {
 
                 // FIXME This transformation should be represented explicitly in the RDF model
                 RDFConnection conn = RDFConnectionUtils.enableRelativeIrisInQueryResults(tmpConn);
 
-            	
+
                 Collection<String> queryStrs = op.getQueryStrings();
 
                 Model model = ModelFactory.createDefaultModel();
@@ -216,7 +219,7 @@ public class OpExecutorDefault
 
                     // TODO Check whether substitution is needed
 //					logger.info("Query before substitution: " + queryStr);
-                    logger.info("Query after substitution: " + effQuery);
+                    logger.info("Query after env-var substitution: " + effQuery);
 
 //					Model contrib = conn.queryConstruct(queryStr);
                     Model contrib = conn.queryConstruct(effQuery);
@@ -236,7 +239,7 @@ public class OpExecutorDefault
     public RdfDataPod visit(OpUpdateRequest op) {
         Op subOp = op.getSubOp();
         RdfDataPod subDataPod = subOp.accept(this);
-        try(RDFConnection conn = subDataPod.openConnection()) {
+        try(RDFConnection conn = subDataPod.getConnection()) {
 
             for(String updateRequestStr : op.getUpdateRequests()) {
                 conn.update(updateRequestStr);
@@ -253,7 +256,7 @@ public class OpExecutorDefault
         Model model = ModelFactory.createDefaultModel();
         for(Op subOp : subOps) {
             try(RdfDataPod subDataPod = subOp.accept(this)) {
-                try(RDFConnection conn = subDataPod.openConnection()) {
+                try(RDFConnection conn = subDataPod.getConnection()) {
                     Model contribModel = conn.queryConstruct("CONSTRUCT WHERE { ?s ?p ?o }");
                     model.add(contribModel);
                 }
@@ -411,7 +414,7 @@ public class OpExecutorDefault
         for(Op subOp : subOps) {
             result = subOp.accept(this);
 
-            try(RDFConnection conn = result.openConnection()) {
+            try(RDFConnection conn = result.getConnection()) {
                 Model contribModel = conn.queryConstruct("CONSTRUCT WHERE { ?s ?p ?o } LIMIT 1");
                 if(!contribModel.isEmpty()) {
                     break;
@@ -502,7 +505,7 @@ public class OpExecutorDefault
         }
 
 
-        try(RDFConnection conn = result.openConnection()) {
+        try(RDFConnection conn = result.getConnection()) {
             String selVarN = selVarName;
             RDFNode node = SparqlRx.execSelect(conn, queryStr)
                 .map(qs -> qs.get(selVarN))
@@ -611,7 +614,7 @@ public class OpExecutorDefault
         RdfDataPod result = new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                RDFConnection raw = subPod.openConnection();
+                RDFConnection raw = subPod.getConnection();
                 RDFConnection result = RDFConnectionBuilder.from(raw)
                     .addQueryTransform(q -> VirtualPartitionedQuery.rewrite(views, q))
                     .getConnection();
@@ -654,14 +657,14 @@ public class OpExecutorDefault
         SparqlStmtParser parser = SparqlStmtParser.wrapWithOptimizePrefixes(
                 SparqlStmtParserImpl.create(DefaultPrefixes.get()));
 
-        try(RDFConnection conn = result.openConnection()) {
+        try(RDFConnection conn = result.getConnection()) {
             List<String> stmts = op.getStmts();
             for(String stmt : stmts) {
                 SparqlStmt before = parser.apply(stmt);
                 SparqlStmt after = SparqlStmtUtils.applyNodeTransform(before, this::substNode);
 
 
-                SparqlStmtUtils.process(conn, after, sink);
+                SparqlStmtUtils.process(conn, after, null, sink);
             }
         } finally {
             tmp.close();
@@ -676,7 +679,7 @@ public class OpExecutorDefault
 
     @Override
     public RdfDataPod visit(OpJobInstance op) {
-        OpExecutorDefault subExecutor = new OpExecutorDefault(repo, taskContext,
+        OpExecutorDefault subExecutor = new OpExecutorDefault(dataset, repo, taskContext,
                 new LinkedHashMap<>(), persistRdfFormat);
 
         JobInstance ji = op.getJobInstance();
@@ -695,8 +698,8 @@ public class OpExecutorDefault
                 throw new RuntimeException("Neither job nor reference to a job set on job instance " + ji);
             }
 
-            DataRef dataRef = jobRef.getDataRef();
-            RdfDataPod jobDataPod = DataPods.fromDataRef(dataRef, repo, this);
+            RdfDataRef dataRef = jobRef.getDataRef();
+            RdfDataPod jobDataPod = DataPods.fromDataRef(dataRef, dataset, repo, this);
             Model jobModel = jobDataPod.getModel();
 
             Node jobNode = jobRef.getNode();
@@ -710,7 +713,7 @@ public class OpExecutorDefault
             logger.warn("Both job and jobRef provided; using the former");
         }
 
-        Op subOp = job.getOp();
+        Op subOp = Objects.requireNonNull(job.getOp(), "Job does not have an operation set");
 
         RdfDataPod result = subOp.accept(subExecutor);
         return result;
@@ -732,9 +735,9 @@ public class OpExecutorDefault
         RdfDataPod result = new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                RDFConnection raw = subPod.openConnection();
+                RDFConnection raw = subPod.getConnection();
                 RDFConnection result = RDFConnectionBuilder.from(raw)
-                    .addQueryTransform(q -> QueryUtils.applyOpTransform(q, TransformUnionQuery::transform))
+                    .addQueryTransform(q -> QueryUtils.applyOpTransform(q, TransformUnionQuery2::transform))
                     .getConnection();
                 return result;
             }

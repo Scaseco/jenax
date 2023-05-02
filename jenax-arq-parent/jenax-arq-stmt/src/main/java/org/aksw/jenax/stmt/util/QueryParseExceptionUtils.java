@@ -7,7 +7,7 @@ import org.apache.jena.ext.com.google.common.collect.ComparisonChain;
 import org.apache.jena.query.QueryParseException;
 
 public class QueryParseExceptionUtils {
-    public static final Pattern posPattern = Pattern.compile("(line )(\\d+)(, column )(\\d+)");
+    public static final Pattern posPattern = Pattern.compile("(line )(\\d+)(, column )(\\d+)", Pattern.CASE_INSENSITIVE);
 
     /**
      * Replace 0 values in line and/or column with 1

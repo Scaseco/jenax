@@ -17,11 +17,11 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryBasic;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.RDFNode;
 
 import com.google.common.collect.Range;
@@ -32,10 +32,10 @@ import io.reactivex.rxjava3.core.Single;
 public class ListServiceEntityQuery
     implements ListService<EntityBaseQuery, RDFNode>
 {
-    protected Function<? super Query, ? extends QueryExecution> qef;
+    protected QueryExecutionFactoryQuery qef;
     protected AttributeGraphFragment attributePart;
 
-    public ListServiceEntityQuery(Function<? super Query, ? extends QueryExecution> qef, AttributeGraphFragment attributePart) {
+    public ListServiceEntityQuery(QueryExecutionFactoryQuery qef, AttributeGraphFragment attributePart) {
         super();
         this.qef = qef;
         this.attributePart = attributePart;

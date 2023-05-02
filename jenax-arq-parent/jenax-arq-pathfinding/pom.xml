@@ -3,90 +3,77 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<artifactId>jenax-arq-pathfinding</artifactId>
 	<packaging>jar</packaging>
-
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>4.4.0-2</version>
+		<version>4.8.0-1</version>
 	</parent>
-
 	<dependencies>
 		<!-- Self Dependencies -->
 		<!-- <dependency> -->
 		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
 		<!-- <artifactId>jena-sparql-api-jgrapht</artifactId> -->
 		<!-- </dependency> -->
-
 		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>jena-jgrapht-bindings</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-jgrapht-bindings</artifactId>
 		</dependency>
-
-
 		<!-- Override guava version drawn in by jgrapht-bindings -->
-                <dependency>
-                	<groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                </dependency>
-
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 		<!-- Override the arq version from the jgrapht-bindings -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 		</dependency>
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.aksw.jenax</groupId> -->
-<!-- 			<artifactId>jenax-arq-connection-core</artifactId> -->
-<!-- 		</dependency> -->
-
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.aksw.jenax</groupId> -->
+		<!-- 			<artifactId>jenax-arq-connection-core</artifactId> -->
+		<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-algebra</artifactId>
 		</dependency>
-
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.aksw.jenax</groupId> -->
-<!-- 			<artifactId>jenax-arq-relations</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- 		<dependency> -->
+		<!-- 			<groupId>org.aksw.jenax</groupId> -->
+		<!-- 			<artifactId>jenax-arq-relations</artifactId> -->
+		<!-- 		</dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-rx-dataaccess</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-datashapes</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-plugins-datatypes</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.aksw.gson</groupId>
 			<artifactId>gson-utils-core</artifactId>
 		</dependency>
-
 		<!-- <dependency> -->
 		<!-- <groupId>org.aksw.jena-sparql-api</groupId> -->
 		<!-- <artifactId>jena-sparql-api-web</artifactId> -->
 		<!-- <scope>test</scope> -->
 		<!-- </dependency> -->
-
-
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<!-- <dependency> <groupId>net.sourceforge.owlapi</groupId> <artifactId>owlapi-distribution</artifactId> 
 			</dependency> -->
 	</dependencies>

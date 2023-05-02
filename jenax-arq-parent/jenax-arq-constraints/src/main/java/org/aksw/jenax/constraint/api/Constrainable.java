@@ -6,7 +6,7 @@ public interface Constrainable
 {
     Constrainable clone();
 
-    Constrainable stateIntersection(ValueSpace valueSpace);
-    Constrainable stateUnion(ValueSpace valueSpace);
+    Constrainable stateIntersection(VSpace valueSpace);
+    Constrainable stateUnion(VSpace valueSpace);
     boolean isConflicting();
 }

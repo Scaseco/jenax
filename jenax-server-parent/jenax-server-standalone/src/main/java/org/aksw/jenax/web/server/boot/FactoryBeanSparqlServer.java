@@ -14,6 +14,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.web.frontend.ServerUtils;
 import org.aksw.jenax.web.servlet.RdfConnectionFactory;
 import org.apache.jena.query.Syntax;
+import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Server;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -87,6 +88,16 @@ public class FactoryBeanSparqlServer {
         beanFactory.registerSingleton("sparqlStmtParser", sparqlStmtParser);
 
         Server result = ServerUtils.startServer(port, new WebAppInitializerSparqlService(rootContext));
+
+//        WebAppContext webAppContext = (WebAppContext)result.getHandler();
+//        webAppContext.getSessionHandler().setMaxInactiveInterval(90 * 24 * 60 * 60);
+
+		for (org.eclipse.jetty.server.Connector connector : result.getConnectors()) {
+			if (connector instanceof AbstractConnector) {
+				((AbstractConnector) connector).setIdleTimeout(90 * 24 * 60 * 60);
+			}
+		}
+
         return result;
     }
 

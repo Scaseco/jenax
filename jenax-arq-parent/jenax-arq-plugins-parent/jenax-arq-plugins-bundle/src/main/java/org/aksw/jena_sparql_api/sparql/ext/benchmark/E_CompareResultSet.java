@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.benchmark;
 
 import java.io.ByteArrayInputStream;
 
-import org.aksw.jena_sparql_api.sparql.ext.json.E_JsonPath;
+import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
@@ -75,7 +75,7 @@ public class E_CompareResultSet
             json.addProperty("expectedSize", relevantSize);
             json.addProperty("actualSize", retrievedSize);
 
-            result = NodeValue.makeNode(E_JsonPath.jsonToNode(json));
+            result = JenaJsonUtils.convertJsonOrValueToNodeValue(json);
 
         } else {
             throw new ExprEvalException("At least one of the arguments could not be parsed as a SPARQL result set");

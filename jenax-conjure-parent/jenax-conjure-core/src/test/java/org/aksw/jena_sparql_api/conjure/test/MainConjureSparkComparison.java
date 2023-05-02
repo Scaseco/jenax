@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.aksw.dcat.jena.domain.api.DcatUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
@@ -106,7 +106,7 @@ public class MainConjureSparkComparison {
 
 
         HttpResourceRepositoryFromFileSystem repo = HttpResourceRepositoryFromFileSystemImpl.createDefault();
-        OpExecutorDefault executor = new OpExecutorDefault(repo, null /* will cause NPE */, new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
+        OpExecutorDefault executor = new OpExecutorDefault(null, repo, null /* will cause NPE */, new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
 
         logger.info("Retrieved " + dcatRecords.size() + " urls for processing " + dcatRecords);
 
@@ -116,7 +116,7 @@ public class MainConjureSparkComparison {
             if(url != null) {
 
                 // Create a copy of the workflow spec and substitute the variables
-                Map<String, Op> map = Collections.singletonMap("dataRef", OpDataRefResource.from(model, DataRefUrl.create(model, url)));
+                Map<String, Op> map = Collections.singletonMap("dataRef", OpDataRefResource.from(model, RdfDataRefUrl.create(model, url)));
                 Op effectiveWorkflow = OpUtils.copyWithSubstitution(opWorkflow, map::get);
 
 
@@ -125,7 +125,7 @@ public class MainConjureSparkComparison {
                 //RDFDataMgr.write(System.err, effectiveWorkflow.getModel(), RDFFormat.TURTLE_PRETTY);
 
                 try(RdfDataPod data = effectiveWorkflow.accept(executor)) {
-                    try(RDFConnection conn = data.openConnection()) {
+                    try(RDFConnection conn = data.getConnection()) {
                         // Print out the data that is the process result
                         Model rmodel = conn.queryConstruct("CONSTRUCT WHERE { ?s ?p ?o }");
 

@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
+import java.util.Iterator;
+
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.jena.sparql.expr.ExprEvalException;
@@ -10,87 +10,74 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 /**
  * Use the property function ?s xml:unnest (xpathexpr ?o) for dealing with (/iterating) NodeList
  * Use the function xml:path(?doc, pathexpr) to extract individual values
- * 
+ *
  * @author raven Mar 2, 2018
  *
  */
 public class E_XPath
 	extends FunctionBase2
-{	
+{
 	private static final Logger logger = LoggerFactory.getLogger(E_XPath.class);
 
-	
-	protected XPath xPath;
+	protected XPathFactory xPathFactory;
 
 	public E_XPath() {
-		 this(XPathFactory.newInstance().newXPath());
+		this(XPathFactory.newInstance());
 	}
-	
-	public E_XPath(XPath xPath) {
-		 this.xPath = xPath;
+
+	public E_XPath(XPathFactory xPathFactory) {
+		 this.xPathFactory = xPathFactory;
 	}
-	
 
     @Override
     public NodeValue exec(NodeValue nv, NodeValue query) {
         NodeValue result;
 
-        // TODO If a node is of type string, we could still try to parse it as xml for convenience
-        
-        Object obj = nv.asNode().getLiteralValue();
-    	if(obj instanceof Node) {
-	    	Node xml = (Node)obj;
-	    	// If 'xml' is a Document with a single node, use the node as the context for the xpath evaluation
-	    	// Reason: Nodes matched by xml:unnest will be wrapped into new (invisible) XML documents
-	    	// We would expect to be able to run xpath expressions directly on the
-	    	// result nodes of the unnesting - without having to consider the invisible document root node 
-	    	if(xml instanceof Document && xml.getChildNodes().getLength() == 1) {
-	    		xml = xml.getFirstChild();
-	    	}
-	    	
-	    	//System.out.println(XmlUtils.toString(xml));
+        org.w3c.dom.Node xmlNode = JenaXmlUtils.extractXmlNode(nv);
 
-	        if(query.isString() && xml != null) {
-	        	String queryStr = query.getString();	        	
-	        		        	
-	            try {
-	            	XPathExpression expr = xPath.compile(queryStr);
-	            	Object tmp = expr.evaluate(xml, XPathConstants.STRING);
+    	if (xmlNode != null) {
+	        if(query.isString()) {
+	        	String queryStr = query.getString();
 
-//	            	if(tmp instanceof NodeList) {
-//	            		NodeList nodes = (NodeList)tmp;
-//	            		for(int i = 0; i < nodes.getLength(); ++i) {
-//	            			Node node = nodes.item(i);
-//	            			//System.out.println("" + node);
-//	            		}
-//	            	}
-	            	
-		        	//Object tmp = xPath.evaluate(queryStr, xml, XPathConstants.STRING);
-		        	// FIXME Hack
-		        	result = NodeValue.makeString("" + tmp);
-	            } catch(Exception e) {
-	                logger.warn(e.getLocalizedMessage());
-	                result = null;
-	            }
+            	Iterator<org.apache.jena.graph.Node> nodes;
+				try {
+					nodes = JenaXmlUtils.evalXPath(xPathFactory, queryStr, xmlNode);
+				} catch (XPathExpressionException e) {
+					logger.warn("XPath evaluation failed", e);
+					throw new ExprEvalException("XPath evaluation failed");
+				}
+
+            	// Ensure that hasNext() is called on the iterator due to misbehavior:
+            	// Guava's getOnlyElement() relies on a NoSuchElement exception when calling next() on an empty iterator
+            	// But at least one jena iterator returns null instead
+            	if (nodes.hasNext()) {
+            		org.apache.jena.graph.Node node = nodes.next();
+
+            		if (nodes.hasNext()) {
+            			throw new ExprEvalException("XPath " + queryStr + " evaluated to multiple results");
+            		}
+
+	            	result = NodeValue.makeNode(node);
+            	} else {
+            		throw new ExprEvalException("XPath " + queryStr + " did not match any results");
+            	}
+
 	        } else {
-	        	result = null; //Expr.NONE.getConstant();
+        		throw new ExprEvalException("XPath query argument is not a string: " + query);
 	        }
         } else {
-            result = null; //Expr.NONE.getConstant();
+    		throw new ExprEvalException("XPath xml node argument is not an xml node ");
         }
-    	//System.out.println(result);
 
     	if (result == null) {
     		throw new ExprEvalException("xpath evaluation yeld null result");
     	}
-    	
+
         return result;
     }
-
 }
+

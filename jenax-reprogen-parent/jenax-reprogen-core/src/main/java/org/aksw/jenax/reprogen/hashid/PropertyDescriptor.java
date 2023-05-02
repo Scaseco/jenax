@@ -58,6 +58,7 @@ public class PropertyDescriptor {
 
     public PropertyDescriptor(ClassDescriptor classDescriptor, P_Path0 path) {
         super();
+
         this.classDescriptor = classDescriptor;
         this.path = path;
     }

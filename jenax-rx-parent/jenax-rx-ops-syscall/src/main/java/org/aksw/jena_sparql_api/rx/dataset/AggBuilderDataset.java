@@ -12,11 +12,12 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 public class AggBuilderDataset
 {
     /** Aggregate all quads into a single dataset */
-    public static ParallelAggregator<Quad, Dataset, ?> quadsToDataset(SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier) {
+    public static ParallelAggregator<Quad, FunctionEnv, Dataset, ?> quadsToDataset(SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier) {
         return AggBuilder.fromCollector(
                 () -> (DatasetGraph)datasetGraphSupplier.get(),
                 DatasetGraph::add,
@@ -25,7 +26,7 @@ public class AggBuilderDataset
     }
 
     /** Group quads by a key (typically the graph component) and map each to its own dataset */
-    public static <K> ParallelAggregator<Quad, Map<K, Dataset>, ?> groupQuadsToDatasetCore(
+    public static <K> ParallelAggregator<Quad, FunctionEnv, Map<K, Dataset>, ?> groupQuadsToDatasetCore(
             SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier,
             SerializableFunction<? super Quad, K> keyMapper) {
 

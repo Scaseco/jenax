@@ -1,6 +1,13 @@
+---
+title: AnyResource
+parent: ARQ Extensions
+nav_order: 40
+---
+
 ## AnyResource
 
-Introduces a Resource implementation that allows for literals in subject positions.
+This tiny module introduces a `Resource` implementation that allows for wrapping even literals with the `Resource` API.
+As a consequence, literals can be described with properties which means that those described literals will appear in subject positions of the RDF graph.
 This is useful in application development to annotate arbitrary nodes with presentation information.
 
 ### Maven
@@ -9,7 +16,6 @@ This is useful in application development to annotate arbitrary nodes with prese
 <dependency>
     <groupId>org.aksw.jena-sparql-api</groupId>
     <artifactId>jena-sparql-api-any-resource</artifactId>
-    <version><!-- Choose your version --></version>
 </dependency>
 ```
 

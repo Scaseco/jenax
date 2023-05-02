@@ -64,8 +64,12 @@ public class QueryExecutionFactoryDataset
             Log.warn(QueryExecutionFactory.class, "Failed to find a QueryEngineFactory for query: "+query) ;
             return null ;
         }
+
+        // Merge the contexts
+        Context cxt = Context.setupContextForDataset(context, dsg);
+
         //dataset.begin(ReadWrite.WRITE);
-        QueryExec qExec = new QueryExecDataset(query, query.toString(), dsg, context, f, -1, null, -1, null, null) {};
+        QueryExec qExec = new QueryExecDataset(query, query.toString(), dsg, cxt, f, -1, null, -1, null, null) {};
         QueryExecution result = QueryExecutionAdapter.adapt(qExec);
         // TODO We shouldn't wrap with txn here
         //QueryExecution result = QueryExecution.a// new QueryExecutionDecoratorTxn<QueryExecution>(tmp, dsg);

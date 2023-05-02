@@ -17,9 +17,9 @@ import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
 import org.aksw.jena_sparql_api.lookup.MapServiceSparqlQuery;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.path.Path;
@@ -83,7 +83,7 @@ public class ShapedProperty {
         ResourceCache resourceCache = src.getResourceCache();
 //        ResourceState rs = resourceCache.get(src.getSourceNode());
         Set<Node> cachedValues = getCachedValues();
-        SparqlQueryConnection conn = src.getConnection();
+        QueryExecutionFactoryQuery conn = src.getConnection();
 
 
         MapService<Concept, Node, Table> core;

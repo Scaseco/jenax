@@ -2,9 +2,9 @@ package org.aksw.jenax.arq.util.quad;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -205,7 +205,7 @@ public class QuadPatternUtils {
 
 
     public static Set<Var> getVarsMentioned(Iterable<? extends Quad> quadPattern) {
-        Set<Var> result = new HashSet<Var>();
+        Set<Var> result = new LinkedHashSet<Var>();
         for (Quad quad : quadPattern) {
             Set<Var> tmp = QuadUtils.getVarsMentioned(quad);
             result.addAll(tmp);
@@ -214,4 +214,15 @@ public class QuadPatternUtils {
         return result;
     }
 
+    /** Returns true iff all quads in the pattern are in the default graph */
+    public static boolean isDefaultGraphOnly(Iterable<? extends Quad> quadPattern) {
+    	boolean result = true;
+    	for (Quad quad : quadPattern) {
+    		if (!QuadUtils.isDefaultGraph(quad)) {
+    			result = false;
+    			break;
+    		}
+    	}
+    	return result;
+    }
 }

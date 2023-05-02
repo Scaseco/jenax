@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import org.aksw.commons.collections.SetUtils;
 
-@Deprecated //Use from a better location (aksw-commons?)
+@Deprecated //Use PolaritySet from aksw-commons-utils
 public class ValueSet<T>
     implements Predicate<T>
 {

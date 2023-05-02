@@ -6,11 +6,11 @@ import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.table.TableN;
 import org.apache.jena.sparql.core.Var;
@@ -36,7 +36,7 @@ public class MapPaginatorSparqlQuery
     protected boolean forceSubQuery;
 
 
-    public MapPaginatorSparqlQuery(SparqlQueryConnection qef, Concept filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
+    public MapPaginatorSparqlQuery(QueryExecutionFactoryQuery qef, Concept filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
         super(qef, filterConcept, isLeftJoin);
         this.attrQuery = attrQuery;
         this.attrVar = attrVar;
@@ -68,7 +68,7 @@ public class MapPaginatorSparqlQuery
 //            console.log('ROW ' + rowLimit);
         }
 
-        Single<Range<Long>> result = SparqlRx.fetchCountQuery(qef::query, countConcept.asQuery(), itemLimit, null); //rowLimit
+        Single<Range<Long>> result = SparqlRx.fetchCountQuery(qef, countConcept.asQuery(), itemLimit, null); //rowLimit
         return result;
     }
 
@@ -115,7 +115,7 @@ public class MapPaginatorSparqlQuery
 //      Node[] prior = {null};
 //      PublishProcessor<Node> boundaryIndicator = PublishProcessor.create();
 
-      return SparqlRx.execSelectRaw(() -> qef.query(query))
+      return SparqlRx.execSelectRaw(qef, query)
               .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(
                       b -> b.get(attrVar),
                       groupKey -> new TableN(),

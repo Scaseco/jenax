@@ -21,11 +21,11 @@ public class E_JsonArray
         for (int i = 0; i < argCount; ++i) {
             NodeValue nodeValue = args.get(i);
             Node node = nodeValue == null ? null : nodeValue.asNode();
-            JsonElement jsonElement = E_JsonConvert.convert(node, RDFDatatypeJson.INSTANCE.getGson());
+            JsonElement jsonElement = E_JsonConvert.convert(node, RDFDatatypeJson.get().getGson());
             jsonArray.add(jsonElement);
         }
 
-        NodeValue result = RDFDatatypeJson.jsonToNodeValue(jsonArray);
+        NodeValue result = JenaJsonUtils.makeNodeValue(jsonArray);
         return result;
     }
 

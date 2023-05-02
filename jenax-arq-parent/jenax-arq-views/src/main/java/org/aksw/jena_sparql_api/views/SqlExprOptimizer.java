@@ -28,6 +28,7 @@ import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.sse.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,13 +64,13 @@ class InverseFunctionManagerImpl
     public InverseFunctionManagerImpl() {
 
         // urlEncode^-1 = urlDecode
-        inverseFactory.put(SparqlifyConstants.urlEncode,
+        inverseFactory.put(Tags.tagStrEncodeForURI,
                 (arg) -> new E_Function(SparqlifyConstants.urlDecode, new ExprList(arg)));
 
 
         // urlDecode^-1 = urlEncode
         inverseFactory.put(SparqlifyConstants.urlDecode,
-                (arg) -> new E_Function(SparqlifyConstants.urlEncode, new ExprList(arg)));
+                (arg) -> new E_Function(Tags.tagStrEncodeForURI, new ExprList(arg)));
 
     }
 

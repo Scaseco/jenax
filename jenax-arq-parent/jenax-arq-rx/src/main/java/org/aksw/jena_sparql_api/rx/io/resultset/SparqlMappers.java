@@ -59,7 +59,7 @@ public class SparqlMappers {
     public static Function<RDFConnection, ResultSetRx> createProcessorResultSetRx(List<SparqlStmt> stmts, SPARQLResultExVisitor<?> sparqlResultExVisitor) {
         List<Var> vars = SparqlStmtUtils.getUnionProjectVars(stmts);
         Function<RDFConnection, Flowable<Binding>> mapper = createMapperBinding(stmts, sparqlResultExVisitor);
-        return conn -> new ResultSetRxImpl(vars, mapper.apply(conn));
+        return conn -> new ResultSetRxImpl(null, vars, mapper.apply(conn));
     }
 
 
@@ -105,7 +105,7 @@ public class SparqlMappers {
      * @throws Exception
      */
     public static <T> Flowable<T> fallbackToVisitor(RDFConnection conn, SparqlStmt stmt, SPARQLResultExVisitor<?> sparqlResultVisitor) throws Exception {
-        try (SPARQLResultEx sr = SparqlStmtUtils.execAny(conn, stmt)) {
+        try (SPARQLResultEx sr = SparqlStmtUtils.execAny(conn, stmt, null)) {
             if (sparqlResultVisitor != null) {
                 sparqlResultVisitor.forwardEx(sr);
             }
@@ -217,7 +217,7 @@ public class SparqlMappers {
             SPARQLResultExVisitor<?> sparqlResultVisitor,
             Supplier<? extends DatasetGraph> datasetGraphSupplier) {
 
-        ParallelAggregator<Quad, Map<Node, Dataset>, ?> agg = AggBuilderDataset.groupQuadsToDatasetCore(datasetGraphSupplier::get, Quad::getGraph);
+        ParallelAggregator<Quad, ?, Map<Node, Dataset>, ?> agg = AggBuilderDataset.groupQuadsToDatasetCore(datasetGraphSupplier::get, Quad::getGraph);
 
         return createMapperQuad(stmts, sparqlResultVisitor)
                 .andThen(quadFlow -> {

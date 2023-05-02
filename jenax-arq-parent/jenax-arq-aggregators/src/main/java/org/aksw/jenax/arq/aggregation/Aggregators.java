@@ -26,10 +26,10 @@ public class Aggregators
      * @param aggregator The backing aggregator
      * @return
      */
-    public static <T, C extends Collection<T>> Collector<T, Accumulator<T, C>, C> createCollector(
-            Aggregator<T, C> aggregator) {
+    public static <T, E, C extends Collection<T>> Collector<T, Accumulator<T, E, C>, C> createCollector(
+            Aggregator<T, E, C> aggregator) {
 
-        Collector<T, Accumulator<T, C>, C> result = Collector.of(
+        Collector<T, Accumulator<T, E, C>, C> result = Collector.of(
                 aggregator::createAccumulator,
                 Accumulator::accumulate,
                 (needle, haystack) -> combineAccumulators(needle, haystack, x -> x, x -> x),
@@ -42,12 +42,12 @@ public class Aggregators
      * {@link #createCollector(Aggregator)} but returning the raw accumulator rather than
      * finishing it to its value
      */
-    public static <T, C extends Collection<T>> Collector<T, Accumulator<T, C>, Accumulator<T, C>>
+    public static <T, E, C extends Collection<T>> Collector<T, Accumulator<T, E, C>, Accumulator<T, E, C>>
         createCollectorRaw(
-            Aggregator<T, C> aggregator,
-            UnaryOperator<Accumulator<T, C>> accumulatorCloner) {
+            Aggregator<T, E, C> aggregator,
+            UnaryOperator<Accumulator<T, E, C>> accumulatorCloner) {
 
-        Collector<T, Accumulator<T, C>, Accumulator<T, C>> result = Collector.of(
+        Collector<T, Accumulator<T, E, C>, Accumulator<T, E, C>> result = Collector.of(
                 aggregator::createAccumulator,
                 Accumulator::accumulate,
                 (needle, haystack) -> combineAccumulators(needle, haystack, accumulatorCloner, x -> x));
@@ -56,13 +56,13 @@ public class Aggregators
     }
 
 
-    public static <T, V, C extends Collection<V>> Collector<T, Accumulator<T, C>, Accumulator<T, C>>
+    public static <T, E, V, C extends Collection<V>> Collector<T, Accumulator<T, E, C>, Accumulator<T, E, C>>
         createCollectorRaw(
-            Aggregator<T, C> aggregator,
+            Aggregator<T, E, C> aggregator,
             Function<? super V, ? extends T> valueToItem,
-            UnaryOperator<Accumulator<T, C>> accumulatorCloner) {
+            UnaryOperator<Accumulator<T, E, C>> accumulatorCloner) {
 
-        Collector<T, Accumulator<T, C>, Accumulator<T, C>> result = Collector.of(
+        Collector<T, Accumulator<T, E, C>, Accumulator<T, E, C>> result = Collector.of(
                 aggregator::createAccumulator,
                 Accumulator::accumulate,
                 (needle, haystack) -> combineAccumulators(needle, haystack, accumulatorCloner, valueToItem));
@@ -80,17 +80,17 @@ public class Aggregators
      * @param accumulatorCloner The cloner; may return its argument for in place changes.
      * @return
      */
-    public static <T, V, C extends Collection<V>> Accumulator<T, C> combineAccumulators(
-            Accumulator<T, C> needle,
-            Accumulator<T, C> haystack,
-            UnaryOperator<Accumulator<T, C>> accumulatorCloner,
+    public static <T, E, V, C extends Collection<V>> Accumulator<T, E, C> combineAccumulators(
+            Accumulator<T, E, C> needle,
+            Accumulator<T, E, C> haystack,
+            UnaryOperator<Accumulator<T, E, C>> accumulatorCloner,
             Function<? super V, ? extends T> valueToItem) {
         if (needle.getValue().size() > haystack.getValue().size()) {
             // Swap
-            Accumulator<T, C> tmp = needle; needle = haystack; haystack = tmp;
+            Accumulator<T, E, C> tmp = needle; needle = haystack; haystack = tmp;
         }
 
-        Accumulator<T, C> result = accumulatorCloner.apply(haystack);
+        Accumulator<T, E, C> result = accumulatorCloner.apply(haystack);
         for (V value : needle.getValue()) {
             T reductionItem = valueToItem.apply(value);
             result.accumulate(reductionItem);

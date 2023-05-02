@@ -10,14 +10,30 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>4.4.0-2</version>
+		<version>4.8.0-1</version>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-csvw</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-models-csvw-univocity</artifactId>
+		</dependency>
+
 		<!-- Google polyline encoder/decoder for sparql extension functions -->
 		<dependency>
 			<groupId>com.google.maps</groupId>
 			<artifactId>google-maps-services</artifactId>
+		</dependency>
+
+		<!-- dbscan -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
 		</dependency>
 
 		<!-- Override version of tika -->
@@ -30,6 +46,12 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
+		<!-- javascript -->
+		<dependency>
+			<groupId>org.openjdk.nashorn</groupId>
+			<artifactId>nashorn-core</artifactId>
+			<version>15.4</version>
+		</dependency>
 
 		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
 			rid of this dep -->
@@ -44,10 +66,25 @@
 			<artifactId>jenax-arq-plugins-datatypes</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-pathfinding</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-dcat-api</artifactId>
+		</dependency>
+
 		<!-- Used for cutsom Aggregators (should probably go to jsa utls) -->
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-collectors</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-utils-gson</artifactId>
 		</dependency>
 
 		<!-- Used for ResultSet comparison -->
@@ -61,6 +98,16 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-plugins-service-vfs</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-fromasfilter</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-sameas</artifactId>
 		</dependency>
 
 		<!-- Used for binary search via the service clause -->

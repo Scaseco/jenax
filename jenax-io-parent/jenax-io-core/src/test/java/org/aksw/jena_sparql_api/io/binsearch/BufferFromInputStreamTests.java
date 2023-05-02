@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.io.binseach.BufferOverInputStream;
-import org.aksw.jena_sparql_api.io.binseach.ReadableByteChannelBase;
+import org.aksw.commons.io.hadoop.binseach.bz2.BufferOverInputStream;
+import org.aksw.commons.io.hadoop.binseach.bz2.ReadableByteChannelBase;
 import org.junit.Test;
 
 import com.github.jsonldjava.shaded.com.google.common.base.Stopwatch;

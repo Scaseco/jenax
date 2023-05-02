@@ -1,3 +1,10 @@
+---
+title: Function Extensions
+parent: RDF/SPARQL Plugins
+has_children: false
+nav_order: 20
+---
+
 ## SPARQL extensions for heterogeneous data
 
 This module enhances Jena's SPARQL engine with additional datatypes, functions and property functions for accessing and processing JSON, CSV and XML data.
@@ -7,13 +14,10 @@ provides appropriate metadata which gets picked up by Jena's plugin system.
 
 ```xml
 <dependency>
-    <artifactId>org.aksw.jena-sparql-api</artifactId>
-    <groupId>jena-sparql-api-sparql-ext</groupId>
-    <version><!-- Check link below for latest version--></version>
+    <artifactId>org.aksw.jenax</artifactId>
+    <groupId>jenax-arq-plugins-bundle</groupId>
 </dependency>
 ```
-Check [here](http://search.maven.org/#search|ga|1|a%3A%22jena-sparql-api-sparql-ext%22) for the latest artifact version.
-
 
 ## Data formats
 
@@ -34,6 +38,7 @@ Note, that while there is streaming support for the CSV format, at present there
 Please refer to the [JsonPath](https://github.com/json-path/JsonPath) project GitHub page for path expression examples and the specification.
 
 #### JSON <-> SPARQL datatype mapping
+
 | JSON        | RDF         |
 | ----------- | ----------- |
 | string      | xsd:string  |

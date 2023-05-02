@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jena_sparql_api.concepts.RelationJoiner;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
@@ -47,4 +48,7 @@ public interface UnaryRelation
         return result;
     }
 
+    default RelationJoiner join() {
+        return joinOn(getVar());
+    }
 }

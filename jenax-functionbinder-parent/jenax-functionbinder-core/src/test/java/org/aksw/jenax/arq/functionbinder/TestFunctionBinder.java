@@ -4,10 +4,14 @@ import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.sys.JenaSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class TestFunctionBinder {
+
+    // TODO Needed again as of Jena 4.7.0-SNAPSHOT 2022-12-16
+    static { JenaSystem.init(); }
 
     @Test
     public void test() throws Exception {

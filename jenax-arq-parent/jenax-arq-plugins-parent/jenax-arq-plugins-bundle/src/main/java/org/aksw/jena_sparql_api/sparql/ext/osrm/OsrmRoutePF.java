@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import org.aksw.jena_sparql_api.sparql.ext.geosparql.F_ParsePolyline;
 import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
-import org.aksw.jena_sparql_api.sparql.ext.url.E_UrlText;
+import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.graph.Node;
@@ -103,9 +103,9 @@ public class OsrmRoutePF extends PropertyFunctionBase {
         System.out.println(request);
         Iterator<Binding> bIter;
         try {
-            NodeValue result = E_UrlText.resolve(NodeValue.makeNode(NodeFactory.createURI(request)));
+            NodeValue result = JenaUrlUtils.resolve(NodeValue.makeNode(NodeFactory.createURI(request)), execCxt);
 
-            JsonObject json = RDFDatatypeJson.INSTANCE.getGson().fromJson(result.asNode().getLiteral().getLexicalForm(), JsonObject.class);
+            JsonObject json = RDFDatatypeJson.get().getGson().fromJson(result.asNode().getLiteral().getLexicalForm(), JsonObject.class);
             JsonArray routes = json.getAsJsonObject().get("routes").getAsJsonArray();
 
             Function<JsonElement, Binding> converter = (JsonElement elt) -> {

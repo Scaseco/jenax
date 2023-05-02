@@ -1,11 +1,30 @@
+---
+title: Features
+nav_order: 20
+---
+
+
 Unofficial extensions for jena - refactoring of https://github.com/SmartDataAnalytics/jena-sparql-api
 
 ** Status of this project: Currently in transition ~ 2021-10-16 **
 
 That project has grown over a decade and its time to separate the good parts from the outdated ones :)
 
+## Maven Dependencies
 
-# Highlights
+We recommend to import the jenax `bom` file in order to ensure consistent versions among the dependencies:
+
+```xml
+<dependency>
+    <groupId>org.aksw.jenax</groupId>
+    <artifactId>jenax-bom</artifactId>
+    <version>${jenax.version}</version>
+    <type>pom</type>
+    <scope>import</scope>
+</dependency>
+```
+
+## Highlights
 
 Some components that deserve particular recognition:
 

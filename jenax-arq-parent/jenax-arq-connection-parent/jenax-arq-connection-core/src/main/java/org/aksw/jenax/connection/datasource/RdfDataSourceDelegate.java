@@ -11,9 +11,4 @@ public interface RdfDataSourceDelegate
     default RDFConnection getConnection() {
         return getDelegate().getConnection();
     }
-
-    @Override
-    default void close() throws Exception {
-        getDelegate().close();
-    }
 }

@@ -1,19 +1,22 @@
 package org.aksw.jena_sparql_api.conjure.datapod.impl;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Map.Entry;
 
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
 import org.aksw.dcat.jena.domain.api.DcatUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefDcat;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefGit;
-import org.aksw.jena_sparql_api.conjure.dataref.core.api.PlainDataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefGit;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefGraph;
+import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.engine.OpExecutorDefault;
 import org.aksw.jena_sparql_api.conjure.dataset.engine.TaskContext;
 import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFileSystem;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
@@ -32,17 +35,22 @@ public class DataPodFactoryAdvancedImpl
 
     protected HttpResourceRepositoryFromFileSystem repo;
 
+    /** The dataset against which to resolve DataRefGraph references */
+    protected Dataset dataset;
+
     public DataPodFactoryAdvancedImpl(
+            Dataset dataset,
             OpVisitor<? extends RdfDataPod> opExecutor,
             HttpResourceRepositoryFromFileSystem repo) {
         super(opExecutor);
 
+        this.dataset = dataset;
         this.repo = repo;
     }
 
 
     @Override
-    public RdfDataPod visit(PlainDataRefUrl dataRef) {
+    public RdfDataPod visit(DataRefUrl dataRef) {
         String url = dataRef.getDataRefUrl();
 
         TaskContext context = ((OpExecutorDefault)opExecutor).getTaskContext();
@@ -60,9 +68,18 @@ public class DataPodFactoryAdvancedImpl
         return result;
     }
 
+    @Override
+    public RdfDataPod visit(DataRefGraph dataRef) {
+        Objects.requireNonNull(dataset, "Cannot resolve DataRefGraph because no dataset has been set");
+
+        String graphIri = dataRef.getGraphIri();
+        Model model = dataset.getNamedModel(graphIri);
+
+        return DataPods.fromModel(model);
+    }
 
     @Override
-    public RdfDataPod visit(PlainDataRefDcat dataRef) {
+    public RdfDataPod visit(DataRefDcat dataRef) {
 
         TaskContext context = ((OpExecutorDefault)opExecutor).getTaskContext();
 
@@ -106,7 +123,7 @@ public class DataPodFactoryAdvancedImpl
 
 
     @Override
-    public RdfDataPod visit(PlainDataRefGit dataRef) {
+    public RdfDataPod visit(DataRefGit dataRef) {
         return super.visit(dataRef);
     }
 };

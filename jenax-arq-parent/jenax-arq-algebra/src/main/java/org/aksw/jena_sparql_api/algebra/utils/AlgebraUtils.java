@@ -127,7 +127,7 @@ public class AlgebraUtils {
         // Maybe I am accidently calling NodeValue.makeNode(var) at some point
         // context.put(ARQ.optPathFlatten, false);
 
-        //context.put(ARQ.optReorderBGP, true);
+        context.put(ARQ.optReorderBGP, false);
 
         context.put(ARQ.optMergeBGPs, false); // We invoke this manually
         context.put(ARQ.optMergeExtends, true);

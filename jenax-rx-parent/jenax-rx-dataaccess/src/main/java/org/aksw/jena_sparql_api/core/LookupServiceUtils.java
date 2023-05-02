@@ -14,11 +14,11 @@ import org.aksw.jenax.arq.aggregation.AggList;
 import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
 import org.aksw.jenax.arq.aggregation.FunctionResultSetAggregate;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Var;
 
@@ -49,7 +49,7 @@ public class LookupServiceUtils {
 //        LookupService<Node, T> result = LookupServiceTransformValue.create(base, transform);
 //        return result;
 //    }
-    public static <T> LookupService<Node, List<Node>> createLookupService(SparqlQueryConnection qef, BinaryRelation relation) {
+    public static <T> LookupService<Node, List<Node>> createLookupService(QueryExecutionFactoryQuery qef, BinaryRelation relation) {
         Var sourceVar = relation.getSourceVar();
 
         AggList<Node> agg = AggList.create(AggLiteral.create(BindingMapperProjectVar.create(relation.getTargetVar())));
@@ -61,7 +61,7 @@ public class LookupServiceUtils {
     }
 
 
-    public static <T> LookupService<Node, T> createLookupService(SparqlQueryConnection sparqlService, MappedQuery<T> mappedQuery) {
+    public static <T> LookupService<Node, T> createLookupService(QueryExecutionFactoryQuery sparqlService, MappedQuery<T> mappedQuery) {
         PartitionedQuery1 partQuery = mappedQuery.getPartQuery();
         Query query = partQuery.getQuery();
         Var partVar = partQuery.getPartitionVar();
@@ -83,7 +83,7 @@ public class LookupServiceUtils {
      * @return
      */
     @Deprecated
-    public static <T> LookupService<Node, T> createLookupService(SparqlQueryConnection sparqlService, MappedConcept<T> mappedConcept) {
+    public static <T> LookupService<Node, T> createLookupService(QueryExecutionFactoryQuery sparqlService, MappedConcept<T> mappedConcept) {
 
         if(true) {
             throw new RuntimeException("This method is broken. Use MapServiceResourceShape.createLookupService(qef, shape) instead)");

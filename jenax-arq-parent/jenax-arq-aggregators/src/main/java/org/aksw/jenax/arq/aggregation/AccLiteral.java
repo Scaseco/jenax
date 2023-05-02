@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.aggregation;
 
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 public class AccLiteral<T>
     implements Acc<T>
@@ -14,7 +15,7 @@ public class AccLiteral<T>
     }
 
     @Override
-    public void accumulate(Binding binding) {
+    public void accumulate(Binding binding, FunctionEnv env) {
         // TODO Detect if we override the value and raise a warning!
         value = bindingMapper.apply(binding, i++);
     }

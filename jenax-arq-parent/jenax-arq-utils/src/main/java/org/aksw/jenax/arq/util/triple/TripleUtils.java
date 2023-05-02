@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.arq.util.io.NTripleUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
-import org.aksw.jenax.arq.util.tuple.TupleAccessorTriple;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
+import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeTriple;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -183,7 +183,7 @@ public class TripleUtils {
 
 
     public static Binding tripleToBinding(Triple pattern, Triple assignment) {
-        return TupleUtils.tupleToBinding(TupleAccessorTriple.INSTANCE, pattern, assignment);
+        return TupleUtils.tupleToBinding(TupleBridgeTriple.INSTANCE, pattern, assignment);
     }
 
 

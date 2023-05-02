@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,9 +44,11 @@ import org.apache.jena.ext.com.google.common.io.CharStreams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.http.HttpOp;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -83,6 +87,25 @@ public class SparqlStmtUtils {
     // TODO Duplicate symbol definition; exists in E_Benchmark
     public static final Symbol symConnection = Symbol.create("http://jsa.aksw.org/connection");
 
+    public static Set<Node> mentionedNodes(SparqlStmt stmt) {
+        NodeTransformCollectNodes xform = new NodeTransformCollectNodes();
+        applyNodeTransform(stmt, xform);
+        Set<Node> result = xform.getNodes();
+        return result;
+    }
+
+//    public static PrefixMapping getPrefixMapping(SparqlStmt stmt) {
+//    	PrefixMapping result = null;
+//    	if (stmt.isParsed()) {
+//	    	if (stmt.isQuery()) {
+//	    		result = stmt.getQuery().getPrefixMapping();
+//	    	} else if (stmt.isUpdateRequest()) {
+//	    		result = stmt.getUpdateRequest().getPrefixMapping();
+//	    	}
+//    	}
+//    	return result;
+//    }
+
     public static Map<String, Boolean> mentionedEnvVars(SparqlStmt stmt) {
         NodeTransformCollectNodes xform = new NodeTransformCollectNodes();
         applyNodeTransform(stmt, xform);
@@ -94,6 +117,19 @@ public class SparqlStmtUtils {
 
         return result;
     }
+
+    /** Check for this specific QueryParseException - often occurs when attempting to parse a file name */
+    public static boolean isEncounteredSlashException(Throwable t) {
+        boolean result = false;
+        if(t instanceof QueryParseException) {
+            QueryParseException qpe = (QueryParseException)t;
+            result = Optional.ofNullable(qpe.getMessage())
+                    .orElse("").contains("Encountered: \"/\"");
+        }
+
+        return result;
+    }
+
 
     /**
      * For the given collection of SparqlStmts yield the set of used projection vars
@@ -122,7 +158,10 @@ public class SparqlStmtUtils {
     }
 
     /**
-     * Removes all unused prefixes from a stmt
+     * Removes all unused prefixes from a stmt.
+     *
+     * Currently the change happens in-place.
+     * TODO optimizePrefixes should not modify in-place because it desyncs with the stmts's original string
      *
      * @param stmt
      * @return
@@ -133,22 +172,42 @@ public class SparqlStmtUtils {
     }
 
     /**
-     * In-place optimize an update request's prefixes to only used prefixes
+     * In-place optimize a parsed sparql statement's prefixes to only used prefixes.
+     * If the statement is not parsed then this operation does nothing!
      * The global prefix map may be null.
+     *
      *
      * @param stmt
      * @param globalPm
      * @return
      */
     public static SparqlStmt optimizePrefixes(SparqlStmt stmt, PrefixMapping globalPm) {
-        if(stmt.isQuery()) {
-            QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
-        } else if(stmt.isUpdateRequest()) {
-            UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
+        if (stmt.isParsed()) {
+            if(stmt.isQuery()) {
+                QueryUtils.optimizePrefixes(stmt.getQuery(), globalPm);
+            } else if(stmt.isUpdateRequest()) {
+                UpdateRequestUtils.optimizePrefixes(stmt.getUpdateRequest(), globalPm);
+            }
         }
         return stmt;
     }
 
+    public static SparqlStmt applyElementTransform(SparqlStmt stmt, Function<? super Element, ? extends Element> transform) {
+        SparqlStmt result;
+        if(stmt.isQuery()) {
+            Query tmp = stmt.getAsQueryStmt().getQuery();
+            Query query = QueryUtils.applyElementTransform(tmp, transform);
+            result = new SparqlStmtQuery(query);
+        } else if(stmt.isUpdateRequest()) {
+            UpdateRequest tmp = stmt.getAsUpdateStmt().getUpdateRequest();
+            UpdateRequest updateRequest = UpdateRequestUtils.applyTransformElt(tmp, transform);
+            result = new SparqlStmtUpdate(updateRequest);
+        } else {
+            result = stmt;
+        }
+
+        return result;
+    }
 
     public static SparqlStmt applyOpTransform(SparqlStmt stmt, Function<? super Op, ? extends Op> transform) {
         SparqlStmt result;
@@ -385,7 +444,39 @@ public class SparqlStmtUtils {
     }
 
 
-    public static SPARQLResultEx execAny(RDFConnection conn, SparqlStmt stmt) {
+    public static SPARQLResultEx execAny(QueryExecution qe, Query q) {
+        SPARQLResultEx result;
+
+        if (q == null) {
+            q = qe.getQuery();
+        }
+
+        if (q.isConstructQuad()) {
+            Iterator<Quad> it = qe.execConstructQuads();
+            result = SPARQLResultEx.createQuads(it, qe::close);
+
+        } else if (q.isConstructType()) {
+            // System.out.println(Algebra.compile(q));
+
+            Iterator<Triple> it = qe.execConstructTriples();
+            result = SPARQLResultEx.createTriples(it, qe::close);
+        } else if (q.isSelectType()) {
+            ResultSet rs = qe.execSelect();
+            result = new SPARQLResultEx(rs, qe::close);
+        } else if(q.isJsonType()) {
+            Iterator<JsonObject> it = qe.execJsonItems();
+            result = new SPARQLResultEx(it, qe::close);
+        } else if (q.isAskType()) {
+            boolean v = qe.execAsk();
+            result = new SPARQLResultEx(v);
+        } else {
+            throw new RuntimeException("Unsupported query type");
+        }
+
+        return result;
+    }
+
+    public static SPARQLResultEx execAny(RDFConnection conn, SparqlStmt stmt, Consumer<Context> cxtMutator) {
         SPARQLResultEx result = null;
 
         if (stmt.isQuery()) {
@@ -402,31 +493,24 @@ public class SparqlStmtUtils {
             QueryExecution qe = conn.query(q);
             Context cxt = qe.getContext();
             if(cxt != null) {
+                if (cxtMutator != null) {
+                    cxtMutator.accept(cxt);
+                }
+
                 cxt.set(symConnection, conn);
             }
 
-            if (q.isConstructQuad()) {
-                Iterator<Quad> it = qe.execConstructQuads();
-                result = SPARQLResultEx.createQuads(it, qe::close);
-
-            } else if (q.isConstructType()) {
-                // System.out.println(Algebra.compile(q));
-
-                Iterator<Triple> it = qe.execConstructTriples();
-                result = SPARQLResultEx.createTriples(it, qe::close);
-            } else if (q.isSelectType()) {
-                ResultSet rs = qe.execSelect();
-                result = new SPARQLResultEx(rs, qe::close);
-            } else if(q.isJsonType()) {
-                Iterator<JsonObject> it = qe.execJsonItems();
-                result = new SPARQLResultEx(it, qe::close);
-            } else {
-                throw new RuntimeException("Unsupported query type");
-            }
+            result = execAny(qe, q);
         } else if (stmt.isUpdateRequest()) {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 
-            conn.update(u);
+            // conn.update(u);
+            Context cxt = ARQ.getContext().copy();
+            if (cxtMutator != null) {
+                cxtMutator.accept(cxt);
+            }
+            conn.newUpdate().update(u).context(cxt).execute();
+
             result = SPARQLResultEx.createUpdateType();
         }
 
@@ -562,8 +646,8 @@ public class SparqlStmtUtils {
 //		}
 //	}
 
-    public static void process(RDFConnection conn, SparqlStmt stmt, SPARQLResultVisitor sink) {
-        SPARQLResultEx sr = execAny(conn, stmt);
+    public static void process(RDFConnection conn, SparqlStmt stmt, Consumer<Context> cxtMutator, SPARQLResultVisitor sink) {
+        SPARQLResultEx sr = execAny(conn, stmt, cxtMutator);
         output(sr, sink);
     }
 
@@ -639,12 +723,12 @@ public class SparqlStmtUtils {
 
         return result;
     }
-    
-    
+
+
     /**
      * Get all variables mentioned in the nodes w.r.t. to the variable representations
      * supported by {@link NodeEnvsubst}
-     * 
+     *
      * @param sparqlStmts
      * @return
      */

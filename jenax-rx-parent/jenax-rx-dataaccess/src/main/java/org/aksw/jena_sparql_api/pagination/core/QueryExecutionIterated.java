@@ -1,11 +1,12 @@
 package org.aksw.jena_sparql_api.pagination.core;
 
+import java.io.Closeable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.commons.collections.IClosable;
+import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.util.execution.QueryExecutionAdapter;
+import org.aksw.jenax.arq.util.exec.QueryExecutionAdapter;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -55,7 +56,7 @@ public class QueryExecutionIterated
     protected boolean stopOnEmptyResult;
     protected boolean stopIfLimitNotReached;
 
-    protected IClosable currentCloseAction = null;
+    protected Closeable currentCloseAction = null;
 
     protected Query originalQuery;
     //private QueryExecution current;
@@ -266,9 +267,7 @@ public class QueryExecutionIterated
 
     @Override
     public void close() {
-        if(currentCloseAction != null) {
-            currentCloseAction.close();
-        }
+    	AutoCloseables.close(currentCloseAction);
         /*
         if(current != null) {
             current.close();

@@ -10,19 +10,19 @@ import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public class MapServiceResourceShape
     implements MapService<Concept, Node, Graph>
 {
-    private SparqlQueryConnection qef;
+    private QueryExecutionFactoryQuery qef;
     private ResourceShape resourceShape;
     private boolean isLeftJoin;
 
-    public MapServiceResourceShape(SparqlQueryConnection qef,
+    public MapServiceResourceShape(QueryExecutionFactoryQuery qef,
             ResourceShape resourceShape,
             boolean isLeftJoin) {
         super();
@@ -38,14 +38,14 @@ public class MapServiceResourceShape
         return result;
     }
 
-    public static MapServiceResourceShape create(SparqlQueryConnection qef, ResourceShape resourceShape, boolean isLeftJoin) {
+    public static MapServiceResourceShape create(QueryExecutionFactoryQuery qef, ResourceShape resourceShape, boolean isLeftJoin) {
         MapServiceResourceShape result = new MapServiceResourceShape(qef, resourceShape, isLeftJoin);
         return result;
     }
 
 
 
-    public static ListService<Concept, Resource> createListService(SparqlQueryConnection qef, ResourceShape resourceShape, boolean isLeftJoin) {
+    public static ListService<Concept, Resource> createListService(QueryExecutionFactoryQuery qef, ResourceShape resourceShape, boolean isLeftJoin) {
         MapServiceResourceShape base = create(qef, resourceShape, isLeftJoin);
 
         ListService<Concept, Resource> result = ListServiceMapWrapper.create(base, ResourceUtils::asResource);
@@ -67,7 +67,7 @@ public class MapServiceResourceShape
      * @param shape
      * @return
      */
-    public static LookupService<Node, Graph> createLookupService(SparqlQueryConnection qef, ResourceShape shape) {
+    public static LookupService<Node, Graph> createLookupService(QueryExecutionFactoryQuery qef, ResourceShape shape) {
         MapServiceResourceShape base = new MapServiceResourceShape(qef, shape, false);
         LookupService<Node, Graph> result = LookupServiceListService.create(base);
 

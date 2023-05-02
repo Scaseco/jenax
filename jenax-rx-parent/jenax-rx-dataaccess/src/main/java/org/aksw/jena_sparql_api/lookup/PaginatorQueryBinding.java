@@ -2,11 +2,11 @@ package org.aksw.jena_sparql_api.lookup;
 
 import java.util.concurrent.Callable;
 
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.QueryExec;
 
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -14,13 +14,13 @@ public class PaginatorQueryBinding
     extends PaginatorQueryBase<Binding>
 {
 
-    public PaginatorQueryBinding(SparqlQueryConnection qef, Query query) {
+    public PaginatorQueryBinding(QueryExecFactoryQuery qef, Query query) {
         super(qef, query);
     }
 
     @Override
-    protected Flowable<Binding> obtainResultIterator(Callable<QueryExecution> qeSupplier) {
-        Flowable<Binding> result = SparqlRx.execSelectRaw(qeSupplier);
+    protected Flowable<Binding> obtainResultIterator(Callable<QueryExec> qeSupplier) {
+        Flowable<Binding> result = SparqlRx.select(qeSupplier);
 
 //        ResultSet rs = qe.execSelect();
 //        Iterator<Binding> result = new IteratorResultSetBinding(rs);

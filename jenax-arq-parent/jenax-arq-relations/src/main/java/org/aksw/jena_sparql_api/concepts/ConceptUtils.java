@@ -331,6 +331,12 @@ public class ConceptUtils {
         return result;
     }
 
+    /** Can be used for joining with empty patterns / substitution of variables */
+    public static Concept empty(Var var) {
+        Concept result = new Concept(new ElementGroup(), var);
+        return result;
+    }
+
     public static Concept createForRdfType(String iriStr) {
         return createForRdfType(NodeFactory.createURI(iriStr));
     }

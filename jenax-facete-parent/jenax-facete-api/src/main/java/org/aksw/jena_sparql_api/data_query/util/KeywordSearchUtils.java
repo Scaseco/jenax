@@ -4,7 +4,9 @@ import java.util.Arrays;
 
 import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Bound;
@@ -106,6 +108,30 @@ public class KeywordSearchUtils {
     }
 
 
+
+//    public static Expr createExprExistsRegexIncludeSubject(Var srcVar, BinaryRelation relation, String searchString) {
+//        Expr expr = null;
+//        if(searchString != null) {
+//            Element relEl = relation.getElement();
+//            Var s = relation.getSourceVar();
+//            Var o = relation.getTargetVar();
+//
+//            ExprVar es = new ExprVar(s);
+//            ExprVar eo = new ExprVar(o);
+//            Expr ess = NodeValue.makeString(searchString);
+//            Expr flags = NodeValue.makeString("i");
+//
+//            Expr innerExpr = new E_Regex(new E_Str(eo), ess, flags);
+//
+//            expr =
+//                    new E_LogicalOr(
+//                        new E_Regex(new E_Str(es), ess, flags),
+//                        new E_Exists(
+//                            ElementUtils.groupIfNeeded(Arrays.asList(relEl, new ElementFilter(innerExpr)))));
+//
+//        }
+//        return expr;
+//    }
 
     /**
      * Create a the pattern:

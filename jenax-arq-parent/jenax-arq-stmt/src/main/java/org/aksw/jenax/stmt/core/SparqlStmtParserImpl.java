@@ -26,23 +26,25 @@ public class SparqlStmtParserImpl
 {
     protected SparqlQueryParser queryParser;
     protected SparqlUpdateParser updateParser;
+    protected String parserBase;
 
     /**
      * If true, parsing will never throw an exception. Instead, the returned
-     * stmt's .isParsed() method will return null, and the original queryString / updateString can be obtained.
+     * stmt's .isParsed() method will return false, and the original queryString / updateString can be obtained.
      */
     protected boolean actAsClassifier;
 
     public SparqlStmtParserImpl(SparqlQueryParser queryParser,
             SparqlUpdateParser updateParser) {
-        this(queryParser, updateParser, false);
+        this(queryParser, updateParser, null, false);
     }
 
     public SparqlStmtParserImpl(SparqlQueryParser queryParser,
-            SparqlUpdateParser updateParser, boolean actAsClassifier) {
+            SparqlUpdateParser updateParser, String parserBase, boolean actAsClassifier) {
         super();
         this.queryParser = queryParser;
         this.updateParser = updateParser;
+        this.parserBase = parserBase;
         this.actAsClassifier = actAsClassifier;
     }
 
@@ -58,13 +60,12 @@ public class SparqlStmtParserImpl
         return actAsClassifier;
     }
 
-
     @Override
     public SparqlStmt apply(String stmtStr) {
         SparqlStmt result;
         try {
             Query query = queryParser.apply(stmtStr);
-            result = new SparqlStmtQuery(query);
+            result = new SparqlStmtQuery(query, parserBase);
         } catch(QueryParseException queryException) {
 
             try {
@@ -77,20 +78,20 @@ public class SparqlStmtParserImpl
                 boolean isQueryException = delta <= 0;
                 if(isQueryException) {
                     if(actAsClassifier) {
-                        result = new SparqlStmtQuery(stmtStr, queryException);
+                        result = new SparqlStmtQuery(null, stmtStr, parserBase, queryException);
                     } else {
                         throw new QueryParseException("Failed to parse " + stmtStr, queryException, queryException.getLine(), queryException.getColumn());
                     }
                 } else {
                     if(actAsClassifier) {
-                        result = new SparqlStmtUpdate(stmtStr, updateException);
+                        result = new SparqlStmtUpdate(null, stmtStr, parserBase, updateException);
                     } else {
                         throw new QueryParseException("Failed to parse " + stmtStr, updateException, updateException.getLine(), updateException.getColumn());
                     }
                 }
             } catch(Exception e) {
                 if(actAsClassifier) {
-                    result = new SparqlStmtUnknown(stmtStr, new QueryParseException(e, 1, 1));
+                    result = new SparqlStmtUnknown(stmtStr, parserBase, new QueryParseException(e, 1, 1));
                 } else {
                     throw new QueryParseException("Failed to parse " + stmtStr, e, 1, 1);
                 }
@@ -98,7 +99,7 @@ public class SparqlStmtParserImpl
 
         } catch(Exception e) {
             if(actAsClassifier) {
-                result = new SparqlStmtUnknown(stmtStr, new QueryParseException(e, 1, 1));
+                result = new SparqlStmtUnknown(stmtStr, parserBase, new QueryParseException(e, 1, 1));
             } else {
                 throw new QueryParseException("Failed to parse " + stmtStr, e, 1, 1);
             }
@@ -132,6 +133,8 @@ public class SparqlStmtParserImpl
 
     public static SparqlStmtParserImpl create(Syntax syntax, PrefixMapping prefixMapping, boolean actAsClassifier) {
         SparqlStmtParserImpl result = create(SparqlParserConfig.newInstance().setSyntax(syntax).setPrefixMapping(prefixMapping).applyDefaults(), actAsClassifier);
+        // Setting prologue because of change in E_IRI in 4.6.0
+        // SparqlStmtParserImpl result = create(SparqlParserConfig.newInstance().setSyntax(syntax).setPrologue(new Prologue(prefixMapping)).applyDefaults(), actAsClassifier);
         return result;
     }
 
@@ -155,7 +158,7 @@ public class SparqlStmtParserImpl
     public static SparqlStmtParserImpl create(SparqlParserConfig config, boolean actAsClassifier) {
         SparqlQueryParser queryParser = SparqlQueryParserImpl.create(config);
         SparqlUpdateParser updateParser = SparqlUpdateParserImpl.create(config);
-        SparqlStmtParserImpl result = new SparqlStmtParserImpl(queryParser, updateParser, actAsClassifier);
+        SparqlStmtParserImpl result = new SparqlStmtParserImpl(queryParser, updateParser, config.getBaseURI(), actAsClassifier);
         return result;
     }
 
@@ -166,5 +169,4 @@ public class SparqlStmtParserImpl
     public static SparqlStmtParserImpl createAsGiven(boolean actAsClassifier) {
         return create(SparqlParserConfig.newInstance().parseAsGiven().applyDefaults(), actAsClassifier);
     }
-
 }

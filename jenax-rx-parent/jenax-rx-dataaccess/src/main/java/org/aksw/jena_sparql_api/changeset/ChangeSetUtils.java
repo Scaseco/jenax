@@ -23,6 +23,7 @@ import org.aksw.jenax.arq.util.triple.GraphUtils;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -39,7 +40,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.expr.E_Equals;
@@ -117,7 +117,7 @@ public class ChangeSetUtils {
         }
     }
 
-    public static LookupService<Node, Node> createLookupServiceMostRecentChangeSet(SparqlQueryConnection qef, Node service, Node graph) {
+    public static LookupService<Node, Node> createLookupServiceMostRecentChangeSet(QueryExecutionFactoryQuery qef, Node service, Node graph) {
 
         Query query = queryMostRecentChangeSet;
         if(service != null || graph != null) {
@@ -327,7 +327,7 @@ public class ChangeSetUtils {
     }
 
     public static UpdateRequest createUpdateRequestGraph(ChangeSetMetadata metadata,
-            SparqlQueryConnection qef,
+            QueryExecutionFactoryQuery qef,
             Diff<Set<Triple>> diff,
             String prefix,
             String serviceUri,
@@ -352,7 +352,7 @@ public class ChangeSetUtils {
 
 //    public Map<Node, ChangeSet> apply(Diff<Graph> diff) {
 
-    public static Map<Node, ChangeSet> createChangeSets(SparqlQueryConnection qef, String serviceUri, String graphUri, ChangeSetMetadata metadata, Diff<Set<Triple>> diff, String prefix) {
+    public static Map<Node, ChangeSet> createChangeSets(QueryExecutionFactoryQuery qef, String serviceUri, String graphUri, ChangeSetMetadata metadata, Diff<Set<Triple>> diff, String prefix) {
         Node service = NodeUtils.createUriOrNull(serviceUri);
         Node graph = NodeUtils.createUriOrNull(graphUri);
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.analytics.BindingAnalytics;
 import org.aksw.jenax.arq.decisiontree.api.DecisionTreeSparqlExpr;
-import org.aksw.jenax.arq.decisiontree.api.E_SerializableIdentity;
+import org.aksw.jenax.arq.util.expr.E_SerializableIdentity;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;

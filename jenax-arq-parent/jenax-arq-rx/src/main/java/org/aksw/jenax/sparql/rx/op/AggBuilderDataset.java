@@ -24,7 +24,7 @@ import org.apache.jena.sparql.core.Quad;
 public class AggBuilderDataset
 {
     /** Aggregate all quads into a single dataset */
-    public static ParallelAggregator<Quad, Dataset, ?> quadsToDataset(SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier) {
+    public static <E> ParallelAggregator<Quad, E, Dataset, ?> quadsToDataset(SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier) {
         return AggBuilder.fromCollector(
                 () -> (DatasetGraph)datasetGraphSupplier.get(),
                 DatasetGraph::add,
@@ -33,7 +33,7 @@ public class AggBuilderDataset
     }
 
     /** Group quads by a key (typically the graph component) and map each to its own dataset */
-    public static <K> ParallelAggregator<Quad, Map<K, Dataset>, ?> groupQuadsToDatasetCore(
+    public static <K, E> ParallelAggregator<Quad, E, Map<K, Dataset>, ?> groupQuadsToDatasetCore(
             SerializableSupplier<? extends DatasetGraph> datasetGraphSupplier,
             SerializableFunction<? super Quad, K> keyMapper) {
 

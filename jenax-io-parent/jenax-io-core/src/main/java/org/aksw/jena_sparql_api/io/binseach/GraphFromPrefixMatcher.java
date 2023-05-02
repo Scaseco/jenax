@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.commons.io.binseach.BinarySearchOnSortedFile;
+import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
@@ -97,21 +99,7 @@ public class GraphFromPrefixMatcher extends GraphBase {
 
         ExtendedIterator<Triple> result;
 
-        // Construct the prefix from the subject
-        // Because whitespaces between subject and predicate may differ, do not include
-        // further components
-        String prefix;
-        Node s = triplePattern.getSubject();
-        if(s.equals(Node.ANY) || s.isVariable()) {
-            prefix = "";
-        } else if (s.isBlank()) {
-            prefix = "_:" + s.getBlankNodeLabel();
-        } else if (s.isURI() ){
-            prefix = "<" + s.getURI() + ">";
-        } else {
-            // Literal in subject position - skip
-            prefix = null;
-        }
+        String prefix = derivePrefix(triplePattern.getSubject());
 
 //        System.out.println("PREFIX: " + prefix);
 
@@ -140,6 +128,25 @@ public class GraphFromPrefixMatcher extends GraphBase {
         result = WrappedIterator.create(Iter.onCloseIO(itTriples, in));
 
         return result;
+    }
+
+
+    public static String derivePrefix(Node s) {
+        // Construct the prefix from the subject
+        // Because whitespaces between subject and predicate may differ, do not include
+        // further components
+        String prefix;
+        if(s.equals(Node.ANY) || s.isVariable()) {
+            prefix = "";
+        } else if (s.isBlank()) {
+            prefix = "_:" + s.getBlankNodeLabel();
+        } else if (s.isURI() ){
+            prefix = "<" + s.getURI() + ">";
+        } else {
+            // Literal in subject position - skip
+            prefix = null;
+        }
+        return prefix;
     }
 
     @Override

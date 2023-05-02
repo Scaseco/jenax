@@ -1,3 +1,9 @@
+---
+title: Statements
+parent: ARQ Extensions
+nav_order: 20
+---
+
 ## Extensions for Jena SPARQL Statement Handling
 
 Jena provides the Query and UpdateRequest domain classes, however it lacks a unifying infrastructure.

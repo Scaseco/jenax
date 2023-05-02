@@ -1,4 +1,10 @@
-## Concept Module
+---
+title: Relations Module
+parent: Query Building
+nav_order: 10
+---
+
+## Relations Module
 
 This module contains:
 

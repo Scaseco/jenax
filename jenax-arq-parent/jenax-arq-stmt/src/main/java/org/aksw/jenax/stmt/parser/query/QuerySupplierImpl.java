@@ -31,7 +31,6 @@ public class QuerySupplierImpl
         super(prologue, baseURI, sharedPrefixes);
     }
 
-
     @Override
     public Query get() {
         PrefixMapping prefixMapping = new PrefixMappingTrie();

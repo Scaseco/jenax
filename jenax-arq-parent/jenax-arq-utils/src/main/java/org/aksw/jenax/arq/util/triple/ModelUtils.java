@@ -3,9 +3,12 @@ package org.aksw.jenax.arq.util.triple;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.RDFFormat;
 
 /**
  * @author Claus Stadler
@@ -32,4 +35,7 @@ public class ModelUtils {
         return model;
     }
 
+    public static String toString(Model model, RDFFormat rdfFormat) {
+        return DatasetUtils.toString(DatasetFactory.wrap(model), rdfFormat);
+    }
 }

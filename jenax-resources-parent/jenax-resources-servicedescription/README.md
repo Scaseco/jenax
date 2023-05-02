@@ -1,3 +1,9 @@
+---
+title: Service Description Probing
+parent: Resources
+nav_order: 30
+---
+
 ## Resources for creating service descriptions
 Most if not all service descriptions can be assembled using a set of SPARQL queries that either probe for the database management system (DBMS) backing a SPARQL endpoint or test for the individual features in question.
 

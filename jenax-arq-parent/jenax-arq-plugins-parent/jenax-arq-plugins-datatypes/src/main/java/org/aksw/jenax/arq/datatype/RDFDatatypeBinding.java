@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.datatype;
 
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -24,6 +25,10 @@ public class RDFDatatypeBinding
 {
     public static final String IRI = "http://jsa.aksw.org/dt/sparql/binding";
     public static final RDFDatatypeBinding INSTANCE = new RDFDatatypeBinding();
+
+    public static RDFDatatype get() {
+        return INSTANCE;
+    }
 
     public RDFDatatypeBinding() {
         this(IRI);

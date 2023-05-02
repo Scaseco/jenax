@@ -14,11 +14,11 @@ import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.system.Txn;
 
 /**
- * Temporary interface; DO NOT reference it directly.
- * It will be removed once Jena moves these defaults to their own interface
+ * Mix-in that provides default implementation of all methods based on {@link #query(Query)}
+ * which in turn is based on {@link #newQuery()}.
  *
- * @author raven
- *
+ * Possibly temporary interface; DO NOT reference it directly.
+ * It will be removed should Jena move these defaults to their own interface.
  */
 public interface LinkSparqlQueryTmp
     extends TransactionalDelegate, LinkSparqlQuery
@@ -36,7 +36,7 @@ public interface LinkSparqlQueryTmp
      * @param resultSetAction
      */
     @Override
-    public default void queryRowSet(String query, Consumer<RowSet> resultSetAction) {
+    default void queryRowSet(String query, Consumer<RowSet> resultSetAction) {
         queryRowSet(parse(query), resultSetAction);
     }
 
@@ -46,7 +46,7 @@ public interface LinkSparqlQueryTmp
      * @param resultSetAction
      */
     @Override
-    public default void queryRowSet(Query query, Consumer<RowSet> resultSetAction) {
+    default void queryRowSet(Query query, Consumer<RowSet> resultSetAction) {
         if ( ! query.isSelectType() )
             throw new JenaConnectionException("Query is not a SELECT query");
 
@@ -64,7 +64,7 @@ public interface LinkSparqlQueryTmp
      * @param rowAction
      */
     @Override
-    public default void querySelect(String query, Consumer<Binding> rowAction) {
+    default void querySelect(String query, Consumer<Binding> rowAction) {
         querySelect(parse(query), rowAction);
     }
 
@@ -74,7 +74,7 @@ public interface LinkSparqlQueryTmp
      * @param rowAction
      */
     @Override
-    public default void querySelect(Query query, Consumer<Binding> rowAction) {
+    default void querySelect(Query query, Consumer<Binding> rowAction) {
         if ( ! query.isSelectType() )
             throw new JenaConnectionException("Query is not a SELECT query");
         Txn.executeRead(this, ()->{
@@ -86,13 +86,13 @@ public interface LinkSparqlQueryTmp
 
     /** Execute a CONSTRUCT query and return as a Model */
     @Override
-    public default Graph queryConstruct(String query) {
+    default Graph queryConstruct(String query) {
         return queryConstruct(parse(query));
     }
 
     /** Execute a CONSTRUCT query and return as a Model */
     @Override
-    public default Graph queryConstruct(Query query) {
+    default Graph queryConstruct(Query query) {
         return
             Txn.calculateRead(this, ()->{
                 try ( QueryExec qExec = query(query) ) {
@@ -103,13 +103,13 @@ public interface LinkSparqlQueryTmp
 
     /** Execute a DESCRIBE query and return as a Model */
     @Override
-    public default Graph queryDescribe(String query) {
+    default Graph queryDescribe(String query) {
         return queryDescribe(parse(query));
     }
 
     /** Execute a DESCRIBE query and return as a Model */
     @Override
-    public default Graph queryDescribe(Query query) {
+    default Graph queryDescribe(Query query) {
         return
             Txn.calculateRead(this, ()->{
                 try ( QueryExec qExec = query(query) ) {
@@ -120,13 +120,13 @@ public interface LinkSparqlQueryTmp
 
     /** Execute a ASK query and return a boolean */
     @Override
-    public default boolean queryAsk(String query) {
+    default boolean queryAsk(String query) {
         return queryAsk(parse(query));
     }
 
     /** Execute a ASK query and return a boolean */
     @Override
-    public default boolean queryAsk(Query query) {
+    default boolean queryAsk(Query query) {
         return
             Txn.calculateRead(this, ()->{
                 try ( QueryExec qExec = query(query) ) {
@@ -145,7 +145,9 @@ public interface LinkSparqlQueryTmp
      * @return QueryExecution
      */
     @Override
-    public QueryExec query(Query query);
+    default QueryExec query(Query query) {
+        return newQuery().query(query).build();
+    }
 
     /** Setup a SPARQL query execution.
      *
@@ -157,7 +159,7 @@ public interface LinkSparqlQueryTmp
      * @return QueryExecution
      */
     @Override
-    public default QueryExec query(String queryString) {
+    default QueryExec query(String queryString) {
         return query(parse(queryString));
     }
 

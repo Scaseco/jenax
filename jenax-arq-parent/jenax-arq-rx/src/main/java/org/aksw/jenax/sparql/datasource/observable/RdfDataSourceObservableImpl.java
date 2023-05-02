@@ -1,0 +1,84 @@
+package org.aksw.jenax.sparql.datasource.observable;
+
+import org.aksw.jenax.arq.datasource.RdfDataEngineFromDataset;
+import org.aksw.jenax.arq.datasource.RdfDataSources;
+import org.aksw.jenax.arq.util.binding.ResultSetUtils;
+import org.aksw.jenax.arq.util.binding.ResultTable;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.connection.datasource.RdfDataSourceDelegateBase;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.algebra.Table;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.disposables.Disposable;
+
+public class RdfDataSourceObservableImpl
+    extends RdfDataSourceDelegateBase
+    implements RdfDataSourceObservable
+{
+    protected ObservableSourceImpl<Query, ResultTable> mapRx;
+
+    public RdfDataSourceObservableImpl(RdfDataSource delegate) {
+        super(delegate);
+        mapRx = new ObservableSourceImpl<Query, ResultTable>(q -> execSelect(delegate, q));
+    }
+
+    @Override
+    public Flowable<ResultTable> observeSelect(Query query) {
+        return mapRx.observe(query);
+    }
+
+    public static ResultTable execSelect(RdfDataSource dataSource, Query query) {
+        ResultTable result = RdfDataSources.exec(dataSource, query, qe -> createResultTable(qe.execSelect()));
+        return result;
+    }
+
+    public static ResultTable createResultTable(ResultSet rs) {
+        Table table = ResultSetUtils.resultSetToTable(rs);
+        Model model = rs.getResourceModel();
+        ResultTable result = new ResultTable(table, model);
+        return result;
+    }
+
+    @Override
+    public void refreshAll(boolean cancelRunning) {
+        mapRx.refreshAll(true);
+    }
+
+    public static void main(String[] args) {
+        Dataset dataset = DatasetFactory.create();
+        dataset.getDefaultModel().add(RDF.type, RDF.type, RDF.Property);
+        RdfDataSourceObservableImpl ds = new RdfDataSourceObservableImpl(RdfDataEngineFromDataset.create(dataset, true));
+
+        Flowable<ResultTable> flow = ds.observeSelect(QueryFactory.create("SELECT * { ?s ?p ?o }"));
+        // ds.refreshAll();
+        // ds.refreshAll();
+
+        Disposable disposable1 = flow.subscribe(t -> {
+            System.out.println("1: Got table of size: " + t.getTable());
+        });
+
+        Disposable disposable2 = flow.subscribe(t -> {
+            System.out.println("2: Got table of size: " + t.getTable());
+        });
+
+        System.out.println("Latest: " + flow.blockingLatest().iterator().next());
+
+        disposable1.dispose();
+        ds.refreshAll(true);
+
+        dataset.getDefaultModel().add(RDF.type, RDFS.seeAlso, RDF.Property);
+        ds.refreshAll(true);
+
+        disposable2.dispose();
+
+    }
+
+}

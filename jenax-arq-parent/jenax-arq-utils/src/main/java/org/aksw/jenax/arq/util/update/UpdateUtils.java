@@ -7,13 +7,18 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.syntax.ElementTransformSubst2;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.modify.request.QuadDataAcc;
 import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateDataDelete;
@@ -22,12 +27,62 @@ import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
 import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.modify.request.UpdateWithUsing;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 import org.apache.jena.update.Update;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
+
+import com.google.common.base.Preconditions;
 
 public class UpdateUtils {
+
+    // RU = rdf update (file extension foo.ru)
+    private static final UpdateRequest RENAME_PROPERTY_RU = UpdateFactory.create("DELETE { ?s ?from ?o } INSERT { ?s ?to ?o } WHERE { ?s ?from ?o }");
+    private static final UpdateRequest RENAME_NAMESPACE_RU = UpdateFactory.create(String.join("\n",
+            "DELETE { ?s ?p ?o }",
+            "INSERT { ?ss ?pp ?oo }",
+            "WHERE {",
+            "  BIND(STRLEN(?from) + 1 AS ?l)",
+            "  ?s ?p ?o",
+            "  BIND(isIRI(?s) && STRSTARTS(STR(?s), ?from) AS ?cs)",
+            "  BIND(isIRI(?p) && STRSTARTS(STR(?p), ?from) AS ?cp)",
+            "  BIND(isIRI(?o) && STRSTARTS(STR(?o), ?from) AS ?co)",
+            "  FILTER(?cs || ?cp || ?co)",
+            "  BIND(IF(?cs, IRI(CONCAT(?to, SUBSTR(STR(?s), ?l))), ?s) AS ?ss)",
+            "  BIND(IF(?cp, IRI(CONCAT(?to, SUBSTR(STR(?p), ?l))), ?p) AS ?pp)",
+            "  BIND(IF(?co, IRI(CONCAT(?to, SUBSTR(STR(?o), ?l))), ?o) AS ?oo)",
+            "}"));
+
+    /**
+     * Rename a property in a graph (via SPARQL Update)
+     * @param graph
+     * @param from
+     * @param to
+     */
+    public static void renameProperty(Graph graph, String from, String to) {
+        Node fromNode = NodeFactory.createURI(from);
+        Node toNode = NodeFactory.createURI(to);
+        execRename(graph, RENAME_PROPERTY_RU, fromNode, toNode);
+    }
+
+
+    public static void renameNamespace(Graph graph, String from, String to) {
+        Node fromNode = NodeFactory.createLiteral(from);
+        Node toNode = NodeFactory.createLiteral(to);
+        execRename(graph, RENAME_NAMESPACE_RU, fromNode, toNode);
+    }
+
+    public static void execRename(Graph graph, UpdateRequest template, Node from, Node to) {
+        UpdateExec
+            .dataset(DatasetGraphFactory.wrap(graph))
+            .update(template)
+             .substitution("from", from)
+             .substitution("to", to)
+            .execute();
+    }
 
     public static Update applyOpTransform(Update update, Function<? super Op, ? extends Op> transform) {
         Function<Element, Element> xform = elt -> ElementUtils.applyOpTransform(elt, transform);
@@ -258,5 +313,30 @@ public class UpdateUtils {
 //    }
 //
 
+    /** Convert a construct query into an insert query */
+    public static Update constructToInsert(Query query) {
+        Preconditions.checkArgument(query.isConstructType(), "Expected a CONSTRUCT query");
 
+        boolean applyWrapping =
+                query.hasLimit() || query.hasOffset() || query.hasOrderBy() || query.hasValues()
+                // Omit features not supported by construct queries:
+                // hasGroupBy() / hasHaving() / query.hasAggregators()
+                ;
+
+        Element elt = applyWrapping
+                ? new ElementSubQuery(query)
+                : query.getQueryPattern();
+
+        UpdateModify result = new UpdateModify();
+        result.setHasInsertClause(true);
+        result.setElement(elt);
+
+        // Copy the construct template
+        query.getGraphURIs().forEach(iri -> result.addUsing(NodeFactory.createURI(iri)));
+        query.getNamedGraphURIs().forEach(iri -> result.addUsingNamed(NodeFactory.createURI(iri)));
+        QuadAcc acc = result.getInsertAcc();
+        query.getConstructTemplate().getQuads().forEach(acc::addQuad);
+
+        return result;
+    }
 }

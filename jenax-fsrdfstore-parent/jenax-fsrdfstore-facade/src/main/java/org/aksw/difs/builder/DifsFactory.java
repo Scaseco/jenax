@@ -3,6 +3,7 @@ package org.aksw.difs.builder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Streams;
+import com.google.re2j.Pattern;
 import com.kstruct.gethostname4j.Hostname;
 
 /**
@@ -368,17 +370,18 @@ public class DifsFactory {
         ResourceRepository<String> resStore;
         PathMatcher pathMatcher;
 
+        FileSystem repoFs = repoRootPath.getFileSystem();
         if (isSingleFileMode) {
-            storeAbsPath = storeAbsPath.getParent();
             String fileName = storeAbsPath.getFileName().toString();
+            storeAbsPath = storeAbsPath.getParent();
 
             resStore = new ResourceRepoImpl(storeAbsPath, iri -> new String[] {});
 
             // FIXME Interpret fileName as a literal!
-            pathMatcher = repoRootPath.getFileSystem().getPathMatcher("glob:./" + fileName);
+            pathMatcher = repoFs.getPathMatcher("glob:**/" + fileName); //+ Pattern.compile(Pattern.quote(storeAbsPath.toString()))); //"glob:**/" + fileName);
         } else {
             resStore = ResourceRepoImpl.createWithUriToPath(storeAbsPath);
-            pathMatcher = repoRootPath.getFileSystem().getPathMatcher("glob:**/*.trig");
+            pathMatcher = repoFs.getPathMatcher("glob:**/*.trig");
         }
 
 

@@ -1,0 +1,144 @@
+PREFIX eg:    <http://www.example.org/>
+
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fno:   <https://w3id.org/function/ontology#>
+PREFIX fnoi:   <https://w3id.org/function/vocabulary/implementation#>
+
+PREFIX fnox:  <https://w3id.org/aksw/fnox#>
+PREFIX norse: <https://w3id.org/aksw/norse#>
+
+# Important: FNO appears to have several limitations:
+# (.) No support for ellipsis
+# (.) No function overloads
+# (.) No recommendation for union types
+# (.) No support for property functions (a.k.a. magic predicates)
+
+
+
+##
+# JSON
+##
+
+norse:json
+  a rdfs:Datatype ;
+  rdfs:subClassOf rdfs:Literal ;
+  rdfs:isDefinedBy norse: ;
+  rdfs:label "JSON" ;
+  rdfs:comment "A JSON datatype suitable for use with 'norse' functions" ;
+  .
+
+norse:json.get a fno:Function ;
+  rdfs:label "json.get" ;
+  rdfs:comment "Return a JSON object's value for a given key" ;
+  fno:expects (
+    [ fno:type norse:json ; fno:required true ]
+    [ fno:type xsd:string ; fno:required true ] # Actually integer would work for json arrays...
+  ) ;
+  fno:returns ( rdfs:Literal ) ;
+  .
+
+norse:json.path a fno:Function ;
+  rdfs:label "json.path" ;
+  rdfs:comment "Return the value of evaluating a JSON path against the given JSON element" ;
+  fno:expects (
+    [ fno:type norse:json ; fno:required true ]
+    [ fno:type xsd:string ; fno:required true ]
+  ) ;
+  fno:returns ( rdfs:Literal ) ;
+  .
+
+norse:json.js a fno:Function ;
+  rdfs:label "json.js" ;
+  rdfs:comment "Invoke a javascript function (specified as a string) with the given arguments" ;
+  fno:expects ( 
+    [ fno:type xsd:string ; fno:required true ]
+    [ fno:type rdfs:Resource ; fnox:ellipsis true ]
+  ) ;
+  fno:returns ( rdfs:Literal ) ;
+  .
+
+norse:json.object a fno:Function ;
+  rdfs:label "JSON object" ;
+  rdfs:comment "Create a json object from the given arguments. Every consecutive pair of arguments is treated as key and corresponding value." ;
+  fno:expects (
+    [ fno:type rdfs:Resource ; fnox:ellipsis true ]
+  ) ;
+  fno:returns ( norse:json ) ;
+  .
+
+norse:json.array a fno:Function ;
+  rdfs:label "JSON array" ;
+  rdfs:comment "Create a json array from the given arguments. RDF literals are converted to the corresponding JSON representation if it exists. Otherwise STR() is implicitly applied." ;
+  fno:expects (
+    [ fno:type rdfs:Resource ; fnox:ellipsis true ]
+  ) ;
+  fno:returns ( norse:json ) ;
+  .
+
+norse:json.entries a fno:Function ;
+  rdfs:label "JSON entries" ;
+  rdfs:comment """Convert all of a JSON object's key-value entries into a JSON array of { "key": ..., "value": ...} objects.""" ;
+  fno:expects (
+    [ fno:type norse:json ; fno:required true ]
+  ) ;
+  fno:returns ( norse:json ) ;
+  .
+
+norse:json.explode a fnox:PropertyFunction ;
+  rdfs:label "JSON explode" ;
+  rdfs:comment "Bind elements of a JSON array (starting with a configurable offset) to a given list of SPARQL variables" ;
+  eg:exampleUsage """(["this", "is", 1, "array"]^^xsd:json, 1) norse:json.explode (?is ?one ?array)""" ;
+  fnox:expectsSubjects (
+    [ fno:type norse:json ; fno:required true ]
+    [ fno:type xsd:integer ; fno:required false ]
+  ) ;
+  fnox:expectsObjects (
+    [ fno:type rdfs:Resource ; fno:require true ] # Typically the output variable
+  ) ;
+  .
+
+norse:json.unnest a fnox:PropertyFunction ;
+  rdfs:label "JSON unnest" ;
+  rdfs:comment "Unnest a json array into a " ;
+  fnox:expectsSubjects ([ fno:type norse:json ; fno:required true ]) ;
+  fnox:expectsObjects (
+    [ fno:type rdfs:Resource ; fno:require true ] # Typically the output variable
+    [ fno:type xsd:integer ; fno:required false ] # The array index - can be used for either for input or output
+  ) ;
+  .
+
+##
+# XML
+##
+
+norse:xml
+  a rdfs:Datatype ;
+  rdfs:subClassOf rdfs:Literal ;
+  rdfs:isDefinedBy norse: ;
+  rdfs:label "XML" ;
+  rdfs:comment "An XML datatype suitable for use with 'norse' functions" ;
+  .
+
+norse:xml.unnest a fnox:PropertyFunction ;
+  rdfs:label "XML unnest" ;
+  rdfs:comment "Unnest an XML node against a given XPath expression (as xsd:string)" ;
+  fnox:expectsSubjects ([ fno:type norse:xml ; fno:required true ]) ;
+  fnox:expectsObjects (
+    [ fno:type xsd:string ; fno:require true ] # Typically the output variable
+    [ fno:type xsd:integer ; fno:required false ] # The array index - can be used for either for input or output
+  ) ;
+  .
+
+
+##
+# Maven (essentially maven style IRI-to-URN conversion)
+##
+
+norse:mvn.toPath
+  a fno:Function ;
+  .
+
+
+
+

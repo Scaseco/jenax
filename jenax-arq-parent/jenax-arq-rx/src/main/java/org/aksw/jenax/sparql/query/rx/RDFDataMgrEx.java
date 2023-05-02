@@ -12,10 +12,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
@@ -24,21 +28,21 @@ import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
-import org.aksw.jenax.arq.util.streamrdf.WriterStreamRDFBaseUtils;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
-import org.apache.jena.ext.com.google.common.collect.Streams;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
@@ -49,9 +53,11 @@ import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.RIOT;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
+import org.apache.jena.riot.system.AsyncParser;
+import org.apache.jena.riot.system.AsyncParserBuilder;
+import org.apache.jena.riot.system.ErrorHandlerFactory;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
-import org.apache.jena.riot.writer.WriterStreamRDFBase;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -59,8 +65,6 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.reactivex.rxjava3.core.Flowable;
 
 /**
  * Extensions to help open an InputStream of unknown content using probing against languages registered to the Jena riot system.
@@ -82,21 +86,21 @@ public class RDFDataMgrEx {
             // RDFLanguages.TRIX
     ));
 
-    
+
     public static String toString(Model model, RDFFormat rdfFormat) {
-    	ByteArrayOutputStream out = new ByteArrayOutputStream();
-    	RDFDataMgr.write(out, model, rdfFormat);
-    	return out.toString(StandardCharsets.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RDFDataMgr.write(out, model, rdfFormat);
+        return out.toString(StandardCharsets.UTF_8);
     }
 
     public static String toString(Dataset dataset, RDFFormat rdfFormat) {
-    	ByteArrayOutputStream out = new ByteArrayOutputStream();
-    	RDFDataMgr.write(out, dataset, rdfFormat);
-    	return out.toString(StandardCharsets.UTF_8);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        RDFDataMgr.write(out, dataset, rdfFormat);
+        return out.toString(StandardCharsets.UTF_8);
     }
 
-    
-    
+
+
     public static boolean isStdIn(String filenameOrIri) {
         return "-".equals(filenameOrIri);
     }
@@ -240,10 +244,13 @@ public class RDFDataMgrEx {
         return result;
     }
 
-    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
-        return probeLang(in, candidates, true);
+    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates, Collection<Entry<Lang, Throwable>> errorCollector) {
+        return probeLang(in, candidates, true, errorCollector);
     }
 
+    public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
+        return probeLang(in, candidates, new ArrayList<>());
+    }
 
     /**
      * Probe the content of the input stream against a given set of candidate languages.
@@ -263,7 +270,8 @@ public class RDFDataMgrEx {
     public static TypedInputStream probeLang(
             InputStream in,
             Iterable<Lang> candidates,
-            boolean tryAllCandidates) {
+            boolean tryAllCandidates,
+            Collection<Entry<Lang, Throwable>> errorCollector) {
         if (!in.markSupported()) {
             throw new IllegalArgumentException("Language probing requires an input stream with mark support");
         }
@@ -281,14 +289,18 @@ public class RDFDataMgrEx {
             @SuppressWarnings("resource")
             CloseShieldInputStream wbin = new CloseShieldInputStream(in);
 
+            AsyncParserBuilder builder = AsyncParser.of(wbin, cand, null)
+                    .mutateSources(parser -> parser.errorHandler(ErrorHandlerFactory.errorHandlerSimple()))
+                    .setChunkSize(100).setQueueSize(10);
+
             //bin.mark(Integer.MAX_VALUE >> 1);
-            Flowable<?> flow;
+            Stream<?> flow;
             if (RDFLanguages.isQuads(cand)) {
-                flow = RDFDataMgrRx.createFlowableQuads(() -> wbin, cand, null);
+                flow = builder.streamQuads();
             } else if (RDFLanguages.isTriples(cand)) {
-                flow = RDFDataMgrRx.createFlowableTriples(() -> wbin, cand, null);
+                flow = builder.streamTriples();
             } else if (ResultSetReaderRegistry.isRegistered(cand)) {
-                flow = RDFDataMgrRx.createFlowableBindings(() -> wbin, cand);
+                flow = RDFDataMgrRx.createFlowableBindings(() -> wbin, cand).blockingStream();
             } else {
                 logger.warn("Skipping probing of unknown Lang: " + cand);
                 continue;
@@ -301,16 +313,20 @@ public class RDFDataMgrEx {
             // We should add an indirection layer that allows to configure the prober
             // and query its result before allowing the client to obtain the input stream
             int n = 100;
-            try {
-                long count = flow.take(n)
-                        .count()
-                        .blockingGet();
-
+            try (Stream<?> s = flow) {
+                Iterator<?> it = s.iterator();
+                long count = 0;
+                for (; count < n && it.hasNext(); ++count) {
+                    it.next();
+                }
                 successCountToLang.put(count, cand);
 
                 logger.debug("Number of items parsed by content type probing for " + cand + ": " + count);
             } catch(Exception e) {
                 logger.debug("Failed to probe with format " + cand, e);
+                if (errorCollector != null) {
+                    errorCollector.add(Pair.of(cand, e));
+                }
                 continue;
             } finally {
                 // logger.debug("Probing format " + cand + " took " + sw.elapsed(TimeUnit.MILLISECONDS));
@@ -338,6 +354,90 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static TypedInputStream probeLang(
+            InputStream in,
+            Iterable<Lang> candidates,
+            boolean tryAllCandidates) {
+        return probeLang(in, candidates, tryAllCandidates, new ArrayList<>());
+    }
+//    public static TypedInputStream probeLang(
+//            InputStream in,
+//            Iterable<Lang> candidates,
+//            boolean tryAllCandidates) {
+//        if (!in.markSupported()) {
+//            throw new IllegalArgumentException("Language probing requires an input stream with mark support");
+//        }
+//
+////        BufferedInputStream bin = new BufferedInputStream(in);
+//
+//        // Here we rely on the VM/JDK not allocating the buffer right away but only
+//        // using this as the max buffer size
+//        // 1GB should be safe enough even for cases with huge literals such as for
+//        // large spatial geometries (I encountered some around ~50MB)
+//        in.mark(1 * 1024 * 1024 * 1024);
+//
+//        Multimap<Long, Lang> successCountToLang = ArrayListMultimap.create();
+//        for(Lang cand : candidates) {
+//            @SuppressWarnings("resource")
+//            CloseShieldInputStream wbin = new CloseShieldInputStream(in);
+//
+//            //bin.mark(Integer.MAX_VALUE >> 1);
+//            Flowable<?> flow;
+//            if (RDFLanguages.isQuads(cand)) {
+//                flow = RDFDataMgrRx.createFlowableQuads(() -> wbin, cand, null);
+//            } else if (RDFLanguages.isTriples(cand)) {
+//                flow = RDFDataMgrRx.createFlowableTriples(() -> wbin, cand, null);
+//            } else if (ResultSetReaderRegistry.isRegistered(cand)) {
+//                flow = RDFDataMgrRx.createFlowableBindings(() -> wbin, cand);
+//            } else {
+//                logger.warn("Skipping probing of unknown Lang: " + cand);
+//                continue;
+//            }
+//
+//            // Stopwatch sw = Stopwatch.createStarted();
+//
+//            // TODO If there is a syntax error within the first n items
+//            // then the format won't be recognized at all
+//            // We should add an indirection layer that allows to configure the prober
+//            // and query its result before allowing the client to obtain the input stream
+//            int n = 100;
+//            try {
+//                long count = flow.take(n)
+//                        .count()
+//                        .blockingGet();
+//
+//                successCountToLang.put(count, cand);
+//
+//                logger.debug("Number of items parsed by content type probing for " + cand + ": " + count);
+//            } catch(Exception e) {
+//                logger.debug("Failed to probe with format " + cand, e);
+//                continue;
+//            } finally {
+//                // logger.debug("Probing format " + cand + " took " + sw.elapsed(TimeUnit.MILLISECONDS));
+//
+//                try {
+//                    in.reset();
+//                } catch (IOException x) {
+//                    throw new RuntimeException(x);
+//                }
+//            }
+//
+//            if (!tryAllCandidates) {
+//                break;
+//            }
+//        }
+//
+//        Entry<Long, Lang> bestCand = successCountToLang.entries().stream()
+//            .sorted((a, b) -> b.getKey().compareTo(a.getKey()))
+//            .findFirst()
+//            .orElse(null);
+//
+//        ContentType bestContentType = bestCand == null ? null : bestCand.getValue().getContentType();
+//        TypedInputStream result = new TypedInputStream(in, bestContentType);
+//
+//        return result;
+//    }
+
 
     public static void peek(InputStream in) {
         in.mark(1 * 1024 * 1024 * 1024);
@@ -360,7 +460,7 @@ public class RDFDataMgrEx {
      * @param probeLangs
      * @return
      */
-    public static TypedInputStream open(String src, Iterable<Lang> probeLangs) {
+    public static TypedInputStream open(String src, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
         Objects.requireNonNull(src);
 
         boolean useStdIn = isStdIn(src);
@@ -376,46 +476,56 @@ public class RDFDataMgrEx {
         } else {
             result = Objects.requireNonNull(RDFDataMgr.open(src), "Could not create input stream from " + src);
 
-            result = probeForSpecificLang(result, probeLangs);
+            result = probeForSpecificLang(result, probeLangs, errorCollector);
         }
 
         return result;
     }
-    
-    /** open via nio */
-    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs) {
-    	InputStream in;
-		try {
-			in = Files.newInputStream(path);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    	
-    	return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs);
+
+    public static TypedInputStream open(String src, Iterable<Lang> probeLangs) {
+        return open(src, probeLangs, new ArrayList<>());
     }
-    
-	public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs) {
-		// TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
-		// rather than the actual content - so we may be fooled here
-		ContentType mediaType = result.getMediaType();
-		if (mediaType != null) {
-		    // Check if the detected content type matches the ones we are probing for
-		    // If not then unset the content type and probe the content again
-		    String mediaTypeStr = mediaType.toHeaderString();
-		    boolean mediaTypeInProbeLangs = Streams.stream(probeLangs)
-		            .anyMatch(lang -> RDFLanguagesEx.getAllContentTypes(lang).contains(mediaTypeStr));
 
-		    if (!mediaTypeInProbeLangs) {
-		        mediaType = null;
-		    }
-		}
+    /** open via nio */
+    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
+        InputStream in;
+        try {
+            in = Files.newInputStream(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-		if(mediaType == null) {
-		    result = probeLang(forceBuffered(result.getInputStream()), probeLangs);
-		}
-		return result;
-	}
+        return probeForSpecificLang(new TypedInputStream(in, (ContentType)null), probeLangs, errorCollector);
+    }
 
+    public static TypedInputStream open(Path path, Iterable<Lang> probeLangs) {
+        return open(path, probeLangs, null);
+    }
+
+    public static TypedInputStream probeForSpecificLang(TypedInputStream result, Iterable<Lang> probeLangs, Collection<Entry<Lang, Throwable>> errorCollector) {
+        // TODO Should we rely on the content type returned by RDFDataMgr? It may be based on e.g. a file extension
+        // rather than the actual content - so we may be fooled here
+
+        // Expand the languages such that when  probing for languages such as turtle or trig then we also accept ntriples or nquads
+        Set<Lang> expandedLangs = RDFLanguagesEx.expandWithSubLangs(probeLangs);
+        ContentType mediaType = result.getMediaType();
+        if (mediaType != null) {
+            // Check if the detected content type matches the ones we are probing for
+            // If not then unset the content type and probe the content again
+            String mediaTypeStr = mediaType.toHeaderString();
+            boolean mediaTypeInProbeLangs = expandedLangs.stream()
+                    .anyMatch(lang -> RDFLanguagesEx.getAllContentTypes(lang).contains(mediaTypeStr));
+
+            if (!mediaTypeInProbeLangs) {
+                mediaType = null;
+            }
+        }
+
+        if(mediaType == null) {
+            result = probeLang(forceBuffered(result.getInputStream()), probeLangs, errorCollector);
+        }
+        return result;
+    }
 
     public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
         InputStream combined = prependWithPrefixes(in, prefixMapping);
@@ -534,42 +644,50 @@ public class RDFDataMgrEx {
     }
 
 
-    public static void readAsGiven(Graph graph, String uri) {
+    public static Graph readAsGiven(Graph graph, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(graph);
+        return graph;
     }
 
-    public static void readAsGiven(Model model, String uri) {
+    public static Model readAsGiven(Model model, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(model);
+        return model;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, String uri) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, String uri) {
+    public static Dataset readAsGiven(Dataset dataset, String uri) {
         newParserBuilderForReadAsGiven(null).source(uri).parse(dataset);
+        return dataset;
     }
-    
+
     public static Model loadModelAsGiven(String uri) {
         Model result = ModelFactoryEx.createInsertOrderPreservingModel();
         readAsGiven(result, uri);
         return result;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, String uri, String baseIri) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, String uri, String baseIri) {
         newParserBuilderForReadAsGiven(baseIri).source(uri).parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, String uri, String baseIri) {
+    public static Dataset readAsGiven(Dataset dataset, String uri, String baseIri) {
         readAsGiven(dataset.asDatasetGraph(), uri, baseIri);
+        return dataset;
     }
 
-    public static void readAsGiven(DatasetGraph datasetGraph, InputStream in, Lang lang) {
+    public static DatasetGraph readAsGiven(DatasetGraph datasetGraph, InputStream in, Lang lang) {
         newParserBuilderForReadAsGiven(null).source(in).lang(lang).build().parse(datasetGraph);
+        return datasetGraph;
     }
 
-    public static void readAsGiven(Dataset dataset, InputStream in, Lang lang) {
+    public static Dataset readAsGiven(Dataset dataset, InputStream in, Lang lang) {
         readAsGiven(dataset.asDatasetGraph(), in, lang);
+        return dataset;
     }
 
     public static Dataset loadDatasetAsGiven(String uri, String baseIri) {
@@ -578,6 +696,9 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static void writeAsGiven(OutputStream out, Model model, RDFFormat rdfFormat, String baseIri) {
+        writeAsGiven(out, DatasetFactory.wrap(model), rdfFormat, baseIri);
+    }
 
     public static void writeAsGiven(OutputStream out, Dataset dataset, RDFFormat rdfFormat, String baseIri) {
         writeAsGiven(out, dataset.asDatasetGraph(), rdfFormat, baseIri);
@@ -588,22 +709,21 @@ public class RDFDataMgrEx {
         Context cxt = RIOT.getContext().copy();
         cxt.setTrue(RIOT.symTurtleOmitBase);
 
+        IRIx irix = baseIri == null
+                ? null
+                : IRIx.create(baseIri) // IRIxResolverUtils.newIRIxAsGiven(baseIri)
+                ;
+
         StreamRDF writer = StreamRDFWriterEx.getWriterStream(
                 out,
                 rdfFormat,
                 cxt,
                 null,
-                null,
+                irix,
                 null,
                 // NodeToLabel.createBNodeByLabelAsGiven(),
                 true
         );
-
-        if (baseIri != null) {
-            // IRIx irix = IRIx.createAny(baseIri);
-            IRIx irix = IRIxResolverUtils.newIRIxAsGiven(baseIri);
-            WriterStreamRDFBaseUtils.setNodeFormatterIRIx((WriterStreamRDFBase)writer, irix);
-        }
 
 
         writer.start();
@@ -628,4 +748,51 @@ public class RDFDataMgrEx {
         // RIOT.multilineLiterals
         // TODO
     }
+
+    /**
+     * Serialize a dataset in memory and return its deserialized version.
+     *
+     * @param dataset The input dataset.
+     * @param rdfFormat The serialization format. Its lang is used for deserialization.
+     * @param result The dataset to write to. If null then a new default dataset is created.
+     * @return The dataset obtained from deserialization.
+     */
+    public static Dataset printParseRoundtrip(Dataset dataset, RDFFormat rdfFormat, Dataset result) {
+        if (result == null) {
+            result = DatasetFactory.create();
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, dataset, rdfFormat);
+            try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                RDFDataMgr.read(result, in, rdfFormat.getLang());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    /**
+     * Serialize a model in memory and return its deserialized version.
+     *
+     * @param model The input model.
+     * @param rdfFormat The serialization format. Its lang is used for deserialization.
+     * @param result The model to write to. If null then a new default model is created.
+     * @return The model obtained from deserialization.
+     */
+    public static Model printParseRoundtrip(Model model, RDFFormat rdfFormat, Model result) {
+        if (result == null) {
+            result = ModelFactory.createDefaultModel();
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, model, rdfFormat);
+            try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                RDFDataMgr.read(result, in, rdfFormat.getLang());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
 }

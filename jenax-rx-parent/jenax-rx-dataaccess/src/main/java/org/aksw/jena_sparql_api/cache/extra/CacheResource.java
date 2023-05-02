@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.cache.extra;
 
 
+import java.io.Closeable;
 import java.util.Iterator;
 
-import org.aksw.commons.collections.IClosable;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -15,7 +15,7 @@ import org.apache.jena.rdf.model.Model;
  *         Time: 2:42 PM
  */
 public interface CacheResource
-    extends IClosable
+    extends Closeable
 {
     boolean isOutdated();
 

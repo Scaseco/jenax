@@ -44,6 +44,7 @@ import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jena_sparql_api.shape.lookup.MapServiceResourceShape;
 import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -54,7 +55,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -235,7 +235,7 @@ public class RdfMapperEngineImpl
         //Graph result;
         Map<Node, RDFNode> result;
         if(!shape.isEmpty()) {
-            RDFConnection qef = sparqlService.getRDFConnection();
+            QueryExecutionFactoryQuery qef = sparqlService.getQueryExecutionFactory();
             LookupService<Node, Graph> ls = MapServiceResourceShape.createLookupService(qef, shape);
             Map<Node, Graph> map = ls.fetchMap(nodes);
 

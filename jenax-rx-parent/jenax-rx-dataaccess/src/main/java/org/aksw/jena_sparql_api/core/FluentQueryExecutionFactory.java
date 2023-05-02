@@ -16,9 +16,12 @@ import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -134,6 +137,32 @@ public class FluentQueryExecutionFactory<P>
 
     public static FluentQueryExecutionFactory<?> from(DatasetGraph datasetGraph){
         return new FluentQueryExecutionFactory<Object>(new QueryExecutionFactoryDatasetGraph(datasetGraph, false));
+    }
+
+    /** @since 4.5.0 */
+    public static FluentQueryExecutionFactory<?> from(QueryExecutionFactoryQuery qefq) {
+        return new FluentQueryExecutionFactory<Object>(new QueryExecutionFactoryBase() {
+
+            @Override
+            public QueryExecution createQueryExecution(Query query) {
+                return qefq.createQueryExecution(query);
+            }
+
+            @Override
+            public QueryExecution createQueryExecution(String queryString) {
+                throw new RuntimeException("Cannot handle query as string. Wrap with a parser.");
+            }
+
+            @Override
+            public String getState() {
+                return "";
+            }
+
+            @Override
+            public String getId() {
+                return "";
+            }
+        });
     }
 
     public static FluentQueryExecutionFactory<?> http(String service, String ... defaultGraphs){

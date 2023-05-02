@@ -6,29 +6,22 @@ import org.apache.jena.sparql.expr.aggregate.Accumulator;
 import org.apache.jena.sparql.function.FunctionEnv;
 
 public class AccJenaWrapper
-	implements Acc<NodeValue>
+    implements Acc<NodeValue>
 {
-	protected org.apache.jena.sparql.expr.aggregate.Accumulator delegate;
-	protected FunctionEnv functionEnv;
+    protected org.apache.jena.sparql.expr.aggregate.Accumulator delegate;
 
     public AccJenaWrapper(Accumulator delegate) {
-    	this(delegate, null);
+        super();
+        this.delegate = delegate;
     }
 
-    public AccJenaWrapper(Accumulator delegate, FunctionEnv functionEnv) {
-		super();
-		this.delegate = delegate;
-		this.functionEnv = functionEnv;
-	}
-
     @Override
-	public void accumulate(Binding binding) {
-    	delegate.accumulate(binding, functionEnv);
+    public void accumulate(Binding binding, FunctionEnv env) {
+        delegate.accumulate(binding, env);
     }
 
     @Override
     public NodeValue getValue() {
-    	return delegate.getValue();
+        return delegate.getValue();
     }
-
 }

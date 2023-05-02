@@ -4,9 +4,10 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.function.FunctionEnv;
 
 public class AccMap<K, V>
-    extends AccMap2<Binding, K, V, Agg<V>>
+    extends AccMap2<Binding, FunctionEnv, K, V, Agg<V>>
     implements Acc<Map<K, V>>
 {
     public AccMap(BiFunction<Binding, Long, K> mapper, Agg<V> subAgg) {

@@ -1,10 +1,11 @@
 package org.aksw.jena_sparql_api.conjure.noderef;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
@@ -17,7 +18,8 @@ public interface NodeRef
 {
     @IriNs("rpif")
     @HashId
-    DataRef getDataRef();
+    @PolymorphicOnly
+    RdfDataRef getDataRef();
     NodeRef setDataRef(Resource dataRef);
 
     @IriNs("rpif")
@@ -37,7 +39,7 @@ public interface NodeRef
 //    }
 
     public static NodeRef createForFile(Model model, String fileIri, Node node, Node graph) {
-      DataRef dataRef = model.createResource().as(DataRefUrl.class).setDataRefUrl(fileIri);
+      RdfDataRef dataRef = model.createResource().as(RdfDataRefUrl.class).setDataRefUrl(fileIri);
 
       NodeRef result = model.createResource().as(NodeRef.class)
         .setDataRef(dataRef)
@@ -48,16 +50,24 @@ public interface NodeRef
     }
 
     public static NodeRef createForDcatEntity(Model model, Node dcatEntity, Node node, Node graph) {
-        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecordNode(dcatEntity);
-//        DataRef dataRef = model.createResource().as(DataRefDcat.class).setDcatRecord(model.wrapAsResource(dcatEntity));
+        RdfDataRef dataRef = model.createResource().as(RdfDataRefDcat.class)
+                .setDcatRecordNode(dcatEntity);
+
+        NodeRef result = createForDataRef(model, dataRef.asNode(), node, graph);
+
+        return result;
+      }
+
+    public static NodeRef createForDataRef(Model model, Node dataRef, Node node, Node graph) {
 
         NodeRef result = model.createResource().as(NodeRef.class)
-          .setDataRef(dataRef)
+          .setDataRef(model.wrapAsResource(dataRef))
           .setNode(node)
           .setGraph(graph);
 
         return result;
       }
+
 
 }
 

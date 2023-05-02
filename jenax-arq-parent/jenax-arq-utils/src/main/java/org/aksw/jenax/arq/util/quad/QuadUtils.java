@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.arq.util.tuple.TupleAccessorQuad;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
+import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeQuad;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -61,6 +61,17 @@ public class QuadUtils {
         }
     }
 
+    /** Return a new quad by setting the specified index to the given value */
+    public static Quad setNode(Quad quad, int idx, Node node) {
+        switch (idx) {
+        case 0: return Quad.create(           node, quad.getSubject(), quad.getPredicate(), quad.getObject());
+        case 1: return Quad.create(quad.getGraph(),              node, quad.getPredicate(), quad.getObject());
+        case 2: return Quad.create(quad.getGraph(), quad.getSubject(),                node, quad.getObject());
+        case 3: return Quad.create(quad.getGraph(), quad.getSubject(), quad.getPredicate(),             node);
+        default: throw new IndexOutOfBoundsException("Cannot access index " + idx + " of a quad");
+        }
+    }
+
     public static TupleSlot idxToSlot(int idx) {
         return SLOTS[idx];
     }
@@ -73,6 +84,7 @@ public class QuadUtils {
         return getNode(quad, slotToIdx(slot));
     }
 
+    @Deprecated /* Use NodeTransformLib */
     public static Quad applyNodeTransform(Quad quad,
             NodeTransform nodeTransform) {
         Node g = nodeTransform.apply(quad.getGraph());
@@ -89,6 +101,31 @@ public class QuadUtils {
         return result;
     }
 
+    public static Quad applyNodeTransform(Quad quad,
+            NodeTransform nodeTransform, boolean tg, boolean ts, boolean tp, boolean to) {
+        Node g = quad.getGraph();
+        Node s = quad.getSubject();
+        Node p = quad.getPredicate();
+        Node o = quad.getObject();
+
+        // new values after transformation
+        Node ng = tg ? nodeTransform.apply(g) : g;
+        Node ns = ts ? nodeTransform.apply(s) : s;
+        Node np = tp ? nodeTransform.apply(p) : p;
+        Node no = to ? nodeTransform.apply(o) : o;
+
+        // final values
+        Node fg = ng != null ? ng : g;
+        Node fs = ns != null ? ns : s;
+        Node fp = np != null ? np : p;
+        Node fo = no != null ? no : o;
+
+        Quad result = fg == g && fs == s && fp == p && fo == o
+                ? quad
+                : new Quad(fg, fs, fp, fo);
+        return result;
+    }
+
     /**
      * Create a quad from an array
      *
@@ -97,6 +134,20 @@ public class QuadUtils {
      */
     public static Quad create(Node[] nodes) {
         return new Quad(nodes[0], nodes[1], nodes[2], nodes[3]);
+    }
+
+    public static Quad createMatch(Node g, Node s, Node p, Node o) {
+        return new Quad(
+                NodeUtils.nullToAny(g),
+                NodeUtils.nullToAny(s),
+                NodeUtils.nullToAny(p),
+                NodeUtils.nullToAny(o));
+    }
+
+    /** A shorted form for {@link Quad#matches(Node, Node, Node, Node)} where the argument is a Quad. */
+    public static boolean matches(Quad pattern, Quad quad) {
+        boolean result = pattern.matches(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject());
+        return result;
     }
 
     public static Node[] quadToArray(Quad quad) {
@@ -116,10 +167,8 @@ public class QuadUtils {
                 throw new RuntimeException("Variable " + node + "not bound");
             }
         }
-
         return result;
     }
-
 
     public static Quad copySubstitute(Quad quad, Binding binding) {
         return new Quad(substitute(quad.getGraph(), binding),
@@ -128,11 +177,9 @@ public class QuadUtils {
                 substitute(quad.getObject(), binding));
     }
 
-
     public static Set<Var> getVarsMentioned(Quad quad) {
         return NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
     }
-
 
     public static Map<Node, Set<Quad>> partitionByGraph(Iterable<Quad> quads) {
         Map<Node, Set<Quad>> result = new HashMap<>();
@@ -214,7 +261,7 @@ public class QuadUtils {
 
 
     public static Binding quadToBinding(Quad pattern, Quad assignment) {
-        return TupleUtils.tupleToBinding(TupleAccessorQuad.INSTANCE, pattern, assignment);
+        return TupleUtils.tupleToBinding(TupleBridgeQuad.INSTANCE, pattern, assignment);
     }
 
 
@@ -259,5 +306,9 @@ public class QuadUtils {
             targetAcc.add(tgt);
         }
         return targetAcc;
+    }
+
+    public static boolean isDefaultGraph(Quad quad) {
+        return quad != null && Quad.isDefaultGraph(quad.getGraph());
     }
 }

@@ -29,14 +29,12 @@ import org.aksw.jenax.arq.util.triple.Triples;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -661,15 +659,15 @@ public class ResourceShape {
                 + "]";
     }
 
-    public static Graph fetchData(SparqlService sparqlService, ResourceShape shape, Node node) {
-        RDFConnection qef = sparqlService.getRDFConnection();
+//    public static Graph fetchData(SparqlService sparqlService, ResourceShape shape, Node node) {
+//        RDFConnection qef = sparqlService.getRDFConnection();
+//
+//        Graph result = fetchData(qef, shape, node);
+//        return result;
+//    }
 
-        Graph result = fetchData(qef, shape, node);
-        return result;
-    }
 
-
-    public static Graph fetchData(SparqlQueryConnection qef, ResourceShape shape, Node node) {
+    public static Graph fetchData(QueryExecutionFactoryQuery qef, ResourceShape shape, Node node) {
         MappedConcept<Graph> mc = ResourceShape.createMappedConcept(shape, null, false);
         LookupService<Node, Graph> ls = LookupServiceUtils.createLookupService(qef, mc);
         Map<Node, Graph> map = ls.fetchMap(Collections.singleton(node));

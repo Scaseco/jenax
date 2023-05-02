@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefDcat;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefOp;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefUrl;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefOp;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpConstruct;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData;
@@ -46,7 +46,6 @@ import org.aksw.jena_sparql_api.conjure.job.api.JobParam;
 import org.aksw.jena_sparql_api.conjure.traversal.api.OpTraversalSelf;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
-import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -202,11 +201,11 @@ public class MainConjurePlayground {
         Op anonymousConjureWorkflow = OpUnion.create(null, countPredicates, reportDate);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String str = RDFNodeJsonUtils.toJsonNodeString(anonymousConjureWorkflow, gson);
-        System.out.println(str);
-        RDFNode tmp = RDFNodeJsonUtils.toRDFNode(str, gson);
+        //String str = RDFNodeJsonUtils.toJsonNodeString(anonymousConjureWorkflow, gson);
+        //System.out.println(str);
+        //RDFNode tmp = RDFNodeJsonUtils.toRDFNode(str, gson);
 
-        anonymousConjureWorkflow = JenaPluginUtils.polymorphicCast(tmp, Op.class);
+        anonymousConjureWorkflow = JenaPluginUtils.polymorphicCast(anonymousConjureWorkflow, Op.class);
 
         /* Example RDF output:
 
@@ -332,33 +331,33 @@ public class MainConjurePlayground {
         // (and gears and screws one wants to configure for production use - and which may at this stage sometimes break)
         HttpResourceRepositoryFromFileSystemImpl repo = HttpResourceRepositoryFromFileSystemImpl.createDefault();
         ResourceStore cacheStore = repo.getCacheStore();
-        OpExecutorDefault catalogExecutor = new OpExecutorDefault(repo, null, new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
+        OpExecutorDefault catalogExecutor = new OpExecutorDefault(null, repo, null, new LinkedHashMap<>(), RDFFormat.TURTLE_PRETTY);
 
         // Get a copy of the limbo dataset catalog via the repo so that it gets cached
-        DataRef dataRef1 = DataRefUrl.create(model, "https://gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl");
+        RdfDataRef dataRef1 = RdfDataRefUrl.create(model, "https://gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl");
 
         // Or set up a workflow that makes databus available
-        DataRef dataRef2 = DataRefSparqlEndpoint.create(model, "https://databus.dbpedia.org/repo/sparql");
+        RdfDataRef dataRef2 = RdfDataRefSparqlEndpoint.create(model, "https://databus.dbpedia.org/repo/sparql");
 
 
         // Create a data ref from a workflow
-        DataRef dataRef3 = DataRefOp.create(
+        RdfDataRef dataRef3 = RdfDataRefOp.create(
                 OpUpdateRequest.create(model, OpData.create(model),
 //					parser.apply("INSERT DATA { [] dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <file:///home/raven/tmp/test.hdt> ] }").toString()));
                         parser.apply("INSERT DATA { [] dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <http://localhost/~raven/bib_lds_20190305.hdt.gz> ] }").toString()));
 
-        DataRef dataRef4 = DataRefOp.create(
+        RdfDataRef dataRef4 = RdfDataRefOp.create(
                 OpUpdateRequest.create(model, OpData.create(model),
 //					parser.apply("INSERT DATA { [] dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <file:///home/raven/tmp/test.hdt> ] }").toString()));
                         parser.apply("INSERT DATA { <http://mydata> dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <https://data.dnb.de/opendata/zdb_lds.hdt.gz> ] }").toString()));
 
 
-            DataRef dataRef5 = DataRefOp.create(
+            RdfDataRef dataRef5 = RdfDataRefOp.create(
                     OpUpdateRequest.create(model, OpData.create(model),
 //						parser.apply("INSERT DATA { [] dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <file:///home/raven/tmp/test.hdt> ] }").toString()));
                             parser.apply("INSERT DATA { <http://mydata> dataid:group eg:mygrp ; dcat:distribution [ dcat:downloadURL <http://localhost/~raven/009e80050fa7f4279596956477157ec2.hdt> ] }").toString()));
 
-        DataRef dataRefX = dataRef4;
+        RdfDataRef dataRefX = dataRef4;
 
         // Set up the workflow that makes a digital copy of a dataset available
         Op basicWorkflow = OpDataRefResource.from(model, dataRefX);
@@ -391,7 +390,7 @@ public class MainConjurePlayground {
         //List<Resource> inputRecords;
 //		try(RdfDataObject catalog = DataObjects.fromSparqlEndpoint("https://databus.dbpedia.org/repo/sparql", null, null)) {
         try(RdfDataPod catalog = basicWorkflow.accept(catalogExecutor)) {
-            try(RDFConnection conn = catalog.openConnection()) {
+            try(RDFConnection conn = catalog.getConnection()) {
 
                 List<Resource> inputRecords = SparqlRx.execConstructGrouped(conn, dcatQuery, Vars.a)
                         .map(RDFNode::asResource)
@@ -419,7 +418,7 @@ public class MainConjurePlayground {
                         xxmodel.add(r.getModel());
                         r = r.inModel(xxmodel);
 
-                        DataRefDcat dr = DataRefDcat.create(xxmodel, r);
+                        RdfDataRefDcat dr = RdfDataRefDcat.create(xxmodel, r);
                         Op odr = OpDataRefResource.from(dr.getModel(), dr);
 
                         RDFDataMgr.write(System.err, dr.getModel(), RDFFormat.TURTLE_PRETTY);

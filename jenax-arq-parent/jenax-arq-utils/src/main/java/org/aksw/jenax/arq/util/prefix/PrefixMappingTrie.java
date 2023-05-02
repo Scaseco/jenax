@@ -7,9 +7,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 import org.apache.jena.atlas.lib.Trie;
+import org.apache.jena.ext.com.google.common.cache.Cache;
+import org.apache.jena.ext.com.google.common.cache.CacheBuilder;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.graph.PrefixMappingBase;
@@ -26,21 +29,27 @@ public class PrefixMappingTrie extends PrefixMappingBase {
     private Map<String, String> prefixToUri = new ConcurrentHashMap<>();
     private Trie<String> uriToPrefix = new Trie<>();
 
+    private Cache<String, Optional<String>> longestMatchCache = CacheBuilder.newBuilder().maximumSize(1000).build();
+
     public PrefixMappingTrie() {}
 
-
     @Override
-    public Optional<Entry<String, String>> findMapping( String uri, boolean partial ) {
-        String prefix = partial
-                ? uriToPrefix.longestMatch(uri)
-                : uriToPrefix.get(uri);
+    public Optional<Entry<String, String>> findMapping(String uri, boolean partial ) {
+        String prefix;
+        try {
+            prefix = partial
+                    ? longestMatchCache.get(uri, () -> Optional.ofNullable(uriToPrefix.longestMatch(uri))).orElse(null)
+                    : uriToPrefix.get(uri);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Unexpected failure during cache lookup", e);
+        }
 
         return Optional.ofNullable(prefix).map(p -> new SimpleEntry<>(p, prefixToUri.get(p)));
     }
 
-
     @Override
     protected void add(String prefix, String uri) {
+        longestMatchCache.invalidateAll();
         prefixToUri.put(prefix, uri);
         uriToPrefix.add(uri, prefix);
     }
@@ -52,6 +61,7 @@ public class PrefixMappingTrie extends PrefixMappingBase {
      */
     @Override
     protected void remove(String prefix) {
+        longestMatchCache.invalidateAll();
         String u = prefixToUri(prefix);
         if ( u == null )
             return;
@@ -66,17 +76,19 @@ public class PrefixMappingTrie extends PrefixMappingBase {
     // Find a prefix for a uri that isn't the supplied prefix.
     protected String findReverseMapping(String uri, String prefixExclude) {
         Objects.requireNonNull(prefixExclude);
-        for ( Map.Entry<String, String> e : prefixToUri.entrySet() ) {
+        for (Map.Entry<String, String> e : prefixToUri.entrySet() ) {
             String p = e.getKey();
             String u = e.getValue();
-            if ( uri.equals(u) && ! prefixExclude.equals(p) )
+            if (uri.equals(u) && !prefixExclude.equals(p)) {
                 return p;
+            }
         }
         return null;
     }
 
     @Override
     protected void clear() {
+        longestMatchCache.invalidateAll();
         prefixToUri.clear();
         uriToPrefix.clear();
     }

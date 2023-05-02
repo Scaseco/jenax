@@ -16,21 +16,21 @@ import org.aksw.commons.collector.domain.Aggregator;
  * @param <B>
  * @param <T>
  */
-public class AggregatorBuilder<B, T> {
+public class AggregatorBuilder<B, E, T> {
 
-    protected Aggregator<B, T> state;
+    protected Aggregator<B, E, T> state;
 
-    public AggregatorBuilder(Aggregator<B, T> state) {
+    public AggregatorBuilder(Aggregator<B, E, T> state) {
         super();
         this.state = state;
     }
 
-    public Aggregator<B, T> get() {
+    public Aggregator<B, E, T> get() {
         return state;
     }
 
-    public <K> AggregatorBuilder<B, Map<K, T>> wrapWithMap(Function<B, K> bindingToKey) {
-        Aggregator<B, Map<K, T>> agg = AggMap2.create(bindingToKey, state);
+    public <K> AggregatorBuilder<B, E, Map<K, T>> wrapWithMap(Function<B, K> bindingToKey) {
+        Aggregator<B, E, Map<K, T>> agg = AggMap2.create(bindingToKey, state);
 
         return new AggregatorBuilder<>(agg);
     }
@@ -41,32 +41,32 @@ public class AggregatorBuilder<B, T> {
      * so that given a jena Binding, each (var, node) pair is mapped to a (var, string) pair.
      * the resulting aggregator yields for each binding's var the Set<String> of the inner aggregator
      */
-    public <X, K, V> AggregatorBuilder<X, Map<K, T>> wrapWithMultiplexDynamic(
+    public <X, K, V> AggregatorBuilder<X, E, Map<K, T>> wrapWithMultiplexDynamic(
             Function<? super X, ? extends Iterator<? extends K>> keyMapper,
             BiFunction<? super X, ? super K, ? extends B> valueMapper) {
-        Aggregator<B, T> local = state;
-        Aggregator<X, Map<K, T>> agg = () -> AccMultiplexDynamic.create(keyMapper, valueMapper, local);
+        Aggregator<B, E, T> local = state;
+        Aggregator<X, E, Map<K, T>> agg = () -> AccMultiplexDynamic.create(keyMapper, valueMapper, local);
 
         return new AggregatorBuilder<>(agg);
     }
 
-    public <O> AggregatorBuilder<B, O> wrapWithTransform(Function<? super T, O> transform) {
-        Aggregator<B, O> agg = AggTransform2.create(state, transform);
+    public <O> AggregatorBuilder<B, E, O> wrapWithTransform(Function<? super T, O> transform) {
+        Aggregator<B, E, O> agg = AggTransform2.create(state, transform);
 
         return new AggregatorBuilder<>(agg);
     }
 
-    public AggregatorBuilder<B, T> wrapWithCondition(Predicate<B> predicate) {
+    public AggregatorBuilder<B, E, T> wrapWithCondition(Predicate<B> predicate) {
         // TODO Is this correct??? i.e. calling createAccumulator here
-        Aggregator<B, T> local = state;
-        Aggregator<B, T> agg = () -> AccCondition.create(predicate, local.createAccumulator());
+        Aggregator<B, E, T> local = state;
+        Aggregator<B, E, T> agg = () -> AccCondition.create(predicate, local.createAccumulator());
 
         return new AggregatorBuilder<>(agg);
     }
 
-    public <U> AggregatorBuilder<U, T> wrapWithBindingTransform(Function<? super U, B> transform) {
-        Aggregator<B, T> local = state;
-        Aggregator<U, T> agg = () -> AccBindingTransform.create(transform, local.createAccumulator());
+    public <U> AggregatorBuilder<U, E, T> wrapWithBindingTransform(Function<? super U, B> transform) {
+        Aggregator<B, E, T> local = state;
+        Aggregator<U, E, T> agg = () -> AccBindingTransform.create(transform, local.createAccumulator());
 
         return new AggregatorBuilder<>(agg);
     }
@@ -77,7 +77,7 @@ public class AggregatorBuilder<B, T> {
 //        return new AggregatorBuilder<>(agg);
 //    }
 
-    public static <B, T> AggregatorBuilder<B, T> from(Aggregator<B, T> agg) {
+    public static <B, E, T> AggregatorBuilder<B, E, T> from(Aggregator<B, E, T> agg) {
         return new AggregatorBuilder<>(agg);
     }
 

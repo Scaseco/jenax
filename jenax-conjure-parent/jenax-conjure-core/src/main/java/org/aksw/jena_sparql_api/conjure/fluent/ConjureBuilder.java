@@ -2,13 +2,13 @@ package org.aksw.jena_sparql_api.conjure.fluent;
 
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRef;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.apache.jena.rdf.model.Model;
 
 public interface ConjureBuilder {
 	ConjureContext getContext();
 
-	ConjureFluent fromDataRef(DataRef dataRef);
+	ConjureFluent fromDataRef(RdfDataRef dataRef);
 	
 	/**
 	 * Lambda based creation which passes in the context's model, so all triples can be
@@ -17,7 +17,7 @@ public interface ConjureBuilder {
 	 * @param dataRefFn
 	 * @return
 	 */
-	ConjureFluent fromDataRefFn(Function<? super Model, ? extends DataRef> dataRefFn);
+	ConjureFluent fromDataRefFn(Function<? super Model, ? extends RdfDataRef> dataRefFn);
 
 	ConjureFluent fromUrl(String url);
 	ConjureFluent fromVar(String name);

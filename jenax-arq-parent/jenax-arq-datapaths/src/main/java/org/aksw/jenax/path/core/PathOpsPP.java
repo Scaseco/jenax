@@ -70,13 +70,19 @@ public class PathOpsPP
 
     @Override
     public String toStringRaw(Object path) {
-    	return toString((PathPP)path);
+        return toString((PathPP)path);
     }
 
     @Override
     public String toString(PathPP path) {
-        org.apache.jena.sparql.path.Path tmp = PathUtils.toSparqlPath(path.getSegments());
-        String str = tmp.toString(new Prologue(PrefixMapping.Extended));
+        List<P_Path0> segments = path.getSegments();
+        String str;
+        if (segments.size() > 0) {
+            org.apache.jena.sparql.path.Path tmp = PathUtils.toSparqlPath(segments);
+            str = tmp.toString(new Prologue(PrefixMapping.Extended));
+        } else {
+            str = "";
+        }
 
         String result = (path.isAbsolute() ? "/" : "") + str;
 

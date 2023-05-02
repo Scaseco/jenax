@@ -1,10 +1,11 @@
 package org.aksw.jena_sparql_api.cache.staging;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-import org.aksw.commons.collections.IClosable;
+import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jena_sparql_api.cache.extra.InputStreamProvider;
 
 /**
@@ -17,10 +18,10 @@ public class InputStreamProviderBlobClosable
     implements InputStreamProvider
 {
     //private java.sql.ResultSet rs;
-	private IClosable closable;
+	private Closeable closable;
     private Blob blob;
 
-    public InputStreamProviderBlobClosable(Blob blob, IClosable closable) {
+    public InputStreamProviderBlobClosable(Blob blob, Closeable closable) {
         //this.rs = rs;
         this.blob = blob;
         this.closable = closable;
@@ -38,9 +39,6 @@ public class InputStreamProviderBlobClosable
 
     @Override
     public void close() {
-    	if(closable != null) {
-    		closable.close();
-    	}
-        //SqlUtils.close(rs);
+      	 AutoCloseables.close(closable);
     }
 }

@@ -1,3 +1,9 @@
+---
+title: RDF Annotations
+parent: Resources
+nav_order: 10
+---
+
 # RDF Annotations
 
 This module purely features annotations for expressing RDF&lt;-&gt;Java mappings. This module has no dependencies.

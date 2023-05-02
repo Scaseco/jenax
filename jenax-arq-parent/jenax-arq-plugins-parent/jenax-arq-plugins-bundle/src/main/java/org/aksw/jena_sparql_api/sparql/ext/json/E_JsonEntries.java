@@ -2,9 +2,6 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import java.util.Map.Entry;
 
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase1;
@@ -50,16 +47,13 @@ public class E_JsonEntries
     public NodeValue exec(NodeValue nv) {
 
         NodeValue result = null;
-        JsonElement json = E_JsonPath.asJson(nv);
+        JsonElement json = JenaJsonUtils.extractJsonElementOrNull(nv);
 
         if(json != null) {
             if(json.isJsonObject() && !json.isJsonArray()) {
                 JsonObject jo = json.getAsJsonObject();
                 JsonArray arr = keysToArray(jo, "key", "value");
-
-                RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-                Node node = E_JsonPath.jsonToNode(arr, gson, jsonDatatype);
-                result = NodeValue.makeNode(node);
+                result = JenaJsonUtils.convertJsonToNodeValue(arr);
             }
         }
 

@@ -1,16 +1,15 @@
 package org.aksw.jena_sparql_api.cache.staging;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.aksw.commons.collections.IClosable;
 
 public class InputStreamClosable
     extends InputStreamDecorator
 {
-    private IClosable closable;
+    private Closeable closable;
 
-    public InputStreamClosable(InputStream decoratee, IClosable closable) {
+    public InputStreamClosable(InputStream decoratee, Closeable closable) {
         super(decoratee);
         this.closable = closable;
     }

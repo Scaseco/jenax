@@ -11,11 +11,26 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.aksw.commons.collections.generator.Generator;
+import org.apache.jena.riot.system.RiotChars;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.NodeTransform;
 
 public class VarUtils {
     public static final Pattern VARNAME = Pattern.compile("(\\?|\\$)?(?<varname>\\S*)");
+
+    // https://www.w3.org/TR/sparql11-query/#rVARNAME
+    // PN_CHARS_BASE ::= [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] | [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
+    // PN_CHARS_U	  ::=  	PN_CHARS_BASE | '_'
+    // VARNAME        ::= ( PN_CHARS_U | [0-9] ) ( PN_CHARS_U | [0-9] | #x00B7 | [#x0300-#x036F] | [#x203F-#x2040] )*
+
+    public static boolean isValidFirstCharForVarName(int ch) {
+        return RiotChars.isPNChars_U(ch) ||  RiotChars.range(ch, '0', '9');
+    }
+
+    public static boolean isValidNonFirstCharForVarName(int ch) {
+        return isValidFirstCharForVarName(ch) || ch == 0x00B7 || RiotChars.range(ch, 0x0300, 0x036F) || RiotChars.range(ch, 0x203F, 0x2040);
+    }
+
 
     /**
      * Parse the patterns (?|$)\\S* as variables
@@ -212,7 +227,34 @@ public class VarUtils {
         return result;
     }
 
+    /**
+     * Return a new string that has all characters disallowed in SPARQL variable names replaced with underscore ('_').
+     */
+    public static String safeVarName(String varName) {
+        // NOTE In TARQL there is a comment: "I've omitted UTF-16 character range #x10000-#xEFFFF."
+        StringBuilder sb = new StringBuilder();
+        int[] codePoints = varName.codePoints().toArray();
+        if (codePoints.length > 0) {
+            int before = codePoints[0];
+            int after = isValidFirstCharForVarName(before) ? before : '_';
+            sb.appendCodePoint(after);
+        }
 
+        for (int i = 1; i < codePoints.length; ++i) {
+            int before = codePoints[i];
+            int after = isValidNonFirstCharForVarName(before) ? before : '_';
+            sb.appendCodePoint(after);
+        }
 
+        String result = sb.toString();
+        return result.isEmpty() ? null : result;
+    }
 
+    /**
+     * Create a variable with a safe version of the given name using {@link #safeVarName(String)}.
+     */
+    public static Var safeVar(String varName) {
+        String safeName = safeVarName(varName);
+        return safeName == null ? null : Var.alloc(safeName);
+    }
 }

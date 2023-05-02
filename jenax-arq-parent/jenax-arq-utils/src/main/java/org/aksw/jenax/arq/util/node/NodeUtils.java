@@ -1,16 +1,28 @@
 package org.aksw.jenax.arq.util.node;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.jena.atlas.io.IndentedLineBuffer;
+import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.riot.lang.LabelToNode;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.riot.out.NodeFormatter;
+import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.tokens.Token;
+import org.apache.jena.riot.tokens.Tokenizer;
+import org.apache.jena.riot.tokens.TokenizerText;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.NodeValue;
 
@@ -32,6 +44,12 @@ public class NodeUtils {
     public static final String R2RML_IRI 					= R2RML_NS + "IRI";
     public static final String R2RML_BlankNode 				= R2RML_NS + "BlankNode";
 
+
+    /** Util method for use a sparql function - <pre>{@code<java:org.aksw.jenax.arq.util.node#hashCode>(?x)}</pre> */
+    public static int hashCode(Node node) {
+        int result = node == null ? 0 : node.hashCode();
+        return result;
+    }
 
     /** Compare nodes via {@link NodeValue#compareAlways(NodeValue, NodeValue)} */
     public static int compareAlways(Node o1, Node o2) {
@@ -81,6 +99,15 @@ public class NodeUtils {
         return n == null ? Node.ANY : n;
     }
 
+    public static Node anyToNull(Node n) {
+        return Node.ANY.equals(n) ? null : n;
+    }
+
+    /** Method to canonicalize variables to Node.ANY */
+    public static Node nullOrFluentToAny(Node n) {
+        return n == null || !n.isConcrete() ? Node.ANY : n;
+    }
+
     /**
      * Create a logical conjunction of two nodes:
      * - Node.ANY, null or a variable matches everything
@@ -110,6 +137,12 @@ public class NodeUtils {
         return result;
     }
 
+    /** If the argument is an IRI-node return the IRI - otherwise return null. Argument may be null. */
+    public static String getIriOrNull(Node node) {
+        return node == null
+            ? null
+            : node.isURI() ? node.getURI() : null;
+    }
 
     /**
      * Return a Node's datatype. Thereby, IRIs are returned as rr:IRI and BlankNodes as rr:BlankNode
@@ -159,6 +192,79 @@ public class NodeUtils {
     }
 
     public static List<Node> createLiteralNodes(Iterable<String> strings) {
-		return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+        return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+    }
+
+    public static Number getNumberNullable(Node node) {
+        Number result = null;
+        if (node != null) {
+            Object obj = node.getLiteralValue();
+            if (!(obj instanceof Number)) {
+                throw new RuntimeException("Value is not returned as a number");
+            }
+            result = ((Number)obj);
+        }
+
+        return result;
+    }
+
+    public static Number getNumber(Node node) {
+        Number number = getNumberNullable(node);
+        Objects.requireNonNull(number, "Number expected but got null");
+        return number;
+    }
+
+    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
+
+    /** Variant of {@link NodeFmtLib#strNodesNT(Node...)} that yield nul as UNDEF */
+    public static String strNodesWithUndef(BiConsumer<IndentedWriter, Node> output, Node...nodes) {
+        IndentedLineBuffer sw = new IndentedLineBuffer();
+        boolean first = true;
+        for ( Node n : nodes ) {
+            if ( !first )
+                sw.append(" ");
+            first = false;
+            if ( n == null ) {
+                sw.append("UNDEF");
+                continue;
+            }
+            output.accept(sw, n);
+        }
+        return sw.toString();
+    }
+
+    /** Parse a sequence of nodes into the provided collection */
+    public static <C extends Collection<? super Node>> C parseNodes(String str, C segments) {
+        // NodeFmtLib.strNodes encodes labels - so we need to decode them
+        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
+
+        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
+        while (tokenizer.hasNext()) {
+            Token token = tokenizer.next() ;
+            Node node = token.asNode() ;
+//            if ( node == null )
+//                throw new RiotException("Bad RDF Term: " + str) ;
+
+            if (node != null) {
+                if (node.isBlank()) {
+                    String label = node.getBlankNodeLabel();
+                    node = decoder.get(null, label);
+                }
+            }
+
+            segments.add(node);
+        }
+
+        return segments;
+    }
+
+
+    /** Returns the default graph for null or a blank string or 'default' (inoring case),
+     * otherwise creates an IRI from the argument */
+    public static Node createGraphNode(String graphName) {
+        Node result = graphName == null || graphName.isBlank() || graphName.equalsIgnoreCase("default")
+                ? Quad.defaultGraphIRI
+                : NodeFactory.createURI(graphName);
+        return result;
     }
 }

@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.irix.IRIx;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.out.NodeToLabel;
@@ -37,6 +37,15 @@ public class StreamRDFWriterEx {
             RDFFormat rdfFormat,
             Context context) {
         return getWriterStream(out, rdfFormat, context, null, null, null, null);
+    }
+
+    public static StreamRDF getWriterStream(
+            OutputStream out,
+            Lang lang,
+            Context context) {
+    	StreamRDF rawWriter = StreamRDFWriter.getWriterStream(out, lang, context);
+    	StreamRDF result = enhanceWriterAsGiven(rawWriter, lang);
+    	return result;
     }
 
 
@@ -97,24 +106,38 @@ public class StreamRDFWriterEx {
             Boolean mapQuadsToTriplesForTripleLangs
     ) {
         StreamRDF rawWriter = StreamRDFWriter.getWriterStream(out, rdfFormat, context);
+    	Lang lang = rdfFormat.getLang();
 
-        StreamRDF coreWriter = StreamRDFUtils.unwrap(rawWriter);
+    	StreamRDF result = enhanceWriter(rawWriter, lang, fixedPrefixes, irix, nodeToLabel, mapQuadsToTriplesForTripleLangs);
+    	return result;
+    }
+
+
+    public static StreamRDF enhanceWriterAsGiven(StreamRDF rawWriter, Lang lang) {
+    	StreamRDF result = enhanceWriter(rawWriter, lang, null, null, null, true);
+    	return result;
+    }
+
+	public static StreamRDF enhanceWriter(StreamRDF rawWriter, Lang lang,
+			PrefixMapping fixedPrefixes, IRIx irix, NodeToLabel nodeToLabel,
+			Boolean mapQuadsToTriplesForTripleLangs) {
+		StreamRDF coreWriter = StreamRDFUtils.unwrap(rawWriter);
 
         // Retain blank nodes as given
         if (coreWriter instanceof WriterStreamRDFBase) {
             WriterStreamRDFBase tmp = (WriterStreamRDFBase)coreWriter;
 
             IRIx effectiveIrix = irix == null
-                    ? IRIxResolverUtils.newIRIxAsGiven("")
+                    ? IRIx.create("") // IRIxResolverUtils.newIRIxAsGiven("")
                     : irix;
 
             NodeToLabel effectiveNodeToLabel = nodeToLabel == null
                     ? SyntaxLabels.createNodeToLabelAsGiven()
                     : nodeToLabel;
 
-            WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
             WriterStreamRDFBaseUtils.setNodeToLabel(tmp, effectiveNodeToLabel);
             WriterStreamRDFBaseUtils.updateFormatter(tmp);
+            WriterStreamRDFBaseUtils.setNodeFormatterIRIx(tmp, effectiveIrix);
 
             if (fixedPrefixes != null) {
                 PrefixMap pm = WriterStreamRDFBaseUtils.getPrefixMap(tmp);
@@ -126,7 +149,7 @@ public class StreamRDFWriterEx {
             }
         }
 
-        if (Boolean.TRUE.equals(mapQuadsToTriplesForTripleLangs) && RDFLanguages.isTriples(rdfFormat.getLang())) {
+        if (Boolean.TRUE.equals(mapQuadsToTriplesForTripleLangs) && RDFLanguages.isTriples(lang)) {
             rawWriter = new StreamRDFWrapper(rawWriter) {
                 @Override
                 public void quad(Quad quad) {
@@ -136,7 +159,7 @@ public class StreamRDFWriterEx {
         }
 
         return rawWriter;
-    }
+	}
 
 //  public static StreamRDF getWriterAsGiven(OutputStream out, RDFFormat rdfFormat, Context context) {
 //	return getWriterStream(out, rdfFormat, context, null, )

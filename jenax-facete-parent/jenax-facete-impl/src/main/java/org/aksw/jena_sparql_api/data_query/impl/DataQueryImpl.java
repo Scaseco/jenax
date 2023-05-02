@@ -44,6 +44,7 @@ import org.aksw.jena_sparql_api.pathlet.PathletJoinerImpl;
 import org.aksw.jena_sparql_api.pathlet.PathletSimple;
 import org.aksw.jena_sparql_api.relationlet.RelationletElementImpl;
 import org.aksw.jena_sparql_api.relationlet.RelationletSimple;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
@@ -1099,7 +1100,7 @@ public class DataQueryImpl<T extends RDFNode>
 //        }
 //        Query query = e.getValue();
         //		QueryExecutionUtils.countQuery(query, new QueryExecutionFactorySparqlQueryConnection(conn));
-        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(conn, query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
+        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(QueryExecutionFactories.of(conn), query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
                 .map(range -> CountUtils.toCountInfo(range));
 
         return result;

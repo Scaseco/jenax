@@ -79,7 +79,10 @@ public class FunctionBinder {
     }
 
     public void register(boolean lazy, String uri, Method method, Object invocationTarget) {
-        logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+        if (logger.isDebugEnabled()) {
+            logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+        }
+
         // Stopwatch sw = Stopwatch.createStarted();
         FunctionFactory factory = factory(lazy, method, invocationTarget);
         functionRegistry.put(uri, factory);
@@ -166,12 +169,12 @@ public class FunctionBinder {
 
     /** Lookup a function for a given method in the default registry. Uses {@link #getFunction(FunctionRegistry, Method)}. */
     public static Function getFunction(Method method) {
-    	return getFunction(FunctionRegistry.get(), method);
+        return getFunction(FunctionRegistry.get(), method);
     }
-    
+
     /**
      * Read a (static) method's @Iri annotation and use it to lookup a function in the given registry
-     * 
+     *
      * At present there is no direct mapping of methods to FuncionFactories (without having to read the @Iri annotation)
      */
     public static Function getFunction(FunctionRegistry registry, Method method) {

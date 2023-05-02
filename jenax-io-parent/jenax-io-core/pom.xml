@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-io-parent</artifactId>
-		<version>4.4.0-2</version>
+		<version>4.8.0-1</version>
 	</parent>
 
 	<dependencies>
@@ -62,9 +62,14 @@
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-io-process-pipes</artifactId>
+			<artifactId>aksw-commons-io-hadoop</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-process-pipes</artifactId>
+		</dependency>
+	
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>

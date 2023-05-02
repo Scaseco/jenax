@@ -1,16 +1,16 @@
 package org.aksw.jena_sparql_api.lookup;
 
+import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public class SparqlFlowEngine {
     //protected Function<String, Query> queryParser;
     protected SparqlQueryParser queryParser;
-    protected SparqlQueryConnection qef;
+    protected QueryExecFactoryQuery qef;
 
-    public SparqlFlowEngine(SparqlQueryConnection qef) {
+    public SparqlFlowEngine(QueryExecFactoryQuery qef) {
         this.qef = qef;
         queryParser = SparqlQueryParserImpl.create();
     }

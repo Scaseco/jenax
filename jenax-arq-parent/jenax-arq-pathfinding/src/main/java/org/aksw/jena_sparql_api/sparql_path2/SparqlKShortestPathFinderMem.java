@@ -6,16 +6,16 @@ import java.util.List;
 
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.TripletPath;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.path.Path;
 
 public class SparqlKShortestPathFinderMem
     implements SparqlKShortestPathFinder
 {
-    protected SparqlQueryConnection qef;
+    protected QueryExecutionFactoryQuery qef;
 
-    public SparqlKShortestPathFinderMem(SparqlQueryConnection qef) {
+    public SparqlKShortestPathFinderMem(QueryExecutionFactoryQuery qef) {
         this.qef = qef;
     }
 
@@ -29,7 +29,7 @@ public class SparqlKShortestPathFinderMem
             boolean r = k == null ? false : rdfPaths.size() >= k;
             return r; });
 
-        
+
         Iterator<TripletPath<Node, Directed<Node>>> result = rdfPaths.stream()
         	.map(NestedPath::asSimpleDirectedPath)
         	.iterator();

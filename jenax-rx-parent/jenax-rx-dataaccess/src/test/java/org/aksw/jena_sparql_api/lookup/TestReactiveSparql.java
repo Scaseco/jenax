@@ -11,14 +11,13 @@ import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.delay.core.QueryExecutionFactoryDelay;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactorySparqlQueryConnection;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sys.JenaSystem;
@@ -36,10 +35,12 @@ public class TestReactiveSparql {
 
     //@Test
     public void testSelectLookupSimple() {
-        RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        // RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        Dataset dataset = RDFDataMgr.loadDataset("virtual-predicates-example.ttl");
+        QueryExecutionFactoryQuery qef = new QueryExecutionFactoryDataset(dataset);
 
         LookupService<Node, Table> ls = new LookupServiceSparqlQuery(
-                conn,
+                qef,
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);
 
@@ -54,14 +55,13 @@ public class TestReactiveSparql {
 
     @Test(expected=RuntimeException.class)
     public void testSelectListSimple() {
-        RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        Dataset dataset = RDFDataMgr.loadDataset("virtual-predicates-example.ttl");
 
         DelayerDefault delayer = new DelayerDefault(5000);
         delayer.setLastRequestTime(System.currentTimeMillis());
 
         MapService<Concept, Node, Table> ms = new MapServiceSparqlQuery(
-                new SparqlQueryConnectionJsa(
-                new QueryExecutionFactoryDelay(new QueryExecutionFactorySparqlQueryConnection(conn), delayer)),
+                new QueryExecutionFactoryDelay(new QueryExecutionFactoryDataset(dataset), delayer),
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);
 
@@ -77,13 +77,13 @@ public class TestReactiveSparql {
 
     @Test
     public void testSelectCancelListSimple() {
-        RDFConnection conn = RDFConnectionFactory.connect(RDFDataMgr.loadDataset("virtual-predicates-example.ttl"));
+        Dataset dataset = RDFDataMgr.loadDataset("virtual-predicates-example.ttl");
 
         DelayerDefault delayer = new DelayerDefault(5000);
         delayer.setLastRequestTime(System.currentTimeMillis());
 
-        MapService<Concept, Node, Table> ms = new MapServiceSparqlQuery(new SparqlQueryConnectionJsa(
-                new QueryExecutionFactoryDelay(new QueryExecutionFactorySparqlQueryConnection(conn), delayer)),
+        MapService<Concept, Node, Table> ms = new MapServiceSparqlQuery(
+                new QueryExecutionFactoryDelay(new QueryExecutionFactoryDataset(dataset), delayer),
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);
 

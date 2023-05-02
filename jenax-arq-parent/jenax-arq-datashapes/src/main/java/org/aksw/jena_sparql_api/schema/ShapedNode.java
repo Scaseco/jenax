@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.path.Path;
 
 public class ShapedNode {
@@ -17,12 +17,12 @@ public class ShapedNode {
 
     protected ResourceCache resourceCache;
     protected Collection<NodeSchema> nodeSchemas;
-    protected SparqlQueryConnection conn;
+    protected QueryExecutionFactoryQuery conn;
 
 
 
     public ShapedNode(Node src, Collection<NodeSchema> nodeSchemas, ResourceCache resourceCache,
-            SparqlQueryConnection conn) {
+    		QueryExecutionFactoryQuery conn) {
         super();
         this.src = src;
         this.resourceCache = resourceCache;
@@ -31,11 +31,11 @@ public class ShapedNode {
     }
 
 
-    public static ShapedNode create(Node src, NodeSchema nodeSchema, ResourceCache resourceCache, SparqlQueryConnection conn) {
+    public static ShapedNode create(Node src, NodeSchema nodeSchema, ResourceCache resourceCache, QueryExecutionFactoryQuery conn) {
         return create(src, Collections.singleton(nodeSchema), resourceCache, conn);
     }
 
-    public static ShapedNode create(Node src, Collection<NodeSchema> nodeSchemas, ResourceCache resourceCache, SparqlQueryConnection conn) {
+    public static ShapedNode create(Node src, Collection<NodeSchema> nodeSchemas, ResourceCache resourceCache, QueryExecutionFactoryQuery conn) {
         return new ShapedNode(src, nodeSchemas, resourceCache, conn);
     }
 
@@ -52,7 +52,7 @@ public class ShapedNode {
         return src;
     }
 
-    public SparqlQueryConnection getConnection() {
+    public QueryExecutionFactoryQuery getConnection() {
         return conn;
     }
 

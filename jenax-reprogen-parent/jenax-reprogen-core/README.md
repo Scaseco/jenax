@@ -1,3 +1,9 @@
+---
+title: Reprogen Usage
+parent: Reprogen
+nav_order: 10
+---
+
 ## Annotation-based Resource Proxy Generation System
 
 ### Introduction

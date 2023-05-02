@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
+import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -199,7 +199,7 @@ public class E_CsvParse
 
 
 //		RDFDatatype dtype = TypeMapper.getInstance().getSafeTypeByName(RDFDatatypeJson.IRI);
-        Node node = RDFDatatypeJson.jsonToNode(arr);
+        Node node = JenaJsonUtils.createLiteralByValue(arr);
         NodeValue result = NodeValue.makeNode(node);
 
         return result;

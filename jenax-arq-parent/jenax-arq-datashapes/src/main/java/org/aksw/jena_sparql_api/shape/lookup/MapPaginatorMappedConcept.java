@@ -7,9 +7,9 @@ import org.aksw.jena_sparql_api.lookup.MapPaginatorSparqlQueryBase;
 import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 import com.google.common.collect.Range;
 
@@ -22,7 +22,7 @@ public class MapPaginatorMappedConcept<G>
     protected ResourceShape resourceShape;
     protected MappedConcept<G> mappedConcept;
 
-    public MapPaginatorMappedConcept(SparqlQueryConnection qef,
+    public MapPaginatorMappedConcept(QueryExecutionFactoryQuery qef,
             Concept filterConcept,
             boolean isLeftJoin,
             MappedConcept<G> mappedConcept) {
