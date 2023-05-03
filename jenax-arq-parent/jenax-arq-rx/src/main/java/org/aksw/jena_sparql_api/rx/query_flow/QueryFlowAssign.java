@@ -2,6 +2,8 @@ package org.aksw.jena_sparql_api.rx.query_flow;
 
 import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.syntax.BindingOverMapMutable;
+import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
@@ -34,23 +36,32 @@ public class QueryFlowAssign
 //    }
 //
 
+    /**
+     *
+     * @implNote
+     * 	 This implementation is very similar to {@link VarExprListUtils#eval(VarExprList, Binding, FunctionEnv)}.
+     *   The only difference is that it throws an exception on reassignment.
+     */
     public static Binding assign(Binding binding, VarExprList exprs, FunctionEnv execCxt) {
-        BindingBuilder b = BindingFactory.builder(binding);
+        BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
         for (Var v : exprs.getVars()) {
-            Node n = exprs.get(v, b.build(), execCxt);
+            Node n = exprs.get(v, mb, execCxt);
             if (n != null) {
-                Node m = binding.get(v);
+                Node m = mb.get(v);
                 if(m != null) {
-                    if(!m.equals(n)) {
+                    if(m.sameValueAs(n)) {
+                        continue;
+                    } else {
                         // TODO Just return from function?
                         throw new RuntimeException("Encountered incompatible mapping in join");
                     }
-                } else {
-                    b.add(v, n);
                 }
+
+                mb.add(v, n);
             }
         }
-        return b.build();
+        Binding result = BindingBuilder.create().addAll(mb).build();
+        return result;
     }
 
     public static Function<Binding, Binding> createMapper(VarExprList exprs, FunctionEnv execCxt) {

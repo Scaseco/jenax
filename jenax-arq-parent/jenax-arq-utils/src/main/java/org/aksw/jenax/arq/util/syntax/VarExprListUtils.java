@@ -35,39 +35,39 @@ public class VarExprListUtils {
 
     /** Evaluate an expression list against a binding. Code taken from {@link QueryIterAssign}. */
     public static Binding eval(VarExprList exprs, Binding binding, FunctionEnv execCxt) {
-    	
-    	// Profiling suggested that internally using a mutable binding performs better than repeated snapshots 
-    	BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
+
+        // Profiling suggested that internally using a mutable binding performs much better than
+        //  repeated snapshots using BindingBuilder
         // BindingBuilder b = Binding.builder(binding);
-        for ( Var v : exprs.getVars() ) {
+        BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
+        for (Var v : exprs.getVars()) {
             // if "binding", not "b" used, we get (Lisp) "let"
             // semantics, not the desired "let*" semantics
             Node n = exprs.get(v, mb, execCxt);
-
-            if ( n == null )
-                // Expression failed to evaluate - no assignment
-                continue;
-
-            // Check is already has a value; if so, must be sameValueAs
-            if ( mb.contains(v) ) {
-                // Optimization may linearize to push a stream through an (extend).
-//                if ( false && mustBeNewVar )
-//                    throw new QueryExecException("Already set: " + v);
+            if (n != null) {
+                // Check is already has a value; if so, must be sameValueAs
                 Node n2 = mb.get(v);
-                if ( !n2.sameValueAs(n) )
-                    //throw new QueryExecException("Already set: "+v) ;
-                    // Error in single assignment.
-                    return null ;
-                continue ;
-            }
-            try {
-                // Add same.
-                mb.add(v, n) ;
-            } catch (ARQInternalErrorException ex) {
-                throw ex;
+                if (n2 != null) {
+                    // Optimization may linearize to push a stream through an (extend).
+    //                if ( false && mustBeNewVar )
+    //                    throw new QueryExecException("Already set: " + v);
+                    if (n2.sameValueAs(n)) {
+                        continue;
+                    } else {
+                        //throw new QueryExecException("Already set: "+v) ;
+                        // Error in single assignment.
+                        return null ;
+                    }
+                }
+                try {
+                    // Add same.
+                    mb.add(v, n) ;
+                } catch (ARQInternalErrorException ex) {
+                    throw ex;
+                }
             }
         }
-        
+
         Binding result = BindingBuilder.create().addAll(mb).build();
         return result;
     }
