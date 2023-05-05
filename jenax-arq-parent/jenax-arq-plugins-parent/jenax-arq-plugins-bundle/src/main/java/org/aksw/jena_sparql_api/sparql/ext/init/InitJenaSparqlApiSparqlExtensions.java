@@ -74,4 +74,9 @@ public class InitJenaSparqlApiSparqlExtensions
     @Override
     public void stop() {
     }
+
+    @Override
+    public int level() {
+        return JenaSubsystemLifecycle.super.level();
+    }
 }

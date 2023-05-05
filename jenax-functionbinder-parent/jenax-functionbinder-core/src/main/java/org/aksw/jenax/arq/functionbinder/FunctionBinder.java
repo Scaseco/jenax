@@ -2,6 +2,8 @@ package org.aksw.jenax.arq.functionbinder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.List;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.reprogen.shared.AnnotationUtils;
@@ -74,18 +76,26 @@ public class FunctionBinder {
 
 
     /** Convenience method to register a function at Jena's default registry */
-    public void register(boolean lazy, String uri, Method method) {
-        register(uri, method, null);
+    public void register(boolean lazy, String functionIri, Method method) {
+        register(functionIri, method, null);
     }
 
-    public void register(boolean lazy, String uri, Method method, Object invocationTarget) {
+    /** Register a method with multiple aliases */
+    public void register(boolean lazy, List<String> functionIris, Method method, Object invocationTarget) {
         if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s)", uri, method, invocationTarget));
+            logger.debug(String.format("Auto-binding SPARQL function(s) %s to %s (invocationTarget: %s)", functionIris, method, invocationTarget));
         }
 
         // Stopwatch sw = Stopwatch.createStarted();
         FunctionFactory factory = factory(lazy, method, invocationTarget);
-        functionRegistry.put(uri, factory);
+        for (String iri : functionIris) {
+            functionRegistry.put(iri, factory);
+        }
+        // logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s) tookn %.2f s", uri, method, invocationTarget, sw.elapsed(TimeUnit.SECONDS) * 0.001f));
+    }
+
+    public void register(boolean lazy, String functionIri, Method method, Object invocationTarget) {
+        register(lazy, Collections.singletonList(functionIri), method, invocationTarget);
         // logger.debug(String.format("Auto-binding SPARQL function %s to %s (invocationTarget: %s) tookn %.2f s", uri, method, invocationTarget, sw.elapsed(TimeUnit.SECONDS) * 0.001f));
     }
 
@@ -96,13 +106,13 @@ public class FunctionBinder {
 
     /** Convenience method to register a function at Jena's default registry */
     public void register(boolean lazy, Method method, Object invocationTarget) {
-        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
+        List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
 
-        if (iri == null) {
+        if (iris.isEmpty()) {
             throw new RuntimeException("No @Iri or @IriNs annotation present on method");
         }
 
-        register(lazy, iri, method);
+        register(lazy, iris, method, invocationTarget);
     }
 
 
@@ -133,15 +143,15 @@ public class FunctionBinder {
      */
     public void registerAll(boolean lazy, Class<?> clz, Object invocationTarget) {
         for (Method method : clz.getMethods()) {
-            String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
+            List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
 
-            if (iri != null) {
+            if (!iris.isEmpty()) {
                 boolean isStatic = Modifier.isStatic(method.getModifiers());
 
                 // If the invocation target is null then only register static methods
                 // otherwise only register only non-static methods
                 if ((invocationTarget == null && isStatic) || (invocationTarget != null && !isStatic)) {
-                    register(lazy, iri, method, invocationTarget);
+                    register(lazy, iris, method, invocationTarget);
                 }
 
             }
@@ -178,9 +188,15 @@ public class FunctionBinder {
      * At present there is no direct mapping of methods to FuncionFactories (without having to read the @Iri annotation)
      */
     public static Function getFunction(FunctionRegistry registry, Method method) {
-        String iri = AnnotationUtils.deriveIriFromMethod(method, DefaultPrefixes.get());
-        FunctionFactory factory = registry.get(iri);
-        Function result = factory == null ? null : factory.create(iri);
+        List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
+        Function result = null;
+        for (String iri : iris) {
+            FunctionFactory factory = registry.get(iri);
+            if (factory != null) {
+                result = factory.create(iri);
+                break;
+            }
+        }
         return result;
     }
 

@@ -13,6 +13,7 @@ import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.sys.JenaSystem;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -26,6 +27,8 @@ import com.google.common.math.DoubleMath;
 public class TestGeoSparqlEx {
 
     private static final double TOLERANCE = 0.001;
+
+    static { JenaSystem.init(); } // Needed because otherwise GeometryWrapper.fromPoint uses CustomGeometryFactory.theInstance() which inits Jena which in turn requires the instance.
 
     @Test
     public void testSimplify() {

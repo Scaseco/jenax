@@ -2,6 +2,7 @@ package org.aksw.jenax.reprogen.shared;
 
 import java.beans.Introspector;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
@@ -25,53 +27,62 @@ public class AnnotationUtils {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationUtils.class);
 
 
-    public static String deriveIriFromMethod(Method method, PrefixMapping pm) {
-        String result = null;
+    /** Legacy method - should no longer be used */
+//    public static String deriveIriFromMethod(Method method, PrefixMapping pm) {
+//
+//    }
 
+    public static List<String> deriveIrisFromMethod(Method method, PrefixMapping pm) {
+        List<String> result = new ArrayList<>();
         Iri iri = method.getAnnotation(Iri.class);
         IriNs iriNs = method.getAnnotation(IriNs.class);
         if(iri != null) {
-            String rdfPropertyStr = iri.value();
+            String[] rdfPropertyStrs = iri.value();
+            for (String rdfPropertyStr : rdfPropertyStrs) {
+                // Always expand URIs
+                // FIXME This will break for general paths - perform prefix expansion using a path transformer!
+                String expanded = pm.expandPrefix(rdfPropertyStr);
+                // String pathStr = "<" + expanded + ">";
 
-            // Always expand URIs
-            // FIXME This will break for general paths - perform prefix expansion using a path transformer!
-            String expanded = pm.expandPrefix(rdfPropertyStr);
-            // String pathStr = "<" + expanded + ">";
+                // result = (P_Path0)PathParser.parse(pathStr, pm);
+                String contrib = expanded;
 
-            // result = (P_Path0)PathParser.parse(pathStr, pm);
-            result = expanded;
-
-            //logger.debug("Parsed bean property RDF annotation " + pathStr + " into " + result + " on " + method);
-            if(logger.isDebugEnabled()) {
-                logger.debug("Found @Iri annotation on " + method + ":");
-                if(Objects.equals(rdfPropertyStr, expanded)) {
-                    logger.debug("  " + rdfPropertyStr);
-                } else {
-                    logger.debug("  " + rdfPropertyStr + " expanded to " + result);
+                //logger.debug("Parsed bean property RDF annotation " + pathStr + " into " + result + " on " + method);
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Found @Iri annotation on " + method + ":");
+                    if(Objects.equals(rdfPropertyStr, expanded)) {
+                        logger.debug("  " + rdfPropertyStr);
+                    } else {
+                        logger.debug("  " + rdfPropertyStr + " expanded to " + result);
+                    }
                 }
-            }
 
+                result.add(contrib);
+            }
             //Node p = NodeFactory.createURI(rdfPropertyStr);
 
             //result = new P_Link(p);
         } else if(iriNs != null) {
-            String ns = iriNs.value();
-            String uri;
-            // If there is a colon we assume a IRI prefix - otherwise we assume a namespace
-            // <schema>: part - i.e. whether there is a colon
-            if(ns.contains(":")) {
-                uri = ns;
-            } else {
-                uri = pm.getNsPrefixURI(ns);
-                if(uri == null) {
-                    throw new RuntimeException("Undefined prefix: " + ns + " on method " + method);
-                }
-            }
-
             String localName = deriveBeanPropertyName(method.getName());
+            String[] nss = iriNs.value();
+            for (String ns : nss) {
+                String uri;
+                // If there is a colon we assume a IRI prefix - otherwise we assume a namespace
+                // <schema>: part - i.e. whether there is a colon
+                if(ns.contains(":")) {
+                    uri = ns;
+                } else {
+                    uri = pm.getNsPrefixURI(ns);
+                    if(uri == null) {
+                        throw new RuntimeException("Undefined prefix: " + ns + " on method " + method);
+                    }
+                }
 
-            result = uri + localName;
-            //result = (P_Path0)PathParser.parse(uri + localName, pm);
+                String contrib = uri + localName;
+                result.add(contrib);
+            }
+            return result;
+                //result = (P_Path0)PathParser.parse(uri + localName, pm);
         }
 
 //		System.out.println(method + " -> " + result);
@@ -110,9 +121,14 @@ public class AnnotationUtils {
     }
 
 
-    public static P_Path0 derivePathFromMethod(Method method, PrefixMapping pm) {
-        String iri = AnnotationUtils.deriveIriFromMethod(method, pm);
-        P_Path0 result = iri == null ? null : new P_Link(NodeFactory.createURI(iri));
+    public static List<P_Path0> derivePathsFromMethod(Method method, PrefixMapping pm) {
+        List<P_Path0> result = AnnotationUtils.deriveIrisFromMethod(method, pm).stream()
+                .map(NodeFactory::createURI)
+                .map(P_Link::new)
+                .collect(Collectors.toList());
+                ;
+//        String iri = AnnotationUtils.deriveIriFromMethod(method, pm);
+//        P_Path0 result = iri == null ? null : new P_Link(NodeFactory.createURI(iri));
         return result;
     }
 
@@ -136,9 +152,9 @@ public class AnnotationUtils {
         for(Method method : clazz.getMethods()) {
             String methodName = method.getName();
             String beanPropertyName = deriveBeanPropertyName(methodName);
-            P_Path0 path = derivePathFromMethod(method, pm);
+            List<P_Path0> paths = derivePathsFromMethod(method, pm);
 
-            if(path != null) {
+            for (P_Path0 path : paths) {
                 result.put(beanPropertyName, path);
             }
         }

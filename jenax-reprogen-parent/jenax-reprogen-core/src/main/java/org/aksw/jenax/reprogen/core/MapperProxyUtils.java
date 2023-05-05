@@ -1528,8 +1528,8 @@ public class MapperProxyUtils {
                 writeMethods.put(beanPropertyName, method);
             }
 
-            P_Path0 path = AnnotationUtils.derivePathFromMethod(method, pm);
-            if(path != null) {
+            List<P_Path0> ps = AnnotationUtils.derivePathsFromMethod(method, pm);
+            for (P_Path0 path : ps) {
                 paths.put(beanPropertyName, path);
             }
         }

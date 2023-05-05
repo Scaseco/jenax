@@ -32,8 +32,8 @@ public class JenaExtensionsGeoSparqlX {
     }
 
     public static void loadDefs(FunctionRegistry registry) {
-        TypeMapper.getInstance().registerDatatype(RDFDatatypeWkbLiteral.INSTANCE);
-        TypeMapper.getInstance().registerDatatype(RDFDatatypeGeoJSON.INSTANCE);
+        TypeMapper.getInstance().registerDatatype(RDFDatatypeWkbLiteral.get());
+        TypeMapper.getInstance().registerDatatype(RDFDatatypeGeoJSON.get());
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "wkb2wkt", F_Wkb2Wkt.class);
         registry.put(GeoSPARQL_URI.GEOF_URI + "parsePolyline", F_ParsePolyline.class);
