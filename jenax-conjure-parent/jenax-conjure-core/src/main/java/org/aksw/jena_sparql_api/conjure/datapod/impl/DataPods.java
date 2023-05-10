@@ -34,6 +34,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -246,10 +247,27 @@ public class DataPods {
 
         Objects.requireNonNull(serviceUrl, "Service URL must not be null");
 
-        Supplier<RDFConnection> supplier = () -> RDFConnectionRemote.create()
+        Supplier<RDFConnection> supplier = () -> {
+            RDFConnection r = RDFConnectionRemote.create()
                 .destination(serviceUrl)
                 .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
                 .build();
+
+            r = RDFConnectionUtils.wrapWithQueryTransform(r,
+                query -> {
+                    Query q = query.cloneQuery();
+                    if (q.getGraphURIs().isEmpty() && defaultGraphs != null) {
+                        q.getGraphURIs().addAll(defaultGraphs);
+                    }
+
+                    if (!q.getNamedGraphURIs().isEmpty() && namedGraphs != null) {
+                        q.getNamedGraphURIs().addAll(namedGraphs);
+                    }
+                    return q;
+                });
+
+            return r;
+        };
 
         RdfDataPod result = fromConnectionSupplier(supplier);
         return result;
