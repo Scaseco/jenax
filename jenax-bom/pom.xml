@@ -72,7 +72,7 @@
 		<tika.version>2.1.0</tika.version>
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
-		<aksw.commons.version>0.9.5</aksw.commons.version>
+		<aksw-commons.version>0.9.7-SNAPSHOT</aksw-commons.version>
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
 		<jts.version>1.18.1</jts.version>
@@ -818,30 +818,30 @@
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-bom</artifactId>
-				<version>${aksw.commons.version}</version>
+				<version>${aksw-commons.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<!-- <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-objectstore</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-models-csvw-domain</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-models-csvw-domain</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-utils</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-paths</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-paths</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-txn</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-collectors</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-collectors</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-rx</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-beans</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-beans</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-collections</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-lambdas-serializable</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-lambdas-serializable</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-io-process-pipes</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-io-utils</artifactId> <version>${aksw.commons.version}</version> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-io-utils</artifactId> <version>${aksw-commons.version}</version> 
 				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-io-syscalls</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> -->
+				<version>${aksw-commons.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
