@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.conjure.datapod.impl;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -41,7 +42,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.util.ResourceUtils;
@@ -247,6 +247,10 @@ public class DataPods {
 
         Objects.requireNonNull(serviceUrl, "Service URL must not be null");
 
+        // Make immutable copies of the arguments
+        List<String> defaultGraphsCpy = defaultGraphs == null ? null : new ArrayList<>(defaultGraphs);
+        List<String> namedGraphsCpy = namedGraphs == null ? null : new ArrayList<>(namedGraphs);
+
         Supplier<RDFConnection> supplier = () -> {
             RDFConnection r = RDFConnectionRemote.create()
                 .destination(serviceUrl)
@@ -255,15 +259,21 @@ public class DataPods {
 
             r = RDFConnectionUtils.wrapWithQueryTransform(r,
                 query -> {
-                    Query q = query.cloneQuery();
-                    if (q.getGraphURIs().isEmpty() && defaultGraphs != null) {
-                        q.getGraphURIs().addAll(defaultGraphs);
+                    boolean updateDefaultGraphs = query.getGraphURIs().isEmpty() && defaultGraphsCpy != null && !defaultGraphsCpy.isEmpty();
+                    boolean updateNamedGraphs = query.getNamedGraphURIs().isEmpty() && namedGraphsCpy != null && !namedGraphsCpy.isEmpty();
+                    Query res;
+                    if (updateDefaultGraphs || updateNamedGraphs) {
+                        res = query.cloneQuery();
+                        if (updateDefaultGraphs) {
+                            res.getGraphURIs().addAll(defaultGraphsCpy);
+                        }
+                        if (updateNamedGraphs) {
+                            res.getNamedGraphURIs().addAll(namedGraphsCpy);
+                        }
+                    } else {
+                        res = query;
                     }
-
-                    if (!q.getNamedGraphURIs().isEmpty() && namedGraphs != null) {
-                        q.getNamedGraphURIs().addAll(namedGraphs);
-                    }
-                    return q;
+                    return res;
                 });
 
             return r;

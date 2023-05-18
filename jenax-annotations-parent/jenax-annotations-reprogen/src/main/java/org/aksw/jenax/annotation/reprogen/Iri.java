@@ -9,14 +9,12 @@ import java.lang.annotation.RetentionPolicy;
  * <ul>
  *   <li>Class level: the RDF type</li>
  *   <li>Attribute: the RDF property</li>
+ *   <li>Method: Allows for reference to a method by IRI. This is mainly used for reflection-based derivation of SPARQL extension functions from annotated functions.</li>
+ *   <li>Method Parameter: Allows reference for a function. This is mainly used for reflection-based "function ontology" derivations from method paramaters.</li>
  * </ul>
  *
  * If the value is an empty string, the annotated property's name
  * will be treated as a relative IRI.
- *
- *
- * @author raven
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Iri {
