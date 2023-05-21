@@ -9,16 +9,13 @@
 	<artifactId>jenax-bom</artifactId>
 	<version>4.8.0-3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
 	<url>https://github.com/Scaseco/jenax</url>
-
 	<issueManagement>
 		<url>https://github.com/Scaseco/jenax/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
-
 	<licenses>
 		<license>
 			<name>Apache License 2.0</name>
@@ -26,14 +23,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
 	<scm>
 		<url>https://github.com/Scaseco/jenax</url>
 		<connection>scm:git:git://github.com/Scaseco/jenax.git</connection>
 		<developerConnection>scm:git:git@github.com:Scaseco/jenax.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-
 	<developers>
 		<developer>
 			<name>Claus Stadler</name>
@@ -42,8 +37,6 @@
 			<organizationUrl>http://aksw.org</organizationUrl>
 		</developer>
 	</developers>
-
-	
 	<modules>
 		<module>..</module>
 	</modules>
@@ -276,6 +269,11 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-csvw</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-d2rq</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -758,13 +756,12 @@
 				<version>1.12.3</version>
 			</dependency>
 			<dependency>
-                                <groupId>org.eclipse.jetty</groupId>
-                                <artifactId>jetty-bom</artifactId>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
 				<version>${jetty.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-                        </dependency>
-
+			</dependency>
 			<!-- Jetty -->
 			<!--
 			<dependency>
@@ -1336,8 +1333,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
-		<build>
+	<build>
 		<plugins>
 			<!-- That's a sledge hammer solution - but at least it works ... -->
 			<plugin>
@@ -1352,7 +1348,6 @@
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
 				<artifactId>gitflow-maven-plugin</artifactId>
@@ -1363,7 +1358,6 @@
 					</gitFlowConfig>
 				</configuration>
 			</plugin>
-
 			<!--Maven Compiler Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1375,8 +1369,6 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-
-
 			<!-- Solution from http://stackoverflow.com/questions/4725668/how-to-deploy-snapshot-with-sources-and-javadoc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1392,7 +1384,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -1409,14 +1400,12 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M1</version>
 				<!-- <configuration> <skipTests>false</skipTests> </configuration> -->
 			</plugin>
-
 			<!-- <plugin> -->
 			<!-- <groupId>org.mortbay.jetty</groupId> -->
 			<!-- <artifactId>jetty-maven-plugin</artifactId> -->
@@ -1431,7 +1420,6 @@
 			<!-- <reload>manual</reload> -->
 			<!-- </configuration> -->
 			<!-- </plugin> -->
-
 			<!-- It may be useful to be able to create fat jars on demand during development,
 				but with the shade plugin as is, it would upload them as part of every deployment/release
 				- therefore its disabled as of now -->
@@ -1447,7 +1435,6 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-
 				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -1504,27 +1491,21 @@
 							<artifactId>hibernate-jpamodelgen</artifactId>
 							<version>5.3.6.Final</version>
 						</dependency>
-
 						<dependency>
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
 							<version>${javax.xml.version}</version>
 						</dependency>
 						<dependency>
-
 							<groupId>javax.annotation</groupId>
 							<artifactId>javax.annotation-api</artifactId>
 							<version>1.3.1</version>
 						</dependency>
-
-
 					</dependencies>
 				</plugin>
-
 			</plugins>
 		</pluginManagement>
 	</build>
-	
 	<profiles>
 		<profile>
 			<id>release</id>
