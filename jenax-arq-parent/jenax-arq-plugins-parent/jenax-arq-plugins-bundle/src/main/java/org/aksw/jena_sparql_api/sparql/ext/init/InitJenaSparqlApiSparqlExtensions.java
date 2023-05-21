@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.init;
 
+import org.aksw.jena_sparql_api.sparql.ext.binding.JenaExtensionBinding;
 import org.aksw.jena_sparql_api.sparql.ext.collection.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.JenaExtensionCollection;
 import org.aksw.jena_sparql_api.sparql.ext.collection.set.JenaExtensionSet;
@@ -54,6 +55,7 @@ public class InitJenaSparqlApiSparqlExtensions
         JenaExtensionPrefix.register();
         JenaExtensionString.register();
         JenaExtensionNumber.register();
+        JenaExtensionBinding.register();
 
         JenaExtensionsMvn.register();
         JenaExtensionsPath.register();

@@ -31,7 +31,7 @@ public interface D2rqDatabase
     /** A password if required by the database. */
     @Iri(D2rqTerms.password)
     @IriType
-    String setPassword();
+    String getPassword();
     D2rqDatabase setPassword(String password);
 
     /**
