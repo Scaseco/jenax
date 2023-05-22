@@ -1,7 +1,6 @@
 package org.aksw.jenax.model.d2rq.domain.api;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
-import org.aksw.jenax.annotation.reprogen.IriType;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 
@@ -30,7 +29,6 @@ public interface D2rqDatabase
 
     /** A password if required by the database. */
     @Iri(D2rqTerms.password)
-    @IriType
     String getPassword();
     D2rqDatabase setPassword(String password);
 
