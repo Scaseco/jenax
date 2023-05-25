@@ -30,6 +30,7 @@ import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.apache.commons.io.IOUtils;
+import org.apache.jena.fuseki.DEF;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.WebContent;
 
@@ -68,17 +69,27 @@ public class SparqlStmtTypeAcceptHeaderFilter
         // If we don't do it here, jersey will consume the data and we won't be able to access it here anymore
         Enumeration<String> it = req.getHeaders("Accept");
         boolean isWildcard = true;
-        while (it.hasMoreElements()) {
+		boolean isSparqlRequest = false;
+		org.apache.jena.atlas.web.MediaType type = null;
+		while (it.hasMoreElements()) {
         	String item = it.nextElement();
         	if (!item.equals("*/*")) {
         		isWildcard = false;
         	}
+			if(!isSparqlRequest) {
+				type = org.apache.jena.atlas.web.MediaType.createFromContentType(item);
+				if (DEF.constructOffer.match(type) != null
+						|| DEF.quadsOffer.match(type) != null
+						|| DEF.rdfOffer.match(type) != null
+						|| DEF.rsOfferTable.match(type) != null
+						|| DEF.rsOfferBoolean.match(type) != null) {
+					isSparqlRequest = true;
+				}
+			}
         }
 
-        boolean isSparqlRequest = false;
-
         // HttpServletRequest subReq = req;
-        if (isWildcard) {
+        if (isWildcard || isSparqlRequest) {
         	List<String> strs = new ArrayList<>();
 
         	String contentTypeStr = req.getContentType();
@@ -108,8 +119,8 @@ public class SparqlStmtTypeAcceptHeaderFilter
 
         		String str = strs.size() == 1 ? strs.iterator().next() : null;
 
-        		String acceptTypeStr = null;;
-        		if (str != null) {
+        		String acceptTypeStr = type != null ? type.getContentTypeStr() : null;
+        		if (str != null && acceptTypeStr == null) {
 	        		SparqlStmt stmt = sparqlStmtParser.apply(str);
 	        		if (stmt.isParsed()) {
 	        			if (stmt.isQuery()) {

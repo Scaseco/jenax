@@ -220,6 +220,62 @@ public abstract class SparqlEndpointBase {
         processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.XML);
     }
 
+    @GET
+    @Produces(WebContent.contentTypeTextCSV)
+    public void executeQueryResultSetCsv(
+            @Suspended AsyncResponse asyncResponse,
+            @QueryParam("query") String queryString,
+            @QueryParam("update") String updateString) {
+        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createCsv());
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(WebContent.contentTypeTextCSV)
+    public void executeQueryResultSetCsvPost(
+            @Suspended AsyncResponse asyncResponse,
+            @FormParam("query") String queryString,
+            @FormParam("update") String updateString) {
+        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createCsv());
+    }
+
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLQuery)
+    @Produces(WebContent.contentTypeTextCSV)
+    public void executeQueryResultSetCsvPostDirect(
+            @Suspended AsyncResponse asyncResponse,
+            String queryString) {
+        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.createCsv());
+    }
+
+
+    @GET
+    @Produces(WebContent.contentTypeTextTSV)
+    public void executeQueryResultSetTsv(
+            @Suspended AsyncResponse asyncResponse,
+            @QueryParam("query") String queryString,
+            @QueryParam("update") String updateString) {
+        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createTsv());
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(WebContent.contentTypeTextTSV)
+    public void executeQueryResultSetTsvPost(
+            @Suspended AsyncResponse asyncResponse,
+            @FormParam("query") String queryString,
+            @FormParam("update") String updateString) {
+        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createTsv());
+    }
+
+    @POST
+    @Consumes(WebContent.contentTypeSPARQLQuery)
+    @Produces(WebContent.contentTypeTextTSV)
+    public void executeQueryResultSetTsvPostDirect(
+            @Suspended AsyncResponse asyncResponse,
+            String queryString) {
+        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.createTsv());
+    }
 
 
     /*

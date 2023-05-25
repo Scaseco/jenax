@@ -646,7 +646,12 @@
 				<artifactId>jena-iri</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>org.apache.jena</groupId> <artifactId>jena-sdb</artifactId> 
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-fuseki-core</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<!-- <dependency> <groupId>org.apache.jena</groupId> <artifactId>jena-sdb</artifactId>
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
 				<groupId>com.hp.hpl.jena</groupId> <artifactId>jena</artifactId> </exclusion> 
 				<exclusion> <groupId>com.hp.hpl.jena</groupId> <artifactId>iri</artifactId> 

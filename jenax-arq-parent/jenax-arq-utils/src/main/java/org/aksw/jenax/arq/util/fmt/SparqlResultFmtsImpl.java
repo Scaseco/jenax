@@ -52,6 +52,15 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 				ResultSetLang.RS_Text, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS);
 	}
 
+	public static SparqlResultFmts createCsv() {
+		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_CSV,
+				ResultSetLang.RS_CSV, RDFFormat.NT, RDFFormat.NQ);
+	}
+
+	public static SparqlResultFmts createTsv() {
+		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_TSV,
+				ResultSetLang.RS_TSV, RDFFormat.NT, RDFFormat.NQ);
+	}
 
 	@Override
 	public Lang forAskResult() {
