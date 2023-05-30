@@ -57,7 +57,7 @@ WHERE {
     SERVICE SILENT <env://REMOTE> {
       # none-blazegraph stores will find no matches for the triple pattern (unless in the odd case where someone added this triple)
       hint:Query hint:optimizer "None"
-      BIND(true AS ?teset)
+      BIND(true AS ?test)
     }
     FILTER(?test) # ?test is expected to be true for stardog
     BIND("blazegraph" AS ?dbmsRawName)
