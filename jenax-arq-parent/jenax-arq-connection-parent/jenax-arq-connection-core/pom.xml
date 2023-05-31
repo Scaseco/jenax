@@ -36,6 +36,17 @@
 		</dependency>
 
 
+		<!-- Needed for blank node rewrite -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-algebra</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-servicedescription</artifactId>
+		</dependency>
+
 		<!-- Unit Testing -->
 
 		<dependency>

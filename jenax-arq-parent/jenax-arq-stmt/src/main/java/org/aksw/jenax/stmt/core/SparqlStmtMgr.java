@@ -68,7 +68,16 @@ public class SparqlStmtMgr {
     }
 
     public static void execSparql(Model model, String filenameOrURI, Function<String, String> envLookup) {
-        try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model))) {
+        Dataset dataset = DatasetFactory.wrap(model);
+        execSparql(dataset, filenameOrURI, envLookup);
+    }
+
+    public static void execSparql(Dataset dataset, String filenameOrURI) {
+        execSparql(dataset, filenameOrURI, (Function<String, String>)null);
+    }
+
+    public static void execSparql(Dataset dataset, String filenameOrURI, Function<String, String> envLookup) {
+        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
             execSparql(conn, filenameOrURI, envLookup);
         }
     }
@@ -217,45 +226,45 @@ public class SparqlStmtMgr {
 
 
     public static List<SparqlStmt> loadSparqlStmts(Path path) {
-    	return loadSparqlStmts(path, SparqlStmtParserImpl.create());
+        return loadSparqlStmts(path, SparqlStmtParserImpl.create());
     }
 
 
     public static List<SparqlStmt> loadSparqlStmts(Path path, SparqlStmtParser parser) {
-    	List<SparqlStmt> result = new ArrayList<>();
-    	try (InputStream in = Files.newInputStream(path)) {
-    		SparqlStmtIterator it = SparqlStmtUtils.parse(in, parser);
-    		it.forEachRemaining(result::add);
-    	} catch (IOException e) {
-    		throw new RuntimeException(e);
-		}
+        List<SparqlStmt> result = new ArrayList<>();
+        try (InputStream in = Files.newInputStream(path)) {
+            SparqlStmtIterator it = SparqlStmtUtils.parse(in, parser);
+            it.forEachRemaining(result::add);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return result;
     }
 
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI) {
-    	return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create(Syntax.syntaxARQ, true));
+        return loadSparqlStmts(filenameOrURI, SparqlStmtParserImpl.create(Syntax.syntaxARQ, true));
     }
 
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, PrefixMapping prefixes) {
-    	SparqlStmtParser parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, prefixes, true);
-    	return loadSparqlStmts(filenameOrURI, parser);
+        SparqlStmtParser parser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, prefixes, true);
+        return loadSparqlStmts(filenameOrURI, parser);
     }
-    
+
     public static List<SparqlStmt> loadSparqlStmts(String filenameOrURI, SparqlStmtParser parser) {
 
-    	List<SparqlStmt> result;
-    	try (TypedInputStream in = SparqlStmtUtils.openInputStream(filenameOrURI)) {
+        List<SparqlStmt> result;
+        try (TypedInputStream in = SparqlStmtUtils.openInputStream(filenameOrURI)) {
             if(in == null) {
                 throw new RuntimeException("Could not open input stream from " + filenameOrURI);
             }
 
             SparqlStmtIterator it;
-			try {
-				it = SparqlStmtUtils.parse(in, parser);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+            try {
+                it = SparqlStmtUtils.parse(in, parser);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             result = Streams.stream(it).collect(Collectors.toList());
         }
@@ -288,10 +297,10 @@ public class SparqlStmtMgr {
             it = SparqlStmtUtils.readStmts(filenameOrStr, sparqlParser);
         } catch(IOException e) {
 
-        	try {
+            try {
                 SparqlStmt sparqlStmt = sparqlParser.apply(filenameOrStr);
                 it = Collections.singletonList(sparqlStmt).iterator();
-        	} catch (QueryParseException f) {
+            } catch (QueryParseException f) {
                 Throwable c = f.getCause();
 
 
@@ -302,11 +311,11 @@ public class SparqlStmtMgr {
                 // qpe.getLine() > 1 ||
                 // && qpe.getColumn() > 1)
                 if  (!SparqlStmtUtils.isEncounteredSlashException(c)) {
-                	throw new RuntimeException("Could not parse " + filenameOrStr, f);
+                    throw new RuntimeException("Could not parse " + filenameOrStr, f);
                 }
-        	}
+            }
 
-        	throw new IOException("Could not open " + filenameOrStr, e);
+            throw new IOException("Could not open " + filenameOrStr, e);
         }
 
         return it;

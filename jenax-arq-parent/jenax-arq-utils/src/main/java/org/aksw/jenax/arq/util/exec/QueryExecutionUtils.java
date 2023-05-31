@@ -141,7 +141,4 @@ public class QueryExecutionUtils {
         }
         return result;
     }
-
-
-
 }
