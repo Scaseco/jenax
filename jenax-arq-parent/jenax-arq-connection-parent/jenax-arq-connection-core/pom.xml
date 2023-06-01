@@ -20,6 +20,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-serviceenhancer</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-utils</artifactId>
 		</dependency>
@@ -47,6 +52,13 @@
 			<artifactId>jenax-resources-servicedescription</artifactId>
 		</dependency>
 
+		<!-- Move the benchmark utils to aksw-commons -->
+<!--		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw</artifactId>
+			<scope>test</scope>
+		</dependency>
+-->
 		<!-- Unit Testing -->
 
 		<dependency>

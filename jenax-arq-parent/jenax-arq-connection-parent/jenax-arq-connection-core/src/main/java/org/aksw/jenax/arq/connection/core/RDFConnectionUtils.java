@@ -269,10 +269,11 @@ public class RDFConnectionUtils {
         });
     }
 
-
     /**
-     * Adapted from {@link Service#exec(OpService, Context)}.
      * Runs an OpService on the given connection. Ignores the service IRI but considers the silent flag.
+     *
+     * @implNote
+     *  Adapted from {@link Service#exec(OpService, Context)}.
      */
     public static QueryIterator execService(OpService opService, RDFConnection target) {
         boolean silent = opService.getSilent();

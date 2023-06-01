@@ -589,6 +589,13 @@
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>${jena.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -596,30 +603,19 @@
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.rdfhdt</groupId>
-				<artifactId>hdt-jena</artifactId>
-				<version>2.1.2</version>
-			</dependency>
-			<!-- <dependency> -->
-			<!-- <groupId>eu.wdaqua</groupId> -->
-			<!-- <artifactId>hdt-jena</artifactId> -->
-			<!-- <version>2.1</version> -->
-			<!-- </dependency> -->
-			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-dboe-storage</artifactId>
+				<artifactId>jena-serviceenhancer</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-			<!-- Needed by some parts of jena since 3.15.0 -->
 			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-dboe-storage</artifactId>
+				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -630,11 +626,6 @@
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-geosparql</artifactId>
 				<version>${jena.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ini4j</groupId>
-				<artifactId>ini4j</artifactId>
-				<version>0.5.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -650,6 +641,32 @@
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-fuseki-core</artifactId>
 				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-tdb2</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.rdfhdt</groupId>
+				<artifactId>hdt-jena</artifactId>
+				<version>2.1.2</version>
+			</dependency>
+			<!-- <dependency> -->
+			<!-- <groupId>eu.wdaqua</groupId> -->
+			<!-- <artifactId>hdt-jena</artifactId> -->
+			<!-- <version>2.1</version> -->
+			<!-- </dependency> -->
+			<!-- Needed by some parts of jena since 3.15.0 -->
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.15</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ini4j</groupId>
+				<artifactId>ini4j</artifactId>
+				<version>0.5.4</version>
 			</dependency>
 			<!-- <dependency> <groupId>org.apache.jena</groupId> <artifactId>jena-sdb</artifactId>
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
@@ -986,11 +1003,6 @@
 				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
 				<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
 				<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-tdb2</artifactId>
-				<version>${jena.version}</version>
-			</dependency>
 			<!-- When commons-compress just isn't enough (e.g. when there is need 
 				for splittable bzip2 decoding) -->
 			<dependency>
