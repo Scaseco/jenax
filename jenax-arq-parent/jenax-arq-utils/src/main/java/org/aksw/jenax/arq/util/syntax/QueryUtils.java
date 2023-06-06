@@ -25,7 +25,9 @@ import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
@@ -156,6 +158,11 @@ public class QueryUtils {
 //        afterQueryTmp.setQueryPattern(eltAfter);
 
         Query result = QueryUtils.restoreQueryForm(afterQueryTmp, beforeQuery);
+
+        // Testing whether this helps to resolve issues with EXISTS blocks
+//        String tmp = result.toString(Syntax.syntaxARQ);
+//        result = QueryFactory.create(tmp, Syntax.syntaxARQ);
+//        System.err.println("Created: " + result);
 
         return result;
     }

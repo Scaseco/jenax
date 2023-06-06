@@ -17,14 +17,24 @@ public class TestRdfDataSourceWithLocalCache {
         RdfDataSource base = () -> RDFConnectionRemote.newBuilder()
                 //.destination("https://query.wikidata.org/sparql")
                 //.destination("https://dbpedia.org/sparql")
-                .destination("https://coypu.demo.aksw.org/ds")
+                //.destination("https://coypu.demo.aksw.org/ds")
+                .destination("http://localhost:8642/sparql")
                 .build();
 
         RdfDataSource ds = new RdfDataSourceWithLocalCache(base);
 
+        // String str = "SELECT (COUNT(*) AS ?c) { SELECT * { ?s ?p ?o } LIMIT 5000000 }";
+        String queryStr = "SELECT  DISTINCT ?v_1\n"
+                + "WHERE\n"
+                + "  { ?v_1  ?p  ?o\n"
+                + "    FILTER ( regex(str(?v_1), \"h\", \"i\") || EXISTS { ?v_1  <http://www.w3.org/2000/01/rdf-schema#label>  ?v_2\n"
+                + "                                                    FILTER regex(str(?v_2), \"h\", \"i\")\n"
+                + "                                                  } )\n"
+                + "  }\n"
+                + "";
         Callable<?> action = () -> {
             try (RDFConnection conn = ds.getConnection()) {
-                try (QueryExecution qe = conn.query("SELECT (COUNT(*) AS ?c) { SELECT * { ?s ?p ?o } LIMIT 5000000 }")) {
+                try (QueryExecution qe = conn.query(queryStr)) {
                     ResultSetFormatter.out(System.out, qe.execSelect());
                 }
                 return null;
