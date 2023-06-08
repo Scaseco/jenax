@@ -31,6 +31,22 @@ public class VarUtils {
         return isValidFirstCharForVarName(ch) || ch == 0x00B7 || RiotChars.range(ch, 0x0300, 0x036F) || RiotChars.range(ch, 0x203F, 0x2040);
     }
 
+// TODO Finish - we may want to track all invalid characters
+//    public static boolean isValidVarName(String varName) {
+//        // NOTE In TARQL there is a comment: "I've omitted UTF-16 character range #x10000-#xEFFFF."
+//        int[] codePoints = varName.codePoints().toArray();
+//        if (codePoints.length > 0) {
+//            int before = codePoints[0];
+//            int after = isValidFirstCharForVarName(before) ? before : '_';
+//            sb.appendCodePoint(after);
+//        }
+//
+//        for (int i = 1; i < codePoints.length; ++i) {
+//            int before = codePoints[i];
+//            int after = isValidNonFirstCharForVarName(before) ? before : '_';
+//            sb.appendCodePoint(after);
+//        }
+//    }
 
     /**
      * Parse the patterns (?|$)\\S* as variables

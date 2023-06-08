@@ -217,6 +217,11 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-models-prefixes</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-dcat-api</artifactId>
 				<version>${project.version}</version>
