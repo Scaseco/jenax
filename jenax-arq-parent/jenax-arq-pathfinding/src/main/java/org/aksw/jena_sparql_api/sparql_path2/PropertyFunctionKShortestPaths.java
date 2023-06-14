@@ -12,15 +12,19 @@ import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
+import org.aksw.jena_sparql_api.post_process.QueryExecutionFactoryPostProcess;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
+import org.aksw.jenax.connection.query.QueryExecutionDecoratorTxn;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.Prologue;
@@ -96,9 +100,10 @@ public class PropertyFunctionKShortestPaths
         SparqlService ss = (SparqlService)ctx.get(SPARQL_SERVICE);
 
         if (ss == null) {
-            ss = new SparqlServiceImpl(new QueryExecutionFactoryDataset(DatasetFactory.wrap(execCxt.getDataset())), null);
+            Dataset ds = DatasetFactory.wrap(execCxt.getDataset());
+            ss = new SparqlServiceImpl(
+                    new QueryExecutionFactoryPostProcess(new QueryExecutionFactoryDataset(), qe -> new QueryExecutionDecoratorTxn<QueryExecution>(qe, ds)), null);
         }
-
 
         Objects.requireNonNull(ss);
         QueryExecutionFactory qef = ss.getQueryExecutionFactory();

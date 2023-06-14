@@ -20,6 +20,7 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Property;
@@ -270,7 +271,13 @@ public class LabelUtils {
     public static String formatLiteralNode(Node node, PrefixMapping prefixMapping) {
         String result;
         if (node.isLiteral()) {
-            Object obj = node.getLiteralValue();
+            Object obj;
+            try {
+                obj = node.getLiteralValue();
+            } catch (DatatypeFormatException e) {
+                // Ignore
+                obj = null;
+            }
 
             String baseStr = obj instanceof Number
                     ? Objects.toString(obj)

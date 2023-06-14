@@ -24,6 +24,8 @@ import org.apache.jena.sparql.util.ExprUtils;
 public class PathPE
     extends PathBase<UnaryXExpr, PathPE>
 {
+    private static final long serialVersionUID = 1L;
+
     public PathPE(PathOps<UnaryXExpr, PathPE> pathOps, boolean isAbsolute, List<UnaryXExpr> segments) {
         super(pathOps, isAbsolute, segments);
     }

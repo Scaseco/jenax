@@ -15,6 +15,7 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Graph;
@@ -113,6 +114,9 @@ public class ElementUtils {
         return createElement(Triple.create(s, p, o));
     }
 
+    public static ElementTriplesBlock createElementTriple(Node s, Node p, Node o, boolean isForward) {
+        return createElement(TripleUtils.create(s, p, o, isForward));
+    }
 
     public static ElementPathBlock createElementPath(Node s, Path p, Node o) {
         ElementPathBlock result = createElementPath(new TriplePath(s, p, o));

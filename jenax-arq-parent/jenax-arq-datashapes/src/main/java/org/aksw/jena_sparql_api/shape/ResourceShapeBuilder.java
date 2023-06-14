@@ -20,6 +20,9 @@ import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.util.ExprUtils;
 
 
+/**
+ * A fluent API to build a resource shape.
+ */
 public class ResourceShapeBuilder {
     protected ResourceShapeBuilder parent;
 

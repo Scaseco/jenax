@@ -11,7 +11,9 @@ import org.apache.jena.sparql.path.P_Path0;
 public class PathPP
     extends PathBase<P_Path0, PathPP>
 {
-     public PathPP(PathOps<P_Path0, PathPP> pathOps, boolean isAbsolute, List<P_Path0> segments) {
+    private static final long serialVersionUID = 1L;
+
+    public PathPP(PathOps<P_Path0, PathPP> pathOps, boolean isAbsolute, List<P_Path0> segments) {
         super(pathOps, isAbsolute, segments);
     }
 }

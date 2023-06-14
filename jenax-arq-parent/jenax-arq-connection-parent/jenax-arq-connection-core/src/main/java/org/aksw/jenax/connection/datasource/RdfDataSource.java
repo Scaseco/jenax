@@ -1,5 +1,7 @@
 package org.aksw.jenax.connection.datasource;
 
+import java.util.function.Function;
+
 import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -19,4 +21,9 @@ import org.apache.jena.rdfconnection.RDFConnection;
 public interface RdfDataSource
 {
     RDFConnection getConnection();
+
+    /** Convenience method for applying decorators */
+    default <O extends RdfDataSource> O decorate(Function<? super RdfDataSource, O> decorator) {
+        return decorator.apply(this);
+    }
 }

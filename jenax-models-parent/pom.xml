@@ -20,7 +20,8 @@
 		<module>jenax-models-dcat-api</module>
 		<module>jenax-models-entityinfo</module>
 		<module>jenax-models-csvw</module>
-		<module>jenax-models-d2rq</module>		
+		<module>jenax-models-d2rq</module>
+		<module>jenax-models-table</module>
 	</modules>
 </project>
 

@@ -17,12 +17,14 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.algebra.op.OpOrder;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
@@ -78,7 +80,8 @@ public class RdfDataSourceWithLocalCache
                         ? e.getKey()
                         : wrapWithCache(op).getKey(); // new OpService(serviceNode, op, false);
 
-                // System.err.println("Cache rewrite [pushed=" + e.getValue() + "]: " + rr);
+//                System.err.println("OriginalQuery:\n" + query);
+//                System.err.println("Cache rewrite [pushed=" + e.getValue() + "]: " + rr);
 
                 return rr;
             });
@@ -106,14 +109,15 @@ public class RdfDataSourceWithLocalCache
             return result;
         }
 
-        public <T extends Op> Entry<Op, Boolean> handleProjectExtend(T op, Function<T, Entry<Op, Boolean>> defaultHandler) {
+        public <T extends Op1> Entry<Op, Boolean> handleProjectExtend(T op, Function<Op, Op> ctor) { //Function<T, Entry<Op, Boolean>> defaultHandler) {
             ProjectExtend pe = ProjectExtend.collect(op);
             Entry<Op, Boolean> result = null;
+            Op subOp = op.getSubOp();
             if (pe != null) {
                 if (pe.getSubOp() instanceof OpGroup) {
                     result = wrapWithCache(pe.toOp());
                 } else {
-                    Entry<Op, Boolean> tmp = rewriteOp(pe.getSubOp());
+                    Entry<Op, Boolean> tmp = rewriteOp(subOp);
                     if (tmp.getValue()) {
                         result = Map.entry(pe.apply(tmp.getKey()), true);
                     }
@@ -121,7 +125,8 @@ public class RdfDataSourceWithLocalCache
             }
 
             if (result == null) {
-                result = defaultHandler.apply(op); // OpRewriter.super.rewrite(op);
+                result = handleOp1(subOp, ctor);
+                // result = defaultHandler.apply(op); // OpRewriter.super.rewrite(op);
             }
 
             return result;
@@ -134,12 +139,19 @@ public class RdfDataSourceWithLocalCache
 
         @Override
         public Entry<Op, Boolean> rewrite(OpProject op) {
-            return handleProjectExtend(op, OpRewriter.super::rewrite);
+            return handleProjectExtend(op, subOp -> new OpProject(subOp, op.getVars()));
         }
 
         @Override
         public Entry<Op, Boolean> rewrite(OpExtend op) {
-            return handleProjectExtend(op, OpRewriter.super::rewrite);
+            // return handleProjectExtend(op, OpRewriter.super::rewrite);
+            return handleProjectExtend(op, subOp -> OpExtend.create(subOp, op.getVarExprList()));
+        }
+
+        @Override
+        public Entry<Op, Boolean> rewrite(OpSlice op) {
+            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> new OpSlice(subOp, op.getStart(), op.getLength()));
+            return result;
         }
 
         @Override

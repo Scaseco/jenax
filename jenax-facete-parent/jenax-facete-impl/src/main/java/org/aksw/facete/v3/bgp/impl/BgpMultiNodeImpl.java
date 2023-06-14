@@ -122,6 +122,9 @@ public class BgpMultiNodeImpl
 
     @Override
     public BgpNode viaAlias(String alias) {
+        // TODO GetOrCreate a BgpNode with the alias
+        // Set<BgpNode> set = new SetFromPropertyValues<>(this, Vocab.one, BgpNode.class);
+
         throw new RuntimeException("not implemented yet");
     }
 

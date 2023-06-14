@@ -145,8 +145,8 @@ public class TripleUtils {
 
     public static Triple create(Node s, Node p, Node o, boolean isForward) {
         Triple result = isForward
-            ? new Triple(s, p, o)
-            : new Triple(o, p, s);
+            ? Triple.create(s, p, o)
+            : Triple.create(o, p, s);
 
         return result;
     }
