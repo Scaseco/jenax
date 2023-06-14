@@ -310,7 +310,7 @@ public abstract class SparqlEndpointBase {
             throw new RuntimeException("No query/update statement provided");
         }
 
-        if (queryStr != null && updateStr != null) {
+        if (queryStr != null && updateStr != null && !updateStr.equals(queryStr)) {
             throw new RuntimeException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
         }
 
