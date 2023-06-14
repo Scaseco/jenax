@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,7 +43,7 @@ public class ClassDescriptor {
     // protected Set<P_Path0> hashIdPaths = new LinkedHashSet<>();
     //protected Map<P_Path0, Function<? super Resource, ? extends Collection<? extends RDFNode>>>
 
-    protected Map<P_Path0, PropertyDescriptor> pathToPropertyDescriptor = new LinkedHashMap<>();
+    protected Map<P_Path0, PropertyDescriptor> pathToPropertyDescriptor = Collections.synchronizedMap(new LinkedHashMap<>());
 
 
     protected Set<BiFunction<? super Resource, ? super HashIdCxt, ? extends HashCode>> directHashIdProcessors = new LinkedHashSet<>();
