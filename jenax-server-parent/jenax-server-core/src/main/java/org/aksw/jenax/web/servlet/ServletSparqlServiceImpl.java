@@ -1,6 +1,9 @@
 package org.aksw.jenax.web.servlet;
 
-import java.io.InputStream;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -9,11 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.aksw.jenax.stmt.core.SparqlStmtParser;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import java.io.InputStream;
 
 
 /**
