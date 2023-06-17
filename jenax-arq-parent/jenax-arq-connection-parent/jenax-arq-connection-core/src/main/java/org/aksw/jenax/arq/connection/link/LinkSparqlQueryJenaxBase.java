@@ -1,14 +1,20 @@
 package org.aksw.jenax.arq.connection.link;
 
 import org.aksw.jenax.arq.connection.TransactionalDelegate;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TransactionalNull;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
+/**
+ * Provide a {@link LinkSparqlQuery} view over a {@link QueryExecutionFactoryQuery}.
+ * The link does not support {@link #newQuery()}.
+ */
 public class LinkSparqlQueryJenaxBase<T extends QueryExecFactoryQuery>
-	implements TransactionalDelegate, LinkSparqlQueryTmp
+    implements TransactionalDelegate, LinkSparqlQueryTmp
 {
     protected T queryExecFactory;
     protected Transactional transactional;

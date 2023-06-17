@@ -35,6 +35,10 @@ public class NodeUtils {
     public static final String nullUri = "http://null.null/null";
     public static final Node nullUriNode = NodeFactory.createURI(nullUri);
 
+    public static final String ANY_IRI_STR = "urn:x-jenax:any";
+    public static final Node ANY_IRI = NodeFactory.createURI(ANY_IRI_STR);
+
+
 
     /** Constants for use with {@link #getDatatypeIri(Node)}
         Conflates the term type into a datatype: Under this perspective, IRIs and

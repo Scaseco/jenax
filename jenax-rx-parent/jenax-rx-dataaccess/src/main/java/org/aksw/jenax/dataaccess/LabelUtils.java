@@ -287,7 +287,7 @@ public class LabelUtils {
             String dtPart = null;
 
             // Hide string / langString datatypes
-            boolean showDatatype = dtIri != null && !(obj instanceof String);
+            boolean showDatatype = dtIri != null && !(obj instanceof String) && !(obj instanceof Number);
 
             if(showDatatype) {
                 Entry<String, String> prefixToIri = prefixMapping == null

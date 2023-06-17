@@ -144,6 +144,8 @@ public class RelationUtils {
     public static Map<Var, Node> createRenameVarMap(Set<Var> mentionedVars, List<Var> rVars, List<? extends Node> targetNodes) {
         //Set<Var> rVars = ElementUtils.getMentionedVars(e);
 
+        // Variables in the intersection of mentionedVars and targetNodes need to be renamed
+
         Set<Var> relationVars = new LinkedHashSet<>(rVars);
         Set<Node> vs = new LinkedHashSet<>(targetNodes);
         if(vs.size() != relationVars.size()) {

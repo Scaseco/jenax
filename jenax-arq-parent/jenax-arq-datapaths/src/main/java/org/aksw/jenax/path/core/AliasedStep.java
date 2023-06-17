@@ -15,14 +15,33 @@ public class AliasedStep
     protected P_Path0 step;
     protected String alias;
 
+    /** TODO Include a constant for the graph? */
+
+    /** Whether the path targets the predicate rather than the values */
+    protected boolean predicateAsTarget;
+
+    public AliasedStep(Node node, boolean isForward, String alias) {
+        this(PathUtils.createStep(node, isForward), alias, false);
+    }
+
+    public AliasedStep(Node node, boolean isForward, String alias, boolean predicateAsTarget) {
+        this(PathUtils.createStep(node, isForward), alias, predicateAsTarget);
+    }
+
     public AliasedStep(P_Path0 step, String alias) {
+        this(step, alias, false);
+    }
+
+    public AliasedStep(P_Path0 step, String alias, boolean predicateAsTarget) {
         super();
         this.step = step;
         this.alias = alias;
+        this.predicateAsTarget = predicateAsTarget;
     }
 
-    public AliasedStep(Node node, boolean isForward, String alias) {
-        this(PathUtils.createStep(node, isForward), alias);
+    /** Return a new step which has the {@link #predicateAsTarget} flag toggled. */
+    public AliasedStep toggleTarget() {
+        return new AliasedStep(step, alias, !predicateAsTarget);
     }
 
     public P_Path0 getStep() {
@@ -37,13 +56,17 @@ public class AliasedStep
         return step.isForward();
     }
 
+    public boolean isPredicateAsTarget() {
+        return predicateAsTarget;
+    }
+
     public String getAlias() {
         return alias;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(alias, step);
+        return Objects.hash(alias, predicateAsTarget, step);
     }
 
     @Override
@@ -55,11 +78,12 @@ public class AliasedStep
         if (getClass() != obj.getClass())
             return false;
         AliasedStep other = (AliasedStep) obj;
-        return Objects.equals(alias, other.alias) && Objects.equals(step, other.step);
+        return Objects.equals(alias, other.alias) && predicateAsTarget == other.predicateAsTarget
+                && Objects.equals(step, other.step);
     }
 
     @Override
     public String toString() {
-        return "AliasedStep [step=" + step + ", alias=" + alias + "]";
+        return "AliasedStep [step=" + step + ", alias=" + alias + ", predicateAsTarget=" + predicateAsTarget + "]";
     }
 }

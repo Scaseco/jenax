@@ -363,7 +363,9 @@ public class ElementUtils {
     @Deprecated // Use TransformElementLib.transform instead
     public static Element applyNodeTransformBackport(Element element, NodeTransform nodeTransform) {
         ElementTransform elementTransform = new ElementTransformSubst2(nodeTransform);//new ElementTransformSubst2(nodeTransform);
-        ExprTransform exprTransform = new ExprTransformNodeElement(nodeTransform, elementTransform);
+
+        // Need to use backport version because of substitution in aggregators
+        ExprTransform exprTransform = new org.aksw.jenax.util.backport.syntaxtransform.ExprTransformNodeElement(nodeTransform, elementTransform);
 
         Element result = org.aksw.jenax.util.backport.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
 

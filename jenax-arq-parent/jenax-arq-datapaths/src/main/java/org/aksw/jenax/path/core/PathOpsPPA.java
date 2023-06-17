@@ -140,11 +140,11 @@ public class PathOpsPPA
             boolean isFwd = true;
             String alias = null;
 
-            if (current.isURI()) {
+            if (!current.isLiteral()) {
                 p = current;
                 current = Iterators.getNext(it, null);
             } else {
-                throw new RuntimeException("Expected an IRI, got: " + current);
+                throw new RuntimeException("Unexpected literal in path (this serialization does not support literals for transitions). got: " + current);
             }
 
             if (current != null && current.isLiteral()) {
