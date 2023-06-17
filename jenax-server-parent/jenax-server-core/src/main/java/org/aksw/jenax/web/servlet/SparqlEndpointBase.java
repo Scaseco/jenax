@@ -1,37 +1,12 @@
 package org.aksw.jenax.web.servlet;
 
-import java.io.OutputStream;
-import java.util.function.Consumer;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.CompletionCallback;
-import javax.ws.rs.container.ConnectionCallback;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
-import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
-import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
-import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
-import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
+import org.aksw.jenax.arq.util.fmt.*;
 import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
-import org.aksw.jenax.stmt.core.SparqlStmt;
-import org.aksw.jenax.stmt.core.SparqlStmtParser;
-import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
-import org.aksw.jenax.stmt.core.SparqlStmtQuery;
-import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
+import org.aksw.jenax.stmt.core.*;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -47,6 +22,18 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.CompletionCallback;
+import javax.ws.rs.container.ConnectionCallback;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.OutputStream;
+import java.util.function.Consumer;
 
 
 /**
@@ -307,11 +294,11 @@ public abstract class SparqlEndpointBase {
 
     public void processStmtAsync(AsyncResponse response, String queryStr, String updateStr, SparqlResultFmts format) {
         if(queryStr == null && updateStr == null) {
-            throw new RuntimeException("No query/update statement provided");
+            throw new QueryException("No query/update statement provided");
         }
 
         if (queryStr != null && updateStr != null && !updateStr.equals(queryStr)) {
-            throw new RuntimeException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
+            throw new QueryException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
         }
 
         String stmtStr = queryStr != null ? queryStr : updateStr;
