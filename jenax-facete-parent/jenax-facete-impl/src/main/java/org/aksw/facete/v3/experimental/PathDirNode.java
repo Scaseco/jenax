@@ -1,38 +1,41 @@
 package org.aksw.facete.v3.experimental;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.aksw.facete.v3.api.traversal.TraversalDirNode;
 import org.aksw.facete.v3.api.traversal.TraversalMultiNode;
 import org.apache.jena.rdf.model.Resource;
 
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
+
 public abstract class PathDirNode<N, M extends TraversalMultiNode<N>>
-	implements TraversalDirNode<N, M>
+    implements TraversalDirNode<N, M>
 {
-	protected N parent;
-	protected boolean isFwd;
-	protected Map<Resource, M> propToMultiNode = new LinkedHashMap<>();
+    protected N parent;
+    protected boolean isFwd;
+    // protected Map<Resource, M> propToMultiNode = new LinkedHashMap<>();
+    protected Table<Resource, Integer, M> propComponentToMultiNode = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new); // HashBasedTable.
 
-	public PathDirNode(N parent, boolean isFwd) {
-		super();
-		this.parent = parent;
-		this.isFwd = isFwd;
-	}
-	
-	@Override
-	public boolean isFwd() {
-		return isFwd;
-	}
+    public PathDirNode(N parent, boolean isFwd) {
+        super();
+        this.parent = parent;
+        this.isFwd = isFwd;
+    }
 
-	@Override
-	public M via(Resource property) {
-		M result = propToMultiNode.computeIfAbsent(property, p -> {
-			// Expanded for easier debugging
-			return viaImpl(p); 
-		});
-		return result;
-	}
+    @Override
+    public boolean isFwd() {
+        return isFwd;
+    }
 
-	protected abstract M viaImpl(Resource property);
+    @Override
+    public M via(Resource property, Integer component) {
+        M result = propComponentToMultiNode.row(property).computeIfAbsent(component, c -> {
+            // Expanded for easier debugging
+            return viaImpl(property, c);
+        });
+        return result;
+    }
+
+    protected abstract M viaImpl(Resource property, Integer component);
 }

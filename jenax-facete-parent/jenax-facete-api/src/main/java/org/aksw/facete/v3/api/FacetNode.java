@@ -101,8 +101,29 @@ public interface FacetNode
     FacetNode parent();
 
 
+    /**
+     * Create a faceted query over the values of this node without constraining the set of matched items of the outer query.
+     * This essentially allows for placing filters into OPTIONAL blocks:
+     *
+     * SELECT ?person ?city
+     * {
+     *   ?person hasAdress ?address
+     *   OPTIONAL {
+     *     ?address hasCountry ?country . FILTER(?country IN (...))
+     *     ?address hasCity ?city . # Projected path with exists constraint on the sub facet
+     *   }
+     * }
+     *
+     *
+     *
+     */
+    // FacetNode subFacetNode();
+
+    // AliasedStep reachingStep();
     Direction reachingDirection();
     Node reachingPredicate();
+    String reachingAlias();
+    Integer targetComponent();
 
     BinaryRelation getReachingRelation();
 
@@ -120,7 +141,7 @@ public interface FacetNode
      */
 //	Set<FacetConstraint> constraints();
 
-    ConstraintFacade<? extends FacetNode> constraints();
+    ConstraintFacade<? extends FacetNode> constraints(); // TODO Rename to enterConstraints()
 
     //Concept toConcept();
 

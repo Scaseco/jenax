@@ -31,7 +31,7 @@ import com.google.common.collect.Streams;
 
 public class NodeUtils {
 
-    /** Placeholder constants to denote a 'null' node */
+    /** Placeholder constants to denote a 'null' node - the absence of a value */
     public static final String nullUri = "http://null.null/null";
     public static final Node nullUriNode = NodeFactory.createURI(nullUri);
 

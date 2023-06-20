@@ -296,4 +296,17 @@ public class FacetNodeImpl
         Direction result = parent == null ? null : parent.getDirection();
         return result;
     }
+
+    @Override
+    public String reachingAlias() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Integer targetComponent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

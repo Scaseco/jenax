@@ -43,7 +43,11 @@ public class ResolverDirNodeImpl
     }
 
     @Override
-    protected ResolverMultiNodeImpl viaImpl(Resource property) {
+    protected ResolverMultiNodeImpl viaImpl(Resource property, Integer component) {
+        if (component != null) {
+            throw new UnsupportedOperationException("Support for referencing components not implemented");
+        }
+
         return new ResolverMultiNodeImpl(this, property, conn);
     }
 

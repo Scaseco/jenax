@@ -35,6 +35,7 @@ public interface TraversalNode<
     //BgpNode model();
 
 
+    @Deprecated // All steps are optional; adding a 'bound' constraint to a paths makes them mandatory!
     default boolean canOpt() {
         return false;
     }
@@ -44,6 +45,7 @@ public interface TraversalNode<
      *
      * @return
      */
+    @Deprecated
     default M opt() {
         throw new UnsupportedOperationException("Optional traversal not implemented or not overridden");
     }

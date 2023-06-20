@@ -11,30 +11,30 @@ import org.apache.jena.rdf.model.Resource;
 
 
 public class FacetMultiNodeImpl
-	implements FacetMultiNode
+    implements FacetMultiNode
 {
-	protected FacetNodeResource parent;
+    protected FacetNodeResource parent;
 //	protected Property property;
 //	protected boolean isFwd;
 
-	protected BgpMultiNode state;
-	
-	public FacetMultiNodeImpl(FacetNodeResource parent, BgpMultiNode state) {//Property property, boolean isFwd) {
-		super();
-		this.parent = parent;
-		this.state = state;
+    protected BgpMultiNode state;
+
+    public FacetMultiNodeImpl(FacetNodeResource parent, BgpMultiNode state) {//Property property, boolean isFwd) {
+        super();
+        this.parent = parent;
+        this.state = state;
 //		this.property = property;
 //		this.isFwd = isFwd;
-	}
+    }
 
 //	public Set<Resource> liveBackingSet() {
 //		Set<Resource> result = isFwd
 //				? new SetFromPropertyValues<>(parent.state(), property, Resource.class)
 //				: new SetFromResourceAndInverseProperty<>(parent.state(), property, Resource.class);
-//				
+//
 //		return result;
 //	}
-	
+
 //	@Override
 //	public Set<FacetNode> children() {
 //		return new CollectionFromConverter(
@@ -43,25 +43,25 @@ public class FacetMultiNodeImpl
 //		);
 //	}
 
-	
-	@Override
-	public boolean hasMultipleReferencedAliases() {
-		return false;
-	}
 
-	/**
-	 * Gets or creates a single successor
-	 * 
-	 */
-	@Override
-	public FacetNode one() {
-		//state.one();
-		
-		return new FacetNodeImpl(parent.query(), state.one());
-		
+    @Override
+    public boolean hasMultipleReferencedAliases() {
+        return false;
+    }
+
+    /**
+     * Gets or creates a single successor
+     *
+     */
+    @Override
+    public FacetNode one() {
+        //state.one();
+
+        return new FacetNodeImpl(parent.query(), state.one());
+
 //		// TODO We could use .children as well
 //		Set<Resource> set = liveBackingSet();
-//		
+//
 //		FacetNode result;
 //		Resource r;
 //		if(set.isEmpty()) {
@@ -70,7 +70,7 @@ public class FacetMultiNodeImpl
 //
 //			r.addProperty(Vocab.parent, parent.state());
 //		}
-//		
+//
 //		if(set.size() == 1) {
 //			result = new FacetNodeImpl(parent.query(), set.iterator().next());
 //		} else {
@@ -78,49 +78,48 @@ public class FacetMultiNodeImpl
 //		}
 //
 //		return result;
-	}
+    }
 
-	@Override
-	public void setConjunctive() {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void remainingValues() {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void availableValues() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void remainingValues() {
+        // TODO Auto-generated method stub
 
-	@Override
-	public boolean contains(FacetNode facetNode) {
-		boolean result;
-		if(!(facetNode instanceof FacetNodeResource)) {
-			result = false;
-		} else {
-			FacetNodeResource tmp = (FacetNodeResource)facetNode;
-			Resource r = tmp.state();
+    }
+    @Override
+    public void availableValues() {
+        // TODO Auto-generated method stub
 
-			result = state.contains(r.as(BgpNode.class));
-			
+    }
+
+    @Override
+    public boolean contains(FacetNode facetNode) {
+        boolean result;
+        if(!(facetNode instanceof FacetNodeResource)) {
+            result = false;
+        } else {
+            FacetNodeResource tmp = (FacetNodeResource)facetNode;
+            Resource r = tmp.state();
+
+            result = state.contains(r.as(BgpNode.class));
+
 //			Set<Resource> set = liveBackingSet();
-//			result = set.contains(r);			
-		}
-		return result;
-	}
+//			result = set.contains(r);
+        }
+        return result;
+    }
 
-	@Override
-	public FacetNode viaAlias(String alias) {
-		throw new RuntimeException("Not implemented yet");
-	}
+    @Override
+    public FacetNode viaAlias(String alias) {
+        throw new RuntimeException("not implemented yet");
+    }
 
-	@Override
-	public Map<String, FacetNode> list() {
-		throw new RuntimeException("not implemented yet");
-	}
-	
+    @Override
+    public Map<String, FacetNode> list() {
+        throw new RuntimeException("not implemented yet");
+    }
+
+//    @Override
+//    public FacetNode viaAlias(String alias, Integer component) {
+//        throw new RuntimeException("Not implemented yet");
+//    }
 }

@@ -1,16 +1,19 @@
 package org.aksw.jenax.arq.util.binding;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.aksw.jenax.arq.util.var.VarUtils;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.TableFactory;
 import org.apache.jena.sparql.algebra.table.TableN;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.graph.NodeTransform;
 
@@ -25,6 +28,19 @@ public class TableUtils {
         Table result = TableFactory.create(vars);
         for (Binding b : bindings) {
             result.addBinding(b);
+        }
+        return result;
+    }
+
+    public static Table createTable(Var var, Iterable<Node> nodesIt) {
+        return createTable(var, nodesIt);
+    }
+
+    public static Table createTable(Var var, Iterator<Node> nodesIt) {
+        Table result = TableFactory.create(Arrays.asList(var));
+        while (nodesIt.hasNext()) {
+            Node node = nodesIt.next();
+            result.addBinding(BindingFactory.binding(var, node));
         }
         return result;
     }

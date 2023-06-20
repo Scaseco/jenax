@@ -5,8 +5,7 @@ import java.util.Optional;
 import org.aksw.commons.util.obj.ObjectUtils;
 
 /**
- * A convenience interface (or rather trait) to perform inline casts
- *
+ * A convenience trait to perform inline casts.
  *
  * @author Claus Stadler, Dec 28, 2018
  *

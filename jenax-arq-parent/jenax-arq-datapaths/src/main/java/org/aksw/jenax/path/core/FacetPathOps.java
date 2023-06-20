@@ -1,6 +1,7 @@
 package org.aksw.jenax.path.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,70 +19,78 @@ import org.apache.jena.sparql.expr.NodeValue;
 
 import com.google.common.collect.Iterators;
 
-public class PathOpsPPA
-    implements PathOps<AliasedStep, PathPPA>
+public class FacetPathOps
+    implements PathOps<FacetStep, FacetPath>
 {
-    public static final AliasedStep PARENT = new AliasedStep(PathOpsNode.PARENT, true, null);
-    public static final AliasedStep SELF = new AliasedStep(PathOpsNode.SELF, true, null);
+    public static final FacetStep PARENT = new FacetStep(PathOpsNode.PARENT, true, null);
+    public static final FacetStep SELF = new FacetStep(PathOpsNode.SELF, true, null);
 
-    private static PathOpsPPA INSTANCE = null;
+    private static FacetPathOps INSTANCE = null;
 
-    public static PathOpsPPA get() {
+    public static FacetPathOps get() {
         if (INSTANCE == null) {
-            synchronized (PathOpsPPA.class) {
+            synchronized (FacetPathOps.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new PathOpsPPA();
+                    INSTANCE = new FacetPathOps();
                 }
             }
         }
         return INSTANCE;
     }
 
+    /** Convenience static shorthand for .get().newRoot() */
+    public static FacetPath newAbsolutePath(FacetStep ... segments) {
+        return get().newPath(true, Arrays.asList(segments));
+    }
 
-    @Override
-    public PathPPA upcast(Path<AliasedStep> path) {
-        return (PathPPA)path;
+    public static FacetPath newRelativePath(FacetStep ... segments) {
+        return get().newPath(false, Arrays.asList(segments));
     }
 
     @Override
-    public List<AliasedStep> getBasePathSegments() {
+    public FacetPath upcast(Path<FacetStep> path) {
+        return (FacetPath)path;
+    }
+
+    @Override
+    public List<FacetStep> getBasePathSegments() {
         return Collections.emptyList();
     }
 
     @Override
-    public Comparator<AliasedStep> getComparator() {
+    public Comparator<FacetStep> getComparator() {
         return Comparator.comparing(Object::toString);
     }
 
     @Override
-    public PathPPA newPath(boolean isAbsolute, List<AliasedStep> segments) {
-        return new PathPPA(this, isAbsolute, segments);
+    public FacetPath newPath(boolean isAbsolute, List<FacetStep> segments) {
+        return new FacetPath(this, isAbsolute, segments);
     }
 
     @Override
-    public PathPPA newPath(AliasedStep element) {
+    public FacetPath newPath(FacetStep element) {
         return newPath(false, Collections.singletonList(element));
     }
 
     @Override
-    public AliasedStep getSelfToken() {
+    public FacetStep getSelfToken() {
         return SELF;
     }
 
     @Override
-    public AliasedStep getParentToken() {
+    public FacetStep getParentToken() {
         return PARENT;
     }
 
     @Override
     public String toStringRaw(Object path) {
-        return toString((PathPPA)path);
+        return toString((FacetPath)path);
     }
 
     /** Note the current serialization depends on nodes to be IRIs! */
 
     /** Convert an aliased step to a sequence of nodes. The nodes are used for serialization. */
-    public static List<Node> toNodes(AliasedStep step) {
+    public static List<Node> toNodes(FacetStep step) {
         List<Node> result = new ArrayList<>(3);
         result.add(step.getNode());
 
@@ -97,11 +106,11 @@ public class PathOpsPPA
     }
 
     @Override
-    public String toString(PathPPA path) {
-        List<AliasedStep> segments = path.getSegments();
+    public String toString(FacetPath path) {
+        List<FacetStep> segments = path.getSegments();
 
         Node[] nodes = segments.stream()
-                .map(PathOpsPPA::toNodes)
+                .map(FacetPathOps::toNodes)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList())
                 .toArray(new Node[0]);
@@ -119,7 +128,7 @@ public class PathOpsPPA
      *
      */
     @Override
-    public PathPPA fromString(String str) {
+    public FacetPath fromString(String str) {
         str = str.trim();
         boolean isAbsolute = false;
 
@@ -132,7 +141,7 @@ public class PathOpsPPA
 
         List<Node> nodes = NodeUtils.parseNodes(str, new ArrayList<>());
 
-        List<AliasedStep> steps = new ArrayList<>();
+        List<FacetStep> steps = new ArrayList<>();
         Iterator<Node> it = nodes.iterator();
         Node current = Iterators.getNext(it, null);
         while (current != null) {
@@ -163,7 +172,7 @@ public class PathOpsPPA
                 }
             }
 
-            AliasedStep step = new AliasedStep(p, isFwd, alias);
+            FacetStep step = new FacetStep(p, isFwd, alias);
             steps.add(step);
         }
 

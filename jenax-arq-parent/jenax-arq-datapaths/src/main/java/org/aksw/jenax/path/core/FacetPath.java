@@ -8,13 +8,13 @@ import org.aksw.commons.path.core.PathBase;
 import org.aksw.commons.path.core.PathOps;
 import org.apache.jena.graph.Node;
 
-/** Path for aliased SPARQL 1.1 property paths. */
-public class PathPPA
-    extends PathBase<AliasedStep, PathPPA>
+/** Paths for traversal of RDF data based on concrete properties IRIs and aliases. */
+public class FacetPath
+    extends PathBase<FacetStep, FacetPath>
 {
     private static final long serialVersionUID = 1L;
 
-    public PathPPA(PathOps<AliasedStep, PathPPA> pathOps, boolean isAbsolute, List<AliasedStep> segments) {
+    public FacetPath(PathOps<FacetStep, FacetPath> pathOps, boolean isAbsolute, List<FacetStep> segments) {
         super(pathOps, isAbsolute, segments);
     }
 
@@ -22,6 +22,6 @@ public class PathPPA
     public Stream<Node> streamNodes() {
         return getSegments().stream()
                 .filter(Objects::nonNull) // For robustness; should never be null
-                .map(AliasedStep::getNode);
+                .map(FacetStep::getNode);
     }
 }

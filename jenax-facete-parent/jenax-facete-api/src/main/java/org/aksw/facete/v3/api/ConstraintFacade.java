@@ -168,6 +168,11 @@ public interface ConstraintFacade<B> {
 //		return exists(rdfNode.asNode());
 //	}
 
-    /** End constraint building and return the parent object */
+    @Deprecated // Renamed to 'leave'
     B end();
+
+    /** Leave constraint building and return the parent object */
+    default B leave() {
+        return end();
+    }
 }
