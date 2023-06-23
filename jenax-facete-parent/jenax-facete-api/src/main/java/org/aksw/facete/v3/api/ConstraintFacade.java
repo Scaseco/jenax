@@ -25,12 +25,13 @@ import com.google.common.collect.Range;
  * @author raven
  *
  */
+// TODO Rename to ConstraintNode?
 public interface ConstraintFacade<B> {
-    Collection<FacetConstraint> list();
+    Collection<FacetConstraintCore> list();
 
     Collection<HLFacetConstraint<? extends ConstraintFacade<B>>> listHl();
 
-    default Stream<FacetConstraint> stream() {
+    default Stream<FacetConstraintCore> stream() {
         return list().stream();
     }
 
@@ -172,7 +173,7 @@ public interface ConstraintFacade<B> {
     B end();
 
     /** Leave constraint building and return the parent object */
-    default B leave() {
+    default B leaveConstraints() {
         return end();
     }
 }

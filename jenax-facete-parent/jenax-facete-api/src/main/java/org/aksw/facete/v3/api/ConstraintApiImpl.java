@@ -1,11 +1,7 @@
 package org.aksw.facete.v3.api;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.aksw.commons.util.obj.ObjectUtils;
-import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
@@ -22,12 +18,17 @@ import org.apache.jena.sparql.expr.NodeValue;
  *
  * TODO Move to impl package
  */
-public class ConstraintFacadeImpl {
+public class ConstraintApiImpl
+//     implements FacetConstraintCore
+{
     protected FacetConstraints model;
     protected TreeQueryNode node;
+
     protected transient Expr exprVar;
 
-    public ConstraintFacadeImpl(FacetConstraints model, TreeQueryNode node) {
+
+
+    public ConstraintApiImpl(FacetConstraints model, TreeQueryNode node) {
         super();
         this.model = model;
         this.node = node;

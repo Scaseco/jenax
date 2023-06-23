@@ -1,5 +1,6 @@
 package org.aksw.jenax.path.core;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -23,5 +24,14 @@ public class FacetPath
         return getSegments().stream()
                 .filter(Objects::nonNull) // For robustness; should never be null
                 .map(FacetStep::getNode);
+    }
+
+    /** Convenience static shorthand for .get().newRoot() */
+    public static FacetPath newAbsolutePath(FacetStep ... segments) {
+        return FacetPathOps.get().newPath(true, Arrays.asList(segments));
+    }
+
+    public static FacetPath newRelativePath(FacetStep ... segments) {
+        return FacetPathOps.get().newPath(false, Arrays.asList(segments));
     }
 }

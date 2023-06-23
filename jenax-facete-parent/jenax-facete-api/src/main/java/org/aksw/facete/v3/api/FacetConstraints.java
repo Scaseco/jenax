@@ -1,5 +1,6 @@
 package org.aksw.facete.v3.api;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -8,13 +9,14 @@ import org.apache.jena.sparql.expr.Expr;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-//class FacetConstraint {
-//
-//}
+// class FacetConstraint {
+// }
 
 /** A collection of constraints */
 public class FacetConstraints {
     // protected Map<Expr, Boolean> exprToState;
+
+    // TODO Have the final value to be a wrapper that links back to the keys?
     protected Table<Set<TreeQueryNode>, Expr, Boolean> model = HashBasedTable.create();
 
     protected TreeQuery treeQuery;
@@ -27,75 +29,20 @@ public class FacetConstraints {
         this.treeQuery = treeQuery;
     }
 
+    public Collection<Expr> getExprs() {
+        return model.columnKeySet();
+    }
+
     public TreeQuery getTreeQuery() {
         return treeQuery;
     }
 
-    public ConstraintFacadeImpl getFacade(TreeQueryNode node) {
-        return new ConstraintFacadeImpl(this, node);
+    public ConstraintApiImpl getFacade(TreeQueryNode node) {
+        return new ConstraintApiImpl(this, node);
     }
 
     @Override
     public String toString() {
         return Objects.toString(model);
-    }
-}
-
-/** Facade to toggle an individual constraint on and off. */
-class ConstraintControl
-    implements FacetConstraintCore
-{
-    protected FacetConstraints container;
-    protected Set<TreeQueryNode> references;
-    protected Expr expr;
-
-    public ConstraintControl(FacetConstraints container, Set<TreeQueryNode> references, Expr expr) {
-        super();
-        this.container = container;
-        this.references = references;
-        this.expr = expr;
-    }
-
-    @Override
-    public boolean enabled() {
-        return Boolean.TRUE.equals(container.model.get(references, expr));
-    }
-
-    /** Remove from the container */
-    public void unlink() {
-        container.model.remove(references, expr);
-    }
-
-    public boolean isUnlinked() {
-        return !container.model.contains(references, expr);
-    }
-
-    @Override
-    public FacetConstraintCore enabled(boolean onOrOff) {
-        container.model.put(references, expr, onOrOff);
-        return this;
-    }
-
-    @Override
-    public Expr expr() {
-        return expr;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(container, expr, references);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ConstraintControl other = (ConstraintControl) obj;
-        return Objects.equals(container, other.container) && Objects.equals(expr, other.expr)
-                && Objects.equals(references, other.references);
     }
 }

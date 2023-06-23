@@ -3,6 +3,7 @@ package org.aksw.jenax.path.core;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
@@ -16,24 +17,28 @@ public class FacetStep
     protected P_Path0 step;
     protected String alias;
 
+    /** The component targeted by this step. A step corresponds to a tuple:
+     * By default a path points to the values reachable via this step, but in the case of RDF it could also refer to the predicate or graph component. */
+    protected Integer targetComponent;
+
     /** Constants for addressing components of a quad */
     public static final Integer TARGET = null; // Use 0?
     public static final Integer PREDICATE = 1;
     public static final Integer SOURCE = 2;
     public static final Integer GRAPH = 3;
-    public static final Integer ANY = -1; // A placeholder to refer to any component - which corresponds to the the triple/quad (or or general tuple expression)
+    public static final Integer TUPLE = -1; // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
 
     public static boolean isTarget(Integer component) { return Objects.equals(TARGET, component); }
     public static boolean isPredicate(Integer component) { return Objects.equals(PREDICATE, component); }
     public static boolean isSource(Integer component) { return Objects.equals(SOURCE, component); }
     public static boolean isGraph(Integer component) { return Objects.equals(GRAPH, component); }
-    public static boolean isAny(Integer component) { return Objects.equals(ANY, component); }
+    public static boolean isTuple(Integer component) { return Objects.equals(TUPLE, component); }
 
     /** TODO Include a constant for the graph? */
 
-    /** The component targeted by this step. A step corresponds to a tuple:
-     * By default a path points to the values reachable via this step, but in the case of RDF it could also refer to the predicate or graph component. */
-    protected Integer targetComponent;
+    public static FacetStep of(Node node, Direction direction, String alias, Integer component) {
+        return new FacetStep(node, direction.isForward(), alias, component);
+    }
 
     public static FacetStep fwd(Resource node, String alias) {
         return fwd(node.asNode(), alias);
@@ -109,6 +114,6 @@ public class FacetStep
 
     @Override
     public String toString() {
-        return "AliasedStep [step=" + step + ", alias=" + alias + ", targetComponent=" + targetComponent + "]";
+        return "FacetStep [step=" + step + ", alias=" + alias + ", targetComponent=" + targetComponent + "]";
     }
 }

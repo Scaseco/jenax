@@ -141,7 +141,7 @@ public interface FacetNode
      */
 //	Set<FacetConstraint> constraints();
 
-    ConstraintFacade<? extends FacetNode> constraints(); // TODO Rename to enterConstraints()
+    ConstraintFacade<? extends FacetNode> enterConstraints(); // TODO Rename to enterConstraints()
 
     //Concept toConcept();
 

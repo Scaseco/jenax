@@ -1,7 +1,6 @@
 package org.aksw.jenax.path.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,15 +35,6 @@ public class FacetPathOps
             }
         }
         return INSTANCE;
-    }
-
-    /** Convenience static shorthand for .get().newRoot() */
-    public static FacetPath newAbsolutePath(FacetStep ... segments) {
-        return get().newPath(true, Arrays.asList(segments));
-    }
-
-    public static FacetPath newRelativePath(FacetStep ... segments) {
-        return get().newPath(false, Arrays.asList(segments));
     }
 
     @Override

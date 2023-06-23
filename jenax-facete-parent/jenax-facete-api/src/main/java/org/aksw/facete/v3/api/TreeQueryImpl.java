@@ -1,6 +1,6 @@
 package org.aksw.facete.v3.api;
 
-import org.aksw.jenax.path.core.FacetPathOps;
+import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
@@ -26,7 +26,7 @@ public class TreeQueryImpl
         TreeQueryNode root = tq.root();
 
         TreeQueryNode n1 = tq.root().getOrCreateChild(FacetStep.fwd(DCTerms.subject, null));
-        TreeQueryNode n2 = tq.root().resolve(FacetPathOps.newRelativePath().resolve(FacetStep.fwd(DCTerms.subject, "a1")));
+        TreeQueryNode n2 = tq.root().resolve(FacetPath.newRelativePath().resolve(FacetStep.fwd(DCTerms.subject, "a1")));
 
         System.out.println("1: " + tq.root());
 
@@ -40,7 +40,7 @@ public class TreeQueryImpl
 
         FacetConstraints constraints = new FacetConstraints(tq);
 
-        ConstraintFacadeImpl c = constraints.getFacade(n2);
+        ConstraintApiImpl c = constraints.getFacade(n2);
         ConstraintControl cc = (ConstraintControl)c.eq(RDF.type.asNode()).enabled(true);
         System.out.println(constraints);
 

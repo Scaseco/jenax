@@ -198,7 +198,7 @@ public class FacetNodeImpl
     }
 
     @Override
-    public ConstraintFacade<? extends FacetNodeResource> constraints() {
+    public ConstraintFacade<? extends FacetNodeResource> enterConstraints() {
         return new ConstraintFacadeImpl<FacetNodeResource>(this);
     }
 
