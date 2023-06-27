@@ -3,23 +3,23 @@ package org.aksw.jenax.model.prefix;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.jenax.model.prefix.domain.api.PrefixDefinition;
-import org.aksw.jenax.model.prefix.domain.api.PrefixSet;
+import org.aksw.jenax.model.prefix.domain.api.HasPrefixes;
+import org.aksw.jenax.model.prefix.domain.api.PrefixDeclaration;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
 
 
-public class PrefixSetTests {
+public class HasPrefixesTests {
 
     @Test
-    public void test() {
-        PrefixSet ps = ModelFactory.createDefaultModel().createResource().as(PrefixSet.class);
+    public void testHasPrefixes() {
+        HasPrefixes ps = ModelFactory.createDefaultModel().createResource().as(HasPrefixes.class);
 
         // Two views over the same data
         // Map<String, String> map = ps.getMap();
-        Set<PrefixDefinition> defs = ps.getDefinitions();
+        Set<PrefixDeclaration> defs = ps.getPrefixes();
 
         ps.put("rdf", RDF.getURI());
 

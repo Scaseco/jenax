@@ -6,10 +6,10 @@ import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 
 public class PrefixSetUtils {
-    public static PrefixMap collect(Iterable<PrefixSet> prefixSets) {
+    public static PrefixMap collect(Iterable<HasPrefixes> prefixSets) {
         PrefixMap result = PrefixMapFactory.createForOutput();
 
-        for(PrefixSet ps : prefixSets) {
+        for(HasPrefixes ps : prefixSets) {
             Map<String, String> mapping = ps.getMap();
             result.putAll(mapping);
         }

@@ -7,19 +7,18 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.PrefixMapping;
 
 @ResourceView
-public interface PrefixDefinition
+public interface PrefixDeclaration
     extends Resource
 {
-    // @Iri(NorsePrefixTerms.prefix)
-    @Iri("http://www.w3.org/2000/01/rdf-schema#label")
+    @Iri(ShaclTerms.prefix)
     String getPrefix();
-    PrefixDefinition setPrefix(String prefix);
+    PrefixDeclaration setPrefix(String prefix);
 
 
-    @Iri(NorsePrefixTerms.namespace)
+    @Iri(ShaclTerms.namespace)
     @IriType
     String getIri();
-    PrefixDefinition setIri(String namespace);
+    PrefixDeclaration setIri(String namespace);
 
     default PrefixMapping addTo(PrefixMapping pm) {
         String prefix = getPrefix();

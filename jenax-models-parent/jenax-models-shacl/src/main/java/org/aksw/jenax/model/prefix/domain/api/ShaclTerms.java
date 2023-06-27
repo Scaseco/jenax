@@ -1,7 +1,7 @@
 package org.aksw.jenax.model.prefix.domain.api;
 
-public class NorsePrefixTerms {
-    public static final String NS = "https://w3id.org/aksw/norse#";
+public class ShaclTerms {
+    public static final String NS = "http://www.w3.org/ns/shacl#";
 
     public static final String prefixes = NS + "prefixes";
     public static final String prefix = NS + "prefix";

@@ -1,7 +1,7 @@
 package org.aksw.jenax.model.prefix.plugin;
 
-import org.aksw.jenax.model.prefix.domain.api.PrefixDefinition;
-import org.aksw.jenax.model.prefix.domain.api.PrefixSet;
+import org.aksw.jenax.model.prefix.domain.api.HasPrefixes;
+import org.aksw.jenax.model.prefix.domain.api.PrefixDeclaration;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -9,12 +9,12 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 
 
-public class JenaPluginPrefix
+public class JenaPluginShacl
     implements JenaSubsystemLifecycle {
 
     @Override
     public void start() {
-        JenaPluginPrefix.init();
+        JenaPluginShacl.init();
     }
 
     @Override
@@ -27,7 +27,7 @@ public class JenaPluginPrefix
 
     public static void init(Personality<RDFNode> p) {
         JenaPluginUtils.registerResourceClasses(
-                PrefixDefinition.class,
-                PrefixSet.class);
+                PrefixDeclaration.class,
+                HasPrefixes.class);
     }
 }

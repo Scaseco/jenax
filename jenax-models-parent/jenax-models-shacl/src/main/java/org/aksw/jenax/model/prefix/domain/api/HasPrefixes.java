@@ -11,11 +11,11 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.PrefixMapping;
 
 @ResourceView
-public interface PrefixSet
+public interface HasPrefixes
     extends Resource
 {
-    @Iri(NorsePrefixTerms.prefix)
-    Set<PrefixDefinition> getDefinitions();
+    @Iri(ShaclTerms.prefixes)
+    Set<PrefixDeclaration> getPrefixes();
 
     // FIXME Reprogen does not yet support IriTypes for keys/values
 //    @Iri(NorsePrefixTerms.prefix)
@@ -23,10 +23,10 @@ public interface PrefixSet
 //    @ValueIri(NorsePrefixTerms.namespace)
 //    Map<String, String> getMap();
 
-    default PrefixSet put(String prefix, String value) {
-        Set<PrefixDefinition> set = getDefinitions();
+    default HasPrefixes put(String prefix, String value) {
+        Set<PrefixDeclaration> set = getPrefixes();
         boolean done = false;
-        for(PrefixDefinition def : set) {
+        for(PrefixDeclaration def : set) {
             String p = def.getPrefix();
             if (Objects.equals(prefix, prefix)) {
                 def.setIri(value);
@@ -36,7 +36,7 @@ public interface PrefixSet
         }
 
         if (!done) {
-            PrefixDefinition n = getModel().createResource().as(PrefixDefinition.class).setPrefix(prefix).setIri(value);
+            PrefixDeclaration n = getModel().createResource().as(PrefixDeclaration.class).setPrefix(prefix).setIri(value);
             set.add(n);
         }
 
@@ -45,8 +45,8 @@ public interface PrefixSet
 
     default Map<String, String> getMap() {
         Map<String, String> result = new HashMap<>();
-        Set<PrefixDefinition> set = getDefinitions();
-        for(PrefixDefinition def : set) {
+        Set<PrefixDeclaration> set = getPrefixes();
+        for(PrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             String namespace = def.getIri();
             result.put(prefix, namespace);
@@ -55,8 +55,8 @@ public interface PrefixSet
     }
 
     default PrefixMapping addTo(PrefixMapping pm) {
-        Set<PrefixDefinition> set = getDefinitions();
-        for(PrefixDefinition def : set) {
+        Set<PrefixDeclaration> set = getPrefixes();
+        for(PrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             // Resource r = def.getIri();
             String iri = def.getIri();

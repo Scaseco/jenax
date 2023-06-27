@@ -14,7 +14,7 @@
 	</parent>
 
 	<modules>
-		<module>jenax-models-prefixes</module>
+		<module>jenax-models-shacl</module>
 		<module>jenax-models-foaf</module>
 		<module>jenax-models-prov</module>
 		<module>jenax-models-dcat-api</module>
