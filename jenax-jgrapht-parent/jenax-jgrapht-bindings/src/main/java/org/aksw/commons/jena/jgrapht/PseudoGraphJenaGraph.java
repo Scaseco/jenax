@@ -33,12 +33,12 @@ public class PseudoGraphJenaGraph
     implements org.jgrapht.Graph<Node, Triple>
 {
     protected org.apache.jena.graph.Graph graph;
-    
+
     // The graph type describing the features of the underlying RDF graph
     // By default DefaultGraphType.directedPseudograph()
     protected GraphType graphType;
-    
-    
+
+
    /**
      * Predicate to which to confine the underlying Jena graph. May be Node.ANY
      * to use all triples regardless to their predicate.
@@ -49,28 +49,28 @@ public class PseudoGraphJenaGraph
     //protected EdgeFactory<Node, Triple> edgeFactory;
     protected EdgeFactoryJenaGraph edgeSupplier;
     protected IntrusiveEdgesSpecifics<Node, Triple> intrusiveEdgesSpecifics;
-    
+
 
     public PseudoGraphJenaGraph(Graph graph) {
         this(graph, DefaultGraphType.directedPseudograph());
     }
-    
+
     public PseudoGraphJenaGraph(Graph graph, GraphType graphType) {
         this(graph, graphType, Node.ANY, null);
     }
 
     public PseudoGraphJenaGraph(Graph graph, Node confinementPredicate) {
-    	this(graph, DefaultGraphType.directedPseudograph(), confinementPredicate);
+        this(graph, DefaultGraphType.directedPseudograph(), confinementPredicate);
     }
 
     public PseudoGraphJenaGraph(Graph graph, GraphType graphType, Node confinementPredicate) {
-    	this(graph, graphType, confinementPredicate, confinementPredicate);
+        this(graph, graphType, confinementPredicate, confinementPredicate);
     }
 
 
     /**
      * Setting insert predicate to null prevents inserts
-     * 
+     *
      * @param graph
      * @param graphType
      * @param confinementPredicate
@@ -113,14 +113,14 @@ public class PseudoGraphJenaGraph
 
     @Override
     public Supplier<Triple> getEdgeSupplier() {
-    	return edgeSupplier;
+        return edgeSupplier;
     }
 
     @Override
     public Triple addEdge(Node sourceVertex, Node targetVertex) {
         //Triple result = edgeFactory.createEdge(sourceVertex, targetVertex);
-    	//Triple e = edgeSupplier.get();
-    	Triple result = edgeSupplier.createEdge(sourceVertex, targetVertex);//intrusiveEdgesSpecifics.add(e, sourceVertex, targetVertex)
+        //Triple e = edgeSupplier.get();
+        Triple result = edgeSupplier.createEdge(sourceVertex, targetVertex);//intrusiveEdgesSpecifics.add(e, sourceVertex, targetVertex)
         graph.add(result);
 
         return result;
@@ -146,10 +146,10 @@ public class PseudoGraphJenaGraph
 
     @Override
     public boolean addVertex(Node v) {
-    	// Approximation of the semantics - as long as there is no Triple with the given Node v,
-    	// addVertex will return true for that v.
-    	boolean result = !containsVertex(v);
-    	return result;
+        // Approximation of the semantics - as long as there is no Triple with the given Node v,
+        // addVertex will return true for that v.
+        boolean result = !containsVertex(v);
+        return result;
     }
 
     @Override
@@ -305,8 +305,8 @@ public class PseudoGraphJenaGraph
         Set<Triple> result = find(vertex, confinementPredicate, Node.ANY).toSet();
         return result;
     }
-    
-  
+
+
     /**
      * A delegate to graph.find - single point for adding any custom find semantics should it become necessary
      *
@@ -317,8 +317,8 @@ public class PseudoGraphJenaGraph
      * @return
      */
     public ExtendedIterator<Triple> find(Node s, Node p, Node o) {
-    	ExtendedIterator<Triple> result = graph.find(s, p, o);
-    	return result;
+        ExtendedIterator<Triple> result = graph.find(s, p, o);
+        return result;
     }
 
     @Override
@@ -364,21 +364,21 @@ public class PseudoGraphJenaGraph
         return true;
     }
 
-	@Override
-	public Supplier<Node> getVertexSupplier() {
-		// Note: We could add a sanity check wrapper in the unlikely case createBlankNode yields a node that is already in the graph
-		return NodeFactory::createBlankNode;
-	}
+    @Override
+    public Supplier<Node> getVertexSupplier() {
+        // Note: We could add a sanity check wrapper in the unlikely case createBlankNode yields a node that is already in the graph
+        return NodeFactory::createBlankNode;
+    }
 
 
-	@Override
-	public Node addVertex() {
-		Node result = Optional.ofNullable(getVertexSupplier())
-			.orElseThrow(UnsupportedOperationException::new)
-			.get();
-		
-		addVertex(result);
-		return result;
-	}
+    @Override
+    public Node addVertex() {
+        Node result = Optional.ofNullable(getVertexSupplier())
+            .orElseThrow(UnsupportedOperationException::new)
+            .get();
+
+        addVertex(result);
+        return result;
+    }
 
 }

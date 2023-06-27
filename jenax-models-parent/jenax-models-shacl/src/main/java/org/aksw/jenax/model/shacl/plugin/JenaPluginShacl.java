@@ -1,7 +1,8 @@
-package org.aksw.jenax.model.prefix.plugin;
+package org.aksw.jenax.model.shacl.plugin;
 
-import org.aksw.jenax.model.prefix.domain.api.HasPrefixes;
-import org.aksw.jenax.model.prefix.domain.api.PrefixDeclaration;
+import org.aksw.jenax.model.shacl.domain.HasPrefixes;
+import org.aksw.jenax.model.shacl.domain.PrefixDeclaration;
+import org.aksw.jenax.model.shacl.domain.ShPrefixMapping;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -28,6 +29,7 @@ public class JenaPluginShacl
     public static void init(Personality<RDFNode> p) {
         JenaPluginUtils.registerResourceClasses(
                 PrefixDeclaration.class,
+                ShPrefixMapping.class,
                 HasPrefixes.class);
     }
 }

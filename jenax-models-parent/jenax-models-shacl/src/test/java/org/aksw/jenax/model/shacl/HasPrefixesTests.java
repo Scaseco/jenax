@@ -1,25 +1,24 @@
-package org.aksw.jenax.model.prefix;
+package org.aksw.jenax.model.shacl;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.jenax.model.prefix.domain.api.HasPrefixes;
-import org.aksw.jenax.model.prefix.domain.api.PrefixDeclaration;
+import org.aksw.jenax.model.shacl.domain.PrefixDeclaration;
+import org.aksw.jenax.model.shacl.domain.ShPrefixMapping;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class HasPrefixesTests {
 
     @Test
     public void testHasPrefixes() {
-        HasPrefixes ps = ModelFactory.createDefaultModel().createResource().as(HasPrefixes.class);
+        ShPrefixMapping ps = ModelFactory.createDefaultModel().createResource().as(ShPrefixMapping.class);
 
         // Two views over the same data
         // Map<String, String> map = ps.getMap();
-        Set<PrefixDeclaration> defs = ps.getPrefixes();
+        Set<PrefixDeclaration> defs = ps.getPrefixDeclarations();
 
         ps.put("rdf", RDF.getURI());
 

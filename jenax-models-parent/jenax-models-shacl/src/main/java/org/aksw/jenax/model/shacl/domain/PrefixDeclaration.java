@@ -1,4 +1,4 @@
-package org.aksw.jenax.model.prefix.domain.api;
+package org.aksw.jenax.model.shacl.domain;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriType;
@@ -6,6 +6,7 @@ import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.PrefixMapping;
 
+/** An individual prefix declaration. */
 @ResourceView
 public interface PrefixDeclaration
     extends Resource

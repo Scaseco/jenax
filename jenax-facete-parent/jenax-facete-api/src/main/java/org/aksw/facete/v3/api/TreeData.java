@@ -23,6 +23,46 @@ import com.google.common.base.Preconditions;
 public class TreeData<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
+
+    private void putItem(T item, T parent) {
+        HierarchyWrapper<T> wrappedItem = new HierarchyWrapper<>(parent);
+        if (itemToWrapperMap.containsKey(parent)) {
+            itemToWrapperMap.get(parent).addChild(item);
+        }
+        itemToWrapperMap.put(item, wrappedItem);
+    }
+
+    /** Return a new instance of this tree structure. Does not copy the elements of type T. */
+    public TreeData<T> cloneTree() {
+        TreeData<T> result = new TreeData<>();
+        for (Entry<T, HierarchyWrapper<T>> entry : itemToWrapperMap.entrySet()) {
+            HierarchyWrapper<T> original = entry.getValue();
+            HierarchyWrapper<T> copy = new HierarchyWrapper<>(original.getParent(), new ArrayList<>(original.getChildren()));
+            result.itemToWrapperMap.put(entry.getKey(), copy);
+        }
+        return result;
+    }
+
+    public TreeData<T> addItems(Collection<T> rootItems,
+            Function<T, ? extends Collection<T>> childItemProvider) {
+        rootItems.forEach(item -> {
+            addItem(null, item);
+            Collection<T> childItems = childItemProvider.apply(item);
+            addItems(item, childItems);
+            addItemsRecursively(childItems, childItemProvider);
+        });
+        return this;
+    }
+
+    private void addItemsRecursively(Collection<T> items,
+            Function<T, ? extends Collection<T>> childItemProvider) {
+        items.forEach(item -> {
+            Collection<T> childItems = childItemProvider.apply(item);
+            addItems(item, childItems);
+            addItemsRecursively(childItems, childItemProvider);
+        });
+    }
+
     /** Add an item to this structure by recursively adding its ancestors first. */
     public void putItem(T item, Function<? super T, ? extends T> getParent) {
         Preconditions.checkNotNull(item);
@@ -34,6 +74,12 @@ public class TreeData<T> implements Serializable {
             addItem(parent, item);
         }
     }
+
+    @Override
+    public String toString() {
+        return this.itemToWrapperMap.toString();
+    }
+
 
     private static class HierarchyWrapper<T> implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -238,29 +284,5 @@ public class TreeData<T> implements Serializable {
 
     public boolean contains(T item) {
         return itemToWrapperMap.containsKey(item);
-    }
-
-    private void putItem(T item, T parent) {
-        HierarchyWrapper<T> wrappedItem = new HierarchyWrapper<>(parent);
-        if (itemToWrapperMap.containsKey(parent)) {
-            itemToWrapperMap.get(parent).addChild(item);
-        }
-        itemToWrapperMap.put(item, wrappedItem);
-    }
-
-    @Override
-    public String toString() {
-        return this.itemToWrapperMap.toString();
-    }
-
-    /** Return a new instance of this tree structure. Does not copy the elements of type T. */
-    public TreeData<T> cloneTree() {
-        TreeData<T> result = new TreeData<>();
-        for (Entry<T, HierarchyWrapper<T>> entry : itemToWrapperMap.entrySet()) {
-            HierarchyWrapper<T> original = entry.getValue();
-            HierarchyWrapper<T> copy = new HierarchyWrapper<>(original.getParent(), new ArrayList<>(original.getChildren()));
-            result.itemToWrapperMap.put(entry.getKey(), copy);
-        }
-        return result;
     }
 }

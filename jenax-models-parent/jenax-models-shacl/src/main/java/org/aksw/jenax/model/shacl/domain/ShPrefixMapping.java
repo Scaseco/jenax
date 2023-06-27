@@ -1,4 +1,4 @@
-package org.aksw.jenax.model.prefix.domain.api;
+package org.aksw.jenax.model.shacl.domain;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,20 +11,17 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.shared.PrefixMapping;
 
 @ResourceView
-public interface HasPrefixes
+public interface ShPrefixMapping
     extends Resource
 {
-    @Iri(ShaclTerms.prefixes)
-    Set<PrefixDeclaration> getPrefixes();
+    @Iri("http://www.w3.org/2002/07/owl#import")
+    Set<ShPrefixMapping> getOwlImports();
 
-    // FIXME Reprogen does not yet support IriTypes for keys/values
-//    @Iri(NorsePrefixTerms.prefix)
-//    @KeyIri(NorsePrefixTerms.prefix)
-//    @ValueIri(NorsePrefixTerms.namespace)
-//    Map<String, String> getMap();
+    @Iri(ShaclTerms.declare)
+    Set<PrefixDeclaration> getPrefixDeclarations();
 
-    default HasPrefixes put(String prefix, String value) {
-        Set<PrefixDeclaration> set = getPrefixes();
+    default ShPrefixMapping put(String prefix, String value) {
+        Set<PrefixDeclaration> set = getPrefixDeclarations();
         boolean done = false;
         for(PrefixDeclaration def : set) {
             String p = def.getPrefix();
@@ -45,7 +42,7 @@ public interface HasPrefixes
 
     default Map<String, String> getMap() {
         Map<String, String> result = new HashMap<>();
-        Set<PrefixDeclaration> set = getPrefixes();
+        Set<PrefixDeclaration> set = getPrefixDeclarations();
         for(PrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             String namespace = def.getIri();
@@ -55,7 +52,7 @@ public interface HasPrefixes
     }
 
     default PrefixMapping addTo(PrefixMapping pm) {
-        Set<PrefixDeclaration> set = getPrefixes();
+        Set<PrefixDeclaration> set = getPrefixDeclarations();
         for(PrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             // Resource r = def.getIri();

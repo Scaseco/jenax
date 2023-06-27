@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.shacl.engine.ShaclPaths;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_ReverseLink;
 import org.apache.jena.sparql.path.Path;
@@ -31,8 +32,10 @@ public class ShaclUtils {
 
     public static final PathAssembler DEFAULT_PATH_ASSEMBLER = new PathAssembler();
 
+    /** There is now a similar method in jena-shacl ShaclPaths.parse(Graph, Node)  */
     public static Path assemblePath(Resource r) {
-        return DEFAULT_PATH_ASSEMBLER.assemblePath(r);
+        // return DEFAULT_PATH_ASSEMBLER.assemblePath(r);
+        return ShaclPaths.parsePath(r.getModel().getGraph(), r.asNode());
     }
 
 
@@ -48,6 +51,7 @@ public class ShaclUtils {
      * @author Claus Stadler
      *
      */
+    @Deprecated // There is now ShaclPaths.parse(Graph, Node)
     public static class PathAssembler {
 
         public Path assemblePath(Resource r) {
@@ -135,6 +139,8 @@ public class ShaclUtils {
         List<Resource> nodeShapes = model.listResourcesWithProperty(SH.property).toList();
 
         for (Resource nodeShape : nodeShapes) {
+            // Path referencePath = ShaclPaths.parsePath(model.getGraph(), nodeShape.getPropertyResourceValue(SH.property).getPropertyResourceValue(SH.path).asNode());
+            // System.out.println("Reference: " + referencePath);
             Resource x = nodeShape.getPropertyResourceValue(SH.property).getPropertyResourceValue(SH.path);
             Path path = ShaclUtils.assemblePath(x);
             System.out.println(nodeShape + ": " + path);

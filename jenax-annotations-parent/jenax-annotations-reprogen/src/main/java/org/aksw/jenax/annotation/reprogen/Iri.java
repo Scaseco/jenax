@@ -17,6 +17,7 @@ import java.lang.annotation.RetentionPolicy;
  * will be treated as a relative IRI.
  */
 @Retention(RetentionPolicy.RUNTIME)
+// @Repeatable(Iris.class) // TODO Switch to repeatable annotation!
 public @interface Iri {
     String[] value() default { "" };
 }

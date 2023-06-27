@@ -1,8 +1,10 @@
 package org.aksw.jenax.arq.connection.core;
 
 import org.aksw.jenax.arq.connection.link.QueryExecFactory;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -17,11 +19,14 @@ public class QueryExecutionFactories {
         return new QueryExecutionFactoryOverSparqlQueryConnection(conn);
     }
 
-
     public static QueryExecutionFactory of(RdfDataSource dataSource) {
         return new QueryExecutionFactoryOverRdfDataSource(dataSource);
     }
 
+    /** Create a {@link QueryExecutionFactory} over a {@link Dataset} */
+    public static QueryExecutionFactory of(Dataset dataset) {
+        return of(RdfDataEngines.of(dataset));
+    }
 
     public static class QueryExecutionFactoryOverRdfDataSource
         implements QueryExecutionFactory
