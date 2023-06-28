@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.datashape.viewselector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
-import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityGraphFragment;
@@ -23,15 +24,15 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplate;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplateImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.GraphPartitionJoin;
+import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.model.shacl.domain.HasPrefixes;
-import org.aksw.jenax.model.shacl.util.PrefixSetUtils;
+import org.aksw.jenax.model.shacl.domain.ShHasTargets;
 import org.aksw.jenax.model.shacl.util.ShSparqlTargets;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.api.Relation;
-import org.apache.jena.ext.com.google.common.collect.Lists;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -41,17 +42,15 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
-import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.system.PrefixMap;
-import org.apache.jena.shacl.lib.ShLib;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
@@ -66,11 +65,13 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.Template;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.topbraid.shacl.model.SHFactory;
 import org.topbraid.shacl.model.SHNodeShape;
-import org.topbraid.shacl.model.SHSPARQLTarget;
-import org.topbraid.shacl.model.impl.SHSPARQLTargetImpl;
 import org.topbraid.shacl.vocabulary.SH;
+
+import com.google.common.collect.Lists;
 
 
 
@@ -254,6 +255,22 @@ public class EntityClassifier {
 //        return result;
 //    }
 
+    private static final Logger logger = LoggerFactory.getLogger(EntityClassifier.class);
+
+
+    public static UnaryRelation createConceptTargetSubjectsOf(Node node) {
+        return new Concept(ElementUtils.createElementTriple(Vars.s, node, Vars.o), Vars.s);
+    }
+
+    public static UnaryRelation createConceptTargetObjectsOf(Node node) {
+        return new Concept(ElementUtils.createElementTriple(Vars.s, node, Vars.o), Vars.o);
+    }
+
+    public static UnaryRelation createConceptTargetClass(Node node) {
+        return new Concept(ElementUtils.createElementPath(Vars.s, PathUtils.typeSubclassOf, node), Vars.s);
+    }
+
+
     public static void main(String[] args) {
 
         EntityClassifier entityClassifier = new EntityClassifier(Arrays.asList(Vars.s));
@@ -265,29 +282,38 @@ public class EntityClassifier {
         // https://www.w3.org/TR/shacl/#targets
         // "The target of a shape is the union of all RDF terms produced by the individual targets that are declared by the shape in the shapes graph."
         for (SHNodeShape nodeShape : nodeShapes) {
-            Set<Resource> extraTargets = new SetFromPropertyValues<>(nodeShape, SH.target, Resource.class);
-            for (Resource extraTarget : extraTargets) {
-//            	  sh:prefixes rs:rr ;
-//            	  sh:select
-                // SH.prefixes;
-                // SH.se
-                // SHACLUtil.isSPARQLProperty(classifier)
+            Node nodeShapeNode = nodeShape.asNode();
+
+            ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);
+            for (Resource extraTarget : hasTargets.getTargets()) {
                 Query query = ShSparqlTargets.tryParseSparqlQuery(extraTarget);
                 if (query != null) {
                     System.out.println(query);
 
-                    entityClassifier.addCondition(nodeShape.asNode(), RelationUtils.fromQuery(query));
+                    entityClassifier.addCondition(nodeShapeNode, RelationUtils.fromQuery(query));
+                } else {
+                    logger.warn("Unsupported shacl target type");
                 }
-
             }
 
+            Set<RDFNode> targetNodes = hasTargets.getTargetNodes();
+            if (!targetNodes.isEmpty()) {
+                Collection<Node> nodes = targetNodes.stream().map(RDFNode::asNode).collect(Collectors.toSet());
+                UnaryRelation r = Concept.create(nodes);
+                entityClassifier.addCondition(nodeShapeNode, r);
+            }
 
-            nodeShape.listProperties(SH.target);
+            Set<RDFNode> targetSubjectsOf = hasTargets.getTargetSubjectsOf();
+            for (RDFNode target : targetSubjectsOf) {
+                // ?s rdf:type/rdfs:subClassOf* ?o
+                UnaryRelation r = createConceptTargetSubjectsOf(target.asNode());
+            }
 
-            nodeShape.listProperties(SH.targetNode);
-            nodeShape.listProperties(SH.targetClass);
-            nodeShape.listProperties(SH.targetSubjectsOf);
-            nodeShape.listProperties(SH.targetObjectsOf);
+            Set<RDFNode> targetObjectsOf = hasTargets.getTargetObjectsOf();
+            for (RDFNode target : targetSubjectsOf) {
+                // ?s rdf:type/rdfs:subClassOf* ?o
+                UnaryRelation r = createConceptTargetObjectsOf(target.asNode());
+            }
         }
 
         entityClassifier.addCondition(NodeFactory.createURI("urn:satisfies:hasLabel"),

@@ -22,7 +22,6 @@ public class PathUtils {
 
     public static final Path nullPath = new P_Link(org.aksw.jenax.arq.util.node.NodeUtils.nullUriNode);
 
-
     /** Return the set of nodes mentioned in a path */
     public static Set<Node> collectNodes(Path path) {
         NodeTransformCollectNodes nodeTransform = new NodeTransformCollectNodes();

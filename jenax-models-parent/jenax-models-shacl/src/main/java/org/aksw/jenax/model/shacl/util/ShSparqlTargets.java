@@ -1,6 +1,6 @@
 package org.aksw.jenax.model.shacl.util;
 
-import org.aksw.jenax.model.shacl.domain.HasPrefixes;
+import org.aksw.jenax.model.shacl.domain.ShHasPrefixes;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
@@ -24,8 +24,8 @@ public class ShSparqlTargets {
         Query result = null;
         String queryString = sparqlTarget.getSPARQL();
         if (queryString != null) {
-            HasPrefixes prefixes = extraTarget.as(HasPrefixes.class);
-            PrefixMap pm = PrefixSetUtils.collect(prefixes);
+            ShHasPrefixes prefixes = extraTarget.as(ShHasPrefixes.class);
+            PrefixMap pm = ShPrefixUtils.collect(prefixes);
             result = new Query();
             if (prefixes != null) {
                 result.getPrefixMapping().setNsPrefixes(pm.getMapping());

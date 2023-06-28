@@ -3,14 +3,14 @@ package org.aksw.jenax.model.shacl;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.jenax.model.shacl.domain.PrefixDeclaration;
+import org.aksw.jenax.model.shacl.domain.ShPrefixDeclaration;
 import org.aksw.jenax.model.shacl.domain.ShPrefixMapping;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class HasPrefixesTests {
+public class ShPrefixesTests {
 
     @Test
     public void testHasPrefixes() {
@@ -18,7 +18,7 @@ public class HasPrefixesTests {
 
         // Two views over the same data
         // Map<String, String> map = ps.getMap();
-        Set<PrefixDeclaration> defs = ps.getPrefixDeclarations();
+        Set<ShPrefixDeclaration> defs = ps.getPrefixDeclarations();
 
         ps.put("rdf", RDF.getURI());
 

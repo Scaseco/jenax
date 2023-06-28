@@ -18,12 +18,12 @@ public interface ShPrefixMapping
     Set<ShPrefixMapping> getOwlImports();
 
     @Iri(ShaclTerms.declare)
-    Set<PrefixDeclaration> getPrefixDeclarations();
+    Set<ShPrefixDeclaration> getPrefixDeclarations();
 
     default ShPrefixMapping put(String prefix, String value) {
-        Set<PrefixDeclaration> set = getPrefixDeclarations();
+        Set<ShPrefixDeclaration> set = getPrefixDeclarations();
         boolean done = false;
-        for(PrefixDeclaration def : set) {
+        for(ShPrefixDeclaration def : set) {
             String p = def.getPrefix();
             if (Objects.equals(prefix, prefix)) {
                 def.setIri(value);
@@ -33,7 +33,7 @@ public interface ShPrefixMapping
         }
 
         if (!done) {
-            PrefixDeclaration n = getModel().createResource().as(PrefixDeclaration.class).setPrefix(prefix).setIri(value);
+            ShPrefixDeclaration n = getModel().createResource().as(ShPrefixDeclaration.class).setPrefix(prefix).setIri(value);
             set.add(n);
         }
 
@@ -42,8 +42,8 @@ public interface ShPrefixMapping
 
     default Map<String, String> getMap() {
         Map<String, String> result = new HashMap<>();
-        Set<PrefixDeclaration> set = getPrefixDeclarations();
-        for(PrefixDeclaration def : set) {
+        Set<ShPrefixDeclaration> set = getPrefixDeclarations();
+        for(ShPrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             String namespace = def.getIri();
             result.put(prefix, namespace);
@@ -52,8 +52,8 @@ public interface ShPrefixMapping
     }
 
     default PrefixMapping addTo(PrefixMapping pm) {
-        Set<PrefixDeclaration> set = getPrefixDeclarations();
-        for(PrefixDeclaration def : set) {
+        Set<ShPrefixDeclaration> set = getPrefixDeclarations();
+        for(ShPrefixDeclaration def : set) {
             String prefix = def.getPrefix();
             // Resource r = def.getIri();
             String iri = def.getIri();

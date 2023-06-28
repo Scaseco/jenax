@@ -7,11 +7,12 @@ import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
-public interface HasPrefixes
-    extends Resource
+public interface ShHasPrefixes
+    extends Resource // allow direct prefix declarations using ShPrefixMapping?
 {
     @Iri(ShaclTerms.prefixes)
     Set<ShPrefixMapping> getPrefixes();
+
 
     // FIXME Reprogen does not yet support IriTypes for keys/values
 //    @Iri(NorsePrefixTerms.prefix)

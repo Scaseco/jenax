@@ -8,18 +8,18 @@ import org.apache.jena.shared.PrefixMapping;
 
 /** An individual prefix declaration. */
 @ResourceView
-public interface PrefixDeclaration
+public interface ShPrefixDeclaration
     extends Resource
 {
     @Iri(ShaclTerms.prefix)
     String getPrefix();
-    PrefixDeclaration setPrefix(String prefix);
+    ShPrefixDeclaration setPrefix(String prefix);
 
 
     @Iri(ShaclTerms.namespace)
     @IriType
     String getIri();
-    PrefixDeclaration setIri(String namespace);
+    ShPrefixDeclaration setIri(String namespace);
 
     default PrefixMapping addTo(PrefixMapping pm) {
         String prefix = getPrefix();

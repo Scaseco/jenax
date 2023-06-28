@@ -7,8 +7,15 @@ import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.path.P_ReverseLink;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathFactory;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 public class PathUtils {
+    /** A pre-built path for the expression <code>rdf:type/rdfs:subclassOf*</code>. */
+    public static final Path typeSubclassOf = PathFactory.pathSeq(
+            PathFactory.pathLink(RDF.type.asNode()),
+            PathFactory.pathZeroOrMore1(PathFactory.pathLink(RDFS.subClassOf.asNode())));
+
     public static P_Path0 createStep(String predicate, boolean isFwd) {
         return createStep(NodeFactory.createURI(predicate), isFwd);
     }
