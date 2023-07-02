@@ -28,7 +28,7 @@ import org.topbraid.shacl.vocabulary.SH;
  * @author raven
  *
  */
-public class ShaclUtils {
+public class ShUtils {
 
     public static final PathAssembler DEFAULT_PATH_ASSEMBLER = new PathAssembler();
 
@@ -142,7 +142,7 @@ public class ShaclUtils {
             // Path referencePath = ShaclPaths.parsePath(model.getGraph(), nodeShape.getPropertyResourceValue(SH.property).getPropertyResourceValue(SH.path).asNode());
             // System.out.println("Reference: " + referencePath);
             Resource x = nodeShape.getPropertyResourceValue(SH.property).getPropertyResourceValue(SH.path);
-            Path path = ShaclUtils.assemblePath(x);
+            Path path = ShUtils.assemblePath(x);
             System.out.println(nodeShape + ": " + path);
         }
 

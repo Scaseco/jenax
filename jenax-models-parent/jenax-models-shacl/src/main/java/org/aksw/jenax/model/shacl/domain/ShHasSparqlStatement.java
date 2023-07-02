@@ -7,6 +7,6 @@ import org.aksw.jenax.annotation.reprogen.ResourceView;
 public interface ShHasSparqlStatement
     extends ShHasPrefixes
 {
-    @Iri(ShaclTerms.select)
+    @Iri(ShTerms.select)
     String getSelectQueryString();
 }

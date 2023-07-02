@@ -17,7 +17,7 @@ public interface ShPrefixMapping
     @Iri("http://www.w3.org/2002/07/owl#import")
     Set<ShPrefixMapping> getOwlImports();
 
-    @Iri(ShaclTerms.declare)
+    @Iri(ShTerms.declare)
     Set<ShPrefixDeclaration> getPrefixDeclarations();
 
     default ShPrefixMapping put(String prefix, String value) {

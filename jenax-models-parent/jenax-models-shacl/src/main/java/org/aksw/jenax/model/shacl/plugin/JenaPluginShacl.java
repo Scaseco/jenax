@@ -3,8 +3,11 @@ package org.aksw.jenax.model.shacl.plugin;
 import org.aksw.jenax.model.shacl.domain.ShHasPrefixes;
 import org.aksw.jenax.model.shacl.domain.ShHasSparqlStatement;
 import org.aksw.jenax.model.shacl.domain.ShHasTargets;
+import org.aksw.jenax.model.shacl.domain.ShNodeShape;
 import org.aksw.jenax.model.shacl.domain.ShPrefixDeclaration;
 import org.aksw.jenax.model.shacl.domain.ShPrefixMapping;
+import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
+import org.aksw.jenax.model.shacl.domain.ShShape;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -34,6 +37,9 @@ public class JenaPluginShacl
                 ShPrefixMapping.class,
                 ShHasPrefixes.class,
                 ShHasTargets.class,
-                ShHasSparqlStatement.class);
+                ShHasSparqlStatement.class,
+                ShShape.class,
+                ShNodeShape.class,
+                ShPropertyShape.class);
     }
 }

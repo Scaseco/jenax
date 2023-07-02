@@ -11,12 +11,12 @@ import org.apache.jena.shared.PrefixMapping;
 public interface ShPrefixDeclaration
     extends Resource
 {
-    @Iri(ShaclTerms.prefix)
+    @Iri(ShTerms.prefix)
     String getPrefix();
     ShPrefixDeclaration setPrefix(String prefix);
 
 
-    @Iri(ShaclTerms.namespace)
+    @Iri(ShTerms.namespace)
     @IriType
     String getIri();
     ShPrefixDeclaration setIri(String namespace);

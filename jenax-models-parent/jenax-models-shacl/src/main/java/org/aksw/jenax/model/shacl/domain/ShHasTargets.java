@@ -11,18 +11,18 @@ import org.apache.jena.rdf.model.Resource;
 public interface ShHasTargets
     extends Resource
 {
-    @Iri(ShaclTerms.target)
+    @Iri(ShTerms.target)
     Set<Resource> getTargets();
 
-    @Iri(ShaclTerms.targetNode)
+    @Iri(ShTerms.targetNode)
     Set<RDFNode> getTargetNodes();
 
-    @Iri(ShaclTerms.targetClass)
+    @Iri(ShTerms.targetClass)
     Set<RDFNode> getTargetClasses();
 
-    @Iri(ShaclTerms.targetSubjectsOf)
+    @Iri(ShTerms.targetSubjectsOf)
     Set<RDFNode> getTargetSubjectsOf();
 
-    @Iri(ShaclTerms.targetObjectsOf)
+    @Iri(ShTerms.targetObjectsOf)
     Set<RDFNode> getTargetObjectsOf();
 }

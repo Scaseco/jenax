@@ -5,13 +5,6 @@ import java.util.Map.Entry;
 
 public interface MethodDescriptor {
 
-//	boolean isCollection();
-//	boolean isScalar();
-//	boolean isMap();
-//	MethodDescriptorCollection asCollection();
-//	MethodDescriptorSimple asScalar();
-//	MethodDescriptorMap asMap();
-
     /**
      * The method described by this descriptor
      *

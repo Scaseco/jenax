@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
@@ -24,18 +26,21 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplate;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplateImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.GraphPartitionJoin;
+import org.aksw.jena_sparql_api.schema.ShUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.model.shacl.domain.ShHasTargets;
+import org.aksw.jenax.model.shacl.domain.ShNodeShape;
+import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.model.shacl.util.ShSparqlTargets;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -51,6 +56,9 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
@@ -60,7 +68,7 @@ import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.aggregate.AggMin;
-import org.apache.jena.sparql.sse.SSE;
+import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -68,7 +76,6 @@ import org.apache.jena.sparql.syntax.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.shacl.model.SHFactory;
-import org.topbraid.shacl.model.SHNodeShape;
 import org.topbraid.shacl.vocabulary.SH;
 
 import com.google.common.collect.Lists;
@@ -86,8 +93,6 @@ public class EntityClassifier {
     //protected int entityKeyLength;
     protected List<Var> entityKeyVars;
 
-
-
     public EntityClassifier(Var var) {
         this(Collections.singletonList(var));
     }
@@ -96,8 +101,6 @@ public class EntityClassifier {
         super();
         this.entityKeyVars = entityKeyVars;
     }
-
-
 
     public EntityClassifier addCondition(Node conditionId, Relation relation) {
         idToCondition.put(conditionId, relation);
@@ -109,8 +112,9 @@ public class EntityClassifier {
      * the ones that satisfy a certain condition.
      * The resulting relation has the same variables in the same order as the provided candidate relation;
      * the classification is a single additional column with a fresh variable name that is guaranteed to
-     * not clash with any of the other mentioned variables
+     * not clash with any of the other mentioned variables.
      *
+     * <pre>
      * SELECT DISTINCT ?x1 ... ?xn ?idNode  {
      *   candidates(?x1 ... ?xn)
      *     {
@@ -126,12 +130,13 @@ public class EntityClassifier {
      *     }
      *   }
      * }
+     * </pre>
      *
      * @param conn
      * @param candidates
      * @param idToCondition
      */
-    protected Relation createClassifyingRelation() {
+    public Relation createClassifyingRelation() {
 
 
         Set<Var> blacklist = new HashSet<>();
@@ -143,11 +148,18 @@ public class EntityClassifier {
 
         Var conditionVar = VarGeneratorBlacklist.create("conditionId", blacklist).next();
 
+        VarGeneratorBlacklist bnodeVarGen = VarGeneratorBlacklist.create("bn", blacklist);
+
+        Map<Var, Var> bnodeRemap = blacklist.stream().filter(v -> v.getName().startsWith(ARQConstants.allocVarAnonMarker)).collect(Collectors.toMap(v -> v, v -> bnodeVarGen.next()));
+
         List<Element> unionMembers = new ArrayList<>(idToCondition.size());
 
         for (Entry<Node, ? extends Relation> e : idToCondition.entrySet()) {
             Node cId = e.getKey();
             Relation c = e.getValue();
+
+            c = c.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(bnodeRemap::get));
+
 
             Relation part = c.rename(entityKeyVars); // e.getVars()
             List<Element> elts = part.getElements();
@@ -270,6 +282,86 @@ public class EntityClassifier {
         return new Concept(ElementUtils.createElementPath(Vars.s, PathUtils.typeSubclassOf, node), Vars.s);
     }
 
+    /**
+     * Util method to extract all properties regardless of the
+     * Logical Constraint Components sh:not, sh:and, sh:or and sh:xone
+     *
+     * TODO Introduce a visitor?
+     *
+     * https://www.w3.org/TR/shacl/#shapes-recursion
+     */
+    public static List<ShPropertyShape> getPropertyShapes(ShNodeShape nodeShape) {
+        for (ShPropertyShape propertyShape : nodeShape.getProperties()) {
+            Resource pathResource = propertyShape.getPath();
+            Path sparqlPath = ShUtils.assemblePath(pathResource);
+            System.err.println("GOT PATH: " + sparqlPath);
+        }
+
+        //
+
+        return null;
+    }
+
+
+    public static void registerNodeShapes(EntityClassifier entityClassifier, Model shaclModel) {
+        // TODO Search for resources with: sh:property|sh:and|sh:or|sh:not|sh:xone
+        // XXX Can Node shapes without any property declarations have any effect?
+        // Note: This also lists shapes in recursive shapes (values of e.g. sh:and) which usually don't declare their own target.
+        // But what if they did? Do we need to create the conjunction of the targets?
+        List<ShNodeShape> nodeShapes = shaclModel.listResourcesWithProperty(SH.property).mapWith(r -> r.as(ShNodeShape.class)).toList();
+
+        // https://www.w3.org/TR/shacl/#targets
+        // "The target of a shape is the union of all RDF terms produced by the individual targets that are declared by the shape in the shapes graph."
+        for (ShNodeShape nodeShape : nodeShapes) {
+            registerNodeShape(entityClassifier, nodeShape);
+        }
+    }
+
+    public static void registerNodeShape(EntityClassifier entityClassifier, ShNodeShape nodeShape) {
+        Node nodeShapeNode = nodeShape.asNode();
+        getPropertyShapes(nodeShape);
+
+        ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);
+        for (Resource extraTarget : hasTargets.getTargets()) {
+            Query query = ShSparqlTargets.tryParseSparqlQuery(extraTarget);
+            if (query != null) {
+                System.out.println(query);
+
+                entityClassifier.addCondition(nodeShapeNode, RelationUtils.fromQuery(query));
+            } else {
+                logger.warn("Unsupported shacl target type");
+            }
+        }
+
+        Set<RDFNode> targetNodes = hasTargets.getTargetNodes();
+        if (!targetNodes.isEmpty()) {
+            Collection<Node> nodes = targetNodes.stream().map(RDFNode::asNode).collect(Collectors.toSet());
+            UnaryRelation r = Concept.create(nodes);
+            entityClassifier.addCondition(nodeShapeNode, r);
+        }
+
+        Set<RDFNode> targetClasses = hasTargets.getTargetClasses();
+        for (RDFNode target : targetClasses) {
+            // ?s rdf:type/rdfs:subClassOf* ?o
+            UnaryRelation r = createConceptTargetClass(target.asNode());
+            entityClassifier.addCondition(nodeShapeNode, r);
+        }
+
+        Set<RDFNode> targetSubjectsOf = hasTargets.getTargetSubjectsOf();
+        for (RDFNode target : targetSubjectsOf) {
+            // ?s rdf:type/rdfs:subClassOf* ?o
+            UnaryRelation r = createConceptTargetSubjectsOf(target.asNode());
+            entityClassifier.addCondition(nodeShapeNode, r);
+        }
+
+        Set<RDFNode> targetObjectsOf = hasTargets.getTargetObjectsOf();
+        for (RDFNode target : targetObjectsOf) {
+            // ?s rdf:type/rdfs:subClassOf* ?o
+            UnaryRelation r = createConceptTargetObjectsOf(target.asNode());
+            entityClassifier.addCondition(nodeShapeNode, r);
+        }
+    }
+
 
     public static void main(String[] args) {
 
@@ -277,54 +369,24 @@ public class EntityClassifier {
 
         SHFactory.ensureInited();
         Model shaclModel = RDFDataMgr.loadModel("/home/raven/Projects/Eclipse/rmltk-parent/r2rml-resource-shacl/src/main/resources/r2rml.core.shacl.ttl");
-        List<SHNodeShape> nodeShapes = shaclModel.listResourcesWithProperty(SH.property).mapWith(r -> r.as(SHNodeShape.class)).toList();
+        List<ShNodeShape> nodeShapes = shaclModel.listResourcesWithProperty(SH.property).mapWith(r -> r.as(ShNodeShape.class)).toList();
 
         // https://www.w3.org/TR/shacl/#targets
         // "The target of a shape is the union of all RDF terms produced by the individual targets that are declared by the shape in the shapes graph."
-        for (SHNodeShape nodeShape : nodeShapes) {
-            Node nodeShapeNode = nodeShape.asNode();
-
-            ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);
-            for (Resource extraTarget : hasTargets.getTargets()) {
-                Query query = ShSparqlTargets.tryParseSparqlQuery(extraTarget);
-                if (query != null) {
-                    System.out.println(query);
-
-                    entityClassifier.addCondition(nodeShapeNode, RelationUtils.fromQuery(query));
-                } else {
-                    logger.warn("Unsupported shacl target type");
-                }
-            }
-
-            Set<RDFNode> targetNodes = hasTargets.getTargetNodes();
-            if (!targetNodes.isEmpty()) {
-                Collection<Node> nodes = targetNodes.stream().map(RDFNode::asNode).collect(Collectors.toSet());
-                UnaryRelation r = Concept.create(nodes);
-                entityClassifier.addCondition(nodeShapeNode, r);
-            }
-
-            Set<RDFNode> targetSubjectsOf = hasTargets.getTargetSubjectsOf();
-            for (RDFNode target : targetSubjectsOf) {
-                // ?s rdf:type/rdfs:subClassOf* ?o
-                UnaryRelation r = createConceptTargetSubjectsOf(target.asNode());
-            }
-
-            Set<RDFNode> targetObjectsOf = hasTargets.getTargetObjectsOf();
-            for (RDFNode target : targetSubjectsOf) {
-                // ?s rdf:type/rdfs:subClassOf* ?o
-                UnaryRelation r = createConceptTargetObjectsOf(target.asNode());
-            }
+        for (ShNodeShape nodeShape : nodeShapes) {
+            registerNodeShape(entityClassifier, nodeShape);
         }
 
-        entityClassifier.addCondition(NodeFactory.createURI("urn:satisfies:hasLabel"),
-                Concept.parse("?s { ?s rdfs:label ?l }"));
-
-        entityClassifier.addCondition(NodeFactory.createURI("urn:satisfies:HasType"),
-                Concept.parse("?x { ?x a ?t }"));
+//        entityClassifier.addCondition(NodeFactory.createURI("urn:satisfies:hasLabel"),
+//                Concept.parse("?s { ?s rdfs:label ?l }"));
+//
+//        entityClassifier.addCondition(NodeFactory.createURI("urn:satisfies:HasType"),
+//                Concept.parse("?x { ?x a ?t }"));
 
         EntityGraphFragment entityGraphFragment = entityClassifier.createGraphFragment();
 
-        Graph graph = SSE.parseGraph("(graph (:e1 rdf:type :t) (:e2 rdfs:label :l) (:e3 rdfs:label :l) (:e3 rdf:type :t) (:e4 rdfs:comment :c) )");
+        Graph graph = RDFDataMgr.loadGraph("/home/raven/Projects/Eclipse/linkedgeodata-parent/legacy/linkedgeodata-docker/lgd-ontop-web/lgd.r2rml.ttl");
+        // Graph graph = SSE.parseGraph("(graph (:e1 rdf:type :t) (:e2 rdfs:label :l) (:e3 rdfs:label :l) (:e3 rdf:type :t) (:e4 rdfs:comment :c) )");
 
 
         Model model = ModelFactory.createModelForGraph(graph);
@@ -359,8 +421,23 @@ public class EntityClassifier {
         eq.getMandatoryJoins().add(new GraphPartitionJoin(entityGraphFragment));
 
         EntityQueryBasic basic = EntityQueryRx.assembleEntityAndAttributeParts(eq);
+        System.out.println("Entity Query: " + basic);
 
         EntityQueryRx.execConstructEntitiesNg(conn::query, basic).forEach(quad -> System.out.println(quad));
+
+
+        Relation r = entityClassifier.createClassifyingRelation();
+
+        UnaryRelation testConcept = ConceptUtils.createForRdfType("http://foo.bar/baz");
+        Relation s = testConcept.join().with(r, r.getVars().get(0)); //r.joinOn(r.getVars().get(0)).with(testConcept);
+
+
+        Relation grouped =  RelationUtils.groupBy(s, s.getVars().iterator().next(), Vars.c, false);
+        System.out.println("Grouped relation: " + grouped);
+
+        Op op = Algebra.optimize(Algebra.compile(grouped.getElement()));
+        System.out.println(op);
+
 
 
         //System.out.println(entityGraphFragment);

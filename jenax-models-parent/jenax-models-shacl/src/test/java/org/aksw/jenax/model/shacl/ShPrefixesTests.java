@@ -12,6 +12,15 @@ import org.junit.Test;
 
 public class ShPrefixesTests {
 
+//    @Test
+//    public void testSetOfLists() {
+//        ShNodeShape nodeShape = ModelFactory.createDefaultModel().createResource().as(ShNodeShape.class);
+//
+//        Set<List<ShNodeShape>> ors = nodeShape.getOr();
+//
+//        System.out.println(ors.size());
+//    }
+
     @Test
     public void testHasPrefixes() {
         ShPrefixMapping ps = ModelFactory.createDefaultModel().createResource().as(ShPrefixMapping.class);

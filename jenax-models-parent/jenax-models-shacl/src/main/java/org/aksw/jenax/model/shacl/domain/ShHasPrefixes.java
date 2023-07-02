@@ -10,8 +10,9 @@ import org.apache.jena.rdf.model.Resource;
 public interface ShHasPrefixes
     extends Resource // allow direct prefix declarations using ShPrefixMapping?
 {
-    @Iri(ShaclTerms.prefixes)
+    @Iri(ShTerms.prefixes)
     Set<ShPrefixMapping> getPrefixes();
+
 
 
     // FIXME Reprogen does not yet support IriTypes for keys/values
