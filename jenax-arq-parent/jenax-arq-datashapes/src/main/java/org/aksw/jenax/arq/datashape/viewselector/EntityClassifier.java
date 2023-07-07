@@ -282,27 +282,6 @@ public class EntityClassifier {
         return new Concept(ElementUtils.createElementPath(Vars.s, PathUtils.typeSubclassOf, node), Vars.s);
     }
 
-    /**
-     * Util method to extract all properties regardless of the
-     * Logical Constraint Components sh:not, sh:and, sh:or and sh:xone
-     *
-     * TODO Introduce a visitor?
-     *
-     * https://www.w3.org/TR/shacl/#shapes-recursion
-     */
-    public static List<ShPropertyShape> getPropertyShapes(ShNodeShape nodeShape) {
-        for (ShPropertyShape propertyShape : nodeShape.getProperties()) {
-            Resource pathResource = propertyShape.getPath();
-            Path sparqlPath = ShUtils.assemblePath(pathResource);
-            System.err.println("GOT PATH: " + sparqlPath);
-        }
-
-        //
-
-        return null;
-    }
-
-
     public static void registerNodeShapes(EntityClassifier entityClassifier, Model shaclModel) {
         // TODO Search for resources with: sh:property|sh:and|sh:or|sh:not|sh:xone
         // XXX Can Node shapes without any property declarations have any effect?
@@ -319,7 +298,7 @@ public class EntityClassifier {
 
     public static void registerNodeShape(EntityClassifier entityClassifier, ShNodeShape nodeShape) {
         Node nodeShapeNode = nodeShape.asNode();
-        getPropertyShapes(nodeShape);
+        // getPropertyShapes(nodeShape);
 
         ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);
         for (Resource extraTarget : hasTargets.getTargets()) {

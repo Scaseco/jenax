@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.path.P_Path0;
 
@@ -40,12 +41,44 @@ public class FacetStep
         return new FacetStep(node, direction.isForward(), alias, component);
     }
 
+    public static FacetStep fwd(String iri) {
+        return fwd(NodeFactory.createURI(iri));
+    }
+
+    public static FacetStep fwd(Resource node) {
+        return fwd(node.asNode());
+    }
+
     public static FacetStep fwd(Resource node, String alias) {
         return fwd(node.asNode(), alias);
     }
 
+    public static FacetStep fwd(Node node) {
+        return of(node, Direction.FORWARD, null, TARGET);
+    }
+
     public static FacetStep fwd(Node node, String alias) {
-        return new FacetStep(node, true, alias, TARGET);
+        return of(node, Direction.FORWARD, alias, TARGET);
+    }
+
+    public static FacetStep bwd(String iri) {
+        return bwd(NodeFactory.createURI(iri));
+    }
+
+    public static FacetStep bwd(Resource node) {
+        return bwd(node.asNode());
+    }
+
+    public static FacetStep bwd(Resource node, String alias) {
+        return bwd(node.asNode(), alias);
+    }
+
+    public static FacetStep bwd(Node node) {
+        return of(node, Direction.BACKWARD, null, TARGET);
+    }
+
+    public static FacetStep bwd(Node node, String alias) {
+        return of(node, Direction.BACKWARD, alias, TARGET);
     }
 
 
@@ -82,6 +115,11 @@ public class FacetStep
         return step.getNode();
     }
 
+    public Direction getDirection() {
+        return Direction.ofFwd(isForward());
+    }
+
+    @Deprecated // Use getDirection
     public boolean isForward() {
         return step.isForward();
     }

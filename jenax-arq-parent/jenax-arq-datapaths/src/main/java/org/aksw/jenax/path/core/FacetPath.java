@@ -28,10 +28,18 @@ public class FacetPath
 
     /** Convenience static shorthand for .get().newRoot() */
     public static FacetPath newAbsolutePath(FacetStep ... segments) {
-        return FacetPathOps.get().newPath(true, Arrays.asList(segments));
+        return newAbsolutePath(Arrays.asList(segments));
+    }
+
+    public static FacetPath newAbsolutePath(List<FacetStep> segments) {
+        return FacetPathOps.get().newPath(true, segments);
     }
 
     public static FacetPath newRelativePath(FacetStep ... segments) {
-        return FacetPathOps.get().newPath(false, Arrays.asList(segments));
+        return newRelativePath(Arrays.asList(segments));
+    }
+
+    public static FacetPath newRelativePath(List<FacetStep> segments) {
+        return FacetPathOps.get().newPath(true, segments);
     }
 }
