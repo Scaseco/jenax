@@ -26,36 +26,36 @@ public interface TraversalDirNode<N, M extends TraversalMultiNode<N>> {
     }
 
     default N via(Resource property, String alias) {
-        return via(property, (Integer)null).viaAlias(alias);
+        return via(property, (Node)null).viaAlias(alias);
     }
 
     default M via(Resource property) {
-        return via(property, (Integer)null);
+        return via(property, (Node)null);
     }
 
-    M via(Resource property, Integer component);
+    M via(Resource property, Node component);
 
 
     boolean isFwd();
 
 
-    default N via(String propertyIRI, Integer component, String alias) {
+    default N via(String propertyIRI, Node component, String alias) {
         return via(ResourceFactory.createProperty(propertyIRI), component, alias);
     }
 
-    default N via(Node node, Integer component, String alias) {
+    default N via(Node node, Node component, String alias) {
         return via(node.getURI(), component, alias);
     }
 
-    default N via(String propertyIRI, Integer component) {
+    default N via(String propertyIRI, Node component) {
         return via(propertyIRI, component, null);
     }
 
-    default M via(Node node, Integer component) {
+    default M via(Node node, Node component) {
         return via(ModelUtils.convertGraphNodeToRDFNode(node).asResource(), component);
     }
 
-    default N via(Resource property, Integer component, String alias) {
+    default N via(Resource property, Node component, String alias) {
         return via(property, component).viaAlias(alias);
     }
 }

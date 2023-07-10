@@ -40,6 +40,6 @@ public class FacetPath
     }
 
     public static FacetPath newRelativePath(List<FacetStep> segments) {
-        return FacetPathOps.get().newPath(true, segments);
+        return FacetPathOps.get().newPath(false, segments);
     }
 }

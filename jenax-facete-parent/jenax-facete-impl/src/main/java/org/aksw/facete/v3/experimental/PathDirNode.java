@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.aksw.facete.v3.api.traversal.TraversalDirNode;
 import org.aksw.facete.v3.api.traversal.TraversalMultiNode;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
 import com.google.common.collect.Table;
@@ -15,7 +16,7 @@ public abstract class PathDirNode<N, M extends TraversalMultiNode<N>>
     protected N parent;
     protected boolean isFwd;
     // protected Map<Resource, M> propToMultiNode = new LinkedHashMap<>();
-    protected Table<Resource, Integer, M> propComponentToMultiNode = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new); // HashBasedTable.
+    protected Table<Resource, Node, M> propComponentToMultiNode = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new); // HashBasedTable.
 
     public PathDirNode(N parent, boolean isFwd) {
         super();
@@ -29,7 +30,7 @@ public abstract class PathDirNode<N, M extends TraversalMultiNode<N>>
     }
 
     @Override
-    public M via(Resource property, Integer component) {
+    public M via(Resource property, Node component) {
         M result = propComponentToMultiNode.row(property).computeIfAbsent(component, c -> {
             // Expanded for easier debugging
             return viaImpl(property, c);
@@ -37,5 +38,5 @@ public abstract class PathDirNode<N, M extends TraversalMultiNode<N>>
         return result;
     }
 
-    protected abstract M viaImpl(Resource property, Integer component);
+    protected abstract M viaImpl(Resource property, Node component);
 }

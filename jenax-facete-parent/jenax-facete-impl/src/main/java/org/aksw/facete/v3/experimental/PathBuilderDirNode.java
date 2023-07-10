@@ -1,5 +1,6 @@
 package org.aksw.facete.v3.experimental;
 
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
 public class PathBuilderDirNode
@@ -10,7 +11,7 @@ public class PathBuilderDirNode
     }
 
     @Override
-    protected PathBuilderMultiNode viaImpl(Resource property, Integer component) {
+    protected PathBuilderMultiNode viaImpl(Resource property, Node component) {
         if (component != null) {
             throw new UnsupportedOperationException("Components not supported yet");
         }

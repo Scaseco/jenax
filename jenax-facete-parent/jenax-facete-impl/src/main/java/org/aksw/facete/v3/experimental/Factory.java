@@ -3,6 +3,7 @@ package org.aksw.facete.v3.experimental;
 import org.aksw.facete.v3.api.traversal.TraversalDirNode;
 import org.aksw.facete.v3.api.traversal.TraversalMultiNode;
 import org.aksw.facete.v3.api.traversal.TraversalNode;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
 interface Factory<N extends TraversalNode<N,D,M>, D extends TraversalDirNode<N, M>, M extends TraversalMultiNode<N>> {
@@ -36,7 +37,7 @@ class PathFactoryDirNode<N extends TraversalNode<N,D,M>, D extends TraversalDirN
     }
 
     @Override
-    protected M viaImpl(Resource property, Integer component) {
+    protected M viaImpl(Resource property, Node component) {
         M result = factory.newMultiNode((D)this, property);
         return result;
     }

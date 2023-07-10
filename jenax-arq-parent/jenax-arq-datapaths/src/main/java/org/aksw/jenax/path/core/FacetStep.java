@@ -8,6 +8,7 @@ import org.aksw.jenax.arq.util.node.PathUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.path.P_Path0;
 
 public class FacetStep
@@ -20,24 +21,24 @@ public class FacetStep
 
     /** The component targeted by this step. A step corresponds to a tuple:
      * By default a path points to the values reachable via this step, but in the case of RDF it could also refer to the predicate or graph component. */
-    protected Integer targetComponent;
+    protected Node targetComponent;
 
     /** Constants for addressing components of a quad */
-    public static final Integer TARGET = null; // Use 0?
-    public static final Integer PREDICATE = 1;
-    public static final Integer SOURCE = 2;
-    public static final Integer GRAPH = 3;
-    public static final Integer TUPLE = -1; // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
+    public static final Node TARGET = Var.alloc("target");
+    public static final Node PREDICATE = Var.alloc("predicate");
+    public static final Node SOURCE = Var.alloc("source");
+    public static final Node GRAPH = Var.alloc("graph");
+    public static final Node TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
 
-    public static boolean isTarget(Integer component) { return Objects.equals(TARGET, component); }
-    public static boolean isPredicate(Integer component) { return Objects.equals(PREDICATE, component); }
-    public static boolean isSource(Integer component) { return Objects.equals(SOURCE, component); }
-    public static boolean isGraph(Integer component) { return Objects.equals(GRAPH, component); }
-    public static boolean isTuple(Integer component) { return Objects.equals(TUPLE, component); }
+    public static boolean isTarget(Node component) { return Objects.equals(TARGET, component); }
+    public static boolean isPredicate(Node component) { return Objects.equals(PREDICATE, component); }
+    public static boolean isSource(Node component) { return Objects.equals(SOURCE, component); }
+    public static boolean isGraph(Node component) { return Objects.equals(GRAPH, component); }
+    public static boolean isTuple(Node component) { return Objects.equals(TUPLE, component); }
 
     /** TODO Include a constant for the graph? */
 
-    public static FacetStep of(Node node, Direction direction, String alias, Integer component) {
+    public static FacetStep of(Node node, Direction direction, String alias, Node component) {
         return new FacetStep(node, direction.isForward(), alias, component);
     }
 
@@ -86,7 +87,7 @@ public class FacetStep
         this(PathUtils.createStep(node, isForward), alias, null);
     }
 
-    public FacetStep(Node node, boolean isForward, String alias, Integer targetComponent) {
+    public FacetStep(Node node, boolean isForward, String alias, Node targetComponent) {
         this(PathUtils.createStep(node, isForward), alias, targetComponent);
     }
 
@@ -94,7 +95,7 @@ public class FacetStep
         this(step, alias, null);
     }
 
-    public FacetStep(P_Path0 step, String alias, Integer targetComponent) {
+    public FacetStep(P_Path0 step, String alias, Node targetComponent) {
         super();
         this.step = step;
         this.alias = alias;
@@ -102,7 +103,7 @@ public class FacetStep
     }
 
     /** Create a copy of this step with the component set to the given value. Used for preallocation of sparql variables for the different components. */
-    public FacetStep copyStep(Integer newComponent) {
+    public FacetStep copyStep(Node newComponent) {
         return new FacetStep(step, alias, newComponent);
     }
 
@@ -124,7 +125,7 @@ public class FacetStep
         return step.isForward();
     }
 
-    public Integer getTargetComponent() {
+    public Node getTargetComponent() {
         return targetComponent;
     }
 

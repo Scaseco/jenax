@@ -78,7 +78,7 @@ public class FacetDirNodeImpl
     }
 
     @Override
-    public FacetMultiNode via(Resource property, Integer component) {
+    public FacetMultiNode via(Resource property, Node component) {
         if (component != null) {
             throw new UnsupportedOperationException("Components not supported yet");
         }
