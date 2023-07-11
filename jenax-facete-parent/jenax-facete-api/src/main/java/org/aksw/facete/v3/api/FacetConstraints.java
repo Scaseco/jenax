@@ -16,7 +16,7 @@ import com.google.common.collect.Table;
 public class FacetConstraints {
     // protected Map<Expr, Boolean> exprToState;
 
-    // TODO Have the final value to be a wrapper that links back to the keys?
+    // TODO Should the final value be a wrapper that links back to the keys?
     protected Table<Set<TreeQueryNode>, Expr, Boolean> model = HashBasedTable.create();
 
     protected TreeQuery treeQuery;

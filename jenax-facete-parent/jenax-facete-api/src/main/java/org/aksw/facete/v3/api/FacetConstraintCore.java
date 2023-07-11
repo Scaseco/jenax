@@ -8,4 +8,6 @@ public interface FacetConstraintCore {
     FacetConstraintCore enabled(boolean onOrOff);
 
     Expr expr();
+
+    void unlink();
 }
