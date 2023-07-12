@@ -68,6 +68,10 @@ public class OutputFormatSpec {
         if (outFormat != null) {
             if ("json".equalsIgnoreCase(outFormat)) {
                 outputMode = OutputMode.JSON;
+            } else if ("list".equalsIgnoreCase(outFormat) || "help".equalsIgnoreCase(outFormat)) {
+                throw new IllegalStateException(
+                        "Available out formats:\n"
+                                + String.join("\n", RDFLanguagesEx.listOutFormats()));
             } else {
 
                 try {
