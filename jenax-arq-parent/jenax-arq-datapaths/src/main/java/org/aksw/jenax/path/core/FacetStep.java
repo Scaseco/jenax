@@ -24,11 +24,11 @@ public class FacetStep
     protected Node targetComponent;
 
     /** Constants for addressing components of a quad */
-    public static final Node TARGET = Var.alloc("target");
-    public static final Node PREDICATE = Var.alloc("predicate");
-    public static final Node SOURCE = Var.alloc("source");
-    public static final Node GRAPH = Var.alloc("graph");
-    public static final Node TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
+    public static final Var TARGET = Var.alloc("target");
+    public static final Var PREDICATE = Var.alloc("predicate");
+    public static final Var SOURCE = Var.alloc("source");
+    public static final Var GRAPH = Var.alloc("graph");
+    public static final Var TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
 
     public static boolean isTarget(Node component) { return Objects.equals(TARGET, component); }
     public static boolean isPredicate(Node component) { return Objects.equals(PREDICATE, component); }

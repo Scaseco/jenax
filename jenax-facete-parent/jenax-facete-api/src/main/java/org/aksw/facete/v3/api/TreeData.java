@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
 
-
 /**
  * A stripped down copy of Vaadin's TreeData class.
  * Used to capture hierarchical projections of FacetPaths.
@@ -23,6 +22,20 @@ import com.google.common.base.Preconditions;
 public class TreeData<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public <O> TreeData<O> map(Function<T, O> mapper) {
+    	TreeData<O> result = new TreeData<>();
+    	map(this, null, null, mapper);
+    	return result;
+    }
+
+    private static <I, O> void map(TreeData<I> treeData, I oldParent, O newParent, Function<I, O> mapper) {
+    	TreeData<O> result = new TreeData<>();
+    	List<I> children = treeData.getChildren(oldParent);
+    	for (I child : children) {
+    		O newChild = mapper.apply(child);
+    		result.addItem(newParent, newChild);
+    	}
+    }
 
     private void putItem(T item, T parent) {
         HierarchyWrapper<T> wrappedItem = new HierarchyWrapper<>(parent);
