@@ -117,7 +117,7 @@ public class SparqlStmtTypeAcceptHeaderFilter
                 isSparqlRequest = !strs.isEmpty();
             }
 
-            String acceptTypeStr = type != null ? type.getContentTypeStr() : null;
+            String acceptTypeStr = type != null ? type.toHeaderString() : null;
             if (isSparqlRequest) {
                 SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.DEFAULT);
 
