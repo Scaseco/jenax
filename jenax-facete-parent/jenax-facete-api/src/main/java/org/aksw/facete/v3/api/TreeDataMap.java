@@ -24,6 +24,23 @@ import com.google.common.base.Preconditions;
 public class TreeDataMap<K, V> implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public <O> TreeDataMap<O, V> mapKeys(Function<K, O> mapper) {
+    	TreeDataMap<O, V> result = new TreeDataMap<>();
+    	mapKeys(this, null, result, null, mapper);
+    	return result;
+    }
+
+    private static <I, O, V> void mapKeys(TreeDataMap<I, V> treeData, I oldParent, TreeDataMap<O, V> result, O newParent, Function<I, O> mapper) {
+    	List<I> children = treeData.getChildren(oldParent);
+    	for (I child : children) {
+    		O newChild = mapper.apply(child);
+    		V value = treeData.get(child); // XXX iterate entries rather than lookup
+    		result.addItem(newParent, newChild);
+    		result.put(newChild, value);
+    		mapKeys(treeData, child, result, newChild, mapper);
+    	}
+    }
+
     public V get(Object key) {
         HierarchyWrapper<K, V> wrapper = itemToWrapperMap.get(key);
         V result = wrapper == null ? null : wrapper.getValue();
@@ -49,15 +66,34 @@ public class TreeDataMap<K, V> implements Serializable {
         itemToWrapperMap.put(item, wrappedItem);
     }
 
+    public TreeDataMap<K, V> putAll(TreeDataMap<K, V> other) {
+        for (Entry<K, HierarchyWrapper<K, V>> entry : other.itemToWrapperMap.entrySet()) {
+            HierarchyWrapper<K, V> otherWrapper = entry.getValue();
+            HierarchyWrapper<K, V> thisWrapper = this.itemToWrapperMap.get(entry.getKey());
+            if (thisWrapper == null) {
+            	thisWrapper = new HierarchyWrapper<>(otherWrapper.getParent(), entry.getKey(), otherWrapper.getValue(), new ArrayList<>(otherWrapper.getChildren()));
+                this.itemToWrapperMap.put(entry.getKey(), thisWrapper);
+            } else {
+                // Ensure that links to the parents are not altered
+            	Preconditions.checkState(Objects.equals(thisWrapper.getParent(), otherWrapper.getParent()), "Parents must be equal");
+            	thisWrapper.getChildren().addAll(otherWrapper.getChildren());
+            	thisWrapper.setValue(otherWrapper.getValue());
+            }                        
+        }
+        return this;
+    }
+    
     /** Return a new instance of this tree structure. Does not copy the elements of type T. */
     public TreeDataMap<K, V> cloneTree() {
         TreeDataMap<K, V> result = new TreeDataMap<>();
-        for (Entry<K, HierarchyWrapper<K, V>> entry : itemToWrapperMap.entrySet()) {
-            HierarchyWrapper<K, V> original = entry.getValue();
-            HierarchyWrapper<K, V> copy = new HierarchyWrapper<>(original.getParent(), original.getKey(), new ArrayList<>(original.getChildren()));
-            result.itemToWrapperMap.put(entry.getKey(), copy);
-        }
+        result.putAll(this);
         return result;
+//        for (Entry<K, HierarchyWrapper<K, V>> entry : itemToWrapperMap.entrySet()) {
+//            HierarchyWrapper<K, V> original = entry.getValue();
+//            HierarchyWrapper<K, V> copy = new HierarchyWrapper<>(original.getParent(), original.getKey(), new ArrayList<>(original.getChildren()));
+//            result.itemToWrapperMap.put(entry.getKey(), copy);
+//        }
+//        return result;
     }
 
     public TreeDataMap<K, V> addItems(Collection<K> rootItems,
@@ -106,12 +142,13 @@ public class TreeDataMap<K, V> implements Serializable {
         private List<K> children;
 
         public HierarchyWrapper(K parent, K key) {
-            this(parent, key, new ArrayList<>());
+            this(parent, key, null, new ArrayList<>());
         }
 
-        public HierarchyWrapper(K parent, K key, List<K> children) {
+        public HierarchyWrapper(K parent, K key, V value, List<K> children) {
             this.parent = parent;
             this.key = key;
+            this.value = value;
             this.children = children;
         }
 

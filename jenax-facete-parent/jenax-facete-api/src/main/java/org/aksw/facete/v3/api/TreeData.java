@@ -24,16 +24,16 @@ public class TreeData<T> implements Serializable {
 
     public <O> TreeData<O> map(Function<T, O> mapper) {
     	TreeData<O> result = new TreeData<>();
-    	map(this, null, null, mapper);
+    	map(this, null, result, null, mapper);
     	return result;
     }
 
-    private static <I, O> void map(TreeData<I> treeData, I oldParent, O newParent, Function<I, O> mapper) {
-    	TreeData<O> result = new TreeData<>();
+    private static <I, O> void map(TreeData<I> treeData, I oldParent, TreeData<O> result, O newParent, Function<I, O> mapper) {
     	List<I> children = treeData.getChildren(oldParent);
     	for (I child : children) {
     		O newChild = mapper.apply(child);
     		result.addItem(newParent, newChild);
+    		map(treeData, child, result, newChild, mapper);
     	}
     }
 
