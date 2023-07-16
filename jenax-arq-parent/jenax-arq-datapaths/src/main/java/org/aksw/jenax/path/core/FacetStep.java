@@ -84,7 +84,7 @@ public class FacetStep
 
 
     public FacetStep(Node node, boolean isForward, String alias) {
-        this(PathUtils.createStep(node, isForward), alias, null);
+        this(PathUtils.createStep(node, isForward), alias, TARGET);
     }
 
     public FacetStep(Node node, boolean isForward, String alias, Node targetComponent) {
@@ -97,6 +97,8 @@ public class FacetStep
 
     public FacetStep(P_Path0 step, String alias, Node targetComponent) {
         super();
+    	Objects.requireNonNull(step);
+    	Objects.requireNonNull(targetComponent);
         this.step = step;
         this.alias = alias;
         this.targetComponent = targetComponent;

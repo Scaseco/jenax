@@ -53,7 +53,12 @@ public class NodeCustom<T>
         return "NodeCustom [value=" + value + "]";
     }
 
+    @Deprecated // Use of()
     public static NodeCustom<?> create(Object value) {
+        return new NodeCustom<>(value);
+    }
+
+    public static <T> NodeCustom<T> of(T value) {
         return new NodeCustom<>(value);
     }
 
@@ -81,5 +86,15 @@ public class NodeCustom<T>
         return NodeTransformLib2.wrapWithNullAsIdentity(x -> x instanceof NodeCustom
             ? mapping.apply(((NodeCustom<T>)x).getValue())
             : null);
+    }
+    
+    /** Create a NodeTransform that transforms the payload of NodeCustom instances */
+    @SuppressWarnings("unchecked")
+    public static <I, O> NodeTransform mapValue(Function<? super I, O> mapping) {
+    	return createNodeTransform((I before) -> {
+			O after = mapping.apply(before);
+			NodeCustom<O> r = NodeCustom.of(after);
+    		return r;
+    	});    	
     }
 }
