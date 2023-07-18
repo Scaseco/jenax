@@ -7,6 +7,7 @@ import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sys.JenaSystem;
 
 import java.math.BigDecimal;
@@ -38,11 +39,11 @@ public class Functions {
     }
 
     public static void register() {
-        //FunctionRegistry functionRegistry = FunctionRegistry.get();
+        FunctionRegistry functionRegistry = FunctionRegistry.get();
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.getFunctionGenerator().getConverterRegistry().register(Unit.class, Node.class,
                 unit -> NodeFactory.createURI(unit.getIri()),
-                node ->  Qudt.unit(node.getURI()).orElseThrow(() -> new NoSuchUnitException(node)));
+                node -> Qudt.unit(node.getURI()).orElseThrow(() -> new NoSuchUnitException(node)));
         binder.getFunctionGenerator().getJavaToRdfTypeMap().put(Unit.class, Node.class);
         binder.registerAll(Functions.class);
     }
