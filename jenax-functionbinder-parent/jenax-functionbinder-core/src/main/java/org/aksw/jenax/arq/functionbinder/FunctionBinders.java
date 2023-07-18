@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.functionbinder;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.aksw.commons.util.convert.ConverterRegistries;
 import org.aksw.commons.util.convert.ConverterRegistry;
@@ -17,15 +18,15 @@ public class FunctionBinders {
         if (DFT_FUNCTION_BINDER == null) {
             synchronized (FunctionBinders.class) {
                 if (DFT_FUNCTION_BINDER == null) {
-                    DFT_FUNCTION_BINDER = createFunctionBinder(FunctionRegistry.get());
+                    DFT_FUNCTION_BINDER = createFunctionBinder(FunctionRegistry::get);
                 }
             }
         }
         return DFT_FUNCTION_BINDER;
     }
 
-    public static FunctionBinder createFunctionBinder(FunctionRegistry functionRegistry) {
-        FunctionBinder binder = new FunctionBinder(functionRegistry);
+    public static FunctionBinder createFunctionBinder(Supplier<FunctionRegistry> functionRegistrySupplier) {
+        FunctionBinder binder = new FunctionBinder(functionRegistrySupplier);
         FunctionGenerator generator = binder.getFunctionGenerator();
 
         // This declaration states that whenever CharSequence is demanded (e.g. as a method  parameter)

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.reprogen.shared.AnnotationUtils;
@@ -22,26 +23,26 @@ import org.slf4j.LoggerFactory;
  */
 public class FunctionBinder {
     private static final Logger logger = LoggerFactory.getLogger(FunctionBinder.class);
+    protected Supplier<FunctionRegistry> functionRegistrySupplier;
 
     protected FunctionGenerator functionGenerator;
-    protected FunctionRegistry functionRegistry;
 
     public FunctionBinder() {
-        this(new FunctionGenerator(), FunctionRegistry.get());
+        this(new FunctionGenerator(), FunctionRegistry::get);
     }
 
-    public FunctionBinder(FunctionRegistry functionRegistry) {
-        this(new FunctionGenerator(), functionRegistry);
+    public FunctionBinder(Supplier<FunctionRegistry> functionRegistrySupplier) {
+        this(new FunctionGenerator(), functionRegistrySupplier);
     }
 
     public FunctionBinder(FunctionGenerator functionGenerator) {
-        this(functionGenerator, FunctionRegistry.get());
+        this(functionGenerator, FunctionRegistry::get);
     }
 
-    public FunctionBinder(FunctionGenerator functionGenerator, FunctionRegistry functionRegistry) {
+    public FunctionBinder(FunctionGenerator functionGenerator, Supplier<FunctionRegistry> functionRegistrySupplier) {
         super();
         this.functionGenerator = functionGenerator;
-        this.functionRegistry = functionRegistry;
+        this.functionRegistrySupplier = functionRegistrySupplier;
     }
 
     public FunctionGenerator getFunctionGenerator() {
@@ -88,6 +89,7 @@ public class FunctionBinder {
 
         // Stopwatch sw = Stopwatch.createStarted();
         FunctionFactory factory = factory(lazy, method, invocationTarget);
+        FunctionRegistry functionRegistry = functionRegistrySupplier.get();
         for (String iri : functionIris) {
             functionRegistry.put(iri, factory);
         }
