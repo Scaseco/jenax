@@ -21,7 +21,6 @@ public class DatasetOneNgImpl
         return new DatasetOneNgImpl(dsg);
     }
 
-
     public static DatasetOneNg create(Dataset dataset, String graphName) {
         return create(dataset, NodeFactory.createURI(graphName));
     }
@@ -30,7 +29,6 @@ public class DatasetOneNgImpl
         DatasetGraphOneNg ng = DatasetGraphOneNgImpl.create(dataset.asDatasetGraph(), graphName);
         return wrap(ng);
     }
-
 
     public static DatasetOneNg create(String graphName) {
         return create(graphName, GraphFactory.createDefaultGraph());

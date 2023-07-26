@@ -12,6 +12,7 @@ import org.aksw.jena_sparql_api.concepts.OrderedConcept;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -77,7 +78,7 @@ public class ServiceUtils {
     }
 
 
-    public static Integer fetchInteger(QueryExecutionFactory qef, Query query, Var v) {
+    public static Integer fetchInteger(QueryExecutionFactoryQuery qef, Query query, Var v) {
         //System.out.println(query);
         QueryExecution qe = qef.createQueryExecution(query);
         Integer result = fetchInteger(qe, v);
@@ -162,7 +163,7 @@ public class ServiceUtils {
         return result;
     }
 
-    public static Range<Long> fetchCountQuery(QueryExecutionFactory sparqlService, Query query, Long itemLimit, Long rowLimit) {
+    public static Range<Long> fetchCountQuery(QueryExecutionFactoryQuery sparqlService, Query query, Long itemLimit, Long rowLimit) {
 
         //Var outputVar = Var.alloc("_count_"); //ConceptUtils.freshVar(concept);
 
