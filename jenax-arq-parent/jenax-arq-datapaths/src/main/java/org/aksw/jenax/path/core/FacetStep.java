@@ -97,8 +97,8 @@ public class FacetStep
 
     public FacetStep(P_Path0 step, String alias, Node targetComponent) {
         super();
-    	Objects.requireNonNull(step);
-    	Objects.requireNonNull(targetComponent);
+        Objects.requireNonNull(step);
+        Objects.requireNonNull(targetComponent);
         this.step = step;
         this.alias = alias;
         this.targetComponent = targetComponent;
@@ -109,6 +109,9 @@ public class FacetStep
         return new FacetStep(step, alias, newComponent);
     }
 
+    public FacetStep toggleDirection() {
+        return of(getNode(), getDirection().opposite(), alias, targetComponent);
+    }
 
     public P_Path0 getStep() {
         return step;

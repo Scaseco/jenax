@@ -110,7 +110,11 @@ public class FacetMultiNodeImpl
 
     @Override
     public FacetNode viaAlias(String alias) {
-        throw new RuntimeException("not implemented yet");
+        if (alias == null) {
+            return one();
+        } else {
+            throw new RuntimeException("not implemented yet");
+        }
     }
 
     @Override

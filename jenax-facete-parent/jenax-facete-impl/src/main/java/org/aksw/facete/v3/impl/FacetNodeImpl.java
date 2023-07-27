@@ -304,7 +304,7 @@ public class FacetNodeImpl
     }
 
     @Override
-    public Integer targetComponent() {
+    public Node targetComponent() {
         // TODO Auto-generated method stub
         return null;
     }

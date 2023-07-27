@@ -383,7 +383,6 @@ public class EntityClassifier {
             concept = tmp;
         }
 
-
         // raw.setValuesDataBlock(table.getVars(), Lists.newArrayList(table.rows()));
         EntityBaseQuery ebq = new EntityBaseQuery(Collections.singletonList(Vars.s), new EntityTemplateImpl(), concept);
 
@@ -393,7 +392,6 @@ public class EntityClassifier {
 
 //        ebq.getStandardQuery().setOffset(5);
 //        ebq.getStandardQuery().setLimit(3);
-
 
         EntityQueryImpl eq = new EntityQueryImpl();
         eq.setBaseQuery(ebq);
@@ -416,8 +414,6 @@ public class EntityClassifier {
 
         Op op = Algebra.optimize(Algebra.compile(grouped.getElement()));
         System.out.println(op);
-
-
 
         //System.out.println(entityGraphFragment);
 //        System.out.println(basic);
