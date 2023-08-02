@@ -1,12 +1,7 @@
 package org.aksw.jena_sparql_api.rx;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -247,6 +242,51 @@ public class RDFLanguagesEx {
                 .orElseThrow(() -> new RuntimeException("No lang found for label " + label));
 
         return result;
+    }
+
+    public static Collection<String> listOutFormats() {
+        LinkedList<String> list = new LinkedList<>();
+        RDFLanguages.getRegisteredLanguages().stream().sorted(Comparator.comparing(Lang::getName)).forEach(l -> {
+            list.add(listOutFormatsAddCts(l.getName(), l));
+        });
+        RDFWriterRegistry.registered().stream().sorted(Comparator.comparing(RDFFormat::toString)).forEach(f -> {
+            list.add(listOutFormatsAddCts(f.toString(), f.getLang()));
+        });
+
+        return list;
+    }
+
+    private static String listOutFormatsAddCts(String mainName, Lang l) {
+        StringBuilder s = new StringBuilder();
+        s.append(mainName);
+        if (l != null) {
+            ContentType primaryCt = l.getContentType();
+            List<String> cts = new LinkedList<>();
+            List<String> names = new LinkedList<>();
+            String name = l.getName();
+            if (!name.equalsIgnoreCase(mainName)) {
+                names.add(name);
+            }
+            l.getAltNames().stream().filter(Objects::nonNull)
+                    .filter(Predicate.not(mainName::equalsIgnoreCase))
+                    .filter(e -> names.stream().noneMatch(e::equalsIgnoreCase))
+                    .forEach(names::add);
+
+            if (primaryCt != null) {
+                cts.add(primaryCt.getContentTypeStr());
+            }
+            l.getAltContentTypes().stream().filter(Objects::nonNull)
+                    .filter(Predicate.not(cts::contains)).forEach(cts::add);
+            if (!names.isEmpty() || !cts.isEmpty()) {
+                s.append('\t');
+                s.append(String.join(",", names));
+            }
+            if (!cts.isEmpty()) {
+                s.append('\t');
+                s.append(String.join(",", cts));
+            }
+        }
+        return s.toString();
     }
 
 

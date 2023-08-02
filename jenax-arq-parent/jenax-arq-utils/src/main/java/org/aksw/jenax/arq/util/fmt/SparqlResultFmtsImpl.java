@@ -1,8 +1,15 @@
 package org.aksw.jenax.arq.util.fmt;
 
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFFormat;
+import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
+import org.apache.jena.atlas.web.MediaType;
+import org.apache.jena.riot.*;
 import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.system.StreamRDFWriter;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.apache.jena.atlas.iterator.Iter.findFirst;
 
 /**
  * Class for providing (default) mappings for the result types defined by SPARQL
@@ -22,6 +29,17 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 	protected RDFFormat triples;
 	protected RDFFormat quads;
 	protected Lang unknown;
+
+	private static List<SparqlResultFmtsImpl> sisterFormats = new ArrayList<>();
+	static {
+		//sisterFormats.add(new SparqlResultFmtsImpl(unknown, askResult, bindings, triples, quads));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_XML, ResultSetLang.RS_XML, ResultSetLang.RS_XML, RDFFormat.RDFXML_PLAIN, RDFFormat.NQ));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.JSONLD, RDFFormat.JSONLD));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.RDFJSON, RDFFormat.JSONLD));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_TSV, ResultSetLang.RS_TSV, ResultSetLang.RS_TSV, RDFFormat.NT, RDFFormat.NQ));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_CSV, ResultSetLang.RS_CSV, ResultSetLang.RS_CSV, RDFFormat.NT, RDFFormat.NQ));
+	}
 
 	public SparqlResultFmtsImpl(Lang unknown, Lang askResult, Lang bindings, RDFFormat triples, RDFFormat quads) {
 		super();
@@ -60,6 +78,170 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 	public static SparqlResultFmts createTsv() {
 		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_TSV,
 				ResultSetLang.RS_TSV, RDFFormat.NT, RDFFormat.NQ);
+	}
+
+	public enum Slot {
+		Unknown, AskResult, Bindings, Triples, Quads
+	}
+
+	public <T> T get(Slot slot) {
+		switch (slot) {
+			case Bindings:
+				return (T) this.bindings;
+			case AskResult:
+				return (T) this.askResult;
+			case Quads:
+				return (T) this.quads;
+			case Triples:
+				return (T) this.triples;
+			case Unknown:
+				return (T) this.unknown;
+		}
+		return null;
+	}
+	protected static void setSisterDefaults(SparqlResultFmtsImpl impl, Slot sourceFmt,
+											EnumSet<Slot> targetFmts) {
+		for (SparqlResultFmtsImpl f:
+		sisterFormats) {
+			if (Objects.equals(f.get(sourceFmt), impl.get(sourceFmt))) {
+				for (Slot s:
+				targetFmts) {
+					impl.set(s, f.get(s));
+				}
+			}
+		}
+	}
+
+	protected void set(Slot s, Object o) {
+		switch (s) {
+			case AskResult:
+				this.askResult = (Lang) o;
+				return;
+			case Bindings:
+				this.bindings = (Lang) o;
+				return;
+			case Quads:
+				this.quads = (RDFFormat) o;
+				return;
+			case Triples:
+				this.triples = (RDFFormat) o;
+				return;
+			case Unknown:
+				this.unknown = (Lang) o;
+				return;
+		}
+	}
+
+	public static SparqlResultFmts forContentTypes(List<String> acceptableContentTypes) {
+		SparqlResultFmtsImpl r = (SparqlResultFmtsImpl) SparqlResultFmtsImpl.createDefault();
+		List<Lang> acceptableLangs = acceptableContentTypes.stream().map(RDFLanguages::contentTypeToLang)
+				.filter(Objects::nonNull).collect(Collectors.toList());
+
+		List<Lang> resultSetFormats = RDFLanguagesEx.getResultSetFormats();
+
+		r.bindings = findFirst(acceptableLangs.iterator(), resultSetFormats::contains).orElse(r.bindings);
+		setSisterDefaults(r, Slot.Bindings, EnumSet.of(Slot.Unknown, Slot.AskResult, Slot.Triples, Slot.Quads));
+		r.askResult = acceptableLangs.stream().findFirst().orElse(r.askResult);
+		r.unknown = acceptableLangs.stream().findFirst().orElse(null);
+
+		List<Lang> quadLangs = RDFLanguagesEx.getQuadLangs();
+		List<Lang> tripleLangs = RDFLanguagesEx.getTripleLangs();
+		Collection<RDFFormat> streamFormats = StreamRDFWriter.registered();
+		Collection<RDFFormat> quadFormats = RDFWriterRegistry.registeredDatasetFormats();
+		Collection<RDFFormat> tripleFormats = RDFWriterRegistry.registeredGraphFormats();
+
+		boolean quadsSet = false;
+		boolean triplesSet = false;
+
+		search:
+		for (String mt:
+		acceptableContentTypes) {
+			MediaType parsed = MediaType.create(mt);
+			Lang lang = RDFLanguages.contentTypeToLang(parsed.getContentTypeStr());
+			if (lang == null)
+				continue search;
+
+			String variant = parsed.getParameter("variant");
+			{
+				RDFFormat streamDefaultFormat = StreamRDFWriter.defaultSerialization(lang);
+				RDFFormatVariant streamDefaultFormatVariant = streamDefaultFormat != null ?
+						streamDefaultFormat.getVariant() : null;
+				if (streamDefaultFormat != null
+						&& (variant == null
+						|| (streamDefaultFormatVariant != null
+						&& variant.equalsIgnoreCase(streamDefaultFormatVariant.toString())))) {
+					// we're done for this
+					if (!quadsSet && quadLangs.contains(lang)) {
+						r.quads = streamDefaultFormat;
+						quadsSet = true;
+						if (triplesSet)
+							break search;
+						else setSisterDefaults(r, Slot.Quads, EnumSet.of(Slot.Triples));
+					}
+					if (!triplesSet && tripleLangs.contains(lang)) {
+						r.triples = streamDefaultFormat;
+						triplesSet = true;
+						if (quadsSet)
+							break search;
+						else setSisterDefaults(r, Slot.Triples, EnumSet.of(Slot.Quads));
+					}
+				}
+			}
+
+			for (RDFFormat f:
+			streamFormats) {
+				RDFFormatVariant formatVariant = f.getVariant();
+				if (f.getLang().equals(lang) && (variant == null
+						|| (formatVariant != null && variant.equalsIgnoreCase(formatVariant.toString())))) {
+					if (!quadsSet && quadLangs.contains(lang)) {
+						r.quads = f;
+						quadsSet = true;
+						if (triplesSet)
+							break search;
+						else setSisterDefaults(r, Slot.Quads, EnumSet.of(Slot.Triples));
+					}
+					if (!triplesSet && tripleLangs.contains(lang)) {
+						r.triples = f;
+						triplesSet = true;
+						if (quadsSet)
+							break search;
+						else setSisterDefaults(r, Slot.Triples, EnumSet.of(Slot.Quads));
+					}
+				}
+			}
+
+			if (!triplesSet) {
+				for (RDFFormat f :
+						tripleFormats) {
+					RDFFormatVariant formatVariant = f.getVariant();
+					if (tripleLangs.contains(lang) && f.getLang().equals(lang) && (variant == null
+							|| (formatVariant != null && variant.equalsIgnoreCase(formatVariant.toString())))) {
+						r.triples = f;
+						triplesSet = true;
+						if (quadsSet)
+							break search;
+						else setSisterDefaults(r, Slot.Triples, EnumSet.of(Slot.Quads));
+						break;
+					}
+				}
+			}
+			if (!quadsSet) {
+				for (RDFFormat f:
+				quadFormats) {
+					RDFFormatVariant formatVariant = f.getVariant();
+					if (quadLangs.contains(lang) && f.getLang().equals(lang) && (variant == null
+							|| (formatVariant != null && variant.equalsIgnoreCase(formatVariant.toString())))) {
+						r.quads = f;
+						quadsSet = true;
+						if (triplesSet)
+							break search;
+						else setSisterDefaults(r, Slot.Quads, EnumSet.of(Slot.Triples));
+						break;
+					}
+				}
+			}
+		}
+		return r;
 	}
 
 	@Override
