@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.SetUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.Maps;
@@ -27,8 +29,10 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
+import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.expr.aggregate.AggCountDistinct;
@@ -37,6 +41,7 @@ import org.apache.jena.sparql.expr.aggregate.Aggregator;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
+import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
@@ -764,6 +769,7 @@ public class QueryGenerationUtils {
     /**
      * Similar to {@link #needsWrapping(Query)} but includes a flag
      * whether to include slice information (limit / offset).
+     * Does not consider the DISTINCT flag!
      *
      * @param query
      * @return
@@ -846,6 +852,8 @@ public class QueryGenerationUtils {
 
         optimizeGroupByToDistinct(query, true);
 
+        boolean enableCountDistinct = false;
+
         boolean isDistinct = query.isDistinct();
         // If the query uses distinct and there is just a single projected variable
         // then we can transform 'DISTINCT ?s' to 'COUNT(DISTINCT ?s)'.
@@ -854,29 +862,17 @@ public class QueryGenerationUtils {
 
         boolean isEffectiveQueryResultStar = isEffectiveQueryResultStar(query);
 
-//        boolean needsWrappingByFeatures
-//                =  query.hasGroupBy()
-//                || query.hasAggregators()
-//                || query.hasHaving()
-//                || query.hasValues()
-//                ;
-//
-//
-//        boolean needsWrapping
-//                = needsWrappingByFeatures
-//                || (isDistinct && projVarCount > 1 && !isEffectiveQueryResultStar )
-//                ;
-
-
         // Check the features - but exclude slice here because special rules are applied
-        boolean needsWrappingByFeatures = needsWrappingByFeatures(query, false);
-        boolean needsWrapping
-            = needsWrappingByFeatures
-            || (isDistinct && projVarCount > 1 && !isEffectiveQueryResultStar )
+        boolean isSubQueryNeededBecauseOfFeatures = needsWrappingByFeatures(query, false);
+        boolean canAvoidSubQuery = enableCountDistinct && projVarCount == 1 || isEffectiveQueryResultStar || !isDistinct;
+
+        boolean isSubQueryNeeded = isSubQueryNeededBecauseOfFeatures || !canAvoidSubQuery;
+            // Sub query may be omitted if
+            // || (isDistinct && !isEffectiveQueryResultStar && !(enableCountDistinct && projVarCount > 1))
             ;
 
 
-        if(rowLimit != null && isDistinct && !needsWrappingByFeatures) {
+        if(rowLimit != null && isDistinct && !isSubQueryNeededBecauseOfFeatures) {
             Element elt = query.getQueryPattern();
             Query subQuery = new Query();
             subQuery.setQuerySelectType();
@@ -900,7 +896,7 @@ public class QueryGenerationUtils {
 
         if(effectiveLimit != Query.NOLIMIT) {
               query.setLimit(effectiveLimit);
-              needsWrapping = true;
+              isSubQueryNeeded = true;
           }
 
       //Element esq = new ElementSubQuery(subQuery);
@@ -918,16 +914,22 @@ public class QueryGenerationUtils {
             }
         }
 
-        boolean useCountDistinct = !needsWrapping && query.isDistinct() && (isEffectiveQueryResultStar || singleResultVar != null);
+        // ISSUE COUNT(DISTINCT ?x) differs from COUNT(DISTINCT *): The former does not count bindings where ?x is unbound - the latter does so.
+        // singleResultVar = null; // Disable generation of COUNT(DISTINCT ?x)
+
+        boolean canUseCountDistinct = !isSubQueryNeeded && isDistinct && (isEffectiveQueryResultStar || singleResultVar != null);
+        boolean useCountDistinct = enableCountDistinct && canUseCountDistinct;
+
         // TODO If there is only a single result variable (without mapping to an expr)
         // we can also use count distinct
 
-
-        Aggregator agg = useCountDistinct
+        Aggregator agg = useCountDistinct // For now this condition should be always false
                 ? singleResultVar == null
                     ? new AggCountDistinct()
                     : new AggCountVarDistinct(new ExprVar(singleResultVar))
-                : new AggCount();
+                : !isSubQueryNeeded && isDistinct
+                    ? new AggCountDistinct()
+                    : new AggCount();
 
         Query result = new Query();
         result.setQuerySelectType();
@@ -937,7 +939,7 @@ public class QueryGenerationUtils {
         result.getProject().add(resultVar, aggCount);
 
         Element queryPattern;
-        if(needsWrapping) {
+        if(isSubQueryNeeded) {
             Query q = query.cloneQuery();
             q.setPrefixMapping(new PrefixMappingImpl());
             queryPattern = new ElementSubQuery(q);
@@ -1095,6 +1097,39 @@ public class QueryGenerationUtils {
         result.add(new ElementBind((Var)quadVars.getSubject(), ExprLib.nodeToExpr(quad.getSubject())));
         result.add(new ElementBind((Var)quadVars.getPredicate(), ExprLib.nodeToExpr(quad.getPredicate())));
         result.add(new ElementBind((Var)quadVars.getObject(), ExprLib.nodeToExpr(quad.getObject())));
+        return result;
+    }
+
+    /**
+     * Injects a FILTER condition that discards 'empty' rows w.r.t. the projection.
+     * Creates a copy of the original query.
+     *
+     * Wraps the inner query with
+     * SELECT ?x1 ... ?xn {
+     *   { ORIGINAL Query }
+     *   FILTER(BOUND(?x1) || ... || BOUND(xn)) # At least one variable must be bound
+     * }
+     *
+     * @param query
+     * @return
+     */
+    public static Query discardUnbound(Query query) {
+        Preconditions.checkArgument(query.isSelectType(), "SELECT query expected.");
+        // We could reuse jena's OpVars to check which variables are not fixed
+
+        Query copy = query.cloneQuery();
+
+        Query result = new Query();
+        result.setQuerySelectType();
+        result.setQueryResultStar(true);
+
+        ExprList exprs = new ExprList(query.getProjectVars().stream()
+                .map(v -> new E_Bound(new ExprVar(v))).collect(Collectors.toList()));
+        Element elt = ElementUtils.groupIfNeeded(
+                new ElementSubQuery(copy),
+                new ElementFilter(ExprUtils.orifyBalanced(exprs)));
+
+        result.setQueryPattern(elt);
         return result;
     }
 }
