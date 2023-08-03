@@ -12,6 +12,7 @@ import org.aksw.jena_sparql_api.data_query.api.ResolverMultiNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverNode;
 import org.aksw.jenax.arq.connection.SparqlQueryConnectionTmp;
 import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Resource;
@@ -43,7 +44,11 @@ public class ResolverDirNodeImpl
     }
 
     @Override
-    protected ResolverMultiNodeImpl viaImpl(Resource property) {
+    protected ResolverMultiNodeImpl viaImpl(Resource property, Node component) {
+        if (component != null) {
+            throw new UnsupportedOperationException("Support for referencing components not implemented");
+        }
+
         return new ResolverMultiNodeImpl(this, property, conn);
     }
 

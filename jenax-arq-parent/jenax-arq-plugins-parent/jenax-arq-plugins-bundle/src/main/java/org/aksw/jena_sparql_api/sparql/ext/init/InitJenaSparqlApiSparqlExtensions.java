@@ -37,7 +37,7 @@ public class InitJenaSparqlApiSparqlExtensions
 
     @Override
     public void start() {
-        logger.debug("JenaSparqlAPI SPARQL extension initialization");
+        logger.debug("Initializing JenaX SPARQL extensions");
 
         JenaExtensionJson.register();
         JenaExtensionCsv.register();

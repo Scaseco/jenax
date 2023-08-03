@@ -24,6 +24,16 @@
 		<!-- </dependency> -->
 
 		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-shacl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-shacl</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-rx-dataaccess</artifactId>
 		</dependency>

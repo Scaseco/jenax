@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -19,6 +20,7 @@ import java.util.stream.StreamSupport;
 
 import org.aksw.commons.util.algebra.ExprFilter;
 import org.aksw.commons.util.algebra.GenericFactorizer;
+import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
 import org.apache.jena.ext.com.google.common.collect.Lists;
@@ -84,6 +86,14 @@ public class ExprUtils {
 
     public static ExprOps getExprOps() {
         return exprOps;
+    }
+
+    /** Return the set of nodes mentioned in a path */
+    public static Set<Node> nodesMentioned(Expr expr) {
+        NodeTransformCollectNodes nodeTransform = new NodeTransformCollectNodes();
+        expr.applyNodeTransform(nodeTransform);
+        Set<Node> result = nodeTransform.getNodes();
+        return result;
     }
 
     public static class ContainsExprAggregator

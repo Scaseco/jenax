@@ -1,7 +1,7 @@
 package org.aksw.jenax.sparql.qudtlib;
 
-import io.github.qudtlib.Qudt;
-import io.github.qudtlib.model.Unit;
+import java.math.BigDecimal;
+
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
@@ -10,7 +10,8 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sys.JenaSystem;
 
-import java.math.BigDecimal;
+import io.github.qudtlib.Qudt;
+import io.github.qudtlib.model.Unit;
 
 public class Functions {
     static {

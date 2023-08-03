@@ -20,6 +20,11 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-datapaths</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-propertypaths</artifactId>
 		</dependency>
 
@@ -42,7 +47,6 @@
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>subgraph-isomorphism-index-jgrapht</artifactId>
 		</dependency>
-		
 	</dependencies>
 
 	<!-- <build> -->

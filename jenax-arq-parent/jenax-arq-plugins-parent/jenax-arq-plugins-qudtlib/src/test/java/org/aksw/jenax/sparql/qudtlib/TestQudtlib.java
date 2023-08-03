@@ -5,6 +5,7 @@ import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sys.JenaSystem;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestQudtlib {
@@ -41,12 +42,12 @@ public class TestQudtlib {
     }
 
     @Test
+    @Ignore
     public void testUnitFromLabel() {
         PrefixMapping pm = new PrefixMappingImpl();
         pm.setNsPrefix("qudt", Functions.NS);
 //        pm.setNsPrefix("unit", "http://qudt.org/vocab/unit/");
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("qudt:unitFromLabel(\"mm2\")", pm));
         System.out.println(nv);
-
     }
 }

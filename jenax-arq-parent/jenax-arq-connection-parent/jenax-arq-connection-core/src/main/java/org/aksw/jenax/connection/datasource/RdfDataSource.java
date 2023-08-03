@@ -31,7 +31,8 @@ public interface RdfDataSource
 
     /**
      * Return a connection-less QueryExecutionFactory view of this data source.
-     * Every QueryExecution will obtain a fresh connection using {@link #getConnection()} upon execution.
+     * Every QueryExecution created with the returned factory will obtain a fresh
+     * connection using {@link #getConnection()} upon execution.
      */
     default QueryExecutionFactoryQuery asQef() {
         return QueryExecutionFactories.of(this);

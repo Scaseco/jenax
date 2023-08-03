@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.aksw.facete.v3.api.AliasedPath;
 import org.aksw.facete.v3.api.Direction;
+import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Property;
@@ -35,6 +36,7 @@ public interface TraversalNode<
     //BgpNode model();
 
 
+    @Deprecated // All steps are optional; adding a 'bound' constraint to a paths makes them mandatory!
     default boolean canOpt() {
         return false;
     }
@@ -44,6 +46,7 @@ public interface TraversalNode<
      *
      * @return
      */
+    @Deprecated
     default M opt() {
         throw new UnsupportedOperationException("Optional traversal not implemented or not overridden");
     }
@@ -89,6 +92,11 @@ public interface TraversalNode<
 
     default M step(Property p, Direction direction) {
         return BACKWARD.equals(direction) ? bwd(p) : fwd(p);
+    }
+
+    default N step(FacetStep step) {
+        // TODO We implicitly assume 'TARGET' for step.getTargetComponent() - validate!
+        return step(step.getNode(), Direction.ofFwd(step.getDirection().isForward())).viaAlias(step.getAlias());
     }
 
 //	default N step(AliasedPathStep aliasedStep) {

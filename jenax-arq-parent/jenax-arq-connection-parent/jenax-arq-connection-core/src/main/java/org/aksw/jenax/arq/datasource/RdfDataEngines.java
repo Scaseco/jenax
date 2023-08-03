@@ -9,6 +9,7 @@ import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
 import org.aksw.jenax.connection.dataengine.RdfDataEngineDecoratorBase;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -96,6 +97,10 @@ public class RdfDataEngines {
                 : new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
 
         return result;
+    }
+
+    public static RdfDataEngine of(Dataset dataset) {
+        return RdfDataEngineFromDataset.create(dataset, true);
     }
 
     /**

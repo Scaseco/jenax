@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.path.core.Path;
 import org.aksw.commons.util.Directed;
 import org.aksw.facete.v3.api.traversal.TraversalNode;
+import org.aksw.jenax.path.core.FacetPath;
+import org.aksw.jenax.path.core.FacetPathOps;
+import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
@@ -58,6 +62,23 @@ public interface FacetNode
         return result;
     }
 
+
+    // Newer API intended to supersede path()
+    default FacetPath facetPath() {
+        List<Directed<FacetNode>> list = path();
+        List<FacetStep> steps = list.stream().map(dfn -> {
+            boolean isFwd = dfn.isForward();
+            FacetNode fn = dfn.getValue();
+            FacetStep step = fn.reachingFacetStep();
+
+            if (!isFwd) {
+                step = step.toggleDirection();
+            }
+            return step;
+        }).collect(Collectors.toList());
+        return FacetPath.newAbsolutePath(steps);
+    }
+
     FacetedQuery query();
 
     /**
@@ -101,8 +122,53 @@ public interface FacetNode
     FacetNode parent();
 
 
+    /**
+     * Create a faceted query over the values of this node without constraining the set of matched items of the outer query.
+     * This essentially allows for placing filters into OPTIONAL blocks:
+     *
+     * SELECT ?person ?city
+     * {
+     *   ?person hasAdress ?address
+     *   OPTIONAL {
+     *     ?address hasCountry ?country . FILTER(?country IN (...))
+     *     ?address hasCity ?city . # Projected path with exists constraint on the sub facet
+     *   }
+     * }
+     *
+     *
+     *
+     */
+    // FacetNode subFacetNode();
+
+    // AliasedStep reachingStep();
     Direction reachingDirection();
     Node reachingPredicate();
+    String reachingAlias();
+    Node targetComponent();
+
+    default FacetStep reachingFacetStep() {
+        Direction d = reachingDirection();
+        Node p = reachingPredicate();
+        String a = reachingAlias();
+        Node c = targetComponent();
+        Node cc = c == null ? FacetStep.TARGET : c; // TODO targetComponent should never be null but right now it can happen
+        FacetStep result = FacetStep.of(p, org.aksw.commons.util.direction.Direction.ofFwd(d.isForward), a, cc);
+        return result;
+    }
+
+    default FacetNode resolve(Path<FacetStep> facetPath) {
+        FacetNode tmp = facetPath.isAbsolute() ? this.root() : this;
+        for (FacetStep step : facetPath.getSegments()) {
+            if (FacetPathOps.PARENT.equals(step)) {
+                tmp = tmp.parent();
+            } else if (FacetPathOps.SELF.equals(step)) {
+                // Nothing to do
+            } else {
+                tmp = tmp.step(step);
+            }
+        }
+        return tmp;
+    }
 
     BinaryRelation getReachingRelation();
 
@@ -120,7 +186,7 @@ public interface FacetNode
      */
 //	Set<FacetConstraint> constraints();
 
-    ConstraintFacade<? extends FacetNode> constraints();
+    ConstraintFacade<? extends FacetNode> enterConstraints(); // TODO Rename to enterConstraints()
 
     //Concept toConcept();
 

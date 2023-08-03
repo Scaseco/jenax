@@ -496,6 +496,21 @@ public class ElementUtils {
         return result;
     }
 
+    public static Element flatMerge(Element... elts) {
+        return flatMerge(Arrays.asList(elts));
+    }
+
+    public static Element flatMerge(Iterable<Element> elts) {
+        List<Element> tmp = new ArrayList<>();
+        for (Element elt : elts) {
+            List<Element> contrib = ElementUtils.toElementList(elt);
+            tmp.addAll(contrib);
+        }
+        Element result = ElementUtils.groupIfNeeded(tmp);
+        return result;
+    }
+
+
     public static ElementData createElementData(Collection<Var> vars, Collection<Binding> rows) {
         ElementData result = new ElementData();
         vars.forEach(result::add);

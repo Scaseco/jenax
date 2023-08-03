@@ -3,7 +3,7 @@ package org.aksw.facete.v3.api;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.aksw.facete.v3.bgp.api.BinaryRelation;;
+import org.aksw.jenax.sparql.relation.api.BinaryRelation;;
 
 /**
  * What should be the nature of this class?

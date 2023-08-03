@@ -198,7 +198,7 @@ public class FacetNodeImpl
     }
 
     @Override
-    public ConstraintFacade<? extends FacetNodeResource> constraints() {
+    public ConstraintFacade<? extends FacetNodeResource> enterConstraints() {
         return new ConstraintFacadeImpl<FacetNodeResource>(this);
     }
 
@@ -296,4 +296,17 @@ public class FacetNodeImpl
         Direction result = parent == null ? null : parent.getDirection();
         return result;
     }
+
+    @Override
+    public String reachingAlias() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Node targetComponent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
