@@ -192,7 +192,8 @@ public class RDFConnectionModular implements RDFConnection {
     }
     @Override
     public QueryExecutionBuilder newQuery() {
-        throw new UnsupportedOperationException();
+        return queryConnection.newQuery();
+        // throw new UnsupportedOperationException();
     }
 }
 
