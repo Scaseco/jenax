@@ -469,6 +469,9 @@ public class SparqlStmtUtils {
         } else if (q.isAskType()) {
             boolean v = qe.execAsk();
             result = new SPARQLResultEx(v);
+        } else if (q.isDescribeType()) {
+            Iterator<Triple> it = qe.execDescribeTriples();
+            result = SPARQLResultEx.createTriples(it, qe::close);
         } else {
             throw new RuntimeException("Unsupported query type");
         }
