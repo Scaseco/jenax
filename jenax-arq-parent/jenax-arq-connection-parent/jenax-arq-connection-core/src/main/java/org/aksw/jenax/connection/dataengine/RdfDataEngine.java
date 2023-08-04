@@ -16,23 +16,23 @@ public interface RdfDataEngine
     extends RdfDataSource, AutoCloseable
 {
 
-	/** Return a new RdfDataEngine whose {@link #getConnection()} method has the given
-	 *  wrapping applied */
-	default RdfDataEngine applyConnectionWrapper(Function<RDFConnection, RDFConnection> wrapper) {
-		RdfDataEngine self = this;
-		return new RdfDataEngine() {
+    /** Return a new RdfDataEngine whose {@link #getConnection()} method has the given
+     *  wrapping applied */
+    default RdfDataEngine applyConnectionWrapper(Function<RDFConnection, RDFConnection> wrapper) {
+        RdfDataEngine self = this;
+        return new RdfDataEngine() {
 
-			@Override
-			public RDFConnection getConnection() {
-				RDFConnection raw = self.getConnection();
-				RDFConnection result = wrapper.apply(raw);
-				return result;
-			}
+            @Override
+            public RDFConnection getConnection() {
+                RDFConnection raw = self.getConnection();
+                RDFConnection result = wrapper.apply(raw);
+                return result;
+            }
 
-			@Override
-			public void close() throws Exception {
-				self.close();
-			}
-		};
-	}
+            @Override
+            public void close() throws Exception {
+                self.close();
+            }
+        };
+    }
 }
