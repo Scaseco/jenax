@@ -5,11 +5,10 @@ import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
 import org.aksw.jenax.stmt.core.*;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
-import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.atlas.web.AcceptList;
+import org.apache.jena.atlas.web.MediaRange;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.*;
 import org.apache.jena.riot.resultset.ResultSetWriter;
@@ -33,7 +32,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.*;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -56,10 +54,9 @@ public abstract class SparqlEndpointBase {
 
     protected abstract RDFConnection getConnection();
 
-    protected void executeAsync(AsyncResponse asyncResponse, List<MediaType> acceptHeaders, String queryString, String updateString) {
-        List<String> acceptableContentTypes = acceptHeaders.stream()
-                .map(MediaType::toString).collect(Collectors.toList());
-        SparqlResultFmts fmts = SparqlResultFmtsImpl.forContentTypes(acceptableContentTypes);
+    protected void executeAsync(AsyncResponse asyncResponse, String acceptHeaders, String queryString, String updateString) {
+        AcceptList acceptList = new AcceptList(acceptHeaders);
+        SparqlResultFmts fmts = SparqlResultFmtsImpl.forContentTypes(acceptList);
         processStmtAsync(asyncResponse, queryString, updateString, fmts);
     }
 
@@ -71,7 +68,7 @@ public abstract class SparqlEndpointBase {
             @Context HttpHeaders headers,
             @FormParam("query") String queryString,
             @FormParam("update") String updateStr) {
-        executeAsync(asyncResponse, headers.getAcceptableMediaTypes(), queryString, updateStr);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateStr);
     }
 
 
@@ -82,7 +79,7 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             String queryString) {
-        executeAsync(asyncResponse, headers.getAcceptableMediaTypes(), queryString, null);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, null);
     }
 
     @GET
@@ -92,7 +89,7 @@ public abstract class SparqlEndpointBase {
             @Context HttpHeaders headers,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-        executeAsync(asyncResponse, headers.getAcceptableMediaTypes(), queryString, updateString);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateString);
     }
 
 
@@ -300,7 +297,7 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             String updateString) {
-        executeAsync(asyncResponse, headers.getAcceptableMediaTypes(), null, updateString);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), null, updateString);
     }
 
 

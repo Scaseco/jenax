@@ -1,6 +1,8 @@
 package org.aksw.jenax.arq.util.fmt;
 
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
+import org.apache.jena.atlas.web.AcceptList;
+import org.apache.jena.atlas.web.MediaRange;
 import org.apache.jena.atlas.web.MediaType;
 import org.apache.jena.riot.*;
 import org.apache.jena.riot.resultset.ResultSetLang;
@@ -8,8 +10,6 @@ import org.apache.jena.riot.system.StreamRDFWriter;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.apache.jena.atlas.iterator.Iter.findFirst;
 
 /**
  * Class for providing (default) mappings for the result types defined by SPARQL
@@ -33,12 +33,13 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 	private static List<SparqlResultFmtsImpl> sisterFormats = new ArrayList<>();
 	static {
 		//sisterFormats.add(new SparqlResultFmtsImpl(unknown, askResult, bindings, triples, quads));
-		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_XML, ResultSetLang.RS_XML, ResultSetLang.RS_XML, RDFFormat.RDFXML_PLAIN, RDFFormat.NQ));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_XML, ResultSetLang.RS_XML, ResultSetLang.RS_XML, RDFFormat.RDFXML_PLAIN, RDFFormat.TRIX));
 		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.JSONLD, RDFFormat.JSONLD));
 		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.RDFJSON, RDFFormat.JSONLD));
 		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, ResultSetLang.RS_JSON, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS));
 		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_TSV, ResultSetLang.RS_TSV, ResultSetLang.RS_TSV, RDFFormat.NT, RDFFormat.NQ));
 		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_CSV, ResultSetLang.RS_CSV, ResultSetLang.RS_CSV, RDFFormat.NT, RDFFormat.NQ));
+		sisterFormats.add(new SparqlResultFmtsImpl(ResultSetLang.RS_Text, ResultSetLang.RS_Text, ResultSetLang.RS_Text, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS));
 	}
 
 	public SparqlResultFmtsImpl(Lang unknown, Lang askResult, Lang bindings, RDFFormat triples, RDFFormat quads) {
@@ -51,32 +52,32 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 	}
 
 	public static SparqlResultFmts createDefault() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_JSON,
+		return new SparqlResultFmtsImpl(Lang.JSONLD, ResultSetLang.RS_JSON,
 				ResultSetLang.RS_JSON, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS);
 	}
 
 	public static SparqlResultFmts createJson() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_JSON,
+		return new SparqlResultFmtsImpl(Lang.JSONLD11, ResultSetLang.RS_JSON,
 				ResultSetLang.RS_JSON, RDFFormat.JSONLD11, RDFFormat.JSONLD11);
 	}
 
 	public static SparqlResultFmts createXml() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_XML,
-				ResultSetLang.RS_XML, RDFFormat.TRIX, null);
+		return new SparqlResultFmtsImpl(Lang.RDFXML, ResultSetLang.RS_XML,
+				ResultSetLang.RS_XML, RDFFormat.RDFXML, RDFFormat.TRIX);
 	}
 
 	public static SparqlResultFmts createTxt() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_Text,
+		return new SparqlResultFmtsImpl(Lang.TRIG, ResultSetLang.RS_Text,
 				ResultSetLang.RS_Text, RDFFormat.TURTLE_BLOCKS, RDFFormat.TRIG_BLOCKS);
 	}
 
 	public static SparqlResultFmts createCsv() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_CSV,
+		return new SparqlResultFmtsImpl(Lang.NQ, ResultSetLang.RS_CSV,
 				ResultSetLang.RS_CSV, RDFFormat.NT, RDFFormat.NQ);
 	}
 
 	public static SparqlResultFmts createTsv() {
-		return new SparqlResultFmtsImpl(null, ResultSetLang.RS_TSV,
+		return new SparqlResultFmtsImpl(Lang.NQ, ResultSetLang.RS_TSV,
 				ResultSetLang.RS_TSV, RDFFormat.NT, RDFFormat.NQ);
 	}
 
@@ -132,20 +133,43 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 		}
 	}
 
-	public static SparqlResultFmts forContentTypes(List<String> acceptableContentTypes) {
+	public static SparqlResultFmts forContentTypes(AcceptList acceptableContentTypes) {
+		// the purpose of this loop is to "inject" the raw sparql-result-set content types as fake Accept headers
+		// when the regular generic CTs are requested (e.g. application/xml)
+		List<MediaRange> mrList = new ArrayList<>(acceptableContentTypes.entries());
+		acceptableContentTypes.entries().forEach(e -> {
+			String origContentTypeStr = e.getContentTypeStr();
+			Lang lang = WebContent.contentTypeToLangResultSet(origContentTypeStr);
+			if (lang != null) {
+				String contentTypeStr = lang.getContentType().getContentTypeStr();
+				if (acceptableContentTypes.entries().stream().noneMatch(f -> f.getContentTypeStr().equals(contentTypeStr))) {
+					MediaRange mr = new MediaRange(e.toHeaderString().replace(origContentTypeStr, contentTypeStr));
+					mrList.add(mr);
+				}
+			}
+		});
+		AcceptList acceptList = new AcceptList(mrList);
+
 		SparqlResultFmtsImpl r = (SparqlResultFmtsImpl) SparqlResultFmtsImpl.createDefault();
-		List<Lang> acceptableLangs = acceptableContentTypes.stream().map(RDFLanguages::contentTypeToLang)
-				.filter(Objects::nonNull).collect(Collectors.toList());
+		List<Lang> acceptableRdfLangs = acceptableContentTypes.entries().stream()
+				.map(MediaType::getContentTypeStr)
+				.map(RDFLanguages::contentTypeToLang)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
-		List<Lang> resultSetFormats = RDFLanguagesEx.getResultSetFormats();
-
-		r.bindings = findFirst(acceptableLangs.iterator(), resultSetFormats::contains).orElse(r.bindings);
-		setSisterDefaults(r, Slot.Bindings, EnumSet.of(Slot.Unknown, Slot.AskResult, Slot.Triples, Slot.Quads));
-		r.askResult = acceptableLangs.stream().findFirst().orElse(r.askResult);
-		r.unknown = acceptableLangs.stream().findFirst().orElse(null);
+		List<Lang> resultSetFormats = new ArrayList<>();
+		resultSetFormats.addAll(RDFLanguagesEx.getResultSetFormats());
+		// the text/plain result set is not in RDFLanguages
+		resultSetFormats.add(ResultSetLang.RS_Text);
 
 		List<Lang> quadLangs = RDFLanguagesEx.getQuadLangs();
 		List<Lang> tripleLangs = RDFLanguagesEx.getTripleLangs();
+
+		r.bindings = RDFLanguagesEx.findLangMatchingAcceptList(acceptList, resultSetFormats, r.bindings);
+		setSisterDefaults(r, Slot.Bindings, EnumSet.of(Slot.Unknown, Slot.AskResult, Slot.Triples, Slot.Quads));
+		r.askResult = RDFLanguagesEx.findLangMatchingAcceptList(acceptList, resultSetFormats, r.askResult);
+		r.unknown = acceptableRdfLangs.stream().findFirst().orElse(r.unknown);
+
 		Collection<RDFFormat> streamFormats = StreamRDFWriter.registered();
 		Collection<RDFFormat> quadFormats = RDFWriterRegistry.registeredDatasetFormats();
 		Collection<RDFFormat> tripleFormats = RDFWriterRegistry.registeredGraphFormats();
@@ -154,14 +178,13 @@ public class SparqlResultFmtsImpl implements SparqlResultFmts {
 		boolean triplesSet = false;
 
 		search:
-		for (String mt:
-		acceptableContentTypes) {
-			MediaType parsed = MediaType.create(mt);
-			Lang lang = RDFLanguages.contentTypeToLang(parsed.getContentTypeStr());
+		for (MediaType mt:
+				acceptableContentTypes.entries()) {
+			Lang lang = RDFLanguages.contentTypeToLang(mt.getContentTypeStr());
 			if (lang == null)
 				continue search;
 
-			String variant = parsed.getParameter("variant");
+			String variant = mt.getParameter("variant");
 			{
 				RDFFormat streamDefaultFormat = StreamRDFWriter.defaultSerialization(lang);
 				RDFFormatVariant streamDefaultFormatVariant = streamDefaultFormat != null ?

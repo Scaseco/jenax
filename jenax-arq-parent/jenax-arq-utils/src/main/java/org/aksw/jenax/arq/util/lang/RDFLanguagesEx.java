@@ -1,19 +1,13 @@
 package org.aksw.jenax.arq.util.lang;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.jena.atlas.web.AcceptList;
 import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.atlas.web.MediaType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
@@ -28,6 +22,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
+import static org.apache.jena.atlas.iterator.Iter.findFirst;
 
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
@@ -186,6 +181,27 @@ public class RDFLanguagesEx {
         return result;
     }
 
+    public static List<String> getPrimaryContentTypes(Iterable<Lang> langs) {
+        List<String> cts = new ArrayList<>();
+        for (Lang l:
+        langs) {
+            ContentType contentType = l.getContentType();
+            if (contentType != null) {
+                cts.add(contentType.getContentTypeStr());
+            }
+        }
+        return cts;
+    }
+
+    public static Set<String> getAllContentTypes(Iterable<Lang> langs) {
+        Set<String> result = new LinkedHashSet<>();
+        for (Lang l:
+        langs) {
+            result.addAll(getAllContentTypes(l));
+        }
+        return result;
+    }
+
 
     /**
      * Simple helper to check whether any of a lang's labels match a given one.
@@ -250,6 +266,23 @@ public class RDFLanguagesEx {
                 .orElseThrow(() -> new RuntimeException("No lang found for label " + label));
 
         return result;
+    }
+
+    public static Lang findLangMatchingAcceptList(AcceptList acceptableContentTypes, List<Lang> resultSetFormats, Lang fallback) {
+        MediaType rsMatch = AcceptList.match(acceptableContentTypes, AcceptList.create(
+                getPrimaryContentTypes(resultSetFormats)
+                .toArray(String[]::new)));
+        if (rsMatch == null) {
+            rsMatch = AcceptList.match(acceptableContentTypes, AcceptList.create(
+                    getAllContentTypes(resultSetFormats)
+                    .toArray(String[]::new)));
+        }
+        if (rsMatch != null) {
+            MediaType finalRsMatch = rsMatch;
+            return findFirst(resultSetFormats.iterator(), p -> matchesContentType(p,
+                    finalRsMatch.getContentTypeStr())).orElse(fallback);
+        }
+        return fallback;
     }
 
 
