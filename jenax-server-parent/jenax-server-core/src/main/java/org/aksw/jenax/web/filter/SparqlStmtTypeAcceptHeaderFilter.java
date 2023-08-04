@@ -34,7 +34,6 @@ import org.apache.jena.fuseki.DEF;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.WebContent;
 
-
 /**
  * Adjust wildcard accept header with a specific one based on the sparql query / update type
  */
@@ -151,7 +150,6 @@ public class SparqlStmtTypeAcceptHeaderFilter
             byte[] bytes = payload.getBytes();
             req = new RepeatablePayloadReadWrapper(req, StandardCharsets.UTF_8, () -> new ByteArrayInputStream(bytes));
         }
-
 
         chain.doFilter(req, res);
     }

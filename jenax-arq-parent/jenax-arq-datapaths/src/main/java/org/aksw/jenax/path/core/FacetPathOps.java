@@ -14,6 +14,7 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.NodeValue;
 
 import com.google.common.collect.Iterators;
@@ -81,15 +82,21 @@ public class FacetPathOps
 
     /** Convert an aliased step to a sequence of nodes. The nodes are used for serialization. */
     public static List<Node> toNodes(FacetStep step) {
-        List<Node> result = new ArrayList<>(3);
+        List<Node> result = new ArrayList<>(4);
         result.add(step.getNode());
 
         if(!step.isForward()) {
             result.add(NodeValue.FALSE.asNode());
         }
 
-        if (step.getAlias() != null) {
-            result.add(NodeFactory.createURI(step.getAlias()));
+        String alias = step.getAlias();
+        if (alias != null && !alias.isEmpty()) {
+            result.add(NodeFactory.createLiteral(alias));
+        }
+
+        Node targetComponent = step.getTargetComponent();
+        if (!FacetStep.isTarget(targetComponent)) {
+            result.add(targetComponent);
         }
 
         return result;
@@ -138,13 +145,20 @@ public class FacetPathOps
             Node p;
             boolean isFwd = true;
             String alias = null;
+            Var targetComponent = FacetStep.TARGET;
 
-            if (!current.isLiteral()) {
+            if (current.isURI()) {
                 p = current;
                 current = Iterators.getNext(it, null);
             } else {
-                throw new RuntimeException("Unexpected literal in path (this serialization does not support literals for transitions). got: " + current);
+                throw new RuntimeException("Property URI expected. got: " + current);
             }
+
+//            if (!current.isLiteral()) {
+//                p = current;
+//            } else {
+//                throw new RuntimeException("Unexpected literal in path (this serialization does not support literals for transitions). got: " + current);
+//            }
 
             if (current != null && current.isLiteral()) {
                 NodeValue nv = NodeValue.makeNode(current);
@@ -162,7 +176,15 @@ public class FacetPathOps
                 }
             }
 
-            FacetStep step = new FacetStep(p, isFwd, alias);
+            if (current != null && current.isLiteral()) {
+                if (current.isVariable()) {
+                    targetComponent = (Var)current;
+                    // alias = nv.getString();
+                    current = Iterators.getNext(it, null);
+                }
+            }
+
+            FacetStep step = new FacetStep(p, isFwd, alias, targetComponent);
             steps.add(step);
         }
 
