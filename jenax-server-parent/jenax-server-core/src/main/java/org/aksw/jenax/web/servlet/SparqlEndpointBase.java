@@ -458,8 +458,11 @@ public abstract class SparqlEndpointBase {
 
 				SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
 				if (sr.isBoolean()) {
-					boolean v = sr.getBooleanResult();
-					rsWriter.write(out, v, cxt);
+                    boolean v = sr.getBooleanResult();
+                    rsWriter.write(out, v, cxt);
+                } else if (sr.isJson()) {
+                    // TODO: set proper json Content-type
+                    ResultSetFormatter.output(out, sr.getJsonItems());
 				} else {
 					rsWriter.write(out, sr.getResultSet(), cxt);
 				}
