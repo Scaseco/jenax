@@ -32,6 +32,27 @@ public interface FacetNode
     extends TraversalNode<FacetNode, FacetDirNode, FacetMultiNode>, Castable
 {
 
+    default FacetNode traverse(FacetPath path) {
+        return goTo(this, path);
+    }
+
+    static FacetNode goTo(FacetNode start, FacetPath path) {
+        FacetNode current = path.isAbsolute() ? start.root() : start;
+        for (FacetStep step : path.getSegments()) {
+            Direction dir = Direction.ofFwd(step.isForward());
+            Node node = step.getNode();
+            FacetMultiNode fmn = current.step(node, dir);
+
+            String alias = step.getAlias();
+            if (alias == null || alias.isEmpty()) {
+                current = fmn.one();
+            } else {
+                current = fmn.viaAlias(alias);
+            }
+        }
+        return current;
+    }
+
     /**
      * TODO Maybe remove this method; do we really need it?
      *

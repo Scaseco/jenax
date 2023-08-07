@@ -101,7 +101,11 @@ public class TreeQueryNodeImpl
 
     @Override
     public FacetPath getFacetPath() {
-        FacetPath result = getParent() == null ? FacetPath.newRelativePath() : parent.getFacetPath().resolve(reachingStep());
+        TreeQueryNode p = getParent();
+        FacetPath result = p == null
+                // ? FacetPath.newRelativePath()
+                ? FacetPath.newAbsolutePath()
+                : parent.getFacetPath().resolve(reachingStep());
         return result;
     }
 

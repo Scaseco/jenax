@@ -1,5 +1,6 @@
 package org.aksw.facete.v3.api.traversal;
 
+import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -30,7 +31,7 @@ public interface TraversalDirNode<N, M extends TraversalMultiNode<N>> {
     }
 
     default M via(Resource property) {
-        return via(property, (Node)null);
+        return via(property, FacetStep.TARGET);
     }
 
     M via(Resource property, Node component);

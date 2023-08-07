@@ -5,6 +5,7 @@ import java.util.Map;
 import org.aksw.facete.v3.bgp.api.BgpDirNode;
 import org.aksw.facete.v3.bgp.api.BgpMultiNode;
 import org.aksw.facete.v3.bgp.api.BgpNode;
+import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
@@ -30,7 +31,7 @@ public class BgpDirNodeImpl
      */
     @Override
     public BgpMultiNode via(Resource property, Node component) {
-        if (component != null) {
+        if (component != null && !FacetStep.isTarget(component)) {
             throw new  UnsupportedOperationException("references to specific components not yet fully implemented");
             // TODO We need for each component a Map<Resource, BgpMultiNode>
         }

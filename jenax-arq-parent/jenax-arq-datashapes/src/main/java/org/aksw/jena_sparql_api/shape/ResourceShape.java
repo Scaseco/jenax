@@ -179,6 +179,7 @@ public class ResourceShape {
     }
 
     public static void collectConcepts(Collection<Concept> result, ResourceShape source, Generator<Var> vargen, boolean includeGraph) {
+        // Concept baseConcept = new Concept(null, Vars.x);
         Concept baseConcept = new Concept((Element)null, Vars.x);
         collectConcepts(result, baseConcept, source, vargen, includeGraph);
     }

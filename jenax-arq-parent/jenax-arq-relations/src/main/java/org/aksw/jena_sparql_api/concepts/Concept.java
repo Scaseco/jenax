@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.concepts;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -244,8 +245,8 @@ public class Concept
 
     public Concept(Element element, Var var) {
         super();
-        this.element = element;
-        this.var = var;
+        this.element = element; // Objects.requireNonNull(element); ResourceShape passes null as an element - might need to be changed
+        this.var = Objects.requireNonNull(var);
     }
 
     public Concept(List<Element> elements, Var var) {

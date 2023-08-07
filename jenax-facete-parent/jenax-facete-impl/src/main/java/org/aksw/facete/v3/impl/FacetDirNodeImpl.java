@@ -21,6 +21,7 @@ import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.impl.FacetedQueryGenerator;
 import org.aksw.jena_sparql_api.utils.views.map.MapVocab;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
@@ -79,13 +80,14 @@ public class FacetDirNodeImpl
 
     @Override
     public FacetMultiNode via(Resource property, Node component) {
-        if (component != null) {
+        if (component != null && !FacetStep.isTarget(component)) {
             throw new UnsupportedOperationException("Components not supported yet");
         }
 
         return new FacetMultiNodeImpl(parent, state.via(property));
         //return new FacetMultiNodeImpl(parent, property, isFwd);
     }
+
 
     @Override
     public FacetedDataQuery<RDFNode> facets(boolean includeAbsent) {
