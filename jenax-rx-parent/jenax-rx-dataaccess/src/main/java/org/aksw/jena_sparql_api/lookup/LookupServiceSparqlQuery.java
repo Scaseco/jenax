@@ -43,6 +43,9 @@ interface TraitConnectionBuilder {
 }
 
 
+/**
+ * LookupService for SPARQL SELECT queries
+ */
 public class LookupServiceSparqlQuery
     implements LookupService<Node, Table>
 {

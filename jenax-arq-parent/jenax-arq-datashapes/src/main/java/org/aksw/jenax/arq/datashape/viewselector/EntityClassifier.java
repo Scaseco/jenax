@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.RelationImpl;
@@ -41,6 +42,7 @@ import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -298,6 +300,11 @@ public class EntityClassifier {
 
     public static void registerNodeShape(EntityClassifier entityClassifier, ShNodeShape nodeShape) {
         Node nodeShapeNode = nodeShape.asNode();
+        
+        if (nodeShapeNode.isBlank()) {
+        	nodeShapeNode = ExprTransformVirtualBnodeUris.bnodeToIri(nodeShapeNode);
+        }
+        
         // getPropertyShapes(nodeShape);
 
         ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);

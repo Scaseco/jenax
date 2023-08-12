@@ -21,6 +21,8 @@ import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.ext.com.google.common.collect.Maps;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -315,6 +317,11 @@ public class ExprTransformVirtualBnodeUris
 //
 //		NodeValue result = fi.exec(BindingFactory.binding(), el, udfUri, env);
         return result;
+    }
+    
+    public static Node bnodeToIri(Node node) {
+    	Node result = node.isBlank() ? NodeFactory.createURI("bnode://" + node.getBlankNodeLabel()) : node;
+    	return result;
     }
 
     // x = <bnode://foo> --> bidOf(?x) = decodeBnodeIri(<bnode://foo>)

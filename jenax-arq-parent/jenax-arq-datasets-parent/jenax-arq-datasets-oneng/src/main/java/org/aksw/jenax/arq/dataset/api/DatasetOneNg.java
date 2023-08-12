@@ -13,7 +13,8 @@ import org.apache.jena.sparql.core.Quad;
  * Typical use is for event streams where each event is encoded as a named graph.
  *
  * Whether a default graph may exist instead of or in addition to a named graph
- * is (currently) unspecified.
+ * is (currently) unspecified. It is recommended to only use this class for
+ * named graphs.
  *
  * @author raven
  *
