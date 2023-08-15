@@ -68,7 +68,8 @@ public class ListFromRDFList
     @Override
     public boolean addAll(Collection<? extends RDFNode> c) {
         ensureNonNull();
-        return super.addAll(c);
+        return addAll(0, c);
+        // return super.addAll(c);
     }
 
     public ListFromRDFList(Resource subject, Property property) {
@@ -103,18 +104,55 @@ public class ListFromRDFList
     }
 
     @Override
+    public boolean addAll(int index, Collection<? extends RDFNode> c) {
+        return addAll(index, c.iterator());
+    }
+
+    public boolean addAll(int index, Iterator<? extends RDFNode> it) {
+        boolean result = it.hasNext();
+        RDFList list = getList();
+        RDFList parentCell = findParent(list, index);
+
+        // If this list is empty then consume one item from the iterator and use it to initialize the list
+        if (parentCell == null) {
+            if (it.hasNext()) {
+                RDFNode item = it.next();
+                add(item);
+                parentCell = getList();
+            }
+        }
+
+        // Append the remaining items (if any)
+        while (it.hasNext()) {
+            RDFNode item = it.next();
+
+            @SuppressWarnings("null")
+            RDFList bak = parentCell.getTail();
+
+            Resource newCellRaw = list.getModel().createResource(); //.as(RDFList.class);
+            newCellRaw.addProperty(RDF.first, item);
+            newCellRaw.addProperty(RDF.rest, bak);
+
+            RDFList newCell = newCellRaw.as(RDFList.class);
+            parentCell.setTail(newCell);
+            parentCell = newCell;
+        }
+
+        return result;
+    }
+
+    @Override
     public void add(int index, RDFNode element) {
         RDFList list = getList();
-        RDFList pos = findParent(list, index);
+        RDFList parentCell = findParent(list, index);
 
-        if(pos == null) {
-            RDFList newPos = list.cons(element);
-            ResourceUtils.setProperty(s, p, newPos);
+        if(parentCell == null) {
+            RDFList newCell = list.cons(element);
+            ResourceUtils.setProperty(s, p, newCell);
         } else {
-            RDFList remainder = pos.cons(element);
-            remainder.setTail(pos.getTail());
-            pos.setTail(remainder);
-
+            RDFList remainder = parentCell.cons(element);
+            remainder.setTail(parentCell.getTail());
+            parentCell.setTail(remainder);
         }
     }
 
