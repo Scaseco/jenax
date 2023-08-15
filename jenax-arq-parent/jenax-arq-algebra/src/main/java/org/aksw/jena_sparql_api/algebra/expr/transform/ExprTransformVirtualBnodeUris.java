@@ -35,10 +35,16 @@ import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_Function;
+import org.apache.jena.sparql.expr.E_NotEquals;
+import org.apache.jena.sparql.expr.E_NotOneOf;
+import org.apache.jena.sparql.expr.E_OneOf;
+import org.apache.jena.sparql.expr.E_OneOfBase;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprFunction2;
+import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransform;
@@ -165,10 +171,9 @@ import org.slf4j.LoggerFactory;
 public class ExprTransformVirtualBnodeUris
     extends ExprTransformCopy
 {
-
-    //parseBid()
-    //unparseBid()
-    //bidOf(?x)
+//  parseBid()
+//  unparseBid()
+//  bidOf(?x)
 
 
 //	protected Function<? super Expr, ? extends Expr> bnodeLabelFn = null;
@@ -244,6 +249,53 @@ public class ExprTransformVirtualBnodeUris
 //        return result;
 //    }
 
+    @Override
+    public Expr transform(ExprFunctionN func, ExprList args) {
+        Expr result = null;
+
+        if (func instanceof E_OneOfBase) {
+            E_OneOfBase e = (E_OneOfBase)func;
+            Expr lhs = e.getLHS();
+            ExprList rhs = e.getRHS();
+
+            List<Expr> bnodeConsts = rhs.getList().stream().filter(x -> x.isConstant() && isBnodeIri(x.getConstant())).collect(Collectors.toList());
+            if (!bnodeConsts.isEmpty()) {
+                List<Expr> exprs = new ArrayList<>();
+                List<Expr> nonBnodes = rhs.getList().stream().filter(x -> !bnodeConsts.contains(x)).collect(Collectors.toList());
+
+                if (func instanceof E_OneOf) {
+                    if (!nonBnodes.isEmpty()) {
+                        exprs.add(new E_OneOf(lhs, new ExprList(nonBnodes)));
+                    }
+                    for (Expr bnodeConst : bnodeConsts) {
+                        E_Equals rawEq = new E_Equals(lhs, bnodeConst);
+                        Expr eq = transform(rawEq, rawEq.getArg1(), rawEq.getArg2());
+                        exprs.add(eq);
+                    }
+                    result = org.aksw.jenax.arq.util.expr.ExprUtils.orifyBalanced(exprs);
+                } else if (func instanceof E_NotOneOf) {
+                    if (!nonBnodes.isEmpty()) {
+                        exprs.add(new E_NotOneOf(lhs, new ExprList(nonBnodes)));
+                    }
+                    for (Expr bnodeConst : bnodeConsts) {
+                        E_NotEquals rawEq = new E_NotEquals(lhs, bnodeConst);
+                        Expr eq = transform(rawEq, rawEq.getArg1(), rawEq.getArg2());
+                        exprs.add(eq);
+                    }
+                    result = org.aksw.jenax.arq.util.expr.ExprUtils.andifyBalanced(exprs);
+                } else {
+                    throw new IllegalStateException("Should never come here");
+                }
+            }
+        }
+
+        if (result == null) {
+            result = func.copy(args);
+        }
+
+        return result;
+    }
+
 
     @Override
     public Expr transform(ExprFunction2 func, Expr a, Expr b) {
@@ -318,26 +370,48 @@ public class ExprTransformVirtualBnodeUris
 //		NodeValue result = fi.exec(BindingFactory.binding(), el, udfUri, env);
         return result;
     }
-    
+
     public static Node bnodeToIri(Node node) {
-    	Node result = node.isBlank() ? NodeFactory.createURI("bnode://" + node.getBlankNodeLabel()) : node;
-    	return result;
+        Node result = node.isBlank() ? NodeFactory.createURI("bnode://" + node.getBlankNodeId().getLabelString()) : node; // node.getBlankNodeLabel()
+        return result;
+    }
+
+//    public Node forceBnodeIri(Node node) {
+//        vel.add(v, expandMacro(macros, forceBnodeIriFnIri, new ExprVar(map.get(v))));
+//    }
+
+    public boolean isBnodeIri(NodeValue in) {
+        // NodeValue in = NodeValue.makeNode(node);
+        NodeValue out = eval(macros, isBnodeIriFnIri, in);
+        boolean result = out.getBoolean();
+        return result;
+    }
+
+    public NodeValue decodeBnodeIriFn(NodeValue in) {
+        NodeValue bnodeLabel;
+        try {
+            bnodeLabel = eval(macros, decodeBnodeIriFnIri, in);
+        } catch(ExprEvalException e) {
+            // FIXME We should induce a type error here
+            bnodeLabel = NodeValue.FALSE;
+        }
+        return bnodeLabel;
     }
 
     // x = <bnode://foo> --> bidOf(?x) = decodeBnodeIri(<bnode://foo>)
     public ExprFunction2 trySubst(ExprFunction2 func, Expr lhs, Expr b, boolean swapped) {
         NodeValue rhs = b.getConstant();
 
-        boolean isRhsBnodeUri = eval(macros, isBnodeIriFnIri, rhs).getBoolean();
+        boolean isRhsBnodeUri = isBnodeIri(rhs); // eval(macros, isBnodeIriFnIri, rhs).getBoolean();
         ExprFunction2 result;
         if(isRhsBnodeUri) {
-            NodeValue bnodeLabel;
-            try {
-                bnodeLabel = eval(macros, decodeBnodeIriFnIri, rhs);
-            } catch(ExprEvalException e) {
-                // FIXME We should induce a type error here
-                bnodeLabel = NodeValue.FALSE;
-            }
+            NodeValue bnodeLabel = decodeBnodeIriFn(rhs);
+//            try {
+//                bnodeLabel = eval(macros, decodeBnodeIriFnIri, rhs);
+//            } catch(ExprEvalException e) {
+//                // FIXME We should induce a type error here
+//                bnodeLabel = NodeValue.FALSE;
+//            }
 
             Expr x = macros.get(bidOfFnIri).getBaseExpr();
 
@@ -402,7 +476,8 @@ public class ExprTransformVirtualBnodeUris
     }
 
     public static void main(String[] args) {
-        Expr input = ExprUtils.parse("?x = <bnode://foobar>");
+        // Expr input = ExprUtils.parse("?x = <bnode://foobar>");
+        Expr input = ExprUtils.parse("?x NOT IN (<bnode://123>, <urn:foo>, <bnode://456>, <urn:bar>)");
 //		Expr input = ExprUtils.parse("<bnode://foo> = <bnode://bar>");
 
         Model model = RDFDataMgr.loadModel("bnode-rewrites.ttl");
@@ -411,6 +486,10 @@ public class ExprTransformVirtualBnodeUris
 //        Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/jena"));
       Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/graphdb"));
         ExprTransformVirtualBnodeUris xform = createTransformFromUdfModel(model, profiles);
+
+        Expr output = ExprTransformer.transform(xform, input);
+        System.out.println(output);
+
 //        Map<String, UserDefinedFunctionDefinition> map = UserDefinedFunctions.load(model, profiles);
 //
 //        // FIXME Load property functions from model
