@@ -16,6 +16,36 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.exec.QueryExec;
 
 public class RdfDataEngines {
+    /**
+     * This method creates an RdfDataSource view over a connection.
+     * Wrapping a connection as an engine is more a hack and should be avoided.
+     */
+    @Deprecated
+    public static RdfDataEngine ofQueryConnection(SparqlQueryConnection conn) {
+        return new RdfDataEngineOverSparqlQueryConnection(new RDFConnectionModular(conn, null, null));
+    }
+
+    public static class RdfDataEngineOverSparqlQueryConnection
+        implements RdfDataEngine
+    {
+        protected RDFConnection conn;
+
+        public RdfDataEngineOverSparqlQueryConnection(RDFConnection conn) {
+            super();
+            this.conn = conn;
+        }
+
+        @Override
+        public RDFConnection getConnection() {
+            return RDFConnectionUtils.withCloseShield(conn);
+        }
+
+        @Override
+        public void close() throws Exception {
+            conn.close();
+        }
+    }
+
     public static class RdfDataEngineOverRdfDataSource
         implements RdfDataEngine
     {

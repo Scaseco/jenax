@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
@@ -29,6 +30,7 @@ import org.apache.jena.sparql.lang.ParserSPARQL11;
 import org.apache.jena.sparql.lang.SPARQLParser;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementData;
+import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 
@@ -204,6 +206,16 @@ public class Concept
 
         return new Concept(elt, Vars.s);
     }
+
+
+    /** Create an element of the form <pre>DISTINCT ?s { ?s ?p ?o FILTER(?s IN (nodes) }</pre>*/
+    public static Concept createFilteredSubjects(Var var, Iterable<Node> nodes) {
+        Element elt = ElementUtils.groupIfNeeded(
+                ElementUtils.createElementTriple(Vars.s, Vars.p, Vars.o),
+                new ElementFilter(ExprUtils.oneOf(Vars.s, nodes)));
+        return new Concept(elt, Vars.s);
+    }
+
 
     public static Element parseElement(String elementStr, PrefixMapping prefixMapping) {
         String tmp = elementStr.trim();

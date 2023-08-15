@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.connection.RDFConnectionModular;
+import org.aksw.jenax.arq.connection.RDFLinkWrapperWithCloseShield;
 import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
 import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
 import org.apache.jena.query.ARQ;
@@ -49,6 +50,9 @@ public class RDFConnectionUtils {
     /** Symbol for placing a connection (TODO supplier?) into an arq context */
     public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
 
+    public static RDFConnection withCloseShield(RDFConnection conn) {
+        return RDFConnectionAdapter.adapt(new RDFLinkWrapperWithCloseShield(RDFLinkAdapter.adapt(conn)));
+    }
 
     public static SparqlQueryConnection unwrapQueryConnection(SparqlQueryConnection conn) {
         SparqlQueryConnection result;

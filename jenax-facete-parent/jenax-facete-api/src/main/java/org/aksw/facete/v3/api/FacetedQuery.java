@@ -1,12 +1,14 @@
 package org.aksw.facete.v3.api;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.sys.JenaSystem;
 
 /**
  *
@@ -45,8 +47,22 @@ public interface FacetedQuery
 
     UnaryRelation baseConcept();
 
-    FacetedQuery connection(SparqlQueryConnection conn);
-    SparqlQueryConnection connection();
+    FacetedQuery dataSource(RdfDataSource rdfDataSource);
+    RdfDataSource dataSource();
+
+    @Deprecated
+    default SparqlQueryConnection connection() {
+        RdfDataSource dataSource = dataSource();
+        SparqlQueryConnection result = dataSource == null
+                ? null
+                : dataSource.getConnection();
+        return result;
+    }
+
+    @Deprecated
+    default FacetedQuery connection(SparqlQueryConnection connection) {
+        return dataSource(connection == null ? null : RdfDataEngines.ofQueryConnection(connection));
+    }
 
 
     /** Create a copy of this FacetedQuery where the base concept has been materialized into

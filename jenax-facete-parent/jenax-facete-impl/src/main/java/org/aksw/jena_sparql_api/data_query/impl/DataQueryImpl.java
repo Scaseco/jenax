@@ -45,10 +45,12 @@ import org.aksw.jena_sparql_api.pathlet.PathletSimple;
 import org.aksw.jena_sparql_api.relationlet.RelationletElementImpl;
 import org.aksw.jena_sparql_api.relationlet.RelationletSimple;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
@@ -156,7 +158,7 @@ public class DataQueryImpl<T extends RDFNode>
     private static final Logger logger = LoggerFactory.getLogger(DataQueryImpl.class);
 
 
-    protected SparqlQueryConnection conn;
+    protected RdfDataSource dataSource;
 
     /**
      * grouped mode (false): default semantic of construct queries
@@ -211,8 +213,59 @@ public class DataQueryImpl<T extends RDFNode>
     protected Class<T> resultClass;
 
     protected List<SortCondition> sortConditions = new ArrayList<>();
-    protected Set<Path> projectedPaths = new LinkedHashSet<Path>();
+    protected Set<Path> projectedPaths = new LinkedHashSet<>();
 
+    public DataQueryImpl(
+            RdfDataSource dataSource,
+            UnaryRelation baseRelation,
+            Template template,
+            Class<T> resultClass) {
+        this(
+                dataSource,
+                baseRelation.getElement(),
+                baseRelation.getVar(),
+                template,
+                resultClass);
+    }
+
+    public DataQueryImpl(
+            RdfDataSource dataSource,
+            Element baseQueryPattern,
+            Var rootVar,
+            Template template,
+            Class<T> resultClass) {
+        this(
+                dataSource,
+                baseQueryPattern,
+                Arrays.asList(rootVar),
+                rootVar,
+                rootVar,
+                template,
+                resultClass);
+    }
+
+    public DataQueryImpl(
+            RdfDataSource dataSource,
+            Element baseElement,
+            List<Var> primaryKeyVars,
+            Node superRootNode,
+            Var defaultVar,
+            Template template,
+            Class<T> resultClass) {
+        super();
+        this.dataSource = dataSource;
+//		this.rootVar = rootNode;
+//		this.baseQueryPattern = baseQueryPattern;
+        //this.baseRelation = baseRelation;
+        this.baseElement = baseElement;
+        this.primaryKeyVars = primaryKeyVars;
+        this.superRootNode = superRootNode;
+        this.defaultVar = defaultVar;
+        this.template = template;
+        this.resultClass = resultClass;
+    }
+
+    @Deprecated
     public DataQueryImpl(
             SparqlQueryConnection conn,
             UnaryRelation baseRelation,
@@ -226,6 +279,7 @@ public class DataQueryImpl<T extends RDFNode>
                 resultClass);
     }
 
+    @Deprecated
     public DataQueryImpl(
             SparqlQueryConnection conn,
             Element baseQueryPattern,
@@ -242,6 +296,7 @@ public class DataQueryImpl<T extends RDFNode>
                 resultClass);
     }
 
+    @Deprecated
     public DataQueryImpl(
             SparqlQueryConnection conn,
             Element baseElement,
@@ -250,17 +305,7 @@ public class DataQueryImpl<T extends RDFNode>
             Var defaultVar,
             Template template,
             Class<T> resultClass) {
-        super();
-        this.conn = conn;
-//		this.rootVar = rootNode;
-//		this.baseQueryPattern = baseQueryPattern;
-        //this.baseRelation = baseRelation;
-        this.baseElement = baseElement;
-        this.primaryKeyVars = primaryKeyVars;
-        this.superRootNode = superRootNode;
-        this.defaultVar = defaultVar;
-        this.template = template;
-        this.resultClass = resultClass;
+        this(RdfDataEngines.ofQueryConnection(conn), baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
     }
 
 
@@ -291,26 +336,26 @@ public class DataQueryImpl<T extends RDFNode>
 //		this.projectedPaths = projectedPaths;
 //	}
 
-    @Override
-    public SparqlQueryConnection connection() {
-        return conn;
-    }
-
-    @Override
-    public DataQuery<T> connection(SparqlQueryConnection connection) {
-        this.conn = connection;
-        return this;
-    }
-
     public <U extends RDFNode> DataQuery<U> as(Class<U> clazz) {
         return new DataQueryImpl<U>(
-                conn,
+                dataSource,
                 baseElement,
                 primaryKeyVars,
                 superRootNode,
                 defaultVar,
                 template,
                 clazz);
+    }
+
+    @Override
+    public RdfDataSource dataSource() {
+        return dataSource;
+    }
+
+    @Override
+    public DataQuery<T> dataSource(RdfDataSource dataSource) {
+        this.dataSource = dataSource;
+        return this;
     }
 
     @Override
@@ -918,7 +963,7 @@ public class DataQueryImpl<T extends RDFNode>
 
     @Override
     public Flowable<T> exec() {
-        Objects.requireNonNull(conn);
+        Objects.requireNonNull(dataSource);
 
         QuerySpec e = toConstructQueryNew();
 //		Node rootVar = e.getKey();
@@ -961,7 +1006,7 @@ public class DataQueryImpl<T extends RDFNode>
 
         // TODO Add the toggle to SparqlRx
         Flowable<Entry<Binding, RDFNode>> rawFlow =
-                SparqlRx.execConstructGrouped(conn, e.getQuery(), e.getPrimaryKeyVars(), e.getRootNode(), true);
+                SparqlRx.execConstructGrouped(dataSource, e.getQuery(), e.getPrimaryKeyVars(), e.getRootNode(), true);
 
 
         boolean deterministic = pseudoRandom != null;
@@ -1100,7 +1145,7 @@ public class DataQueryImpl<T extends RDFNode>
 //        }
 //        Query query = e.getValue();
         //		QueryExecutionUtils.countQuery(query, new QueryExecutionFactorySparqlQueryConnection(conn));
-        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(QueryExecutionFactories.of(conn), query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
+        Single<CountInfo> result = SparqlRx.fetchCountQueryPartition(QueryExecutionFactories.of(dataSource), query, e.getPrimaryKeyVars(), distinctItemCount, rowCount)
                 .map(range -> CountUtils.toCountInfo(range));
 
         return result;

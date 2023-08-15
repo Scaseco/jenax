@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.aksw.jenax.arq.connection.RDFLinkWrapperWithCloseShield;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.connection.query.QueryExecWithNodeTransform;
 import org.apache.jena.graph.Node;
@@ -28,6 +29,10 @@ public class RDFLinkUtils {
 
     /** Symbol for placing a connection (TODO supplier?) into an arq context */
     public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
+
+    public static RDFLink withCloseShield(RDFLink link) {
+        return new RDFLinkWrapperWithCloseShield(link);
+    }
 
     public static LinkSparqlQuery unwrapQueryConnection(LinkSparqlQuery conn) {
         LinkSparqlQuery result;

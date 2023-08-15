@@ -8,6 +8,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
 public interface LinkDatasetGraphDelegate
     extends LinkDatasetGraphTmp
 {
+    @Override
     LinkDatasetGraph getDelegate();
 
     @Override

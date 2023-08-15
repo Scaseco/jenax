@@ -4,6 +4,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -14,8 +15,10 @@ import org.aksw.facete.v3.api.FacetValue;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.pathlet.Path;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
@@ -168,9 +171,20 @@ public interface DataQuery<T extends RDFNode> {
     // Filter injection without renaming variables
     DataQuery<T> filterDirect(Element element);
 
-    DataQuery<T> connection(SparqlQueryConnection connection);
-    SparqlQueryConnection connection();
+    DataQuery<T> dataSource(RdfDataSource dataSource);
+    RdfDataSource dataSource();
 
+    @Deprecated
+    default SparqlQueryConnection connection() {
+        RdfDataSource dataSource = dataSource();
+        SparqlQueryConnection result = Optional.ofNullable(dataSource).map(RdfDataSource::getConnection).orElse(null);
+        return result;
+    }
+
+    @Deprecated
+    default DataQuery<T> connection(SparqlQueryConnection connection) {
+        return dataSource(RdfDataEngines.ofQueryConnection(connection));
+    }
 
     default DataQuery<T> only(Iterable<Node> nodes) {
         Expr e = new E_OneOf(new ExprVar(Vars.s), ExprListUtils.nodesToExprs(nodes));

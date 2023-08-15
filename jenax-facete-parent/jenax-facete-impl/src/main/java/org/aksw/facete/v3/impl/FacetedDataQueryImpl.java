@@ -6,6 +6,7 @@ import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.data_query.impl.DataQueryImpl;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
@@ -31,17 +32,36 @@ public class FacetedDataQueryImpl<T extends RDFNode>
     extends DataQueryImpl<T>
     implements FacetedDataQuery<T>
 {
+    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseQueryPattern, Var rootVar, Template template,
+            Class<T> resultClass) {
+        super(dataSource, baseQueryPattern, rootVar, template, resultClass);
+    }
 
+    @Deprecated
+    public FacetedDataQueryImpl(RdfDataSource dataSource, UnaryRelation baseRelation, Template template,
+            Class<T> resultClass) {
+        super(dataSource, baseRelation, template, resultClass);
+    }
+
+    @Deprecated
+    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseElement, List<Var> primaryKeyVars,
+            Node superRootNode, Var defaultVar, Template template, Class<T> resultClass) {
+        super(dataSource, baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
+    }
+
+    @Deprecated
     public FacetedDataQueryImpl(SparqlQueryConnection conn, Element baseQueryPattern, Var rootVar, Template template,
             Class<T> resultClass) {
         super(conn, baseQueryPattern, rootVar, template, resultClass);
     }
 
+    @Deprecated
     public FacetedDataQueryImpl(SparqlQueryConnection conn, UnaryRelation baseRelation, Template template,
             Class<T> resultClass) {
         super(conn, baseRelation, template, resultClass);
     }
 
+    @Deprecated
     public FacetedDataQueryImpl(SparqlQueryConnection conn, Element baseElement, List<Var> primaryKeyVars,
             Node superRootNode, Var defaultVar, Template template, Class<T> resultClass) {
         super(conn, baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);

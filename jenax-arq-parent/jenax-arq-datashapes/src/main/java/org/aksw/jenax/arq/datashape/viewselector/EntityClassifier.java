@@ -300,11 +300,11 @@ public class EntityClassifier {
 
     public static void registerNodeShape(EntityClassifier entityClassifier, ShNodeShape nodeShape) {
         Node nodeShapeNode = nodeShape.asNode();
-        
+
         if (nodeShapeNode.isBlank()) {
-        	nodeShapeNode = ExprTransformVirtualBnodeUris.bnodeToIri(nodeShapeNode);
+            nodeShapeNode = ExprTransformVirtualBnodeUris.bnodeToIri(nodeShapeNode);
         }
-        
+
         // getPropertyShapes(nodeShape);
 
         ShHasTargets hasTargets = nodeShape.as(ShHasTargets.class);

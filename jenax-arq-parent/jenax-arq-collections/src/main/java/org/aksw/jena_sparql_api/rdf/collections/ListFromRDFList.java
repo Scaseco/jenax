@@ -31,7 +31,6 @@ public class ListFromRDFList
     protected Property p;
     protected boolean isFwd;
 
-
     protected RDFList getList() {
         // Pick any resource and treat it as a list
         Resource o = ResourceUtils.getPropertyValue(s, p, isFwd, Resource.class);
@@ -43,7 +42,7 @@ public class ListFromRDFList
         // This would cause a get-method to cause a side effect - it breaks on read only models
         // // Also, clear all any other value for consistency
         if (false) {
-        	ensureNonNull();
+            ensureNonNull();
         }
 
         return o.as(RDFList.class);
@@ -61,17 +60,17 @@ public class ListFromRDFList
             }
         }
 
-    	
-    	return this;
+
+        return this;
     }
-    
+
     /** Ensure that adding an empty collection to a non-intialized list result in termination with rdf:nil */
     @Override
     public boolean addAll(Collection<? extends RDFNode> c) {
-    	ensureNonNull();
-    	return super.addAll(c);
+        ensureNonNull();
+        return super.addAll(c);
     }
-    
+
     public ListFromRDFList(Resource subject, Property property) {
         this(subject, property, true);
     }
@@ -79,7 +78,7 @@ public class ListFromRDFList
     public static ListFromRDFList create(Resource subject, Property property) {
         return new ListFromRDFList(subject, property);
     }
-    
+
     public ListFromRDFList(Resource subject, Property property, boolean isFwd) {
         super();
         this.s = subject;
@@ -118,7 +117,6 @@ public class ListFromRDFList
 
         }
     }
-
 
     public static RDFList getParent(RDFList child) {
         // TODO Somehow replace RDF.rest with the property referred to by the list implementation
@@ -196,7 +194,6 @@ public class ListFromRDFList
         return result;
     }
 
-
     public static RDFList findElement(RDFList list, int index) {
         RDFList result = list;
         for(int i = 0; i < index; ++i) {
@@ -205,7 +202,6 @@ public class ListFromRDFList
 
         return result;
     }
-
 
     @Override
     public int size() {
@@ -222,7 +218,6 @@ public class ListFromRDFList
         return result;
     }
     //protected RDFList list;
-
 
     /**
      * <p>
@@ -317,7 +312,7 @@ public class ListFromRDFList
 
     /** Return a (new) mutable view of the list as Nodes */
     public List<Node> asNodes() {
-    	Converter<RDFNode, Node> converter = Converter.from(RDFNode::asNode, s.getModel()::asRDFNode);
-    	return new ConvertingList<>(this, converter);
+        Converter<RDFNode, Node> converter = Converter.from(RDFNode::asNode, s.getModel()::asRDFNode);
+        return new ConvertingList<>(this, converter);
     }
 }
