@@ -48,6 +48,21 @@ public class TestListViewFromRDFList {
         // System.out.println(str);
     }
 
+//    @Test
+//    public void testAddAll2() {
+//        Model x = ModelFactory.createDefaultModel();
+//        Resource r = x.createResource();
+//        List<RDFNode> javaList = new ListFromRDFList(r, RDF.type);
+//
+//        List<RDFNode> items = Arrays.asList(
+//                x.asRDFNode(NodeValue.makeInteger(0).asNode()),
+//                x.createLiteral("middle"));
+//
+//        // Test add method (in contrast to addAll)
+//        javaList.addAll(items);
+//        Assert.assertEquals(items, javaList);
+//    }
+
     /**
      * Simply compare the list operations of the view with that of a reference
      *

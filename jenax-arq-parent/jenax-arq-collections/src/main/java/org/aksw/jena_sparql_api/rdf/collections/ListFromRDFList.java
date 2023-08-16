@@ -310,8 +310,7 @@ public class ListFromRDFList
         }
         @Override
         public boolean hasPrevious() {
-            RDFList tmp = getPreviousCell();
-            return tmp != null;
+            return cursorCell != null;
         }
 
         @Override
@@ -355,6 +354,7 @@ public class ListFromRDFList
                 newCell = list.cons(e);
                 ResourceUtils.setProperty(s, p, newCell);
                 cursorCell = newCell;
+                reachedEnd = cursorCell.getTail().equals(RDF.nil);
             } else if (reachedEnd) {
                 // Insert after m_head
                 newCell = newListCell(e, cursorCell.getTail());
@@ -367,6 +367,7 @@ public class ListFromRDFList
                 cursorCell = newCell;
             }
             seenCell = newCell;
+            ++currentIndex;
         }
     }
 
