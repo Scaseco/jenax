@@ -501,15 +501,24 @@ public class ElementUtils {
     }
 
     public static Element flatMerge(Iterable<Element> elts) {
-        List<Element> tmp = new ArrayList<>();
-        for (Element elt : elts) {
-            List<Element> contrib = ElementUtils.toElementList(elt);
-            tmp.addAll(contrib);
-        }
-        Element result = ElementUtils.groupIfNeeded(tmp);
+        Element result = ElementUtils.groupIfNeeded(flatMergeList(elts));
         return result;
     }
 
+    public static List<Element> flatMergeList(Element... elts) {
+        return flatMergeList(Arrays.asList(elts));
+    }
+
+    public static List<Element> flatMergeList(Iterable<? extends Element> elts) {
+        List<Element> result = new ArrayList<>();
+        for (Element elt : elts) {
+            if (elt != null) {
+                List<Element> contrib = ElementUtils.toElementList(elt);
+                result.addAll(contrib);
+            }
+        }
+        return result;
+    }
 
     public static ElementData createElementData(Collection<Var> vars, Collection<Binding> rows) {
         ElementData result = new ElementData();
