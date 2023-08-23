@@ -13,6 +13,7 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -117,6 +118,14 @@ public class NodeTransformLib2 {
                 .forEachRemaining(out::add);
         }
         return out;
+    }
+
+    public static SortCondition transform(NodeTransform nodeTransform, SortCondition sortCondition) {
+        Expr before = sortCondition.getExpression();
+        Expr after = NodeTransformLib.transform(nodeTransform, before);
+        int dir = sortCondition.getDirection();
+        SortCondition result = new SortCondition(after, dir);
+        return result;
     }
 
     public static Graph applyNodeTransform(NodeTransform nodeTransform, Graph graph) {

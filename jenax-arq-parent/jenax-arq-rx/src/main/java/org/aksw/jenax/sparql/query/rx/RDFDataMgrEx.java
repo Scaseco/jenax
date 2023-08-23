@@ -248,6 +248,16 @@ public class RDFDataMgrEx {
         return probeLang(in, candidates, true, errorCollector);
     }
 
+    /**
+     * Determine the RDF content of the given input stream. The returned input stream buffers the given stream if needed.
+     * Only the returned stream should be used after using this function.
+     *
+     * The following example shows how to obtain a Lang from the probing result:
+     * <pre>
+     * TypedInputStream tin = RDFDataMgrEx.probeLang(in, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
+     * Lang lang = RDFLanguages.contentTypeToLang(tis.getContentType());
+     * </pre>
+     */
     public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
         return probeLang(in, candidates, new ArrayList<>());
     }
