@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.data_query.api.ResolverDirNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverMultiNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverNode;
 import org.aksw.jenax.arq.connection.SparqlQueryConnectionTmp;
+import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -45,7 +46,7 @@ public class ResolverDirNodeImpl
 
     @Override
     protected ResolverMultiNodeImpl viaImpl(Resource property, Node component) {
-        if (component != null) {
+        if (component != null && !FacetStep.isTarget(component)) {
             throw new UnsupportedOperationException("Support for referencing components not implemented");
         }
 
