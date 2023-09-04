@@ -3,9 +3,9 @@ package org.aksw.jenax.connection.datasource;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 /**
@@ -34,7 +34,7 @@ public interface RdfDataSource
      * Every QueryExecution created with the returned factory will obtain a fresh
      * connection using {@link #getConnection()} upon execution.
      */
-    default QueryExecutionFactoryQuery asQef() {
+    default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);
     }
 }

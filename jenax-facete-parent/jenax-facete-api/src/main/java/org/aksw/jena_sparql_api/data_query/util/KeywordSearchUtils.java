@@ -4,9 +4,7 @@ import java.util.Arrays;
 
 import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Bound;
@@ -15,6 +13,8 @@ import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_LogicalOr;
 import org.apache.jena.sparql.expr.E_Regex;
 import org.apache.jena.sparql.expr.E_Str;
+import org.apache.jena.sparql.expr.E_StrContains;
+import org.apache.jena.sparql.expr.E_StrLowerCase;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -211,9 +211,7 @@ public class KeywordSearchUtils {
         return result;
     }
 
-
     public static Concept createConceptExistsRegexLabelOnly(BinaryRelation relation, String searchString) {
-
         Concept result;
         if(searchString != null) {
             Element element = new ElementFilter(new E_Exists(ElementUtils.groupIfNeeded(
@@ -222,6 +220,25 @@ public class KeywordSearchUtils {
                             new E_Str(new ExprVar(relation.getTargetVar())),
                             NodeValue.makeString(searchString),
                             NodeValue.makeString("i"))))));
+
+            result = new Concept(element, relation.getSourceVar());
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    public static Concept createConceptExistsStrConstainsLabelOnly(BinaryRelation relation, String searchString) {
+
+        String str = searchString.toLowerCase();
+        Concept result;
+        if(searchString != null) {
+            Element element = new ElementFilter(new E_Exists(ElementUtils.groupIfNeeded(
+                    relation.getElement(),
+                    new ElementFilter(new E_StrContains(
+                            new E_StrLowerCase(new E_Str(new ExprVar(relation.getTargetVar()))),
+                            NodeValue.makeString(str)
+                            )))));
 
             result = new Concept(element, relation.getSourceVar());
         } else {

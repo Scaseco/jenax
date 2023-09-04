@@ -98,9 +98,12 @@ public class NodeUtils {
         return node == null || Node.ANY.equals(node);
     }
 
-    /** This method is unfortunately private in {@link Triple} at least in jena 3.16 */
+    /** Method now exists in Jena's NodeUtils.
+     * This method was private in {@link Triple} at least in jena 3.16
+     */
+    @Deprecated
     public static Node nullToAny(Node n) {
-        return n == null ? Node.ANY : n;
+        return org.apache.jena.sparql.util.NodeUtils.nullToAny(n);
     }
 
     public static Node anyToNull(Node n) {
@@ -270,5 +273,30 @@ public class NodeUtils {
                 ? Quad.defaultGraphIRI
                 : NodeFactory.createURI(graphName);
         return result;
+    }
+
+    /** Serialize and deserialize (print/parse) a node. Returns true iff the result is the same (term-equality) as the input. */
+    public static boolean isValid(Node node) {
+        boolean result = false;
+        try {
+            if (node != null) {
+                String str = NodeFmtLib.strNT(node);
+                List<Node> nodes = parseNodes(str, new ArrayList<>());
+                if (nodes.size() == 1) {
+                    Node actual = nodes.get(0);
+                    result = node.equals(actual); // NodeCmp.compareRDFTerms(node, actual) == 0;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return result;
+    }
+
+    /** Throws an {@link IllegalArgumentException} if {@link #isValid(Node)} returns false. */
+    public static void validate(Node node) {
+        if (!isValid(node)) {
+            throw new IllegalArgumentException("Node does not print/parse: " + node);
+        }
     }
 }
