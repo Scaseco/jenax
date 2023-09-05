@@ -11,6 +11,9 @@ import org.apache.jena.shared.PrefixMapping;
 public interface ShPrefixDeclaration
     extends Resource
 {
+    @Iri("rdfs:label")
+    String getName();
+
     @Iri(ShTerms.prefix)
     String getPrefix();
     ShPrefixDeclaration setPrefix(String prefix);

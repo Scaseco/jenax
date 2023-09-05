@@ -299,11 +299,7 @@ public class EntityClassifier {
     }
 
     public static void registerNodeShape(EntityClassifier entityClassifier, ShNodeShape nodeShape) {
-        Node nodeShapeNode = nodeShape.asNode();
-
-        if (nodeShapeNode.isBlank()) {
-            nodeShapeNode = ExprTransformVirtualBnodeUris.bnodeToIri(nodeShapeNode);
-        }
+        Node nodeShapeNode = ExprTransformVirtualBnodeUris.bnodeToIri(nodeShape.asNode());
 
         // getPropertyShapes(nodeShape);
 
