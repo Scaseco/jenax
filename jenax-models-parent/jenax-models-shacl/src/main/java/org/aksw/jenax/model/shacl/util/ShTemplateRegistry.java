@@ -24,4 +24,15 @@ public class ShTemplateRegistry {
     public Multimap<Node, Node> getShapeToViews() {
         return shapeToViews;
     }
+
+    public void clear() {
+        viewToTemplate.clear();
+        shapeToViews.clear();
+    }
+
+    public ShTemplateRegistry addAll(ShTemplateRegistry other) {
+        viewToTemplate.putAll(other.getViewToTemplate());
+        shapeToViews.putAll(other.getShapeToViews());
+        return this;
+    }
 }

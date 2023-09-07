@@ -240,6 +240,31 @@ public class NodeUtils {
         return sw.toString();
     }
 
+    public static Node parseNode(String str) {
+        Node result = null;
+        // NodeFmtLib.strNodes encodes labels - so we need to decode them
+        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
+
+        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
+        if (tokenizer.hasNext()) {
+            Token token = tokenizer.next() ;
+            Node node = token.asNode() ;
+//            if ( node == null )
+//                throw new RiotException("Bad RDF Term: " + str) ;
+
+            if (node != null) {
+                if (node.isBlank()) {
+                    String label = node.getBlankNodeLabel();
+                    node = decoder.get(null, label);
+                }
+            }
+
+            result = node;
+        }
+
+        return result;
+    }
+
     /** Parse a sequence of nodes into the provided collection */
     public static <C extends Collection<? super Node>> C parseNodes(String str, C segments) {
         // NodeFmtLib.strNodes encodes labels - so we need to decode them
