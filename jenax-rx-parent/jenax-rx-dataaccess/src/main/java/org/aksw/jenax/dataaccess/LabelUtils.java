@@ -112,11 +112,13 @@ public class LabelUtils {
     public static LookupService<Node, String> getLabelLookupService(
             QueryExecutionFactoryQuery conn,
             Property labelProperty,
-            PrefixMapping prefixMapping) {
+            PrefixMapping prefixMapping,
+            int partitionSize) {
 
         BinaryRelation labelRelation = BinaryRelationImpl.create(labelProperty);
         return LookupServiceUtils.createLookupService(conn, labelRelation)
-              .partition(10)
+              .partition(partitionSize)
+              .filterKeys(k -> k.isURI())
               .defaultForAbsentKeys(k -> null)
               .cache()
               .mapValues(LabelUtils::getLabelFromLookup);

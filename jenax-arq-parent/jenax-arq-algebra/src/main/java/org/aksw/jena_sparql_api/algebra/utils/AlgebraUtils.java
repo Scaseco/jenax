@@ -18,6 +18,7 @@ import org.aksw.commons.collections.FeatureMapImpl;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collections.multimaps.BiHashMultimap;
 import org.aksw.commons.collections.multimaps.IBiSetMultimap;
+import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jena_sparql_api.algebra.analysis.VarInfo;
 import org.aksw.jena_sparql_api.algebra.transform.TransformAddFilterFromExtend;
 import org.aksw.jena_sparql_api.algebra.transform.TransformDeduplicatePatterns;

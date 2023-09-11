@@ -19,7 +19,6 @@ import org.apache.jena.sparql.graph.NodeTransform;
 
 public class TableUtils {
 
-
     public static ResultSet toResultSet(Table table) {
         return ResultSet.adapt(table.toRowSet());
     }

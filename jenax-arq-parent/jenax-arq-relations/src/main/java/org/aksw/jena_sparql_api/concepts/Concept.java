@@ -33,7 +33,9 @@ import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.vocabulary.RDF;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
 /**
@@ -216,6 +218,24 @@ public class Concept
         return new Concept(elt, Vars.s);
     }
 
+    public static Concept createForTypes(Iterable<Node> types) {
+        Concept result = Iterables.size(types) == 1
+                ? createForType(types.iterator().next())
+                : createForTypesOneOf(types);
+        return result;
+    }
+
+    public static Concept createForType(Node type) {
+        Element elt = ElementUtils.createElementTriple(Vars.s, RDF.type.asNode(), type);
+        return new Concept(elt, Vars.s);
+    }
+
+    public static Concept createForTypesOneOf(Iterable<Node> types) {
+        Element elt = ElementUtils.groupIfNeeded(
+                ElementUtils.createElementTriple(Vars.s, RDF.type.asNode(), Vars.o),
+                new ElementFilter(ExprUtils.oneOf(Vars.o, types)));
+        return new Concept(elt, Vars.s);
+    }
 
     public static Element parseElement(String elementStr, PrefixMapping prefixMapping) {
         String tmp = elementStr.trim();

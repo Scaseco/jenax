@@ -94,7 +94,6 @@ public class QueryGenerationUtils {
         return result;
     }
 
-
     public static Query createQueryQuad(Quad quad) {
         Query query = new Query();
         query.setQuerySelectType();

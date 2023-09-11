@@ -90,8 +90,8 @@ public class QueryUtils {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOpTmp = transform.apply(beforeOp);
 
-        //Set<Var> afterOpVars = OpVars.visibleVars(afterOp);
-//		Op op = NodeTransformLib.transform(new NodeTransformBNodesToVariables(), afterOp);
+        // Set<Var> afterOpVars = OpVars.visibleVars(afterOp);
+        // Op op = NodeTransformLib.transform(new NodeTransformBNodesToVariables(), afterOp);
 
         // Rename.reverseVarRename(afterOp, true);
         Collection<Var> mentionedVars = OpVars.mentionedVars(beforeOp);

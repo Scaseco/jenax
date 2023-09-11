@@ -28,7 +28,7 @@ public enum SubstitutionStrategy {
      * Substitute and constrain to the original value
      *
      */
-    SUSTITUTE_AND_FILTER(true, true); // (:g ?s ?p ?o) -> (?graph ?s ?p ?o) FILTER(?graph = :g)
+    SUBSTITUTE_AND_FILTER(true, true); // (:g ?s ?p ?o) -> (?graph ?s ?p ?o) FILTER(?graph = :g)
 
     protected boolean substitute;
     protected boolean injectFilter;

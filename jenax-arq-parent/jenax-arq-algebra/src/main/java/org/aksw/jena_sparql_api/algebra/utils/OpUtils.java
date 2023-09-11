@@ -696,4 +696,13 @@ public class OpUtils {
         Op result = factorizer.factorize(op, cxt, varAlloc::allocVar);
         return result;
     }
+
+    public static boolean isUnitTable(Op op) {
+        boolean result = false;
+        if (op instanceof OpTable) {
+            if (((OpTable) op).isJoinIdentity())
+                result = true;
+        }
+        return result;
+    }
 }

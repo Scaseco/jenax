@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
-import org.aksw.jenax.annotation.reprogen.PolymorphicOnly;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 
+@ResourceView
 public interface UserDefinedFunctionResource
     extends Resource
 {

@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.algebra.transform;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.algebra.utils.FixpointIteration;
+import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.sparql.algebra.Op;

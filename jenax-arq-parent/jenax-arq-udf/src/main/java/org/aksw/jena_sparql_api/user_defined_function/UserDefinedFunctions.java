@@ -9,12 +9,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.expr.E_Function;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransform;
+import org.apache.jena.sparql.expr.ExprTransformer;
+import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.user.ExprTransformExpand;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionFactory;
 import org.apache.jena.sparql.util.ExprUtils;
@@ -137,5 +146,26 @@ public class UserDefinedFunctions {
                 }
             }
         }
+    }
+
+    public static Expr expandMacro(Map<String, UserDefinedFunctionDefinition> macros, String udfUri, Expr ... args) {
+        Expr e = new E_Function(udfUri, new ExprList(Arrays.asList(args)));
+        Expr result = expandMacro(macros, e);
+        return result;
+    }
+
+    public static Expr expandMacro(Map<String, UserDefinedFunctionDefinition> macros, Expr e) {
+        ExprTransform xform = new ExprTransformExpand(macros);
+        e = FixpointIteration.apply(100, e, x -> ExprTransformer.transform(xform, x));
+        e = FixpointIteration.apply(100, e, ExprLib::foldConstants);
+        //e = ExprLib.foldConstants(e);
+        return e;
+    }
+
+    /** Evaluate a specific macro */
+    public static NodeValue eval(Map<String, UserDefinedFunctionDefinition> macros, String udfUri, Expr ... args) {
+        Expr expr = expandMacro(macros, udfUri, args);
+        NodeValue result = ExprUtils.eval(expr);
+        return result;
     }
 }
