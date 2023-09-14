@@ -42,6 +42,8 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A rewrite that attempts to inject cache operations around group by computations.
@@ -51,6 +53,8 @@ import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkS
 public class RdfDataSourceWithLocalCache
     extends RdfDataSourceDelegateBase
 {
+    private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalCache.class);
+
     public static final String REMOTE_IRI = "env://REMOTE";
     public static final Node REMOTE_NODE = NodeFactory.createURI(REMOTE_IRI);
 
@@ -58,7 +62,6 @@ public class RdfDataSourceWithLocalCache
 
     /** Requests go to this dataset which is configured to delegate SERVICE >env://REMOTE> requests to the delegate data source */
     public Dataset proxyDataset;
-
 
     // TODO Convert to test case
     public static void main(String[] args) {
@@ -77,7 +80,7 @@ public class RdfDataSourceWithLocalCache
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
         RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RdfDataEngines.of(DatasetFactory.create()));
-        Query rewritten = MyRewriter.rewriteQuery(query);
+        Query rewritten = OpRewriteInjectCacheOps.rewriteQuery(query);
         System.out.println(rewritten);
     }
 
@@ -109,7 +112,7 @@ public class RdfDataSourceWithLocalCache
     @Override
     public RDFConnection getConnection() {
         RDFConnection base = RDFConnection.connect(proxyDataset);
-        RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, MyRewriter::rewriteQuery);
+        RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, OpRewriteInjectCacheOps::rewriteQuery);
         return result;
     }
 
@@ -119,7 +122,13 @@ public class RdfDataSourceWithLocalCache
     }
 
     public static Op wrapWithCacheOp(Op op) {
-        Op result = new OpService(CACHE_NODE, new OpService(REMOTE_NODE, op, false), false);
+        Op remote = wrapWithRemote(op);
+        Op result = new OpService(CACHE_NODE, remote, false);
+        return result;
+    }
+
+    public static Op wrapWithRemote(Op op) {
+        Op result = new OpService(REMOTE_NODE, op, false);
         return result;
     }
 
@@ -134,27 +143,29 @@ public class RdfDataSourceWithLocalCache
         return result;
     }
 
-    public static class MyRewriter
+    /** Rewriter that injects caching operations after group by operations */
+    public static class OpRewriteInjectCacheOps
         implements OpRewriter<Entry<Op, Boolean>> {
 
         public static Query rewriteQuery(Query query) {
-            System.err.println("OriginalQuery:\n" + query);
-            // Query result = QueryUtils.applyOpTransform(query, op -> { System.out.println(op); return op; } );
-            Query result = QueryUtils.applyOpTransform(query, MyRewriter::rewriteOpx);
+            if (logger.isDebugEnabled()) {
+                logger.debug("OriginalQuery:\n" + query);
+            }
+            Query result = QueryUtils.applyOpTransform(query, OpRewriteInjectCacheOps::rewriteOpx);
             return result;
         }
 
         public static Op rewriteOpx(Op op) {
-            MyRewriter rewriter = new MyRewriter();
+            OpRewriteInjectCacheOps rewriter = new OpRewriteInjectCacheOps();
             Entry<Op, Boolean> e = rewriter.rewriteOp(op);
 
             Op rr = e.getValue()
                     ? e.getKey()
-                    : wrapWithCache(op).getKey(); // new OpService(serviceNode, op, false);
+                    : wrapWithRemote(op); // wrapWithCache(op).getKey(); - always cache?
 
-            //System.err.println("Cache rewrite [pushed=" + e.getValue() + "]: " + rr);
-            System.err.println("Cache rewrite [pushed=" + e.getValue() + "]: " + OpAsQuery.asQuery(rr));
-
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cache rewrite [pushed=" + e.getValue() + "]: " + OpAsQuery.asQuery(rr));
+            }
             return rr;
         }
 
