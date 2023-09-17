@@ -28,7 +28,11 @@ import org.apache.jena.update.UpdateRequest;
 public class RDFLinkUtils {
 
     /** Symbol for placing a connection (TODO supplier?) into an arq context */
+    @Deprecated // Data source is the better abstraction!
     public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
+
+
+    public static final Symbol symRdfDataSource = Symbol.create("https://w3id.org/aksw/jenax#rdfDataSource");
 
     public static RDFLink withCloseShield(RDFLink link) {
         return new RDFLinkWrapperWithCloseShield(link);

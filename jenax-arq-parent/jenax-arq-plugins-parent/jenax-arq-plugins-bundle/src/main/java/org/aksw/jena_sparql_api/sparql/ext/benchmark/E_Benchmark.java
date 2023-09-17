@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
+import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -72,7 +73,7 @@ public class E_Benchmark
         RDFConnection conn = null;
         Context cxt = env.getContext();
         if(cxt != null) {
-            conn = cxt.get(RDFConnectionUtils.CONNECTION_SYMBOL);
+            conn = cxt.get(RDFLinkUtils.CONNECTION_SYMBOL);
         }
 
         if(conn == null) {
@@ -92,7 +93,7 @@ public class E_Benchmark
         RDFConnection conn = null;
         Context cxt = env.getContext();
         if(cxt != null) {
-            conn = cxt.get(RDFConnectionUtils.CONNECTION_SYMBOL);
+            conn = cxt.get(RDFLinkUtils.CONNECTION_SYMBOL);
         }
 
         if(conn == null) {

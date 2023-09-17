@@ -239,11 +239,13 @@ public class DataPods {
         List<String> defaultGraphs = dataRef.getDefaultGraphs();
         List<String> namedGraphs = dataRef.getNamedGraphs();
 
-        RdfDataPod result = fromSparqlEndpoint(serviceUrl, defaultGraphs, namedGraphs);
+        Object auth = dataRef.getAuth();
+
+        RdfDataPod result = fromSparqlEndpoint(serviceUrl, defaultGraphs, namedGraphs, auth);
         return result;
     }
 
-    public static RdfDataPod fromSparqlEndpoint(String serviceUrl, List<String> defaultGraphs, List<String> namedGraphs) {
+    public static RdfDataPod fromSparqlEndpoint(String serviceUrl, List<String> defaultGraphs, List<String> namedGraphs, Object auth) {
 
         Objects.requireNonNull(serviceUrl, "Service URL must not be null");
 

@@ -40,7 +40,6 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
@@ -48,7 +47,15 @@ import org.apache.jena.update.UpdateRequest;
 public class RDFConnectionUtils {
 
     /** Symbol for placing a connection (TODO supplier?) into an arq context */
-    public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
+    // @Deprecated
+    // public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
+
+    /**
+     * Context symbol for placing a data source into the query execution context (for sub queries).
+     * (Alternatively, the execCxt's datasetGraph could be a DatasetGraphSparqlService)
+     */
+    // public static final Symbol RDF_DATASOURCE = Symbol.create("rdfDataSource");
+
 
     public static RDFConnection withCloseShield(RDFConnection conn) {
         return RDFConnectionAdapter.adapt(new RDFLinkWrapperWithCloseShield(RDFLinkAdapter.adapt(conn)));
@@ -202,7 +209,7 @@ public class RDFConnectionUtils {
                 public UpdateProcessor postProcess(UpdateProcessor qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
-                        cxt.set(CONNECTION_SYMBOL, result[0]);
+                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
                         contextMutator.accept(cxt);
                     }
 
@@ -212,7 +219,7 @@ public class RDFConnectionUtils {
                 public QueryExecution postProcess(QueryExecution qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
-                        cxt.set(CONNECTION_SYMBOL, result[0]);
+                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
                         contextMutator.accept(cxt);
                     }
 

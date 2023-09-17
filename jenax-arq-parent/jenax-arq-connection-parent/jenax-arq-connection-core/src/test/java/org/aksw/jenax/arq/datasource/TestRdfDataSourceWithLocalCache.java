@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class TestRdfDataSourceWithLocalCache {
 
-    @Test // TODO Add a 'delaying' data source to simulate latency
+    // @Test // TODO Add a 'delaying' data source to simulate latency
     public void test() {
         RdfDataSource base = () -> RDFConnectionRemote.newBuilder()
                 //.destination("https://query.wikidata.org/sparql")

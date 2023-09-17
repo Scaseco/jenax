@@ -12,22 +12,22 @@ import org.apache.jena.graph.Node;
 
 public class SparqlLibArrayFn {
 
-    @IriNs(JenaExtensionArray.NS)
+    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
     public static Node get(NodeList nodes, int index) {
         return nodes.get(index);
     }
 
-    @IriNs(JenaExtensionArray.NS)
+    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
     public static NodeList of(Node... nodes) {
         return new NodeListImpl(Arrays.asList(nodes));
     }
 
-    @IriNs(JenaExtensionArray.NS)
+    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
     public static int size(NodeList nodes) {
         return nodes.size();
     }
 
-    @IriNs(JenaExtensionArray.NS)
+    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
     public static NodeSet toSet(NodeList nodes) {
         return new NodeSetImpl(new LinkedHashSet<>(nodes));
     }

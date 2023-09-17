@@ -10,6 +10,7 @@ public class JenaExtensionsPath {
 
     public static void register() {
         PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
+        PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.LEGACY_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
     }
 
     public static void addPrefixes(PrefixMapping pm) {

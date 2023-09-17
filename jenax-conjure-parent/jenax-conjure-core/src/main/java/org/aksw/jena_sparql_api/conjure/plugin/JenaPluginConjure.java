@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.conjure.plugin;
 
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfAuthBasic;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfAuthBearerToken;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefCatalog;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefDcat;
@@ -125,5 +127,10 @@ public class JenaPluginConjure
 
         JenaPluginUtils.registerResourceClasses(
                 ResourceSpec.class, ResourceSpecInline.class, ResourceSpecUrl.class);
+
+        JenaPluginUtils.registerResourceClasses(
+                // RdfAuth.class,
+                RdfAuthBasic.class,
+                RdfAuthBearerToken.class);
     }
 }

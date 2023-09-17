@@ -11,6 +11,7 @@ public interface DataRefSparqlEndpoint
     List<String> getDefaultGraphs();
     List<String> getNamedGraphs();
 
+    Object getAuth();
 
     default DatasetDescription getDatsetDescription() {
         List<String> dgs = getDefaultGraphs();

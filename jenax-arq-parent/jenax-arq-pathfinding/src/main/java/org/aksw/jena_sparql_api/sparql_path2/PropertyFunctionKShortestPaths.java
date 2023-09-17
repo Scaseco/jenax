@@ -11,22 +11,19 @@ import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletPath;
-import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
-import org.aksw.jena_sparql_api.post_process.QueryExecutionFactoryPostProcess;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorTxn;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -41,7 +38,6 @@ import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropFuncArgType;
 import org.apache.jena.sparql.pfunction.PropertyFunctionEval;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.Symbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,18 +66,21 @@ public class PropertyFunctionKShortestPaths
 {
     private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionKShortestPaths.class);
 
-    public static final String DEFAULT_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
+    public static final String NORSE_NS = "https://w3id.org/aksw/norse#";
+    public static final String DEFAULT_IRI = NORSE_NS + "kShortestPaths";
+
+    public static final String LEGACY_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
 
     // public static final Symbol PROLOGUE = Symbol.create("prologue");
-    public static final Symbol SPARQL_SERVICE = Symbol.create("sparqlService");
+    // public static final Symbol SPARQL_SERVICE = Symbol.create("sparqlService");
 
-    protected Function<SparqlService, SparqlKShortestPathFinder> serviceToPathFinder;
+    protected Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder;
     //protected Gson gson;
 
-    public PropertyFunctionKShortestPaths(Function<SparqlService, SparqlKShortestPathFinder> serviceToPathFinder) { //Gson gson) {
+    public PropertyFunctionKShortestPaths(Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder) { //Gson gson) {
         super(PropFuncArgType.PF_ARG_SINGLE, PropFuncArgType.PF_ARG_EITHER);
 //        this.gson = gson;
-        this.serviceToPathFinder = serviceToPathFinder;
+        this.dataSourceToPathFinder = dataSourceToPathFinder;
     }
 
     @Override
@@ -91,22 +90,24 @@ public class PropertyFunctionKShortestPaths
         Context ctx = execCxt.getContext();
 
         // TODO: Get the currently running query so we can inject the prefixes
-        System.out.println("CONTEXT" + ctx);
+        // System.out.println("CONTEXT" + ctx);
 
         Prologue prologue = (Prologue)ctx.get(ARQConstants.sysCurrentQuery);
         if (prologue == null) {
             prologue = new Prologue(PrefixMapping.Extended);
         }
-        SparqlService ss = (SparqlService)ctx.get(SPARQL_SERVICE);
+        RdfDataSource dataSource = (RdfDataSource)ctx.get(RDFLinkUtils.symRdfDataSource);
 
-        if (ss == null) {
-            Dataset ds = DatasetFactory.wrap(execCxt.getDataset());
-            ss = new SparqlServiceImpl(
-                    new QueryExecutionFactoryPostProcess(new QueryExecutionFactoryDataset(), qe -> new QueryExecutionDecoratorTxn<QueryExecution>(qe, ds)), null);
+        if (dataSource == null) {
+            DatasetGraph datasetGraph = execCxt.getDataset();
+            dataSource = RdfDataEngines.of(dataSource);
+//            Dataset ds = DatasetFactory.wrap(datasetGraph);
+//            ss = new SparqlServiceImpl(
+//                    new QueryExecutionFactoryPostProcess(new QueryExecutionFactoryDataset(), qe -> new QueryExecutionDecoratorTxn<QueryExecution>(qe, ds)), null);
         }
 
-        Objects.requireNonNull(ss);
-        QueryExecutionFactory qef = ss.getQueryExecutionFactory();
+        Objects.requireNonNull(dataSource);
+        QueryExecutionFactory qef = dataSource.asQef();
         Objects.requireNonNull(qef);
 
         List<Node> argList = argObject.getArgList();
@@ -161,10 +162,10 @@ public class PropertyFunctionKShortestPaths
 
         Path path = PathParser.parse(pathStr, prologue);
 
-        SparqlKShortestPathFinder pathFinder = serviceToPathFinder.apply(ss);
+        SparqlKShortestPathFinder pathFinder = dataSourceToPathFinder.apply(dataSource);
         if(pathFinder == null) {
             logger.info("Falling back on default k shortest path finder service");
-            pathFinder = new SparqlKShortestPathFinderMem(ss.getQueryExecutionFactory());
+            pathFinder = new SparqlKShortestPathFinderMem(dataSource.asQef());
         }
 
         Iterator<TripletPath<Node, Directed<Node>>> itPaths = pathFinder.findPaths(s, targetNode, path, k);

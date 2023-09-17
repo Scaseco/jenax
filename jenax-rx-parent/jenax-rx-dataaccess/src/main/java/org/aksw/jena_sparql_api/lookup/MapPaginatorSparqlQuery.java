@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.lookup;
 
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Range;
 
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 
@@ -115,11 +117,22 @@ public class MapPaginatorSparqlQuery
 //      Node[] prior = {null};
 //      PublishProcessor<Node> boundaryIndicator = PublishProcessor.create();
 
-      return SparqlRx.execSelectRaw(qef, query)
+      Flowable<Entry<Node, Table>> result = SparqlRx.execSelectRaw(qef, query)
               .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(
                       b -> b.get(attrVar),
                       groupKey -> new TableN(),
                       Table::addBinding));
+
+      if (false) {
+          List<Entry<Node, Table>> items = result.toList().blockingGet();
+          System.out.println("Query: " + query);
+          List<Binding> bindings = SparqlRx.execSelectRaw(qef, query).toList().blockingGet();
+          System.out.println("Raw Bindings: " + bindings);
+          System.out.println("Items: " + items);
+          result = Flowable.fromIterable(items);
+      }
+
+      return result;
 //      return ReactiveSparqlUtils.groupByOrdered(
 //    		  ReactiveSparqlUtils.execSelect(() -> qef.createQueryExecution(query)),
 //    		  b -> b.get(attrVar))

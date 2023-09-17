@@ -15,7 +15,6 @@ public class JenaPluginPath
     public void stop() {
     }
 
-
     public static void init() {
         TypeMapper typeMapper = TypeMapper.getInstance();
         typeMapper.registerDatatype(RDFDatatypePPath.INSTANCE);

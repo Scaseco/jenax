@@ -6,6 +6,7 @@ import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.connection.dataengine.RdfDataEngine;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 /**
@@ -33,6 +34,10 @@ public interface RdfDataSource
      * Return a connection-less QueryExecutionFactory view of this data source.
      * Every QueryExecution created with the returned factory will obtain a fresh
      * connection using {@link #getConnection()} upon execution.
+     * The connection is closed when closing the {@link QueryExecution}
+     * (NOT the {@link org.apache.jena.query.QueryExecutionFactory})!
+     * Consequently, the use of connection pooling is recommended in cases where calling
+     * {@link #getConnection()} is expensive.
      */
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);

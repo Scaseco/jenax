@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql_path2;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -20,10 +21,13 @@ import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 public class PathExecutionUtils {
+    private static final Logger logger = LoggerFactory.getLogger(PathExecutionUtils.class);
 
     /**
      * A function that creates a lookup service for a given qef and predicate class
@@ -71,12 +75,13 @@ public class PathExecutionUtils {
 
         org.jgrapht.Graph<Integer, LabeledEdge<Integer, PredicateClass>> nfaGraph = nfa.getGraph();
 
-        System.out.println("NFA");
-        System.out.println(nfa);
-        for(LabeledEdge<Integer, PredicateClass> edge : nfaGraph.edgeSet()) {
-            System.out.println(edge);
+        if (logger.isDebugEnabled()) {
+            logger.debug("NFA:");
+            logger.debug("" + nfa);
+            for(LabeledEdge<Integer, PredicateClass> edge : nfaGraph.edgeSet()) {
+                logger.debug("" + edge);
+            }
         }
-
 //        PartialNfa<Integer, Path> peek = nfaCompiler.peek();
 
         //QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://dbpedia.org/sparql", "http://dbpedia.org").config().selectOnly().end().create();
@@ -124,7 +129,11 @@ public class PathExecutionUtils {
 
                     //getMatchingTriplets.apply(trans, nestedPath))
             TripletLookup<LabeledEdge<Integer, PredicateClass>, Node, Node, Node> getMatchingTriplets =
-                    (trans, vToNestedPaths) -> PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize).fetchMap(vToNestedPaths.keySet());
+                    (trans, vToNestedPaths) -> {
+                        LookupService<Node, Set<Triplet<Node, Node>>> ls = PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize);
+                        Map<Node, Set<Triplet<Node, Node>>> r = ls.fetchMap(vToNestedPaths.keySet());
+                        return r;
+                    };
                   //.collect(Collectors.toSet());
 //            BiFunction<
 //                LabeledEdge<Integer, PredicateClass>,

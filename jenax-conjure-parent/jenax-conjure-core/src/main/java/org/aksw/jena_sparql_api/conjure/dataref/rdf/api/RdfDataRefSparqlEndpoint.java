@@ -33,6 +33,11 @@ public interface RdfDataRefSparqlEndpoint
     @IriType
     List<String> getDefaultGraphs();
 
+    @HashId
+    @Iri("rpif:auth")
+    RdfAuth getAuth();
+    RdfDataRefSparqlEndpoint setAuth(RdfAuth auth);
+
     @Override
     default <T> T acceptRdf(RdfDataRefVisitor<T> visitor) {
         T result = visitor.visit(this);

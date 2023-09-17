@@ -735,8 +735,8 @@ public class ConceptUtils {
             // Case for e.g. Get all products offered by some 10 vendors
             // Select ?vendor ?product { ... }
 
-            boolean requireSubQuery = limit != null || offset != null;
-
+            // boolean requireSubQuery = limit != null || offset != null;
+            boolean requireSubQuery = QueryUtils.hasLimit(limit) || QueryUtils.hasNonZeroOffset(offset);
 
             Element newFilterElement;
             if(requireSubQuery) {
