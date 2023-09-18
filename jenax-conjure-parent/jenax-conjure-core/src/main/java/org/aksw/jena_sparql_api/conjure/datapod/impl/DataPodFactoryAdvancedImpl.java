@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.conjure.datapod.impl;
 
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.aksw.dcat.jena.domain.api.DcatDistribution;
 import org.aksw.dcat.jena.domain.api.DcatUtils;
@@ -120,7 +120,6 @@ public class DataPodFactoryAdvancedImpl
         RdfDataPod result = DataPods.create(url, repo);
         return result;
     }
-
 
     @Override
     public RdfDataPod visit(DataRefGit dataRef) {

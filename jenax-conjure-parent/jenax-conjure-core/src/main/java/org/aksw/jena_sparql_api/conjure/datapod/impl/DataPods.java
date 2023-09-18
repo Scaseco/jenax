@@ -1,12 +1,13 @@
 package org.aksw.jena_sparql_api.conjure.datapod.impl;
 
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import org.aksw.commons.io.util.UriUtils;
 import org.aksw.commons.util.ref.Ref;
@@ -16,6 +17,7 @@ import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRef;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefVisitor;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfAuthBasic;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
@@ -27,12 +29,14 @@ import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromF
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
 import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
+import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.jena.http.auth.AuthLib;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -41,6 +45,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.WebContent;
@@ -253,11 +258,31 @@ public class DataPods {
         List<String> defaultGraphsCpy = defaultGraphs == null ? null : new ArrayList<>(defaultGraphs);
         List<String> namedGraphsCpy = namedGraphs == null ? null : new ArrayList<>(namedGraphs);
 
-        Supplier<RDFConnection> supplier = () -> {
-            RDFConnection r = RDFConnectionRemote.create()
-                .destination(serviceUrl)
-                .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
-                .build();
+        Authenticator tmpAuthenticator = null;
+
+        if (auth instanceof RdfAuthBasic) {
+            RdfAuthBasic authData = (RdfAuthBasic)auth;
+            String username = authData.getUsername();
+            String password = authData.getPassword();
+            tmpAuthenticator = AuthLib.authenticator(username, password);
+        }
+
+        Authenticator authenticator = tmpAuthenticator;
+
+        // RDFConnectionRemote.newBuilder().
+        RdfDataSource dataSource = () -> {
+
+            RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                    .destination(serviceUrl)
+                    .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
+                    ;
+
+            if (authenticator != null) {
+                HttpClient httpClient = HttpClient.newBuilder().authenticator(authenticator).build();
+                builder.httpClient(httpClient);
+            }
+
+            RDFConnection r = builder.build();
 
             r = RDFConnectionUtils.wrapWithQueryTransform(r,
                 query -> {
@@ -281,16 +306,15 @@ public class DataPods {
             return r;
         };
 
-        RdfDataPod result = fromConnectionSupplier(supplier);
+        RdfDataPod result = fromDataSource(dataSource);
         return result;
     }
 
-
-    public static RdfDataPod fromConnectionSupplier(Supplier<? extends RDFConnection> supplier) {
+    public static RdfDataPod fromDataSource(RdfDataSource supplier) {
         return new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                RDFConnection result = supplier.get();
+                RDFConnection result = supplier.getConnection();
                 return result;
             }
         };

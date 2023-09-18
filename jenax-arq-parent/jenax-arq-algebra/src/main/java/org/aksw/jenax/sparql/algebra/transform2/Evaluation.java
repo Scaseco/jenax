@@ -42,7 +42,7 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
 /**
  * A generalization of {@link Transform}
  */
- interface Evaluation<T> {
+ public interface Evaluation<T> {
      T eval(OpTable op);
      T eval(OpBGP op);
      T eval(OpTriple op);
