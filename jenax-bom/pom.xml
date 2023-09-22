@@ -9,7 +9,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>4.8.0-3-SNAPSHOT</version>
+	<version>4.9.0-1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
@@ -43,7 +43,7 @@
 		<module>..</module>
 	</modules>
 	<properties>
-		<jena.version>4.8.0</jena.version>
+		<jena.version>4.9.0</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
