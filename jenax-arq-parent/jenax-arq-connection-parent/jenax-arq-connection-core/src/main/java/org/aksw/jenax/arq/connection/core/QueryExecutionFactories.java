@@ -5,12 +5,17 @@ import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public class QueryExecutionFactories {
+    public static QueryExecutionFactory empty() {
+        return of(DatasetFactory.empty());
+    }
+
     public static QueryExecutionFactory adapt(QueryExecFactory queryExecFactory) {
         return new QueryExecutionFactoryOverQueryExecFactory(queryExecFactory);
     }

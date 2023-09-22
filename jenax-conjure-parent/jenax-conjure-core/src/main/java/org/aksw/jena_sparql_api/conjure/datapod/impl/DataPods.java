@@ -297,6 +297,8 @@ public class DataPods {
                         .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
                         ;
 
+                // FIXME We cannot set default / named graphs on the remote builder
+
                 rdfConnectionBuilder = rdfConnectionBuilder.httpClient(httpClient);
 
                 RDFConnection r = rdfConnectionBuilder.build();

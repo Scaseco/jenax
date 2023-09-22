@@ -6,7 +6,8 @@ import java.util.Map;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.sparql.core.QuerySolutionBase;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingLib;
 
 /**
  * @author Claus Stadler
@@ -15,61 +16,44 @@ import org.apache.jena.sparql.core.QuerySolutionBase;
  *         Time: 2:30 PM
  */
 public class QuerySolutionWithEquals
-    extends QuerySolutionBase
+    extends QuerySolutionWrapper
 {
-    private QuerySolution querySolution;
-    private Map<String, RDFNode> map;
-
     public QuerySolutionWithEquals(QuerySolution querySolution) {
-        this.querySolution = querySolution;
-        this.map = createMap(querySolution);
-    }
-
-    @Override
-    protected RDFNode _get(String varName) {
-        return querySolution.get(varName);
-    }
-
-    @Override
-    protected boolean _contains(String varName) {
-        return querySolution.contains(varName);
-    }
-
-    @Override
-    public Iterator<String> varNames() {
-        return querySolution.varNames();
+        super(querySolution);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof QuerySolution)) return false;
 
-        QuerySolutionWithEquals that = (QuerySolutionWithEquals) o;
-
-        boolean result = this.map.equals(that.map);
+        QuerySolution that = (QuerySolution) o;
+        Binding thisBinding = asBinding();
+        Binding thatBinding = QuerySolutionWrapper.asBinding(that);
+        boolean result = BindingLib.equals(thisBinding, thatBinding);
         return  result;
     }
 
+    @Override
+    public int hashCode() {
+        Binding binding = asBinding();
+        int result = binding.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        String result = asBinding().toString();
+        return result;
+    }
+
     public static Map<String, RDFNode> createMap(QuerySolution querySolution) {
-        Map<String, RDFNode> result = new HashMap<String, RDFNode>();
+        Map<String, RDFNode> result = new HashMap<>();
         Iterator<String> it = querySolution.varNames();
         while(it.hasNext()) {
             String varName = it.next();
             result.put(varName, querySolution.get(varName));
         }
-
         return result;
     }
-
-    @Override
-    public int hashCode() {
-        return this.map.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "" + map;
-    }
-
 }
