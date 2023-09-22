@@ -27,6 +27,7 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -270,6 +271,18 @@ public class GeoSparqlExFunctions {
     @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static double metricArea(GeometryWrapper geom) {
         return area(geom, NodeValue.makeNode(NodeFactory.createURI(Unit_URI.METRE_URL)));
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static boolean isValid(GeometryWrapper geom) {
+        return geom.isValid();
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper makeValid(GeometryWrapper geomWrapper) {
+        Geometry fixedGeometry = GeometryFixer.fix(geomWrapper.getParsingGeometry());
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, fixedGeometry);
+        return result;
     }
 
 }
