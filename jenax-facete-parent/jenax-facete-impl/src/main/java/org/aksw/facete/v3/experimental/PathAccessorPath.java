@@ -4,7 +4,7 @@ import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessorRdf;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.sparql.path.P_Path0;
 
 //

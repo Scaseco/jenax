@@ -23,7 +23,7 @@ import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.query.OpVisitorTriplesQuads;
 import org.aksw.jenax.arq.util.query.TransformCollectOps;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;

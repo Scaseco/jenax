@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.core;
 import java.util.Iterator;
 
 import org.aksw.commons.collections.PrefetchIterator;
-import org.apache.jena.ext.com.google.common.collect.Iterators;
+import com.google.common.collect.Iterators;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.engine.binding.Binding;

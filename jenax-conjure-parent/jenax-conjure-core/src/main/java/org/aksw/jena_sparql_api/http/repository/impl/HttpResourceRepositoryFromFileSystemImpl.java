@@ -47,10 +47,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
-import org.apache.jena.ext.com.google.common.base.Splitter; // due to spark conflict
-import org.apache.jena.ext.com.google.common.hash.HashCode; // due to spark conflict
-import org.apache.jena.ext.com.google.common.hash.Hashing;  // due to spark conflict
-import org.apache.jena.ext.com.google.common.io.ByteSource; // due to spark conflict
+import com.google.common.base.Splitter; // due to spark conflict
+import com.google.common.hash.HashCode; // due to spark conflict
+import com.google.common.hash.Hashing;  // due to spark conflict
+import com.google.common.io.ByteSource; // due to spark conflict
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.WebContent;
@@ -620,7 +620,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
 
 
         // Compute hash
-        ByteSource bs = org.apache.jena.ext.com.google.common.io.Files.asByteSource(tmp.toFile());
+        ByteSource bs = com.google.common.io.Files.asByteSource(tmp.toFile());
 
         HashCode hashCode;
         try {

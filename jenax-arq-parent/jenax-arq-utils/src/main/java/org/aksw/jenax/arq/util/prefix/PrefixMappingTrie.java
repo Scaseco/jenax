@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 import org.apache.jena.atlas.lib.Trie;
-import org.apache.jena.ext.com.google.common.cache.Cache;
-import org.apache.jena.ext.com.google.common.cache.CacheBuilder;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.graph.PrefixMappingBase;

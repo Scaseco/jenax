@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ext.com.google.common.hash.HashCode;
-import org.apache.jena.ext.com.google.common.hash.HashFunction;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
-import org.apache.jena.ext.com.google.common.io.ByteSource;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
 
 public class HashUtils {
 	protected static HashFunction hashing = Hashing.sha256();

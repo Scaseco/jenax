@@ -20,7 +20,7 @@ import org.aksw.jenax.arq.dataset.diff.DatasetGraphDiff;
 import org.aksw.jenax.arq.util.quad.SetFromDatasetGraph;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import com.google.common.collect.Streams;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;

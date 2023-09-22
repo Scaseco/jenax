@@ -4,7 +4,7 @@ import java.util.AbstractCollection;
 import java.util.Iterator;
 import java.util.function.Function;
 
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import com.google.common.collect.Streams;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;

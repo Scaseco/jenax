@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.util.node;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.graph.NodeTransform;

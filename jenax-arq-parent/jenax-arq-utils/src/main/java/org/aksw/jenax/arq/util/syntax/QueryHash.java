@@ -12,7 +12,7 @@ import java.util.TreeSet;
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.util.math.Lehmer;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.core.Quad;

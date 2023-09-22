@@ -20,7 +20,7 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.path.P_Path0;

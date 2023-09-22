@@ -22,7 +22,7 @@ import org.aksw.jena_sparql_api.relationlet.VarRef;
 import org.aksw.jena_sparql_api.relationlet.VarRefStatic;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.path.P_Path0;

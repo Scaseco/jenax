@@ -37,14 +37,14 @@ public class JenaExtensionFs {
 
 //        FunctionRegistry.get().put(ns + "sha256", E_UnaryPathFunction.newFactory(path ->
 //            NodeValue.makeString(
-//                org.apache.jena.ext.com.google.common.io.Files
+//                com.google.common.io.Files
 //                    .asByteSource(path.toFile())
 //                    .hash(Hashing.sha256())
 //                    .toString())));
 //
 //        FunctionRegistry.get().put(ns + "md5", E_UnaryPathFunction.newFactory(path ->
 //        NodeValue.makeString(
-//            org.apache.jena.ext.com.google.common.io.Files
+//            com.google.common.io.Files
 //                .asByteSource(path.toFile())
 //                .hash(Hashing.md5())
 //                .toString())));

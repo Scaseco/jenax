@@ -17,7 +17,7 @@ import org.aksw.jenax.arq.util.dataset.DatasetGraphRDFSReduced;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphSameAs;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphUnionDefaultGraph;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.ext.com.google.common.io.MoreFiles;
+import com.google.common.io.MoreFiles;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;

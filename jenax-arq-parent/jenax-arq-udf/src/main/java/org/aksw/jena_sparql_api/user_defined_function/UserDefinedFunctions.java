@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;

@@ -15,7 +15,7 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.relation.dataset.GraphNameAndNode;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDatasetImpl;
-import org.apache.jena.ext.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;

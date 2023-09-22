@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.aksw.commons.util.string.StringUtils;
-import org.apache.jena.ext.com.google.common.base.Stopwatch;
+import com.google.common.base.Stopwatch;
 
 
 

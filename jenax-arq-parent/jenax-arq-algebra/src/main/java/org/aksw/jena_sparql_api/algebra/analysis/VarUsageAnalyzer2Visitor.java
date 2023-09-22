@@ -13,7 +13,7 @@ import java.util.Set;
 
 import org.aksw.commons.collections.multimaps.MultimapUtils;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;

@@ -2,7 +2,7 @@ package org.aksw.jenax.io.kryo.jena;
 
 import java.util.List;
 
-import org.apache.jena.ext.com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 import org.apache.jena.sparql.expr.E_BNode;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprFunction;

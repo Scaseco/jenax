@@ -18,7 +18,7 @@ import org.aksw.combinatorics.collections.NodeMapping;
 import org.aksw.commons.collections.stacks.NestedStack;
 import org.aksw.commons.collections.trees.Tree;
 import org.aksw.commons.collections.trees.TreeUtils;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

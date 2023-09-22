@@ -6,7 +6,7 @@ import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.arq.util.node.NodeSet;
 import org.aksw.jenax.arq.util.node.NodeSetImpl;
-import org.apache.jena.ext.com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;

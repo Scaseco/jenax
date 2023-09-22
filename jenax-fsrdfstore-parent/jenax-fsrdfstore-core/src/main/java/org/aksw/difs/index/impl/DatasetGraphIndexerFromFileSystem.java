@@ -28,7 +28,7 @@ import org.aksw.commons.util.array.Array;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.difs.index.api.DatasetGraphIndexPlugin;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.jena.ext.com.google.common.io.MoreFiles;
+import com.google.common.io.MoreFiles;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;

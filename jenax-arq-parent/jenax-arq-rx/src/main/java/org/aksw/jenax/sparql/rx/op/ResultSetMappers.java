@@ -8,7 +8,7 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.binding.CollectionFromTable;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
