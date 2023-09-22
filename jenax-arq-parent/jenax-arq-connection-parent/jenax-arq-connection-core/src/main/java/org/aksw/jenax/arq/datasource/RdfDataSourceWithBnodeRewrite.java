@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
@@ -36,7 +37,9 @@ public class RdfDataSourceWithBnodeRewrite
 
     protected String givenProfileName;
     protected String derivedProfileName;
-    protected ExprTransformVirtualBnodeUris transformer;
+
+    // null = not yet initialized, empty = no suitable transformer found
+    protected Optional<ExprTransformVirtualBnodeUris> transformer = null;
 
     public RdfDataSourceWithBnodeRewrite(RdfDataSource delegate, String givenProfileName) {
         super(delegate);
@@ -106,16 +109,23 @@ public class RdfDataSourceWithBnodeRewrite
         RDFConnection base = getDelegate().getConnection();
 
         RDFConnection result;
-        if ("auto".equalsIgnoreCase(givenProfileName) && transformer == null) {
-            String detectedProfileName = detectProfile(base);
-            if(detectedProfileName != null) {
-                derivedProfileName = detectedProfileName;
-                transformer = getTransform(derivedProfileName);
+        if (transformer == null) {
+            if ("auto".equalsIgnoreCase(givenProfileName)) {
+                derivedProfileName = detectProfile(base);
+            } else {
+                derivedProfileName = givenProfileName;
+            }
+
+            if(derivedProfileName != null) {
+                ExprTransformVirtualBnodeUris tmp = getTransform(derivedProfileName);
+                transformer = Optional.ofNullable(tmp);
+            } else {
+                transformer = Optional.empty();
             }
         }
 
-        if(transformer != null) {
-            result = RDFConnectionUtils.wrapWithQueryTransform(base, transformer::rewrite);
+        if (transformer.isPresent()) {
+            result = RDFConnectionUtils.wrapWithQueryTransform(base, transformer.get()::rewrite);
         } else {
             logger.warn("No bnode profile found - bnodes are not supported");
             result = base;
