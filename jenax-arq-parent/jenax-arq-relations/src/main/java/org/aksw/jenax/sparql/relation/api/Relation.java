@@ -19,9 +19,12 @@ import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementFilter;
@@ -221,6 +224,9 @@ public interface Relation
         return project(Arrays.asList(vars));
     }
 
+    default Relation filter(Var var, Node node) {
+        return filter(new E_Equals(ExprLib.nodeToExpr(var), ExprLib.nodeToExpr(node)));
+    }
 
     default Relation filter(Expr ... exprs) {
         return filter(Arrays.asList(exprs));
