@@ -107,14 +107,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
-
-
 public class MainSparqlPath2 {
 
     private static final Logger logger = LoggerFactory.getLogger(MainSparqlPath2.class);
 
     public static SparqlService proxySparqlService(SparqlService coreSparqlService, SparqlStmtParserImpl sparqlStmtParser, Prologue prologue) {
-
         GraphSparqlService graph = new GraphSparqlService(coreSparqlService);
         Model model = ModelFactory.createModelForGraph(graph);
 

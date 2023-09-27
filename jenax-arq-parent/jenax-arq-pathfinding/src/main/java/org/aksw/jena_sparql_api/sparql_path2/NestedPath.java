@@ -11,6 +11,8 @@ import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletImpl;
 import org.aksw.commons.util.triplet.TripletPath;
 
+import com.github.jsonldjava.shaded.com.google.common.base.Objects;
+
 public class NestedPath<V, E>
     implements Serializable
 {
@@ -24,6 +26,12 @@ public class NestedPath<V, E>
 
     public NestedPath(V current) {
         this(Optional.empty(), current);
+    }
+
+    public boolean containsVertex(Object vertex) {
+        boolean result = Objects.equal(current, vertex) ||
+                getParentLink().map(ParentLink::getTarget).map(parent -> parent.containsVertex(vertex)).orElse(false);
+        return result;
     }
 
     public boolean containsEdge(Object edge, boolean reverse) {
@@ -50,6 +58,9 @@ public class NestedPath<V, E>
         this.current = current;
     }
 
+    public static <V, E> NestedPath<V, E> of(NestedPath<V, E> parentPath, Directed<E> edgeLabel, V targetVertex) {
+        return new NestedPath<>(new ParentLink<>(parentPath, edgeLabel), targetVertex);
+    }
 
     public Optional<ParentLink<V, E>> getParentLink() {
         return Optional.ofNullable(parentLink);

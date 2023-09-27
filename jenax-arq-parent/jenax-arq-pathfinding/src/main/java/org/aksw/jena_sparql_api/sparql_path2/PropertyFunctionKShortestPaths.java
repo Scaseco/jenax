@@ -221,7 +221,7 @@ public class PropertyFunctionKShortestPaths
     public static NodeList pathToNodeList(TripletPath<Node, Directed<Node>> path) {
         List<Node> list = new ArrayList<>();
         list.add(path.getStart());
-        list.add(path.getEnd());
+        // list.add(path.getEnd());
 
         // int lastTripletIdx = path.getTriplets().size() - 1;
         // int i = 0;

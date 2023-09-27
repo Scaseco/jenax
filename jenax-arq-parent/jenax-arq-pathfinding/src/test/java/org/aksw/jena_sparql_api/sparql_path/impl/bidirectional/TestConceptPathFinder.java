@@ -56,8 +56,7 @@ public class TestConceptPathFinder {
             .build();
 
 
-        //Concept.parse("?s | ?s ?p [ a eg:D ]", PrefixMapping.Extended),
-
+        // Concept.parse("?s | ?s ?p [ a eg:D ]", PrefixMapping.Extended),
         // Create search for paths between two given sparql concepts
         PathSearch<SimplePath> pathSearch = pathFinder.createSearch(
             Concept.parse("?s { ?s eg:cd ?o }", PrefixMapping.Extended),

@@ -1,5 +1,6 @@
 #PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX bif: <bif:>
+PREFIX afn: <http://jena.apache.org/ARQ/function#>
 PREFIX apf: <http://jena.hpl.hp.com/ARQ/property#>
 PREFIX stardog: <tag:stardog:api:functions:>
 PREFIX hint: <http://www.bigdata.com/queryHints#>
@@ -33,12 +34,21 @@ WHERE {
     BIND("virtuoso" AS ?dbmsShortName)
   }
 
-  # Jena ~ https://jena.apache.org/documentation/query/library-propfunc.html
+  # Jena ~ https://jena.apache.org/documentation/query/library-propfunc.html (apf:versionARQ was removed in jena-4.9.0)
   OPTIONAL {
     SERVICE SILENT <env://REMOTE> {
       ?dbmsRawName apf:versionARQ ?dbmsVersion
     }
     FILTER(BOUND(?dbmsVersion))
+    BIND("jena" AS ?dbmsShortName)
+  }
+
+  # Jena 4.9.0+
+  OPTIONAL {
+    SERVICE SILENT <env://REMOTE> {
+      BIND(afn:bnode(BNODE()) AS ?bnodeLabel)
+    }
+    FILTER(BOUND(?bnodeLabel))
     BIND("jena" AS ?dbmsShortName)
   }
 
@@ -63,7 +73,7 @@ WHERE {
     BIND("blazegraph" AS ?dbmsRawName)
     BIND("blazegraph" AS ?dbmsShortName)
   }
-  
+
   # GraphDB
   OPTIONAL {
     SERVICE SILENT <env://REMOTE> {
@@ -84,7 +94,7 @@ WHERE {
   }
 
 
-  # TODO https://github.com/w3c/sparql-12/wiki/Inventory-of-existing-extensions-to-SPARQL-1.1 Kineo, Communica, 
+  # TODO https://github.com/w3c/sparql-12/wiki/Inventory-of-existing-extensions-to-SPARQL-1.1 Kineo, Communica,
 
 
   BIND( REPLACE(REPLACE(STR(?dbmsRawName), '\\s+', ' '), ' ', '-') AS ?dbmsName)

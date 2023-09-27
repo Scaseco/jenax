@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.collections.PolaritySet;
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.Triplet;
@@ -34,7 +35,7 @@ import com.google.common.collect.Multimap;
  */
 public class NfaExecutionUtils {
 
-    public static <S, T, G, V, E> boolean collectPaths(Nfa<S, T> nfa, NfaFrontier<S, G, V, E> frontier, Predicate<T> isEpsilon, Function<NestedPath<V, E>, Boolean> pathCallback) {
+    public static <S, T, G, V, E> boolean collectPaths(Nfa<S, T> nfa, NfaFrontier<S, G, V, E> frontier, Predicate<T> isEpsilon, Predicate<NestedPath<V, E>> pathFilter, Function<NestedPath<V, E>, Boolean> pathCallback) {
         boolean isFinished = false;
         Set<S> currentStates = frontier.getCurrentStates();
         for(S state : currentStates) {
@@ -42,11 +43,14 @@ public class NfaExecutionUtils {
             boolean isFinal = isFinalState(nfa, state, isEpsilon);
             if(isFinal) {
                 Multimap<G, NestedPath<V, E>> ps = frontier.getPaths(state);
-                for(NestedPath<V, E> path : ps.values()) {
-                    //MyPath<V, E> rdfPath = path.asSimplePath();
-                    isFinished = pathCallback.apply(path);
-                    if(isFinished) {
-                        break;
+                for (NestedPath<V, E> path : ps.values()) {
+                    boolean acceptPath = pathFilter != null && pathFilter.test(path);
+                    if (acceptPath) {
+                        //MyPath<V, E> rdfPath = path.asSimplePath();
+                        isFinished = pathCallback.apply(path);
+                        if(isFinished) {
+                            break;
+                        }
                     }
                 }
             }
@@ -63,6 +67,7 @@ public class NfaExecutionUtils {
     public static <S, D, T extends LabeledEdge<S, ? extends Directed<? extends ValueSet<D>>>> Pair<ValueSet<D>> extractNextPropertyClasses(Graph<S, T> nfaGraph, Predicate<T> isEpsilon, Set<S> states, boolean reverse) {
         Set<T> transitions = JGraphTUtils.resolveTransitions(nfaGraph, isEpsilon, states, false);
 
+        // PolaritySet<T>
         ValueSet<D> fwd = ValueSet.createEmpty();
         ValueSet<D> bwd = ValueSet.createEmpty();
 
@@ -166,7 +171,10 @@ public class NfaExecutionUtils {
                             throw new RuntimeException("Should not happen");
                         }
 
-                        NestedPath<V, E> next = new NestedPath<V, E>(new ParentLink<V, E>(parentPath, p0), o);
+                        // boolean isSimplePath = !parentPath.containsVertex(o);
+                        // if (isSimplePath) {
+
+                        NestedPath<V, E> next = NestedPath.of(parentPath, p0, o);
                         G groupKey = pathGrouper.apply(next);
 
                         if(next.isCycleFree()) {
@@ -176,6 +184,7 @@ public class NfaExecutionUtils {
                                 result.add(targetState, groupKey, next);
                             }
                         }
+                        // }
                     }
                 }
             }
@@ -366,7 +375,7 @@ public class NfaExecutionUtils {
 
         while(!frontier.isEmpty()) {
 
-            boolean abort = collectPaths(nfa, frontier, isEpsilon, pathCallback);
+            boolean abort = collectPaths(nfa, frontier, isEpsilon, null, pathCallback);
             if(abort) {
                 break;
             }
@@ -379,7 +388,9 @@ public class NfaExecutionUtils {
                     isEpsilon,
                     getMatchingTriplets,
                     pathGrouper,
-                    x -> false);
+                    // Reject paths where the last vertex is contained elsewhere in the path
+                    p -> p.getParentLink().map(parent -> parent.getTarget().containsVertex(p.getCurrent())).orElse(false));
+                    // x -> false);
 
             frontier = nextFrontier;
         }
