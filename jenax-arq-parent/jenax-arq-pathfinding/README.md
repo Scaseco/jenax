@@ -6,7 +6,7 @@ nav_order: 20
 ---
 
 ## PathFinding
-The property function `norse:simplePaths` matches up to `?n` paths between the RDF terms `?from` and `?to` w.r.t. a property path expression `?pathExpr`.
+The property function `norse:simplePaths` matches up to `?n` paths between the RDF terms `?from` and `?to` w.r.t. a property path expression string `?pathExprStr`.
 
 ## Example Data
 
@@ -34,9 +34,6 @@ SELECT ?path {
   }
 
   ?from norse:simplePaths(?pathExprStr ?path ?to ?n) .
-
-  # 
-  BIND(norse:array.last(?path) AS ?target) # should be eg:bob
 }
 ```
 
