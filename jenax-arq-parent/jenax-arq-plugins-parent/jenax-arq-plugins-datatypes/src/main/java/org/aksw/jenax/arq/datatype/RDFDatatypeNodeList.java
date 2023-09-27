@@ -56,5 +56,4 @@ public class RDFDatatypeNodeList
         NodeList result = new NodeListImpl(nodes);
         return result;
     }
-
 }
