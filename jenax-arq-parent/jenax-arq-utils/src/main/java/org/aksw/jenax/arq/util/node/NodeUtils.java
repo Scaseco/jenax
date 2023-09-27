@@ -19,6 +19,7 @@ import org.apache.jena.riot.lang.LabelToNode;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.out.NodeFormatterTTL;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerText;
@@ -30,6 +31,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 
 public class NodeUtils {
+
+    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
+    public static final NodeFormatter ttlFormatter = new NodeFormatterTTL();
+
 
     /** Placeholder constants to denote a 'null' node - the absence of a value */
     public static final String nullUri = "http://null.null/null";
@@ -220,8 +225,6 @@ public class NodeUtils {
         Objects.requireNonNull(number, "Number expected but got null");
         return number;
     }
-
-    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
 
     /** Variant of {@link NodeFmtLib#strNodesNT(Node...)} that yield nul as UNDEF */
     public static String strNodesWithUndef(BiConsumer<IndentedWriter, Node> output, Node...nodes) {

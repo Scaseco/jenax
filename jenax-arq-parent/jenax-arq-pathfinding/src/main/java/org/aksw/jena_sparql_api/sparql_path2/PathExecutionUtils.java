@@ -91,7 +91,9 @@ public class PathExecutionUtils {
         return result;
     }
 
-    public static void executePath(Path path, Node startNode, Node targetNode, QueryExecutionFactoryQuery qef, Function<NestedPath<Node, Node>, Boolean> pathCallback) {
+    public static void executePath(Path path, Node startNode, Node targetNode,
+            QueryExecutionFactoryQuery qef,
+            Function<NestedPath<Node, Node>, Boolean> pathCallback) {
 
         Nfa<Integer, LabeledEdge<Integer, PredicateClass>> nfa = PathCompiler.compileToNfa(path);
 

@@ -348,6 +348,14 @@ public class NfaExecutionUtils {
         return result;
     }
 
+    /**
+     * Check whether the latest contribution (the last vertex) is already part of the path.
+     * No other vertices are checked for uniqueness.
+     */
+    public static boolean isLastVertexAlreadyContained(NestedPath<?, ?> p) {
+        boolean result = p.getParentLink().map(parent -> parent.getTarget().containsVertex(p.getCurrent())).orElse(false);
+        return result;
+    }
 
     /**
      * Generic Nfa execution
@@ -389,7 +397,8 @@ public class NfaExecutionUtils {
                     getMatchingTriplets,
                     pathGrouper,
                     // Reject paths where the last vertex is contained elsewhere in the path
-                    p -> p.getParentLink().map(parent -> parent.getTarget().containsVertex(p.getCurrent())).orElse(false));
+                    NfaExecutionUtils::isLastVertexAlreadyContained
+            );
                     // x -> false);
 
             frontier = nextFrontier;

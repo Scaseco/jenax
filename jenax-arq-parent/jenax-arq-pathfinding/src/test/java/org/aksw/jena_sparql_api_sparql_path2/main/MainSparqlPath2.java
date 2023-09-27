@@ -41,7 +41,7 @@ import org.aksw.jena_sparql_api.sparql_path2.PathCompiler;
 import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionFactoryKShortestPaths;
-import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionKShortestPaths;
+import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionPathFinder;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlServiceFactory;
@@ -335,7 +335,7 @@ public class MainSparqlPath2 {
 
     public static void main(String[] args) throws InterruptedException, IOException {
 
-        PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
+        PropertyFunctionRegistry.get().put(PropertyFunctionPathFinder.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
 
         String queryStr;
 

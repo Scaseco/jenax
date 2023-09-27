@@ -6,17 +6,17 @@ import java.util.List;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.norse.NorseTerms;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
-import org.apache.jena.vocabulary.RDF;
 
 /** Datatype for 'arrays' of RDF terms */
 public class RDFDatatypeNodeList
     extends BaseDatatype
 {
-    public static final String IRI = RDF.uri + "array";
+    public static final String IRI = NorseTerms.NS + "array"; // RDF.uri + "array";
     public static final RDFDatatypeNodeList INSTANCE = new RDFDatatypeNodeList();
 
     public static RDFDatatype get() {
@@ -42,7 +42,7 @@ public class RDFDatatypeNodeList
         String result;
         if (nodes instanceof NodeList) {
             NodeList nl = (NodeList)nodes;
-            result = NodeUtils.strNodesWithUndef(NodeUtils.ntFormatter::format, nl.toArray(new Node[0]));
+            result = NodeUtils.strNodesWithUndef(NodeUtils.ttlFormatter::format, nl.toArray(new Node[0]));
         } else {
             throw new DatatypeFormatException("Not a NodeList datatype");
         }
