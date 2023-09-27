@@ -34,9 +34,6 @@ SELECT ?path {
   }
 
   ?from norse:simplePaths(?pathExprStr ?path ?to ?n) .
-
-  # 
-  BIND(norse:array.last(?path) AS ?target) # should be eg:bob
 }
 ```
 
