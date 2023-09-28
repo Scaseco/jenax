@@ -67,9 +67,9 @@ public class PropertyFunctionPathFinder
     private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionPathFinder.class);
 
     public static final String NORSE_NS = "https://w3id.org/aksw/norse#";
-    public static final String DEFAULT_IRI = NORSE_NS + "simplePaths";
+    public static final String DEFAULT_IRI = NORSE_NS + "path.simplePaths";
 
-    public static final String LEGACY_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
+    // public static final String LEGACY_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
 
     // public static final Symbol PROLOGUE = Symbol.create("prologue");
     // public static final Symbol SPARQL_SERVICE = Symbol.create("sparqlService");
@@ -164,7 +164,9 @@ public class PropertyFunctionPathFinder
 
         SparqlKShortestPathFinder pathFinder = dataSourceToPathFinder.apply(dataSource);
         if(pathFinder == null) {
-            logger.info("Falling back on default k shortest path finder service");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using default path finder service");
+            }
             pathFinder = new SparqlKShortestPathFinderMem(dataSource.asQef());
         }
 
