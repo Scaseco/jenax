@@ -33,7 +33,7 @@ SELECT ?path {
     (eg:anne eg:bob "(!rdf:type|^!rdf:type)+" 100)
   }
 
-  ?from norse:simplePaths(?pathExprStr ?path ?to ?n) .
+  ?from norse:path.simplePaths(?pathExprStr ?path ?to ?n) .
 }
 ```
 
@@ -71,7 +71,7 @@ SELECT ?idx ?property ?direction ?reachedNode
     (eg:anne eg:bob "(!rdf:type|^!rdf:type)+" 100)
   }
 
-  ?from norse:simplePaths(?pathExprStr ?path ?to ?n) .
+  ?from norse:path.simplePaths(?pathExprStr ?path ?to ?n) .
 
   BIND(norse:array.size(?path) AS ?pathLen)
   (1 ?pathLen 3) norse:number.range ?i # for (?i = 1; i < ?pathLen; ?i +=3) { ... }
