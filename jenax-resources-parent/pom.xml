@@ -17,5 +17,6 @@
 		<module>jenax-resources-test-config</module>
 		<module>jenax-resources-prefixes</module>
 		<module>jenax-resources-servicedescription</module>
+		<module>jenax-resources-void</module>
 	</modules>
 </project>

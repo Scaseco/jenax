@@ -97,6 +97,13 @@ public class SparqlStmtMgr {
     }
 
 
+
+//    public static void execSparql(Dataset dataset, String filenameOrURI, Function<String, String> envLookup) {
+//        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+//            execSparql(conn, filenameOrURI, envLookup);
+//        }
+//    }
+
     /**
      * Load a single query from a given file, URL or classpath resource
      *

@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jenax-arq-udf</artifactId>
+    <artifactId>jenax-models-udf</artifactId>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>org.aksw.jenax</groupId>
-        <artifactId>jenax-arq-parent</artifactId>
+        <artifactId>jenax-models-parent</artifactId>
         <version>4.9.0-1-SNAPSHOT</version>
     </parent>
 
@@ -23,6 +23,9 @@
             <groupId>org.aksw.jenax</groupId>
             <artifactId>jenax-arq-utils</artifactId>
         </dependency>
+
+                <!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
+                <!-- maybe its better to have udf build on the top level functionbinder module -->
 
 
 	<!-- UDF registers annotated classes at jena's model personalities -->

@@ -22,6 +22,8 @@
 		<module>jenax-models-csvw</module>
 		<module>jenax-models-d2rq</module>
 		<module>jenax-models-table</module>
+		<module>jenax-models-void</module>
+		<module>jenax-models-udf</module>
 	</modules>
 </project>
 
