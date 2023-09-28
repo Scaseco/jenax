@@ -8,7 +8,7 @@ import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import com.google.common.collect.Streams;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapAdapter;

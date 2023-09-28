@@ -3,7 +3,7 @@ package org.aksw.jenax.sparql.relation.dataset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import com.google.common.collect.Streams;
 import org.apache.jena.query.Dataset;
 
 

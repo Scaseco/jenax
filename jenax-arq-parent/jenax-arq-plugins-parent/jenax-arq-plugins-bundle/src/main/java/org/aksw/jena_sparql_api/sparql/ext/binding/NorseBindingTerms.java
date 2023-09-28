@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.binding;
 
-import org.aksw.jena_sparql_api.sparql.ext.init.NorseTerms;
+import org.aksw.jenax.norse.NorseTerms;
 
 public class NorseBindingTerms {
     public static final String Datatype = NorseTerms.NS + "binding";

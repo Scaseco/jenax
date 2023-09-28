@@ -1,8 +1,10 @@
 package org.aksw.jena_sparql_api.sparql_path2;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
 import org.aksw.commons.jena.jgrapht.LabeledEdgeImpl;
@@ -69,7 +71,29 @@ public class PathExecutionUtils {
         return result;
     }
 
-    public static void executePath(Path path, Node startNode, Node targetNode, QueryExecutionFactoryQuery qef, Function<NestedPath<Node, Node>, Boolean> pathCallback) {
+    // Better to check for non-simple path upon adding another vertex as a contribution
+    @Deprecated // Use NestedPath.containsVertex to check presence of a vertex upon contribution
+    public static boolean isSimplePath(NestedPath<?, ?> path) {
+        boolean result = true;
+        Set<Object> vertices = new HashSet<>();
+        NestedPath<?, ?> current = path;
+        while (current != null) {
+            Object vertex = current.getCurrent();
+            if (vertices.contains(vertex)) {
+                result = false;
+                break;
+            } else {
+                vertices.add(vertex);
+            }
+            current = path.getParentLink().map(ParentLink::getTarget).orElse(null);
+        }
+
+        return result;
+    }
+
+    public static void executePath(Path path, Node startNode, Node targetNode,
+            QueryExecutionFactoryQuery qef,
+            Function<NestedPath<Node, Node>, Boolean> pathCallback) {
 
         Nfa<Integer, LabeledEdge<Integer, PredicateClass>> nfa = PathCompiler.compileToNfa(path);
 
@@ -111,10 +135,12 @@ public class PathExecutionUtils {
 //
 //            //Map<Node, Graph> nodeToGraph = lsls.apply(nodes);
 //        };
+        Predicate<NestedPath<Node, Node>> pathFilter = targetNode == null
+                ? np -> true
+                : np -> np.getCurrent().equals(targetNode);
 
-        while(!frontier.isEmpty()) {
-
-            boolean abort = NfaExecutionUtils.collectPaths(nfa, frontier, LabeledEdgeImpl::isEpsilon, pathCallback);
+        while (!frontier.isEmpty()) {
+            boolean abort = NfaExecutionUtils.collectPaths(nfa, frontier, LabeledEdgeImpl::isEpsilon, pathFilter, pathCallback);
             if(abort) {
                 break;
             }
@@ -151,6 +177,7 @@ public class PathExecutionUtils {
                     getMatchingTriplets,
                     nestedPath -> nestedPath.getCurrent(),
                     p -> false
+                    // PathExecutionUtils::isSimplePath
                     );
             //System.out.println("advancing...");
             frontier = nextFrontier;

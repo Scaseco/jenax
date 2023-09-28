@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.jena.ext.com.google.common.cache.Cache;
+import com.google.common.cache.Cache;
 import org.apache.jena.sparql.core.DatasetGraph;
 
 public class GraphCache {

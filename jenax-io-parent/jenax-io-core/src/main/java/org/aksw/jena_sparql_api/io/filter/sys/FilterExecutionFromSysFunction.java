@@ -26,7 +26,7 @@ import org.aksw.jena_sparql_api.io.endpoint.HotFile;
 import org.aksw.jena_sparql_api.io.endpoint.HotFileFromJava;
 import org.aksw.jena_sparql_api.io.endpoint.InputStreamSupplier;
 import org.aksw.jena_sparql_api.io.endpoint.InputStreamSupplierBasic;
-import org.apache.jena.ext.com.google.common.base.StandardSystemProperty;
+import com.google.common.base.StandardSystemProperty;
 
 import com.google.common.io.ByteStreams;
 

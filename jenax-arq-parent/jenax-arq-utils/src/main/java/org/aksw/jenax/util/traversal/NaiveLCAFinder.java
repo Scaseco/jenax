@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import org.aksw.commons.util.traverse.BreadthFirstSearchLib;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;

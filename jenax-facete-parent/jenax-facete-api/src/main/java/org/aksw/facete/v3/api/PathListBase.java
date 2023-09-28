@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 
 public abstract class PathListBase<T extends PathBase<T, S>, S>
 	implements PathBase<T, S>

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.jena.ext.com.google.common.collect.ForwardingSet;
+import com.google.common.collect.ForwardingSet;
 import org.apache.jena.graph.Node;
 
 public class NodeSetImpl

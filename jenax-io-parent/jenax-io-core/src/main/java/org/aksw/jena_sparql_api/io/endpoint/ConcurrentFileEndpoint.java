@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ext.com.google.common.io.ByteSource;
+import com.google.common.io.ByteSource;
 
 import com.github.jsonldjava.shaded.com.google.common.collect.ObjectArrays;
 import com.google.common.base.Stopwatch;
@@ -162,7 +162,7 @@ public class ConcurrentFileEndpoint
 		
 		ConcurrentFileEndpoint endpoint = ConcurrentFileEndpoint.create(file, StandardOpenOption.CREATE);
 		
-		ByteSource byteSource = org.apache.jena.ext.com.google.common.io.Files.asByteSource(new File("/home/raven/Projects/Data/LSQ/deleteme.sorted.nt"));
+		ByteSource byteSource = com.google.common.io.Files.asByteSource(new File("/home/raven/Projects/Data/LSQ/deleteme.sorted.nt"));
 
 		List<Runnable> tasks = new ArrayList<>();
 		tasks.add(

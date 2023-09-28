@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.expr.ExprUtils;
-import org.apache.jena.ext.com.google.common.collect.HashMultimap;
-import org.apache.jena.ext.com.google.common.collect.SetMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.core.Var;

@@ -61,13 +61,13 @@ import org.slf4j.LoggerFactory;
  * @author raven
  *
  */
-public class PropertyFunctionKShortestPaths
+public class PropertyFunctionPathFinder
     extends PropertyFunctionEval
 {
-    private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionKShortestPaths.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertyFunctionPathFinder.class);
 
     public static final String NORSE_NS = "https://w3id.org/aksw/norse#";
-    public static final String DEFAULT_IRI = NORSE_NS + "kShortestPaths";
+    public static final String DEFAULT_IRI = NORSE_NS + "simplePaths";
 
     public static final String LEGACY_IRI = "http://jsa.aksw.org/fn/kShortestPaths";
 
@@ -77,7 +77,7 @@ public class PropertyFunctionKShortestPaths
     protected Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder;
     //protected Gson gson;
 
-    public PropertyFunctionKShortestPaths(Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder) { //Gson gson) {
+    public PropertyFunctionPathFinder(Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder) { //Gson gson) {
         super(PropFuncArgType.PF_ARG_SINGLE, PropFuncArgType.PF_ARG_EITHER);
 //        this.gson = gson;
         this.dataSourceToPathFinder = dataSourceToPathFinder;
@@ -221,7 +221,7 @@ public class PropertyFunctionKShortestPaths
     public static NodeList pathToNodeList(TripletPath<Node, Directed<Node>> path) {
         List<Node> list = new ArrayList<>();
         list.add(path.getStart());
-        list.add(path.getEnd());
+        // list.add(path.getEnd());
 
         // int lastTripletIdx = path.getTriplets().size() - 1;
         // int i = 0;

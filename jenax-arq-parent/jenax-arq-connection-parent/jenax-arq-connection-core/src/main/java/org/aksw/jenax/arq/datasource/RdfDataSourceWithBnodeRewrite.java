@@ -75,6 +75,8 @@ public class RdfDataSourceWithBnodeRewrite
             QueryIterator r;
             if (opExec.getService().getURI().equals("env://REMOTE")) {
                 // try {
+                // These requests materialize the result set, so the connection should be idle
+                // once execService returns
                     r = RDFConnectionUtils.execService(opExec, conn);
                     // RDFLinkAdapter.adapt(base).query(query).sel
                     // r = new QueryIteratorResultSet(base.query(query).execSelect());

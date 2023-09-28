@@ -41,7 +41,7 @@ import org.aksw.jena_sparql_api.sparql_path2.PathCompiler;
 import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionFactoryKShortestPaths;
-import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionKShortestPaths;
+import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionPathFinder;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlServiceFactory;
@@ -107,14 +107,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
-
-
 public class MainSparqlPath2 {
 
     private static final Logger logger = LoggerFactory.getLogger(MainSparqlPath2.class);
 
     public static SparqlService proxySparqlService(SparqlService coreSparqlService, SparqlStmtParserImpl sparqlStmtParser, Prologue prologue) {
-
         GraphSparqlService graph = new GraphSparqlService(coreSparqlService);
         Model model = ModelFactory.createModelForGraph(graph);
 
@@ -338,7 +335,7 @@ public class MainSparqlPath2 {
 
     public static void main(String[] args) throws InterruptedException, IOException {
 
-        PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
+        PropertyFunctionRegistry.get().put(PropertyFunctionPathFinder.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
 
         String queryStr;
 

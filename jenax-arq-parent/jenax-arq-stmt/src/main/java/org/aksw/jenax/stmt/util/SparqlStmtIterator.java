@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
-import org.apache.jena.ext.com.google.common.collect.AbstractIterator;
+import com.google.common.collect.AbstractIterator;
 import org.apache.jena.query.QueryParseException;
 
 /**

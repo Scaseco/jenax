@@ -9,8 +9,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.atlas.lib.Trie;
-import org.apache.jena.ext.com.google.common.cache.Cache;
-import org.apache.jena.ext.com.google.common.cache.CacheBuilder;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.jena.riot.system.PrefixLib;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapBase;

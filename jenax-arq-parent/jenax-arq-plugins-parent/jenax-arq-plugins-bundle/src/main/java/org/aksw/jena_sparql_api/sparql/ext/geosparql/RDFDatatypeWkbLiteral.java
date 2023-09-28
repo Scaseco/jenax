@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.ext.com.google.common.base.Ascii;
-import org.apache.jena.ext.com.google.common.io.BaseEncoding;
+import com.google.common.base.Ascii;
+import com.google.common.io.BaseEncoding;
 import org.apache.jena.geosparql.implementation.DimensionInfo;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;

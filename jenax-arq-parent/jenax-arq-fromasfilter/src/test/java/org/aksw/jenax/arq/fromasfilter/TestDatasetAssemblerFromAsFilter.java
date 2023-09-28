@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
-import org.apache.jena.ext.com.google.common.io.MoreFiles;
+import com.google.common.io.MoreFiles;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;

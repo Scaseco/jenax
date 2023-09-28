@@ -17,8 +17,8 @@ public class PropertyFunctionFactoryKShortestPaths
 
     @Override
     public PropertyFunction create(String uri) {
-        PropertyFunctionKShortestPaths result = PropertyFunctionKShortestPaths.DEFAULT_IRI.equals(uri)
-                ? new PropertyFunctionKShortestPaths(dataSourceToPathFinder)
+        PropertyFunctionPathFinder result = PropertyFunctionPathFinder.DEFAULT_IRI.equals(uri)
+                ? new PropertyFunctionPathFinder(dataSourceToPathFinder)
                 : null
                 ;
 

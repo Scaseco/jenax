@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.sparql.ext.init;
+package org.aksw.jenax.norse;
 
 public class NorseTerms {
     public static final String NS = "https://w3id.org/aksw/norse#";

@@ -14,7 +14,7 @@ import org.aksw.jena_sparql_api.algebra.utils.ExprHolder;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpFilter;

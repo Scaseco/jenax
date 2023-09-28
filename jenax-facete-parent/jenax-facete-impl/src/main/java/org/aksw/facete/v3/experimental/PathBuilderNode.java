@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import org.aksw.facete.v3.api.AliasedPath;
 import org.aksw.facete.v3.api.AliasedPathImpl;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;

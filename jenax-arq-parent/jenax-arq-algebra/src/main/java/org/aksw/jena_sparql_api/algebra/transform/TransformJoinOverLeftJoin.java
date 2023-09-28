@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.algebra.transform;
 
 import java.util.Set;
 
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.Transform;

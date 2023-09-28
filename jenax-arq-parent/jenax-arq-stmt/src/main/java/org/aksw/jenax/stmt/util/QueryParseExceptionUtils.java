@@ -3,7 +3,7 @@ package org.aksw.jenax.stmt.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.jena.ext.com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ComparisonChain;
 import org.apache.jena.query.QueryParseException;
 
 public class QueryParseExceptionUtils {

@@ -9,12 +9,25 @@ import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.arq.util.node.NodeSet;
 import org.aksw.jenax.arq.util.node.NodeSetImpl;
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.expr.ExprEvalException;
 
 public class SparqlLibArrayFn {
 
     @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
     public static Node get(NodeList nodes, int index) {
         return nodes.get(index);
+    }
+
+    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    public static Node last(NodeList nodes) {
+        int n = nodes.size();
+        Node result;
+        if (n == 0) {
+            throw new ExprEvalException("Attempt to access last element of an empty node list");
+        } else {
+            result = nodes.get(n - 1);
+        }
+        return result;
     }
 
     @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
