@@ -23,6 +23,7 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplateImpl;
 import org.aksw.jena_sparql_api.schema.ShUtils;
 import org.aksw.jenax.arq.connection.core.QueryExecutionFactories;
 import org.aksw.jenax.arq.util.node.NodeCustom;
+import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
@@ -294,6 +295,15 @@ public class ElementGeneratorLateral {
             treeData.putItem(key, ScopedFacetPath::getParent);
         }
 
+        // Extract sort conditions
+        for (SortCondition sc : sortConditions) {
+            Set<ConstraintNode> nodes = NodeCustom.mentionedValues(sc.getExpression(), ConstraintNode.class);
+            for (ConstraintNode<NodeQuery> node : nodes) {
+                ScopedFacetPath pathContrib = ConstraintNode.toScopedFacetPath(node);
+                treeData.putItem(pathContrib, ScopedFacetPath::getParent);
+            }
+        }
+
         if (!constraintIndex.isEmpty()) {
             System.out.println("Constraints: " + constraintIndex);
         }
@@ -326,7 +336,16 @@ public class ElementGeneratorLateral {
             subQuery.setQueryPattern(nodeElement);
 
             // FIXME In general we need to resolve path references!
-            sortConditions.forEach(subQuery::addOrderBy);
+
+            NodeTransform xform = NodeCustom.createNodeTransform((ConstraintNode cn) -> {
+                ScopedFacetPath spf = ConstraintNode.toScopedFacetPath(cn);
+                Var v = FacetPathMappingImpl.resolveVar(pathMapping, spf).asVar();
+                return v;
+            });
+            for (SortCondition sc : sortConditions) {
+                SortCondition resolvedSc = NodeTransformLib2.transform(xform, sc);
+                subQuery.addOrderBy(resolvedSc);
+            }
 
             nodeElement = new ElementSubQuery(subQuery);
         }
@@ -340,10 +359,16 @@ public class ElementGeneratorLateral {
 
             Var s = current.source().var();
             Node p;
-            Var o = current.target().var();
+            Var o = targetVar;
+
+            if (reachingStep.getDirection().equals(Direction.BACKWARD)) {
+                o = s;
+                s = targetVar;
+            }
+
 
             if (relation.getVars().size() == 2) {
-                System.out.println("Relation: " + relation);
+                // System.out.println("Relation: " + relation);
                 // FacetStep facetStep = current.getParentNode().reachingStep();
                 // FacetStep facetStep = current.getReachingStep();
                 // FacetPath facetPath = current.getParentNode().getFacetPath();
@@ -356,6 +381,8 @@ public class ElementGeneratorLateral {
             // If there is limit, slice, filter or order then create an appropriate sub-query
             // Bind the parent variable to '?s'
 
+
+
             ElementGroup bindSpoGroup = new ElementGroup();
             ElementBind bindS = new ElementBind(Vars.x, new ExprVar(s));
             bindSpoGroup.addElement(bindS);
@@ -365,7 +392,7 @@ public class ElementGeneratorLateral {
             bindSpoGroup.addElement(bindP);
 
             // Bind element's target to ?o
-            ElementBind bindO = new ElementBind(Vars.z, new ExprVar(targetVar));
+            ElementBind bindO = new ElementBind(Vars.z, new ExprVar(o));
             bindSpoGroup.addElement(bindO);
 
             // Add the bindSpoGroup as the first union member

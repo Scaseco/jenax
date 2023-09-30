@@ -2,12 +2,10 @@ package org.aksw.jenax.facete.treequery2.impl;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.IntStream;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
@@ -17,12 +15,8 @@ import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.SortCondition;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprVar;
-import org.apache.jena.sparql.syntax.ElementGroup;
 
 /**
  * A root node corresponds to a variable of a graph pattern.
@@ -65,28 +59,13 @@ public class NodeQueryImpl
 
     @Override
     public NodeQuery sort(int sortDirection) {
-        SortCondition sc = new SortCondition(var, sortDirection);
-
-        List<SortCondition> sortConditions = relationQuery.getSortConditions();
-        Expr ev = new ExprVar(var);
-        int idx = IntStream.range(0, sortConditions.size()).filter(i -> sortConditions.get(i).getExpression().equals(ev)).findFirst().orElse(-1);
-        if (idx < 0) {
-            if (sortDirection != Query.ORDER_UNKNOW)
-            sortConditions.add(sc);
-        } else {
-            if (sortDirection == Query.ORDER_UNKNOW) {
-                sortConditions.remove(idx);
-            } else {
-                sortConditions.set(idx, sc);
-            }
-        }
+        RelationQuery.doSort(relationQuery(), new ExprVar(var), sortDirection);
         return this;
     }
 
     @Override
     public int getSortDirection() {
-        Expr ev = new ExprVar(var);
-        int result = relationQuery.getSortConditions().stream().filter(sc -> sc.getExpression().equals(ev)).map(SortCondition::getDirection).findFirst().orElse(Query.ORDER_UNKNOW);
+        int result = RelationQuery.getSortDirection(relationQuery(), new ExprVar(var));
         return result;
     }
 
@@ -139,7 +118,15 @@ public class NodeQueryImpl
         NodeQuery result = subPaths.computeIfAbsent(step, ss -> {
             FacetStep relationStep = FacetStep.of(step.getNode(), step.getDirection(), step.getAlias(), FacetStep.TUPLE);
             RelationQueryImpl tmp = (RelationQueryImpl)children.computeIfAbsent(relationStep, fs -> {
-                Relation baseRelation = relationQuery().getContext().getPropertyResolver().resolve(fs.getNode());
+                Node property = fs.getNode();
+                Relation baseRelation = relationQuery().getContext().getPropertyResolver().resolve(property);
+
+                if (step.getDirection().equals(Direction.BACKWARD)) {
+                    if (baseRelation.getVars().size() != 2) {
+                        throw new IllegalArgumentException("Reverse step via " + property + " did not resolve to a binary relation: " + baseRelation);
+                    }
+                    baseRelation = baseRelation.toBinaryRelation().reverse();
+                }
 
                 Var sourceVar = FacetRelationUtils.resolveComponent(FacetStep.SOURCE, baseRelation);
                 Var targetVar = relationQuery.target().var();

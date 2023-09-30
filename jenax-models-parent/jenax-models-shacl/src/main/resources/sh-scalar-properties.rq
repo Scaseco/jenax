@@ -1,0 +1,49 @@
+# This file contains two complementary queries for checking for non-multivalued properties:
+# (1) The first one infers "sh:maxCount 1" by ignoring any xsd:string and xsd:langString triples
+# (2) The second query infers "sh:uniqueLang true" for those triples ignored by the first one
+
+# Note that each query typically results in a full scan of the data.
+
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# This query does not consider triples with xsd:string and rdf:langString datatypes
+CONSTRUCT {
+  ?shape
+    sh:path ?p ;
+    sh:maxCount ?maxCount
+}
+WHERE
+{
+  { SELECT ?p (MAX(?c) AS ?maxCount) {
+    { SELECT ?s ?p (COUNT(*) AS ?c) {
+      ?s ?p ?o
+      FILTER(!isLiteral(?o) || !(DATATYPE(?o) IN (xsd:string, rdf:langString)))
+    } GROUP BY ?s ?p }
+  } GROUP BY ?p HAVING (?maxCount = 1) }
+
+  # gpsh = global property shape, contrasts class-local property shape (clps)
+  BIND(IRI(CONCAT(STR(<env://B>), '/gpsh/', ENCODE_FOR_URI(STR(?p)))) AS ?shape)
+}
+
+# This query only considers triples with xsd:string and rdf:langString datatypes
+CONSTRUCT {
+  ?shape
+    sh:path ?p ;
+    sh:uniqueLang true
+}
+WHERE
+{
+  { SELECT ?p (MAX(?c) AS ?maxCount) {
+    { SELECT ?s ?p ?lang (COUNT(*) AS ?c) {
+      ?s ?p ?o
+      FILTER(isLiteral(?o) && (DATATYPE(?o) IN (xsd:string, rdf:langString)))
+      BIND(lang(?o) AS ?lang)
+    } GROUP BY ?s ?p ?lang }
+  } GROUP BY ?p HAVING (?maxCount = 1) }
+
+  # gpsh = global property shape, contrasts class-local property shape (clps)
+  BIND(IRI(CONCAT(STR(<env://B>), '/gpsh/', ENCODE_FOR_URI(STR(?p)))) AS ?shape)
+}
+

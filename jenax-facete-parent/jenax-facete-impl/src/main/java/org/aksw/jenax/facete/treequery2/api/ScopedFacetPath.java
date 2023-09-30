@@ -48,10 +48,6 @@ public class ScopedFacetPath
         return getSystem() + ":" + getDelegate();
     }
 
-    public static ScopedFacetPath of(VarScope system, Path<FacetStep> basePath) {
-        return new ScopedFacetPath(system, basePath);
-    }
-
     /** Convenience static shorthand for .get().newRoot() */
     public static ScopedFacetPath newAbsolutePath(VarScope scope, FacetStep ... segments) {
         return newAbsolutePath(scope, Arrays.asList(segments));
@@ -71,6 +67,14 @@ public class ScopedFacetPath
 
     public static ScopedFacetPath of(Var startVar, FacetPath facetPath) {
         return of(VarScope.of(startVar), facetPath);
+    }
+
+    public static ScopedFacetPath of(VarScope system, Path<FacetStep> basePath) {
+        return new ScopedFacetPath(system, basePath);
+    }
+
+    public static ScopedFacetPath of(String scopeName, Var var, Path<FacetStep> basePath) {
+        return new ScopedFacetPath(VarScope.of(scopeName, var), basePath);
     }
 
     /**

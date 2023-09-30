@@ -3,6 +3,10 @@ package org.aksw.jenax.model.shacl.domain;
 public class ShTerms {
     public static final String NS = "http://www.w3.org/ns/shacl#";
 
+    public static final String uniqueLang = NS + "uniqueLang";
+    public static final String minCount = NS + "minCount";
+    public static final String maxCount = NS + "maxCount";
+
     public static final String prefixes = NS + "prefixes";
     public static final String declare = NS + "declare";
     public static final String prefix = NS + "prefix";

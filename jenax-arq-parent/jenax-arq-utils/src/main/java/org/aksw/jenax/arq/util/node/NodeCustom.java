@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.node;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -72,9 +73,18 @@ public class NodeCustom<T>
         return result;
     }
 
+    /** Return all payloads of type T in all NodeCustom instances in the given expression */
+    public static <T> Set<T> mentionedValues(Expr expr, Class<T> payloadClass) {
+        Set<T> result = ExprUtils.nodesMentioned(expr).stream()
+                .flatMap(x -> ObjectUtils.tryCastAs(NodeCustom.class, x).stream())
+                .map(NodeCustom::getValue)
+                .flatMap(v -> ObjectUtils.tryCastAs(payloadClass, v).stream())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        return result;
+    }
 
     /** Substitute all referenced paths in an expression w.r.t. the given path mapping */
-    public static <T> Expr resolveExpr(Function<T, Node> mapping, Expr expr) {
+    public static <T> Expr resolveExpr(Function<T, ? extends Node> mapping, Expr expr) {
         NodeTransform nodeTransform = createNodeTransform(mapping);
         Expr result = ExprTransformer.transform(new NodeTransformExpr(nodeTransform), expr);
         return result;
@@ -87,14 +97,14 @@ public class NodeCustom<T>
             ? mapping.apply(((NodeCustom<T>)x).getValue())
             : null);
     }
-    
+
     /** Create a NodeTransform that transforms the payload of NodeCustom instances */
     @SuppressWarnings("unchecked")
     public static <I, O> NodeTransform mapValue(Function<? super I, O> mapping) {
-    	return createNodeTransform((I before) -> {
-			O after = mapping.apply(before);
-			NodeCustom<O> r = NodeCustom.of(after);
-    		return r;
-    	});    	
+        return createNodeTransform((I before) -> {
+            O after = mapping.apply(before);
+            NodeCustom<O> r = NodeCustom.of(after);
+            return r;
+        });
     }
 }

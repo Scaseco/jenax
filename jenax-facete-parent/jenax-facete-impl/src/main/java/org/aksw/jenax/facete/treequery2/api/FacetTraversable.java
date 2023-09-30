@@ -16,6 +16,20 @@ import org.apache.jena.rdf.model.Resource;
 public interface FacetTraversable<T extends FacetTraversable<T>>
     extends HasFacetPath
 {
+    /** Returns null if there is no child reachable with the given step. */
+    // RootNode getChild(FacetStep step);
+    T getOrCreateChild(FacetStep step);
+
+    T getParent();
+
+    default T getRootNode() {
+        return TreeUtils.getRoot((T)this, FacetTraversable::getParent);
+    }
+
+    default T resolve(FacetPath facetPath) {
+        return FacetTraversable.resolve((T)this, facetPath);
+    }
+
     default T fwd(String property) {
         return getOrCreateChild(FacetStep.fwd(property));
     }
@@ -38,20 +52,6 @@ public interface FacetTraversable<T extends FacetTraversable<T>>
 
     default T bwd(Resource property) {
         return getOrCreateChild(FacetStep.bwd(property));
-    }
-
-    /** Returns null if there is no child reachable with the given step. */
-    // RootNode getChild(FacetStep step);
-    T getOrCreateChild(FacetStep step);
-
-    T getParent();
-
-    default T getRootNode() {
-        return TreeUtils.getRoot((T)this, FacetTraversable::getParent);
-    }
-
-    default T resolve(FacetPath facetPath) {
-        return FacetTraversable.resolve((T)this, facetPath);
     }
 
     public static <T extends FacetTraversable<T>> T resolve(T node, FacetPath facetPath) {

@@ -4,6 +4,9 @@ import java.util.Objects;
 
 import org.apache.jena.sparql.core.Var;
 
+/**
+ * A qualified variable.
+ */
 public class VarScope {
     protected String scopeName;
     protected Var startVar;

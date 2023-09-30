@@ -1,51 +1,28 @@
 package org.aksw.jenax.facete.treequery2.api;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
 import org.aksw.facete.v3.api.NodeFacetPath;
+import org.aksw.facete.v3.api.VarScope;
+import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 
 public interface NodeQuery
-    extends FacetTraversable<NodeQuery>, HasSlice
-    // extends NodeQuery
+    extends FacetTraversable<NodeQuery>, HasSlice, Sortable<NodeQuery>
 {
-	/**
-	 * Wrap this node as a Jena node so that it can be used as a 'pseudo-variable' in expressions.
-	 * To substitute NodeQuery references in expressions, apply a node transform using NodeFacetPath.createNodeTransform(pathTransform).
-	 */
+    /**
+     * Wrap this node as a Jena node so that it can be used as a 'pseudo-variable' in expressions.
+     * To substitute NodeQuery references in expressions, apply a node transform using NodeFacetPath.createNodeTransform(pathTransform).
+     */
     default Node asJenaNode() {
         return NodeFacetPath.of(this);
     }
-
-    default NodeQuery sortAsc() {
-        return sort(Query.ORDER_ASCENDING);
-    }
-
-    default NodeQuery sortNone() {
-        return sort(Query.ORDER_UNKNOW);
-    }
-
-    default NodeQuery sortDefault() {
-        return sort(Query.ORDER_DEFAULT);
-    }
-
-    default NodeQuery sortDesc() {
-        return sort(Query.ORDER_DESCENDING);
-    }
-
-    /**
-     * Updates or adds the first sort condition of this query node's variable in the list of sort conditions
-     */
-    NodeQuery sort(int sortDirection);
-
-    /** Returns the direction of the first sort condition that matches this query node's variable */
-    int getSortDirection();
 
     @Override
     default FacetPath getFacetPath() {
@@ -64,6 +41,18 @@ public interface NodeQuery
             // Objects.requireNonNull(step); // Sanity check - only root nodes may return null for steps
             result = base.resolve(step);
         }
+        return result;
+    }
+
+
+    // @Override
+    default ScopedFacetPath getScopedFacetPath() {
+        RelationQuery relationQuery = relationQuery();
+        String baseScopeName = relationQuery.getScopeBaseName();
+        NodeQuery root = getRoot();
+        Var rootVar = root.var();
+        FacetPath facetPath = getFacetPath();
+        ScopedFacetPath result = ScopedFacetPath.of(baseScopeName, rootVar, facetPath);
         return result;
     }
 
@@ -133,4 +122,43 @@ public interface NodeQuery
     default OrderNode<NodeQuery> orderBy() {
         return new OrderNodeImpl(this);
     }
+
+    /**
+     * Compute the VarScope for this nodeQuery.
+     * This is essentially the base name when using the NodeQuery as a root for further paths.
+     * This is based on the VarScope of this NodeQuery's root, and the facet path between
+     * the root and this nodeQuery.
+     */
+    public static VarScope computeVarScope(NodeQuery nodeQuery) {
+        // NodeQuery nodeQuery = constraintNode.getRoot();
+        FacetPath facetPath = nodeQuery.getFacetPath(); // TODO The facetPath must affect the scope
+
+        RelationQuery relationQuery = nodeQuery.relationQuery();
+        FacetPathMapping pathMapping = relationQuery.getContext().getPathMapping();
+        String baseScope = relationQuery.getScopeBaseName();
+        String scopeContrib = pathMapping.allocate(facetPath);
+
+        // TODO Probably this should be part of the PathMapping in order to allow for checking for hash clashes
+        String finalScope = FacetPathMappingImpl.toString(
+                FacetPathMappingImpl.DEFAULT_HASH_FUNCTION.newHasher()
+                .putString(baseScope, StandardCharsets.UTF_8)
+                .putString(scopeContrib, StandardCharsets.UTF_8)
+                .hash());
+
+        // FacetPath constraintPath = constraintNode.getFacetPath();
+        VarScope result = VarScope.of(finalScope, nodeQuery.var());
+        return result;
+    }
+
+    /** Return the ScopedFacetPath that is rooted in this nodeQuery and points to constraintPath */
+    public static ScopedFacetPath toScopedFacetPath(NodeQuery nodeQuery, FacetPath constraintPath) {
+        VarScope varScope = computeVarScope(nodeQuery);
+        ScopedFacetPath scopedFacetPath = ScopedFacetPath.of(varScope, constraintPath);
+        return scopedFacetPath;
+    }
+
+    /** Return the ScopedFacetPath that points from this <b>nodeQuery's root</b> to this nodeQuery */
+//    public static ScopedFacetPath getScopedFacetPathFor(NodeQuery nodeQuery) {
+//    }
+
 }

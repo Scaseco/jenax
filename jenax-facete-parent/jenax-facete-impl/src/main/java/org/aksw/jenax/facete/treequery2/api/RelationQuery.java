@@ -3,6 +3,7 @@ package org.aksw.jenax.facete.treequery2.api;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.aksw.facete.v4.impl.PropertyResolverImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
@@ -14,8 +15,11 @@ import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.treequery2.old.NodeQueryOld;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.syntax.ElementGroup;
 
 public interface RelationQuery
@@ -121,4 +125,29 @@ public interface RelationQuery
         return new RelationQueryImpl(scopeBaseName, null, relation, null, queryContext, new HashMap<>());
     }
 
+    public static void doSort(RelationQuery relationQuery, Expr expr, int sortDirection) {
+        SortCondition sc = new SortCondition(expr, sortDirection);
+        List<SortCondition> sortConditions = relationQuery.getSortConditions();
+        // Expr ev = new ExprVar(var);
+        int idx = IntStream.range(0, sortConditions.size()).filter(i -> sortConditions.get(i).getExpression().equals(expr)).findFirst().orElse(-1);
+        if (idx < 0) {
+            if (sortDirection != Query.ORDER_UNKNOW)
+            sortConditions.add(sc);
+        } else {
+            if (sortDirection == Query.ORDER_UNKNOW) {
+                sortConditions.remove(idx);
+            } else {
+                sortConditions.set(idx, sc);
+            }
+        }
+    }
+
+    public static int getSortDirection(RelationQuery relationQuery, Expr expr) {
+        // Expr ev = new ExprVar(var);
+        int result = relationQuery.getSortConditions().stream()
+                .filter(sc -> sc.getExpression().equals(expr))
+                .map(SortCondition::getDirection).findFirst()
+                .orElse(Query.ORDER_UNKNOW);
+        return result;
+    }
 }

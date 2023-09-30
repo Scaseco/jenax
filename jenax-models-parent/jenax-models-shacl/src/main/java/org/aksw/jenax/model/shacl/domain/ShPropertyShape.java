@@ -11,6 +11,18 @@ public interface ShPropertyShape
     @Iri(ShTerms.path)
     Resource getPath();
 
+    @Iri(ShTerms.uniqueLang)
+    Boolean isUniqueLang();
+    ShPropertyShape setUniqueLang(Boolean value);
+
+    @Iri(ShTerms.minCount)
+    Number getMinCount();
+    ShShape setMinCount(Number number);
+
+    @Iri(ShTerms.maxCount)
+    Number getMaxCount();
+    ShShape setMaxCount(Number number);
+
     @Iri(ShTerms.xclass)
     Set<Resource> getShaclClasses();
 }
