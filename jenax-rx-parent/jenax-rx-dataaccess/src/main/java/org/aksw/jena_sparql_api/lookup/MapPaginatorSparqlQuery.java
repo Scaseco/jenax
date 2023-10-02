@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Range;
 
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 
@@ -118,10 +118,10 @@ public class MapPaginatorSparqlQuery
 //      PublishProcessor<Node> boundaryIndicator = PublishProcessor.create();
 
       Flowable<Entry<Node, Table>> result = SparqlRx.execSelectRaw(qef, query)
-              .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(
+              .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(SequentialGroupBySpec.create(
                       b -> b.get(attrVar),
                       groupKey -> new TableN(),
-                      Table::addBinding));
+                      Table::addBinding)));
 
       if (false) {
           List<Entry<Node, Table>> items = result.toList().blockingGet();

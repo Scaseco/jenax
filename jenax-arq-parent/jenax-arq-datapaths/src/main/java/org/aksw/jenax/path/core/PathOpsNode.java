@@ -47,12 +47,6 @@ public class PathOpsNode
         return INSTANCE;
     }
 
-
-    /** Convenience static shorthand for .get().newRoot() */
-    public static PathNode newAbsolutePath() {
-        return get().newRoot();
-    }
-
     public static PathNode newRelativePath() {
         return get().newPath(false, Collections.emptyList());
     }
@@ -75,11 +69,6 @@ public class PathOpsNode
     @Override
     public PathNode newPath(boolean isAbsolute, List<Node> segments) {
         return new PathNode(this, isAbsolute, segments);
-    }
-
-    @Override
-    public PathNode newPath(Node element) {
-        return newPath(false, Collections.singletonList(element));
     }
 
     @Override

@@ -17,11 +17,11 @@ public class TestPathEquivalence {
     public void testPropertyPath() {
         org.apache.jena.sparql.path.Path p1p = PathParser.parse("rdfs:subClassOf*", PrefixMapping.Extended);
         Node p1n = NodeFactory.createLiteralByValue(p1p, RDFDatatypePPath.INSTANCE);
-        Path<Node> p1 = PathOpsNode.newAbsolutePath().resolve(p1n);
+        Path<Node> p1 = PathOpsNode.get().newAbsolutePath().resolve(p1n);
 
         org.apache.jena.sparql.path.Path p2p = PathParser.parse("rdfs:subClassOf*", PrefixMapping.Extended);
         Node p2n = NodeFactory.createLiteralByValue(p2p, RDFDatatypePPath.INSTANCE);
-        Path<Node> p2 = PathOpsNode.newAbsolutePath().resolve(p2n);
+        Path<Node> p2 = PathOpsNode.get().newAbsolutePath().resolve(p2n);
 
         Assert.assertEquals(p1p, p2p);
         Assert.assertEquals(p1n, p2n);
@@ -31,7 +31,7 @@ public class TestPathEquivalence {
     @Test
     public void testBlankNodeInPath() {
         Node bn = NodeFactory.createBlankNode();
-        Path<Node> expected = PathOpsNode.newAbsolutePath().resolve(bn);
+        Path<Node> expected = PathOpsNode.get().newAbsolutePath().resolve(bn);
         String str = expected.toString();
         Path<Node> actual = PathOpsNode.get().fromString(str);
 

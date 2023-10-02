@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.aksw.commons.path.core.Path;
-import org.aksw.commons.path.core.PathOpsStr;
+import org.aksw.commons.path.core.PathStr;
 import org.apache.jena.sparql.algebra.Op;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -38,7 +38,7 @@ public class Tracker<T> {
 
     public Tracker() {
         super();
-        this.path = PathOpsStr.newAbsolutePath();
+        this.path = PathStr.newAbsolutePath();
         this.pathToOp = new LinkedHashMap<>();
         this.parentToChildren = ArrayListMultimap.create();
         this.pathToData = new HashMap<>();

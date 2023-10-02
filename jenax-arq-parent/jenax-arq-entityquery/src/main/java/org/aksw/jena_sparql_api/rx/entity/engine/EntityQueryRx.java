@@ -22,6 +22,7 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.aksw.jena_sparql_api.rx.AggObjectGraph;
 import org.aksw.jena_sparql_api.rx.AggObjectGraph.AccObjectGraph;
 import org.aksw.jena_sparql_api.rx.ExprTransformAllocAggregate;
@@ -45,14 +46,6 @@ import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
-import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -87,6 +80,15 @@ import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -963,10 +965,10 @@ public class EntityQueryRx {
             Function<? super ITEM, KEY> itemToKey,
             Aggregator<? super ITEM, ?, VALUE> aggregator) {
         return upstream -> upstream
-            .lift(FlowableOperatorSequentialGroupBy.<ITEM, KEY, Accumulator<? super ITEM, ?, VALUE>>create(
+            .lift(FlowableOperatorSequentialGroupBy.<ITEM, KEY, Accumulator<? super ITEM, ?, VALUE>>create(SequentialGroupBySpec.create(
                     itemToKey,
                     groupKey -> aggregator.createAccumulator(),
-                    Accumulator::accumulate))
+                    Accumulator::accumulate)))
             .map(keyAndAcc -> {
                 KEY groupKey = keyAndAcc.getKey();
                 Accumulator<? super ITEM, ?, VALUE> accGraph = keyAndAcc.getValue();

@@ -22,16 +22,14 @@
 
 		<!-- TODO Move the NodeQuery API to the facete project -->
 
-<!--
-		<dependency>
-  <groupId>com.graphql-java</groupId>
-  <artifactId>graphql-java-tools</artifactId>
-  <version>5.2.4</version>
-	</dependency>
--->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-models-void</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-json</artifactId>
 		</dependency>
 
 		<dependency>

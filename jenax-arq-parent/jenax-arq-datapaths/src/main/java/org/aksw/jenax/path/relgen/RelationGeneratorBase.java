@@ -104,7 +104,7 @@ public abstract class RelationGeneratorBase
         pastRelations.clear();
         relation = null;
         columnIdx = 0;
-        relationStartAbsPath = PathOpsPE.newAbsolutePath();
+        relationStartAbsPath = PathOpsPE.get().newAbsolutePath();
         relPath = PathOpsPE.newRelativePath();
         updateHash();
     }

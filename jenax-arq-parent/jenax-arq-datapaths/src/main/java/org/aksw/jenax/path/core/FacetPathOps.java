@@ -59,11 +59,6 @@ public class FacetPathOps
     }
 
     @Override
-    public FacetPath newPath(FacetStep element) {
-        return newPath(false, Collections.singletonList(element));
-    }
-
-    @Override
     public FacetStep getSelfToken() {
         return SELF;
     }
@@ -112,7 +107,7 @@ public class FacetPathOps
                 .collect(Collectors.toList())
                 .toArray(new Node[0]);
 
-        String result = (path.isAbsolute() ? "/" : "") + NodeFmtLib.strNodesNT(nodes);
+        String result = (path.isAbsolute() ? "/" : "") + NodeFmtLib.strNodesTTL(nodes);
         return result;
     }
 

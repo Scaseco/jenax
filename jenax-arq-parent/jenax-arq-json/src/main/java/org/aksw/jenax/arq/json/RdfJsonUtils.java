@@ -46,7 +46,6 @@ public class RdfJsonUtils {
             result.add(jsonElement);
         }
         return result;
-
     }
 
     public static JsonArray toJson(ResultSet rs, int maxDepth, boolean flat) {

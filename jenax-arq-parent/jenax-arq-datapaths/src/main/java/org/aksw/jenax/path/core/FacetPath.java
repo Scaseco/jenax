@@ -1,6 +1,5 @@
 package org.aksw.jenax.path.core;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -26,20 +25,33 @@ public class FacetPath
                 .map(FacetStep::getNode);
     }
 
-    /** Convenience static shorthand for .get().newRoot() */
+    /* Static convenience shorthands */
+
+    public static FacetPath parse(String str) {
+        return FacetPathOps.get().fromString(str);
+    }
+
+    public static FacetPath newAbsolutePath(FacetStep segment) {
+        return FacetPathOps.get().newAbsolutePath(segment);
+    }
+
     public static FacetPath newAbsolutePath(FacetStep ... segments) {
-        return newAbsolutePath(Arrays.asList(segments));
+        return FacetPathOps.get().newAbsolutePath(segments);
     }
 
     public static FacetPath newAbsolutePath(List<FacetStep> segments) {
-        return FacetPathOps.get().newPath(true, segments);
+        return FacetPathOps.get().newAbsolutePath(segments);
+    }
+
+    public static FacetPath newRelativePath(FacetStep segment) {
+        return FacetPathOps.get().newRelativePath(segment);
     }
 
     public static FacetPath newRelativePath(FacetStep ... segments) {
-        return newRelativePath(Arrays.asList(segments));
+        return FacetPathOps.get().newRelativePath(segments);
     }
 
     public static FacetPath newRelativePath(List<FacetStep> segments) {
-        return FacetPathOps.get().newPath(false, segments);
+        return FacetPathOps.get().newRelativePath(segments);
     }
 }

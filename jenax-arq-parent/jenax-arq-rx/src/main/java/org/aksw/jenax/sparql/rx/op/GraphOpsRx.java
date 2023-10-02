@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -17,10 +18,10 @@ public class GraphOpsRx {
             Function<Triple, Node> grouper,
             Supplier<Graph> graphSupplier) {
 
-        return FlowableOperatorSequentialGroupBy.<Triple, Node, Graph>create(
+        return FlowableOperatorSequentialGroupBy.<Triple, Node, Graph>create(SequentialGroupBySpec.create(
                 grouper::apply,
                 groupKey -> graphSupplier.get(),
-                Graph::add).transformer();
+                Graph::add)).transformer();
 //        return upstream ->
 //            upstream
 //                .lift(new OperatorOrderedGroupBy<Triple, Node, Graph>(

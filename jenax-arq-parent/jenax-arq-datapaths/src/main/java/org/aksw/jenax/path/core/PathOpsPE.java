@@ -55,12 +55,6 @@ public class PathOpsPE
         return INSTANCE;
     }
 
-
-    /** Convenience static shorthand for .get().newRoot() */
-    public static PathPE newAbsolutePath() {
-        return get().newRoot();
-    }
-
     public static PathPE newRelativePath() {
         return get().newPath(false, Collections.emptyList());
     }
@@ -83,11 +77,6 @@ public class PathOpsPE
     @Override
     public PathPE newPath(boolean isAbsolute, List<UnaryXExpr> segments) {
         return new PathPE(this, isAbsolute, segments);
-    }
-
-    @Override
-    public PathPE newPath(UnaryXExpr element) {
-        return newPath(false, Collections.singletonList(element));
     }
 
     @Override

@@ -54,11 +54,6 @@ public class PathOpsPP
     }
 
     @Override
-    public PathPP newPath(P_Path0 element) {
-        return newPath(false, Collections.singletonList(element));
-    }
-
-    @Override
     public P_Path0 getSelfToken() {
         return SELF;
     }
@@ -105,7 +100,4 @@ public class PathOpsPP
 
         return newPath(isAbsolute, segments);
     }
-
-
-
 }

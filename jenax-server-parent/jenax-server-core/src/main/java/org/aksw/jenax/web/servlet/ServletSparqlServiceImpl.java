@@ -29,7 +29,7 @@ public class ServletSparqlServiceImpl
     @Context
     protected HttpServletRequest req;
 
-    /** The connection factory in mandatory */
+    /** The connection factory is mandatory. It creates RDFConnections from the http request. */
     @Autowired
     protected RdfConnectionFactory sparqlConnectionFactory;
 
