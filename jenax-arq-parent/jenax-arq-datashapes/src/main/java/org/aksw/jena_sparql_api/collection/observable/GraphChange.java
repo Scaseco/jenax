@@ -24,9 +24,9 @@ import org.aksw.commons.collection.observable.ObservableSetImpl;
 import org.aksw.commons.collection.observable.ObservableValue;
 import org.aksw.commons.collections.CartesianProduct;
 import org.aksw.commons.collections.SetUtils;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import com.google.common.collect.HashMultimap;
@@ -259,7 +259,7 @@ public class GraphChange
 
 
     public RdfField createSetField(Node sourceNode, Node predicate, boolean isForward) {
-        DirectedFilteredTriplePattern dftp = DirectedFilteredTriplePattern.create(sourceNode, predicate, isForward);
+        TripleFilter dftp = TripleFilter.create(sourceNode, predicate, isForward);
         RdfField result = new RdfFieldForSubGraph(this, dftp);
 
         return result;

@@ -25,6 +25,7 @@ import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.expr.NodeValue;
 
 import com.google.common.collect.Iterables;
@@ -326,5 +327,19 @@ public class NodeUtils {
         if (!isValid(node)) {
             throw new IllegalArgumentException("Node does not print/parse: " + node);
         }
+    }
+
+    public static boolean put(BindingBuilder builder, Node nodeOrVar, Node node) {
+        boolean result = true;
+        if (NodeUtils.isNullOrAny(node)) {
+            // nothing to do
+        } else if (nodeOrVar.isVariable()) {
+            builder.add((Var)nodeOrVar, node);
+        } else {
+            if (!nodeOrVar.equals(node)) {
+                result = false;
+            }
+        }
+        return result;
     }
 }

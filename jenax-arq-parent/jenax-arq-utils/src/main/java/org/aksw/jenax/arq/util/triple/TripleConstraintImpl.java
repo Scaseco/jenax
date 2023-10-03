@@ -1,6 +1,5 @@
-package org.aksw.jena_sparql_api.relation;
+package org.aksw.jenax.arq.util.triple;
 
-import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.engine.binding.Binding;

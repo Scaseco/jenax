@@ -3,14 +3,14 @@ package org.aksw.jena_sparql_api.schema;
 import java.util.Collection;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 
 public interface NodeSchema {
     PropertySchema createPropertySchema(Node predicate, boolean isForward);
 
-    Set<DirectedFilteredTriplePattern> getGenericPatterns();
+    Set<TripleFilter> getGenericPatterns();
     Collection<? extends PropertySchema> getPredicateSchemas();
 //    NodeGraphView instantiate(Node node);
 

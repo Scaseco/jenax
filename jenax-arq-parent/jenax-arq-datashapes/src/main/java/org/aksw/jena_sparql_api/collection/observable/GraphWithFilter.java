@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.collection.observable;
 
-import org.aksw.jena_sparql_api.relation.TripleConstraint;
+import org.aksw.jenax.arq.util.triple.TripleConstraint;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;

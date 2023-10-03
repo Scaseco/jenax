@@ -80,7 +80,7 @@ public class QuadTableCoreFromNestedMapsImpl
      ***************************/
 
     public static boolean isWildcard(Node n) {
-        return n == null || Node.ANY.equals(n);
+        return n == null || Node.ANY.equals(n) || n.isVariable();
     }
 
     /**

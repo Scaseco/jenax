@@ -27,6 +27,29 @@ WHERE
   BIND(IRI(CONCAT(STR(<env://B>), '/gpsh/', ENCODE_FOR_URI(STR(?p)))) AS ?shape)
 }
 
+# Compute maxCount for inverse properties
+CONSTRUCT {
+  ?shape
+    sh:path ?pinv ;
+    sh:maxCount ?maxCount ;
+    .
+  ?pinv sh:inversePath ?p .
+}
+WHERE
+{
+  { SELECT ?p (MAX(?c) AS ?maxCount) {
+    { SELECT ?o ?p (COUNT(*) AS ?c) {
+      ?s ?p ?o
+      FILTER(!isLiteral(?o))
+    } GROUP BY ?o ?p }
+  } GROUP BY ?o ?p HAVING (?maxCount = 1) }
+
+  # gpsh = global property shape, contrasts class-local property shape (clps)
+  BIND(IRI(CONCAT(STR(<env://B>), '/gpsh/inv/', ENCODE_FOR_URI(STR(?p)))) AS ?shape)
+
+  BIND(IRI(CONCAT(STR(<env://B>), '/gpsh/inv/path/', ENCODE_FOR_URI(STR(?p)))) AS ?pinv)
+}
+
 # This query only considers triples with xsd:string and rdf:langString datatypes
 CONSTRUCT {
   ?shape

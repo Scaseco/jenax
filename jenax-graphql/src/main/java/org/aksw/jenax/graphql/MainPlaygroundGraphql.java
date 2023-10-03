@@ -1,22 +1,22 @@
 package org.aksw.jenax.graphql;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.commons.util.direction.Direction;
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
+import org.aksw.jenax.arq.datasource.RdfDataEngines;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
+import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.connection.datasource.RdfDataSource;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
@@ -24,22 +24,29 @@ import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
+import org.aksw.jenax.io.json.schema.NodeConverter;
+import org.aksw.jenax.io.json.schema.NodeConverterObject;
+import org.aksw.jenax.io.json.schema.PropertyConverter;
+import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
+import org.aksw.jenax.model.shacl.util.ShUtils;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.VOID;
 import org.apache.jena.vocabulary.XSD;
@@ -47,6 +54,7 @@ import org.apache.jena.vocabulary.XSD;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Range;
+import com.google.gson.JsonElement;
 
 import graphql.language.Argument;
 import graphql.language.ArrayValue;
@@ -80,14 +88,24 @@ public class MainPlaygroundGraphql {
 
 
     protected VoidDataset voidDataset;
+    protected Model shaclModel;
 
-    public MainPlaygroundGraphql(VoidDataset voidDataset) {
+    protected Multimap<P_Path0, ShPropertyShape> globalPropertyShapes;
+
+    public MainPlaygroundGraphql(VoidDataset voidDataset, Model shaclModel) {
         super();
         this.voidDataset = voidDataset;
+        this.shaclModel = shaclModel;
+
+        globalPropertyShapes = ShUtils.indexGlobalPropertyShapes(shaclModel);
+        // SHACLUtil.getPropertyConstraintAtInstance(voidDataset, null)
+        // SHACLUtil.proper
     }
 
     public static final String xid = "xid"; // "@id" with '@' replaced by 'x' because '@' is not a valid in graphql identifiers
     public static final String orderBy = "orderBy";
+    public static final String hide = "hide"; // Attach all sub-fields of "this node" to the parent
+    public static final String inverse = "inverse"; // Directive for inverse properties
 
     public static void main(String[] args) {
         // System.out.println(ObjectUtils.tryCastAs(long.class, 1));
@@ -97,6 +115,12 @@ public class MainPlaygroundGraphql {
         // SparqlStmtMgr.execSparql(model, "void/sportal/compact/qb2.rq");
 
         // TODO Generate basic void
+        RdfDataSource dataSource = RdfDataEngines.of(dataModel);
+        Model shaclModel;
+        try (RDFConnection conn = dataSource.getConnection()) {
+            shaclModel = SparqlStmtMgr.execConstruct(conn, "sh-scalar-properties.rq");
+        }
+
 
         Model voidModel = RDFDataMgr.loadModel("/home/raven/Datasets/pokedex/pokedex.void.ttl");
         Resource voidDatasetRaw = IterableUtils.expectOneItem(voidModel.listSubjectsWithProperty(RDF.type, VOID.Dataset).toList());
@@ -112,8 +136,9 @@ public class MainPlaygroundGraphql {
 
         Parser parser = new Parser();
         Document document = parser.parseDocument(
-                "{ Pokemon(limit: 10, offset: 5, orderBy: [{colour: desc}, {path: [colour, etag], dir: asc}]) {"
-                + "maleRatio @inverse, colour(xid: \"red\"), speciesOf { baseHP }, "
+                "{ Pokemon(limit: 10, offset: 5, orderBy: [{colour: desc}, {path: [colour], dir: asc}]) {"
+//                + "maleRatio, colour(xid: \"red\"), speciesOf @inverse { baseHP }, "
+                + "label, colour, speciesOf @inverse { label }, "
                 + "} }");
         System.out.println(document.toString());
 //        + "Instrument(id: \"1234\", created_datime: { between: { min: 1, max: 5} }) {"
@@ -125,30 +150,40 @@ public class MainPlaygroundGraphql {
 
 
 
-        MainPlaygroundGraphql mapper = new MainPlaygroundGraphql(voidDataset);
-        Aggregator<Triple, ?, Object> agg = mapper.graphQlToNodeQuery(document, nodeQuery, true);
+        MainPlaygroundGraphql mapper = new MainPlaygroundGraphql(voidDataset, shaclModel);
+        NodeConverter jsonConverter = mapper.graphQlToNodeQuery(document, nodeQuery, true);
         RelationQuery rq = nodeQuery.relationQuery();
         Query query = ElementGeneratorLateral.toQuery(rq);
 
+        System.out.println(query);
+
         FlowableOperatorSequentialGroupBy<Quad, org.apache.jena.graph.Node, Graph> grouper = FlowableOperatorSequentialGroupBy.create(SequentialGroupBySpec.create(
                 Quad::getGraph,
-                graphNode -> GraphFactory.createDefaultGraph(),
+                graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
                 (graph, quad) -> graph.add(quad.asTriple())));
 
-        RdfDataSource dataSource = () -> RDFConnectionRemote.newBuilder().queryEndpoint("http://localhost:8642/sparql").build();
-        Flowable<Entry<org.apache.jena.graph.Node, Graph>> graphFlow = SparqlRx
+        // RdfDataSource remoteDataSource = () -> RDFConnectionRemote.newBuilder().queryEndpoint("http://localhost:8642/sparql").build();
+        Flowable<RDFNode> graphFlow = SparqlRx
                 .execConstructQuads(() -> dataSource.asQef().createQueryExecution(query))
-                .lift(grouper);
+                .lift(grouper)
+                .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
 
-        graphFlow.forEach(e -> {
-            System.out.println("Graph Flow item: " + e.getKey());
-            RDFDataMgr.write(System.out, e.getValue(), RDFFormat.TURTLE_PRETTY);
+        graphFlow.forEach(rdfNode -> {
+            System.out.println("Graph Flow item: " + rdfNode.asNode());
+            // RDFDataMgr.write(System.out, rdfNode.getModel(), RDFFormat.TURTLE_PRETTY);
+            // System.out.println(RdfJsonUtils.toJson(rdfNode, Integer.MAX_VALUE, false));
+            org.apache.jena.graph.Node node = rdfNode.asNode();
+            Graph graph = rdfNode.getModel().getGraph();
+            JsonElement json = jsonConverter.convert(graph, node);
+            System.out.println(json);
         });
 
         for (NodeQuery child : nodeQuery.getChildren()) {
             System.out.println("child: " + child.getScopedFacetPath());
             System.out.println(child.var());
         }
+
+        System.out.println("jsonConverter: " + jsonConverter);
     }
 
 
@@ -210,11 +245,24 @@ public class MainPlaygroundGraphql {
         return result;
     }
 
-    public Object graphQlToNodeQueryChildren(Node<?> node, NodeQuery nodeQuery, boolean isType) {
+    public NodeConverter graphQlToNodeQueryChildren(Node<?> node, NodeQuery nodeQuery, boolean isType) {
+        NodeConverter childConverter = null;
         for (Node<?> child : node.getChildren()) {
-            graphQlToNodeQuery(child, nodeQuery,  isType);
+            NodeConverter childConverterContrib = graphQlToNodeQuery(child, nodeQuery,  isType);
+            if (childConverterContrib != null) {
+                if (childConverter != null) {
+                    System.err.println("WARN: Multiple converters obtained");
+                } else {
+                    childConverter = childConverterContrib;
+                }
+            }
         }
-        return nodeQuery;
+        return childConverter;
+
+//        for (Node<?> child : node.getChildren()) {
+//            graphQlToNodeQuery(child, nodeQuery,  isType);
+//        }
+//        return nodeQuery;
     }
 
     public static Optional<Node<?>> tryGetNode(Node<?> node, String ... path) {
@@ -403,7 +451,8 @@ public class MainPlaygroundGraphql {
     }
 
 
-    public Aggregator<Triple, ?, Object> graphQlToNodeQuery(Node<?> node, NodeQuery nodeQuery, boolean isType) {
+    public NodeConverter graphQlToNodeQuery(Node<?> node, NodeQuery nodeQuery, boolean isType) {
+        NodeConverter result = null;
         boolean isNodeProcessed = false;
 
         boolean typeFound = false;
@@ -414,11 +463,13 @@ public class MainPlaygroundGraphql {
             //selectionSet.
             // System.out.println(selectionSet);
         } else if (node instanceof SelectionSet) {
+            NodeConverterObject nodeConverter = null;
             SelectionSet selectionSet = (SelectionSet)node;
             for (Selection<?> selection : selectionSet.getSelections()) {
                 if (selection instanceof Field) {
                     // The map of aggregators
-                    Map<String, Aggregator<Triple, ?, Object>> aggMap = new LinkedHashMap<>();
+                    // Map<String, PropertyConverter> converters = new LinkedHashMap<>();
+                    PropertyConverter propertyConverter = null;
 
                     Field field = (Field)selection;
                     Multimap<String, Value<?>> args = indexArguments(field);
@@ -434,8 +485,12 @@ public class MainPlaygroundGraphql {
                     } else {
                         boolean isSpecialField = false;
                         if (!isSpecialField) {
+                            if (nodeConverter == null) {
+                                nodeConverter = new NodeConverterObject();
+                            }
+
                             FacetPath keyPath = resolveKeyToProperty(fieldName);
-                            boolean isInverse = directives.containsKey("inverse");
+                            boolean isInverse = directives.containsKey(inverse);
                             if (isInverse) {
                                 if (keyPath.getNameCount() == 1) {
                                     keyPath = FacetPath.newRelativePath(keyPath.getName(0).toSegment().toggleDirection());
@@ -446,6 +501,29 @@ public class MainPlaygroundGraphql {
 
                             if (keyPath.getNameCount() == 1) {
                                 // Set up an accumulator for the facet path
+                                FacetStep step = keyPath.getFileName().toSegment();
+                                P_Path0 basicPath = PathUtils.createStep(step.getNode(), step.getDirection().isForward());
+                                propertyConverter = PropertyConverter.of(basicPath);
+
+                                Collection<ShPropertyShape> propertyShapes = globalPropertyShapes.get(basicPath);
+                                if (!propertyShapes.isEmpty()) {
+                                    boolean allMaxCountsAreOne = propertyShapes.stream()
+                                            .map(ShPropertyShape::getMaxCount)
+                                            .allMatch(v -> v != null && v.intValue() == 1);
+
+                                    boolean isUniqueLang = propertyShapes.stream()
+                                            .map(ShPropertyShape::isUniqueLang)
+                                            .allMatch(v -> v != null && v == true);
+
+                                    if (allMaxCountsAreOne) {
+                                        propertyConverter.setMaxCount(1);
+                                    }
+
+                                    if (isUniqueLang) {
+                                        propertyConverter.setUniqueLang(true);
+                                    }
+                                }
+
                             }
                         }
                     }
@@ -476,9 +554,30 @@ public class MainPlaygroundGraphql {
                     }
 
                     NodeQuery childQuery = fieldQuery != null ? fieldQuery : nodeQuery;
-                    for (Node<?> child : selection.getChildren()) {
-                        graphQlToNodeQuery(child, childQuery,  isType && !typeFound);
+                    NodeConverter childConverterContrib = graphQlToNodeQueryChildren(selection, childQuery,  isType && !typeFound);
+
+                    if (nodeConverter == null) {
+                        result = childConverterContrib;
+                    } else {
+                        if (propertyConverter != null) {
+                            if (childConverterContrib != null) {
+                                propertyConverter.setTargetNodeConverter(childConverterContrib);
+                            }
+                            nodeConverter.getPropertyConverters().put(fieldName, propertyConverter);
+                        }
+                        result = nodeConverter;
                     }
+//                    NodeConverter childConverter = null;
+//                    for (Node<?> child : selection.getChildren()) {
+//                        NodeConverter childConverterContrib = graphQlToNodeQuery(child, childQuery,  isType && !typeFound);
+//                        if (childConverterContrib != null) {
+//                            if (childConverter != null) {
+//                                System.err.println("WARN: Multiple converters obtained");
+//                            } else {
+//                                childConverter = childConverterContrib;
+//                            }
+//                        }
+//                    }
 
                     // graphQlToNodeQuery(selection, fieldQuery, isType && !typeFound);
                     // field.get
@@ -487,13 +586,13 @@ public class MainPlaygroundGraphql {
                 // System.out.println(selection);
                 // selection.fi
             }
-
+            // result = nodeConverter;
             isNodeProcessed = true;
         }
 
         // for (Node<?> child : node.getChildren()) {
         if (!isNodeProcessed) {
-            graphQlToNodeQueryChildren(node, nodeQuery,  isType && !typeFound);
+            result = graphQlToNodeQueryChildren(node, nodeQuery,  isType && !typeFound);
         }
         // }
 
@@ -523,6 +622,6 @@ public class MainPlaygroundGraphql {
         // System.out.println(doc.getChildren());
 
         // RelationQue
-        return null;
+        return result;
     }
 }

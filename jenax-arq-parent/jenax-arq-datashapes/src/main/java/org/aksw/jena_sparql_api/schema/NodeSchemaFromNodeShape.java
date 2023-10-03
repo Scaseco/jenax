@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -94,7 +94,7 @@ public interface NodeSchemaFromNodeShape
     }
 
     @Override
-    default Set<DirectedFilteredTriplePattern> getGenericPatterns() {
+    default Set<TripleFilter> getGenericPatterns() {
         return Collections.emptySet();
     }
 

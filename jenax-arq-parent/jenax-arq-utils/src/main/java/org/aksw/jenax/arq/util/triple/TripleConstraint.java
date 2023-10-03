@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.relation;
+package org.aksw.jenax.arq.util.triple;
 
 import java.util.function.Predicate;
 
@@ -34,7 +34,7 @@ public interface TripleConstraint
     Triple getMatchTriple();
 
     /**
-     * True if {@link #getMatchTriple()} matchs the same set of triples as {@link #getExpr()}.
+     * True if {@link #getMatchTriple()} matches the same set of triples as {@link #getExpr()}.
      */
     boolean isMatchTripleExhaustive();
 

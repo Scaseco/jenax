@@ -4,7 +4,7 @@ import org.aksw.commons.collection.observable.ObservableCollection;
 import org.aksw.commons.collection.observable.ObservableConvertingCollection;
 import org.aksw.commons.collection.observable.ObservableSet;
 import org.aksw.jena_sparql_api.relation.ConverterTripleToNode;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
@@ -15,7 +15,7 @@ public class SetOfNodesFromGraph {
 //    extends AbstractSet<Node>
 //    implements ObservableSet<Node> {
 
-    public static ObservableCollection<Node> create(ObservableGraph graph, DirectedFilteredTriplePattern dftp) {
+    public static ObservableCollection<Node> create(ObservableGraph graph, TripleFilter dftp) {
         Node source = dftp.getSource();
         Node predicate = dftp.getTriplePattern().getPredicate();
         boolean isForward = dftp.isForward();
@@ -32,7 +32,7 @@ public class SetOfNodesFromGraph {
     }
 
     public static ObservableCollection<Node> create(ObservableGraph graph, Node sourceNode, Node predicate, boolean isForward) {
-        DirectedFilteredTriplePattern dftp = DirectedFilteredTriplePattern.create(sourceNode, predicate, isForward);
+        TripleFilter dftp = TripleFilter.create(sourceNode, predicate, isForward);
         return create(graph, dftp);
     }
 

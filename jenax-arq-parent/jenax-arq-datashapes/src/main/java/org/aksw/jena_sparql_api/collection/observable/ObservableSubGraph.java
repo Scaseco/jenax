@@ -11,7 +11,7 @@ import org.aksw.commons.collection.observable.CollectionChangedEvent;
 import org.aksw.commons.collection.observable.CollectionChangedEventImpl;
 import org.aksw.commons.collection.observable.Registration;
 import org.aksw.commons.collection.observable.StreamOps;
-import org.aksw.jena_sparql_api.relation.TripleConstraint;
+import org.aksw.jenax.arq.util.triple.TripleConstraint;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 

@@ -9,7 +9,7 @@ import org.aksw.commons.collection.observable.ObservableSet;
 import org.aksw.commons.collection.observable.ObservableValue;
 import org.aksw.commons.collection.observable.ObservableValueFromObservableCollection;
 import org.aksw.commons.collection.observable.Registration;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -30,24 +30,24 @@ public interface ObservableGraph
 
 
     default ObservableValue<Node> createValueField(Node source, Node predicate, boolean isForward) {
-        DirectedFilteredTriplePattern dftp = DirectedFilteredTriplePattern.create(source, predicate, isForward);
+        TripleFilter dftp = TripleFilter.create(source, predicate, isForward);
         ObservableValue<Node> result = createValueField(source, dftp);
         return result;
     }
 
-    default ObservableValue<Node> createValueField(Node sourceNode, DirectedFilteredTriplePattern dftp) {
+    default ObservableValue<Node> createValueField(Node sourceNode, TripleFilter dftp) {
         ObservableCollection<Node> set = createSetField(sourceNode, dftp);
         ObservableValue<Node> result = ObservableValueFromObservableCollection.decorate(set);
         return result;
     }
 
-    default ObservableCollection<Node> createSetField(Node sourceNode, DirectedFilteredTriplePattern dftp) {
+    default ObservableCollection<Node> createSetField(Node sourceNode, TripleFilter dftp) {
         ObservableCollection<Node> set = SetOfNodesFromGraph.create(this, dftp);
         return set;
     }
 
     default ObservableCollection<Node> createSetField(Node source, Node predicate, boolean isForward) {
-        DirectedFilteredTriplePattern dftp = DirectedFilteredTriplePattern.create(source, predicate, isForward);
+        TripleFilter dftp = TripleFilter.create(source, predicate, isForward);
         return createSetField(source, dftp);
     }
 
