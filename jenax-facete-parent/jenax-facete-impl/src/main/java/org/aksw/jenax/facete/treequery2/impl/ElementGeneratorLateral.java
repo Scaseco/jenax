@@ -305,7 +305,7 @@ public class ElementGeneratorLateral {
         }
 
         if (!constraintIndex.isEmpty()) {
-            System.out.println("Constraints: " + constraintIndex);
+            // System.out.println("Constraints: " + constraintIndex);
         }
 
         ElementGeneratorWorker eltWorker = new ElementGeneratorWorker(treeData, constraintIndex, pathMapping, propertyResolver);
