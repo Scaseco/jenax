@@ -1,3 +1,4 @@
+PREFIX sh: <http://www.w3.org/ns/shacl#>
 
 # Expand convenience list-based prefix mappings
 # Note, this also works without a local name, as in ("ns2" foo:)
@@ -36,12 +37,12 @@ WHERE {
 # Attach a prefixSet on the function level to all definitions without prefixes
 PREFIX o: <http://ns.aksw.org/jena/udf/>
 INSERT {
-  ?d o:prefixMapping ?ps
+  ?d sh:prefixes ?ps
 }
 WHERE {
   ?s
     a o:UserDefinedFunction ;
-    o:prefixMapping ?ps ;
+    sh:prefixes ?ps ;
     o:definition ?d
     FILTER(!EXISTS { ?d o:prefixSet [] })
 }

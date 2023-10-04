@@ -9,7 +9,7 @@
 
 
 ## r2rml namespace declaration
-rs:rr sh:declare [ sh:prefix "rr" ; sh:namespace <http://www.w3.org/ns/r2rml#>  ] .
+rs:rr sh:declare [ sh:prefix "rr" ; sh:namespace "http://www.w3.org/ns/r2rml#"  ] .
 
 ## TermMaps - with rule to prevent incorrectly matching RefObjectMaps
 rs:TermMapSparqlTarget

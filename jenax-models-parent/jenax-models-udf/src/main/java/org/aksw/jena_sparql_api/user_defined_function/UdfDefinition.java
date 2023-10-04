@@ -5,9 +5,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.model.shacl.domain.ShHasPrefixes;
+import org.aksw.jenax.model.shacl.util.ShPrefixUtils;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.system.Prefixes;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
@@ -15,20 +18,22 @@ import org.apache.jena.sparql.util.ExprUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ResourceView
 public interface UdfDefinition
-    extends Resource
+    // extends Resource
+    extends ShHasPrefixes
 {
-    @Iri("http://ns.aksw.org/jena/udf/prefixMapping")
-    PrefixSet getPrefixSet();
+    // @Iri("http://ns.aksw.org/jena/udf/prefixMapping")
+    // PrefixSet getPrefixSet();
 
-    default PrefixMapping addTo(PrefixMapping pm) {
-        PrefixSet ps = getPrefixSet();
-        if(ps != null) {
-            ps.addTo(pm);
-        }
-
-        return pm;
-    }
+//    default PrefixMapping addTo(PrefixMapping pm) {
+//        PrefixSet ps = getPrefixSet();
+//        if(ps != null) {
+//            ps.addTo(pm);
+//        }
+//
+//        return pm;
+//    }
 
     @Iri("http://ns.aksw.org/jena/udf/expr")
     String getExpr();
@@ -82,8 +87,9 @@ public interface UdfDefinition
 
 //		String uri = r.getURI();
 
-        PrefixMapping pm = new PrefixMappingImpl();
-        r.addTo(pm);
+        // PrefixMapping pm = new PrefixMappingImpl();
+        PrefixMapping pm = Prefixes.adapt(ShPrefixUtils.collect(r));
+        // r.addTo(pm);
 
         Logger logger = LoggerFactory.getLogger(UdfDefinition.class);
 

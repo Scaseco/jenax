@@ -36,6 +36,7 @@ import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
+import org.apache.jena.sparql.util.PrefixMapping2;
 
 import com.google.common.collect.Streams;
 
@@ -147,6 +148,17 @@ public class SparqlStmtMgr {
             result.add(query);
         }
 
+        return result;
+    }
+
+    public static List<Query> loadQueries(String filenameOrURI) {
+        List<Query> result;
+        try {
+            PrefixMapping pm = new PrefixMapping2(PrefixMapping.Extended);
+            result = loadQueries(filenameOrURI, pm);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
         return result;
     }
 

@@ -1,0 +1,14 @@
+PREFIX v: <http://rdfs.org/ns/void#>
+
+CONSTRUCT {
+  <env://D> v:classPartition ?k .
+  ?k v:class ?t .
+}
+{
+  SELECT
+    (IRI(CONCAT(STR(<env:B>), '/cp/', ENCODE_FOR_URI(STR(?t)))) AS ?k)
+    ?t
+  {
+    SELECT DISTINCT ?t { ?s a ?t }
+  }
+}

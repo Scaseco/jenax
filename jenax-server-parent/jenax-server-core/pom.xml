@@ -66,29 +66,30 @@
 
 
 	<dependencies>
-                        <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                        </dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+		</dependency>
 
-                        <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                        </dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-commons</artifactId>
+		</dependency>
 
-                        <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-tree</artifactId>
-                        </dependency>
-                        <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-util</artifactId>
-                        </dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-tree</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-util</artifactId>
+		</dependency>
 
-                        <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-analysis</artifactId>
-                        </dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-analysis</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-connection-core</artifactId>
@@ -109,9 +110,16 @@
 			<artifactId>jena-arq</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-path-finding</artifactId> 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-graphql</artifactId>
+		</dependency>
+
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId>
+		<artifactId>jena-sparql-api-path-finding</artifactId> 
 			</dependency> -->
-		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-update</artifactId> 
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId>
+		<artifactId>jena-sparql-api-update</artifactId> 
 			</dependency> -->
 
 		<dependency>
@@ -151,7 +159,6 @@
 		<!-- <groupId>org.atmosphere</groupId> -->
 		<!-- <artifactId>atmosphere-jersey</artifactId> -->
 		<!-- </dependency> -->
-
 
 
 		<dependency>
@@ -194,13 +201,13 @@
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>javax.ws.rs-api</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-fuseki-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-fuseki-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
-        <!-- <dependency> -->
+		<!-- <dependency> -->
 		<!-- <groupId>javax.servlet</groupId> -->
 		<!-- <artifactId>javax.servlet-api</artifactId> -->
 		<!-- </dependency> -->

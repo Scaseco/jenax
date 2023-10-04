@@ -1,0 +1,41 @@
+
+# QUERY IS BUGGED! - but probe-dataset-hash-simple is sufficient anyway.
+
+## Weakness: Does not find properties after the first n triples
+##  This could be mitigated with a skip-scan on the properties
+
+SELECT (MD5(GROUP_CONCAT(?tripleHash)) AS ?datasetHash) {
+# SELECT ?tripleHash {
+    { SELECT ?s {
+      { SELECT DISTINCT ?s {
+          {
+            # Resources-by-property sampling
+            SELECT DISTINCT ?s {
+                # Sample the the set of properties from the first n triples...
+                { SELECT DISTINCT ?p { SELECT * { ?s ?p ?o } LIMIT 1000000 } }
+              LATERAL {
+                # ... then for each property scan up to m triples in order collect up to o resources
+                { SELECT DISTINCT ?s { SELECT ?s ?p ?o { ?s ?p ?o } LIMIT 1000 } LIMIT 1000 }
+            } }
+          }
+        UNION
+          {
+            # Resources-by-class sampling
+            SELECT DISTINCT ?s {
+                # Sample the the set of classes from the first n triples...
+                { SELECT DISTINCT ?t { SELECT * { ?s a ?t } LIMIT 1000000 } }
+              LATERAL {
+                # ... then for each class scan up to m triples in order collect up to o resources
+                { SELECT DISTINCT ?s { SELECT ?s ?o { ?s a ?t } LIMIT 1000 } LIMIT 1000 }
+            } }
+          }
+      } }
+    } ORDER BY ?s }
+  LATERAL {
+    # Sample n triples of each resource
+    { SELECT * { { SELECT * { ?s ?p ?o } LIMIT 1000 } } ORDER BY ?s ?p ?o }
+  }
+  # BIND(MD5(CONCAT(STR(?s), '-', STR(?p), '-', STR(?o))) AS ?tripleHash)
+  BIND(CONCAT(STR(?s), '-', STR(?p), '-', STR(?o)) AS ?tripleHash)
+}
+

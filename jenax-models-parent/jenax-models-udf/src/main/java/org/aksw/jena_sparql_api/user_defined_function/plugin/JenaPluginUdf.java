@@ -2,8 +2,6 @@ package org.aksw.jena_sparql_api.user_defined_function.plugin;
 
 
 import org.aksw.jena_sparql_api.user_defined_function.InverseDefinition;
-import org.aksw.jena_sparql_api.user_defined_function.PrefixDefinition;
-import org.aksw.jena_sparql_api.user_defined_function.PrefixSet;
 import org.aksw.jena_sparql_api.user_defined_function.UdfDefinition;
 import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctionResource;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -26,8 +24,8 @@ public class JenaPluginUdf
         JenaPluginUtils.registerResourceClasses(
                 UserDefinedFunctionResource.class,
                 InverseDefinition.class,
-                PrefixDefinition.class,
-                PrefixSet.class,
+                // PrefixDefinition.class,
+                // PrefixSet.class,
                 UdfDefinition.class
                 );
     }

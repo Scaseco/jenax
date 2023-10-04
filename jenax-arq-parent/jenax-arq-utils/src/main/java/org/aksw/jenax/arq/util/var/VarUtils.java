@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntPredicate;
 import java.util.regex.Pattern;
 
 import org.aksw.commons.collections.generator.Generator;
@@ -248,23 +249,39 @@ public class VarUtils {
      */
     public static String safeVarName(String varName) {
         // NOTE In TARQL there is a comment: "I've omitted UTF-16 character range #x10000-#xEFFFF."
+        String result = safeIdentifier(varName, '_',
+                VarUtils::isValidFirstCharForVarName, VarUtils::isValidNonFirstCharForVarName);
+        return result;
+    }
+
+    public static String safeIdentifier(String varName, int replacement, IntPredicate isValidChar) {
+        return safeIdentifier(varName, replacement, isValidChar, isValidChar);
+    }
+
+    /**
+     * Return a new string that has all characters disallowed in SPARQL variable names replaced with underscore ('_').
+     */
+    // Move to aksw-commons
+    public static String safeIdentifier(String varName, int replacement, IntPredicate isValidFirstChar, IntPredicate isValidNonFirstChar) {
+        // NOTE In TARQL there is a comment: "I've omitted UTF-16 character range #x10000-#xEFFFF."
         StringBuilder sb = new StringBuilder();
         int[] codePoints = varName.codePoints().toArray();
         if (codePoints.length > 0) {
             int before = codePoints[0];
-            int after = isValidFirstCharForVarName(before) ? before : '_';
+            int after = isValidFirstChar.test(before) ? before : replacement;
             sb.appendCodePoint(after);
         }
 
         for (int i = 1; i < codePoints.length; ++i) {
             int before = codePoints[i];
-            int after = isValidNonFirstCharForVarName(before) ? before : '_';
+            int after = isValidNonFirstChar.test(before) ? before : replacement;
             sb.appendCodePoint(after);
         }
 
         String result = sb.toString();
         return result.isEmpty() ? null : result;
     }
+
 
     /**
      * Create a variable with a safe version of the given name using {@link #safeVarName(String)}.

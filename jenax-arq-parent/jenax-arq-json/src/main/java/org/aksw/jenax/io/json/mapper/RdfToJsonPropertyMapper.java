@@ -1,7 +1,9 @@
-package org.aksw.jenax.io.json.schema;
+package org.aksw.jenax.io.json.mapper;
 
 import java.util.Iterator;
 
+import org.aksw.commons.path.json.PathJson;
+import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
@@ -16,52 +18,51 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 
-public class PropertyConverter
-    implements RdfToJsonConverter
+public class RdfToJsonPropertyMapper
+    implements RdfToJsonMapper
 {
-    // protected String name;
     protected TripleFilter baseFilter;
-    protected NodeConverter targetNodeSchema = NodeConverterLiteral.get();
+    protected RdfToJsonNodeMapper targetNodeMapper = RdfToJsonNodeMapperLiteral.get();
 
     protected boolean isUniqueLang = false;
     protected int maxCount = -1;
 
     /**
-     * Only applicable if the value produced by this PropertyConverter is a json object.
-     * If hidden is true, then the owning NodeConverter should merge the produced json object into
+     * Only applicable if the value produced by this PropertyMapper is a json object.
+     * If hidden is true, then the owning NodeMapper should merge the produced json object into
      * its own json object.
      */
     protected boolean isHidden = false;
 
-    public PropertyConverter(TripleFilter baseFilter) {
+    public RdfToJsonPropertyMapper(TripleFilter baseFilter) {
         super();
         this.baseFilter = baseFilter;
     }
 
-    public static PropertyConverter of(P_Path0 basicPath) {
+    public static RdfToJsonPropertyMapper of(P_Path0 basicPath) {
         return of(basicPath.getNode(), Direction.ofFwd(basicPath.isForward()));
     }
 
-    public static PropertyConverter of(Node predicate, Direction direction) {
+    public static RdfToJsonPropertyMapper of(Node predicate, Direction direction) {
         TripleFilter baseFilter = TripleFilter.create(Vars.s, predicate, direction.isForward());
-        return new PropertyConverter(baseFilter);
+        return new RdfToJsonPropertyMapper(baseFilter);
     }
 
     public TripleFilter getBaseFilter() {
         return baseFilter;
     }
 
-    public PropertyConverter setBaseFilter(TripleFilter baseFilter) {
+    public RdfToJsonPropertyMapper setBaseFilter(TripleFilter baseFilter) {
         this.baseFilter = baseFilter;
         return this;
     }
 
-    public NodeConverter getTargetNodeSchema() {
-        return targetNodeSchema;
+    public RdfToJsonNodeMapper getTargetNodeMapper() {
+        return targetNodeMapper;
     }
 
-    public PropertyConverter setTargetNodeConverter(NodeConverter targetNodeSchema) {
-        this.targetNodeSchema = targetNodeSchema;
+    public RdfToJsonPropertyMapper setTargetNodeMapper(RdfToJsonNodeMapper targetNodeMapper) {
+        this.targetNodeMapper = targetNodeMapper;
         return this;
     }
 
@@ -69,7 +70,7 @@ public class PropertyConverter
         return isUniqueLang;
     }
 
-    public PropertyConverter setUniqueLang(boolean isUniqueLang) {
+    public RdfToJsonPropertyMapper setUniqueLang(boolean isUniqueLang) {
         this.isUniqueLang = isUniqueLang;
         return this;
     }
@@ -78,7 +79,7 @@ public class PropertyConverter
         return maxCount;
     }
 
-    public PropertyConverter setMaxCount(int maxCount) {
+    public RdfToJsonPropertyMapper setMaxCount(int maxCount) {
         this.maxCount = maxCount;
         return this;
     }
@@ -92,7 +93,7 @@ public class PropertyConverter
     }
 
     @Override
-    public JsonElement convert(Graph graph, Node node) {
+    public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         // Always generate a json array first. If the schema allows for a single value then extract
         // the only value from the array.
         JsonArray tmp = null;
@@ -105,7 +106,9 @@ public class PropertyConverter
             Iterator<Triple> it = graph.find(pattern);
 
             try {
+                int i = 0;
                 while (it.hasNext()) {
+                    PathJson subPath = path.resolve(Step.of(i));
                     Triple triple = it.next();
 
                     Boolean filterResult = filter.evalExpr(triple);
@@ -113,12 +116,13 @@ public class PropertyConverter
                         // Node s = TripleUtils.getSource(triple, isForward);
                         Node o = TripleUtils.getTarget(triple, isForward);
 
-                        JsonElement contrib = targetNodeSchema.convert(graph, o);
+                        JsonElement contrib = targetNodeMapper.map(subPath, errors, graph, o);
                         if (tmp == null) {
                             tmp = new JsonArray();
                         }
                         tmp.add(contrib);
                     }
+                    ++i;
                 }
             } finally {
                 Iter.close(it);
@@ -148,7 +152,7 @@ public class PropertyConverter
 
     @Override
     public String toString() {
-        return "PropertyConverter [baseFilter=" + baseFilter + ", targetNodeSchema=" + targetNodeSchema
-                + ", isUniqueLang=" + isUniqueLang + ", maxCount=" + maxCount + "]";
+        return "PropertyMapper [baseFilter=" + baseFilter + ", targetNodeMapper=" + targetNodeMapper + ", isUniqueLang="
+                + isUniqueLang + ", maxCount=" + maxCount + ", isHidden=" + isHidden + "]";
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.aksw.commons.collections.IterableUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -59,6 +60,16 @@ public class QueryExecutionUtils {
             throw new RuntimeException("RDFNode " + tmp + " is not a literal");
         }
 
+        return result;
+    }
+
+    public static Optional<Node> fetchNode(Function<? super Query, ? extends QueryExecution> qef, Query query) {
+        String varName = IterableUtils.expectOneItem(query.getResultVars());
+        Optional<Node> result;
+        try (QueryExecution qe = qef.apply(query)) {
+            result = Optional.ofNullable(QueryExecUtils.getAtMostOne(qe, varName))
+                    .map(RDFNode::asNode);
+        }
         return result;
     }
 
