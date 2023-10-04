@@ -320,7 +320,7 @@ public class ElementGeneratorLateral {
 
         MappedElement constraintEltAcc = eltWorker.createElement();
         Element constraintElt = constraintEltAcc.getElement();
-        System.out.println("Elt: " + constraintElt);
+        // System.out.println("Elt: " + constraintElt);
 
         nodeElement = ElementUtils.mergeElements(nodeElement, constraintElt);
 

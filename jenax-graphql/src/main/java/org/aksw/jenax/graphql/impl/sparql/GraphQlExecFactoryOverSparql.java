@@ -62,7 +62,11 @@ public class GraphQlExecFactoryOverSparql
         return result;
     }
 
-    public static GraphQlExecFactory lazyAutoConf(RdfDataSource dataSource) {
+    /**
+     * Create a GraphQlExecFactory that auto-configures itself on first use.
+     * Any query made while auto configuration is in progress will block until completion.
+     */
+    public static GraphQlExecFactory autoConfigureLazy(RdfDataSource dataSource) {
         return GraphQlExecFactoryLazy.of(() -> {
             ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
                     MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool()));

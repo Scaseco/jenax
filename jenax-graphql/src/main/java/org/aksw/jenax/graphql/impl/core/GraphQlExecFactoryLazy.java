@@ -62,11 +62,11 @@ public class GraphQlExecFactoryLazy
     public static GraphQlExecFactoryLazy of(Callable<ListenableFuture<GraphQlExecFactory>> delegateCreation) {
         ComputeOnce<GraphQlExecFactory> once = ComputeOnce.of(() -> {
             if (logger.isInfoEnabled()) {
-                logger.info("Submitting async GraphQlExecFactory creation");
+                logger.info("Submitting task for async GraphQlExecFactory creation");
             }
             ListenableFuture<GraphQlExecFactory> r = delegateCreation.call();
             if (logger.isInfoEnabled()) {
-                logger.info("Submitted async GraphQlExecFactory creation");
+                logger.info("Successfully submitted task for async GraphQlExecFactory creation");
             }
             return r;
         });
@@ -82,7 +82,7 @@ public class GraphQlExecFactoryLazy
         boolean hasToWait = !future.isDone();
         if (hasToWait) {
             if (logger.isInfoEnabled()) {
-                logger.info("Thread " + thread.getName() + " (id=" + thread.getId() + ") awaiting GraphQlExecFactory creation");
+                logger.info("Thread " + thread.getName() + " (id=" + thread.getId() + ") awaiting async GraphQlExecFactory creation");
             }
         }
 
@@ -92,7 +92,7 @@ public class GraphQlExecFactoryLazy
         } finally {
             if (hasToWait) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Thread " + thread.getName() + " (id=" + thread.getId() + ") unblocked.");
+                    logger.info("Thread " + thread.getName() + " (id=" + thread.getId() + ") successfully received GraphQlExecfactory");
                 }
             }
         }

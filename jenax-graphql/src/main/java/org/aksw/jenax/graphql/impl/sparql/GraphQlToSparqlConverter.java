@@ -148,7 +148,7 @@ public class GraphQlToSparqlConverter {
         String fieldName = field.getName();
         Map<String, List<Directive>> directives = field.getDirectivesByName();
 
-        System.out.println("Seen field: " + fieldName);
+        // System.out.println("Seen field: " + fieldName);
         FacetPath keyPath = resolver.resolveKeyToProperty(fieldName);
         if (keyPath != null) {
             boolean isInverse = directives.containsKey(GraphQlSpecialKeys.inverse);
@@ -243,7 +243,7 @@ public class GraphQlToSparqlConverter {
             tryApplyOrderBy(nodeQuery, val);
         }
 
-        System.out.println("ORDER: " + val);
+        // System.out.println("ORDER: " + val);
         return null;
     }
 
@@ -293,13 +293,13 @@ public class GraphQlToSparqlConverter {
 
 
     public Object tryApplyOrderBy(NodeQuery nodeQuery, ObjectValue ov) {
-        System.out.println("ORDER: " + ov);
+        // System.out.println("ORDER: " + ov);
 
         Multimap<String, Value<?>> mm = GraphQlUtils.indexValues(ov);
 
         Value<?> pathValue = IterableUtils.expectZeroOrOneItems(mm.get("path"));
         FacetPath path = toFacetPath(pathValue);
-        System.out.println("FacetPath: " + path);
+        // System.out.println("FacetPath: " + path);
         Value<?> dirValue = IterableUtils.expectZeroOrOneItems(mm.get("dir"));
 
         if (path != null) {

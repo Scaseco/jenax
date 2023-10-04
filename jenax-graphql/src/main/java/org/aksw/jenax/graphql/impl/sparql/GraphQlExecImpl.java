@@ -48,7 +48,6 @@ public class GraphQlExecImpl
     public Stream<JsonElement> getDataStream(String name) {
         GraphQlToSparqlMapping.Entry entry = mapping.getTopLevelMappings().get(name);
 
-        // ElementGeneratorLateral.create
         NodeQuery nodeQuery = entry.getNodeQuery();
         RdfToJsonMapper jsonMapper = entry.getMapper();
         RelationQuery rq = nodeQuery.relationQuery();
@@ -60,31 +59,19 @@ public class GraphQlExecImpl
                     graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
                     (graph, quad) -> graph.add(quad.asTriple())));
 
-
-        // RdfDataSource remoteDataSource = () -> RDFConnectionRemote.newBuilder().queryEndpoint("http://localhost:8642/sparql").build();
         Flowable<RDFNode> graphFlow = SparqlRx
                 .execConstructQuads(() -> dataSource.asQef().createQueryExecution(query))
                 .lift(grouper)
                 .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
 
         Flowable<JsonElement> result = graphFlow.map(rdfNode -> {
-            System.err.println("Graph Flow item: " + rdfNode.asNode());
-            // RDFDataMgr.write(System.out, rdfNode.getModel(), RDFFormat.TURTLE_PRETTY);
-            // System.out.println(RdfJsonUtils.toJson(rdfNode, Integer.MAX_VALUE, false));
             org.apache.jena.graph.Node node = rdfNode.asNode();
             Graph graph = rdfNode.getModel().getGraph();
             JsonArray errors = new JsonArray();
             JsonElement json = jsonMapper.map(PathJson.newAbsolutePath(), errors, graph, node);
-            // System.err.println(json);
+            // TODO Handle errors
             return json;
         });
-
-//        for (NodeQuery child : nodeQuery.getChildren()) {
-//            System.out.println("child: " + child.getScopedFacetPath());
-//            System.out.println(child.var());
-//        }
-//
-//        System.out.println("jsonConverter: " + jsonConverter);
 
         return result.blockingStream();
     }

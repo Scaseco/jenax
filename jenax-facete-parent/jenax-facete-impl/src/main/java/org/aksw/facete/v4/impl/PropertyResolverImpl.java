@@ -59,9 +59,9 @@ public class PropertyResolverImpl
     // FIXME This must be made configurable
     private static Dataset virtualProperties = null;
 
-    static {
-        loadShacl();
-    }
+//    static {
+//        loadShacl();
+//    }
     // public static Map<String, BinaryRelation> userDefinedProperties = new HashMap<>();
 
     @Override
@@ -135,7 +135,7 @@ public class PropertyResolverImpl
     }
 
 
-    public static void loadShacl() {
+    public static void testLoadShacl() {
         SHFactory.ensureInited();
         Model shaclModel = RDFDataMgr.loadModel("test.r2rml.core.shacl.ttl");
         // List<ShNodeShape> nodeShapes = shaclModel.listResourcesWithProperty(SH.property).mapWith(r -> r.as(ShNodeShape.class)).toList();
