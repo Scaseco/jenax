@@ -58,4 +58,34 @@ public class PathPE
     public PathPE resolveAll() {
         return resolve(PathOpsPE.VAR_X);
     }
+
+    /* Static convenience shorthands */
+
+    public static PathPE parse(String str) {
+        return PathOpsPE.get().fromString(str);
+    }
+
+    public static PathPE newAbsolutePath(UnaryXExpr segment) {
+        return PathOpsPE.get().newAbsolutePath(segment);
+    }
+
+    public static PathPE newAbsolutePath(UnaryXExpr ... segments) {
+        return PathOpsPE.get().newAbsolutePath(segments);
+    }
+
+    public static PathPE newAbsolutePath(List<UnaryXExpr> segments) {
+        return PathOpsPE.get().newAbsolutePath(segments);
+    }
+
+    public static PathPE newRelativePath(UnaryXExpr segment) {
+        return PathOpsPE.get().newRelativePath(segment);
+    }
+
+    public static PathPE newRelativePath(UnaryXExpr ... segments) {
+        return PathOpsPE.get().newRelativePath(segments);
+    }
+
+    public static PathPE newRelativePath(List<UnaryXExpr> segments) {
+        return PathOpsPE.get().newRelativePath(segments);
+    }
 }

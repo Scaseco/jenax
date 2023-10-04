@@ -62,7 +62,7 @@ public class GraphQlExecFactoryLazy
     public static GraphQlExecFactoryLazy of(Callable<ListenableFuture<GraphQlExecFactory>> delegateCreation) {
         ComputeOnce<GraphQlExecFactory> once = ComputeOnce.of(() -> {
             if (logger.isInfoEnabled()) {
-                logger.info("Submitting up async GraphQlExecFactory creation");
+                logger.info("Submitting async GraphQlExecFactory creation");
             }
             ListenableFuture<GraphQlExecFactory> r = delegateCreation.call();
             if (logger.isInfoEnabled()) {

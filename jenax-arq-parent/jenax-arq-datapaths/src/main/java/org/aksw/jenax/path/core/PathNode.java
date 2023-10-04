@@ -17,6 +17,8 @@ import org.apache.jena.rdf.model.Resource;
 public class PathNode
     extends PathBase<Node, PathNode>
 {
+    private static final long serialVersionUID = 1L;
+
     public PathNode(PathOps<Node, PathNode> pathOps, boolean isAbsolute, List<Node> segments) {
         super(pathOps, isAbsolute, segments);
     }
@@ -24,5 +26,35 @@ public class PathNode
     /** Convenience method for {@link Resource} */
     public PathNode resolve(Resource other) {
         return resolve(other.asNode());
+    }
+
+    /* Static convenience shorthands */
+
+    public static PathNode parse(String str) {
+        return PathOpsNode.get().fromString(str);
+    }
+
+    public static PathNode newAbsolutePath(Node segment) {
+        return PathOpsNode.get().newAbsolutePath(segment);
+    }
+
+    public static PathNode newAbsolutePath(Node ... segments) {
+        return PathOpsNode.get().newAbsolutePath(segments);
+    }
+
+    public static PathNode newAbsolutePath(List<Node> segments) {
+        return PathOpsNode.get().newAbsolutePath(segments);
+    }
+
+    public static PathNode newRelativePath(Node segment) {
+        return PathOpsNode.get().newRelativePath(segment);
+    }
+
+    public static PathNode newRelativePath(Node ... segments) {
+        return PathOpsNode.get().newRelativePath(segments);
+    }
+
+    public static PathNode newRelativePath(List<Node> segments) {
+        return PathOpsNode.get().newRelativePath(segments);
     }
 }
