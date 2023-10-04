@@ -42,11 +42,8 @@ import graphql.language.StringValue;
 import graphql.language.Value;
 
 /**
- * Things to be done:
- * - Run the basic void and shacl generation queries
- * - Use the resulting model to configure key and property resolvers; might also need property-per-class resolver
- * -
- *
+ * Compiles a graphql query to a {@link GraphQlToSparqlMapping} instance.
+ * Relies on a {@link GraphQlResolver} to map field names to SPARQL classes and properties.
  */
 public class GraphQlToSparqlConverter {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlToSparqlConverter.class);

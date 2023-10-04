@@ -51,25 +51,6 @@ public class WebAppInitUtils {
         //  fr.setInitParameter("dispatcher", "REQUEST");
         }
 
-        {
-            FilterRegistration.Dynamic fr = servletContext.addFilter("FilterPost", new FilterPost());
-            fr.addMappingForUrlPatterns(null, true, "/*");
-            fr.setAsyncSupported(true);
-        //  fr.setInitParameter("dispatcher", "REQUEST");
-        }
-
-        {
-        	// The sparqlStmtParser is set in FactoryBeanSparqlServer - getting it out here
-        	// is not ideal
-        	GenericWebApplicationContext cxt = (GenericWebApplicationContext)rootContext;
-        	SparqlStmtParser sparqlStmtParser = (SparqlStmtParser)cxt.getBeanFactory().getSingleton("sparqlStmtParser");
-
-            FilterRegistration.Dynamic fr = servletContext.addFilter("SparqlStmtTypeAcceptHeaderFilter", new SparqlStmtTypeAcceptHeaderFilter(sparqlStmtParser));
-            fr.addMappingForUrlPatterns(null, true, "/*");
-            fr.setAsyncSupported(true);
-        //  fr.setInitParameter("dispatcher", "REQUEST");
-        }
-
     }
 
 }

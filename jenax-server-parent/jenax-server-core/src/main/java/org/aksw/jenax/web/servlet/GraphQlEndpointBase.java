@@ -2,14 +2,12 @@ package org.aksw.jenax.web.servlet;
 
 import java.util.Objects;
 
-import javax.ws.rs.FormParam;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.CompletionCallback;
 import javax.ws.rs.container.ConnectionCallback;
 import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -20,9 +18,6 @@ import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import graphql.language.Document;
-import graphql.parser.Parser;
-
 public abstract class GraphQlEndpointBase {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlEndpointBase.class);
 
@@ -30,27 +25,23 @@ public abstract class GraphQlEndpointBase {
 
 
     @POST
+    @Consumes //(MediaType.APPLICATION_JSON)
+    // @Produces(MediaType.APPLICATION_JSON)
     public void execute(
             @Suspended AsyncResponse response,
-            @Context HttpHeaders headers,
-            @FormParam("query") String query) {
-        processQueryAsync(response, query);
+            // @Context HttpHeaders headers,
+            String postBody) {
+        processQueryAsync(response, postBody);
     }
 
     public void processQueryAsync(
             AsyncResponse response,
             String query) {
 
-
-        // RDFConnection conn = getConnection();
-        // logger.debug("Opened connection: " + System.identityHashCode(conn));
-
-        GraphQlExec tmp;
+        GraphQlExec exec;
         try {
-            Parser parser = new Parser();
-            Document document = parser.parseDocument(query);
             GraphQlExecFactory gef = Objects.requireNonNull(getGraphQlExecFactory(), "GraphQlExecFactory is null");
-            tmp = gef.create(document);
+            exec = GraphQlExecUtils.execJson(gef, query);
         } catch (Exception e) {
             response.resume(e);
             throw new RuntimeException(e);
@@ -104,13 +95,13 @@ public abstract class GraphQlEndpointBase {
 //        response.setTimeout(600, TimeUnit.SECONDS);
 
 
-        Response x = processQuery(tmp);
+        Response x = processQuery(exec);
         response.resume(x);
     }
 
     public Response processQuery(GraphQlExec ge) {
         String contentTypeStr = WebContent.contentTypeJSON;
-        StreamingOutput processor = out -> GraphQlExecUtils.write(out, ge);
+        StreamingOutput processor = out -> { GraphQlExecUtils.writePretty(out, ge); };
         Response result = Response.ok(processor, contentTypeStr).build();
         return result;
     }

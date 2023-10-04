@@ -19,6 +19,8 @@ import org.eclipse.jetty.server.Server;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
+/** Use ServerBuilder instead which is not limited to a single sparql servlet */
+@Deprecated
 public class FactoryBeanSparqlServer {
     protected Integer port;
 
@@ -92,11 +94,11 @@ public class FactoryBeanSparqlServer {
 //        WebAppContext webAppContext = (WebAppContext)result.getHandler();
 //        webAppContext.getSessionHandler().setMaxInactiveInterval(90 * 24 * 60 * 60);
 
-		for (org.eclipse.jetty.server.Connector connector : result.getConnectors()) {
-			if (connector instanceof AbstractConnector) {
-				((AbstractConnector) connector).setIdleTimeout(90 * 24 * 60 * 60);
-			}
-		}
+        for (org.eclipse.jetty.server.Connector connector : result.getConnectors()) {
+            if (connector instanceof AbstractConnector) {
+                ((AbstractConnector) connector).setIdleTimeout(90 * 24 * 60 * 60);
+            }
+        }
 
         return result;
     }

@@ -1,12 +1,16 @@
 package org.aksw.jenax.web.provider;
 
-import org.apache.jena.query.QueryException;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import java.util.concurrent.ExecutionException;
 
-public class UnwrapRuntimeExceptionProvider extends Throwable implements ExceptionMapper<RuntimeException> {
+import org.apache.jena.query.QueryException;
+
+public class UnwrapRuntimeExceptionProvider
+    // extends Throwable // Why did this ever extend Throwable?
+    implements ExceptionMapper<RuntimeException>
+{
     @Override
     public Response toResponse(RuntimeException e) {
         Throwable current = e;

@@ -25,19 +25,13 @@ public class DatasetMetadata {
     protected static final Query propertyPartitionsQuery = SparqlStmtMgr.loadQuery("void/minimal/property-partitions.rq");
     protected static final List<Query> shaclQueries = SparqlStmtMgr.loadQueries("sh-scalar-properties.rq");
 
-    protected String datasetHash;
     protected VoidDataset voidDataset;
     protected Model shaclModel;
 
-    public DatasetMetadata(String datasetHash, VoidDataset voidDataset, Model shaclModel) {
+    public DatasetMetadata(VoidDataset voidDataset, Model shaclModel) {
         super();
-        this.datasetHash = datasetHash;
         this.voidDataset = voidDataset;
         this.shaclModel = shaclModel;
-    }
-
-    public String getDatasetHash() {
-        return datasetHash;
     }
 
     public VoidDataset getVoidDataset() {
@@ -70,19 +64,23 @@ public class DatasetMetadata {
         return combiner.exec();
     }
 
+    public static ListenableFuture<String> fetchDatasetHash(RdfDataSource dataSource, ListeningExecutorService executorService) {
+        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> fetchDatasetHash(dataSource.asQef()));
+        return datasetHashFuture;
+    }
+
     public static ListenableFuture<DatasetMetadata> fetch(RdfDataSource dataSource, ListeningExecutorService executorService) {
         QueryExecutionFactoryQuery qef = dataSource.asQef();
 
         List<Query> voidQueries = Arrays.asList(classPartitionsQuery, propertyPartitionsQuery);
-        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> fetchDatasetHash(qef));
         ListenableFuture<Model> voidModelFuture = asyncModel(executorService, qef, voidQueries);
         ListenableFuture<Model> shaclModelFuture = asyncModel(executorService, qef, shaclQueries);
 
         ListenableFuture<DatasetMetadata> result =
-                Futures.whenAllSucceed(datasetHashFuture, voidModelFuture, shaclModelFuture).call(() -> {
+                Futures.whenAllSucceed(voidModelFuture, shaclModelFuture).call(() -> {
                     List<VoidDataset> voidDatasets = VoidUtils.listVoidDatasets(voidModelFuture.get());
                     VoidDataset voidDataset = IterableUtils.expectZeroOrOneItems(voidDatasets);
-                    return new DatasetMetadata(datasetHashFuture.get(), voidDataset, shaclModelFuture.get());
+                    return new DatasetMetadata(voidDataset, shaclModelFuture.get());
                 }
                 , executorService);
 
