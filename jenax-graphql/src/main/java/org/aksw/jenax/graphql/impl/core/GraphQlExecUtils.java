@@ -47,13 +47,16 @@ public class GraphQlExecUtils {
         return result;
     }
 
-    /** Convenience method to execute a string */
+    /** Execute a graphql string and obtain the
+     *  complete result document a guava json object */
     public static JsonObject materialize(GraphQlExecFactory gef, String queryStr) {
         GraphQlExec ge = exec(gef, queryStr);
         JsonObject result = GraphQlExecUtils.materialize(ge);
         return result;
     }
 
+    /** Execute a graphql string and obtain the
+     *  complete result document a guava json object */
     public static JsonObject materialize(GraphQlExec exec) {
         return new GraphQlExecToJsonObject().write(exec);
     }
@@ -68,7 +71,8 @@ public class GraphQlExecUtils {
 
     public static void write(OutputStream out, GraphQlExec exec, Gson gson) {
         try {
-            new GraphQlResponseWriterImpl(gson).write(out, exec);
+            new GraphQlResultWriterImpl(gson).write(out, exec);
+            out.write('\n');
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

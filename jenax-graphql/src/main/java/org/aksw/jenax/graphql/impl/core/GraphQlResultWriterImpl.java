@@ -16,12 +16,11 @@ import com.google.gson.stream.JsonWriter;
 /**
  * Writes out the data streams of a GraphQlExec to the an OutputStream.
  */
-public class GraphQlResponseWriterImpl
-    // implements GraphQlResponseWriter
+public class GraphQlResultWriterImpl
 {
     protected Gson gson;
 
-    protected GraphQlResponseWriterImpl(Gson gson) {
+    protected GraphQlResultWriterImpl(Gson gson) {
         super();
         this.gson = gson;
     }

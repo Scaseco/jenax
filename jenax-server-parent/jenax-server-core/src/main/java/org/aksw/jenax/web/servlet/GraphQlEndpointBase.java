@@ -101,7 +101,9 @@ public abstract class GraphQlEndpointBase {
 
     public Response processQuery(GraphQlExec ge) {
         String contentTypeStr = WebContent.contentTypeJSON;
-        StreamingOutput processor = out -> { GraphQlExecUtils.writePretty(out, ge); };
+        StreamingOutput processor = out -> {
+            GraphQlExecUtils.writePretty(out, ge);
+        };
         Response result = Response.ok(processor, contentTypeStr).build();
         return result;
     }
