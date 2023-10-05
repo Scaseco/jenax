@@ -3,6 +3,7 @@ package org.aksw.jenax.web.server.boot;
 import java.util.function.Function;
 
 import javax.servlet.FilterRegistration;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,6 +15,7 @@ import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.web.filter.FilterPost;
 import org.aksw.jenax.web.filter.SparqlStmtTypeAcceptHeaderFilter;
+import org.aksw.jenax.web.frontend.WebMvcConfigYasgui;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
 import org.aksw.jenax.web.provider.UnwrapRuntimeExceptionProvider;
@@ -23,7 +25,9 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 public class ServletBuilderSparql
     implements ServletBuilder
@@ -68,32 +72,36 @@ public class ServletBuilderSparql
         beanFactory.registerSingleton("sparqlConnectionFactory", connectionFactory);
         beanFactory.registerSingleton("sparqlStmtParser", sparqlStmtParser);
 
-        WebApplicationInitializer result = servletContext -> {
+        WebApplicationInitializer result = servletContext ->
+            ServletBuilderSparql.initServlet(servletContext, rootContext);
+        return result;
+    }
 
-            String path = "/sparql/*";
+    public static void initServlet(ServletContext servletContext, GenericWebApplicationContext rootContext) {
+        String path = "/sparql/*";
 
-            // TODO The filters here are hacky as they fiddle with headers and message body which e.g. breaks consuming the full post body in a servlet
+        // TODO The filters here are hacky as they fiddle with headers and message body which e.g. breaks consuming the full post body in a servlet
 
-            {
-                FilterRegistration.Dynamic fr = servletContext.addFilter("FilterPost", new FilterPost());
-                fr.addMappingForUrlPatterns(null, true, path);
-                fr.setAsyncSupported(true);
-            //  fr.setInitParameter("dispatcher", "REQUEST");
-            }
+        {
+            FilterRegistration.Dynamic fr = servletContext.addFilter("FilterPost", new FilterPost());
+            fr.addMappingForUrlPatterns(null, true, path);
+            fr.setAsyncSupported(true);
+        //  fr.setInitParameter("dispatcher", "REQUEST");
+        }
 
-            {
-                // The sparqlStmtParser is set in FactoryBeanSparqlServer - getting it out here
-                // is not ideal
-                GenericWebApplicationContext cxt = (GenericWebApplicationContext)rootContext;
-                SparqlStmtParser sparqlStmtParser = (SparqlStmtParser)cxt.getBeanFactory().getSingleton("sparqlStmtParser");
+        {
+            // The sparqlStmtParser is set in FactoryBeanSparqlServer - getting it out here
+            // is not ideal
+            GenericWebApplicationContext cxt = (GenericWebApplicationContext)rootContext;
+            SparqlStmtParser sparqlStmtParser = (SparqlStmtParser)cxt.getBeanFactory().getSingleton("sparqlStmtParser");
 
-                FilterRegistration.Dynamic fr = servletContext.addFilter("SparqlStmtTypeAcceptHeaderFilter", new SparqlStmtTypeAcceptHeaderFilter(sparqlStmtParser));
-                fr.addMappingForUrlPatterns(null, true, path);
-                fr.setAsyncSupported(true);
-            //  fr.setInitParameter("dispatcher", "REQUEST");
-            }
+            FilterRegistration.Dynamic fr = servletContext.addFilter("SparqlStmtTypeAcceptHeaderFilter", new SparqlStmtTypeAcceptHeaderFilter(sparqlStmtParser));
+            fr.addMappingForUrlPatterns(null, true, path);
+            fr.setAsyncSupported(true);
+        //  fr.setInitParameter("dispatcher", "REQUEST");
+        }
 
-
+        {
             ServletRegistration.Dynamic servlet = servletContext.addServlet("sparqlServiceServlet", new ServletContainer());
             //servlet.setInitParameter("contextConfigLocation", "workaround-for-JERSEY-2038");
             servlet.setInitParameter(ServerProperties.PROVIDER_CLASSNAMES, String.join(",",
@@ -107,8 +115,18 @@ public class ServletBuilderSparql
             servlet.addMapping(path);
             servlet.setAsyncSupported(true);
             servlet.setLoadOnStartup(1);
-        };
+        }
 
-        return result;
+        // Dispatcher servlet is used to serve the html/js/css resources
+        {
+            AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
+//            dispatcherContext.register(WebMvcConfigSnorql.class);
+            dispatcherContext.register(WebMvcConfigYasgui.class);
+
+            ServletRegistration.Dynamic servlet = servletContext.addServlet("dispatcherServlet", new DispatcherServlet(dispatcherContext));
+            servlet.addMapping("/*");
+            servlet.setAsyncSupported(true);
+            servlet.setLoadOnStartup(1);
+        }
     }
 }

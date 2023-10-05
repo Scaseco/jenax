@@ -46,6 +46,7 @@ public class WebAppInitializerSparqlServiceUtils {
             servlet.setLoadOnStartup(1);
         }
 
+        // Dispatcher servlet is used to serve the html/js/css resources
         {
             AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
 //            dispatcherContext.register(WebMvcConfigSnorql.class);
