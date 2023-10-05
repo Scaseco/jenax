@@ -18,6 +18,7 @@ public interface QueryExecDecorator
 {
     QueryExec getDecoratee();
 
+    @Override
     default Context getContext() {
         return getDecoratee().getContext();
     }

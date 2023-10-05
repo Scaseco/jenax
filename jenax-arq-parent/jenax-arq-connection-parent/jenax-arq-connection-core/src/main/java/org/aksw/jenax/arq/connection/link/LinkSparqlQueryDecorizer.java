@@ -4,9 +4,11 @@ import java.util.function.Function;
 
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
-/** Transform a {@link LinkSparqlQuery} into another one */
+/**
+ * A "decorizer" is a factory for decorators.
+ * Transforms a {@link LinkSparqlQuery} into another one typically by decorating it. */
 @FunctionalInterface
 public interface LinkSparqlQueryDecorizer
-	extends Function<LinkSparqlQuery, LinkSparqlQuery>
+    extends Function<LinkSparqlQuery, LinkSparqlQuery>
 {
 }

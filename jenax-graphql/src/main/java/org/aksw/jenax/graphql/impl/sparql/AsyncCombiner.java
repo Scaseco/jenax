@@ -54,7 +54,7 @@ public class AsyncCombiner<I, O> {
         List<ListenableFuture<I>> futures = tasks.stream()
                 .map(executorService::submit).collect(Collectors.toList());
         ListenableFuture<O> result = Futures.transform(
-                Futures.successfulAsList(futures), combiner::apply, executorService);
+                Futures.allAsList(futures), combiner::apply, executorService);
         return result;
     }
 }

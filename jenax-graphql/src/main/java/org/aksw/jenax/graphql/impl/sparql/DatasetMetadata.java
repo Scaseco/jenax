@@ -14,12 +14,16 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 public class DatasetMetadata {
+    private static final Logger logger = LoggerFactory.getLogger(DatasetMetadata.class);
+
     protected static final Query datasetHashQuery = SparqlStmtMgr.loadQuery("probe-dataset-hash-simple.rq");
     protected static final Query classPartitionsQuery = SparqlStmtMgr.loadQuery("void/minimal/class-partitions.rq");
     protected static final Query propertyPartitionsQuery = SparqlStmtMgr.loadQuery("void/minimal/property-partitions.rq");
@@ -59,7 +63,16 @@ public class DatasetMetadata {
     public static ListenableFuture<Model> asyncModel(ListeningExecutorService executorService, QueryExecutionFactoryQuery qef, List<Query> constructQueries) {
         AsyncCombiner<Model, Model> combiner = AsyncCombiner.of(executorService, DatasetMetadata::combine);
         for (Query query : constructQueries) {
-            combiner.addTask(() -> qef.execConstruct(query));
+            combiner.addTask(() -> {
+                Model r;
+                try {
+                    r = qef.execConstruct(query);
+                } catch (Exception e) {
+                    logger.info("Query execution failed: " + query);
+                    throw new RuntimeException(e);
+                }
+                return r;
+            });
         }
         return combiner.exec();
     }

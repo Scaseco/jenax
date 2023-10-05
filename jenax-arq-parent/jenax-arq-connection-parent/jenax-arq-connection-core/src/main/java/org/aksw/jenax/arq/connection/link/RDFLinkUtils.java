@@ -346,6 +346,7 @@ public class RDFLinkUtils {
 
     }
 
+    /** Disable update and dataset APIs */
     public static RDFLink wrapWithQueryOnly(RDFLink link) {
         LinkSparqlQuery queryLink = unwrapQueryConnection(link);
         return new RDFLinkModular(queryLink, null, null);

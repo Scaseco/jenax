@@ -347,7 +347,9 @@ public class QueryUtils {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOp = xform.apply(beforeOp);// Transformer.transform(xform, beforeOp);
         Query afterQuery = OpAsQuery.asQuery(afterOp);
-        afterQuery.getPrefixMapping().setNsPrefixes(beforeQuery.getPrefixMapping());
+
+        // Prefixes are restored in restoreQueryForm!
+        // afterQuery.getPrefixMapping().setNsPrefixes(beforeQuery.getPrefixMapping());
 
         Query result = restoreQueryForm(afterQuery, beforeQuery);
 //		if(beforeQuery.isConstructType()) {

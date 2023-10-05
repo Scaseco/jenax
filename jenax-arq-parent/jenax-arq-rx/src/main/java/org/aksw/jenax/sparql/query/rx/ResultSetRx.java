@@ -26,9 +26,9 @@ import io.reactivex.rxjava3.disposables.Disposable;
  *
  */
 public interface ResultSetRx {
-	// Reference to the query in order to be able to supply it
+    // Reference to the query in order to be able to supply it
     // in the wrappers returned by the asQueryExec* methods
-	SparqlStmtQuery getQueryStmt();
+    SparqlStmtQuery getQueryStmt();
     List<Var> getVars();
     Flowable<Binding> getBindings();
 
@@ -43,14 +43,14 @@ public interface ResultSetRx {
      * @return A query execution wrapping this result set
      */
     default QueryExecution asQueryExecution() {
-    	QueryExec qExec = asQueryExec();
-    	return org.apache.jena.sparql.exec.QueryExecutionAdapter.adapt(qExec);
+        QueryExec qExec = asQueryExec();
+        return org.apache.jena.sparql.exec.QueryExecutionAdapter.adapt(qExec);
     }
 
     default QueryExec asQueryExec() {
-    	SparqlStmtQuery queryStmt = getQueryStmt();
-    	Query query = queryStmt == null ? null : queryStmt.getQuery();
-    	QueryExec result = new QueryExecBaseSelect(query, null, null) {
+        SparqlStmtQuery queryStmt = getQueryStmt();
+        Query query = queryStmt == null ? null : queryStmt.getQuery();
+        QueryExec result = new QueryExecBaseSelect(query, null) {
             protected Disposable disposable = null;
 
 //            @Override
@@ -80,8 +80,8 @@ public interface ResultSetRx {
                 // super.closeActual();
             }
 
-			@Override
-			protected RowSet createRowSet(Query query) {
+            @Override
+            protected RowSet createRowSet(Query query) {
                 if (disposable != null) {
                     throw new IllegalStateException("execSelect has already been called");
                 }
@@ -92,7 +92,7 @@ public interface ResultSetRx {
                 disposable = (Disposable)it;
                 RowSet result = RowSetStream.create(vars, it);
                 return result;
-			}
+            }
         };
 
         return result;

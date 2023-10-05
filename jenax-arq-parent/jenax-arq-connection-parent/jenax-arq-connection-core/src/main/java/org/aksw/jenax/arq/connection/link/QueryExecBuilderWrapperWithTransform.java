@@ -3,14 +3,12 @@ package org.aksw.jenax.arq.connection.link;
 import java.util.function.Function;
 
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.Syntax;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
 /** QueryExecBuilder base class which parses query strings and delegates them to the object based method*/
 public class QueryExecBuilderWrapperWithTransform
-    extends QueryExecBuilderDelegateBase
+    extends QueryExecBuilderDelegateBaseParse
 {
     protected Function<? super Query, ? extends Query> queryTransformer;
     protected Function<? super QueryExec, ? extends QueryExec> queryExecTransformer;
@@ -55,15 +53,15 @@ public class QueryExecBuilderWrapperWithTransform
         return result;
     }
 
-    @Override
-    public QueryExecBuilder query(String queryString) {
-        Query query = QueryFactory.create(queryString);
-        return query(query);
-    }
-
-    @Override
-    public QueryExecBuilder query(String queryString, Syntax syntax) {
-        Query query = QueryFactory.create(queryString, syntax);
-        return query(query);
-    }
+//    @Override
+//    public QueryExecBuilder query(String queryString) {
+//        Query query = QueryFactory.create(queryString);
+//        return query(query);
+//    }
+//
+//    @Override
+//    public QueryExecBuilder query(String queryString, Syntax syntax) {
+//        Query query = QueryFactory.create(queryString, syntax);
+//        return query(query);
+//    }
 }

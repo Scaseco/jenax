@@ -11,22 +11,25 @@ public interface QueryExecModDelegate
 {
     QueryExecMod getDelegate();
 
+    @Override
     default QueryExecMod initialTimeout(long timeout, TimeUnit timeUnit) {
         getDelegate().initialTimeout(timeout, timeUnit);
         return this;
     }
 
+    @Override
     default QueryExecMod overallTimeout(long timeout, TimeUnit timeUnit) {
         getDelegate().overallTimeout(timeout, timeUnit);
         return this;
     }
 
+    @Override
     default Context getContext() {
         return getDelegate().getContext();
     }
 
+    @Override
     default QueryExec build() {
         return getDelegate().build();
     }
-
 }

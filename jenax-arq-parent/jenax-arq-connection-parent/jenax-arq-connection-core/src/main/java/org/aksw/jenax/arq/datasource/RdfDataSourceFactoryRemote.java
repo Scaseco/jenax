@@ -32,7 +32,9 @@ public class RdfDataSourceFactoryRemote
             RDFConnectionRemoteBuilder b = RDFConnectionRemote.newBuilder();
             if (userInfo.hasUserInfo()) {
                 b = b.destination(userInfo.getUrlWithoutUserInfo());
-                HttpClient httpClient = HttpClient.newBuilder().authenticator(AuthLib.authenticator(userInfo.getUser(), userInfo.getPass())).build();
+                HttpClient httpClient = HttpClient.newBuilder()
+                        .authenticator(AuthLib.authenticator(userInfo.getUser(), userInfo.getPass()))
+                        .build();
                 b = b.httpClient(httpClient);
             } else {
                 b = b.destination(url);
