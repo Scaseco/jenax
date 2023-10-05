@@ -8,7 +8,7 @@ import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.LookupServiceCacheMem;
 import org.aksw.commons.rx.lookup.LookupServicePartition;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;

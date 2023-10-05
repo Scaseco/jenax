@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.parse;
 
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryDecorator;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 

@@ -6,7 +6,8 @@ import java.util.Map;
 
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+
 import com.google.common.collect.Iterators;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

@@ -8,7 +8,7 @@ import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

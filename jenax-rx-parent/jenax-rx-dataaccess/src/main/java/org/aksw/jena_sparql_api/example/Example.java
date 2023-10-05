@@ -4,7 +4,7 @@ import org.aksw.jena_sparql_api.delay.core.QueryExecutionFactoryDelay;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
 import org.aksw.jena_sparql_api.retry.core.QueryExecutionFactoryRetry;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;

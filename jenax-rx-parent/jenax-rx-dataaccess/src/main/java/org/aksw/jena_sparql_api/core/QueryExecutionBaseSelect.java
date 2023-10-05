@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.collections.SinglePrefetchIterator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Node;

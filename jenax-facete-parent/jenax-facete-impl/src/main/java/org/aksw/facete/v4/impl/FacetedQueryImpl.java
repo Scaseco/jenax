@@ -9,7 +9,7 @@ import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.facete.v3.api.TreeQueryNode;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import com.google.common.base.Preconditions;

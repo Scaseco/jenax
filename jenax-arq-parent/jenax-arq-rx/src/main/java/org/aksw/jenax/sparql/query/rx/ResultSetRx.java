@@ -3,7 +3,7 @@ package org.aksw.jenax.sparql.query.rx;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jenax.arq.connection.link.QueryExecBaseSelect;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.sparql.rx.op.FlowOfBindingsOps;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.apache.jena.query.Query;

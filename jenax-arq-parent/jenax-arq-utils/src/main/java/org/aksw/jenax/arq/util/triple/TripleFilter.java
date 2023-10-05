@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.util.triple;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.aksw.jenax.arq.util.exec.ExecutionContextUtils;
+import org.aksw.jenax.arq.util.exec.query.ExecutionContextUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.NodeUtils;

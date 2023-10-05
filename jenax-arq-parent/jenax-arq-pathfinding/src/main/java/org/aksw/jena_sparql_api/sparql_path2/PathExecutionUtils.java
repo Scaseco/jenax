@@ -19,7 +19,7 @@ import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.analytics.core.MappedConcept;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;

@@ -7,7 +7,7 @@ import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
 import org.apache.jena.graph.Node;
 
 import com.google.common.collect.Range;

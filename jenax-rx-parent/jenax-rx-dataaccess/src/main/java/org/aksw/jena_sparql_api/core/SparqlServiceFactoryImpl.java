@@ -7,9 +7,9 @@ import java.util.Map;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCacheEx;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.pagination.core.QueryExecutionFactoryPaginated;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 

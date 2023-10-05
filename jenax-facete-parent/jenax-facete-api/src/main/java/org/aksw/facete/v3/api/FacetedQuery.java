@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.arq.datasource.RdfDataEngines;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 

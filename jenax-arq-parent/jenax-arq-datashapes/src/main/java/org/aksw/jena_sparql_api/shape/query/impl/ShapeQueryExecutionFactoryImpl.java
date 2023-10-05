@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.shape.query.impl;
 import org.aksw.jena_sparql_api.shape.query.api.ShapeQueryExecution;
 import org.aksw.jena_sparql_api.shape.query.api.ShapeQueryExecutionFactory;
 import org.aksw.jena_sparql_api.shape.syntax.ShapeQuery;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
 
 public class ShapeQueryExecutionFactoryImpl
     implements ShapeQueryExecutionFactory

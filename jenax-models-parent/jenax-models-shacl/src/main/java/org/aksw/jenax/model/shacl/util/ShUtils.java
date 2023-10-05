@@ -3,7 +3,7 @@ package org.aksw.jenax.model.shacl.util;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.model.shacl.domain.ShNodeShape;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.apache.jena.atlas.iterator.Iter;

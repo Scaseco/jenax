@@ -4,10 +4,10 @@ import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.aksw.jenax.arq.connection.RDFConnectionModular;
-import org.aksw.jenax.arq.connection.SparqlQueryConnectionJsaBase;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
+import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsaBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;

@@ -6,7 +6,7 @@ import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.data_query.impl.DataQueryImpl;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;

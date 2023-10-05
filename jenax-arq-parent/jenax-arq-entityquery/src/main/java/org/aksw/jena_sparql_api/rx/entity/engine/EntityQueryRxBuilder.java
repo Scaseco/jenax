@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryBasic;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.ExprListEval;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;

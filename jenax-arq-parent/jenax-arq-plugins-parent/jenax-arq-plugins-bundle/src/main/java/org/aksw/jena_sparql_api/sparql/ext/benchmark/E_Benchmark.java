@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
-import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
-import org.aksw.jenax.arq.connection.link.RDFLinkUtils;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;

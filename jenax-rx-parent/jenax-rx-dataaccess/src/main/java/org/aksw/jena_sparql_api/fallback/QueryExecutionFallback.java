@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

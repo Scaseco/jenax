@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.aksw.jena_sparql_api.cache.extra.Cache;
 import org.aksw.jena_sparql_api.cache.extra.CacheResource;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;

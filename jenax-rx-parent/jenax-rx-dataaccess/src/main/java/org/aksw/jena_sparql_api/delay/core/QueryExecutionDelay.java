@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.delay.core;
 import java.util.Iterator;
 
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

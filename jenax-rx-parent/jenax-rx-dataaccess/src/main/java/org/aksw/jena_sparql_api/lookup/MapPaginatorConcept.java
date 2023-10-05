@@ -4,8 +4,8 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

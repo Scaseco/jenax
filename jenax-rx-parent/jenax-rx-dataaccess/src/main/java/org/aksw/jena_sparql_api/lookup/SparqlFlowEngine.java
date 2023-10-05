@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.lookup;
 
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.query.Query;

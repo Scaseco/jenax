@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.jena.query.Query;

@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.util.expr;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.aksw.jenax.arq.util.exec.ExecutionContextUtils;
+import org.aksw.jenax.arq.util.exec.query.ExecutionContextUtils;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;

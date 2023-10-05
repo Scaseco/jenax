@@ -7,7 +7,7 @@ import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;

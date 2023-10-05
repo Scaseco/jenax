@@ -3,7 +3,8 @@ package org.aksw.jenax.arq.datasource;
 import java.util.concurrent.Callable;
 
 import org.aksw.commons.util.benchmark.BenchmarkUtils;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalCache;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;

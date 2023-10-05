@@ -6,7 +6,7 @@ import java.util.List;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;

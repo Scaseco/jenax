@@ -15,14 +15,14 @@ import org.aksw.jena_sparql_api.entity.graph.metamodel.MainPlaygroundResourceMet
 import org.aksw.jena_sparql_api.entity.graph.metamodel.PredicateStats;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceMetamodel;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;

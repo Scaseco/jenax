@@ -17,7 +17,7 @@ import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
 import org.aksw.jena_sparql_api.lookup.MapServiceSparqlQuery;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;

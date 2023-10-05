@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.concurrent.Callable;
 
 import org.aksw.commons.rx.lookup.ListPaginator;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.exec.QueryExec;

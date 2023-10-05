@@ -3,7 +3,7 @@ package org.aksw.jenax.facete.treequery2.impl;
 import java.util.List;
 
 import org.aksw.commons.io.slice.Slice;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.treequery2.old.NodeQueryOld;
 import org.apache.jena.graph.Node;

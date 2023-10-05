@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.path.Path;

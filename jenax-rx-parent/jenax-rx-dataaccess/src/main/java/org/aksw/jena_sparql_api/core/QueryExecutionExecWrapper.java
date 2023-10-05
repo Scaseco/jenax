@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.query.QueryExecution;
 
 /**

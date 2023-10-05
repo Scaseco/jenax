@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.graphql.GraphQlExec;
 import org.aksw.jenax.graphql.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.core.GraphQlExecFactoryLazy;

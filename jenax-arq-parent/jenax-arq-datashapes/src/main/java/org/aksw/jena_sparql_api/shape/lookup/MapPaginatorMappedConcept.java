@@ -7,7 +7,7 @@ import org.aksw.jena_sparql_api.lookup.MapPaginatorSparqlQueryBase;
 import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 

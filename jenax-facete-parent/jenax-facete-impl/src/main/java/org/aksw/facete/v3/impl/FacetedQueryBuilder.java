@@ -1,7 +1,7 @@
 package org.aksw.facete.v3.impl;
 
 import org.aksw.facete.v3.api.FacetedQuery;
-import org.aksw.jenax.arq.connection.core.RDFConnectionBuilder;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;

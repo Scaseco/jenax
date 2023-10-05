@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

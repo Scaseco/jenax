@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.ext.virtuoso;
 
-import org.aksw.jenax.arq.connection.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.Model;

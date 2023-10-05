@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionBaseSelect;
-import org.aksw.jenax.arq.util.exec.QueryExecutionAdapter;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionAdapter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;

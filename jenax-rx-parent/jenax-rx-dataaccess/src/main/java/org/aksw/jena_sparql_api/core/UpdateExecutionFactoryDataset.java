@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
-import org.aksw.jena_sparql_api.arq.core.update.UpdateEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;

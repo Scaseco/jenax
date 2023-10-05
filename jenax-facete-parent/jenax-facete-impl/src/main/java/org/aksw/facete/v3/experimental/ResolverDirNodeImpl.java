@@ -10,7 +10,7 @@ import org.aksw.jena_sparql_api.data_query.api.DataQuery;
 import org.aksw.jena_sparql_api.data_query.api.ResolverDirNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverMultiNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverNode;
-import org.aksw.jenax.arq.connection.SparqlQueryConnectionTmp;
+import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionTmp;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.apache.jena.graph.Node;

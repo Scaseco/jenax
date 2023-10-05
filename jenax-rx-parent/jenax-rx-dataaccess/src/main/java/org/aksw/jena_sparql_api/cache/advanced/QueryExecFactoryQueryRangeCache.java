@@ -16,14 +16,14 @@ import org.aksw.commons.store.object.key.impl.KryoUtils;
 import org.aksw.commons.store.object.key.impl.ObjectStoreImpl;
 import org.aksw.commons.store.object.path.impl.ObjectSerializerKryo;
 import org.aksw.jena_sparql_api.lookup.ListPaginatorSparql;
-import org.aksw.jenax.arq.connection.link.LinkSparqlQueryDecorizer;
-import org.aksw.jenax.arq.connection.link.QueryExecFactories;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecoratorBase;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQueryDecorizer;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.syntax.QueryHash;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQueryDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
@@ -148,11 +148,11 @@ public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryDecora
         return result;
     }
 
-    public static QueryExecFactoryQueryDecorizer createQueryExecMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    public static QueryExecFactoryQueryTransform createQueryExecMod(java.nio.file.Path cacheDir, long maxRequestSize) {
         return qef -> create(qef, cacheDir, maxRequestSize);
     }
 
-    public static LinkSparqlQueryDecorizer createLinkMod(java.nio.file.Path cacheDir, long maxRequestSize) {
+    public static LinkSparqlQueryTransform createLinkMod(java.nio.file.Path cacheDir, long maxRequestSize) {
         return link -> {
             QueryExecFactoryQuery qef = QueryExecFactories.of(link);
             qef = create(qef, cacheDir, maxRequestSize);
@@ -162,7 +162,7 @@ public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryDecora
     }
 
     public static LinkSparqlQuery decorate(LinkSparqlQuery link, java.nio.file.Path cacheDir, long maxRequestSize) {
-        LinkSparqlQueryDecorizer mod = createLinkMod(cacheDir, maxRequestSize);
+        LinkSparqlQueryTransform mod = createLinkMod(cacheDir, maxRequestSize);
         LinkSparqlQuery result = mod.apply(link);
         return result;
     }

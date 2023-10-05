@@ -1,15 +1,16 @@
 package org.aksw.jenax.connectionless;
 
-import org.aksw.jenax.arq.connection.RDFConnectionModular;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionJsa;
-import org.aksw.jenax.arq.connection.core.SparqlUpdateConnectionJsa;
-import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
+import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsa;
+import org.aksw.jenax.dataaccess.sparql.connection.update.SparqlUpdateConnectionJsa;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 /**
- * TODO This class should be turned into a connectionless RDFLinkModular.
+ * FIXME This class is archaic but some code still refers to it.
+ * This class should be turned into a connectionless RDFLinkModular.
  *
  * A SparqlService is an object that bundles together related sparql features
  * - i.e. querying and updating.
@@ -18,6 +19,7 @@ import org.apache.jena.sparql.core.DatasetDescription;
  * @author raven
  *
  */
+@Deprecated /** Use {@link RdfDataSource} instead */
 public interface SparqlService
 //    extends AutoCloseable
 {

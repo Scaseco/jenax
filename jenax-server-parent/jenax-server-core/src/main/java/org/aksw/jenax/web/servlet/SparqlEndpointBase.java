@@ -1,7 +1,7 @@
 package org.aksw.jenax.web.servlet;
 
 import org.aksw.jenax.arq.util.fmt.*;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
 import org.aksw.jenax.stmt.core.*;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;

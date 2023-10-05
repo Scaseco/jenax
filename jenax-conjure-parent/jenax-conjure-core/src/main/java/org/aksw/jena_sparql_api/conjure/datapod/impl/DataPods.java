@@ -29,9 +29,9 @@ import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFi
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
-import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
-import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.dataset.connection.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.http.HttpHeaders;

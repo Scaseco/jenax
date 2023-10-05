@@ -18,7 +18,7 @@ import org.aksw.jenax.arq.aggregation.AccBestLiteral;
 import org.aksw.jenax.arq.aggregation.BestLiteralConfig;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.enhanced.EnhGraph;

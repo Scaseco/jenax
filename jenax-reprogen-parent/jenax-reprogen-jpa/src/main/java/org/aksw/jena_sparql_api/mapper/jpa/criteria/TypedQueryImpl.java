@@ -43,10 +43,11 @@ import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.VExpression;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.VPath;
 import org.aksw.jena_sparql_api.mapper.model.TypeDecider;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+
 import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

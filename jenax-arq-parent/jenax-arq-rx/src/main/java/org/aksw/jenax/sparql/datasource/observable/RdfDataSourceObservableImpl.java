@@ -1,11 +1,11 @@
 package org.aksw.jenax.sparql.datasource.observable;
 
-import org.aksw.jenax.arq.datasource.RdfDataEngineFromDataset;
-import org.aksw.jenax.arq.datasource.RdfDataSources;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.binding.ResultTable;
-import org.aksw.jenax.connection.datasource.RdfDataSource;
-import org.aksw.jenax.connection.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFromDataset;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
