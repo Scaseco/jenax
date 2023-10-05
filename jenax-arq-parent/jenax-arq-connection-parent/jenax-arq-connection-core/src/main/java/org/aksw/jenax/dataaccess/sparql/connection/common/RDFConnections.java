@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.connection.common;
 
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.RDFConnectionAdapter;

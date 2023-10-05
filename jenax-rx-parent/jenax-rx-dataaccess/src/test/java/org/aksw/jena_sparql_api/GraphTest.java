@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api;
 
 import org.aksw.jena_sparql_api.core.GraphQueryExecutionFactory;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

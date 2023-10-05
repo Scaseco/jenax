@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.common.WorkerThreadBase;
-import org.aksw.jenax.dataaccess.sparql.exec.builder.update.UpdateExecBuilderDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.link.query.IteratorDelegateWithWorkerThread;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;

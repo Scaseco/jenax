@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.exec.update.DatasetExecDecoratorTxn;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateProcessorFactoryDataset;
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateProcessorFactoryDataset;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ARQ;

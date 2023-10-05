@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.lookup;
 
 import org.aksw.commons.rx.lookup.ListPaginator;
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 
 /**
  * Paginator based on a concept.

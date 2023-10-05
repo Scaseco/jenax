@@ -3,8 +3,8 @@ package org.aksw.jenax.connectionless;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsa;
 import org.aksw.jenax.dataaccess.sparql.connection.update.SparqlUpdateConnectionJsa;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.core.DatasetDescription;
 

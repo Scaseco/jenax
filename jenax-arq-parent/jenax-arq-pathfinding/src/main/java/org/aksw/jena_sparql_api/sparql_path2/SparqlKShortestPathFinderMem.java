@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.TripletPath;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;
 

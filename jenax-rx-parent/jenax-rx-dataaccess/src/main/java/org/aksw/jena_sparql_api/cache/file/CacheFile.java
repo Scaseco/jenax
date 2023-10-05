@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.core.utils.ResultSetUtils;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFormatter;

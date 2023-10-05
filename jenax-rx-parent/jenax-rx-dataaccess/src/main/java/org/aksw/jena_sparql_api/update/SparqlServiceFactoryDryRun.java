@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.update;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceImpl;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 import java.net.http.HttpClient;

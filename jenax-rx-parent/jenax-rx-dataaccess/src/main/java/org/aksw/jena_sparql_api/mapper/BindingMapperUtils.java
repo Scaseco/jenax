@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.aksw.jenax.arq.aggregation.BindingMapper;
 import org.aksw.jenax.arq.aggregation.FunctionBindingMapper;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

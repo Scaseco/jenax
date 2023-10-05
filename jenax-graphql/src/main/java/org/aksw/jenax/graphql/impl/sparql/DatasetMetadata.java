@@ -6,7 +6,7 @@ import java.util.List;
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.model.voidx.util.VoidUtils;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;

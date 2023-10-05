@@ -6,7 +6,7 @@ import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.RMM;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceMetamodel;
 import org.aksw.jena_sparql_api.lookup.LookupServiceSparqlQuery;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.GraphUtil;

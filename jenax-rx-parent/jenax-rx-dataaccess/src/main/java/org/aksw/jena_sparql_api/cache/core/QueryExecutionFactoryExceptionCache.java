@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.cache.core;
 
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryExecution;
 
 import com.google.common.cache.Cache;

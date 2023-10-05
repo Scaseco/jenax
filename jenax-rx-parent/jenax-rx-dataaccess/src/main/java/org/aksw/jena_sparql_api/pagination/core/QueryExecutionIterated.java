@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionAdapter;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

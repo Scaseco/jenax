@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataset.connection;
 
 import java.util.function.Supplier;
 
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsaBase;
-import org.aksw.jenax.dataaccess.sparql.engine.factory.query.QueryEngineFactoryProvider;
-import org.aksw.jenax.dataaccess.sparql.exec.builder.query.QueryExecBuilderDelegateBase;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.factory.engine.query.QueryEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateOverBuilder;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.ARQ;

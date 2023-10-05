@@ -2,9 +2,9 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataset.connection;
 
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.engine.factory.query.QueryEngineFactoryProvider;
-import org.aksw.jenax.dataaccess.sparql.engine.factory.update.UpdateEngineFactoryCore;
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.factory.engine.query.QueryEngineFactoryProvider;
+import org.aksw.jenax.dataaccess.sparql.factory.engine.update.UpdateEngineFactoryCore;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;

@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.update;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryDataset;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryModel;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.core.DatasetDescription;

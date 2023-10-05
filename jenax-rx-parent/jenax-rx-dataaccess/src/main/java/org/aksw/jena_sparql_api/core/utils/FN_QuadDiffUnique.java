@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.jena_sparql_api.core.QuadContainmentChecker;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.sparql.core.Quad;
 
 import com.google.common.base.Function;

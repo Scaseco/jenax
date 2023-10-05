@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.update;
 
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.rdf.model.Model;
 

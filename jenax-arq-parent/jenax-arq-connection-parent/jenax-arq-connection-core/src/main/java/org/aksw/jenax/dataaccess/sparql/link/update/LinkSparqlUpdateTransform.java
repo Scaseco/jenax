@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.link.update;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.aksw.jenax.dataaccess.sparql.exec.builder.update.UpdateExecBuilderWrapperWithTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperWithTransform;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;

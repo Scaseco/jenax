@@ -1,7 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.connection.query;
 
 import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;

@@ -1,6 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.connection.update;
 
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateProcessorFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateProcessorFactory;
 import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TransactionalNull;
 import org.apache.jena.update.UpdateExecutionBuilder;

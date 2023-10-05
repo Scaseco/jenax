@@ -5,7 +5,7 @@ import java.util.function.Function;
 import org.aksw.jena_sparql_api.core.FluentFnBase;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactoryDatasetDescription;
 import org.aksw.jena_sparql_api.parse.UpdateExecutionFactoryParse;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.update.UpdateRequest;
 

@@ -1,8 +1,8 @@
 package org.aksw.jenax.dataaccess.sparql.exec.query;
 
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryOverQueryExecFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryOverQueryExecFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryJenaxBase;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdflink.LinkSparqlQuery;

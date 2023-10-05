@@ -9,7 +9,7 @@ import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
 import org.aksw.jenax.arq.dataset.impl.DatasetGraphOneNgImpl;
 import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

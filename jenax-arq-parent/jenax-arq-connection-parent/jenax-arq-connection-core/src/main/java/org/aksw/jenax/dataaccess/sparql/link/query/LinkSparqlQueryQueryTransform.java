@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.link.query;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
-import org.aksw.jenax.dataaccess.sparql.exec.builder.query.QueryExecBuilderWrapperWithTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperWithTransform;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.exec.QueryExec;

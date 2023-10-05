@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.changeset;
 
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.factory.update.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.update.UpdateProcessor;
