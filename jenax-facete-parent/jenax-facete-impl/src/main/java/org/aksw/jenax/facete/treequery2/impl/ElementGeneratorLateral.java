@@ -82,6 +82,7 @@ public class ElementGeneratorLateral {
         return toQuery(nodeQuery.relationQuery());
     }
 
+    /** Returns a CONSTRUCT quads query */
     public static Query toQuery(RelationQuery relationQuery) {
         Element elt = toElement(relationQuery);
         List<NodeQuery> roots = relationQuery.roots();

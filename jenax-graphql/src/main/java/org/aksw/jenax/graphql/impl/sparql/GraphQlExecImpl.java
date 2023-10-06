@@ -8,6 +8,8 @@ import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.commons.util.stream.SequentialGroupBySpec;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
@@ -20,6 +22,8 @@ import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.exec.QueryExecAdapter;
+import org.apache.jena.sparql.exec.QueryExecutionAdapter;
 import org.apache.jena.sparql.util.ModelUtils;
 
 import com.google.gson.JsonArray;
@@ -54,15 +58,20 @@ public class GraphQlExecImpl
         Query query = ElementGeneratorLateral.toQuery(rq);
 
         FlowableOperatorSequentialGroupBy<Quad, Node, Graph> grouper = FlowableOperatorSequentialGroupBy.create(
-                SequentialGroupBySpec.create(
-                    Quad::getGraph,
-                    graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
-                    (graph, quad) -> graph.add(quad.asTriple())));
+            SequentialGroupBySpec.create(
+                Quad::getGraph,
+                graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
+                (graph, quad) -> graph.add(quad.asTriple())));
 
         Flowable<RDFNode> graphFlow = SparqlRx
-                .execConstructQuads(() -> dataSource.asQef().createQueryExecution(query))
-                .lift(grouper)
-                .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
+            .execConstructQuads(() ->
+                // Produce quads by executing the construct query as a select one
+                QueryExecutionAdapter.adapt(
+                    QueryExecSelect.of(
+                        query, q ->
+                        QueryExecAdapter.adapt(dataSource.asQef().createQueryExecution(q)))))
+            .lift(grouper)
+            .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
 
         Flowable<JsonElement> result = graphFlow.map(rdfNode -> {
             org.apache.jena.graph.Node node = rdfNode.asNode();

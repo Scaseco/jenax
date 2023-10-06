@@ -22,56 +22,23 @@ import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
-import org.apache.jena.sparql.util.Context;
-import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Map all non-select sparql query types to select queries.
- *
- * Describe queries are currently unsupported.
+ * Works for CONSTRUCT and ASK. DESCRIBE and JSON not yet supported.
  */
 public abstract class QueryExecBaseSelect
     extends AutoCloseableBase
     implements QueryExec
 {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecBaseSelect.class);
-
     protected Query query;
-    protected Context context;
 
-    protected RowSet activeRowSet = null;
-
-    public QueryExecBaseSelect(Query query, Context context) {
+    public QueryExecBaseSelect(Query query) {
         super();
         this.query = query;
-        this.context = context;
-    }
-
-//    public static QueryExecFactoryQuery constructViaSelect(QueryExecFactoryQuery base) {
-//    	return new QueryExecBaseSelect() {
-//
-//			@Override
-//			protected RowSet createRowSet(Query selectQuery) {
-//				// TODO Auto-generated method stub
-//				return null;
-//			}
-//		};
-//
-//    }
-
-
-    protected synchronized void setActiveRowSet(RowSet rowSet) {
-        this.activeRowSet = rowSet;
-
-        if (isClosed()) {
-            activeRowSet.close();
-        }
-    }
-
-    protected RowSet getActiveRowSet() {
-        return activeRowSet;
     }
 
     /**
@@ -79,80 +46,7 @@ public abstract class QueryExecBaseSelect
      * query of select type.
      * The RowSet may need to implement close() in order to close an underlying query execution.
      */
-    protected abstract RowSet createRowSet(Query selectQuery);
-
-    protected synchronized final RowSet select(Query query) {
-        // ensureOpen();
-
-        if(this.getActiveRowSet() != null) {
-            throw new RuntimeException("A query is already running");
-        }
-
-        RowSet rowSet = createRowSet(query);
-
-        if(rowSet == null) {
-            throw new RuntimeException("Failed to obtain a QueryExecution for query: " + query);
-        }
-
-        setActiveRowSet(activeRowSet);
-        return rowSet;
-    }
-
-    @Override
-    public boolean ask() {
-        if (!query.isAskType()) {
-            throw new RuntimeException("ASK query expected. Got: ["
-                    + query.toString() + "]");
-        }
-
-        Query selectQuery = QueryUtils.elementToQuery(query.getQueryPattern());
-        selectQuery.setLimit(1);
-
-        RowSet rs = select(selectQuery);
-
-        long rowCount = 0;
-        while(rs.hasNext()) {
-            rs.next();
-            ++rowCount;
-        }
-
-        if (rowCount > 1) {
-            logger.warn("Received " + rowCount + " rows for the query ["
-                    + query.toString() + "]");
-        }
-
-        return rowCount > 0;
-    }
-
-    @Override
-    public Iterator<Quad> constructQuads() {
-        if (!query.isConstructType()) {
-            throw new RuntimeException("CONSTRUCT query expected. Got: ["
-                    + query.toString() + "]");
-        }
-
-        Template template = query.getConstructTemplate();
-        Query clone = adjust(query);
-        RowSet rs = select(clone);
-        Iterator<Quad> result = TemplateLib.calcQuads(template.getQuads(), rs);
-
-        return result;
-    }
-
-
-    protected Iterator<Triple> constructStreaming(Query query) {
-        if (!query.isConstructType()) {
-            throw new RuntimeException("CONSTRUCT query expected. Got: ["
-                    + query.toString() + "]");
-        }
-
-        Template template = query.getConstructTemplate();
-        Query clone = adjust(query);
-        RowSet rs = select(clone);
-        Iterator<Triple> result = TemplateLib.calcTriples(template.getTriples(), rs);
-
-        return result;
-    }
+    protected abstract RowSet doSelect(Query selectQuery);
 
     public static Query adjust(Query query) {
         Template template = query.getConstructTemplate();
@@ -184,6 +78,46 @@ public abstract class QueryExecBaseSelect
     }
 
     @Override
+    public boolean ask() {
+        if (!query.isAskType()) {
+            throw new RuntimeException("ASK query expected. Got: ["
+                    + query.toString() + "]");
+        }
+
+        Query selectQuery = QueryUtils.elementToQuery(query.getQueryPattern());
+        selectQuery.setLimit(1);
+
+        RowSet rs = doSelect(selectQuery);
+
+        long rowCount = 0;
+        while(rs.hasNext()) {
+            rs.next();
+            ++rowCount;
+        }
+
+        if (rowCount > 1) {
+            logger.warn("Received " + rowCount + " rows for the query ["
+                    + query.toString() + "]");
+        }
+
+        return rowCount > 0;
+    }
+
+    @Override
+    public Iterator<Quad> constructQuads() {
+        if (!query.isConstructType()) {
+            throw new RuntimeException("CONSTRUCT query expected. Got: ["
+                    + query.toString() + "]");
+        }
+
+        Template template = query.getConstructTemplate();
+        Query clone = adjust(query);
+        RowSet rs = doSelect(clone);
+        Iterator<Quad> result = TemplateLib.calcQuads(template.getQuads(), rs);
+        return result;
+    }
+
+    @Override
     public Graph construct(Graph result) {
         GraphUtil.add(result, constructTriples());
         return result;
@@ -198,7 +132,17 @@ public abstract class QueryExecBaseSelect
 
     @Override
     public Iterator<Triple> constructTriples() {
-        return constructStreaming(this.query);
+        if (!query.isConstructType()) {
+            throw new RuntimeException("CONSTRUCT query expected. Got: ["
+                    + query.toString() + "]");
+        }
+
+        Template template = query.getConstructTemplate();
+        Query clone = adjust(query);
+        RowSet rs = doSelect(clone);
+        Iterator<Triple> result = TemplateLib.calcTriples(template.getTriples(), rs);
+
+        return result;
     }
 
     @Override
@@ -207,8 +151,7 @@ public abstract class QueryExecBaseSelect
             throw new RuntimeException("SELECT query expected. Got: ["
                     + query.toString() + "]");
         }
-
-        return createRowSet(query);
+        return doSelect(query);
     }
 
     @Override
@@ -221,12 +164,6 @@ public abstract class QueryExecBaseSelect
         return query == null ? null : query.toString();
     }
 
-    //@Override
-    public void executeUpdate(UpdateRequest updateRequest)
-    {
-        throw new RuntimeException("Not implemented");
-    }
-
     @Override
     public JsonArray execJson() {
         throw new UnsupportedOperationException();
@@ -235,16 +172,6 @@ public abstract class QueryExecBaseSelect
     @Override
     public Iterator<JsonObject> execJsonItems() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public DatasetGraph getDataset() {
-        return null;
-    }
-
-    @Override
-    public Context getContext() {
-        return context;
     }
 
     @Override
@@ -263,25 +190,6 @@ public abstract class QueryExecBaseSelect
     public boolean isClosed() {
         return isClosed;
     }
-
-    @Override
-    public void closeActual() {
-        RowSet rowSet = getActiveRowSet();
-        if (rowSet != null) {
-            rowSet.close();
-        }
-    }
-
-    @Override
-    public void abort() {
-        close();
-    }
-
-//	@Override
-//	public Graph describe() {
-//		Graph graph = GraphFactory.createDefaultGraph();
-//		return describe(graph);
-//	}
 
     /**
     * We use this query execution for retrieving the result set of the
@@ -424,3 +332,4 @@ public abstract class QueryExecBaseSelect
     // }
 
 }
+

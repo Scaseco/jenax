@@ -12,6 +12,8 @@ import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecOverRowSet;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
@@ -83,7 +85,7 @@ public class RdfDataSources {
      * requests and transforms them into select query ones.
      * The execution work is done in a {@link QueryExecBaseSelect}.
      */
-    public static LinkSparqlQueryTransform execAsSelectDecorizer(Predicate<Query> convertToSelect) {
+    public static LinkSparqlQueryTransform execQueryViaSelect(Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform result = baseLink -> {
             return new LinkSparqlQueryTmp() {
                 @Override
@@ -101,19 +103,7 @@ public class RdfDataSources {
                             QueryExec r;
                             boolean doConvert = convertToSelect.test(seenQuery);
                             if (doConvert) {
-                                r = new QueryExecBaseSelect(seenQuery, getContext()) {
-                                    @Override
-                                    protected RowSet createRowSet(Query selectQuery) {
-                                        QueryExec baseExec = delegate.query(selectQuery).build();
-                                        RowSet s = new RowSetDelegateBase(baseExec.select()) {
-                                            @Override
-                                            public void close() {
-                                                baseExec.close();
-                                            }
-                                        };
-                                        return s;
-                                    }
-                                };
+                                r = QueryExecSelect.of(seenQuery, q -> delegate.query(q).build());
                             } else {
                                 r = delegate.query(seenQuery).build();
                             }
@@ -145,8 +135,8 @@ public class RdfDataSources {
      * @param convertToSelect Only matching queries are executed as select
      * @return
      */
-    public static RdfDataSource execAsSelect(RdfDataSource dataSource, Predicate<Query> convertToSelect) {
-        LinkSparqlQueryTransform decorizer = execAsSelectDecorizer(convertToSelect);
+    public static RdfDataSource execQueryViaSelect(RdfDataSource dataSource, Predicate<Query> convertToSelect) {
+        LinkSparqlQueryTransform decorizer = execQueryViaSelect(convertToSelect);
         RdfDataSource result = RdfDataSources.applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
         return result;
     }
