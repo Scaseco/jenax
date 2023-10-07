@@ -886,7 +886,7 @@ public class DataQueryImpl<T extends RDFNode>
 
 
             // Now that all paths have been collected and added to the pathlet
-            // materalize it
+            // materialize it
             RelationletSimple rn = pathlet.materialize();
 
             // Resolve all var refs against the materialized relationlet

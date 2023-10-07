@@ -10,10 +10,13 @@ import org.apache.jena.sparql.expr.Expr;
  * @author raven
  *
  */
+@Deprecated
 public interface FacetConstraint
-    extends Resource, FacetConstraintCore
+    extends Resource, FacetConstraintControl
 {
     @Override
     FacetConstraint enabled(boolean onOrOff);
+
+    /** Sets the expression of this constraint control */
     FacetConstraint expr(Expr expr);
 }

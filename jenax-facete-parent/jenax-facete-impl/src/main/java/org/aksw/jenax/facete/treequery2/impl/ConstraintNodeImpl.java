@@ -1,13 +1,24 @@
 package org.aksw.jenax.facete.treequery2.impl;
 
 import org.aksw.facete.v3.api.ConstraintFacade;
+import org.aksw.facete.v3.api.FacetedDataQuery;
+import org.aksw.facete.v3.api.VarScope;
+import org.aksw.facete.v3.impl.FacetedDataQueryImpl;
+import org.aksw.facete.v4.impl.ElementGenerator;
+import org.aksw.facete.v4.impl.FacetedRelationQuery;
 import org.aksw.jenax.arq.util.node.NodeCustom;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
+import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprLib;
 
 /**
@@ -20,6 +31,10 @@ public class ConstraintNodeImpl
 {
     public ConstraintNodeImpl(NodeQuery root, FacetPath path) {
         super(root, path);
+    }
+
+    public ScopedFacetPath getScopedFacetPath() {
+        return ConstraintNode.toScopedFacetPath(this);
     }
 
     @Override
@@ -60,6 +75,40 @@ public class ConstraintNodeImpl
     public int getSortDirection() {
         RelationQuery relationQuery = getRoot().relationQuery();
         int result = RelationQuery.getSortDirection(relationQuery, ExprLib.nodeToExpr(asJenaNode()));
+        return result;
+    }
+
+    @Override
+    public FacetedDataQuery<RDFNode> availableValues() {
+        return createValueQuery(false);
+    }
+
+    @Override
+    public FacetedDataQuery<RDFNode> remainingValues() {
+        return createValueQuery(true);
+    }
+
+
+    public FacetedDataQuery<RDFNode> createValueQuery(boolean applySelfConstraints) {
+        // root.relationQuery().getFacetConstraints()
+
+        // TODO The base element is missing when running configure - where should it be appended?
+        ElementGenerator eltGen = ElementGenerator.configure(this);
+
+        ScopedFacetPath sfp = getScopedFacetPath();
+
+        Relation baseRelation = root.relationQuery().getRelation();
+        UnaryRelation relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
+        relation = relation.prependOn(relation.getVars()).with(baseRelation).toUnaryRelation();
+
+        RdfDataSource dataSource = null; //facetedQuery.dataSource();
+        FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(
+                dataSource,
+                relation.getElement(),
+                relation.getVar(),
+                null,
+                RDFNode.class);
+
         return result;
     }
 }

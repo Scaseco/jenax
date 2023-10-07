@@ -27,6 +27,8 @@ public class RdfToJsonPropertyMapper
     protected boolean isUniqueLang = false;
     protected int maxCount = -1;
 
+    protected boolean single = false; // Only accept a single value (the first one encountered)
+
     /**
      * Only applicable if the value produced by this PropertyMapper is a json object.
      * If hidden is true, then the owning NodeMapper should merge the produced json object into
@@ -92,6 +94,14 @@ public class RdfToJsonPropertyMapper
         this.isHidden = isHidden;
     }
 
+    public boolean isSingle() {
+        return single;
+    }
+
+    public void setSingle(boolean single) {
+        this.single = single;
+    }
+
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         // Always generate a json array first. If the schema allows for a single value then extract
@@ -133,7 +143,7 @@ public class RdfToJsonPropertyMapper
         if (tmp == null) {
             result = JsonNull.INSTANCE;
         } else {
-            if (isUniqueLang || maxCount == 1) {
+            if (isUniqueLang || maxCount == 1 || single) {
                 int arraySize = tmp.size();
                 if (arraySize == 0) {
                     result = JsonNull.INSTANCE;

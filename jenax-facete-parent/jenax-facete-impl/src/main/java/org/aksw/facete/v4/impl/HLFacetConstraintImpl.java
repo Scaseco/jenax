@@ -2,27 +2,30 @@ package org.aksw.facete.v4.impl;
 
 import java.util.Map;
 
-import org.aksw.facete.v3.api.ConstraintControl;
-import org.aksw.facete.v3.api.FacetConstraintCore;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.HLFacetConstraint;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.Expr;
 
+
+/**
+ * Fluent API wrapper for a {@link FacetConstraintControl}
+ */
 public class HLFacetConstraintImpl<B>
     implements HLFacetConstraint<B>
 {
     protected B parent;
-    protected FacetConstraintCore constraint;
+    protected FacetConstraintControl constraint;
 
-    public HLFacetConstraintImpl(B parent, FacetConstraintCore constraint) {
+    public HLFacetConstraintImpl(B parent, FacetConstraintControl constraint) {
         super();
         this.parent = parent;
         this.constraint = constraint;
     }
 
     @Override
-    public FacetConstraintCore state() {
+    public FacetConstraintControl state() {
         return constraint;
     }
 

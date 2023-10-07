@@ -18,6 +18,8 @@ import org.apache.jena.sparql.core.Var;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+
+/** The entry point is {@link FacetedRelationQuery} */
 public class FacetedQueryImpl
     implements FacetedQuery
 {

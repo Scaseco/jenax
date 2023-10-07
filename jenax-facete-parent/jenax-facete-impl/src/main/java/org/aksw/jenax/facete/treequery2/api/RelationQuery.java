@@ -25,15 +25,16 @@ import org.apache.jena.sparql.syntax.ElementGroup;
 public interface RelationQuery
     extends HasSlice
 {
+    /** A name to use for prefixing variables of this node's relation */
+    String getScopeBaseName();
+
     /**
      * Returns the parent relation and a variable of it to which this relation connects.
      * Returns null if there is no parent
      */
     NodeQuery getParentNode();
 
-    /** A name to use for prefixing variables of this node's relation */
-    String getScopeBaseName();
-
+    /** The step by which this relation was reached from the parent node (null if there is no parent) */
     FacetStep getReachingStep();
 
     /** Unlink this RelationQuery from its parent.

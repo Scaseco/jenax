@@ -134,6 +134,7 @@ public class FacetStep
         return targetComponent;
     }
 
+    // Maybe switch to a List<String> to make hierarchical operations nicer (right now some code uses '.' as a separator)
     public String getAlias() {
         return alias;
     }

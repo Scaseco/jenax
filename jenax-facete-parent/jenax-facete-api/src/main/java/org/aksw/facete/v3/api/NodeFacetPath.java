@@ -17,6 +17,7 @@ import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformExpr;
 
+@Deprecated // Use NodeCustom directly
 public class NodeFacetPath
     extends NodeCustom<HasFacetPath> // Does not extend from HasFacetPath itself because usage of Node and HasFacetPath should reside in different architecture layers
 {

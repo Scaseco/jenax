@@ -41,7 +41,7 @@ public class TreeQueryImpl
         FacetConstraints constraints = new FacetConstraints(tq);
 
         ConstraintApiImpl c = constraints.getFacade(n2);
-        ConstraintControl cc = (ConstraintControl)c.eq(RDF.type.asNode()).enabled(true);
+        FacetConstraintControlImpl cc = (FacetConstraintControlImpl)c.eq(RDF.type.asNode()).enabled(true);
         System.out.println(constraints);
 
         cc.unlink();

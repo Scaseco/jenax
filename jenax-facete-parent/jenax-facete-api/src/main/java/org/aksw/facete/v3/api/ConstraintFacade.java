@@ -27,11 +27,11 @@ import com.google.common.collect.Range;
  */
 // TODO Rename to ConstraintNode?
 public interface ConstraintFacade<B> {
-    Collection<FacetConstraintCore> list();
+    Collection<FacetConstraintControl> list();
 
     Collection<HLFacetConstraint<? extends ConstraintFacade<B>>> listHl();
 
-    default Stream<FacetConstraintCore> stream() {
+    default Stream<FacetConstraintControl> stream() {
         return list().stream();
     }
 

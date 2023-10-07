@@ -88,6 +88,7 @@ class TreeRelation {
  * reorder siblings.
  *
  */
+@Deprecated // Use RelationQuery
 public class FacetedRelationQuery {
 
     /**

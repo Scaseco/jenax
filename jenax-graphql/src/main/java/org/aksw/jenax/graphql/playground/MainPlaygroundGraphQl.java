@@ -13,10 +13,11 @@ import com.google.gson.JsonObject;
 public class MainPlaygroundGraphQl {
     public static void main(String[] args) {
         String queryStr =
-                "{ Pokemon(limit: 10, offset: 5, orderBy: [{colour: desc}, {path: [colour], dir: asc}]) {"
+                "{ Pokemon(limit: 10, offset: 5, orderBy: [{colour: desc}, {path: [colour], dir: asc}]) @rdf(base: \"http://coypu\", namespaces: { rdfs: \"http://www.w3.org/2000/01/rdf-schema#\" }) {"
 //                + "maleRatio, colour(xid: \"red\"), speciesOf @inverse { baseHP }, "
-                + "label, colour, speciesOf @inverse { label } "
+                + "label @rdf(ns: rdfs), colour @rdf(iri: \"http://myvocab.org/farbe\"), speciesOf @inverse { label } "
                 + "} }";
+
 
         System.out.println(queryStr);
 

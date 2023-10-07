@@ -13,6 +13,7 @@ import com.google.common.collect.Multimaps;
 
 import graphql.language.Argument;
 import graphql.language.BooleanValue;
+import graphql.language.EnumValue;
 import graphql.language.Field;
 import graphql.language.FloatValue;
 import graphql.language.IntValue;
@@ -53,6 +54,14 @@ public class GraphQlUtils {
         return number == null ? null : number.longValue();
     }
 
+    public static String getString(Node<?> node, String ... path) {
+        return tryGetNode(node, path)
+                .map(GraphQlUtils::toNodeValue)
+                .map(NodeValue::asNode)
+                .map(org.apache.jena.graph.Node::getLiteralLexicalForm)
+                .orElse(null);
+    }
+
     /** Bridge graphql nodes to jena NodeValues (the latter has a nicer API) */
     public static NodeValue toNodeValue(Node<?> node) {
         NodeValue result = null;
@@ -64,7 +73,15 @@ public class GraphQlUtils {
             result = NodeValue.makeBoolean(((BooleanValue)node).isValue());
         } else if (node instanceof StringValue) {
             result = NodeValue.makeString(((StringValue)node).getValue());
+        } else if (node instanceof EnumValue) {
+            result = NodeValue.makeString(((EnumValue)node).getName());
         }
+        return result;
+    }
+
+    public static String toString(Node<?> node) {
+        NodeValue nv = toNodeValue(node);
+        String result = nv == null ? null : nv.getString();
         return result;
     }
 
@@ -98,6 +115,15 @@ public class GraphQlUtils {
         Value<?> result = IterableUtils.expectZeroOrOneItems(a);
         //Value<?> result = arg == null ? null : arg.getValue();
         return result;
+    }
+
+    public static Optional<Value<?>> tryGetArgumentValue(Multimap<String, Value<?>> args, String argName) {
+        Value<?> value = getArgumentValue(args, argName);
+        return Optional.ofNullable(value);
+    }
+
+    public static Value<?> getValue(Argument arg) {
+        return arg == null ? null : arg.getValue();
     }
 
 }

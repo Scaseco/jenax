@@ -71,13 +71,13 @@ public class GraphQlExecFactoryOverSparql
      * Any query made while auto configuration is in progress will block until completion.
      */
     public static GraphQlExecFactory autoConfigureLazy(RdfDataSource dataSource) {
-        return GraphQlExecFactoryLazy.of(() -> {
+        GraphQlResolver resolver = GraphQlResolverImplLazy.of(() -> {
             ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
                     MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool()));
 
             ListenableFuture<DatasetMetadata> metadataFuture = DatasetMetadata.fetch(dataSource, executorService);
             // TODO Make display of auto-detection results optional
-            ListenableFuture<GraphQlExecFactory> r = Futures.transform(metadataFuture, metadata -> {
+            ListenableFuture<GraphQlResolver> r = Futures.transform(metadataFuture, metadata -> {
                 if (logger.isInfoEnabled()) {
                     Set<Node> classes = metadata.getVoidDataset().getClassPartitionMap().keySet();
                     logger.info("Autodetected classes: " + classes);
@@ -85,13 +85,40 @@ public class GraphQlExecFactoryOverSparql
                     Set<Node> properties = metadata.getVoidDataset().getPropertyPartitionMap().keySet();
                     logger.info("Autodetected properties: " + properties);
                 }
-
-                GraphQlExecFactory s = of(dataSource, metadata);
+                GraphQlResolver s = resolverOf(metadata);
                 return s;
             }, executorService);
 
             r.addListener(() -> executorService.shutdown(), executorService);
             return r;
         });
+
+        GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
+        GraphQlExecFactory result = new GraphQlExecFactoryOverSparql(dataSource, converter);
+        return result;
     }
 }
+
+//return GraphQlExecFactoryLazy.ofWithLogging(() -> {
+//ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
+//      MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool()));
+//
+//ListenableFuture<DatasetMetadata> metadataFuture = DatasetMetadata.fetch(dataSource, executorService);
+//// TODO Make display of auto-detection results optional
+//ListenableFuture<GraphQlExecFactory> r = Futures.transform(metadataFuture, metadata -> {
+//  if (logger.isInfoEnabled()) {
+//      Set<Node> classes = metadata.getVoidDataset().getClassPartitionMap().keySet();
+//      logger.info("Autodetected classes: " + classes);
+//
+//      Set<Node> properties = metadata.getVoidDataset().getPropertyPartitionMap().keySet();
+//      logger.info("Autodetected properties: " + properties);
+//  }
+//
+//  GraphQlExecFactory s = of(dataSource, metadata);
+//  return s;
+//}, executorService);
+//
+//r.addListener(() -> executorService.shutdown(), executorService);
+//return r;
+//});
+

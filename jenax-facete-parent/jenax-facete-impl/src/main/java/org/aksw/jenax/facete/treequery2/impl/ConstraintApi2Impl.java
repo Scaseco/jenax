@@ -2,7 +2,7 @@ package org.aksw.jenax.facete.treequery2.impl;
 
 import java.util.Set;
 
-import org.aksw.facete.v3.api.FacetConstraintCore;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
 import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.arq.util.node.NodeUtils;
@@ -31,17 +31,17 @@ public class ConstraintApi2Impl<T>
         this.exprVar = ExprLib.nodeToExpr(NodeCustom.of(node));
     }
 
-    public FacetConstraintCore createConstraint(Expr expr) {
+    public FacetConstraintControl createConstraint(Expr expr) {
         // TODO Extract the custom values
        Set<T> references = NodeCustom.mentionedValues(expr);
        // model.model.row(references).computeIfAbsent(expr, e -> new ConstraintControl(model, references, expr));
-       FacetConstraintCore result = new ConstraintControl2Impl<>(model, references, expr);
+       FacetConstraintControl result = new ConstraintControl2Impl<>(model, references, expr);
        return result;
     }
 
-    public FacetConstraintCore exists() {
+    public FacetConstraintControl exists() {
        Expr expr = new E_Bound(exprVar);
-       FacetConstraintCore result = createConstraint(expr);
+       FacetConstraintControl result = createConstraint(expr);
        return result;
     }
 
@@ -49,8 +49,8 @@ public class ConstraintApi2Impl<T>
     * At present we allow a null argument to denote absent values.
     *
     */
-    public FacetConstraintCore eq(Node node) {
-       FacetConstraintCore result;
+    public FacetConstraintControl eq(Node node) {
+       FacetConstraintControl result;
        if(node == null || NodeUtils.nullUriNode.equals(node)) {
            result = absent();
        } else {
@@ -62,15 +62,15 @@ public class ConstraintApi2Impl<T>
     }
 
 
-    public FacetConstraintCore absent() {
+    public FacetConstraintControl absent() {
      Expr expr = new E_Equals(exprVar, NodeValueUtils.NV_ABSENT);
-     FacetConstraintCore result = createConstraint(expr);
+     FacetConstraintControl result = createConstraint(expr);
      return result;
     }
 
-    public FacetConstraintCore regex(String pattern, String flags) {
+    public FacetConstraintControl regex(String pattern, String flags) {
      Expr expr = new E_Regex(new E_Str(exprVar), pattern, flags);
-     FacetConstraintCore result = createConstraint(expr);
+     FacetConstraintControl result = createConstraint(expr);
      return result;
     }
 }

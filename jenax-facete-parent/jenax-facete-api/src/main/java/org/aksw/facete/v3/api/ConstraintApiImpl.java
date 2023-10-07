@@ -35,16 +35,16 @@ public class ConstraintApiImpl
         this.exprVar = ExprLib.nodeToExpr(NodeFacetPath.of(node));
     }
 
-    public FacetConstraintCore createConstraint(Expr expr) {
+    public FacetConstraintControl createConstraint(Expr expr) {
         Set<TreeQueryNode> references = NodeFacetPath.mentionedPathNodes(expr);
         // model.model.row(references).computeIfAbsent(expr, e -> new ConstraintControl(model, references, expr));
-        FacetConstraintCore result = new ConstraintControl(model, references, expr);
+        FacetConstraintControl result = new FacetConstraintControlImpl(model, references, expr);
         return result;
     }
 
-    public FacetConstraintCore exists() {
+    public FacetConstraintControl exists() {
         Expr expr = new E_Bound(exprVar);
-        FacetConstraintCore result = createConstraint(expr);
+        FacetConstraintControl result = createConstraint(expr);
         return result;
     }
 
@@ -52,8 +52,8 @@ public class ConstraintApiImpl
      * At present we allow a null argument to denote absent values.
      *
      */
-    public FacetConstraintCore eq(Node node) {
-        FacetConstraintCore result;
+    public FacetConstraintControl eq(Node node) {
+        FacetConstraintControl result;
         if(node == null || NodeUtils.nullUriNode.equals(node)) {
             result = absent();
         } else {
@@ -65,9 +65,9 @@ public class ConstraintApiImpl
     }
 
 
-    public FacetConstraintCore absent() {
+    public FacetConstraintControl absent() {
         Expr expr = new E_Equals(exprVar, NodeValueUtils.NV_ABSENT);
-        FacetConstraintCore result = createConstraint(expr);
+        FacetConstraintControl result = createConstraint(expr);
         return result;
     }
 
@@ -131,9 +131,9 @@ public class ConstraintApiImpl
     }
 */
 
-    public FacetConstraintCore regex(String pattern, String flags) {
+    public FacetConstraintControl regex(String pattern, String flags) {
         Expr expr = new E_Regex(new E_Str(exprVar), pattern, flags);
-        FacetConstraintCore result = createConstraint(expr);
+        FacetConstraintControl result = createConstraint(expr);
         return result;
     }
 }

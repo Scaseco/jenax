@@ -11,6 +11,8 @@ import org.aksw.facete.v3.api.TreeQueryNode;
 import org.aksw.facete.v3.api.VarScope;
 import org.aksw.facete.v3.impl.FacetedDataQueryImpl;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.facete.treequery2.api.NodeQuery;
+import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;

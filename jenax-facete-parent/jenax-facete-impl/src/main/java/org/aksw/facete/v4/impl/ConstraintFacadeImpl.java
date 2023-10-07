@@ -3,9 +3,9 @@ package org.aksw.facete.v4.impl;
 import java.util.Collection;
 
 import org.aksw.facete.v3.api.ConstraintApiImpl;
-import org.aksw.facete.v3.api.ConstraintControl;
+import org.aksw.facete.v3.api.FacetConstraintControlImpl;
 import org.aksw.facete.v3.api.ConstraintFacade;
-import org.aksw.facete.v3.api.FacetConstraintCore;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.HLFacetConstraint;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
@@ -29,7 +29,7 @@ public class ConstraintFacadeImpl<T>
     }
 
     @Override
-    public Collection<FacetConstraintCore> list() {
+    public Collection<FacetConstraintControl> list() {
         // constraintApi.listConstraints(facetNode.node);
         // TODO Only list the constraints for the parent facet node
 
@@ -51,19 +51,19 @@ public class ConstraintFacadeImpl<T>
 
     @Override
     public HLFacetConstraint<? extends ConstraintFacade<T>> eq(Node node) {
-        ConstraintControl fc = (ConstraintControl)constraintApi.eq(node);
+        FacetConstraintControlImpl fc = (FacetConstraintControlImpl)constraintApi.eq(node);
         return new HLFacetConstraintImpl<>(this, fc);
     }
 
     @Override
     public HLFacetConstraint<? extends ConstraintFacade<T>> exists() {
-        ConstraintControl cc = (ConstraintControl)constraintApi.exists();
+        FacetConstraintControlImpl cc = (FacetConstraintControlImpl)constraintApi.exists();
         return new HLFacetConstraintImpl<>(this, cc);
     }
 
     @Override
     public HLFacetConstraint<? extends ConstraintFacade<T>> absent() {
-        ConstraintControl cc = (ConstraintControl)constraintApi.absent();
+        FacetConstraintControlImpl cc = (FacetConstraintControlImpl)constraintApi.absent();
         return new HLFacetConstraintImpl<>(this, cc);
     }
 
@@ -99,7 +99,7 @@ public class ConstraintFacadeImpl<T>
 
     @Override
     public HLFacetConstraint<? extends ConstraintFacade<T>> regex(String pattern, String flags) {
-        ConstraintControl cc = (ConstraintControl)constraintApi.regex(pattern, flags);
+        FacetConstraintControlImpl cc = (FacetConstraintControlImpl)constraintApi.regex(pattern, flags);
         return new HLFacetConstraintImpl<>(this, cc);
     }
 

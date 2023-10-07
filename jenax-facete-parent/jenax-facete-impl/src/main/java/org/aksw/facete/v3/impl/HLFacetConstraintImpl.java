@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.aksw.facete.v3.api.FacetConstraint;
-import org.aksw.facete.v3.api.FacetConstraintCore;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.FacetNodeResource;
 import org.aksw.facete.v3.api.FacetedQuery;
@@ -32,9 +32,9 @@ public class HLFacetConstraintImpl<P>
     // The expression that can be added and removed from the state
     //protected Expr constraintExpr;
 
-    protected FacetConstraintCore state;
+    protected FacetConstraintControl state;
 
-    public HLFacetConstraintImpl(P parent, FacetNode facetNode, FacetConstraintCore state) {
+    public HLFacetConstraintImpl(P parent, FacetNode facetNode, FacetConstraintControl state) {
         super();
         this.parent = parent;
         this.facetNode = facetNode;
@@ -42,7 +42,7 @@ public class HLFacetConstraintImpl<P>
     }
 
     @Override
-    public FacetConstraintCore state() {
+    public FacetConstraintControl state() {
         return state;
     }
 
@@ -140,14 +140,14 @@ public class HLFacetConstraintImpl<P>
 
     @Override
     public boolean isActive() {
-        Collection<FacetConstraintCore> items = facetNode.enterConstraints().list();
+        Collection<FacetConstraintControl> items = facetNode.enterConstraints().list();
         boolean result = items.contains(state);
         return result;
     }
 
     @Override
     public boolean setActive() {
-        Collection<FacetConstraintCore> items = facetNode.enterConstraints().list();
+        Collection<FacetConstraintControl> items = facetNode.enterConstraints().list();
         boolean result = items.add(state);
         return result;
         //return this;
@@ -155,7 +155,7 @@ public class HLFacetConstraintImpl<P>
 
     @Override
     public boolean remove() {
-        Collection<FacetConstraintCore> items = facetNode.enterConstraints().list();
+        Collection<FacetConstraintControl> items = facetNode.enterConstraints().list();
         boolean result = items.remove(state);
         return result;
         //return this;

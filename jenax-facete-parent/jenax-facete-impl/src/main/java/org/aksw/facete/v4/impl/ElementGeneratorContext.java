@@ -24,7 +24,7 @@ public class ElementGeneratorContext {
     /** The FacetPaths on this tree are purely element ids (they reference relations rather than components) */
     protected Set<FacetPath> mandatoryElementIds = new HashSet<>();
     protected TreeDataMap<FacetPath, ElementAcc> facetPathToAcc = new TreeDataMap<>();
-    
+
     // XXX Actually we don't need this map because is duplicates information from the PathMapping
     protected Map<FacetPath, Var> pathToVar = new LinkedHashMap<>();
 
@@ -44,24 +44,27 @@ public class ElementGeneratorContext {
     }
 
     public ElementGeneratorContext setFacetTree(TreeData<FacetPath> facetTree) {
-		this.facetTree = facetTree;
-		return this;
-	}
-    
-    public ElementGeneratorContext setConstraintIndex(SetMultimap<FacetPath, Expr> localConstraintIndex) {
-    	this.localConstraintIndex = localConstraintIndex;
-    	return this;
+        this.facetTree = facetTree;
+        return this;
     }
-    
+
+    public ElementGeneratorContext setConstraintIndex(SetMultimap<FacetPath, Expr> localConstraintIndex) {
+        this.localConstraintIndex = localConstraintIndex;
+
+        // Register all paths with the overall tree
+        localConstraintIndex.keySet().forEach(this::addPath);
+        return this;
+    }
+
     public VarScope getScope() {
-		return scope;
-	}
-    
+        return scope;
+    }
+
     public void addPath(FacetPath facetPath) {
         facetTree.putItem(facetPath, FacetPath::getParent);
     }
-    
+
     public Map<FacetPath, Var> getPathToVar() {
-		return pathToVar;
-	}
+        return pathToVar;
+    }
 }

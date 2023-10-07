@@ -6,7 +6,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.Expr;
 
 public interface HLFacetConstraint<B> {
-    FacetConstraintCore state();
+    FacetConstraintControl state();
     Map<Node, FacetNode> mentionedFacetNodes();
 
     Expr expr();

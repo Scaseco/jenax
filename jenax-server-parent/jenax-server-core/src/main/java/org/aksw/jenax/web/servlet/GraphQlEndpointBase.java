@@ -35,7 +35,7 @@ public abstract class GraphQlEndpointBase {
     }
 
     public void processQueryAsync(
-            AsyncResponse response,
+            AsyncResponse asyncResponse,
             String query) {
 
         GraphQlExec exec;
@@ -43,11 +43,11 @@ public abstract class GraphQlEndpointBase {
             GraphQlExecFactory gef = Objects.requireNonNull(getGraphQlExecFactory(), "GraphQlExecFactory is null");
             exec = GraphQlExecUtils.execJson(gef, query);
         } catch (Exception e) {
-            response.resume(e);
+            asyncResponse.resume(e);
             throw new RuntimeException(e);
         }
 
-        response
+        asyncResponse
         .register(new ConnectionCallback() {
             @Override
             public void onDisconnect(AsyncResponse disconnect) {
@@ -65,7 +65,7 @@ public abstract class GraphQlEndpointBase {
             }
         });
 
-        response
+        asyncResponse
         .register(new CompletionCallback() {
             @Override
             public void onComplete(Throwable t) {
@@ -95,11 +95,11 @@ public abstract class GraphQlEndpointBase {
 //        response.setTimeout(600, TimeUnit.SECONDS);
 
 
-        Response x = processQuery(exec);
-        response.resume(x);
+        Response response = createResponse(exec);
+        asyncResponse.resume(response);
     }
 
-    public Response processQuery(GraphQlExec ge) {
+    public static Response createResponse(GraphQlExec ge) {
         String contentTypeStr = WebContent.contentTypeJSON;
         StreamingOutput processor = out -> {
             GraphQlExecUtils.writePretty(out, ge);

@@ -111,6 +111,7 @@ public interface TraversalNode<
 //		return result;
 //	}
 
+    @Deprecated
     default N walk(AliasedPath path) {
         List<Entry<P_Path0, String>> steps = path.getSteps();
 //		if(true) {
@@ -121,6 +122,7 @@ public interface TraversalNode<
         return result;
     }
 
+    @Deprecated
     default N walkAliased(Iterator<? extends Entry<P_Path0, String>> it) {
         N result;
         if(it.hasNext()) {
@@ -137,6 +139,7 @@ public interface TraversalNode<
         return result;
     }
 
+    @Deprecated
     default N walk(Path path) {
         TraversalNode<N, D, M> result;
         if(path == null) {
@@ -157,6 +160,7 @@ public interface TraversalNode<
         return (N) result;
     }
 
+    @Deprecated
     default N walk(SimplePath simplePath) {
         return walk(SimplePath.toPropertyPath(simplePath));
     }

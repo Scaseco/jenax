@@ -3,12 +3,12 @@ package org.aksw.jenax.facete.treequery2.impl;
 import java.util.Objects;
 import java.util.Set;
 
-import org.aksw.facete.v3.api.FacetConstraintCore;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.apache.jena.sparql.expr.Expr;
 
 /** Facade to toggle an individual constraint on and off. */
 public class ConstraintControl2Impl<T>
-    implements FacetConstraintCore
+    implements FacetConstraintControl
 {
     protected FacetConstraints<T> container;
     protected Set<T> references;
@@ -37,7 +37,7 @@ public class ConstraintControl2Impl<T>
     }
 
     @Override
-    public FacetConstraintCore enabled(boolean onOrOff) {
+    public FacetConstraintControl enabled(boolean onOrOff) {
         container.model.put(references, expr, onOrOff);
         return this;
     }

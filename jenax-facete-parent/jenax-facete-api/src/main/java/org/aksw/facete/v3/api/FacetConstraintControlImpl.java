@@ -6,14 +6,14 @@ import java.util.Set;
 import org.apache.jena.sparql.expr.Expr;
 
 /** Facade to toggle an individual constraint on and off. */
-public class ConstraintControl
-    implements FacetConstraintCore
+public class FacetConstraintControlImpl
+    implements FacetConstraintControl
 {
     protected FacetConstraints container;
     protected Set<TreeQueryNode> references;
     protected Expr expr;
 
-    public ConstraintControl(FacetConstraints container, Set<TreeQueryNode> references, Expr expr) {
+    public FacetConstraintControlImpl(FacetConstraints container, Set<TreeQueryNode> references, Expr expr) {
         super();
         this.container = container;
         this.references = references;
@@ -35,7 +35,7 @@ public class ConstraintControl
     }
 
     @Override
-    public FacetConstraintCore enabled(boolean onOrOff) {
+    public FacetConstraintControl enabled(boolean onOrOff) {
         container.model.put(references, expr, onOrOff);
         return this;
     }
@@ -58,7 +58,7 @@ public class ConstraintControl
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ConstraintControl other = (ConstraintControl) obj;
+        FacetConstraintControlImpl other = (FacetConstraintControlImpl) obj;
         return Objects.equals(container, other.container) && Objects.equals(expr, other.expr)
                 && Objects.equals(references, other.references);
     }

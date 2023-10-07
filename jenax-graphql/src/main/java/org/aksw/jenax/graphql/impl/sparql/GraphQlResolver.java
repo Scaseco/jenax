@@ -3,7 +3,6 @@ package org.aksw.jenax.graphql.impl.sparql;
 import java.util.Collection;
 import java.util.Set;
 
-import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.apache.jena.graph.Node;
@@ -20,9 +19,7 @@ import org.apache.jena.sparql.path.P_Path0;
  */
 public interface GraphQlResolver {
     Set<Node> resolveKeyToClasses(String key);
-    NodeQuery resolveKeyToClasses(NodeQuery nq, String key);
-    FacetPath resolveKeyToProperty(String rawKey);
-    NodeQuery resolveKeyToProperty(NodeQuery nq, String key);
+    FacetPath resolveKeyToProperty(String key);
 
     Collection<ShPropertyShape> getGlobalPropertyShapes(P_Path0 path);
 }

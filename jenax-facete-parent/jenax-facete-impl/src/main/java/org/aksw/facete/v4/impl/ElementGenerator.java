@@ -25,8 +25,12 @@ import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.FacetPathMapping;
+import org.aksw.jenax.facete.treequery2.api.NodeQuery;
+import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
+import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
@@ -105,6 +109,73 @@ public class ElementGenerator {
         }
     }
 
+
+    public static ElementGenerator configure(ConstraintNode<NodeQuery> cn) {
+        NodeQuery nq = cn.getRoot();
+        RelationQuery rq = nq.relationQuery();
+        Relation baseRelation = rq.getRelation();
+        List<Var> rootVars = baseRelation.getVars();
+        // org.aksw.jenax.facete.treequery2.impl.FacetConstraints<ConstraintNode<NodeQuery>> constraints = rq.getFacetConstraints();
+
+        MappedQuery result = null;
+
+        // For each variable create the element for the constraints.
+        // TODO How to handle cross-variable constraints cleanly?
+        for (Var rootVar : rootVars) {
+
+
+            TreeData<ScopedFacetPath> treeData = new TreeData<>();
+
+            // FacetNodeImpl focusNode = (FacetNodeImpl)frq.getFacetedQuery().focus();
+//            NodeQuery focusNode = nq;
+//            TreeQueryNode tq = focusNode.node;
+//
+//            ScopedFacetPath focusPath = ScopedFacetPath.of(rootVar, tq.getFacetPath());
+
+            ScopedFacetPath focusPath = nq.getRoot().getScopedFacetPath();
+
+          // FacetPath focusPath = ElementGeneratorUtils.cleanPath(tq.getFacetPath());
+
+
+            treeData.putItem(focusPath, ScopedFacetPath::getParent);
+          // TreeDataUtils.putItem(treeData, focusPath, FacetPath::getParent);
+
+            // org.aksw.jenax.facete.treequery2.impl.FacetConstraints<ConstraintNode<NodeQuery>> facetConstraints = rq.getFacetConstraints();
+            Set<Expr> constraintExprs = ElementGeneratorLateral.createScopedConstraintExprs(rq);
+            SetMultimap<ScopedFacetPath, Expr> constraintIndex = org.aksw.jenax.facete.treequery2.impl.FacetConstraints.createConstraintIndex(constraintExprs);
+
+
+            // SetMultimap<ScopedFacetPath, Expr> constraintIndex = createConstraintIndex(constraints, treeData);
+
+            UnaryRelation baseConcept = new Concept(baseRelation.getElement(), rootVar);
+
+          // Generator<Var> varGen = GeneratorFromFunction.createInt().map(i -> Var.alloc("vv" + i));
+
+          // Var rootVar = baseConcept.getVar();
+//          Var superRootVar = Var.alloc("superRoot"); // Should not appear
+          // DynamicInjectiveFunction<FacetPath, Var> ifn = DynamicInjectiveFunction.of(varGen);
+//          FacetPath superRootPath = FacetPath.newAbsolutePath();
+//          for (Var rootVar : baseConcept.getVar()) {
+//              baseConcept.getVar();
+//          }
+
+          // ifn.getMap().put(FacetPath.newAbsolutePath(), rootVar);
+
+          // FacetPathMapping fpm = ifn::apply;
+          // Var rootVar = ifn.apply(PathOpsPPA.get().newRoot());
+
+          //VarScope varScope = VarScope.of(rootVar);
+
+            FacetPathMapping fpm = new FacetPathMappingImpl();
+            ElementGenerator eltGen = new ElementGenerator(fpm, constraintIndex, focusPath);
+            Traverser.forTree(treeData::getChildren).depthFirstPreOrder(treeData.getRootItems()).forEach(eltGen::addPath);
+
+            return eltGen;
+        }
+        return null;
+    }
+
+    @Deprecated
     public static ElementGenerator configure(FacetedQueryImpl fq) {
         FacetedRelationQuery frq = fq.relationQuery;
 //      UnaryRelation baseConcept;
@@ -438,7 +509,11 @@ public class ElementGenerator {
 
         // Var var = Var.alloc("todoAddRoot");
         // ElementGeneratorContext cxt = new ElementGeneratorContext(var, facetTree, effectiveConstraints);
-        MappedElement me = new ElementGeneratorWorker(pathMapping, propertyResolver).createElement();
+//        TreeData<ScopedFacetPath> facetTree = new TreeData<>();
+//        if (focusPath != null) {
+//            facetTree.putItem(focusPath, ScopedFacetPath::getParent);
+//        }
+        MappedElement me = new ElementGeneratorWorker(facetTree, effectiveConstraints, pathMapping, propertyResolver).createElement();
 
         // Var var = pathMapping.allocate(path);
         return new Concept(me.getElement(), var);

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.util.direction.Direction;
-import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.model.shacl.util.ShUtils;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
@@ -16,7 +15,6 @@ import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.path.P_Path0;
-import org.apache.jena.vocabulary.RDF;
 
 import com.google.common.collect.Multimap;
 
@@ -56,20 +54,6 @@ public class GraphQlResolverImpl
     }
 
     @Override
-    public NodeQuery resolveKeyToClasses(NodeQuery nq, String key) {
-        Set<org.apache.jena.graph.Node> classes = resolveKeyToClasses(key);
-        org.apache.jena.graph.Node cls = IterableUtils.expectZeroOrOneItems(classes);
-        NodeQuery result = null;
-        if (cls != null) {
-            // FacetStep step = FacetStep.of(RDF.type.asNode(), Direction.FORWARD, "", FacetStep.TARGET);
-            result = nq.constraints().fwd(RDF.type.asNode())
-                    .enterConstraints().eq(cls).activate().leaveConstraints()
-                    .getRoot();
-        }
-        return result;
-    }
-
-    @Override
     public FacetPath resolveKeyToProperty(String rawKey) {
         // TODO Try to resolve the key name - if it fails try again by removing the inverse prefix
         boolean isFwd = !rawKey.startsWith("inv_");
@@ -95,13 +79,6 @@ public class GraphQlResolverImpl
                 result = null;
             }
         }
-        return result;
-    }
-
-    @Override
-    public NodeQuery resolveKeyToProperty(NodeQuery nq, String key) {
-        FacetPath keyPath = resolveKeyToProperty(key);
-        NodeQuery result = keyPath == null ? null : nq.resolve(keyPath);
         return result;
     }
 }
