@@ -107,7 +107,7 @@ The effective document becomes:
   Pokemon @rdf(iri: "http://pokedex.dataincubator.org/pkm/Pokemon")
   {
     label @rdf(iri: "http://www.w3.org/2000/01/rdf-schema#label"),
-    colour @rdf(iri: "<http://pokedex.dataincubator.org/pkm/colour"),
+    colour @rdf(iri: "http://pokedex.dataincubator.org/pkm/colour"),
     sameAsLinks @rdf(iri: "http://www.w3.org/2002/07/owl#sameAs")
   }
 }
