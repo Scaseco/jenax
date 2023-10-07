@@ -226,7 +226,7 @@ public class GraphQlToSparqlConverter {
                 // Handle arguments of the field, such as slice, filter and orderBy
                 tryApplySlice(fieldQuery, args);
                 tryApplyOrderBy(fieldQuery, args);
-                tryUpdateContext(args);
+                // tryUpdateContext(args);
                 // GraphQlUtils.tryU
 
                 for (Argument arg : field.getArguments()) {
@@ -387,7 +387,7 @@ public class GraphQlToSparqlConverter {
         String result = null;
         String base = context.getFinalBase();
         String ns = context.getFinalNs();
-        String iri = context.getIri();
+        String iri = context.getFinalIri();
 
         if (base != null && !base.isBlank()) {
             result = base + fieldName;
@@ -473,15 +473,15 @@ public class GraphQlToSparqlConverter {
         }
     }
 
-    public static void tryUpdateContext(Multimap<String, Value<?>> args) {
-        String baseIri = GraphQlUtils.tryGetArgumentValue(args, "base")
-                .map(GraphQlUtils::toString)
-                .orElse(null);
-
-        Value<?> val = GraphQlUtils.tryGetArgumentValue(args, "namespaces").orElse(null);
-        PrefixMap pm = tryGetPrefixMap(val);
-
-    }
+//    public static void tryUpdateContext(Multimap<String, Value<?>> args) {
+//        String baseIri = GraphQlUtils.tryGetArgumentValue(args, "base")
+//                .map(GraphQlUtils::toString)
+//                .orElse(null);
+//
+//        Value<?> val = GraphQlUtils.tryGetArgumentValue(args, "namespaces").orElse(null);
+//        PrefixMap pm = tryGetPrefixMap(val);
+//
+//    }
 
     public static PrefixMap tryGetPrefixMap(Value<?> value) {
         PrefixMap result = null;
