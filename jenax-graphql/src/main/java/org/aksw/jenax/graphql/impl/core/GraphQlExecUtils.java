@@ -62,11 +62,11 @@ public class GraphQlExecUtils {
     }
 
     public static void write(OutputStream out, GraphQlExec exec) {
-        write(out, exec, new Gson());
+        write(out, exec, new GsonBuilder().serializeNulls().create());
     }
 
     public static void writePretty(OutputStream out, GraphQlExec exec) {
-        write(out, exec, new GsonBuilder().setPrettyPrinting().create());
+        write(out, exec, new GsonBuilder().serializeNulls().setPrettyPrinting().create());
     }
 
     public static void write(OutputStream out, GraphQlExec exec, Gson gson) {
