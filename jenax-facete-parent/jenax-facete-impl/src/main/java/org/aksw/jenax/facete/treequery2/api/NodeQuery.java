@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
-import org.aksw.facete.v3.api.NodeFacetPath;
 import org.aksw.facete.v3.api.VarScope;
+import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
@@ -21,7 +21,7 @@ public interface NodeQuery
      * To substitute NodeQuery references in expressions, apply a node transform using NodeFacetPath.createNodeTransform(pathTransform).
      */
     default Node asJenaNode() {
-        return NodeFacetPath.of(this);
+        return NodeCustom.of(this);
     }
 
     @Override

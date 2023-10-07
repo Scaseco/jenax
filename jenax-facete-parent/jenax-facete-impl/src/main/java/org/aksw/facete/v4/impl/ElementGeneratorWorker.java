@@ -77,7 +77,7 @@ public class ElementGeneratorWorker {
 
         for (Entry<VarScope, Collection<Expr>> e : localIndices.asMap().entrySet()) {
             ElementGeneratorContext cxt = getOrCreateContext(e.getKey());
-            SetMultimap<FacetPath, Expr> localConstraintIndex = FacetConstraints.createConstraintIndex(e.getValue());
+            SetMultimap<FacetPath, Expr> localConstraintIndex = FacetConstraints.createConstraintIndex(FacetPath.class, e.getValue());
             cxt.setConstraintIndex(localConstraintIndex);
         }
 
@@ -116,7 +116,7 @@ public class ElementGeneratorWorker {
      */
     public void analysePathModality(Expr expr) {
         //public void addExpr(Expr expr) {
-        Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(expr);
+        Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(ScopedFacetPath.class, expr);
 
         boolean isMandatory = !FacetedQueryGenerator.isAbsent(expr);
 
@@ -268,7 +268,7 @@ public class ElementGeneratorWorker {
     }
 
     public void allocateElements(Expr expr) {
-        Collection<ScopedFacetPath> paths = NodeCustom.mentionedValues(expr);
+        Collection<ScopedFacetPath> paths = NodeCustom.mentionedValues(ScopedFacetPath.class, expr);
         for(ScopedFacetPath path : paths) {
             allocateElement(path);
         }
@@ -437,7 +437,7 @@ public class ElementGeneratorWorker {
 
     public void createElementsForExprs2(ElementGeneratorContext cxt, ElementGroup globalAcc, Collection<Expr> baseExprs, boolean negate) {
 
-        NodeTransform resolveFacetPaths = NodeCustom.createNodeTransform((FacetPath fp) -> {
+        NodeTransform resolveFacetPaths = NodeCustom.createNodeTransform(FacetPath.class, (FacetPath fp) -> {
             return resolve(ScopedFacetPath.of(cxt.getScope(), fp));
         }); //this::resolve);
 
@@ -490,7 +490,7 @@ public class ElementGeneratorWorker {
         Set<Expr> seenExprs = new LinkedHashSet<>();
 
 
-        NodeTransform resolveFacetPaths = NodeCustom.createNodeTransform(this::resolve);
+        NodeTransform resolveFacetPaths = NodeCustom.createNodeTransform(ScopedFacetPath.class, this::resolve);
     //        //NodeTransform xform = NodeTransformLib2.wrapWithNullAsIdentity();
     //
     //

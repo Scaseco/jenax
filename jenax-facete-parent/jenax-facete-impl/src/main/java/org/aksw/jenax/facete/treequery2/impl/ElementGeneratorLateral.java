@@ -243,7 +243,7 @@ public class ElementGeneratorLateral {
     public static Set<Expr> createScopedConstraintExprs(RelationQuery relationQuery) {
         FacetConstraints<ConstraintNode<NodeQuery>> constraints = relationQuery.getFacetConstraints();
         Collection<Expr> rawExprs = constraints.getExprs();
-        NodeTransform constraintTransform = NodeCustom.mapValue((ConstraintNode<NodeQuery> cn) -> ConstraintNode.toScopedFacetPath(cn));
+        NodeTransform constraintTransform = NodeCustom.mapValue(ConstraintNode.class, (ConstraintNode<NodeQuery> cn) -> ConstraintNode.toScopedFacetPath(cn));
         Set<Expr> result = rawExprs.stream()
                 .map(e -> e.applyNodeTransform(constraintTransform))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -279,7 +279,7 @@ public class ElementGeneratorLateral {
 
         // Handle constraints
         Set<Expr> constraintExprs = createScopedConstraintExprs(current);
-        SetMultimap<ScopedFacetPath, Expr> constraintIndex = FacetConstraints.createConstraintIndex(constraintExprs);
+        SetMultimap<ScopedFacetPath, Expr> constraintIndex = FacetConstraints.createConstraintIndex(ScopedFacetPath.class, constraintExprs);
 
 
         // TreeData<FacetPath> facetTree = new TreeData<>(); // Empty tree because we rely on the constraints
@@ -298,7 +298,7 @@ public class ElementGeneratorLateral {
 
         // Extract sort conditions
         for (SortCondition sc : sortConditions) {
-            Set<ConstraintNode> nodes = NodeCustom.mentionedValues(sc.getExpression(), ConstraintNode.class);
+            Set<ConstraintNode> nodes = NodeCustom.mentionedValues(ConstraintNode.class, sc.getExpression());
             for (ConstraintNode<NodeQuery> node : nodes) {
                 ScopedFacetPath pathContrib = ConstraintNode.toScopedFacetPath(node);
                 treeData.putItem(pathContrib, ScopedFacetPath::getParent);
@@ -338,7 +338,7 @@ public class ElementGeneratorLateral {
 
             // FIXME In general we need to resolve path references!
 
-            NodeTransform xform = NodeCustom.createNodeTransform((ConstraintNode cn) -> {
+            NodeTransform xform = NodeCustom.createNodeTransform(ConstraintNode.class, (ConstraintNode cn) -> {
                 ScopedFacetPath spf = ConstraintNode.toScopedFacetPath(cn);
                 Var v = FacetPathMappingImpl.resolveVar(pathMapping, spf).asVar();
                 return v;

@@ -33,7 +33,7 @@ public class ConstraintApi2Impl<T>
 
     public FacetConstraintControl createConstraint(Expr expr) {
         // TODO Extract the custom values
-       Set<T> references = NodeCustom.mentionedValues(expr);
+       Set<T> references = NodeCustom.mentionedValues(model.getConstraintClass(), expr);
        // model.model.row(references).computeIfAbsent(expr, e -> new ConstraintControl(model, references, expr));
        FacetConstraintControl result = new ConstraintControl2Impl<>(model, references, expr);
        return result;

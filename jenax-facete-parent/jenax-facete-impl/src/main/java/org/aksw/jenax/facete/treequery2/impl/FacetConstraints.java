@@ -13,9 +13,12 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Table;
 
 public class FacetConstraints<T> {
-	protected Table<Set<T>, Expr, Boolean> model = HashBasedTable.create();
-	
-    public FacetConstraints() {
+    protected Class<?> constraintClass;
+    protected Table<Set<T>, Expr, Boolean> model = HashBasedTable.create();
+
+    public FacetConstraints(Class<?> constraintClass) {
+        super();
+        this.constraintClass = constraintClass;
     }
 
     public Collection<Expr> getExprs() {
@@ -26,6 +29,10 @@ public class FacetConstraints<T> {
         return new ConstraintApi2Impl<>(this, node);
     }
 
+    public Class<?> getConstraintClass() {
+        return constraintClass;
+    }
+
     @Override
     public String toString() {
         return Objects.toString(model);
@@ -34,11 +41,11 @@ public class FacetConstraints<T> {
 //    public static <T> SetMultimap<T, Expr> createConstraintIndex(FacetConstraints<T> constraints) {
 //        Collection<Expr> exprs = constraints.getExprs();
 //    }
-    
-    public static <T> SetMultimap<T, Expr> createConstraintIndex(Collection<Expr> exprs) {
+
+    public static <T> SetMultimap<T, Expr> createConstraintIndex(Class<?> constraintClass, Collection<Expr> exprs) {
         SetMultimap<T, Expr> constraintIndex = HashMultimap.create();
         for (Expr expr : exprs) {
-            Set<T> paths = NodeCustom.mentionedValues(expr);
+            Set<T> paths = NodeCustom.mentionedValues(constraintClass, expr);
             for (T path : paths) {
                 constraintIndex.put(path, expr);
             }

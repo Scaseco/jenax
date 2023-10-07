@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
-import org.aksw.facete.v3.api.NodeFacetPath;
+import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.apache.jena.sparql.expr.Expr;
@@ -19,7 +19,7 @@ public class ElementGeneratorUtils {
     public static SetMultimap<FacetPath, Expr> indexConstraints(Collection<Expr> constraints) {
         SetMultimap<FacetPath, Expr> result = LinkedHashMultimap.create();
         for(Expr expr : constraints) {
-            Set<FacetPath> paths = NodeFacetPath.mentionedPaths(expr);
+            Set<FacetPath> paths = NodeCustom.mentionedValues(FacetPath.class, expr);
             for(FacetPath path : paths) {
                 result.put(path, expr);
             }

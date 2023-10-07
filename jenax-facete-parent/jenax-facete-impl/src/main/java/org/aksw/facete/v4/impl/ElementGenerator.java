@@ -102,7 +102,7 @@ public class ElementGenerator {
     }
 
     public void addExpr(Expr expr) {
-        Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(expr);
+        Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(ScopedFacetPath.class, expr);
         for (ScopedFacetPath path : paths) {
             addPath(path);
             constraintIndex.put(path, expr);
@@ -142,7 +142,7 @@ public class ElementGenerator {
 
             // org.aksw.jenax.facete.treequery2.impl.FacetConstraints<ConstraintNode<NodeQuery>> facetConstraints = rq.getFacetConstraints();
             Set<Expr> constraintExprs = ElementGeneratorLateral.createScopedConstraintExprs(rq);
-            SetMultimap<ScopedFacetPath, Expr> constraintIndex = org.aksw.jenax.facete.treequery2.impl.FacetConstraints.createConstraintIndex(constraintExprs);
+            SetMultimap<ScopedFacetPath, Expr> constraintIndex = org.aksw.jenax.facete.treequery2.impl.FacetConstraints.createConstraintIndex(ScopedFacetPath.class, constraintExprs);
 
 
             // SetMultimap<ScopedFacetPath, Expr> constraintIndex = createConstraintIndex(constraints, treeData);
@@ -241,7 +241,7 @@ public class ElementGenerator {
     public static SetMultimap<VarScope, Expr> createUnscopedConstraintExprs(Collection<Expr> scopedExprs) {
         SetMultimap<VarScope, Expr> result = HashMultimap.create();
         for (Expr expr : scopedExprs) {
-            Set<ScopedFacetPath> sfps = NodeCustom.mentionedValues(expr);
+            Set<ScopedFacetPath> sfps = NodeCustom.mentionedValues(ScopedFacetPath.class, expr);
             Multimap<VarScope, FacetPath> index = sfps.stream().collect(
                     Multimaps.toMultimap(ScopedFacetPath::getScope, ScopedFacetPath::getFacetPath, HashMultimap::create));
 
@@ -254,7 +254,7 @@ public class ElementGenerator {
             }
 
             VarScope scope = index.keySet().iterator().next();
-            Expr e = expr.applyNodeTransform(NodeCustom.mapValue(ScopedFacetPath::getFacetPath));
+            Expr e = expr.applyNodeTransform(NodeCustom.mapValue(ScopedFacetPath.class, ScopedFacetPath::getFacetPath));
             result.put(scope, e);
         }
         return result;
@@ -266,7 +266,7 @@ public class ElementGenerator {
           SetMultimap<ScopedFacetPath, Expr> constraintIndex = HashMultimap.create();
           for (Expr expr : exprs) {
               // Set<FacetPath> paths = NodeFacetPath.mentionedPaths(expr);
-              Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(expr);
+              Set<ScopedFacetPath> paths = NodeCustom.mentionedValues(ScopedFacetPath.class, expr);
 
 //              Map<FacetPath, FacetPath> remap = new HashMap<>();
 //              for (FacetPath path : paths) {
@@ -329,7 +329,7 @@ public class ElementGenerator {
 
             SetMultimap<FacetPath, Expr> constraintIndex = HashMultimap.create();
             for (Expr expr : exprs) {
-                Set<FacetPath> paths = NodeFacetPath.mentionedPaths(expr);
+                Set<FacetPath> paths = NodeCustom.mentionedValues(FacetPath.class, expr);
 
                 Map<FacetPath, FacetPath> remap = new HashMap<>();
                 for (FacetPath path : paths) {
@@ -370,7 +370,7 @@ public class ElementGenerator {
 
 
     public Collection<Expr> transformAddScope(Collection<Expr> exprs, VarScope scope) {
-        NodeTransform constraintTransform = NodeCustom.mapValue((FacetPath fp) -> ScopedFacetPath.of(scope, fp));
+        NodeTransform constraintTransform = NodeCustom.mapValue(ScopedFacetPath.class, (FacetPath fp) -> ScopedFacetPath.of(scope, fp));
         Collection<Expr> result = exprs.stream()
               .map(e -> e.applyNodeTransform(constraintTransform))
               .collect(Collectors.toList());

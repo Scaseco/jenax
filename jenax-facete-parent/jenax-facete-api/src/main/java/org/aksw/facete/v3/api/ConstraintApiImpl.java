@@ -3,6 +3,7 @@ package org.aksw.facete.v3.api;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
+import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.E_Bound;
@@ -26,17 +27,15 @@ public class ConstraintApiImpl
 
     protected transient Expr exprVar;
 
-
-
     public ConstraintApiImpl(FacetConstraints model, TreeQueryNode node) {
         super();
         this.model = model;
         this.node = node;
-        this.exprVar = ExprLib.nodeToExpr(NodeFacetPath.of(node));
+        this.exprVar = ExprLib.nodeToExpr(NodeCustom.of(node));
     }
 
     public FacetConstraintControl createConstraint(Expr expr) {
-        Set<TreeQueryNode> references = NodeFacetPath.mentionedPathNodes(expr);
+        Set<TreeQueryNode> references = NodeCustom.mentionedValues(TreeQueryNode.class, expr);
         // model.model.row(references).computeIfAbsent(expr, e -> new ConstraintControl(model, references, expr));
         FacetConstraintControl result = new FacetConstraintControlImpl(model, references, expr);
         return result;

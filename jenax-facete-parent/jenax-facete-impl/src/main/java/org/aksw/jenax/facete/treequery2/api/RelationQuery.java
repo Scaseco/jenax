@@ -62,6 +62,10 @@ public interface RelationQuery
      */
     Relation getRelation();
 
+
+    /** Extra relations that are joined with this relation */
+    // List<RelationFragment> getRelationFragments();
+
     /**
      * The context of this query which for example holds the PropertyResolver
      * for mapping properties to graph patterns.

@@ -4,10 +4,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.aksw.commons.collections.IterableUtils;
+import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.range.RangeUtils;
+import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
@@ -20,11 +23,17 @@ import org.aksw.jenax.io.json.mapper.RdfToJsonPropertyMapper;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.stmt.core.SparqlParserConfig;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
@@ -76,6 +85,7 @@ public class GraphQlToSparqlConverter {
     }
 
     public class Worker {
+        /** The context keeps track of which information (e.g. namespaces) currently applies */
         protected Context context = new Context(null, null);
 
         public void convertTopLevelFields(SelectionSet selectionSet, GraphQlToSparqlMapping result) {
@@ -87,6 +97,10 @@ public class GraphQlToSparqlConverter {
 
         public void convertTopLevelField(Field field, GraphQlToSparqlMapping result) {
             context = setupContext(new Context(context, field), field);
+
+            Relation filterRelation = tryParseSparqlQuery(context, field);
+            System.err.println("Filter relation: " + filterRelation);
+
 
             NodeQuery nodeQuery = NodeQueryImpl.newRoot();
 
@@ -114,21 +128,23 @@ public class GraphQlToSparqlConverter {
                 tryApplySlice(nodeQuery, args);
                 tryApplyOrderBy(nodeQuery, args);
 
-                for (Argument arg : field.getArguments()) {
-                    String argName = arg.getName();
+                if (false) { // The idea was to allow to filter fields - but this codeblock is broken
+                    for (Argument arg : field.getArguments()) {
+                        String argName = arg.getName();
 
-                    FacetPath facetPath = resolveProperty(context, argName);
-                    NodeQuery argQuery = facetPath == null ? null : fieldQuery.resolve(facetPath);
+                        FacetPath facetPath = resolveProperty(context, argName);
+                        NodeQuery argQuery = facetPath == null ? null : fieldQuery.resolve(facetPath);
 
-                    Value<?> rawV = arg.getValue();
-                    if (rawV instanceof StringValue) {
-                        StringValue v = (StringValue)rawV;
-                        String str = v.getValue();
+                        Value<?> rawV = arg.getValue();
+                        if (rawV instanceof StringValue) {
+                            StringValue v = (StringValue)rawV;
+                            String str = v.getValue();
 
-                        org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
-                        argQuery.constraints().fwd(TO_STRING).enterConstraints()
-                            .eq(NodeFactory.createLiteral(str)).activate()
-                        .leaveConstraints();
+                            org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
+                            argQuery.constraints().fwd(TO_STRING).enterConstraints()
+                                .eq(NodeFactory.createLiteral(str)).activate()
+                            .leaveConstraints();
+                        }
                     }
                 }
             }
@@ -163,6 +179,9 @@ public class GraphQlToSparqlConverter {
 
         public RdfToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery) {
             context = setupContext(new Context(context, field), field);
+
+            Relation filterRelation = tryParseSparqlQuery(context, field);
+            System.err.println("Filter relation: " + filterRelation);
 
             RdfToJsonPropertyMapper propertyMapper = null;
             Multimap<String, Value<?>> args = GraphQlUtils.indexArguments(field);
@@ -409,6 +428,27 @@ public class GraphQlToSparqlConverter {
             result = iri;
         }
 
+        return result;
+    }
+
+    public static Relation tryParseSparqlQuery(Context cxt, Field field) {
+        List<Directive> sparqlDirectives = field.getDirectives("sparql");
+        Directive dir = ListUtils.lastOrNull(sparqlDirectives);
+
+        String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument("query"))
+            .map(Argument::getValue)
+            .map(GraphQlUtils::toString)
+            .orElse(null);
+
+        Relation result = null;
+        if (queryStr != null) {
+            String base = cxt.getFinalBase();
+            PrefixMapping pm = new PrefixMappingAdapter(cxt.getFinalPrefixMap());
+            SparqlQueryParser parser = SparqlQueryParserImpl.create(
+                    SparqlParserConfig.newInstance().setBaseURI(base).setPrefixMapping(pm));
+            Query query = parser.apply(queryStr);
+            result = RelationUtils.fromQuery(query);
+        }
         return result;
     }
 

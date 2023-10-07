@@ -84,7 +84,7 @@ public class RelationQueryImpl
         this.reachingStep = reachingStep;
         this.varToComponent = varToComponent;
 
-        this.facetConstraints = new FacetConstraints<>();
+        this.facetConstraints = new FacetConstraints<>(ConstraintNode.class);
     }
 
     @Override
@@ -219,9 +219,9 @@ public class RelationQueryImpl
 
     @Override
     public FacetStep getReachingStep() {
-    	return reachingStep;
+        return reachingStep;
     }
-    
+
     @Override
     public NodeQuery source() {
         return resolveComponent(FacetStep.SOURCE);
