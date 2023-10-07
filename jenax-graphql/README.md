@@ -1,4 +1,4 @@
-## GraphQL-to-SPARQL rewriter
+## GraphQL-to-SPARQL Rewriter
 
 
 ### Features
