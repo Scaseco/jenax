@@ -1,9 +1,13 @@
 package org.aksw.jenax.graphql.impl.sparql;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.aksw.commons.collections.IterableUtils;
+import org.aksw.commons.path.core.Path;
+import org.aksw.commons.path.core.PathStr;
+import org.aksw.facete.v3.api.TreeDataMap;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -13,6 +17,7 @@ import com.google.common.collect.Multimaps;
 
 import graphql.language.Argument;
 import graphql.language.BooleanValue;
+import graphql.language.Directive;
 import graphql.language.EnumValue;
 import graphql.language.Field;
 import graphql.language.FloatValue;
@@ -20,6 +25,7 @@ import graphql.language.IntValue;
 import graphql.language.Node;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
+import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.Value;
 
@@ -126,4 +132,35 @@ public class GraphQlUtils {
         return arg == null ? null : arg.getValue();
     }
 
+    public static TreeDataMap<Path<String>, Field> indexFields(SelectionSet selectionSet) {
+        TreeDataMap<Path<String>, Field> result = new TreeDataMap<>();
+        Path<String> path = PathStr.newAbsolutePath();
+        indexFields(result, path, selectionSet);
+        return result;
+    }
+
+    public static void indexFields(TreeDataMap<Path<String>, Field> tree, Path<String> path, SelectionSet selection) {
+        if (selection != null) {
+            List<Field> list = selection.getSelectionsOfType(Field.class);
+            if (list != null) {
+                for (Field childField : list) {
+                    indexField(tree, path, childField);
+                }
+            }
+        }
+    }
+
+    public static String getArgValueAsString(Directive directive, String argName) {
+        String result = GraphQlUtils.toString(GraphQlUtils.getValue(directive.getArgument(argName)));
+        return result;
+    }
+
+    public static void indexField(TreeDataMap<Path<String>, Field> tree, Path<String> path, Field field) {
+        String fieldName = field.getName();
+        Path<String> fieldPath = path.resolve(fieldName);
+        tree.putItem(fieldPath, Path::getParent);
+        tree.put(fieldPath, field);
+        SelectionSet selectionSet = field.getSelectionSet();
+        indexFields(tree, fieldPath, selectionSet);
+    }
 }

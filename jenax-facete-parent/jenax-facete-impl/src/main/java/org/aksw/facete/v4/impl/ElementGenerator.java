@@ -132,6 +132,9 @@ public class ElementGenerator {
 //
 //            ScopedFacetPath focusPath = ScopedFacetPath.of(rootVar, tq.getFacetPath());
 
+            // ScopedFacetPath thisPath = ConstraintNode.toScopedFacetPath(cn);
+            // treeData.putItem(thisPath, ScopedFacetPath::getParent);
+
             ScopedFacetPath focusPath = nq.getRoot().getScopedFacetPath();
 
           // FacetPath focusPath = ElementGeneratorUtils.cleanPath(tq.getFacetPath());
@@ -506,6 +509,7 @@ public class ElementGenerator {
                 : ElementGeneratorUtils.hideConstraintsForPath(constraintIndex, path);
 
         Var var = FacetPathMappingImpl.resolveVar(pathMapping, path).asVar();
+
 
         // Var var = Var.alloc("todoAddRoot");
         // ElementGeneratorContext cxt = new ElementGeneratorContext(var, facetTree, effectiveConstraints);

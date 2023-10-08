@@ -5,6 +5,7 @@ import java.io.OutputStream;
 
 import org.aksw.jenax.graphql.GraphQlExec;
 import org.aksw.jenax.graphql.GraphQlExecFactory;
+import org.aksw.jenax.graphql.GraphQlStream;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
@@ -18,6 +19,19 @@ import graphql.parser.Parser;
 
 /** Utils to output the data from a GraphQlExec */
 public class GraphQlExecUtils {
+
+    public static JsonObject collectMetadata(GraphQlExec exec) {
+        JsonObject result = new JsonObject();
+        JsonObject metadata = new JsonObject();
+        result.add("metadata", metadata);
+        for (GraphQlStream stream : exec.getDataStreams()) {
+            JsonObject streamMetadata = stream.getMetadata();
+            if (streamMetadata != null) {
+                metadata.add(stream.getName(), streamMetadata);
+            }
+        }
+        return result;
+    }
 
     public static GraphQlExec execJson(GraphQlExecFactory gef, String jsonRequest) {
         return execJson(gef, new Gson(), jsonRequest);

@@ -8,9 +8,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.graphql.GraphQlExec;
+import org.aksw.jenax.graphql.GraphQlStream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
 /**
@@ -49,7 +51,8 @@ public class GraphQlResultWriterImpl
 
             // TODO Handle the case of non-array responses
             writer.beginArray();
-            try (Stream<JsonElement> stream = exec.getDataStream(name)) {
+            GraphQlStream dataStream = exec.getDataStream(name);
+            try (Stream<JsonElement> stream = dataStream.openStream()) {
                 stream.forEach(item -> gson.toJson(item, writer));
             }
             writer.endArray();
@@ -61,6 +64,13 @@ public class GraphQlResultWriterImpl
         writer.beginArray();
         // TODO Write out encountered errors
         writer.endArray(); // end errors
+
+        JsonObject metadata = GraphQlExecUtils.collectMetadata(exec);
+        if (!metadata.keySet().isEmpty()) {
+            writer.name("extensions");
+            gson.toJson(metadata, writer);
+        }
+
 
         writer.endObject(); // end response
     }

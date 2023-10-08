@@ -9,8 +9,12 @@ import org.apache.jena.sparql.core.Var;
 public interface QueryContext {
     Set<Var> getUsedVars();
 
+    /**
+     * Field id generator.
+     * Used to allocate a fresh ID for each relation attached to the query model
+     */
     @Deprecated // Probably no longer needed?
-    Generator<String> getScopeNameGenerator();
+    Generator<String> getFieldIdGenerator();
 
     FacetPathMapping getPathMapping();
     PropertyResolver getPropertyResolver();

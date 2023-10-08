@@ -126,7 +126,7 @@ public interface RelationQuery
 //    }
 
     public static RelationQuery of(Supplier<Relation> relation, QueryContext queryContext) {
-        String scopeBaseName = queryContext.getScopeNameGenerator().next();
+        String scopeBaseName = queryContext.getFieldIdGenerator().next();
         return new RelationQueryImpl(scopeBaseName, null, relation, null, queryContext, new HashMap<>());
     }
 

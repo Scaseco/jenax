@@ -14,6 +14,7 @@ import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -25,7 +26,7 @@ public class NodeQueryImpl
     extends NodeQueryBase
     implements NodeQuery
 {
-    protected RelationQueryImpl relationQuery;
+    protected RelationQuery relationQuery;
     protected Var var;
     protected FacetStep reachingStep;
 
@@ -33,6 +34,9 @@ public class NodeQueryImpl
     protected Map<FacetStep, NodeQuery> subPaths = new LinkedHashMap<>();
 
     protected ConstraintNode<NodeQuery> constraintRoot;
+
+    /** Upon query generation, inject the given graph pattern */
+    protected UnaryRelation filterRelation = null;
 
     public NodeQueryImpl(RelationQueryImpl relationQuery, Var var, FacetStep reachingStep) {
         super();
@@ -45,11 +49,22 @@ public class NodeQueryImpl
 
     @Override
     public NodeQuery getParent() {
-        return relationQuery == null ? null : relationQuery.parent;
+        return relationQuery == null ? null : relationQuery.getParentNode();
     }
 //    public RootedFacetTraversable<NodeQuery> facets() {
 //        return constraintTraversable;
 //    }
+
+    @Override
+    public NodeQuery setFilterRelation(UnaryRelation filterRelation) {
+        this.filterRelation = filterRelation;
+        return this;
+    }
+
+    @Override
+    public UnaryRelation getFilterRelation() {
+        return filterRelation;
+    }
 
     @Override
     public ConstraintNode<NodeQuery> constraints() {
@@ -132,7 +147,9 @@ public class NodeQueryImpl
                 Var targetVar = relationQuery.target().var();
 
                 QueryContext cxt = relationQuery.getContext();
-                String scopeName = cxt.getScopeNameGenerator().next();
+
+
+                String scopeName = cxt.getFieldIdGenerator().next();
                 Set<Var> usedVars = cxt.getUsedVars();
                 Relation relation = FacetRelationUtils.renameVariables(baseRelation, sourceVar, targetVar, scopeName, usedVars);
                 usedVars.addAll(relation.getVarsMentioned());

@@ -1,15 +1,21 @@
 package org.aksw.jenax.graphql.impl.sparql;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
+import org.aksw.commons.path.core.Path;
 import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.range.RangeUtils;
+import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -24,9 +30,11 @@ import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
@@ -40,6 +48,7 @@ import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Range;
 
@@ -79,16 +88,39 @@ public class GraphQlToSparqlConverter {
         OperationDefinition op = document.getFirstDefinitionOfType(OperationDefinition.class).orElse(null);
         if (op != null) {
             SelectionSet selectionSet = op.getSelectionSet();
+
+            // System.err.println("Field index: " + fieldIndex);
+
             new Worker().convertTopLevelFields(selectionSet, result);
         }
         return result;
     }
 
+
+//    public static TreeDataMap<Path<String>, Field> indexFields(Document document) {
+//        TreeDataMap<Path<String>, Field> result = new TreeDataMap<>();
+//        Path<String> path = PathStr.newAbsolutePath();
+//        OperationDefinition op = document.getFirstDefinitionOfType(OperationDefinition.class).orElse(null);
+//        if (op != null) {
+//            SelectionSet selectionSet = op.getSelectionSet();
+//            indexFields(result, path, selectionSet);
+//        }
+//        return result;
+//    }
+
     public class Worker {
         /** The context keeps track of which information (e.g. namespaces) currently applies */
         protected Context context = new Context(null, null);
+        // protected TreeDataMap<Path<String>, Field> fieldIndex;
 
         public void convertTopLevelFields(SelectionSet selectionSet, GraphQlToSparqlMapping result) {
+
+            // Index the field tree and create a global map of field names thereby considering
+            // aliases declared on fields using such as { foo (as: "bar") }
+            // fieldIndex = GraphQlUtils.indexFields(selectionSet);
+            // context = new Context(null, selectionSet);
+
+
             // RdfToJsonNodeMapperObject nodeConverter = null;
             for (Field field : selectionSet.getSelectionsOfType(Field.class)) {
                 convertTopLevelField(field, result);
@@ -96,24 +128,30 @@ public class GraphQlToSparqlConverter {
         }
 
         public void convertTopLevelField(Field field, GraphQlToSparqlMapping result) {
-            context = setupContext(new Context(context, field), field);
-
-            Relation filterRelation = tryParseSparqlQuery(context, field);
-            System.err.println("Filter relation: " + filterRelation);
-
+            context = context.newChildContext(field);
+            setupContext(context);
 
             NodeQuery nodeQuery = NodeQueryImpl.newRoot();
+            context.setNodeQuery(nodeQuery);
+
+            // Relation filterRelation = tryParseSparqlQuery(context, field);
+
+//            if (filterRelation != null) {
+//                // TODO Error message if not an unary relation
+//                nodeQuery.setFilterRelation(filterRelation.toUnaryRelation());
+//            }
 
             // The map of aggregators
             // Map<String, PropertyConverter> converters = new LinkedHashMap<>();
-            RdfToJsonPropertyMapper propertyConverter = null;
             Multimap<String, Value<?>> args = GraphQlUtils.indexArguments(field);
 
             String fieldName = field.getName();
 
+            // String fieldIri = deriveFieldIri(context, fieldName);
 
+            processSparqlDirectives(context);
 
-            Map<String, List<Directive>> directives = field.getDirectivesByName();
+            // Map<String, List<Directive>> directives = field.getDirectivesByName();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Seen top level field: " + fieldName);
@@ -121,6 +159,10 @@ public class GraphQlToSparqlConverter {
 
             Node classNode = resolveClass(context, fieldName);
             NodeQuery fieldQuery = resolveKeyToClasses(nodeQuery, classNode);
+
+            SelectionSet subSelection = field.getSelectionSet();
+            RdfToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
+            result.addEntry(fieldName, nodeQuery, nodeMapper);
 
 
             // Handle arguments of the field, such as slice, filter and orderBy
@@ -149,10 +191,6 @@ public class GraphQlToSparqlConverter {
                 }
             }
 
-            SelectionSet subSelection = field.getSelectionSet();
-            RdfToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
-            result.addEntry(fieldName, nodeQuery, nodeMapper);
-
             context = context.getParent();
         }
 
@@ -165,10 +203,10 @@ public class GraphQlToSparqlConverter {
                 for (Selection<?> selection : selectionSet.getSelections()) {
                     if (selection instanceof Field) {
                         Field field = (Field)selection;
-                        String fieldName = field.getName();
+                        String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
                         RdfToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
                         if (propertyMapper != null) {
-                            nodeMapperObject.getPropertyMappers().put(fieldName, propertyMapper);
+                            nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
                         }
                     }
                 }
@@ -178,10 +216,11 @@ public class GraphQlToSparqlConverter {
         }
 
         public RdfToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery) {
-            context = setupContext(new Context(context, field), field);
+            // context = setupContext(new Context(context, field), field);
+            context = context.newChildContext(field);
+            setupContext(context);
 
-            Relation filterRelation = tryParseSparqlQuery(context, field);
-            System.err.println("Filter relation: " + filterRelation);
+            // Relation filterRelation = tryParseSparqlQuery(context, field);
 
             RdfToJsonPropertyMapper propertyMapper = null;
             Multimap<String, Value<?>> args = GraphQlUtils.indexArguments(field);
@@ -205,6 +244,14 @@ public class GraphQlToSparqlConverter {
                 }
 
                 NodeQuery fieldQuery = nodeQuery.resolve(keyPath);
+                context.setNodeQuery(fieldQuery);
+
+                processSparqlDirectives(context);
+
+//                if (filterRelation != null) {
+//                    // TODO Error message if not an unary relation
+//                    fieldQuery.setFilterRelation(filterRelation.toUnaryRelation());
+//                }
 
                 if (keyPath.getNameCount() == 1) { // xid resolves to a zero-segment path
                     // Set up an accumulator for the facet path
@@ -242,6 +289,13 @@ public class GraphQlToSparqlConverter {
                     }
                 }
 
+                SelectionSet subSelection = field.getSelectionSet();
+                RdfToJsonNodeMapper childConverterContrib = convertInnerSelectionSet(subSelection, fieldQuery);
+
+                if (propertyMapper != null) { // can it be null here?
+                    propertyMapper.setTargetNodeMapper(childConverterContrib);
+                }
+
                 // Handle arguments of the field, such as slice, filter and orderBy
                 tryApplySlice(fieldQuery, args);
                 tryApplyOrderBy(fieldQuery, args);
@@ -264,13 +318,6 @@ public class GraphQlToSparqlConverter {
                             .eq(NodeFactory.createLiteral(str)).activate()
                         .leaveConstraints();
                     }
-                }
-
-                SelectionSet subSelection = field.getSelectionSet();
-                RdfToJsonNodeMapper childConverterContrib = convertInnerSelectionSet(subSelection, fieldQuery);
-
-                if (propertyMapper != null) { // can it be null here?
-                    propertyMapper.setTargetNodeMapper(childConverterContrib);
                 }
             }
 
@@ -343,27 +390,63 @@ public class GraphQlToSparqlConverter {
 
         public Object tryApplyOrderBy(NodeQuery nodeQuery, ObjectValue ov) {
             // System.out.println("ORDER: " + ov);
-
             Multimap<String, Value<?>> mm = GraphQlUtils.indexValues(ov);
+            // System.err.println(mm);
 
-            Value<?> pathValue = IterableUtils.expectZeroOrOneItems(mm.get("path"));
-            FacetPath path = toFacetPath(pathValue);
-            // System.out.println("FacetPath: " + path);
-            Value<?> dirValue = IterableUtils.expectZeroOrOneItems(mm.get("dir"));
+            // for (String fieldName : mm.keySet()) {
+            for (Entry<String, Collection<Value<?>>> e : mm.asMap().entrySet()) {
+                String fieldName = e.getKey();
+                Value<?> val = Iterables.getOnlyElement(e.getValue());
+                String orderStr = GraphQlUtils.toString(val);
 
-            if (path != null) {
-                // We do not want to project the sort conditions so we need to
-                // resolve against this node's constraints
-                ConstraintNode<NodeQuery> sortNode = nodeQuery.constraints().resolve(path);
-                sortNode.sort(Query.ORDER_ASCENDING);
-                // nodeQuery.relationQuery().getSortConditions().add(new SortCondition(sortNode.getRoot().asJenaNode(), Query.ORDER_DESCENDING));
-                // nodeQuery.resolve(path);
-                // sortNode.getRoot().sortDesc();
-                // nodeQuery.resolve(path).sortDesc();
+                int order = "ASC".equalsIgnoreCase(orderStr)
+                        ? Query.ORDER_ASCENDING
+                        : "DESC".equalsIgnoreCase(orderStr)
+                            ? Query.ORDER_DESCENDING
+                            : Query.ORDER_DEFAULT;
+
+                Set<Context> matches = context.findField(fieldName);
+                List<Path<String>> matchingPaths = matches.stream().map(Context::getPath).collect(Collectors.toList());
+
+                Context match;
+                if (matches.isEmpty()) {
+                    throw new NoSuchElementException("Could not resolve field name " + fieldName + " at path " + context.getPath());
+                } else if (matches.size() > 1) {
+                    throw new IllegalArgumentException("Ambiguous resolution. Field name + " + fieldName + " expected to resolve to 1 field. Got " + matchingPaths.size() + " fields: " + matchingPaths);
+                } else {
+                    match = Iterables.getOnlyElement(matches);
+                }
+
+                NodeQuery nq = match.getNodeQuery();
+                FacetPath facetPath = nq.getFacetPath();
+
+                FacetPath base = nodeQuery.getFacetPath();
+                FacetPath rel = base.relativize(facetPath);
+
+                //FacetPath facetPath = match.getFacetPath();
+                // NodeQuery nodeQuery = match.getNodeQuery();
+                ConstraintNode<NodeQuery> sortNode = nodeQuery.constraints().resolve(rel);
+                sortNode.sort(order);
             }
 
-            // ov.getObjectFields()
-            // Value<?> val = getArgumentValue(args, "order");
+//            Value<?> pathValue = Iterables.getOnlyElement(mm.get("path"), null);
+//            FacetPath path = toFacetPath(pathValue);
+//            // System.out.println("FacetPath: " + path);
+//            Value<?> dirValue = Iterables.getOnlyElement(mm.get("dir"), null);
+//
+//            if (path != null) {
+//                // We do not want to project the sort conditions so we need to
+//                // resolve against this node's constraints
+//                ConstraintNode<NodeQuery> sortNode = nodeQuery.constraints().resolve(path);
+//                sortNode.sort(Query.ORDER_ASCENDING);
+//                // nodeQuery.relationQuery().getSortConditions().add(new SortCondition(sortNode.getRoot().asJenaNode(), Query.ORDER_DESCENDING));
+//                // nodeQuery.resolve(path);
+//                // sortNode.getRoot().sortDesc();
+//                // nodeQuery.resolve(path).sortDesc();
+//            }
+//
+//            // ov.getObjectFields()
+//            // Value<?> val = getArgumentValue(args, "order");
 
             return null;
         }
@@ -378,7 +461,8 @@ public class GraphQlToSparqlConverter {
         }
     }
 
-    public static Context setupContext(Context cxt, Field field) {
+    public static Context setupContext(Context cxt) {
+        Field field = cxt.getField();
         List<Directive> rdfDirectives = field.getDirectives("rdf");
         for (Directive rdf : rdfDirectives) {
             String baseContrib = GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("base")));
@@ -435,7 +519,39 @@ public class GraphQlToSparqlConverter {
         List<Directive> sparqlDirectives = field.getDirectives("sparql");
         Directive dir = ListUtils.lastOrNull(sparqlDirectives);
 
-        String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument("query"))
+        return tryParseSparqlQuery(cxt, dir);
+    }
+
+
+    public static void processSparqlDirectives(Context cxt) {
+        Field field = cxt.getField();
+        String fieldIri = deriveFieldIri(cxt, field.getName());
+        NodeQuery nodeQuery = cxt.getNodeQuery();
+
+        // Process sparql directives
+        List<UnaryRelation> filterRelations = new ArrayList<>();
+        for (Directive dir : field.getDirectives()) {
+            Relation contrib = null;
+            if ("sparql".equals(dir.getName())) {
+                contrib = tryParseSparqlQuery(cxt, dir);
+            } else if ("class".equals(dir.getName())) {
+                // Produce an IRI from the field name
+                contrib = ConceptUtils.createForRdfType(fieldIri);
+            }
+
+            if (contrib != null) {
+                filterRelations.add(contrib.toUnaryRelation());
+            }
+        }
+
+        UnaryRelation filterRelation = filterRelations.stream().reduce((a, b) -> {
+            return a.joinOn(a.getVar()).with(b).toUnaryRelation();
+        }).orElse(null);
+        nodeQuery.setFilterRelation(filterRelation);
+    }
+
+    public static Relation tryParseSparqlQuery(Context cxt, Directive dir) {
+        String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument("fragment"))
             .map(Argument::getValue)
             .map(GraphQlUtils::toString)
             .orElse(null);

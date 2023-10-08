@@ -10,6 +10,7 @@ import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
@@ -18,11 +19,25 @@ public interface NodeQuery
 {
     /**
      * Wrap this node as a Jena node so that it can be used as a 'pseudo-variable' in expressions.
-     * To substitute NodeQuery references in expressions, apply a node transform using NodeFacetPath.createNodeTransform(pathTransform).
+     * To substitute NodeQuery references in expressions, apply a node transform using NodeCustom.createNodeTransform(pathTransform).
      */
     default Node asJenaNode() {
         return NodeCustom.of(this);
     }
+
+    /** */
+//    getConstraintGroups() {
+//
+//    }
+
+    /**
+     * Sets a graph pattern which is used to 'filter' the values of this node.
+     * If the filter pattern can be evaluated to a result set then it results in a set intersection between
+     * that result set's column and this node's result set column.
+     * If the filter pattern is a filter, then this node's result set is filtered by it.
+     */
+    NodeQuery setFilterRelation(UnaryRelation relation);
+    UnaryRelation getFilterRelation();
 
     @Override
     default FacetPath getFacetPath() {

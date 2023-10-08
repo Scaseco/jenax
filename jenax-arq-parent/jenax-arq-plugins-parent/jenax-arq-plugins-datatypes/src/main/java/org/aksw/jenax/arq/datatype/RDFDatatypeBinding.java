@@ -75,6 +75,7 @@ public class RDFDatatypeBinding
         return parseCore(lexicalForm, null);
     }
 
+    // It seems there is no method in Jena's SSE for serializing bindings
     public static Binding parseCore(String lexicalForm, Binding parent) {
         BindingBuilder builder = BindingFactory.builder(parent);
         ExprList el = RDFDatatypeExprList.parse(lexicalForm);

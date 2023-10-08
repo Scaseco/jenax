@@ -2,6 +2,7 @@ package org.aksw.facete.v4.api.impl;
 
 import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jena_sparql_api.data_query.api.QuerySpec;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
@@ -33,10 +34,13 @@ public class TestFacetedQuery3 {
                 .getOrCreateChild(FacetStep.fwd(RDF.type.asNode(), "a")).enterConstraints().eq(RDFS.Class).activate().leaveConstraints().getParent()
                 .getOrCreateChild(FacetStep.fwd(RDF.type.asNode(), "b")).enterConstraints().eq(OWL.Class).activate().leaveConstraints().getParent();
 
+        // nq.availableValues();
+
         ConstraintNode<NodeQuery> node = nq.constraints().fwd(RDFS.label);
         FacetedDataQuery<RDFNode> dataQuery = node.availableValues();
 
-        System.out.println(dataQuery.toConstructQueryNew().getQuery());
+        QuerySpec spec = dataQuery.toConstructQueryNew();
+        System.out.println(spec);
 
         Query query = ElementGeneratorLateral.toQuery(nq);
         System.out.println(query);

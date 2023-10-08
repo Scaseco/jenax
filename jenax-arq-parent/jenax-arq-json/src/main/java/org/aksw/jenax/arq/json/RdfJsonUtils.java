@@ -7,13 +7,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.jena.geosparql.assembler.VocabGeoSPARQL;
+import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.parsers.wkt.WKTWriter;
+import org.apache.jena.geosparql.implementation.vocabulary.Geo;
+import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.locationtech.jts.geom.Geometry;
@@ -108,19 +112,25 @@ public class RdfJsonUtils {
                 Boolean value = (Boolean) obj;
                 result = new JsonPrimitive(value);
             } else if(obj instanceof GeometryWrapper) {
-                WKTReader wktReader = new WKTReader();
-                try {
-                    final Geometry geom = wktReader.read(node.getLiteralLexicalForm());
-
+                // TODO Add an extension point for custom datatypes
+                GeometryWrapper w = (GeometryWrapper)obj;
+                String datatypeUri = node.getLiteralDatatypeURI();
+                switch (datatypeUri) {
+                case Geo.WKT:
+                    result = new JsonPrimitive(WKTWriter.write(w));
+                    break;
+                case Geo.GEO_JSON:
                     GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
+                    Geometry geom = w.getParsingGeometry();
                     String jsonString = geoJsonWriter.write(geom);
                     Gson gson = new Gson();
                     result = gson.fromJson(jsonString, JsonObject.class);
-                } catch (ParseException e) {
-                    throw new RuntimeException("Invalid WKT : " + node);
+                    break;
+                default:
+                    result = new JsonPrimitive(node.getLiteralLexicalForm());
+                    break;
                 }
             } else {
-
                 String value = node.getLiteralLexicalForm(); // Objects.toString(obj);
                 result = new JsonPrimitive(value ) ; //+ "^^" + obj.getClass().getCanonicalName());
 //				throw new RuntimeException("Unsupported literal: " + rdfNode);

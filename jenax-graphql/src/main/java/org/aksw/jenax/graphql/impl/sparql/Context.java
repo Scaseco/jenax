@@ -1,19 +1,68 @@
 package org.aksw.jenax.graphql.impl.sparql;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import org.aksw.commons.path.core.Path;
+import org.aksw.commons.path.core.PathStr;
 import org.aksw.jenax.arq.util.prefix.PrefixMap2;
+import org.aksw.jenax.facete.treequery2.api.NodeQuery;
+import org.aksw.jenax.path.core.FacetPath;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 
-import graphql.language.Node;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
+
+import graphql.language.Field;
+
+// TODO Try to isolate prefix machinery
+class PrefixCxt {
+    protected String base = null;
+    protected PrefixMap prefixMap = null;
+    protected String iri = null;
+    protected String ns = null;
+
+    public String getBase() {
+        return base;
+    }
+    public void setBase(String base) {
+        this.base = base;
+    }
+    public PrefixMap getPrefixMap() {
+        return prefixMap;
+    }
+    public void setPrefixMap(PrefixMap prefixMap) {
+        this.prefixMap = prefixMap;
+    }
+    public String getIri() {
+        return iri;
+    }
+    public void setIri(String iri) {
+        this.iri = iri;
+    }
+    public String getNs() {
+        return ns;
+    }
+    public void setNs(String ns) {
+        this.ns = ns;
+    }
+
+
+}
+
 
 public class Context {
-    protected Node<?> source;
+    // Effective local values
+    protected Field field;
     protected Context parent;
     protected String base = null;
     /** A stack of prefix maps is built from nesting using the PrefixMap2 class */
@@ -22,19 +71,65 @@ public class Context {
     protected String iri;
     protected String ns;
 
+    // Computed values taking parent context into account
     protected PrefixMap finalPrefixMap = null;
     protected String finalBase = null;
     protected String finalNs = null;
     protected String finalIri = null;
 
-    public Context(Context parent, Node<?> source) {
+    // protected FacetPath facetPath = null;
+    protected NodeQuery nodeQuery;
+
+    // Contexts of immediate children. Used to reference information of fields by name
+    protected Map<String, Context> childContexts = new LinkedHashMap<>();
+
+    public Context(Context parent, Field field) {
         super();
         this.parent = parent;
-        this.source = source;
+        this.field = field;
+    }
+
+    public Path<String> getPath() {
+        Path<String> parentPath = parent != null ? parent.getPath() : PathStr.newAbsolutePath();
+        Path<String> result = field == null
+                ? parentPath
+                : parentPath.resolve(field.getName());
+        return result;
+    }
+
+//    public FacetPath getFacetPath() {
+//        return facetPath;
+//    }
+//
+//    public void setFacetPath(FacetPath facetPath) {
+//        this.facetPath = facetPath;
+//    }
+
+    public NodeQuery getNodeQuery() {
+        return nodeQuery;
+    }
+
+    public void setNodeQuery(NodeQuery nodeQuery) {
+        this.nodeQuery = nodeQuery;
+    }
+
+    public Field getField() {
+        return field;
+    }
+
+    public Context newChildContext(Field field) {
+        String fieldName = field.getName();
+        Context result = new Context(this, field);
+        childContexts.put(fieldName, result);
+        return result;
     }
 
     public Context getParent() {
         return parent;
+    }
+
+    public Map<String, Context> getChildContexts() {
+        return childContexts;
     }
 
     public Optional<Context> tryGetParent() {
@@ -120,5 +215,51 @@ public class Context {
     public String getFinalIri() {
         return finalIri != null ? finalIri : tryGetParent().map(Context::getFinalIri).orElse(null);
     }
+
+
+
+    public Set<Context> findField(String name) {
+        Set<Context> result = Streams.stream(Traverser.<Context>forTree(cxt -> cxt.getChildContexts().values()).depthFirstPreOrder(this))
+            .filter(cxt -> {
+                Field field = cxt.getField();
+                Set<String> names = getEffectiveFieldNames(field);
+                boolean r = names.contains(name);
+                return r;
+            })
+            .collect(Collectors.toSet());
+        return result;
+    }
+
+
+    public static Set<String> getEffectiveFieldNames(Field field) {
+        Set<String> result = getAliases(field);
+        if (result.isEmpty()) {
+            result = Set.of(field.getName());
+        }
+        return result;
+    }
+
+    // Field has a getAlias() method - can we exploit that for our purpose???
+    // No, alias causes output fields to become renamed - we want to introduce a flat name by which a nested field can be referenced
+    public static Set<String> getAliases(Field field) {
+        // String alias = field.getAlias();
+//        Set<String> result = alias == null ? Set.of() : Set.of(alias);
+        Set<String> result = field.getDirectives("as").stream()
+            .map(d -> GraphQlUtils.getArgValueAsString(d, "name"))
+            .collect(Collectors.toSet());
+        return result;
+    }
+
+//    public static Set<Path<String>> findField(TreeDataMap<Path<String>, Field> tree, Path<String> basePath, String name) {
+//        Set<Path<String>> result = Streams.stream(Traverser.<Path<String>>forTree(tree::getChildren).depthFirstPreOrder(basePath))
+//            .filter(path -> {
+//                Field field = tree.get(path);
+//                Set<String> names = getEffectiveFieldNames(field);
+//                boolean r = names.contains(name);
+//                return r;
+//            })
+//            .collect(Collectors.toSet());
+//        return result;
+//    }
 }
 

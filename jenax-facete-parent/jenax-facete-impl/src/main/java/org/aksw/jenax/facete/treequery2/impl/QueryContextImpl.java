@@ -39,7 +39,7 @@ public class QueryContextImpl
 	}
 
     @Override
-    public Generator<String> getScopeNameGenerator() {
+    public Generator<String> getFieldIdGenerator() {
         return scopeNameGenerator;
 
     }

@@ -3,6 +3,7 @@ package org.aksw.jenax.facete.treequery2.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.path.PathUtils;
 import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.DatasetFactory;
@@ -309,6 +311,36 @@ public class ElementGeneratorLateral {
             // System.out.println("Constraints: " + constraintIndex);
         }
 
+        Element constraintElt = new ElementGroup();
+
+
+        // Add filter elements on the nodes
+        Collection<NodeQuery> children = current.roots();
+        for (NodeQuery child : children) {
+
+            UnaryRelation filterRelation = child.getFilterRelation();
+            if (filterRelation != null) {
+                Var filterVar = filterRelation.getVar();
+
+                String relationName = current.getScopeBaseName();
+                Var nodeQueryVar = child.var();
+
+                String scopeName = relationName + nodeQueryVar.getName();
+
+                // Prepend the var scope to all filter variables
+                Relation finalRelation = FacetRelationUtils.renameVariables(filterRelation, nodeQueryVar, filterVar, scopeName, Collections.emptySet());
+//                Relation finalRelation = filterRelation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(
+//                    v -> v.isVariable()
+//                        ? v.equals(filterVar)
+//                            ? nodeQueryVar
+//                            : Var.alloc(relationName + nodeQueryVar.getName() + filterVar.getName())
+//                        : null));
+
+                constraintElt = ElementUtils.mergeElements(constraintElt, finalRelation.getElement());
+            }
+        }
+
+
         ElementGeneratorWorker eltWorker = new ElementGeneratorWorker(treeData, constraintIndex, pathMapping, propertyResolver);
 
 
@@ -320,8 +352,12 @@ public class ElementGeneratorLateral {
         // way to fix this?)
 
         MappedElement constraintEltAcc = eltWorker.createElement();
-        Element constraintElt = constraintEltAcc.getElement();
+        Element constraintEltContrib = constraintEltAcc.getElement();
+        constraintElt = ElementUtils.mergeElements(constraintElt, constraintEltContrib);
+
         // System.out.println("Elt: " + constraintElt);
+
+
 
         nodeElement = ElementUtils.mergeElements(nodeElement, constraintElt);
 
@@ -331,6 +367,12 @@ public class ElementGeneratorLateral {
         if (limit != null || offset != null || !sortConditions.isEmpty()) {
             Query subQuery = new Query();
             subQuery.setQuerySelectType();
+
+            // Somewhat hacky - checks whether the query we are building is the root
+            if (parentVar.equals(targetVar)) {
+                subQuery.setDistinct(true);
+            }
+
             subQuery.addProjectVars(Arrays.asList(parentVar, targetVar));
             subQuery.setLimit(limit == null ? Query.NOLIMIT : limit);
             subQuery.setOffset(offset == null ? Query.NOLIMIT : offset);
@@ -354,6 +396,17 @@ public class ElementGeneratorLateral {
         boolean applyCache = false;
         if (applyCache) {
             nodeElement = new ElementService("bulk+10:cache:", nodeElement);
+        }
+
+        // Make sure we always retrieve root nodes so that even if it they have no properties
+        // we become aware of its existence
+        // Its like declaring a vertex exists in a graph without attaching any edges
+        if (reachingStep == null) {
+            Var s = current.source().var();
+            ElementBind bind = new ElementBind(Vars.x, new ExprVar(s));
+            ElementGroup bindGroup = new ElementGroup();
+            bindGroup.addElement(bind);
+            unionMembers.add(bindGroup);
         }
 
         if (reachingStep != null) {
@@ -383,7 +436,6 @@ public class ElementGeneratorLateral {
             // Bind the parent variable to '?s'
 
 
-
             ElementGroup bindSpoGroup = new ElementGroup();
             ElementBind bindS = new ElementBind(Vars.x, new ExprVar(s));
             bindSpoGroup.addElement(bindS);
@@ -405,7 +457,6 @@ public class ElementGeneratorLateral {
 //        }
 
         // Add any children
-        Collection<NodeQuery> children = current.roots();
         for (NodeQuery child : children) {
             for (RelationQuery subRq : child.children().values()) {
                 FacetStep stepToChild = subRq.getReachingStep();
