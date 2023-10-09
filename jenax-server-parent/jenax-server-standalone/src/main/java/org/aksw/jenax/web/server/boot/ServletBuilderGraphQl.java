@@ -2,7 +2,7 @@ package org.aksw.jenax.web.server.boot;
 
 import javax.servlet.ServletRegistration;
 
-import org.aksw.jenax.graphql.GraphQlExecFactory;
+import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.web.frontend.WebMvcConfigYasgui;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;

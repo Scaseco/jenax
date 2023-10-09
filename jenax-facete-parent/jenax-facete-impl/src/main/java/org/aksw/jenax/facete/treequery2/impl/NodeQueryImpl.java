@@ -1,7 +1,9 @@
 package org.aksw.jenax.facete.treequery2.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +39,24 @@ public class NodeQueryImpl
 
     /** Upon query generation, inject the given graph pattern */
     protected UnaryRelation filterRelation = null;
+
+
+    /**
+     * Extra sparql fragments injected at this node
+     * FIXME Each relation must carry a mapping for how its variables map to facet paths
+     */
+    protected List<Relation> injectRelations = new ArrayList<>();
+
+    @Override
+    public NodeQuery addInjectRelation(Relation relation) {
+        injectRelations.add(relation);
+        return this;
+    }
+
+    @Override
+    public List<Relation> getInjectRelations() {
+        return injectRelations;
+    }
 
     public NodeQueryImpl(RelationQueryImpl relationQuery, Var var, FacetStep reachingStep) {
         super();

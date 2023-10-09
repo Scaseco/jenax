@@ -2,6 +2,7 @@ package org.aksw.jenax.facete.treequery2.api;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.aksw.facete.v3.api.VarScope;
@@ -10,6 +11,7 @@ import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -38,6 +40,18 @@ public interface NodeQuery
      */
     NodeQuery setFilterRelation(UnaryRelation relation);
     UnaryRelation getFilterRelation();
+
+
+    /**
+     * Inject a relation to this node.
+     *
+     * TODO Consolidate with GraphQlToSparqlConverter; currently the variable mapping is done there
+     *
+     * @param relation
+     * @return
+     */
+    NodeQuery addInjectRelation(Relation relation);
+    List<Relation> getInjectRelations();
 
     @Override
     default FacetPath getFacetPath() {

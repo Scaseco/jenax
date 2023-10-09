@@ -2,13 +2,12 @@ package org.aksw.jenax.facete.treequery2.impl;
 
 import org.aksw.facete.v3.api.ConstraintFacade;
 import org.aksw.facete.v3.api.FacetedDataQuery;
-import org.aksw.facete.v3.api.VarScope;
 import org.aksw.facete.v3.impl.FacetedDataQueryImpl;
 import org.aksw.facete.v4.impl.ElementGenerator;
-import org.aksw.facete.v4.impl.FacetedRelationQuery;
 import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
+import org.aksw.jenax.facete.treequery2.api.FacetPathMapping;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
@@ -29,8 +28,18 @@ public class ConstraintNodeImpl
     extends RootedFacetTraversableBase<NodeQuery, ConstraintNode<NodeQuery>>
     implements ConstraintNode<NodeQuery>
 {
+    protected Var var;
+
     public ConstraintNodeImpl(NodeQuery root, FacetPath path) {
         super(root, path);
+        FacetPathMapping fpm = root.relationQuery().getContext().getPathMapping();
+        ScopedFacetPath sfp = getScopedFacetPath();
+        this.var = FacetPathMappingImpl.resolveVar(fpm, sfp).asVar();
+    }
+
+    @Override
+    public Var var() {
+        return var;
     }
 
     public ScopedFacetPath getScopedFacetPath() {

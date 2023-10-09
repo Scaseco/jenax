@@ -293,6 +293,8 @@ public class ElementGeneratorLateral {
 //            ScopeNode scopeNode = new ScopeNode(current.getScopeBaseName(), current.target().var());
         org.aksw.jenax.facete.treequery2.api.FacetPathMapping pathMapping = current.getContext().getPathMapping(); // new FacetPathMappingImpl();
 
+        // FIXME We need to add the paths for injected relations!
+
         TreeData<ScopedFacetPath> treeData = new TreeData<>();
         for (ScopedFacetPath key : constraintIndex.keySet()) {
             treeData.putItem(key, ScopedFacetPath::getParent);
@@ -337,6 +339,10 @@ public class ElementGeneratorLateral {
 //                        : null));
 
                 constraintElt = ElementUtils.mergeElements(constraintElt, finalRelation.getElement());
+            }
+
+            for (Relation rel : child.getInjectRelations()) {
+                constraintElt = ElementUtils.mergeElements(constraintElt, rel.getElement());
             }
         }
 

@@ -11,9 +11,9 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.aksw.jenax.graphql.GraphQlExec;
-import org.aksw.jenax.graphql.GraphQlExecFactory;
-import org.aksw.jenax.graphql.impl.core.GraphQlExecUtils;
+import org.aksw.jenax.graphql.api.GraphQlExec;
+import org.aksw.jenax.graphql.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
 import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
