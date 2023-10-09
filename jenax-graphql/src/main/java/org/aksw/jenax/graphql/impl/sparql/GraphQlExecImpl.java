@@ -32,6 +32,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import graphql.language.Document;
+import graphql.language.Field;
+import graphql.language.OperationDefinition;
 import io.reactivex.rxjava3.core.Flowable;
 
 public class GraphQlExecImpl
@@ -88,8 +91,12 @@ public class GraphQlExecImpl
             return result.blockingStream();
         };
 
-        JsonObject metadata = new JsonObject();
-        metadata.addProperty("sparqlQuery", query.toString());
+        Field field = entry.getTopLevelField();
+        JsonObject metadata = null;
+        if (field.hasDirective("debug")) {
+            metadata = new JsonObject();
+            metadata.addProperty("sparqlQuery", query.toString());
+        }
 
         return new GraphQlStreamImpl(name, metadata, streamFactory);
     }

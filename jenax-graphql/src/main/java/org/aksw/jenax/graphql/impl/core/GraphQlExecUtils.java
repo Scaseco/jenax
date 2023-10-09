@@ -21,14 +21,21 @@ import graphql.parser.Parser;
 public class GraphQlExecUtils {
 
     public static JsonObject collectMetadata(GraphQlExec exec) {
-        JsonObject result = new JsonObject();
         JsonObject metadata = new JsonObject();
-        result.add("metadata", metadata);
         for (GraphQlStream stream : exec.getDataStreams()) {
             JsonObject streamMetadata = stream.getMetadata();
             if (streamMetadata != null) {
                 metadata.add(stream.getName(), streamMetadata);
             }
+        }
+        return metadata;
+    }
+
+    public static JsonObject collectExtensions(GraphQlExec exec) {
+        JsonObject result = new JsonObject();
+        JsonObject metadata = collectMetadata(exec);
+        if (!metadata.keySet().isEmpty()) {
+            result.add("metadata", metadata);
         }
         return result;
     }
@@ -43,6 +50,7 @@ public class GraphQlExecUtils {
     }
 
     public static GraphQlExec execJson(GraphQlExecFactory gef, JsonObject jsonObject) {
+        Preconditions.checkArgument(jsonObject != null, "Expected a GraphQL document in JSON but got null");
         JsonElement queryElt = jsonObject.get("query");
         Preconditions.checkArgument(queryElt != null, "JSON object does not have a query field");
         Preconditions.checkArgument(queryElt.isJsonPrimitive(), "Value for 'query' is not a string");

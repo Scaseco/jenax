@@ -65,7 +65,7 @@ public class GraphQlResultWriterImpl
         // TODO Write out encountered errors
         writer.endArray(); // end errors
 
-        JsonObject metadata = GraphQlExecUtils.collectMetadata(exec);
+        JsonObject metadata = GraphQlExecUtils.collectExtensions(exec);
         if (!metadata.keySet().isEmpty()) {
             writer.name("extensions");
             gson.toJson(metadata, writer);

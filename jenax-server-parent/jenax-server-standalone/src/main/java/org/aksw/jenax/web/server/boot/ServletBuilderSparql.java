@@ -118,9 +118,10 @@ public class ServletBuilderSparql
         }
 
         // Dispatcher servlet is used to serve the html/js/css resources
+        // This is hacky as it registers the mapping under "/*" which is not local to the sparql endpoint
         {
             AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-//            dispatcherContext.register(WebMvcConfigSnorql.class);
+            // dispatcherContext.register(WebMvcConfigSnorql.class);
             dispatcherContext.register(WebMvcConfigYasgui.class);
 
             ServletRegistration.Dynamic servlet = servletContext.addServlet("dispatcherServlet", new DispatcherServlet(dispatcherContext));

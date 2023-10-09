@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.textareas {
+    display: flex;
+    height: 400px;
+    gap: 20px; /* Spacing between textareas */
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: vertical; /* Allow vertical resizing only */
+}
+
+button {
+    display: block;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Minimal UI for GraphQL</h2>
+
+    <textarea id="input" onchange="saveState()"></textarea>
+    <button onclick="sendRequest()">Send</button>
+
+<!--    <div class="textareas">-->
+    <textarea id="output" disabled="true"></textarea>
+<!--    </div>-->
+    <textarea id="debug" disabled="true"></textarea>
+
+  </div>
+
+  <script>
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const debug = document.getElementById('debug');
+
+  const endpoint = document.location.href
+  const saveKey = "savedRequest";
+
+  const restoredValue = localStorage.getItem(saveKey);
+  if (restoredValue != null) {
+    input.value = restoredValue;
+  }
+
+  function saveState() {
+    const v = input.value;
+    console.log("Saved state: " + v)
+    localStorage.setItem(saveKey, v);
+  }
+
+  function sendRequest() {
+    const v = input.value;
+
+    const graphQlPayload = {
+      query: v
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint);
+    xhr.send(JSON.stringify(graphQlPayload));
+    // xhr.responseType = "json";
+    xhr.onload = () => {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        const data = xhr.response;
+        output.value = data;
+        const json = JSON.parse(data);
+        // Check for extensions.metadata keys
+        var debugStr = "";
+        const meta = json?.extensions?.metadata;
+        if (meta) {
+          for (const [key, value] of Object.entries(meta)) {
+            const sparqlQuery = value?.sparqlQuery;
+            if (sparqlQuery) {
+              debugStr += "Entry " + key + ":\n" + sparqlQuery + "\n\n";
+            }
+          }
+        }
+        debug.value = debugStr
+      } else {
+        output.value = `Error: ${xhr.status}\n\n${xhr.responseText}`;
+      }
+    }
+  }
+</script>
+</body>
+</html>

@@ -34,7 +34,7 @@ public class GraphQlExecToJsonObject {
         result.add("data", dataObject);
         result.add("errors", errorsArray);
 
-        JsonObject metadata = GraphQlExecUtils.collectMetadata(exec);
+        JsonObject metadata = GraphQlExecUtils.collectExtensions(exec);
         if (!metadata.keySet().isEmpty()) {
             result.add("extensions", metadata);
         }

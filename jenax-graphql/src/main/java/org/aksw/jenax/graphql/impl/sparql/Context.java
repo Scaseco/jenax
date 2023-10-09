@@ -2,7 +2,9 @@ package org.aksw.jenax.graphql.impl.sparql;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
@@ -19,6 +21,7 @@ import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 
@@ -217,6 +220,20 @@ public class Context {
     }
 
 
+    public Context findOnlyField(String fieldName) {
+        Set<Context> matches = findField(fieldName);
+        List<Path<String>> matchingPaths = matches.stream().map(Context::getPath).collect(Collectors.toList());
+
+        Context match;
+        if (matches.isEmpty()) {
+            throw new NoSuchElementException("Could not resolve field name " + fieldName + " at path " + this.getPath());
+        } else if (matches.size() > 1) {
+            throw new IllegalArgumentException("Ambiguous resolution. Field name + " + fieldName + " expected to resolve to 1 field. Got " + matchingPaths.size() + " fields: " + matchingPaths);
+        } else {
+            match = Iterables.getOnlyElement(matches);
+        }
+        return match;
+    }
 
     public Set<Context> findField(String name) {
         Set<Context> result = Streams.stream(Traverser.<Context>forTree(cxt -> cxt.getChildContexts().values()).depthFirstPreOrder(this))

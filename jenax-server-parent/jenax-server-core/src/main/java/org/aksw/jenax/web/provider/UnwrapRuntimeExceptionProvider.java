@@ -14,12 +14,12 @@ public class UnwrapRuntimeExceptionProvider
     @Override
     public Response toResponse(RuntimeException e) {
         Throwable current = e;
-        while ((current instanceof RuntimeException || current instanceof ExecutionException) && current.getCause() != null) {
-            current = current.getCause();
-        }
-        if (current instanceof QueryException) {
-            return new QueryExceptionProvider().toResponse((QueryException) current);
-        }
+//        while ((current instanceof RuntimeException || current instanceof ExecutionException) && current.getCause() != null) {
+//            current = current.getCause();
+//        }
+//        if (current instanceof QueryException) {
+//            return new QueryExceptionProvider().toResponse((QueryException) current);
+//        }
         return new UncaughtExceptionProvider().toResponse(current);
     }
 }
