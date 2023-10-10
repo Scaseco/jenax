@@ -1,5 +1,6 @@
 package org.aksw.jenax.graphql.sparql;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -13,8 +14,8 @@ import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
+import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlStream;
 import org.aksw.jenax.graphql.impl.common.GraphQlStreamImpl;
 import org.aksw.jenax.io.json.mapper.RdfToJsonMapper;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -40,6 +41,7 @@ public class GraphQlExecImpl
 {
     protected RdfDataSource dataSource;
     protected GraphQlToSparqlMapping mapping;
+    protected List<GraphQlDataProvider> dataProviders;
 
     public GraphQlExecImpl(RdfDataSource dataSource, GraphQlToSparqlMapping mapping) {
         super();
@@ -47,13 +49,21 @@ public class GraphQlExecImpl
         this.mapping = mapping;
     }
 
+    public RdfDataSource getDataSource() {
+        return dataSource;
+    }
+
+    public GraphQlToSparqlMapping getMapping() {
+        return mapping;
+    }
+
     @Override
-    public Set<String> getDataStreamNames() {
+    public Set<String> getDataProviderNames() {
         return mapping.getTopLevelMappings().keySet();
     }
 
     @Override
-    public GraphQlStream getDataStream(String name) {
+    public GraphQlDataProvider getDataProvider(String name) {
         GraphQlToSparqlMapping.Entry entry = mapping.getTopLevelMappings().get(name);
 
         NodeQuery nodeQuery = entry.getNodeQuery();

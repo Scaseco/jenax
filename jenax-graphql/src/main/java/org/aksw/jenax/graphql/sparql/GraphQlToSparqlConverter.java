@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.range.RangeUtils;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
@@ -29,6 +28,7 @@ import org.aksw.jenax.io.json.mapper.RdfToJsonPropertyMapper;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.MappedRelation;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
@@ -41,13 +41,9 @@ import org.apache.jena.query.Query;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.algebra.optimize.TransformScopeRename;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Path0;
-import org.apache.jena.sparql.syntax.PatternVars;
-import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
@@ -547,12 +543,12 @@ public class GraphQlToSparqlConverter {
         for (Directive dir : field.getDirectives()) {
             Relation contrib = null;
             boolean isInject = false;
-            if ("sparql".equals(dir.getName())) {
-                contrib = tryParseSparqlQuery(cxt, dir, "fragment");
+            if (GraphQlSpecialKeys.sparql.equals(dir.getName())) {
+                contrib = tryParseSparqlQuery(cxt, dir, GraphQlSpecialKeys.fragment);
 
                 // FIXME handle the case where fragment and inject are given
                 if (contrib == null) {
-                    contrib = tryParseSparqlQuery(cxt, dir, "inject");
+                    contrib = tryParseSparqlQuery(cxt, dir, GraphQlSpecialKeys.inject);
                     if (contrib != null) {
                         isInject = true;
                     }
@@ -571,7 +567,7 @@ public class GraphQlToSparqlConverter {
 
                 if (isInject) {
                     // Resolve visible variables against known fields
-                    Map<Var, Var> varMap = new HashMap<>();
+                    Map<Var, Node> varMap = new HashMap<>();
                     for (Var v : contrib.getVars()) {
                         String name = v.getName();
                         Context match;
@@ -588,17 +584,19 @@ public class GraphQlToSparqlConverter {
                         FacetPath delta = facetPath.relativize(tgtFacetPath);
 
                         ConstraintNode<NodeQuery> cn = nodeQuery.constraints().resolve(delta);
+                        Node jenaNode = cn.asJenaNode();
 
-                        Var substVar = cn.var();
+                        Node substVar = jenaNode; // cn.var();
                         varMap.put(v, substVar);
                     }
 
                     // FIXME Only substitute in-scope variables - so apply scope rename first
                     // TransformScopeRename.transform(null);
                     // Rename.reverseVarRename(null)
-                    Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
-                    System.err.println("Resolved contrib: " + resolvedContrib);
-                    nodeQuery.addInjectRelation(resolvedContrib);
+                    // Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
+                    MappedRelation<Node> mr = MappedRelation.of(contrib, varMap);
+                    // System.err.println("Resolved contrib: " + resolvedContrib);
+                    nodeQuery.addInjectRelation(mr);
                     // TODO Register the resolved relation
                 } else {
                     filterRelations.add(contrib.toUnaryRelation());

@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlStream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -45,14 +44,13 @@ public class GraphQlResultWriterImpl
         writer.name("data");
         writer.beginObject();
 
-        Set<String> dataStreamNames = exec.getDataStreamNames();
-        for (String name : dataStreamNames) {
+        for (GraphQlDataProvider dataProvider : exec.getDataProviders()) {
+            String name = dataProvider.getName();
             writer.name(name);
 
             // TODO Handle the case of non-array responses
             writer.beginArray();
-            GraphQlStream dataStream = exec.getDataStream(name);
-            try (Stream<JsonElement> stream = dataStream.openStream()) {
+            try (Stream<JsonElement> stream = dataProvider.openStream()) {
                 stream.forEach(item -> gson.toJson(item, writer));
             }
             writer.endArray();
@@ -70,7 +68,6 @@ public class GraphQlResultWriterImpl
             writer.name("extensions");
             gson.toJson(metadata, writer);
         }
-
 
         writer.endObject(); // end response
     }

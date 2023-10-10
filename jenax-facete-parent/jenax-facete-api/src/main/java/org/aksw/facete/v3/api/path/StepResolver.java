@@ -84,12 +84,12 @@ class AliasedPathResolver {
 
 
 
-class MappedRelation {
-    // Remapping of variables
-    //BiMap<Var, Var> map;
-    Map<Var, Var> innerToOuter;
-    Relation r;
-}
+//class MappedRelation {
+//    // Remapping of variables
+//    //BiMap<Var, Var> map;
+//    Map<Var, Var> innerToOuter;
+//    Relation r;
+//}
 
 //interface Step {
 //	Relation apply(Relation step);

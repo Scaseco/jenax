@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.path.PathUtils;
+import org.aksw.jenax.sparql.relation.api.MappedRelation;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
@@ -63,6 +67,7 @@ import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.Template;
+import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.sys.JenaSystem;
 
 import com.google.common.collect.BiMap;
@@ -309,6 +314,28 @@ public class ElementGeneratorLateral {
             }
         }
 
+        List<Relation> resolvedMappedRelations = new ArrayList<>();
+        // Extract referenced paths from injected relations
+        for (NodeQuery child : current.roots()) {
+            for (MappedRelation<Node> mappedRelation :  child.getInjectRelations()) {
+                Map<Var, Node> mapping = mappedRelation.getMapping();
+                Map<Var, Var> resolvedMapping = new LinkedHashMap<>();
+                for (Entry<Var, Node> e : mapping.entrySet()) {
+                    Var k = e.getKey();
+                    ConstraintNode xcn = NodeCustom.extract(e.getValue(), ConstraintNode.class);
+                    if (xcn != null) {
+                        ScopedFacetPath pathContrib =  ConstraintNode.toScopedFacetPath(xcn);
+                        treeData.putItem(pathContrib, ScopedFacetPath::getParent);
+                        Var v = FacetPathMappingImpl.resolveVar(pathMapping, pathContrib).asVar();
+                        resolvedMapping.put(k, v);
+                    }
+                }
+                Relation resolvedRelation = mappedRelation.getDelegate()
+                        .applyNodeTransform(new NodeTransformSubst(resolvedMapping));
+                resolvedMappedRelations.add(resolvedRelation);
+            }
+        }
+
         if (!constraintIndex.isEmpty()) {
             // System.out.println("Constraints: " + constraintIndex);
         }
@@ -340,12 +367,7 @@ public class ElementGeneratorLateral {
 
                 constraintElt = ElementUtils.mergeElements(constraintElt, finalRelation.getElement());
             }
-
-            for (Relation rel : child.getInjectRelations()) {
-                constraintElt = ElementUtils.mergeElements(constraintElt, rel.getElement());
-            }
         }
-
 
         ElementGeneratorWorker eltWorker = new ElementGeneratorWorker(treeData, constraintIndex, pathMapping, propertyResolver);
 
@@ -363,7 +385,10 @@ public class ElementGeneratorLateral {
 
         // System.out.println("Elt: " + constraintElt);
 
-
+        // Add injected relations
+        for (Relation rel : resolvedMappedRelations) {
+            constraintElt = ElementUtils.mergeElements(constraintElt, rel.getElement());
+        }
 
         nodeElement = ElementUtils.mergeElements(nodeElement, constraintElt);
 

@@ -15,4 +15,9 @@ public class GraphQlSpecialKeys {
 
     /** Directive name for inverse properties */
     public static final String inverse = "inverse";
+
+    public static final String sparql = "sparql";
+    public static final String fragment = "fragment";
+    public static final String inject = "inject";
+
 }

@@ -20,12 +20,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-.textareas {
-    display: flex;
-    height: 400px;
-    gap: 20px; /* Spacing between textareas */
-}
-
 textarea {
     width: 100%;
     height: 200px;
@@ -48,11 +42,8 @@ button {
     <textarea id="input" onchange="saveState()"></textarea>
     <button onclick="sendRequest()">Send</button>
 
-<!--    <div class="textareas">-->
-    <textarea id="output" disabled="true"></textarea>
-<!--    </div>-->
-    <textarea id="debug" disabled="true"></textarea>
-
+    <textarea id="output" readonly="true"></textarea>
+    <textarea id="debug" readonly="true"></textarea>
   </div>
 
   <script>
@@ -89,6 +80,7 @@ button {
       if (xhr.readyState == 4 && xhr.status == 200) {
         const data = xhr.response;
         output.value = data;
+
         const json = JSON.parse(data);
         // Check for extensions.metadata keys
         var debugStr = "";
@@ -104,6 +96,7 @@ button {
         debug.value = debugStr
       } else {
         output.value = `Error: ${xhr.status}\n\n${xhr.responseText}`;
+        debug.value = "";
       }
     }
   }

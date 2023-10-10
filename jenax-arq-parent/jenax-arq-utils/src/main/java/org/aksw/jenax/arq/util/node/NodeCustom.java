@@ -70,6 +70,17 @@ public class NodeCustom<T>
         return new NodeCustom<>(value);
     }
 
+    public static <T> T extract(Node node, Class<?> payloadClass) {
+        T result = null;
+        if (node instanceof NodeCustom) {
+            Object v = ((NodeCustom<?>)node).getValue();
+            if (payloadClass.isInstance(v)) {
+                result = (T)v;
+            }
+        }
+        return result;
+    }
+
     public static Stream<NodeCustom<?>> streamCustomNodes(Expr expr) {
         Stream<NodeCustom<?>> result = ExprUtils.nodesMentioned(expr).stream()
                 .flatMap(x -> ObjectUtils.tryCastAs(NodeCustom.class, x).stream())

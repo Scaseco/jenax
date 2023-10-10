@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public interface GraphQlStream {
+public interface GraphQlDataProvider {
     /** The name of the provider. Usable as a key in the JSON result. */
     String getName();
 

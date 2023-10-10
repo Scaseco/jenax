@@ -1,10 +1,9 @@
 package org.aksw.jenax.graphql.impl.common;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlStream;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -16,13 +15,12 @@ public class GraphQlExecToJsonObject {
         // { data: { ...  dataStreams ... } }
         JsonObject dataObject = new JsonObject();
 
-        Set<String> dataStreamNames = exec.getDataStreamNames();
-        for (String name : dataStreamNames) {
-            GraphQlStream dataStream = exec.getDataStream(name);
+        for (GraphQlDataProvider dataProvider : exec.getDataProviders()) {
+            String name = dataProvider.getName();
 
             // TODO Handle the case of non-array responses
             JsonArray items = new JsonArray();
-            try (Stream<JsonElement> stream = dataStream.openStream()) {
+            try (Stream<JsonElement> stream = dataProvider.openStream()) {
                 stream.forEach(items::add);
             }
             dataObject.add(name, items);

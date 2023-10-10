@@ -15,6 +15,7 @@ import org.aksw.jenax.facete.treequery2.api.QueryContext;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.relation.api.MappedRelation;
 import org.aksw.jenax.sparql.relation.api.Relation;
 import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
@@ -45,16 +46,16 @@ public class NodeQueryImpl
      * Extra sparql fragments injected at this node
      * FIXME Each relation must carry a mapping for how its variables map to facet paths
      */
-    protected List<Relation> injectRelations = new ArrayList<>();
+    protected List<MappedRelation<Node>> injectRelations = new ArrayList<>();
 
     @Override
-    public NodeQuery addInjectRelation(Relation relation) {
+    public NodeQuery addInjectRelation(MappedRelation<Node> relation) {
         injectRelations.add(relation);
         return this;
     }
 
     @Override
-    public List<Relation> getInjectRelations() {
+    public List<MappedRelation<Node>> getInjectRelations() {
         return injectRelations;
     }
 

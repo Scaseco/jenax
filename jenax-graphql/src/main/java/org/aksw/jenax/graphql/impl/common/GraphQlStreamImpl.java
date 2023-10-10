@@ -3,13 +3,13 @@ package org.aksw.jenax.graphql.impl.common;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.graphql.api.GraphQlStream;
+import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class GraphQlStreamImpl
-    implements GraphQlStream
+    implements GraphQlDataProvider
 {
     protected String name;
     protected JsonObject metadata;
