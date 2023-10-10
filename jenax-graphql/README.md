@@ -13,75 +13,157 @@
 
 \* The generated SPARQL query makes use of the LATERAL feature, however this can be polyfilled at the cost of multiple requests with jenax SPARQL polyfills in jenax-dataaccess
 
-## Querying
 
+## Building SPARQL queries with GraphQL
 The core machinery is based on the `@rdf` and `@sparql` directives.
 
-In general, we differ between `top-level fields`, which specify sets of items and `inner fields` which correspond to properties of these items. Inner fields are inherently backed by the set of items in the RDF graph that are reached by traversing paths of RDF properties based on a field's annotation.
-For top-level fields the initial set of items needs to be specified.
+### Prefixes and Namespaces
+The essential aspect for bridging GraphQL and SPARQL is to annotate fields with IRIs. The explicit way to accomplish this is using the `@rdf(iri: )` directive.
 
-All fields can be annotated with an IRI using the `@rdf(iri: "...")` directive.
-
-```GraphQl
-{ myField @rdf(iri: "http://www.example.org/myIri") ... }
-```
-
-#### Selecting the Initial Set of Items
-
-The initial set of items is conceptually specified using a SPARQL SELECT query that projects only a single variable.
-An explicit SPARQL query can be specified using the `@sparql(fragement="...")` directive:
 ```graphql
 {
-  People @sparql(fragment="SELECT ?s WHERE { ?s a <http://xmlns.com/foaf/0.1/Person> })" {
+  label @rdf(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+}
+```
+
+In the following we show all the supported approaches for easing this task and making it less repetetive.
+Note, that ultimately these approaches are just implicit variants of the explicit `@rdf(iri: )` annotation.
+
+A set of prefixes can be declared with `@rdf(prefixes:)`. The prefixes are available for use on the field itself and any descending fields.
+`@rdf(iri:)` is evaluated only after a field's _effective_ set of prefixes has been computed. In the example below the field `label` is thus effectively annotated with `@rdf(iri: "http://www.w3.org/2000/01/rdf-schema#")
+```graphql
+{
+  label @rdf(iri: "rdfs:label")
+    @rdf(prefixes: {
+      rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+    })
+}
+```
+
+Often a field name matches the last part of an IRI. In the example above, we have repeatedly written `label`. We can eliminate the repetition using `@rdf(ns: )`. It is like `@rdf(iri:)` with the addition that it appends the field name.
+```graphql
+{
+  label @rdf(ns: "rdfs")
+    @rdf(prefixes: {
+      rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+    })
+}
+```
+
+Setting a `base` IRI on a field implicitely sets `@rdf(iri:)` for the annotated field and all descendants that are not otherwise annotated.
+```graphql
+{
+  label
+    @rdf(prefixes: {
+      rdfs: "http://www.w3.org/2000/01/rdf-schema#"
+    }),
+    base: "rdfs")
+}
+```
+
+#### Pitfalls
+The values for `iri`, `ns` and `base` are always resolved against a field's effective prefixes.
+You should avoid defining prefixes that are also used as IRI schemas, such as `http`, `https` or `urn`.
+In the example below, the IRI for `label` is expanded to `http://www.example.org///www.w3.org/2000/01/rdf-schema#label`.
+```graphql
+{
+  label @rdf(iri: "http://www.w3.org/2000/01/rdf-schema#label")
+    @rdf(prefixes: {
+      http: "http://www.example.org/"
+    })
+}
+```
+
+### Selecting the Initial Set of Items
+The core machinery is based on the `@rdf` and `@sparql` directives.
+
+In general, we differ between `top-level fields`, which specify sets of items and `inner fields` which correspond to properties of these items.
+Inner fields are thus inherently backed by the set of items in the RDF graph that are reached by traversing paths of RDF properties based on a field's annotation.
+For top-level fields, the initial set of items needs to be specified.
+
+The initial set of items is conceptually specified using a SPARQL SELECT query that projects only a single variable.
+An explicit SPARQL query that projects a single variable can be specified using the `@sparql(fragment:)` directive:
+```graphql
+{
+  People @sparql(fragment: "SELECT ?s WHERE { ?s a <http://xmlns.com/foaf/0.1/Person> })" {
     ...
   }
 }
 ```
 
-The annotation `@sparql(fragment="")` is generally used to state that the values of a field should be intersected with those of the supplied fragment. If the set of items is not otherwise specified, then the sparql fragment becomes its specification. Query fragments are independent so processors need to ensure that no variable name clashes arise when assembling a GraphQL's effective SPARQL query.
+The annotation `@sparql(fragment:)` is generally used to state that the values of a field should be intersected with those of the supplied fragment.
+If the set of items is not otherwise specified, then the sparql fragment becomes its specification.
+It is possible to specify multiple query fragments. Variables in different fragments are considered as different ones.
 
-
-Providing multiple sparql fragments results in the intersection of the resources.
 ```graphql
 {
   HumanLeaders
-    @sparql(fragment="SELECT ?s WHERE { ?s a <http://xmlns.com/foaf/0.1/Person> })"
-    @sparql(fragment="SELECT ?x WHERE { ?leader <https://dbpedia.org/ontology/leaderName> ?leader })" {
+    @sparql(fragment="SELECT ?x WHERE { ?x a <http://xmlns.com/foaf/0.1/Person> })"
+    # ?x in the fragment below is different from that above.
+    @sparql(fragment="SELECT ?leader WHERE { ?leader <https://dbpedia.org/ontology/leaderName> ?x })" {
     ...
   }
 }
 ```
 
 A common use case is to select instances of given class.
-The `@class` directive is a shorthand for which uses the field's IRI to produce a SPARQL fragement `SELECT ?x WHERE { ?x a $FIELD_IRI$ }`.
+The `@class` directive is a shorthand for which uses the field's IRI to produce the SPARQL fragment `SELECT ?x WHERE { ?x a $FIELD_IRI$ }`.
 
 ```graphql
 {
-  People @class @rdf(iri="http://xmlns.com/foaf/0.1/Person") {
-    ...
+  People @class @rdf(iri="http://xmlns.com/foaf/0.1/Person")
+}
+```
+
+All `@rdf` directives are always processed first. Afterwards, `@sparql` and its shorthands are evaluated in the specified order.
+
+
+The following example specifies the initial set of items to be the intersection of items that are `foaf:Person` and those that have a `dbo:leaderName`.
+If `@class` was omitted, then the `@sparql(fragment:)` alone would be used as the specification of initial items.
+```graphql
+{
+  HumanLeaders @class
+    @rdf(iri: "foaf:Person")
+    @rdf(prefixes: {
+      dbo: "http://dbpedia.org/ontology/"
+      foaf: "http://xmlns.com/foaf/0.1/"
+    })
+    @sparql(fragment="SELECT ?leader WHERE { ?leader <https://dbpedia.org/ontology/leaderName> ?x })" {
   }
 }
 ```
 
-NOTE: All `@rdf` directives are always processed first. Afterwards, `@sparql` and its shorthands are evaluated in the specified order.
+**If the set of initial items is otherwise unspecified, it defaults to the set of subjects in the graphs.**
 
+### Pagination (Limit and Offset)
+Limit and offset can be provided as arguments to any field.
 
-
-The `base` argument of the `@rdf` sets a base namespace for the annotated field and is valid for all descendant fields unless overridden.
-
-
-
-
-Top level fields of a query document are by default interpreted as class names, whereas all inner fields are treated as properties.
-
-
-For example, the Pokedex dataset has the class `Pokemon` (`http://pokedex.dataincubator.org/pkm/Pokemon`) whose instances carry the `rdfs:label` property.
-Using auto-mapping, the following query is fully functional:
 ```graphql
 {
-  Pokemon {
-    label
-  }
+  People(limit: 10, offset: 5) @class @rdf(iri: "foaf:Person")
+    @rdf(prefixes: {
+      foaf: "http://xmlns.com/foaf/0.1/"
+    })
+}
+```
+
+
+### Ordering
+Use the `orderBy` argument. It accepts and object where the keys are field references and value can be `ASC` or `DESC.
+Nested fields can be be annotated with `@as(name="alias")` which allows them to be referenced with a "flat" name.
+
+```graphql
+{
+  field(orderBy: { a: ASC, b: DESC })
+    a
+    b
+}
+```
+
+### References to nested fields
+```
+{
+  label `@as(name="alias")`
 }
 ```
 
