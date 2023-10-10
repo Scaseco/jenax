@@ -16,7 +16,7 @@ import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.impl.common.GraphQlStreamImpl;
+import org.aksw.jenax.graphql.impl.common.GraphQlDataProviderImpl;
 import org.aksw.jenax.io.json.mapper.RdfToJsonMapper;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
@@ -24,9 +24,11 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.exec.QueryExecAdapter;
 import org.apache.jena.sparql.exec.QueryExecutionAdapter;
+import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.util.ModelUtils;
 
 import com.google.gson.JsonArray;
@@ -66,10 +68,16 @@ public class GraphQlExecImpl
     public GraphQlDataProvider getDataProvider(String name) {
         GraphQlToSparqlMapping.Entry entry = mapping.getTopLevelMappings().get(name);
 
+        // GraphQlToSparqlConverter.setupContext(null)
+        // entry.getTopLevelField();
+
+        PrefixMap prefixMap = entry.getPrefixMap();
+
         NodeQuery nodeQuery = entry.getNodeQuery();
         RdfToJsonMapper jsonMapper = entry.getMapper();
         RelationQuery rq = nodeQuery.relationQuery();
         Query query = ElementGeneratorLateral.toQuery(rq);
+        query.setPrefixMapping(new PrefixMappingAdapter(prefixMap));
 
         Supplier<Stream<JsonElement>> streamFactory = () -> {
             FlowableOperatorSequentialGroupBy<Quad, Node, Graph> grouper = FlowableOperatorSequentialGroupBy.create(
@@ -106,6 +114,6 @@ public class GraphQlExecImpl
             metadata.addProperty("sparqlQuery", query.toString());
         }
 
-        return new GraphQlStreamImpl(name, metadata, streamFactory);
+        return new GraphQlDataProviderImpl(name, metadata, streamFactory);
     }
 }

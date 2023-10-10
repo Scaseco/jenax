@@ -165,7 +165,6 @@ public class GraphQlToSparqlConverter {
 
             SelectionSet subSelection = field.getSelectionSet();
             RdfToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
-            result.addEntry(field, nodeQuery, nodeMapper);
 
 
             // Handle arguments of the field, such as slice, filter and orderBy
@@ -195,6 +194,10 @@ public class GraphQlToSparqlConverter {
             }
 
             processSparqlDirectives(context, resolver);
+
+            // Materialize prefixes
+            PrefixMap prefixMap = PrefixMapFactory.create(context.getFinalPrefixMap());
+            result.addEntry(field, prefixMap, nodeQuery, nodeMapper);
 
             // context = context.getParent();
             contextStack.pop();
