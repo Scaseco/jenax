@@ -98,7 +98,7 @@ It is possible to specify multiple query fragments. Variables in different fragm
 ```graphql
 {
   HumanLeaders
-    @sparql(fragment="SELECT ?x WHERE { ?x a <http://xmlns.com/foaf/0.1/Person> })"
+    @sparql(fragment="SELECT ?x WHERE { ?x a <http://xmlns.com/foaf/0.1/Person> })")
     # ?x in the fragment below is different from that above.
     @sparql(fragment="SELECT ?leader WHERE { ?leader <https://dbpedia.org/ontology/leaderName> ?x })" {
     ...
@@ -107,7 +107,7 @@ It is possible to specify multiple query fragments. Variables in different fragm
 ```
 
 A common use case is to select instances of given class.
-The `@class` directive is a shorthand for which uses the field's IRI to produce the SPARQL fragment `SELECT ?x WHERE { ?x a $FIELD_IRI$ }`.
+The `@class` directive is a shorthand which uses the field's IRI to produce the SPARQL fragment `SELECT ?x WHERE { ?x a $FIELD_IRI$ }`.
 
 ```graphql
 {
@@ -128,7 +128,7 @@ If `@class` was omitted, then the `@sparql(fragment:)` alone would be used as th
       dbo: "http://dbpedia.org/ontology/"
       foaf: "http://xmlns.com/foaf/0.1/"
     })
-    @sparql(fragment="SELECT ?leader WHERE { ?leader <https://dbpedia.org/ontology/leaderName> ?x })" {
+    @sparql(fragment="SELECT ?leader WHERE { ?leader dbo:leaderName ?x })" {
   }
 }
 ```
@@ -149,7 +149,7 @@ Limit and offset can be provided as arguments to any field.
 
 
 ### Ordering
-Use the `orderBy` argument. It accepts and object where the keys are field references and value can be `ASC` or `DESC.
+Use the `orderBy` argument. It accepts and object where the keys are field references and value can be `ASC` or `DESC`.
 Nested fields can be be annotated with `@as(name="alias")` which allows them to be referenced with a "flat" name.
 
 ```graphql
@@ -167,14 +167,14 @@ Nested fields can be be annotated with `@as(name="alias")` which allows them to 
 }
 ```
 
-#### Aliases vs @as
+#### GraphQL aliases vs @as
 GraphQL allows declaration of aliases for a field. However, result values for that field will use the renamed field.
 
 `@as(name="alias")` is used to specify a name by which a nested field can be referenced.
 The `@as` directive is used when resolving variables in filter conditions. It does not cause any change in the resulting document structure.
 
 
-`@rdf(ns="")` is always applied to the field name and never to the alias as the following example shows:
+`@rdf(ns:)` is always applied to the field name and never to the alias as the following example shows:
 
 ```graphql
 {
@@ -184,8 +184,6 @@ The `@as` directive is used when resolving variables in filter conditions. It do
   }
 }
 ```
-
-`alias:fieldName` 
 
 Find all people who have friends with the same firstName.
 ```
