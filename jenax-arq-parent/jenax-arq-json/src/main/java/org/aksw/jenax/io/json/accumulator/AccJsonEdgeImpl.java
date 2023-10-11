@@ -11,6 +11,8 @@ import org.apache.jena.graph.Triple;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.stream.JsonWriter;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
@@ -56,7 +58,6 @@ class AccJsonEdgeImpl
 
     @Override
     public void setTargetAcc(AccJsonNode targetAcc) {
-        Preconditions.checkArgument(targetAcc.getParent() == null, "Parent already set");
         targetAcc.setParent(this);
         this.targetAcc = targetAcc;
     }
@@ -84,64 +85,46 @@ class AccJsonEdgeImpl
     @Override
     public void begin(Node node, AccContext context, boolean skipOutput) throws Exception {
         super.begin(node, context, skipOutput);
-
         seenTargetCount = 0;
 
-        if (context.isMaterialize()) {
-            value = new JsonArray();
-        }
-
-        if (!skipOutput && context.isSerialize()) {
-            JsonWriter jsonWriter = context.getJsonWriter();
-            jsonWriter.name(jsonKey);
-            if (!isSingle) {
-                jsonWriter.beginArray();
-            }
-        }
-    }
-
-    @Override
-    public void end(AccContext context) throws Exception {
-        if (!hasBegun()) { // FIXME hash - we should not allow end without begin!
-            return;
-        }
-        endCurrentTarget(context);
-
-        if (!skipOutput && context.isSerialize()) {
-            JsonWriter jsonWriter = context.getJsonWriter();
-            if (!isSingle) {
-                jsonWriter.endArray();
-            }
-        }
-
-        super.end(context);
-    }
-
-    protected void endCurrentTarget(AccContext context) throws Exception {
-        if (currentTarget != null) {
-            targetAcc.end(context);
-
+        if (!skipOutput) {
             if (context.isMaterialize()) {
-                this.value.getAsJsonArray().add(targetAcc.getValue());
+                value = isSingle
+                        ? JsonNull.INSTANCE
+                        : new JsonArray();
             }
 
-            currentTarget = null;
+            if (context.isSerialize()) {
+                JsonWriter jsonWriter = context.getJsonWriter();
+                jsonWriter.name(jsonKey);
+                if (!isSingle) {
+                    jsonWriter.beginArray();
+                }
+            }
         }
     }
 
     /** Accepts a triple if source and field id match that of the current state */
     @Override
     public AccJson transition(Triple input, AccContext context) throws Exception {
+        ensureBegun();
+
+        // End the current target (array item) if there is one
+        // endCurrentTarget(context);
+
         AccJson result = null;
         String inputFieldId = input.getPredicate().getURI();
         if (matchFieldId.equals(inputFieldId)) {
             Node edgeInputSource = TripleUtils.getSource(input, isForward);
 
-            endCurrentTarget(context);
+            // endCurrentTarget(context);
 
             if (Objects.equals(currentSourceNode, edgeInputSource)) {
                 ++seenTargetCount;
-                System.err.println("items so far seen at path " + getPath() + ": " + seenTargetCount);
+                // System.err.println("items so far seen at path " + getPath() + ": " + seenTargetCount);
+
+                // If there is too many items we need still consume all the edges as usual
+                // but we call begin() on the accumulators with serialization disabled
                 boolean isTooMany = isSingle && seenTargetCount > 1;
                 if (isTooMany) {
                     AccJsonErrorHandler errorHandler = context.getErrorHandler();
@@ -150,34 +133,56 @@ class AccJsonEdgeImpl
                         errorHandler.accept(new AccJsonErrorEvent(path, "Multiple values encountered for a field that was declared to have at most a single one."));
                         this.skipOutput = true;
                     }
-
                 }
-
-                // FIXME If there is too many items we need still need to do pass all the edges to the
-                // accumulators but we need to disable serialization!
-
-                // How to disable that? Using the context?
 
                 currentTarget = TripleUtils.getTarget(input, isForward);
                 targetAcc.begin(currentTarget, context, skipOutput);
                 result = targetAcc;
-
-
-                // result = targetAcc.transition(input, context);
-            } else {
-                // I think we don't have to end the target acc here, because
-                // the parent will close it since we indicate we don't have a transition
-//                if (currentSourceNode != null) {
-//                    targetAcc.end(context);
-//
-//                }
             }
         }
         return result;
     }
 
     @Override
+    public void end(AccContext context) throws Exception {
+        ensureBegun();
+
+        if (!skipOutput) {
+            if (context.isMaterialize()) {
+                // XXX Calling parent.getValue() here causes IllegalState because
+                // getValue() must only be called after end()
+                // So we access the field directly
+                AccJsonNodeObject acc = (AccJsonNodeObject)parent;
+                acc.value.getAsJsonObject().add(jsonKey, value);
+            }
+
+            if (context.isSerialize()) {
+                JsonWriter jsonWriter = context.getJsonWriter();
+                if (!isSingle) {
+                    jsonWriter.endArray();
+                }
+            }
+        }
+        super.end(context);
+    }
+
+    @Override
     public String toString() {
         return "Field(matches: " + matchFieldId + ", target: " + currentTarget + ", " + targetAcc + ")";
+    }
+
+    @Override
+    public void acceptContribution(JsonElement item, AccContext context) {
+        if (context.isMaterialize()) {
+            if (isSingle) {
+                if (value == null) {
+                    value = item;
+                } else {
+                    // error
+                }
+            } else {
+                value.getAsJsonArray().add(item);
+            }
+        }
     }
 }

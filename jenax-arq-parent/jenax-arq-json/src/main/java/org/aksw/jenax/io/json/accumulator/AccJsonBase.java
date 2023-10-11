@@ -9,6 +9,8 @@ abstract class AccJsonBase
     implements AccJson
 {
     protected AccJson parent;
+
+    /** The materialized value - requires materialization to be enabled in the context */
     protected JsonElement value = null;
     protected Node oldSourceNode; // Old value stored for debugging
 
@@ -24,6 +26,10 @@ abstract class AccJsonBase
 //        this.parent = parent;
 //    }
 
+    public void ensureBegun() {
+        Preconditions.checkState(hasBegun == true);
+    }
+
     @Override
     public void setParent(AccJson parent) {
         Preconditions.checkArgument(this.parent == null, "Parent already set");
@@ -37,7 +43,8 @@ abstract class AccJsonBase
 
     @Override
     public JsonElement getValue() {
-        if (currentSourceNode != null) {
+        // if (currentSourceNode != null) {
+        if (hasBegun) {
             throw new IllegalStateException("getValue() must only be called after end()");
         }
         return value;

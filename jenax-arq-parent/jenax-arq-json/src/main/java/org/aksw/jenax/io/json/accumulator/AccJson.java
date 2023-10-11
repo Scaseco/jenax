@@ -38,7 +38,7 @@ interface AccJson {
      *
      * @throws IllegalStateException if there was a prior call to begin() without corresponding end()
      *
-     * @param node The source node to which the next incoming edges will connect to
+     * @param node The source node to which the next incoming edge(s) will connect to
      * @param context The context which holds the JSON serializers
      * @param skipOutput When output should be disabled (used to skip over lists of items where just one was expected)
      */
@@ -68,6 +68,12 @@ interface AccJson {
      *
      * Deprecated: Use JsonTreeWriter to produce json elements
      */
-    @Deprecated
     JsonElement getValue();
+
+
+    /**
+     * For materialization: Whenever end() is called on a state with materialization enabled, then
+     * it passes its accumulated value to the parent using this method.
+     */
+    void acceptContribution(JsonElement value, AccContext context);
 }

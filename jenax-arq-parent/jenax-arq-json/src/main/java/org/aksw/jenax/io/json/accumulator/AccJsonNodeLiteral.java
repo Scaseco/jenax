@@ -7,6 +7,8 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
+import com.google.gson.JsonElement;
+
 class AccJsonNodeLiteral
     extends AccJsonBase
     implements AccJsonNode
@@ -30,11 +32,16 @@ class AccJsonNodeLiteral
 
     @Override
     public void end(AccContext context) throws Exception {
+        ensureBegun();
+        if (!skipOutput && context.isMaterialize() && parent != null) {
+            parent.acceptContribution(value, context);
+        }
         super.end(context);
     }
 
     @Override
     public AccJson transition(Triple edge, AccContext context) {
+        ensureBegun();
         // Literals reject all edges (indicated by null)
         return null;
     }
@@ -42,5 +49,10 @@ class AccJsonNodeLiteral
     @Override
     public String toString() {
         return "AccJsonNodeLiteral(source: " + currentSourceNode + ")";
+    }
+
+    @Override
+    public void acceptContribution(JsonElement value, AccContext context) {
+        throw new UnsupportedOperationException("Literals cannot expect json elemnts as contributions");
     }
 }

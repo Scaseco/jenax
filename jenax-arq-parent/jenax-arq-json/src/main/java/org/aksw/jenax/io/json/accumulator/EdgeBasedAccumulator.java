@@ -53,7 +53,7 @@ public class EdgeBasedAccumulator {
 
         List<Quad> data = Arrays.asList(
             // movie0: just a movie label
-            create("urn:movie0", "urn:movie0", "urn:movieLabel", "urn:movie[0].label[0]"),
+             create("urn:movie0", "urn:movie0", "urn:movieLabel", "urn:movie[0].label[0]"),
 
             create("urn:movie1", "urn:movie1", "urn:actor", "urn:actor1"),
             create("urn:movie1", "urn:actor1", "urn:actorLabel", "urn:actor[1].label[0]"),

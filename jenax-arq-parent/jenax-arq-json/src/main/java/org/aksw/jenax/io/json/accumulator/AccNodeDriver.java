@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import org.aksw.commons.collections.trees.TreeUtils;
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
 import org.apache.jena.graph.Node;
@@ -15,14 +14,13 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 
 class AccNodeDriver {
-    protected AccJson currentAcc;
+    protected AccJson currentState;
     protected Node currentSource;
-
-    // protected JsonElement value;
 
     protected AccNodeDriver(AccJson rootAcc) {
         super();
-        this.currentAcc = rootAcc;
+        Preconditions.checkArgument(rootAcc.getParent() == null, "Root accumulator must not have a parent");
+        this.currentState = rootAcc;
     }
 
     public static AccNodeDriver of(AccJson rootAcc) {
@@ -38,7 +36,7 @@ class AccNodeDriver {
             // If the input's source differs from the current one
             // then invoke end() on the accumulators up to the root
             if (!source.equals(currentSource)) {
-                endCurrent(cxt);
+                endCurrentItem(cxt);
                 currentSource = null;
             }
         }
@@ -46,23 +44,23 @@ class AccNodeDriver {
         if (currentSource == null) {
             currentSource = source;
             // XXX Should we filter out the 'root quad' that announces the existence of a node?
-            currentAcc.begin(currentSource, cxt, false);
+            currentState.begin(currentSource, cxt, false);
         }
         AccJson nextState;
 
         // Find a state that accepts the transition
         while (true) {
-            nextState = currentAcc.transition(triple, cxt);
+            nextState = currentState.transition(triple, cxt);
             if (nextState == null) {
-                currentAcc.end(cxt);
-                AccJson parentAcc = currentAcc.getParent();
+                currentState.end(cxt);
+                AccJson parentAcc = currentState.getParent();
                 if (parentAcc != null) {
-                    currentAcc = parentAcc;
+                    currentState = parentAcc;
                 } else {
                     throw new RuntimeException("No acceptable transition for " + triple);
                 }
             } else {
-                currentAcc = nextState;
+                currentState = nextState;
                 break;
             }
         }
@@ -73,28 +71,25 @@ class AccNodeDriver {
     }
 
     public void end(AccContext cxt) throws Exception {
-        endCurrent(cxt);
+        endCurrentItem(cxt);
         this.currentSource = null;
     }
 
     public JsonElement getValue() {
-        return currentAcc.getValue();
+        return currentState.getValue();
     }
 
-    protected void endCurrent(AccContext cxt) throws Exception {
-        // Get the root of the currentAcc
-        currentAcc = TreeUtils.findRoot(currentAcc, AccJson::getParent);
-        // Ending the root recursively ends any inner nodes
-        currentAcc.end(cxt);
-//        while (true) {
-//            currentAcc.end(node, cxt);
-//            AccJson parent = currentAcc.getParent();
-//            if (parent != null) {
-//                currentAcc = parent;
-//            } else {
-//                break;
-//            }
-//        }
+    /** Recursively calls end() on the current accumulator and all its ancestors */
+    protected void endCurrentItem(AccContext cxt) throws Exception {
+        while (true) {
+            currentState.end(cxt);
+            AccJson parent = currentState.getParent();
+            if (parent != null) {
+                currentState = parent;
+            } else {
+                break;
+            }
+        }
     }
 
 
