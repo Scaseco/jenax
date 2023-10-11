@@ -31,19 +31,19 @@ class AccJsonNodeLiteral
     }
 
     @Override
+    public AccJson transition(Triple edge, AccContext context) {
+        ensureBegun();
+        // Literals reject all edges (indicated by null)
+        return null;
+    }
+
+    @Override
     public void end(AccContext context) throws Exception {
         ensureBegun();
         if (!skipOutput && context.isMaterialize() && parent != null) {
             parent.acceptContribution(value, context);
         }
         super.end(context);
-    }
-
-    @Override
-    public AccJson transition(Triple edge, AccContext context) {
-        ensureBegun();
-        // Literals reject all edges (indicated by null)
-        return null;
     }
 
     @Override

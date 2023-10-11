@@ -27,6 +27,7 @@ class AccJsonEdgeImpl
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
+    protected boolean skipOutputStartedHere = false;
 
     // since last call to begin()
     protected long seenTargetCount = 0;
@@ -86,11 +87,12 @@ class AccJsonEdgeImpl
     public void begin(Node node, AccContext context, boolean skipOutput) throws Exception {
         super.begin(node, context, skipOutput);
         seenTargetCount = 0;
+        skipOutputStartedHere = false;
 
         if (!skipOutput) {
             if (context.isMaterialize()) {
                 value = isSingle
-                        ? JsonNull.INSTANCE
+                        ? null
                         : new JsonArray();
             }
 
@@ -131,12 +133,12 @@ class AccJsonEdgeImpl
                     if (errorHandler != null) {
                         PathJson path = getPath();
                         errorHandler.accept(new AccJsonErrorEvent(path, "Multiple values encountered for a field that was declared to have at most a single one."));
-                        this.skipOutput = true;
+                        this.skipOutputStartedHere = true;
                     }
                 }
 
                 currentTarget = TripleUtils.getTarget(input, isForward);
-                targetAcc.begin(currentTarget, context, skipOutput);
+                targetAcc.begin(currentTarget, context, skipOutput || skipOutputStartedHere);
                 result = targetAcc;
             }
         }
@@ -152,8 +154,12 @@ class AccJsonEdgeImpl
                 // XXX Calling parent.getValue() here causes IllegalState because
                 // getValue() must only be called after end()
                 // So we access the field directly
-                AccJsonNodeObject acc = (AccJsonNodeObject)parent;
-                acc.value.getAsJsonObject().add(jsonKey, value);
+                if (parent != null) {
+                    // Turns null into JsonNull
+                    JsonElement elt = value == null ? JsonNull.INSTANCE : value;
+                    AccJsonNodeObject acc = (AccJsonNodeObject)parent;
+                    acc.value.getAsJsonObject().add(jsonKey, elt);
+                }
             }
 
             if (context.isSerialize()) {
@@ -173,15 +179,18 @@ class AccJsonEdgeImpl
 
     @Override
     public void acceptContribution(JsonElement item, AccContext context) {
-        if (context.isMaterialize()) {
-            if (isSingle) {
-                if (value == null) {
-                    value = item;
+        ensureBegun();
+        if (!skipOutput) {
+            if (context.isMaterialize()) {
+                if (isSingle) {
+                    if (value == null) {
+                        value = item;
+                    } else {
+                        // error
+                    }
                 } else {
-                    // error
+                    value.getAsJsonArray().add(item);
                 }
-            } else {
-                value.getAsJsonArray().add(item);
             }
         }
     }

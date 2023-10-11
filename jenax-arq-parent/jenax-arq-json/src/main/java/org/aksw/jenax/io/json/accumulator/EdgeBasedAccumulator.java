@@ -52,16 +52,17 @@ public class EdgeBasedAccumulator {
         moveLabelEdge.setTargetAcc(movieLabelValue);
 
         List<Quad> data = Arrays.asList(
-            // movie0: just a movie label
-             create("urn:movie0", "urn:movie0", "urn:movieLabel", "urn:movie[0].label[0]"),
+            // movie0: label only for movie
+            create("urn:movie0", "urn:movie0", "urn:movieLabel", "urn:movie[0].label[0]"),
 
+            // movie1: labels for actors and movies
             create("urn:movie1", "urn:movie1", "urn:actor", "urn:actor1"),
             create("urn:movie1", "urn:actor1", "urn:actorLabel", "urn:actor[1].label[0]"),
             create("urn:movie1", "urn:actor1", "urn:actorLabel", "urn:actor[1].label[1]"),
             create("urn:movie1", "urn:movie1", "urn:movieLabel", "urn:movie[1].label[0]"),
             create("urn:movie1", "urn:movie1", "urn:movieLabel", "urn:movie[1].label[1]"),
 
-            // Movie0: just an actor label
+            // Movie0: label only for actor
             create("urn:movie2", "urn:movie2", "urn:actor", "urn:actor2"),
             create("urn:movie2", "urn:actor2", "urn:actorLabel", "urn:actor[2].label[0]")
 
@@ -100,7 +101,7 @@ public class EdgeBasedAccumulator {
         // writer.close(); // Don't close system.out
 
         System.out.println();
-        System.out.println("Materialized: " + materialized);
+        System.out.println("Materialized: " + gson.toJson(materialized));
     }
 
     public static Quad create(String g, String s, String p, String o) {

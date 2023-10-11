@@ -72,11 +72,6 @@ class AccJsonNodeObject
                 AccJsonEdge edgeAcc = edgeAccs[i];
                 edgeAcc.begin(null, context, skipOutput);
                 edgeAcc.end(context);
-
-                if (context.isMaterialize()) {
-                    String jsonKey = edgeAcc.getJsonKey();
-                    value.getAsJsonObject().add(jsonKey, edgeAcc.getValue());
-                }
             }
 
             currentFieldIndex = requestedFieldIndex;
@@ -99,28 +94,12 @@ class AccJsonNodeObject
     public void end(AccContext context) throws Exception {
         ensureBegun();
 
-        if (currentFieldAcc != null) {
-            // currentFieldAcc.end(context);
-
-            if (context.isMaterialize()) {
-                String jsonKey = currentFieldAcc.getJsonKey();
-                JsonElement fieldValue = currentFieldAcc.getValue();
-                value.getAsJsonObject().add(jsonKey, fieldValue);
-            }
-        }
-
         // Visit all remaining fields
         for (int i = currentFieldIndex + 1; i < edgeAccs.length; ++i) {
             AccJsonEdge edgeAcc = edgeAccs[i];
             // Edge.begin receives the target of an edge - but there is none so we pass null
             edgeAcc.begin(null, context, skipOutput); // TODO We need to tell fields that there is no value
             edgeAcc.end(context);
-
-            String fieldName = edgeAcc.getJsonKey();
-            JsonElement fieldValue = edgeAcc.getValue();
-            if (context.isMaterialize()) {
-                value.getAsJsonObject().add(fieldName, fieldValue);
-            }
         }
 
         if (!skipOutput) {

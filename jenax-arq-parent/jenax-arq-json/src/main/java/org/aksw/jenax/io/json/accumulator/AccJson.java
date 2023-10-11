@@ -23,9 +23,9 @@ interface AccJson {
 
     /**
      * Sets the parent of this accumulator.
-     *
      * This method should never be called by application code.
-     * {@link IllegalStateException} if a parent has already been set.
+     *
+     * @throws {@link IllegalStateException} if a parent has already been set.
      */
     void setParent(AccJson parent);
 
@@ -65,8 +65,6 @@ interface AccJson {
      * If cxt.isMaterialize is enabled then this method returns the json
      * data assembled for the current node.
      * It is only valid to call this method after end().
-     *
-     * Deprecated: Use JsonTreeWriter to produce json elements
      */
     JsonElement getValue();
 
