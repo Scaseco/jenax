@@ -1,4 +1,4 @@
-package org.aksw.jenax.io.json.mapper;
+package org.aksw.jenax.io.json.graph;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
@@ -8,22 +8,22 @@ import org.apache.jena.graph.Node;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-public class RdfToJsonNodeMapperLiteral
-    implements RdfToJsonNodeMapper
+public class GraphToJsonNodeMapperLiteral
+    implements GraphToJsonNodeMapper
 {
-    private static final RdfToJsonNodeMapperLiteral INSTANCE = new RdfToJsonNodeMapperLiteral();
+    private static final GraphToJsonNodeMapperLiteral INSTANCE = new GraphToJsonNodeMapperLiteral();
 
-    public static RdfToJsonNodeMapperLiteral get() {
+    public static GraphToJsonNodeMapperLiteral get() {
         return INSTANCE;
     }
 
-    protected RdfToJsonNodeMapperLiteral() {
+    protected GraphToJsonNodeMapperLiteral() {
         super();
     }
 
     @Override
-    public RdfToJsonNodeMapperType getType() {
-        return RdfToJsonNodeMapperType.LITERAL;
+    public GraphToJsonNodeMapperType getType() {
+        return GraphToJsonNodeMapperType.LITERAL;
     }
 
     @Override

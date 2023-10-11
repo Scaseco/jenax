@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
-import org.aksw.jenax.io.json.mapper.RdfToJsonMapper;
+import org.aksw.jenax.io.json.graph.GraphToJsonMapper;
 import org.apache.jena.riot.system.PrefixMap;
 
 import graphql.language.Document;
@@ -17,9 +17,9 @@ public class GraphQlToSparqlMapping {
         /** A cache of the prefixes computed from the field */
         protected PrefixMap prefixMap;
         protected NodeQuery nodeQuery;
-        protected RdfToJsonMapper mapper;
+        protected GraphToJsonMapper mapper;
 
-        public Entry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, RdfToJsonMapper mapper) {
+        public Entry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonMapper mapper) {
             super();
             this.nodeQuery = nodeQuery;
             this.prefixMap = prefixMap;
@@ -39,7 +39,7 @@ public class GraphQlToSparqlMapping {
             return nodeQuery;
         }
 
-        public RdfToJsonMapper getMapper() {
+        public GraphToJsonMapper getMapper() {
             return mapper;
         }
     }
@@ -65,7 +65,7 @@ public class GraphQlToSparqlMapping {
         return topLevelMappings;
     }
 
-    public void addEntry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, RdfToJsonMapper mapper) {
+    public void addEntry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonMapper mapper) {
         String fieldName = topLevelField.getName();
         topLevelMappings.put(fieldName, new Entry(topLevelField, prefixMap, nodeQuery, mapper));
     }

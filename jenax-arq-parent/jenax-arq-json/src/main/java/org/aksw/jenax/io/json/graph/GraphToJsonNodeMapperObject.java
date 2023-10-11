@@ -1,4 +1,4 @@
-package org.aksw.jenax.io.json.mapper;
+package org.aksw.jenax.io.json.graph;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,26 +13,26 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class RdfToJsonNodeMapperObject
-    implements RdfToJsonNodeMapper
+public class GraphToJsonNodeMapperObject
+    implements GraphToJsonNodeMapper
 {
-    protected Map<String, RdfToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
+    protected Map<String, GraphToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
 
-    public Map<String, RdfToJsonPropertyMapper> getPropertyMappers() {
+    public Map<String, GraphToJsonPropertyMapper> getPropertyMappers() {
         return propertyMappers;
     }
 
     @Override
-    public RdfToJsonNodeMapperType getType() {
-        return RdfToJsonNodeMapperType.OBJECT;
+    public GraphToJsonNodeMapperType getType() {
+        return GraphToJsonNodeMapperType.OBJECT;
     }
 
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         JsonObject result = new JsonObject();
-        for (Entry<String, RdfToJsonPropertyMapper> e : getPropertyMappers().entrySet()) {
+        for (Entry<String, GraphToJsonPropertyMapper> e : getPropertyMappers().entrySet()) {
             String name = e.getKey();
-            RdfToJsonPropertyMapper mapper = e.getValue();
+            GraphToJsonPropertyMapper mapper = e.getValue();
 
             PathJson subPath = path.resolve(Step.of(name));
             JsonElement contrib = mapper.map(subPath, errors, graph, node);

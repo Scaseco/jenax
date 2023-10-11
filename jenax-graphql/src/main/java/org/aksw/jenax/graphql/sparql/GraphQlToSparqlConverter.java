@@ -21,10 +21,10 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
-import org.aksw.jenax.io.json.mapper.RdfToJsonNodeMapper;
-import org.aksw.jenax.io.json.mapper.RdfToJsonNodeMapperLiteral;
-import org.aksw.jenax.io.json.mapper.RdfToJsonNodeMapperObject;
-import org.aksw.jenax.io.json.mapper.RdfToJsonPropertyMapper;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperLiteral;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObject;
+import org.aksw.jenax.io.json.graph.GraphToJsonPropertyMapper;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
@@ -164,7 +164,7 @@ public class GraphQlToSparqlConverter {
             NodeQuery fieldQuery = nodeQuery;
 
             SelectionSet subSelection = field.getSelectionSet();
-            RdfToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
+            GraphToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
 
 
             // Handle arguments of the field, such as slice, filter and orderBy
@@ -203,17 +203,17 @@ public class GraphQlToSparqlConverter {
             contextStack.pop();
         }
 
-        public RdfToJsonNodeMapper convertInnerSelectionSet(SelectionSet selectionSet, NodeQuery nodeQuery) {
-            RdfToJsonNodeMapper result;
+        public GraphToJsonNodeMapper convertInnerSelectionSet(SelectionSet selectionSet, NodeQuery nodeQuery) {
+            GraphToJsonNodeMapper result;
             if (selectionSet == null) {
-                result = RdfToJsonNodeMapperLiteral.get();
+                result = GraphToJsonNodeMapperLiteral.get();
             } else {
-                RdfToJsonNodeMapperObject nodeMapperObject = new RdfToJsonNodeMapperObject();
+                GraphToJsonNodeMapperObject nodeMapperObject = new GraphToJsonNodeMapperObject();
                 for (Selection<?> selection : selectionSet.getSelections()) {
                     if (selection instanceof Field) {
                         Field field = (Field)selection;
                         String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
-                        RdfToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
+                        GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
                         if (propertyMapper != null) {
                             nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
                         }
@@ -224,7 +224,7 @@ public class GraphQlToSparqlConverter {
             return result;
         }
 
-        public RdfToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery) {
+        public GraphToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery) {
             // context = setupContext(new Context(context, field), field);
             Context context = contextStack.peek().newChildContext(field);
             setupContext(context);
@@ -232,7 +232,7 @@ public class GraphQlToSparqlConverter {
 
             // Relation filterRelation = tryParseSparqlQuery(context, field);
 
-            RdfToJsonPropertyMapper propertyMapper = null;
+            GraphToJsonPropertyMapper propertyMapper = null;
             Multimap<String, Value<?>> args = GraphQlUtils.indexArguments(field);
 
             String fieldName = field.getName();
@@ -266,7 +266,7 @@ public class GraphQlToSparqlConverter {
                     // Set up an accumulator for the facet path
                     FacetStep step = keyPath.getFileName().toSegment();
                     P_Path0 basicPath = PathUtils.createStep(step.getNode(), step.getDirection().isForward());
-                    propertyMapper = RdfToJsonPropertyMapper.of(basicPath);
+                    propertyMapper = GraphToJsonPropertyMapper.of(basicPath);
                     propertyMapper.setSingle(isSingle);
 
                     Collection<ShPropertyShape> propertyShapes;
@@ -299,7 +299,7 @@ public class GraphQlToSparqlConverter {
                 }
 
                 SelectionSet subSelection = field.getSelectionSet();
-                RdfToJsonNodeMapper childConverterContrib = convertInnerSelectionSet(subSelection, fieldQuery);
+                GraphToJsonNodeMapper childConverterContrib = convertInnerSelectionSet(subSelection, fieldQuery);
 
                 if (propertyMapper != null) { // can it be null here?
                     propertyMapper.setTargetNodeMapper(childConverterContrib);

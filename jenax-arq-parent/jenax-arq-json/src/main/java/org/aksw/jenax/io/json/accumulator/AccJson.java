@@ -1,0 +1,68 @@
+package org.aksw.jenax.io.json.accumulator;
+
+import org.aksw.commons.path.json.PathJson;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+
+import com.google.gson.JsonElement;
+
+
+/**
+ * Interface for accumulating a JSON object from a stream of triples (edges in a graph).
+ * The accumulator is like a state in a state automaton:
+ * An accumulator receives an individual edge in order to decide whether it can transition to a child state.
+ * If it can't then it returns null.
+ * {@link AccNodeDriver} drives the lookup. If a state (=accumulator) cannot handle the edge, it searches whether
+ * any of that state's ancestors accepts it.
+ * It is an error if no suitable accumulator is found for an edge - because that means that it is unclear
+ * which accumulator should match the subsequent edges.
+ */
+interface AccJson {
+
+    PathJson getPath();
+
+    /**
+     * Sets the parent of this accumulator.
+     *
+     * This method should never be called by application code.
+     * {@link IllegalStateException} if a parent has already been set.
+     */
+    void setParent(AccJson parent);
+
+
+    AccJson getParent();
+
+    /**
+     * Start accumulation based on a given node in the underlying graph
+     *
+     * @throws IllegalStateException if there was a prior call to begin() without corresponding end()
+     */
+    void begin(Node node, AccContext cxt, boolean skipOutput) throws Exception;
+
+    /**
+     * Process an edge.
+     * Based on the given edge, this accumulator attempts to transition to another AccJson instance and return it.
+     * If there is no valid transition then this method returns null.
+     */
+    AccJson transition(Triple edge, AccContext cxt) throws Exception;
+
+    /**
+     * End the accumulator's current node
+     *
+     * @throws IllegalStateException if there was no prior call to begin()
+     */
+    void end(AccContext cxt) throws Exception;
+
+    /** True after begin() and before end()*/
+    boolean hasBegun();
+
+    /**
+     * If cxt.isMaterialize is enabled then this method returns the json
+     * data assembled for the current node.
+     * It is only valid to call this method after end().
+     *
+     * Deprecated: Use JsonTreeWriter to produce json elements
+     */
+    @Deprecated
+    JsonElement getValue();
+}

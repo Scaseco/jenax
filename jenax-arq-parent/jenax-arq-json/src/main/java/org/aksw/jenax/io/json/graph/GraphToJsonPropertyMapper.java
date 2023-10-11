@@ -1,4 +1,4 @@
-package org.aksw.jenax.io.json.mapper;
+package org.aksw.jenax.io.json.graph;
 
 import java.util.Iterator;
 
@@ -18,11 +18,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 
-public class RdfToJsonPropertyMapper
-    implements RdfToJsonMapper
+public class GraphToJsonPropertyMapper
+    implements GraphToJsonMapper
 {
     protected TripleFilter baseFilter;
-    protected RdfToJsonNodeMapper targetNodeMapper = RdfToJsonNodeMapperLiteral.get();
+    protected GraphToJsonNodeMapper targetNodeMapper = GraphToJsonNodeMapperLiteral.get();
 
     protected boolean isUniqueLang = false;
     protected int maxCount = -1;
@@ -36,34 +36,34 @@ public class RdfToJsonPropertyMapper
      */
     protected boolean isHidden = false;
 
-    public RdfToJsonPropertyMapper(TripleFilter baseFilter) {
+    public GraphToJsonPropertyMapper(TripleFilter baseFilter) {
         super();
         this.baseFilter = baseFilter;
     }
 
-    public static RdfToJsonPropertyMapper of(P_Path0 basicPath) {
+    public static GraphToJsonPropertyMapper of(P_Path0 basicPath) {
         return of(basicPath.getNode(), Direction.ofFwd(basicPath.isForward()));
     }
 
-    public static RdfToJsonPropertyMapper of(Node predicate, Direction direction) {
+    public static GraphToJsonPropertyMapper of(Node predicate, Direction direction) {
         TripleFilter baseFilter = TripleFilter.create(Vars.s, predicate, direction.isForward());
-        return new RdfToJsonPropertyMapper(baseFilter);
+        return new GraphToJsonPropertyMapper(baseFilter);
     }
 
     public TripleFilter getBaseFilter() {
         return baseFilter;
     }
 
-    public RdfToJsonPropertyMapper setBaseFilter(TripleFilter baseFilter) {
+    public GraphToJsonPropertyMapper setBaseFilter(TripleFilter baseFilter) {
         this.baseFilter = baseFilter;
         return this;
     }
 
-    public RdfToJsonNodeMapper getTargetNodeMapper() {
+    public GraphToJsonNodeMapper getTargetNodeMapper() {
         return targetNodeMapper;
     }
 
-    public RdfToJsonPropertyMapper setTargetNodeMapper(RdfToJsonNodeMapper targetNodeMapper) {
+    public GraphToJsonPropertyMapper setTargetNodeMapper(GraphToJsonNodeMapper targetNodeMapper) {
         this.targetNodeMapper = targetNodeMapper;
         return this;
     }
@@ -72,7 +72,7 @@ public class RdfToJsonPropertyMapper
         return isUniqueLang;
     }
 
-    public RdfToJsonPropertyMapper setUniqueLang(boolean isUniqueLang) {
+    public GraphToJsonPropertyMapper setUniqueLang(boolean isUniqueLang) {
         this.isUniqueLang = isUniqueLang;
         return this;
     }
@@ -81,7 +81,7 @@ public class RdfToJsonPropertyMapper
         return maxCount;
     }
 
-    public RdfToJsonPropertyMapper setMaxCount(int maxCount) {
+    public GraphToJsonPropertyMapper setMaxCount(int maxCount) {
         this.maxCount = maxCount;
         return this;
     }
