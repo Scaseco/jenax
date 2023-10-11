@@ -21,8 +21,8 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.collector.domain.Accumulator;
 import org.aksw.commons.collector.domain.Aggregator;
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jena_sparql_api.rx.AggObjectGraph;
 import org.aksw.jena_sparql_api.rx.AggObjectGraph.AccObjectGraph;
 import org.aksw.jena_sparql_api.rx.ExprTransformAllocAggregate;
@@ -965,7 +965,7 @@ public class EntityQueryRx {
             Function<? super ITEM, KEY> itemToKey,
             Aggregator<? super ITEM, ?, VALUE> aggregator) {
         return upstream -> upstream
-            .lift(FlowableOperatorSequentialGroupBy.<ITEM, KEY, Accumulator<? super ITEM, ?, VALUE>>create(SequentialGroupBySpec.create(
+            .lift(FlowableOperatorCollapseRuns.<ITEM, KEY, Accumulator<? super ITEM, ?, VALUE>>create(CollapseRunsSpec.create(
                     itemToKey,
                     groupKey -> aggregator.createAccumulator(),
                     Accumulator::accumulate)))

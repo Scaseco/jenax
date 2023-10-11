@@ -33,11 +33,16 @@ interface AccJson {
     AccJson getParent();
 
     /**
-     * Start accumulation based on a given node in the underlying graph
+     * Start accumulation based on a given node in the underlying graph.
+     * Calls cannot be nested.
      *
      * @throws IllegalStateException if there was a prior call to begin() without corresponding end()
+     *
+     * @param node The source node to which the next incoming edges will connect to
+     * @param context The context which holds the JSON serializers
+     * @param skipOutput When output should be disabled (used to skip over lists of items where just one was expected)
      */
-    void begin(Node node, AccContext cxt, boolean skipOutput) throws Exception;
+    void begin(Node node, AccContext context, boolean skipOutput) throws Exception;
 
     /**
      * Process an edge.

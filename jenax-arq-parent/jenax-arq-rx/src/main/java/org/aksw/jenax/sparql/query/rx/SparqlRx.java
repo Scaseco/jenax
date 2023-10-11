@@ -15,9 +15,9 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.rx.util.FlowableUtils;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
@@ -464,7 +464,7 @@ public class SparqlRx {
                 .doOnNext(i -> currentValue[0] = i)
                 .doOnCancel(() -> isCancelled[0] = true)
                 .map(i -> Maps.immutableEntry((int)(i / 3), i))
-                .lift(FlowableOperatorSequentialGroupBy.<Entry<Integer, Integer>, Integer, List<Integer>>create(SequentialGroupBySpec.create(
+                .lift(FlowableOperatorCollapseRuns.<Entry<Integer, Integer>, Integer, List<Integer>>create(CollapseRunsSpec.create(
                         Entry::getKey,
                         groupKey -> new ArrayList<>(),
                         (acc, e) -> acc.add(e.getValue()))));
@@ -716,7 +716,7 @@ public class SparqlRx {
             // For future reference: If we get an empty results by using the query object, we probably have wrapped a variable with NodeValue.makeNode.
             .execSelectRaw(() -> qeSupp.apply(clone))
             //.groupBy(createGrouper(primaryKeyVars, false)::apply)
-            .lift(FlowableOperatorSequentialGroupBy.<Binding, Binding, AccGraph2>create(SequentialGroupBySpec.create(
+            .lift(FlowableOperatorCollapseRuns.<Binding, Binding, AccGraph2>create(CollapseRunsSpec.create(
                     grouper::apply,
                     groupKey -> new AccGraph2(template),
                     AccGraph2::accumulate)))

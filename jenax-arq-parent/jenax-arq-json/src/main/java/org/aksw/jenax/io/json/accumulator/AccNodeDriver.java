@@ -5,8 +5,8 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.aksw.commons.collections.trees.TreeUtils;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
-import org.aksw.commons.util.stream.StreamOperatorSequentialGroupBy;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
+import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
@@ -106,7 +106,7 @@ class AccNodeDriver {
         // AccContext cxt = null; // enable materialize
 
         AccNodeDriver driver = this;
-        SequentialGroupBySpec<Quad, Node, AccNodeDriver> spec = SequentialGroupBySpec.create(
+        CollapseRunsSpec<Quad, Node, AccNodeDriver> spec = CollapseRunsSpec.create(
                 Quad::getGraph,
                 (accNum, collapseKey) -> {
 //                    try {
@@ -129,7 +129,7 @@ class AccNodeDriver {
                     }
                 });
 
-        Stream<Entry<Node, JsonElement>> result = StreamOperatorSequentialGroupBy.create(spec)
+        Stream<Entry<Node, JsonElement>> result = StreamOperatorCollapseRuns.create(spec)
             .transform(quadStream)
             .map(e -> {
                 AccNodeDriver tmp = e.getValue();

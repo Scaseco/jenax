@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -92,7 +92,7 @@ public class FlowOfRdfNodesInDatasetsOps {
      */
     public static FlowableTransformer<ResourceInDataset, NodesInDataset> groupedResourceInDataset() {
         return upstream -> upstream
-                .lift(FlowableOperatorSequentialGroupBy.create(SequentialGroupBySpec.<ResourceInDataset, Dataset, List<ResourceInDataset>>create(
+                .lift(FlowableOperatorCollapseRuns.create(CollapseRunsSpec.<ResourceInDataset, Dataset, List<ResourceInDataset>>create(
                         ResourceInDataset::getDataset,
                         (k1, k2) -> k1 == k2 || k1.asDatasetGraph() == k2.asDatasetGraph(),
                         key -> new ArrayList<>(),

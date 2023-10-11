@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -118,7 +118,7 @@ public class MapPaginatorSparqlQuery
 //      PublishProcessor<Node> boundaryIndicator = PublishProcessor.create();
 
       Flowable<Entry<Node, Table>> result = SparqlRx.execSelectRaw(qef, query)
-              .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(SequentialGroupBySpec.create(
+              .lift(FlowableOperatorCollapseRuns.<Binding, Node, Table>create(CollapseRunsSpec.create(
                       b -> b.get(attrVar),
                       groupKey -> new TableN(),
                       Table::addBinding)));

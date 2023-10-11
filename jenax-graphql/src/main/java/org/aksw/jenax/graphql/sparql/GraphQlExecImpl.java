@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.aksw.commons.path.json.PathJson;
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
@@ -80,8 +80,8 @@ public class GraphQlExecImpl
         query.setPrefixMapping(new PrefixMappingAdapter(prefixMap));
 
         Supplier<Stream<JsonElement>> streamFactory = () -> {
-            FlowableOperatorSequentialGroupBy<Quad, Node, Graph> grouper = FlowableOperatorSequentialGroupBy.create(
-                SequentialGroupBySpec.create(
+            FlowableOperatorCollapseRuns<Quad, Node, Graph> grouper = FlowableOperatorCollapseRuns.create(
+                CollapseRunsSpec.create(
                     Quad::getGraph,
                     graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
                     (graph, quad) -> graph.add(quad.asTriple())));
