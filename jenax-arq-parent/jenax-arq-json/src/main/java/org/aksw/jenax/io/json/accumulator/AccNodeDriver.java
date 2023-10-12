@@ -1,5 +1,6 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
@@ -13,7 +14,7 @@ import org.apache.jena.sparql.core.Quad;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 
-class AccNodeDriver {
+public class AccNodeDriver {
     protected AccJson currentState;
     protected Node currentSource;
 
@@ -27,7 +28,7 @@ class AccNodeDriver {
         return new AccNodeDriver(rootAcc);
     }
 
-    public void accumulate(Quad input, AccContext cxt) throws Exception {
+    public void accumulate(Quad input, AccContext cxt) throws IOException {
         Node source = input.getGraph();
         Triple triple = input.asTriple();
 
@@ -66,11 +67,11 @@ class AccNodeDriver {
         }
     }
 
-    public void begin(AccContext cxt) throws Exception {
+    public void begin(AccContext cxt) throws IOException {
 
     }
 
-    public void end(AccContext cxt) throws Exception {
+    public void end(AccContext cxt) throws IOException {
         endCurrentItem(cxt);
         this.currentSource = null;
     }
@@ -80,7 +81,7 @@ class AccNodeDriver {
     }
 
     /** Recursively calls end() on the current accumulator and all its ancestors */
-    protected void endCurrentItem(AccContext cxt) throws Exception {
+    protected void endCurrentItem(AccContext cxt) throws IOException {
         while (true) {
             currentState.end(cxt);
             AccJson parent = currentState.getParent();
@@ -98,24 +99,10 @@ class AccNodeDriver {
     public Stream<Entry<Node, JsonElement>> asStream(AccContext cxt, Stream<Quad> quadStream) {
         Preconditions.checkArgument(!quadStream.isParallel(), "Json aggregation requires sequential stream");
 
-        // AccContext cxt = null; // enable materialize
-
         AccNodeDriver driver = this;
         CollapseRunsSpec<Quad, Node, AccNodeDriver> spec = CollapseRunsSpec.create(
                 Quad::getGraph,
-                (accNum, collapseKey) -> {
-//                    try {
-//                        driver.begin(cxt);
-//                    } catch (Exception e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                	if (accNum != 0) { try {
-//                    // driver.end(cxt);
-//                } catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                } }
-                return driver;
-                },
+                (accNum, collapseKey) -> driver,
                 (acc, quad) -> {
                     try {
                         acc.accumulate(quad, cxt);
@@ -126,14 +113,14 @@ class AccNodeDriver {
 
         Stream<Entry<Node, JsonElement>> result = StreamOperatorCollapseRuns.create(spec)
             .transform(quadStream)
-            .map(e -> {
-                AccNodeDriver tmp = e.getValue();
+            .map(entry -> {
+                AccNodeDriver tmp = entry.getValue();
                 try {
                     tmp.end(cxt);
-                } catch (Exception e1) {
-                    throw new RuntimeException(e1);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-                return Map.entry(e.getKey(), tmp.getValue());
+                return Map.entry(entry.getKey(), tmp.getValue());
             });
 
         return result;

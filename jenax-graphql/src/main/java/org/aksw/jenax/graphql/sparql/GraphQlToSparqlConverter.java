@@ -264,9 +264,16 @@ public class GraphQlToSparqlConverter {
 
                 if (keyPath.getNameCount() == 1) { // xid resolves to a zero-segment path
                     // Set up an accumulator for the facet path
+
                     FacetStep step = keyPath.getFileName().toSegment();
                     P_Path0 basicPath = PathUtils.createStep(step.getNode(), step.getDirection().isForward());
-                    propertyMapper = GraphToJsonPropertyMapper.of(basicPath);
+                    boolean useRelationId = true;
+                    if (useRelationId) {
+                        Node node = NodeFactory.createLiteral(fieldQuery.relationQuery().getScopeBaseName());
+                        propertyMapper = GraphToJsonPropertyMapper.of(node, step.getDirection().isForward());
+                    } else {
+                        propertyMapper = GraphToJsonPropertyMapper.of(basicPath);
+                    }
                     propertyMapper.setSingle(isSingle);
 
                     Collection<ShPropertyShape> propertyShapes;

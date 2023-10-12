@@ -3,7 +3,7 @@ package org.aksw.jenax.io.json.accumulator;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 
-class AccContext {
+public class AccContext {
     protected Gson gson;
     protected JsonWriter jsonWriter;
 
@@ -15,6 +15,15 @@ class AccContext {
         this.jsonWriter = jsonWriter;
         this.materialize = materialize;
         this.serialize = serialize;
+    }
+
+    /** Create a context that only materializes */
+    public static AccContext materializing() {
+        return new AccContext(null,  null,  true, false);
+    }
+
+    public static AccContext serializing(Gson gson, JsonWriter jsonWriter) {
+        return new AccContext(gson,  jsonWriter,  false, true);
     }
 
     public void setErrorHandler(AccJsonErrorHandler errorHandler) {

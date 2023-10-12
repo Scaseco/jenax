@@ -1,5 +1,6 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void begin(Node source, AccContext context, boolean skipOutput) throws Exception {
+    public void begin(Node source, AccContext context, boolean skipOutput) throws IOException {
         super.begin(source, context, skipOutput);
 
         // Reset fields
@@ -65,7 +66,7 @@ public class AccJsonObject
     }
 
     @Override
-    public AccJson transition(Triple input, AccContext context) throws Exception {
+    public AccJson transition(Triple input, AccContext context) throws IOException {
         ensureBegun();
 
         Node inputFieldId = input.getPredicate();
@@ -112,7 +113,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void end(AccContext context) throws Exception {
+    public void end(AccContext context) throws IOException {
         ensureBegun();
 
         // Visit all remaining fields

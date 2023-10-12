@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Stream;
 
 import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
@@ -50,9 +48,9 @@ public class GraphQlResultWriterImpl
 
             // TODO Handle the case of non-array responses
             writer.beginArray();
-            try (Stream<JsonElement> stream = dataProvider.openStream()) {
-                stream.forEach(item -> gson.toJson(item, writer));
-            }
+
+            dataProvider.write(writer, gson);
+
             writer.endArray();
         }
 

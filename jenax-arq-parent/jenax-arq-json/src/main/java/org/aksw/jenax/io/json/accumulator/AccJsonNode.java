@@ -1,8 +1,6 @@
 package org.aksw.jenax.io.json.accumulator;
 
-interface AccJsonNode
+public interface AccJsonNode
     extends AccJson
 {
-
-    // AccJson transition(Triple edge);
 }

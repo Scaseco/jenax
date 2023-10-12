@@ -34,8 +34,9 @@ public class AggJsonProperty
     @Override
     public AccJsonEdge newAccumulator() {
         AccJsonNode valueAcc = targetAggregator.newAccumulator();
-        AccJsonEdge result = new AccJsonProperty(jsonKey, matchFieldId, isForward, valueAcc);
+        AccJsonProperty result = new AccJsonProperty(jsonKey, matchFieldId, isForward, valueAcc);
         valueAcc.setParent(result);
+        result.setSingle(isSingle);
         return result;
     }
 
@@ -56,6 +57,7 @@ public class AggJsonProperty
         return targetAggregator;
     }
 
+    @Override
     public AggJsonProperty setTargetAgg(AggJsonNode targetAggregator) {
         this.targetAggregator = targetAggregator;
         return this;

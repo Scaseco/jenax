@@ -1,11 +1,13 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
+
 import org.apache.jena.graph.Node;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 
-abstract class AccJsonBase
+public abstract class AccJsonBase
     implements AccJson
 {
     protected AccJson parent;
@@ -51,7 +53,7 @@ abstract class AccJsonBase
     }
 
     @Override
-    public void begin(Node sourceNode, AccContext cxt, boolean skipOutput) throws Exception {
+    public void begin(Node sourceNode, AccContext cxt, boolean skipOutput) throws IOException {
         if (hasBegun) {
             throw new IllegalStateException("begin() has already been called() with " + currentSourceNode);
         }
@@ -61,7 +63,7 @@ abstract class AccJsonBase
     }
 
     @Override
-    public void end(AccContext cxt) throws Exception {
+    public void end(AccContext cxt) throws IOException {
         this.oldSourceNode = currentSourceNode;
         this.currentSourceNode = null;
         this.hasBegun = false;

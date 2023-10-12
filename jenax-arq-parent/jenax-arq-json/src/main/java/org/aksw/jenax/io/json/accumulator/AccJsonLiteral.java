@@ -1,5 +1,7 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
+
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
@@ -9,7 +11,7 @@ import org.apache.jena.graph.Triple;
 
 import com.google.gson.JsonElement;
 
-class AccJsonLiteral
+public class AccJsonLiteral
     extends AccJsonBase
     implements AccJsonNode
 {
@@ -19,7 +21,7 @@ class AccJsonLiteral
     }
 
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws Exception {
+    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
 
         // Always materialize literals
@@ -38,10 +40,16 @@ class AccJsonLiteral
     }
 
     @Override
-    public void end(AccContext context) throws Exception {
+    public void end(AccContext context) throws IOException {
         ensureBegun();
-        if (!skipOutput && context.isMaterialize() && parent != null) {
-            parent.acceptContribution(value, context);
+        if (!skipOutput) {
+//            if (context.isSerialize() && value == null) {
+//                context.getJsonWriter().nullValue();
+//            }
+
+            if (context.isMaterialize() && parent != null) {
+                parent.acceptContribution(value, context);
+            }
         }
         super.end(context);
     }

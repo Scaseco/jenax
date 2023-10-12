@@ -47,6 +47,10 @@ public class GraphToJsonPropertyMapper
         return of(basicPath.getNode(), Direction.ofFwd(basicPath.isForward()));
     }
 
+    public static GraphToJsonPropertyMapper of(Node node, boolean isForward) {
+        return of(node, Direction.ofFwd(isForward));
+    }
+
     public static GraphToJsonPropertyMapper of(Node predicate, Direction direction) {
         TripleFilter baseFilter = TripleFilter.create(Vars.s, predicate, direction.isForward());
         return new GraphToJsonPropertyMapper(baseFilter);
@@ -190,6 +194,11 @@ public class GraphToJsonPropertyMapper
         boolean isForward = baseFilter.isForward();
 
         AggJsonProperty result = AggJsonProperty.of(jsonKey, p, isForward, targetAgg);
+        // FIXME Hacky - GraphToJsonProperty mapper needs an explicit flag whether it only matches a single value
+        // Right now there is a mismatch between the APIs of GraphToJsonProperty and AggJsonProperty
+        boolean isSingle = isUniqueLang || maxCount == 1;
+        result.setSingle(isSingle);
+
         return result;
     }
 }

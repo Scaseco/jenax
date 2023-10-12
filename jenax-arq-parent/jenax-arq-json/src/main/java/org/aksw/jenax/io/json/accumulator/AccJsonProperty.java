@@ -15,7 +15,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.stream.JsonWriter;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
-class AccJsonProperty
+public class AccJsonProperty
     extends AccJsonBase
     implements AccJsonEdge
 {
@@ -84,7 +84,7 @@ class AccJsonProperty
      * @throws IOException
      */
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws Exception {
+    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
         seenTargetCount = 0;
         skipOutputStartedHere = false;
@@ -108,7 +108,7 @@ class AccJsonProperty
 
     /** Accepts a triple if source and field id match that of the current state */
     @Override
-    public AccJson transition(Triple input, AccContext context) throws Exception {
+    public AccJson transition(Triple input, AccContext context) throws IOException {
         ensureBegun();
 
         // End the current target (array item) if there is one
@@ -146,7 +146,7 @@ class AccJsonProperty
     }
 
     @Override
-    public void end(AccContext context) throws Exception {
+    public void end(AccContext context) throws IOException {
         ensureBegun();
 
         if (!skipOutput) {
@@ -166,6 +166,8 @@ class AccJsonProperty
                 JsonWriter jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
                     jsonWriter.endArray();
+                } else if (seenTargetCount == 0) {
+                    jsonWriter.nullValue();
                 }
             }
         }

@@ -471,11 +471,11 @@ public class ElementGeneratorLateral {
             ElementBind bindS = new ElementBind(Vars.x, new ExprVar(s));
             bindSpoGroup.addElement(bindS);
 
-            // Bind the predicate to ?p
-            boolean useRelationId = false;
+            // false: Bind the predicate to ?y, true: bind the relationId to ?y
+            boolean useRelationId = true;
             Node y;
             if (useRelationId) {
-                y = NodeFactory.createURI(current.getScopeBaseName());
+                y = NodeFactory.createLiteral(current.getScopeBaseName());
             } else { // use the property
                 y = p;
             }

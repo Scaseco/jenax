@@ -1,5 +1,7 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
+
 import org.aksw.commons.path.json.PathJson;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -17,7 +19,7 @@ import com.google.gson.JsonElement;
  * It is an error if no suitable accumulator is found for an edge - because that means that it is unclear
  * which accumulator should match the subsequent edges.
  */
-interface AccJson {
+public interface AccJson {
 
     PathJson getPath();
 
@@ -42,21 +44,21 @@ interface AccJson {
      * @param context The context which holds the JSON serializers
      * @param skipOutput When output should be disabled (used to skip over lists of items where just one was expected)
      */
-    void begin(Node node, AccContext context, boolean skipOutput) throws Exception;
+    void begin(Node node, AccContext context, boolean skipOutput) throws IOException;
 
     /**
      * Process an edge.
      * Based on the given edge, this accumulator attempts to transition to another AccJson instance and return it.
      * If there is no valid transition then this method returns null.
      */
-    AccJson transition(Triple edge, AccContext cxt) throws Exception;
+    AccJson transition(Triple edge, AccContext cxt) throws IOException;
 
     /**
      * End the accumulator's current node
      *
      * @throws IllegalStateException if there was no prior call to begin()
      */
-    void end(AccContext cxt) throws Exception;
+    void end(AccContext cxt) throws IOException;
 
     /** True after begin() and before end()*/
     boolean hasBegun();

@@ -2,7 +2,7 @@ package org.aksw.jenax.io.json.accumulator;
 
 import org.apache.jena.graph.Node;
 
-interface AccJsonEdge
+public interface AccJsonEdge
     extends AccJson
 {
     Node getMatchFieldId();
