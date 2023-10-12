@@ -1,9 +1,11 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import org.apache.jena.graph.Node;
+
 interface AccJsonEdge
     extends AccJson
 {
-    String getMatchFieldId();
+    Node getMatchFieldId();
     String getJsonKey();
     boolean isForward();
 

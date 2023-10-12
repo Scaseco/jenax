@@ -9,18 +9,17 @@ import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.stream.JsonWriter;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
-class AccJsonEdgeImpl
+class AccJsonProperty
     extends AccJsonBase
     implements AccJsonEdge
 {
-    protected String matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
+    protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
     protected String jsonKey;
@@ -35,11 +34,12 @@ class AccJsonEdgeImpl
     /** If true then no array is created. Any item after the first raises an error event. */
     protected boolean isSingle;
 
-    public AccJsonEdgeImpl(String jsonKey, String matchFieldId, boolean isForward) {
+    public AccJsonProperty(String jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
         super();
         this.matchFieldId = matchFieldId;
         this.jsonKey = jsonKey;
         this.isForward = isForward;
+        this.targetAcc = targetAcc;
     }
 
     @Override
@@ -69,7 +69,7 @@ class AccJsonEdgeImpl
     }
 
     @Override
-    public String getMatchFieldId() {
+    public Node getMatchFieldId() {
         return matchFieldId;
     }
 
@@ -115,7 +115,7 @@ class AccJsonEdgeImpl
         // endCurrentTarget(context);
 
         AccJson result = null;
-        String inputFieldId = input.getPredicate().getURI();
+        Node inputFieldId = input.getPredicate(); //.getURI();
         if (matchFieldId.equals(inputFieldId)) {
             Node edgeInputSource = TripleUtils.getSource(input, isForward);
 
@@ -157,7 +157,7 @@ class AccJsonEdgeImpl
                 if (parent != null) {
                     // Turns null into JsonNull
                     JsonElement elt = value == null ? JsonNull.INSTANCE : value;
-                    AccJsonNodeObject acc = (AccJsonNodeObject)parent;
+                    AccJsonObject acc = (AccJsonObject)parent;
                     acc.value.getAsJsonObject().add(jsonKey, elt);
                 }
             }

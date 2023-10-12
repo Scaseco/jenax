@@ -9,7 +9,7 @@ import org.apache.jena.graph.Triple;
 
 import com.google.gson.JsonElement;
 
-class AccJsonNodeLiteral
+class AccJsonLiteral
     extends AccJsonBase
     implements AccJsonNode
 {

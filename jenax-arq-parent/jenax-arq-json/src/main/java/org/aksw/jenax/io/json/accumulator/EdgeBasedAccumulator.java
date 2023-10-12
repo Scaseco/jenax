@@ -1,7 +1,6 @@
 package org.aksw.jenax.io.json.accumulator;
 
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
@@ -12,14 +11,13 @@ import org.apache.jena.sparql.core.Quad;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.internal.bind.JsonTreeWriter;
 import com.google.gson.stream.JsonWriter;
 
 
 
 public class EdgeBasedAccumulator {
     public static void main(String[] args) throws Exception {
-        AccJsonNodeObject movieObject = new AccJsonNodeObject();
+        AggJsonObject movieObject = new AggJsonObject();
 
         /*
          * movie: {
@@ -30,26 +28,26 @@ public class EdgeBasedAccumulator {
          * }
          */
 
-        AccJsonEdge actorEdge = new AccJsonEdgeImpl("actor", "urn:actor", true);
-        movieObject.addEdge(actorEdge);
+        AggJsonEdge actorEdge = AggJsonProperty.of("actor", NodeFactory.createURI("urn:actor"), true);
+        movieObject.addPropertyAggregator(actorEdge);
 
-        AccJsonNodeObject actorObject = new AccJsonNodeObject();
-        actorEdge.setTargetAcc(actorObject);
+        AggJsonObject actorObject = new AggJsonObject();
+        actorEdge.setTargetAgg(actorObject);
 
-        AccJsonEdge actorLabelEdge = new AccJsonEdgeImpl("label", "urn:actorLabel", true);
+        AggJsonEdge actorLabelEdge = AggJsonProperty.of("label", NodeFactory.createURI("urn:actorLabel"), true);
         actorLabelEdge.setSingle(true);
-        AccJsonNodeLiteral actorLabelValue = new AccJsonNodeLiteral();
-        actorLabelEdge.setTargetAcc(actorLabelValue);
-        actorObject.addEdge(actorLabelEdge);
+        AggJsonLiteral actorLabelValue = new AggJsonLiteral();
+        actorLabelEdge.setTargetAgg(actorLabelValue);
+        actorObject.addPropertyAggregator(actorLabelEdge);
 
-        AccJsonEdge moveLabelEdge = new AccJsonEdgeImpl("label", "urn:movieLabel", true);
-        movieObject.addEdge(moveLabelEdge);
+        AggJsonEdge moveLabelEdge = AggJsonProperty.of("label", NodeFactory.createURI("urn:movieLabel"), true);
+        movieObject.addPropertyAggregator(moveLabelEdge);
 
-        AccJsonNodeLiteral movieLabelValue = new AccJsonNodeLiteral();
+        AggJsonLiteral movieLabelValue = new AggJsonLiteral();
 
         // JsonTreeWriter x = new JsonTreeWriter();
         // x.get();
-        moveLabelEdge.setTargetAcc(movieLabelValue);
+        moveLabelEdge.setTargetAgg(movieLabelValue);
 
         List<Quad> data = Arrays.asList(
             // movie0: label only for movie
@@ -92,7 +90,7 @@ public class EdgeBasedAccumulator {
         JsonArray materialized = new JsonArray();
         try {
             writer.beginArray();
-            AccNodeDriver driver = new AccNodeDriver(movieObject);
+            AccNodeDriver driver = AccNodeDriver.of(movieObject.newAccumulator());
             driver.asStream(accContext, data.stream()).map(Entry::getValue).forEach(materialized::add);
             writer.endArray();
         } finally {

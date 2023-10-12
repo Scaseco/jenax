@@ -14,17 +14,38 @@ import org.apache.jena.graph.Triple;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-class AccJsonNodeObject
+public class AccJsonObject
     extends AccJsonBase
     implements AccJsonNode
 {
-    protected Map<String, Integer> fieldIdToIndex = new HashMap<>();
+    protected Map<Node, Integer> fieldIdToIndex = new HashMap<>();
     protected AccJsonEdge[] edgeAccs = new AccJsonEdge[0];
 
     protected int currentFieldIndex = -1;
     protected AccJsonEdge currentFieldAcc = null;
 
-     @Override
+
+    /** Should not be used directly; use {@link AggJsonEdge} as the builder */
+    public AccJsonObject() {
+        this(new HashMap<>(), new AccJsonEdge[0]);
+    }
+
+    protected AccJsonObject(Map<Node, Integer> fieldIdToIndex, AccJsonEdge[] edgeAccs) {
+        super();
+        this.fieldIdToIndex = fieldIdToIndex;
+        this.edgeAccs = edgeAccs;
+    }
+
+    /** Create a new instance and set it as the parent on all the property accumulators */
+    public static AccJsonObject of(Map<Node, Integer> fieldIdToIndex, AccJsonEdge[] edgeAccs) {
+        AccJsonObject result = new AccJsonObject(fieldIdToIndex, edgeAccs);
+        for (AccJsonEdge acc : edgeAccs) {
+            acc.setParent(result);
+        }
+        return result;
+    }
+
+    @Override
     public void begin(Node source, AccContext context, boolean skipOutput) throws Exception {
         super.begin(source, context, skipOutput);
 
@@ -47,7 +68,7 @@ class AccJsonNodeObject
     public AccJson transition(Triple input, AccContext context) throws Exception {
         ensureBegun();
 
-        String inputFieldId = input.getPredicate().getURI();
+        Node inputFieldId = input.getPredicate();
 
         AccJson result = null;
         Integer inputFieldIndex = fieldIdToIndex.get(inputFieldId);
@@ -120,7 +141,7 @@ class AccJsonNodeObject
     public void addEdge(AccJsonEdge subAcc) {
         // TODO Lots of array copying!
         // We should add a builder for efficiet adds and derive the more efficient array version from it.
-        String fieldId = subAcc.getMatchFieldId();
+        Node fieldId = subAcc.getMatchFieldId();
         int fieldIndex = edgeAccs.length;
         fieldIdToIndex.put(fieldId, fieldIndex);
         edgeAccs = Arrays.copyOf(edgeAccs, fieldIndex + 1);
