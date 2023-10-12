@@ -7,6 +7,7 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.util.closeable.AutoCloseableBase;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
@@ -15,6 +16,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Substitute;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
@@ -36,9 +38,20 @@ public abstract class QueryExecBaseSelect
     private static final Logger logger = LoggerFactory.getLogger(QueryExecBaseSelect.class);
     protected Query query;
 
+    /**
+     * If true, then triples and quads are produced by raw substitution with the bindings.
+     * This means literals and variables (that are not substituted due) may appear in any component.
+     */
+    protected boolean rawTuples;
+
     public QueryExecBaseSelect(Query query) {
+        this(query, false);
+    }
+
+    public QueryExecBaseSelect(Query query, boolean rawTuples) {
         super();
         this.query = query;
+        this.rawTuples = rawTuples;
     }
 
     /**
@@ -113,7 +126,13 @@ public abstract class QueryExecBaseSelect
         Template template = query.getConstructTemplate();
         Query clone = adjust(query);
         RowSet rs = doSelect(clone);
-        Iterator<Quad> result = TemplateLib.calcQuads(template.getQuads(), rs);
+        Iterator<Quad> result;
+        if (rawTuples) {
+            result = Iter.flatMap(rs, b -> Iter.map(
+                template.getQuads().iterator(), q -> Substitute.substitute(q, b)));
+        } else {
+            result = TemplateLib.calcQuads(template.getQuads(), rs);
+        }
         return result;
     }
 
@@ -140,8 +159,13 @@ public abstract class QueryExecBaseSelect
         Template template = query.getConstructTemplate();
         Query clone = adjust(query);
         RowSet rs = doSelect(clone);
-        Iterator<Triple> result = TemplateLib.calcTriples(template.getTriples(), rs);
-
+        Iterator<Triple> result;
+        if (rawTuples) {
+            result = Iter.flatMap(rs, b -> Iter.map(
+                template.getTriples().iterator(), t -> Substitute.substitute(t, b)));
+        } else {
+            result = TemplateLib.calcTriples(template.getTriples(), rs);
+        }
         return result;
     }
 

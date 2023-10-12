@@ -32,7 +32,7 @@ public class AccJsonProperty
     protected long seenTargetCount = 0;
 
     /** If true then no array is created. Any item after the first raises an error event. */
-    protected boolean isSingle;
+    protected boolean isSingle = false;
 
     public AccJsonProperty(String jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
         super();
@@ -48,8 +48,8 @@ public class AccJsonProperty
     }
 
     @Override
-    public void setSingle(boolean isSingle) {
-        this.isSingle = isSingle;
+    public void setSingle(boolean value) {
+        this.isSingle = value;
     }
 
     @Override

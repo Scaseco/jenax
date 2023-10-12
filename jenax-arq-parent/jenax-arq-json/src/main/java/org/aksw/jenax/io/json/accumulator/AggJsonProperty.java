@@ -64,7 +64,7 @@ public class AggJsonProperty
     }
 
     @Override
-    public AggJsonEdge setSingle(boolean value) {
+    public AggJsonProperty setSingle(boolean value) {
         this.isSingle = value;
         return this;
     }

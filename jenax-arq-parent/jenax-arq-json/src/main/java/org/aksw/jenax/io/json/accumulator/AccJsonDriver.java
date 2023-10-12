@@ -14,20 +14,33 @@ import org.apache.jena.sparql.core.Quad;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 
-public class AccNodeDriver {
+/**
+ * This class implements the driver for accumulating (json) objects from a sequence of edges (triples).
+ * The AccJson objects can be seen as states in a state automaton, and this class drives
+ * transitioning between the states based on the input.
+ */
+public class AccJsonDriver {
     protected AccJson currentState;
     protected Node currentSource;
 
-    protected AccNodeDriver(AccJson rootAcc) {
+    protected AccJsonDriver(AccJson rootAcc) {
         super();
         Preconditions.checkArgument(rootAcc.getParent() == null, "Root accumulator must not have a parent");
         this.currentState = rootAcc;
     }
 
-    public static AccNodeDriver of(AccJson rootAcc) {
-        return new AccNodeDriver(rootAcc);
+    public static AccJsonDriver of(AccJson rootAcc) {
+        return new AccJsonDriver(rootAcc);
     }
 
+    /**
+     * We expect each root node to be announced with a dummy quad that does not carry any
+     * edge information (s, s, ANY, ANY)
+     *
+     * @param input
+     * @param cxt
+     * @throws IOException
+     */
     public void accumulate(Quad input, AccContext cxt) throws IOException {
         Node source = input.getGraph();
         Triple triple = input.asTriple();
@@ -42,27 +55,32 @@ public class AccNodeDriver {
             }
         }
 
+        boolean isNewSource = false;
         if (currentSource == null) {
             currentSource = source;
             // XXX Should we filter out the 'root quad' that announces the existence of a node?
             currentState.begin(currentSource, cxt, false);
+            isNewSource = true;
         }
         AccJson nextState;
 
-        // Find a state that accepts the transition
-        while (true) {
-            nextState = currentState.transition(triple, cxt);
-            if (nextState == null) {
-                currentState.end(cxt);
-                AccJson parentAcc = currentState.getParent();
-                if (parentAcc != null) {
-                    currentState = parentAcc;
+        // Effectively skip the first quad that introduces a new source
+        if (!isNewSource) {
+            // Find a state that accepts the transition
+            while (true) {
+                nextState = currentState.transition(triple, cxt);
+                if (nextState == null) {
+                    currentState.end(cxt);
+                    AccJson parentAcc = currentState.getParent();
+                    if (parentAcc != null) {
+                        currentState = parentAcc;
+                    } else {
+                        throw new RuntimeException("No acceptable transition for " + triple);
+                    }
                 } else {
-                    throw new RuntimeException("No acceptable transition for " + triple);
+                    currentState = nextState;
+                    break;
                 }
-            } else {
-                currentState = nextState;
-                break;
             }
         }
     }
@@ -83,7 +101,9 @@ public class AccNodeDriver {
     /** Recursively calls end() on the current accumulator and all its ancestors */
     protected void endCurrentItem(AccContext cxt) throws IOException {
         while (true) {
-            currentState.end(cxt);
+            // if (currentState.hasBegun()) {
+                currentState.end(cxt);
+            // }
             AccJson parent = currentState.getParent();
             if (parent != null) {
                 currentState = parent;
@@ -99,8 +119,8 @@ public class AccNodeDriver {
     public Stream<Entry<Node, JsonElement>> asStream(AccContext cxt, Stream<Quad> quadStream) {
         Preconditions.checkArgument(!quadStream.isParallel(), "Json aggregation requires sequential stream");
 
-        AccNodeDriver driver = this;
-        CollapseRunsSpec<Quad, Node, AccNodeDriver> spec = CollapseRunsSpec.create(
+        AccJsonDriver driver = this;
+        CollapseRunsSpec<Quad, Node, AccJsonDriver> spec = CollapseRunsSpec.create(
                 Quad::getGraph,
                 (accNum, collapseKey) -> driver,
                 (acc, quad) -> {
@@ -114,7 +134,7 @@ public class AccNodeDriver {
         Stream<Entry<Node, JsonElement>> result = StreamOperatorCollapseRuns.create(spec)
             .transform(quadStream)
             .map(entry -> {
-                AccNodeDriver tmp = entry.getValue();
+                AccJsonDriver tmp = entry.getValue();
                 try {
                     tmp.end(cxt);
                 } catch (Exception e) {

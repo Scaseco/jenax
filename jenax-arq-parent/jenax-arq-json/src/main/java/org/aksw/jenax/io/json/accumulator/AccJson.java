@@ -14,7 +14,7 @@ import com.google.gson.JsonElement;
  * The accumulator is like a state in a state automaton:
  * An accumulator receives an individual edge in order to decide whether it can transition to a child state.
  * If it can't then it returns null.
- * {@link AccNodeDriver} drives the lookup. If a state (=accumulator) cannot handle the edge, it searches whether
+ * {@link AccJsonDriver} drives the lookup. If a state (=accumulator) cannot handle the edge, it searches whether
  * any of that state's ancestors accepts it.
  * It is an error if no suitable accumulator is found for an edge - because that means that it is unclear
  * which accumulator should match the subsequent edges.

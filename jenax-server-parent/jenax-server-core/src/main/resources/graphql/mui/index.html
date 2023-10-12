@@ -22,7 +22,7 @@ h2 {
 
 textarea {
     width: 100%;
-    height: 200px;
+    height: 350px;
     padding: 10px;
     box-sizing: border-box;
     resize: vertical; /* Allow vertical resizing only */
@@ -33,6 +33,10 @@ button {
     padding: 10px 20px;
     cursor: pointer;
 }
+
+.button-container {
+  display: flex;
+}
 </style>
 </head>
 <body>
@@ -40,7 +44,11 @@ button {
     <h2>Minimal UI for GraphQL</h2>
 
     <textarea id="input" onchange="saveState()"></textarea>
-    <button onclick="sendRequest()">Send</button>
+
+    <div class="button-container">
+      <button onclick="sendRequest()">Send</button>
+      <button onclick="showCurl()">Curl</button>
+    </div>
 
     <textarea id="output" readonly="true"></textarea>
     <textarea id="debug" readonly="true"></textarea>
@@ -65,16 +73,31 @@ button {
     localStorage.setItem(saveKey, v);
   }
 
-  function sendRequest() {
-    const v = input.value;
+  function toBashString(str) {
+    return str.replace("'", "'\\''")
+  }
 
+  function showCurl() {
+    const payloadStr = buildRequest();
+    output.value = `curl -X POST '${toBashString(endpoint)}' -d '${toBashString(payloadStr)}'`;
+    debug.value = "";
+  }
+
+  function buildRequest() {
+    const v = input.value;
     const graphQlPayload = {
       query: v
     }
+    const r = JSON.stringify(graphQlPayload)
+    return r;
+  }
+
+  function sendRequest() {
+    const payloadStr = buildRequest();
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint);
-    xhr.send(JSON.stringify(graphQlPayload));
+    xhr.send(payloadStr);
     // xhr.responseType = "json";
     xhr.onload = () => {
       if (xhr.readyState == 4 && xhr.status == 200) {
@@ -89,7 +112,7 @@ button {
           for (const [key, value] of Object.entries(meta)) {
             const sparqlQuery = value?.sparqlQuery;
             if (sparqlQuery) {
-              debugStr += "Entry " + key + ":\n" + sparqlQuery + "\n\n";
+              debugStr += `Entry ${key}:\n${sparqlQuery}\n\n`;
             }
           }
         }

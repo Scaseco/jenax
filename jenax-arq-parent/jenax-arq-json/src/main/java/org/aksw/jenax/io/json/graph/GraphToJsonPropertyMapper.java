@@ -194,10 +194,13 @@ public class GraphToJsonPropertyMapper
         boolean isForward = baseFilter.isForward();
 
         AggJsonProperty result = AggJsonProperty.of(jsonKey, p, isForward, targetAgg);
-        // FIXME Hacky - GraphToJsonProperty mapper needs an explicit flag whether it only matches a single value
-        // Right now there is a mismatch between the APIs of GraphToJsonProperty and AggJsonProperty
-        boolean isSingle = isUniqueLang || maxCount == 1;
-        result.setSingle(isSingle);
+        // TODO uniqueLang and maxCount act as filters for the matcher
+        // they don't directly translate to the accumulator - so what to do with them?
+        // We could have the accumulator materialize the values and then pick the best one
+        // Or we assume that the input to the accumulator is already pre-filtered
+
+        // boolean isSingle = isUniqueLang || (maxCount >= 0 && maxCount <= 1);
+        result.setSingle(single);
 
         return result;
     }

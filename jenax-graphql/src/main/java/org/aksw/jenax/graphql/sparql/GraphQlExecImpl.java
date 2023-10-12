@@ -21,7 +21,7 @@ import org.aksw.jenax.graphql.api.GraphQlExec;
 import org.aksw.jenax.graphql.impl.common.GraphQlDataProviderBase;
 import org.aksw.jenax.io.json.accumulator.AccContext;
 import org.aksw.jenax.io.json.accumulator.AccJson;
-import org.aksw.jenax.io.json.accumulator.AccNodeDriver;
+import org.aksw.jenax.io.json.accumulator.AccJsonDriver;
 import org.aksw.jenax.io.json.accumulator.AggJson;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -109,7 +109,9 @@ public class GraphQlExecImpl
                         QueryExecutionAdapter.adapt(
                             QueryExecSelect.of(
                                 query, q ->
-                                QueryExecAdapter.adapt(dataSource.asQef().createQueryExecution(q)))))
+                                QueryExecAdapter.adapt(dataSource.asQef().createQueryExecution(q)),
+                                true // raw tuples
+                                )))
                     .blockingStream();
 
 
@@ -117,7 +119,7 @@ public class GraphQlExecImpl
                 @Override
                 public Stream<JsonElement> openStream() {
                     AccJson acc = agg.newAccumulator();
-                    AccNodeDriver driver = AccNodeDriver.of(acc);
+                    AccJsonDriver driver = AccJsonDriver.of(acc);
                     AccContext context = AccContext.materializing();
 
                     Stream<Quad> quadStream = quadStreamSupplier.get();
@@ -129,7 +131,7 @@ public class GraphQlExecImpl
                 @Override
                 public void write(JsonWriter writer, Gson gson) throws IOException {
                     AccJson acc = agg.newAccumulator();
-                    AccNodeDriver driver = AccNodeDriver.of(acc);
+                    AccJsonDriver driver = AccJsonDriver.of(acc);
                     AccContext context = AccContext.serializing(gson, writer);
 
                     quadStreamSupplier.get().forEach(quad -> {
