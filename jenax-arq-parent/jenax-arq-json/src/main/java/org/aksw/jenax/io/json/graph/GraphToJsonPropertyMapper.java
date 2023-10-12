@@ -8,6 +8,8 @@ import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.io.json.accumulator.AggJsonNode;
+import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -164,5 +166,30 @@ public class GraphToJsonPropertyMapper
     public String toString() {
         return "PropertyMapper [baseFilter=" + baseFilter + ", targetNodeMapper=" + targetNodeMapper + ", isUniqueLang="
                 + isUniqueLang + ", maxCount=" + maxCount + ", isHidden=" + isHidden + "]";
+    }
+
+    public AggJsonProperty toAggregator(String jsonKey) {
+        AggJsonNode targetAgg = targetNodeMapper.toAggregator();
+
+        // It should be fairly easy to extend AggJsonProperty such that the TripleFilter can be passed to it
+        // It just hasn't happened
+
+        if (baseFilter.getExprs() != null) {
+            throw new UnsupportedOperationException("Expressions are not yet supported.");
+        }
+
+        Triple t = baseFilter.getTriplePattern();
+        Node p = t.getPredicate();
+        if (!p.isConcrete()) {
+            throw new UnsupportedOperationException("Predicate must be concrete");
+        }
+        if (t.getSubject().isConcrete() || t.getObject().isConcrete()) {
+            throw new UnsupportedOperationException("Subject and/or object must nont be variables");
+        }
+
+        boolean isForward = baseFilter.isForward();
+
+        AggJsonProperty result = AggJsonProperty.of(jsonKey, p, isForward, targetAgg);
+        return result;
     }
 }

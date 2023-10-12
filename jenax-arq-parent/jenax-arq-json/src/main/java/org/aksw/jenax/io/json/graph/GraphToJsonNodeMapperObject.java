@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
+import org.aksw.jenax.io.json.accumulator.AggJsonNode;
+import org.aksw.jenax.io.json.accumulator.AggJsonObject;
+import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 
@@ -72,5 +75,15 @@ public class GraphToJsonNodeMapperObject
     @Override
     public String toString() {
         return "NodeMapperObject [propertyMappers=" + propertyMappers + "]";
+    }
+
+    @Override
+    public AggJsonNode toAggregator() {
+        AggJsonObject result = AggJsonObject.of();
+        propertyMappers.forEach((name, mapper) -> {
+            AggJsonProperty agg = mapper.toAggregator(name);
+            result.addPropertyAggregator(agg);
+        });
+        return result;
     }
 }

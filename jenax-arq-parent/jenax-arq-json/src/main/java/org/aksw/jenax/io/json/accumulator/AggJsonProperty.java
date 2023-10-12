@@ -23,11 +23,11 @@ public class AggJsonProperty
         this.targetAggregator = targetAggregator;
     }
 
-    public static AggJsonEdge of(String jsonKey, Node matchFieldId, boolean isForward) {
+    public static AggJsonProperty of(String jsonKey, Node matchFieldId, boolean isForward) {
         return of(jsonKey, matchFieldId, isForward, null);
     }
 
-    public static AggJsonEdge of(String jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    public static AggJsonProperty of(String jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         return new AggJsonProperty(jsonKey, matchFieldId, isForward, targetAggregator);
     }
 

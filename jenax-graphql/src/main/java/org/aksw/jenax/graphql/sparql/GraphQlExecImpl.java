@@ -17,7 +17,8 @@ import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.graphql.api.GraphQlDataProvider;
 import org.aksw.jenax.graphql.api.GraphQlExec;
 import org.aksw.jenax.graphql.impl.common.GraphQlDataProviderImpl;
-import org.aksw.jenax.io.json.graph.GraphToJsonMapper;
+import org.aksw.jenax.io.json.accumulator.AggJson;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -74,7 +75,11 @@ public class GraphQlExecImpl
         PrefixMap prefixMap = entry.getPrefixMap();
 
         NodeQuery nodeQuery = entry.getNodeQuery();
-        GraphToJsonMapper jsonMapper = entry.getMapper();
+        GraphToJsonNodeMapper jsonMapper = entry.getMapper();
+
+        AggJson agg = jsonMapper.toAggregator();
+
+
         RelationQuery rq = nodeQuery.relationQuery();
         Query query = ElementGeneratorLateral.toQuery(rq);
         query.setPrefixMapping(new PrefixMappingAdapter(prefixMap));

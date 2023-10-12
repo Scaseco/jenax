@@ -2,6 +2,8 @@ package org.aksw.jenax.io.json.graph;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
+import org.aksw.jenax.io.json.accumulator.AggJsonLiteral;
+import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 
@@ -35,5 +37,10 @@ public class GraphToJsonNodeMapperLiteral
     @Override
     public String toString() {
         return "NodeMapperLiteral []";
+    }
+
+    @Override
+    public AggJsonNode toAggregator() {
+        return new AggJsonLiteral();
     }
 }
