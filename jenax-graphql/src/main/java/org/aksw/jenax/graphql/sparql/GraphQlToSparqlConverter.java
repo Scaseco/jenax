@@ -41,6 +41,9 @@ import org.apache.jena.query.Query;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.optimize.TransformScopeRename;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Path0;
@@ -601,7 +604,6 @@ public class GraphQlToSparqlConverter {
                     }
 
                     // FIXME Only substitute in-scope variables - so apply scope rename first
-                    // TransformScopeRename.transform(null);
                     // Rename.reverseVarRename(null)
                     // Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
                     MappedRelation<Node> mr = MappedRelation.of(contrib, varMap);

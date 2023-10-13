@@ -108,9 +108,11 @@ public class AccJsonDriver {
     /** Recursively calls end() on the current accumulator and all its ancestors */
     protected void endCurrentItem(AccContext cxt) throws IOException {
         while (true) {
-            // if (currentState.hasBegun()) {
+            // If no item was seen then begin was not called on the currentState
+            // XXX Can we design the process in a way such that we don't have to check for hasBegun here?
+            if (currentState.hasBegun()) {
                 currentState.end(cxt);
-            // }
+            }
             AccJson parent = currentState.getParent();
             if (parent != null) {
                 currentState = parent;
@@ -119,7 +121,6 @@ public class AccJsonDriver {
             }
         }
     }
-
 
     // This method needs to go to the aggregator because it needs to create an accumulator specifically
     // for the stream

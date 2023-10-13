@@ -20,6 +20,7 @@ import org.aksw.facete.v3.api.TreeData;
 import org.aksw.facete.v4.impl.ElementGeneratorWorker;
 import org.aksw.facete.v4.impl.MappedElement;
 import org.aksw.facete.v4.impl.PropertyResolver;
+import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
@@ -51,12 +52,18 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.OpAsQuery;
+import org.apache.jena.sparql.algebra.optimize.TransformScopeRename;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.path.Path;
@@ -318,20 +325,9 @@ public class ElementGeneratorLateral {
         // Extract referenced paths from injected relations
         for (NodeQuery child : current.roots()) {
             for (MappedRelation<Node> mappedRelation :  child.getInjectRelations()) {
-                Map<Var, Node> mapping = mappedRelation.getMapping();
-                Map<Var, Var> resolvedMapping = new LinkedHashMap<>();
-                for (Entry<Var, Node> e : mapping.entrySet()) {
-                    Var k = e.getKey();
-                    ConstraintNode xcn = NodeCustom.extract(e.getValue(), ConstraintNode.class);
-                    if (xcn != null) {
-                        ScopedFacetPath pathContrib =  ConstraintNode.toScopedFacetPath(xcn);
-                        treeData.putItem(pathContrib, ScopedFacetPath::getParent);
-                        Var v = FacetPathMappingImpl.resolveVar(pathMapping, pathContrib).asVar();
-                        resolvedMapping.put(k, v);
-                    }
-                }
-                Relation resolvedRelation = mappedRelation.getDelegate()
-                        .applyNodeTransform(new NodeTransformSubst(resolvedMapping));
+                Relation resolvedRelation = resolveRelation(mappedRelation, pathMapping, treeData);
+//                Relation resolvedRelation = mappedRelation.getDelegate()
+//                        .applyNodeTransform(new NodeTransformSubst(resolvedMapping));
                 resolvedMappedRelations.add(resolvedRelation);
             }
         }
@@ -349,6 +345,12 @@ public class ElementGeneratorLateral {
 
             UnaryRelation filterRelation = child.getFilterRelation();
             if (filterRelation != null) {
+                Map<Var, Node> varMap = Map.of(filterRelation.getVar(), child.constraints().asJenaNode());
+                Relation resolvedRelation = resolveRelation(MappedRelation.of(filterRelation, varMap), pathMapping, treeData);
+                constraintElt = ElementUtils.mergeElements(constraintElt, resolvedRelation.getElement());
+
+                if (false) { // Old code - gets the variable name wrong
+
                 Var filterVar = filterRelation.getVar();
 
                 String relationName = current.getScopeBaseName();
@@ -366,6 +368,7 @@ public class ElementGeneratorLateral {
 //                        : null));
 
                 constraintElt = ElementUtils.mergeElements(constraintElt, finalRelation.getElement());
+                }
             }
         }
 
@@ -517,6 +520,37 @@ public class ElementGeneratorLateral {
         return result;
     }
 
+    /** Given a mappedRelation add the referenced paths to the treeData */
+    protected Relation resolveRelation(MappedRelation<Node> mappedRelation,
+            org.aksw.jenax.facete.treequery2.api.FacetPathMapping pathMapping,
+            TreeData<ScopedFacetPath> treeData) {
+        Map<Var, Node> mapping = mappedRelation.getMapping();
+        Map<Var, Var> resolvedMapping = new LinkedHashMap<>();
+        for (Entry<Var, Node> e : mapping.entrySet()) {
+            Var k = e.getKey();
+            ConstraintNode xcn = NodeCustom.extract(e.getValue(), ConstraintNode.class);
+            if (xcn != null) {
+                ScopedFacetPath pathContrib =  ConstraintNode.toScopedFacetPath(xcn);
+                treeData.putItem(pathContrib, ScopedFacetPath::getParent);
+                Var v = FacetPathMappingImpl.resolveVar(pathMapping, pathContrib).asVar();
+                resolvedMapping.put(k, v);
+            }
+        }
+        Relation rel = mappedRelation.getDelegate();
+        NodeTransform xform = new NodeTransformSubst(resolvedMapping);
+        List<Var> vars = rel.getVars();
+        boolean isQuery = rel.holdsQuery();
+        List<Var> newVars = NodeTransformLib.transformVars(xform, vars);
+        Op op = isQuery ? Algebra.compile(rel.extractQuery()) : Algebra.compile(rel.getElement());
+        op = TransformScopeRename.transform(op);
+        op = NodeTransformLib.transform(xform, op);
+        op = Rename.reverseVarRename(op, true);
+        Query q = OpAsQuery.asQuery(op);
+        Element elt = isQuery ? new ElementSubQuery(q) : q.getQueryPattern();
+
+        Relation resolvedRelation = new RelationImpl(elt, newVars);
+        return resolvedRelation;
+    }
 
     /**
      *
