@@ -31,6 +31,8 @@ public class TestGraphQlSparql {
         GraphQlExecFactory gef = GraphQlExecFactoryOverSparql.autoConfEager(dataSource);
         JsonObject actual = GraphQlExecUtils.materialize(gef, queryStr);
 
+        // System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
+
         Assert.assertEquals(expected, actual);
     }
 
