@@ -57,6 +57,13 @@ public class AccJsonDriver {
 
         boolean isNewSource = false;
         if (currentSource == null) {
+            // flush the writer whenever we encounter a new item
+            if (false) {
+                if (cxt.isSerialize()) {
+                    cxt.getJsonWriter().flush();
+                }
+            }
+
             currentSource = source;
             // XXX Should we filter out the 'root quad' that announces the existence of a node?
             currentState.begin(currentSource, cxt, false);

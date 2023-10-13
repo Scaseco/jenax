@@ -43,21 +43,25 @@ button {
   <div class="container">
     <h2>Minimal UI for GraphQL</h2>
 
-    <textarea id="input" onchange="saveState()"></textarea>
+    <textarea id="input" onchange="saveState()" spellcheck="false"></textarea>
 
     <div class="button-container">
-      <button onclick="sendRequest()">Send</button>
-      <button onclick="showCurl()">Curl</button>
+      <button id="sendBtn" onclick="sendRequest()">Send</button>
+      <button id="abortBtn" onclick="abortRequest()" disabled="true">Abort</button>
+      <button onclick="showCurl()" title="Create a curl request for copy&amp;paste">Curl</button>
     </div>
 
-    <textarea id="output" readonly="true"></textarea>
-    <textarea id="debug" readonly="true"></textarea>
+    <textarea id="output" readonly="true" placeholder="Response area. Click 'Send' or 'Curl' to see the response. Can be JSON data or an error message."></textarea>
+    <textarea id="debug" readonly="true" placeholder="Debug information area. Annotate a top-level field with @debug to show the generated SPARQL query."></textarea>
   </div>
 
   <script>
   const input = document.getElementById('input');
   const output = document.getElementById('output');
   const debug = document.getElementById('debug');
+
+  const sendBtn = document.getElementById('sendBtn');
+  const abortBtn = document.getElementById('abortBtn');
 
   const endpoint = document.location.href
   const saveKey = "savedRequest";
@@ -69,7 +73,6 @@ button {
 
   function saveState() {
     const v = input.value;
-    console.log("Saved state: " + v)
     localStorage.setItem(saveKey, v);
   }
 
@@ -92,36 +95,69 @@ button {
     return r;
   }
 
+  var pendingXhr = null;
+
+  function abortRequest() {
+    if (pendingXhr != null) {
+      pendingXhr.abort();
+    }
+  }
+
+  function setAbortDisabled(value) {
+    abortBtn.disabled = value;
+    sendBtn.disabled = !value;
+  }
+
   function sendRequest() {
+    // Abort any pending request
+    abortRequest();
+    setAbortDisabled(false);
+
     const payloadStr = buildRequest();
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", endpoint);
-    xhr.send(payloadStr);
-    // xhr.responseType = "json";
-    xhr.onload = () => {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        const data = xhr.response;
-        output.value = data;
+    xhr.onreadystatechange = () => {
+      // Only handle requests for the latest pending xhr
+      if (xhr == pendingXhr) {
+        // 0 = UNSENT (aborted), 4 = DONE
+        if (xhr.readyState == 0 || xhr.readyState == 4) {
+          setAbortDisabled(true);
 
-        const json = JSON.parse(data);
-        // Check for extensions.metadata keys
-        var debugStr = "";
-        const meta = json?.extensions?.metadata;
-        if (meta) {
-          for (const [key, value] of Object.entries(meta)) {
-            const sparqlQuery = value?.sparqlQuery;
-            if (sparqlQuery) {
-              debugStr += `Entry ${key}:\n${sparqlQuery}\n\n`;
+          if (xhr.status == 200) {
+            const data = xhr.response;
+            output.value = data;
+
+            const json = JSON.parse(data);
+            // Check for extensions.metadata keys
+            var debugStr = "";
+            const meta = json?.extensions?.metadata;
+            if (meta) {
+              for (const [key, value] of Object.entries(meta)) {
+                const sparqlQuery = value?.sparqlQuery;
+                if (sparqlQuery) {
+                  debugStr += `Entry ${key}:\n${sparqlQuery}\n\n`;
+                }
+              }
+            }
+            debug.value = debugStr
+          } else {
+            if (xhr.status == 0) {
+              // Retain the current output
+              // output.value = "Request aborted";
+            } else {
+              output.value = `Error: ${xhr.status}\n\n${xhr.responseText}`;
+              debug.value = "";
             }
           }
+          pendingXhr = null;
+        } else {
+          setAbortDisabled(false);
         }
-        debug.value = debugStr
-      } else {
-        output.value = `Error: ${xhr.status}\n\n${xhr.responseText}`;
-        debug.value = "";
       }
     }
+    xhr.open("POST", endpoint);
+    xhr.send(payloadStr);
+    pendingXhr = xhr;
   }
 </script>
 </body>

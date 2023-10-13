@@ -129,11 +129,11 @@ public class AccJsonProperty
                 // but we call begin() on the accumulators with serialization disabled
                 boolean isTooMany = isSingle && seenTargetCount > 1;
                 if (isTooMany) {
+                    this.skipOutputStartedHere = true;
                     AccJsonErrorHandler errorHandler = context.getErrorHandler();
                     if (errorHandler != null) {
                         PathJson path = getPath();
                         errorHandler.accept(new AccJsonErrorEvent(path, "Multiple values encountered for a field that was declared to have at most a single one."));
-                        this.skipOutputStartedHere = true;
                     }
                 }
 

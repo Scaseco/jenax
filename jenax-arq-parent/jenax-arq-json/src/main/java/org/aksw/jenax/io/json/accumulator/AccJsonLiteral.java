@@ -10,6 +10,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 
 public class AccJsonLiteral
     extends AccJsonBase
@@ -25,11 +26,8 @@ public class AccJsonLiteral
         super.begin(node, context, skipOutput);
 
         // Always materialize literals
+        // Only emit them when calling end()
         value = RdfJsonUtils.toJson(Graph.emptyGraph, node, 0, 1, false);
-
-        if (!skipOutput && context.isSerialize()) {
-            context.getGson().toJson(value, context.getJsonWriter());
-        }
     }
 
     @Override
@@ -43,12 +41,18 @@ public class AccJsonLiteral
     public void end(AccContext context) throws IOException {
         ensureBegun();
         if (!skipOutput) {
+            JsonElement effectiveValue = value == null ? JsonNull.INSTANCE : value;
+
+            if (context.isSerialize()) {
+                context.getGson().toJson(effectiveValue, context.getJsonWriter());
+            }
+
 //            if (context.isSerialize() && value == null) {
 //                context.getJsonWriter().nullValue();
 //            }
 
             if (context.isMaterialize() && parent != null) {
-                parent.acceptContribution(value, context);
+                parent.acceptContribution(effectiveValue, context);
             }
         }
         super.end(context);
