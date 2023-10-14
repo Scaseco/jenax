@@ -71,6 +71,8 @@ public class ConceptPathFinder {
         return result;
     }
 
+    /** Queries the datasource for all triples with predicate 'joinsWith'  */
+    @Deprecated
     public static Model createJoinSummary(QueryExecutionFactory qef) {
 
         QueryExecution qe = qef.createQueryExecution("Select ?x ?y { ?x <" + VocabPath.joinsWith.getURI() + "> ?y }");
@@ -82,6 +84,7 @@ public class ConceptPathFinder {
         return result;
     }
 
+    /** Create a join summary that excludes joins of list membership properties (rdf:_1, etc) */
     public static Model createDefaultJoinSummaryModel(QueryExecutionFactory qef) {
 
         ResultSet rs = getPropertyAdjacency(qef);
@@ -117,13 +120,13 @@ public class ConceptPathFinder {
         return joinSummaryModel;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, int nPaths, int maxHops) {
+    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops) {
         Model joinSummaryModel = createDefaultJoinSummaryModel(qef);
         List<SimplePath> result = findPaths(qef, sourceConcept, tmpTargetConcept, nPaths, maxHops, joinSummaryModel);
         return result;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, int nPaths, int maxHops, Model joinSummaryModel) {
+    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops, Model joinSummaryModel) {
 
         /*
         if(joinSummaryModel == null) {

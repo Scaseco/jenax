@@ -1,0 +1,573 @@
+@prefix fp7:  <http://fp7-pp.publicdata.eu/ontology/> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+<http://fp7-pp.publicdata.eu/resource/project/257943>
+        rdf:type                fp7:Project;
+        rdfs:label              "LOD2";
+        fp7:call                <http://fp7-pp.publicdata.eu/resource/call/FP7-ICT-2009-5>;
+        fp7:funding             <http://fp7-pp.publicdata.eu/resource/funding/257943-999978045> , <http://fp7-pp.publicdata.eu/resource/funding/257943-986022364> , <http://fp7-pp.publicdata.eu/resource/funding/257943-996499625> , <http://fp7-pp.publicdata.eu/resource/funding/257943-996068072> , <http://fp7-pp.publicdata.eu/resource/funding/257943-985784326> , <http://fp7-pp.publicdata.eu/resource/funding/257943-998733341> , <http://fp7-pp.publicdata.eu/resource/funding/257943-985840295> , <http://fp7-pp.publicdata.eu/resource/funding/257943-999653968> , <http://fp7-pp.publicdata.eu/resource/funding/257943-999940991> , <http://fp7-pp.publicdata.eu/resource/funding/257943-968656842> , <http://fp7-pp.publicdata.eu/resource/funding/257943-999854564> , <http://fp7-pp.publicdata.eu/resource/funding/257943-997863930> , <http://fp7-pp.publicdata.eu/resource/funding/257943-998372404> , <http://fp7-pp.publicdata.eu/resource/funding/257943-985890347> , <http://fp7-pp.publicdata.eu/resource/funding/257943-999994826>;
+        fp7:id                  "257943"^^xsd:int;
+        fp7:instrument          <http://fp7-pp.publicdata.eu/resource/instrument/CP>;
+        fp7:strategicObjective  <http://fp7-pp.publicdata.eu/resource/so/ICT-2009.4.3>;
+        fp7:year                <http://dbpedia.org/resource/year/2010> .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-999978045>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner NATIONAL UNIVERSITY OF IRELAND, GALWAY in project LOD2";
+        fp7:amount       "692704"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/999978045>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/999978045>
+        rdf:type               fp7:Partner;
+        rdfs:label             "NATIONAL UNIVERSITY OF IRELAND, GALWAY";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/999978045>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/IE013> .
+
+<http://fp7-pp.publicdata.eu/resource/address/999978045>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Ireland-GALWAY>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Ireland> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Ireland-GALWAY>
+        rdfs:label  "GALWAY";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node582043319> .
+
+<http://linkedgeodata.org/triplify/node582043319>
+        rdfs:label  "GALWAY";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "53.2744122"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "-9.0490632"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Ireland>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Ireland" .
+
+<http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>
+        rdfs:label  "HES/REC" .
+
+<http://nuts.geovocab.org/id/IE013>
+        rdfs:label  "IE013" .
+
+<http://fp7-pp.publicdata.eu/resource/role/Partner>
+        rdfs:label  "Partner" .
+
+fp7:Funding  rdfs:label  "Funding" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-986022364>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner SEMANTIC WEB COMPANY GMBH in project LOD2";
+        fp7:amount       "518526"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/986022364>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/986022364>
+        rdf:type               fp7:Partner;
+        rdfs:label             "SEMANTIC WEB COMPANY GMBH";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/986022364>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/AT130> .
+
+<http://fp7-pp.publicdata.eu/resource/address/986022364>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Austria-WIEN>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Austria> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Austria-WIEN>
+        rdfs:label  "WIEN";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node17328659> .
+
+<http://linkedgeodata.org/triplify/node17328659>
+        rdfs:label  "VIENNA" , "WIEN";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "48.2084672"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "16.3730907"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Austria>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Austria" .
+
+<http://fp7-pp.publicdata.eu/resource/oc/SME>
+        rdfs:label  "SME" .
+
+<http://nuts.geovocab.org/id/AT130>
+        rdfs:label  "AT130" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-996499625>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner EXALEAD in project LOD2";
+        fp7:amount       "470220"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/996499625>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/996499625>
+        rdf:type               fp7:Partner;
+        rdfs:label             "EXALEAD";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/996499625>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/FR101> .
+
+<http://fp7-pp.publicdata.eu/resource/address/996499625>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/France-PARIS>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/France> .
+
+<http://fp7-pp.publicdata.eu/resource/city/France-PARIS>
+        rdfs:label  "PARIS";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node17807753> .
+
+<http://linkedgeodata.org/triplify/node17807753>
+        rdfs:label  "PARIS";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "48.8565056"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "2.3521334"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/France>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "France" .
+
+<http://nuts.geovocab.org/id/FR101>
+        rdfs:label  "FR101" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-996068072>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner ZEMANTA PAMETNE SPLETNE STORITVE INSVETOVANJE DOO in project LOD2";
+        fp7:amount       "147980"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/996068072>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/996068072>
+        rdf:type               fp7:Partner;
+        rdfs:label             "ZEMANTA PAMETNE SPLETNE STORITVE INSVETOVANJE DOO";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/996068072>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/SI021> .
+
+<http://fp7-pp.publicdata.eu/resource/address/996068072>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Slovenia-LJUBLJANA>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Slovenia> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Slovenia-LJUBLJANA>
+        rdfs:label  "LJUBLJANA";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node6968827> .
+
+<http://linkedgeodata.org/triplify/node6968827>
+        rdfs:label  "LJUBLJANA";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "46.049865"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "14.5068921"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Slovenia>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Slovenia" .
+
+<http://nuts.geovocab.org/id/SI021>
+        rdfs:label  "SI021" .
+
+<http://fp7-pp.publicdata.eu/resource/instrument/CP>
+        rdfs:label  "CP" .
+
+<http://dbpedia.org/resource/year/2010>
+        rdfs:label  "2010" .
+
+<http://fp7-pp.publicdata.eu/resource/call/FP7-ICT-2009-5>
+        rdf:type    fp7:Call;
+        rdfs:label  "FP7-ICT-2009-5" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-985784326>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner OPEN KNOWLEDGE FOUNDATION LIMITED LBG in project LOD2";
+        fp7:amount       "362304"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/985784326>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/985784326>
+        rdf:type               fp7:Partner;
+        rdfs:label             "OPEN KNOWLEDGE FOUNDATION LIMITED LBG";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/985784326>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/UKH12> .
+
+<http://fp7-pp.publicdata.eu/resource/address/985784326>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/United+Kingdom-CAMBRIDGE>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/United+Kingdom> .
+
+<http://fp7-pp.publicdata.eu/resource/city/United+Kingdom-CAMBRIDGE>
+        rdfs:label  "CAMBRIDGE";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node20971094> .
+
+<http://linkedgeodata.org/triplify/node20971094>
+        rdfs:label  "CAMBRIDGE";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "52.2033051"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "0.124862"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/United+Kingdom>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "United Kingdom" .
+
+<http://nuts.geovocab.org/id/UKH12>
+        rdfs:label  "UKH12" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-998733341>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner VYSOKA SKOLA EKONOMICKA V PRAZE in project LOD2";
+        fp7:amount       "240546"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/998733341>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/998733341>
+        rdf:type               fp7:Partner;
+        rdfs:label             "VYSOKA SKOLA EKONOMICKA V PRAZE";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/998733341>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/CZ010> .
+
+<http://fp7-pp.publicdata.eu/resource/address/998733341>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Czech+Republic-PRAHA+3>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Czech+Republic> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Czech+Republic-PRAHA+3>
+        rdfs:label  "PRAHA 3" .
+
+<http://fp7-pp.publicdata.eu/resource/country/Czech+Republic>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Czech Republic" .
+
+<http://nuts.geovocab.org/id/CZ010>
+        rdfs:label  "CZ010" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-985840295>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner WOLTERS KLUWER DEUTSCHLAND GMBH in project LOD2";
+        fp7:amount       "371815"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/985840295>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/985840295>
+        rdf:type               fp7:Partner;
+        rdfs:label             "WOLTERS KLUWER DEUTSCHLAND GMBH";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/985840295>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/LARGE>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/DEA23> .
+
+<http://fp7-pp.publicdata.eu/resource/address/985840295>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Germany-KOLN>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Germany> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Germany-KOLN>
+        rdfs:label  "KOLN";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node20953083> .
+
+<http://linkedgeodata.org/triplify/node20953083>
+        rdfs:label  "COLOGNE" , "KOELN" , "KOLN" , "KÖLN";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "50.9412323"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "6.9569467"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Germany>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Germany" .
+
+<http://fp7-pp.publicdata.eu/resource/oc/LARGE>
+        rdfs:label  "LARGE" .
+
+<http://nuts.geovocab.org/id/DEA23>
+        rdfs:label  "DEA23" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-999653968>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner STICHTING CENTRUM VOOR WISKUNDE EN INFORMATICA in project LOD2";
+        fp7:amount       "505275"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/999653968>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/999653968>
+        rdf:type               fp7:Partner;
+        rdfs:label             "STICHTING CENTRUM VOOR WISKUNDE EN INFORMATICA";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/999653968>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/NL326> .
+
+<http://fp7-pp.publicdata.eu/resource/address/999653968>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Netherlands%2C+the-AMSTERDAM>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Netherlands%2C+the> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Netherlands%2C+the-AMSTERDAM>
+        rdfs:label  "AMSTERDAM";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node46363754> .
+
+<http://linkedgeodata.org/triplify/node46363754>
+        rdfs:label  "AMSTERDAM";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "52.3668696"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "4.8885011"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Netherlands%2C+the>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Netherlands, the" .
+
+<http://nuts.geovocab.org/id/NL326>
+        rdfs:label  "NL326" .
+
+<http://fp7-pp.publicdata.eu/resource/so/ICT-2009.4.3>
+        rdfs:label         "ICT-2009.4.3";
+        fp7:soAggregated   <http://fp7-pp.publicdata.eu/resource/so-a/12+Intelligent+Information+Management>;
+        fp7:soDescription  <http://fp7-pp.publicdata.eu/resource/so-d/Intelligent+information+management> .
+
+<http://fp7-pp.publicdata.eu/resource/so-a/12+Intelligent+Information+Management>
+        rdfs:label  "12 Intelligent Information Management" .
+
+<http://fp7-pp.publicdata.eu/resource/so-d/Intelligent+information+management>
+        rdfs:label  "Intelligent information management" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-999940991>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner INSTITUT MIHAJLO PUPIN in project LOD2";
+        fp7:amount       "193500"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/999940991>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/999940991>
+        rdf:type               fp7:Partner;
+        rdfs:label             "INSTITUT MIHAJLO PUPIN";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/999940991>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/RS> .
+
+<http://fp7-pp.publicdata.eu/resource/address/999940991>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Serbia-BEOGRAD>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Serbia> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Serbia-BEOGRAD>
+        rdfs:label  "BEOGRAD";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node60571493> .
+
+<http://linkedgeodata.org/triplify/node60571493>
+        rdfs:label  "BELGRADE" , "BEOGRAD";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "44.8178836"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "20.456805"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Serbia>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/ACC>;
+        rdfs:label  "Serbia" .
+
+<http://nuts.geovocab.org/id/RS>
+        rdfs:label  "RS" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-968656842>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner INSTYTUT INFORMATYKI GOSPODARCZEJ SP ZOO in project LOD2";
+        fp7:amount       "166580"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/968656842>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/968656842>
+        rdf:type               fp7:Partner;
+        rdfs:label             "INSTYTUT INFORMATYKI GOSPODARCZEJ SP ZOO";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/968656842>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/PL415> .
+
+<http://fp7-pp.publicdata.eu/resource/address/968656842>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Poland-POZNAN>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Poland> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Poland-POZNAN>
+        rdfs:label  "POZNAN";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node362654889> .
+
+<http://linkedgeodata.org/triplify/node362654889>
+        rdfs:label  "POZNAN";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "51.6768198"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "22.3045472"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Poland>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Poland" .
+
+<http://nuts.geovocab.org/id/PL415>
+        rdfs:label  "PL415" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-999854564>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner UNIVERSITAET LEIPZIG in project LOD2";
+        fp7:amount       "1333901"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/999854564>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Coordinator> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/999854564>
+        rdf:type               fp7:Partner;
+        rdfs:label             "UNIVERSITAET LEIPZIG";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/999854564>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/DED31> .
+
+<http://fp7-pp.publicdata.eu/resource/address/999854564>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Germany-LEIPZIG>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Germany> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Germany-LEIPZIG>
+        rdfs:label  "LEIPZIG";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node1681920624> .
+
+<http://linkedgeodata.org/triplify/node1681920624>
+        rdfs:label  "LEIPZIG";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "51.340462"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "12.3747049"^^xsd:float .
+
+<http://nuts.geovocab.org/id/DED31>
+        rdfs:label  "DED31" .
+
+<http://fp7-pp.publicdata.eu/resource/role/Coordinator>
+        rdfs:label  "Coordinator" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-997863930>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner Korea Advanced Institute of Science and Technology in project LOD2";
+        fp7:amount       "0"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/997863930>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/997863930>
+        rdf:type               fp7:Partner;
+        rdfs:label             "Korea Advanced Institute of Science and Technology";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/997863930>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/LARGE>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/KR> .
+
+<http://fp7-pp.publicdata.eu/resource/address/997863930>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/South+Korea-DAEJEON>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/South+Korea> .
+
+<http://fp7-pp.publicdata.eu/resource/city/South+Korea-DAEJEON>
+        rdfs:label  "DAEJEON";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node257363455> .
+
+<http://linkedgeodata.org/triplify/node257363455>
+        rdfs:label  "DAEJEON";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "36.3436711"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "127.4050533"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/South+Korea>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/OTHER>;
+        rdfs:label  "South Korea" .
+
+<http://nuts.geovocab.org/id/KR>
+        rdfs:label  "KR" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-998372404>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner OPENLINK GROUP LIMITED in project LOD2";
+        fp7:amount       "870380"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/998372404>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/998372404>
+        rdf:type               fp7:Partner;
+        rdfs:label             "OPENLINK GROUP LIMITED";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/998372404>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/UKI22> .
+
+<http://fp7-pp.publicdata.eu/resource/address/998372404>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/United+Kingdom-CROYDON>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/United+Kingdom> .
+
+<http://fp7-pp.publicdata.eu/resource/city/United+Kingdom-CROYDON>
+        rdfs:label  "CROYDON";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node21262496> .
+
+<http://linkedgeodata.org/triplify/node21262496>
+        rdfs:label  "CROYDON";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "51.3713049"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "-0.101957"^^xsd:float .
+
+<http://nuts.geovocab.org/id/UKI22>
+        rdfs:label  "UKI22" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-985890347>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner TENFORCE BVBA* in project LOD2";
+        fp7:amount       "706280"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/985890347>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/985890347>
+        rdf:type               fp7:Partner;
+        rdfs:label             "TENFORCE BVBA*";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/985890347>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/SME>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/BE241> .
+
+<http://fp7-pp.publicdata.eu/resource/address/985890347>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Belgium-KAMPENHOUT>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Belgium> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Belgium-KAMPENHOUT>
+        rdfs:label  "KAMPENHOUT";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node320357115> .
+
+<http://linkedgeodata.org/triplify/node320357115>
+        rdfs:label  "KAMPENHOUT";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "50.9413315"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "4.5495668"^^xsd:float .
+
+<http://fp7-pp.publicdata.eu/resource/country/Belgium>
+        rdf:type    <http://fp7-pp.publicdata.eu/resource/ct/MS>;
+        rdfs:label  "Belgium" .
+
+<http://nuts.geovocab.org/id/BE241>
+        rdfs:label  "BE241" .
+
+<http://fp7-pp.publicdata.eu/resource/funding/257943-999994826>
+        rdf:type         fp7:Funding;
+        rdfs:label       "Funding of partner FREIE UNIVERSITAET BERLIN in project LOD2";
+        fp7:amount       "669988"^^xsd:decimal;
+        fp7:partner      <http://fp7-pp.publicdata.eu/resource/partner/999994826>;
+        fp7:partnerRole  <http://fp7-pp.publicdata.eu/resource/role/Partner> .
+
+<http://fp7-pp.publicdata.eu/resource/partner/999994826>
+        rdf:type               fp7:Partner;
+        rdfs:label             "FREIE UNIVERSITAET BERLIN";
+        fp7:address            <http://fp7-pp.publicdata.eu/resource/address/999994826>;
+        fp7:organisationClass  <http://fp7-pp.publicdata.eu/resource/oc/HES%2FREC>;
+        <pf7-o:nutsRegion>     <http://nuts.geovocab.org/id/DE300> .
+
+<http://fp7-pp.publicdata.eu/resource/address/999994826>
+        fp7:city     <http://fp7-pp.publicdata.eu/resource/city/Germany-BERLIN>;
+        fp7:country  <http://fp7-pp.publicdata.eu/resource/country/Germany> .
+
+<http://fp7-pp.publicdata.eu/resource/city/Germany-BERLIN>
+        rdfs:label  "BERLIN";
+        owl:sameAs  <http://linkedgeodata.org/triplify/node473867813> .
+
+<http://linkedgeodata.org/triplify/node473867813>
+        rdfs:label  "BERLIN";
+        <http://www.w3.org/2003/01/geo/wgs84_pos#lat>
+                "52.5015955"^^xsd:float;
+        <http://www.w3.org/2003/01/geo/wgs84_pos#long>
+                "13.4023271"^^xsd:float .
+
+<http://nuts.geovocab.org/id/DE300>
+        rdfs:label  "DE300" .

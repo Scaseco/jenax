@@ -108,7 +108,7 @@ public class LabelUtils {
      *  </pre>
      */
     // We could also expose internal info using a Fragment4 of the form (?entity, ?bestLabel, ?bestLabelLang, ?bestLabelProperty).
-    public static Fragment2 createRelationPrefLabelsLateral(LiteralPreference config) {
+    public static Fragment2 createFragmentPrefLabelsLateral(LiteralPreference config) {
 
         Var propertyVar = Vars.y; // Var.alloc("property");
         Var propertyScoreVar = Var.alloc("propertyScore");
@@ -176,7 +176,7 @@ public class LabelUtils {
             Arrays.asList("en", "de", ""),
             Arrays.asList(RDFS.label.asNode(), RDFS.comment.asNode(), RDFS.seeAlso.asNode()),
             false);
-        Fragment fragment = createRelationPrefLabelsLateral(pref);
+        Fragment fragment = createFragmentPrefLabelsLateral(pref);
         System.out.println(fragment);
     }
 }

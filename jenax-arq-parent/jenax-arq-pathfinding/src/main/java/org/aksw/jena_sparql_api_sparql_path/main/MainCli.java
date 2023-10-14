@@ -62,7 +62,7 @@ public class MainCli {
 
         Concept tmpTargetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat", "s");
 
-        ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10, 10);
+        ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10l, 10l);
     }
 
     public static void main(String[] args) throws IOException, SQLException {
@@ -76,7 +76,7 @@ public class MainCli {
 
         Concept tmpTargetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat", "s");
 
-        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10, 10);
+        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10l, 10l);
         System.out.println(paths);
     }
 
