@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 /**
@@ -42,10 +42,10 @@ public interface FacetedQuery
 
     Collection<FacetConstraint> constraints();
 
-    FacetedQuery baseConcept(Supplier<? extends UnaryRelation> conceptSupplier);
-    FacetedQuery baseConcept(UnaryRelation concept);
+    FacetedQuery baseConcept(Supplier<? extends Fragment1> conceptSupplier);
+    FacetedQuery baseConcept(Fragment1 concept);
 
-    UnaryRelation baseConcept();
+    Fragment1 baseConcept();
 
     FacetedQuery dataSource(RdfDataSource rdfDataSource);
     RdfDataSource dataSource();

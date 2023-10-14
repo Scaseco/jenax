@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Collections;
 import java.util.Set;

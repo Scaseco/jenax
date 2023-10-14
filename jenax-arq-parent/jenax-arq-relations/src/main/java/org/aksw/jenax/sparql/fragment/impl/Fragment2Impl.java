@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParser;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParserImpl;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParser;
@@ -35,14 +35,14 @@ import org.apache.jena.sparql.syntax.PatternVars;
  * @author raven
  *
  */
-public class BinaryRelationImpl
-    implements BinaryRelation // TODO Actually we could just extend RelationImpl
+public class Fragment2Impl
+    implements Fragment2 // TODO Actually we could just extend RelationImpl
 {
     private Var sourceVar;
     private Var targetVar;
     private Element element;
 
-    public BinaryRelationImpl(Element element, Var sourceVar, Var targetVar) {
+    public Fragment2Impl(Element element, Var sourceVar, Var targetVar) {
         this.element = element;
         this.sourceVar = sourceVar;
         this.targetVar = targetVar;
@@ -64,32 +64,32 @@ public class BinaryRelationImpl
         return element;
     }
 
-    public static BinaryRelation create(String elementStr, String sourceVarName,
+    public static Fragment2 create(String elementStr, String sourceVarName,
             String targetVarName) {
         SparqlElementParser parser = SparqlElementParserImpl.create(Syntax.syntaxARQ, null);
-        BinaryRelation result = create(elementStr, sourceVarName, targetVarName, parser);
+        Fragment2 result = create(elementStr, sourceVarName, targetVarName, parser);
         return result;
     }
 
-    public static BinaryRelation create(String prologueStr, String elementStr, String sourceVarName,
+    public static Fragment2 create(String prologueStr, String elementStr, String sourceVarName,
             String targetVarName) {
         SparqlQueryParser queryParser = SparqlQueryParserImpl.create();
         SparqlPrologueParser prologueParser = new SparqlPrologueParserImpl(queryParser);
 
         Prologue prologue = prologueParser.apply(prologueStr);
 
-        BinaryRelation result = create(elementStr, sourceVarName, targetVarName, prologue);
+        Fragment2 result = create(elementStr, sourceVarName, targetVarName, prologue);
         return result;
     }
 
-    public static BinaryRelation create(String elementStr, String sourceVarName,
+    public static Fragment2 create(String elementStr, String sourceVarName,
             String targetVarName, Prologue prologue) {
         SparqlElementParser parser = SparqlElementParserImpl.create(Syntax.syntaxARQ, prologue);
-        BinaryRelation result = create(elementStr, sourceVarName, targetVarName, parser);
+        Fragment2 result = create(elementStr, sourceVarName, targetVarName, parser);
         return result;
     }
 
-    public static BinaryRelation create(String elementStr, String sourceVarName,
+    public static Fragment2 create(String elementStr, String sourceVarName,
             String targetVarName, Function<String, ? extends Element> elementParser) {
         Var sourceVar = Var.alloc(sourceVarName);
         Var targetVar = Var.alloc(targetVarName);
@@ -111,7 +111,7 @@ public class BinaryRelationImpl
             }
         }
 
-        BinaryRelation result = new BinaryRelationImpl(element, sourceVar, targetVar);
+        Fragment2 result = new Fragment2Impl(element, sourceVar, targetVar);
 
         return result;
     }
@@ -134,32 +134,32 @@ public class BinaryRelationImpl
 //        return result;
 //    }
 
-    public BinaryRelation applyNodeTransform(NodeTransform nodeTransform) {
+    public Fragment2 applyNodeTransform(NodeTransform nodeTransform) {
         Var s = VarUtils.applyNodeTransform(sourceVar, nodeTransform);
         Var t = VarUtils.applyNodeTransform(targetVar, nodeTransform);
         Element e = ElementUtils.applyNodeTransform(element, nodeTransform);
 
-        BinaryRelation result = new BinaryRelationImpl(e, s, t);
+        Fragment2 result = new Fragment2Impl(e, s, t);
         return result;
     }
 
-    public static BinaryRelation create(org.apache.jena.sparql.path.Path path) {
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElement(new TriplePath(Vars.s, path, Vars.o)), Vars.s, Vars.o);
+    public static Fragment2 create(org.apache.jena.sparql.path.Path path) {
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(new TriplePath(Vars.s, path, Vars.o)), Vars.s, Vars.o);
         return result;
     }
 
-    public static BinaryRelation create(Node p) {
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElement(new Triple(Vars.s, p, Vars.o)), Vars.s, Vars.o);
+    public static Fragment2 create(Node p) {
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(new Triple(Vars.s, p, Vars.o)), Vars.s, Vars.o);
         return result;
     }
 
-    public static BinaryRelation create(Resource p) {
-        BinaryRelation result = create(p.asNode());
+    public static Fragment2 create(Resource p) {
+        Fragment2 result = create(p.asNode());
         return result;
     }
 
-    public static BinaryRelation create(String p) {
-        BinaryRelation result = create(NodeFactory.createURI(p));
+    public static Fragment2 create(String p) {
+        Fragment2 result = create(NodeFactory.createURI(p));
         return result;
     }
 
@@ -171,8 +171,8 @@ public class BinaryRelationImpl
      * @param o
      * @return
      */
-    public static BinaryRelation createFwd(Var s, Node p, Var o) {
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElementTriple(s, p, o), s, o);
+    public static Fragment2 createFwd(Var s, Node p, Var o) {
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElementTriple(s, p, o), s, o);
         return result;
     }
 
@@ -184,8 +184,8 @@ public class BinaryRelationImpl
      * @param o
      * @return
      */
-    public static BinaryRelation createBwd(Var s, Node p, Var o) {
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElementTriple(s, p, o), o, s);
+    public static Fragment2 createBwd(Var s, Node p, Var o) {
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElementTriple(s, p, o), o, s);
         return result;
     }
 
@@ -196,8 +196,8 @@ public class BinaryRelationImpl
      * @param o
      * @return
      */
-    public static BinaryRelation create(Var s, Node p, Var o, boolean isFwd) {
-        BinaryRelation result = isFwd
+    public static Fragment2 create(Var s, Node p, Var o, boolean isFwd) {
+        Fragment2 result = isFwd
                 ? createFwd(s, p, o)
                 : createBwd(s, p, o);
 
@@ -224,7 +224,7 @@ public class BinaryRelationImpl
             return false;
         if (getClass() != obj.getClass())
             return false;
-        BinaryRelationImpl other = (BinaryRelationImpl) obj;
+        Fragment2Impl other = (Fragment2Impl) obj;
         if (element == null) {
             if (other.element != null)
                 return false;
@@ -253,11 +253,11 @@ public class BinaryRelationImpl
          */
     }
 
-    public static BinaryRelation empty() {
-        return new BinaryRelationImpl(new ElementGroup(), Vars.s, Vars.s);
+    public static Fragment2 empty() {
+        return new Fragment2Impl(new ElementGroup(), Vars.s, Vars.s);
     }
 
-    public static BinaryRelation empty(Var var) {
-        return new BinaryRelationImpl(new ElementGroup(), var, var);
+    public static Fragment2 empty(Var var) {
+        return new Fragment2Impl(new ElementGroup(), var, var);
     }
 }

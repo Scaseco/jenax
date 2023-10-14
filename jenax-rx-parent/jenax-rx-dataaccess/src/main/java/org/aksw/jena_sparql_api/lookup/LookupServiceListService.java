@@ -4,8 +4,8 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 
 import io.reactivex.rxjava3.core.Flowable;

@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.data_query.api;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;;
 
 public interface PathAccessorRdf<P>
     extends PathAccessorSimple<P>
 {
-    BinaryRelation getReachingRelation(P path);
+    Fragment2 getReachingRelation(P path);
 
     boolean isReverse(P path);
     String getPredicate(P path);

@@ -1,7 +1,7 @@
 package org.aksw.jenax.analytics.core;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.arq.aggregation.Agg;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 /**
  * A combination of a set of items with an aggregator.

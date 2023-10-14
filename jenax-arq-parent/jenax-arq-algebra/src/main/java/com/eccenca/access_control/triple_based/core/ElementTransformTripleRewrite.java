@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.PolaritySet;
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
@@ -16,9 +15,10 @@ import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.sparql.path.PathRewriter;
 import org.aksw.jenax.sparql.path.PathUtils;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.aksw.jenax.util.backport.syntaxtransform.ElementTransformer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -106,7 +106,7 @@ public class ElementTransformTripleRewrite
     }
 
     public Element applyTripleTransform(Triple t) {
-        TernaryRelation templateRelation = genericLayer.getRelation().toTernaryRelation();
+        Fragment3 templateRelation = genericLayer.getRelation().toFragment3();
 
         // Substitute all variables in the filter with the triple pattern counter
         int c = triplePatternCounter;
@@ -115,9 +115,9 @@ public class ElementTransformTripleRewrite
                     v -> v,
                     v -> prefixVar("i" + c + "_", v)));
 
-        TernaryRelation instanceRelation = templateRelation.applyNodeTransform(
+        Fragment3 instanceRelation = templateRelation.applyNodeTransform(
                 new NodeTransformSubst(instanceMap))
-                .toTernaryRelation();
+                .toFragment3();
 
         triplePatternCounter++;
 
@@ -151,7 +151,7 @@ public class ElementTransformTripleRewrite
      * @param varGen
      * @return
      */
-    public static Element applyTransform(Triple triple, TernaryRelation filter, PolaritySet<Binding> valueSet, Generator<Var> varGen) {
+    public static Element applyTransform(Triple triple, Fragment3 filter, PolaritySet<Binding> valueSet, Generator<Var> varGen) {
 
         // If the relation is a mere basic graph pattern, we can just substitute its variables with
         // the rdf terms / variables of the triple
@@ -187,7 +187,7 @@ public class ElementTransformTripleRewrite
         }
 
 
-        Element result = RelationUtils.renameNodes(
+        Element result = FragmentUtils.renameNodes(
                 filter,
                 Arrays.asList(newTripleVars));
 

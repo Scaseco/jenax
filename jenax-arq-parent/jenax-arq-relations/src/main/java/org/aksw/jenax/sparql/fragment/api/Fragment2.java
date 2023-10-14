@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.PathBlock;
@@ -21,8 +21,8 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 
 import com.google.common.collect.Sets;
 
-public interface BinaryRelation
-    extends GeneralizedBinaryRelation
+public interface Fragment2
+    extends GeneralizedFragment2
 {
     Var getSourceVar();
     Var getTargetVar();
@@ -50,8 +50,8 @@ public interface BinaryRelation
         return result;
     }
 
-    default BinaryRelation reverse() {
-        BinaryRelation result = new BinaryRelationImpl(getElement(), getTargetVar(), getSourceVar());
+    default Fragment2 reverse() {
+        Fragment2 result = new Fragment2Impl(getElement(), getTargetVar(), getSourceVar());
         return result;
     }
 
@@ -91,8 +91,8 @@ public interface BinaryRelation
         return result;
     }
 
-    default BinaryRelation applyNodeTransform(NodeTransform nodeTransform) {
-        BinaryRelation result = Relation.applyDefaultNodeTransform(this, nodeTransform).toBinaryRelation();
+    default Fragment2 applyNodeTransform(NodeTransform nodeTransform) {
+        Fragment2 result = Fragment.applyDefaultNodeTransform(this, nodeTransform).toFragment2();
         return result;
     }
 

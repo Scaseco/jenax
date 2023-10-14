@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.mapper.model;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.concepts.PropertyRelation;
 import org.aksw.jena_sparql_api.mapper.impl.type.RdfClass;
+import org.aksw.jenax.sparql.fragment.impl.PropertyRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;

@@ -16,9 +16,9 @@ import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
@@ -123,7 +123,7 @@ public class FacetNodeImpl
     }
 
     @Override
-    public BinaryRelation getReachingRelation() {
+    public Fragment2 getReachingRelation() {
         throw new UnsupportedOperationException();
     }
 
@@ -155,12 +155,12 @@ public class FacetNodeImpl
         VarScope varScope = VarScope.of(scopeName, baseVar);
         ScopedFacetPath sfp = ScopedFacetPath.of(varScope, node.getFacetPath());
 
-        Relation baseRelation = facetedQuery.relationQuery().baseRelation.get();
+        Fragment baseRelation = facetedQuery.relationQuery().baseRelation.get();
 
 
 //        Var baseVar = baseConcept.getVar();
 
-        UnaryRelation relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
+        Fragment1 relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
 
         // Var baseVar = facetedQuery.baseConcept().getVar();
         // Var resolvedVar =  FacetPathMappingImpl.resolveVar(pathMapping, sfp).asVar();

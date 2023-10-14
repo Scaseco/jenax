@@ -20,7 +20,6 @@ import org.aksw.facete.v3.api.TreeData;
 import org.aksw.facete.v4.impl.ElementGeneratorWorker;
 import org.aksw.facete.v4.impl.MappedElement;
 import org.aksw.facete.v4.impl.PropertyResolver;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
@@ -40,10 +39,11 @@ import org.aksw.jenax.model.shacl.domain.ShNodeShape;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.MappedFragment;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.aksw.jenax.sparql.path.PathUtils;
-import org.aksw.jenax.sparql.relation.api.MappedRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.DatasetFactory;
@@ -283,7 +283,7 @@ public class ElementGeneratorLateral {
             // Node p = step.getNode();
             // Create the element for this node
 
-        Relation relation = current.getRelation();
+        Fragment relation = current.getRelation();
         nodeElement = relation.getElement();
 
         Long limit = current.limit();
@@ -321,11 +321,11 @@ public class ElementGeneratorLateral {
             }
         }
 
-        List<Relation> resolvedMappedRelations = new ArrayList<>();
+        List<Fragment> resolvedMappedRelations = new ArrayList<>();
         // Extract referenced paths from injected relations
         for (NodeQuery child : current.roots()) {
-            for (MappedRelation<Node> mappedRelation :  child.getInjectRelations()) {
-                Relation resolvedRelation = resolveRelation(mappedRelation, pathMapping, treeData);
+            for (MappedFragment<Node> mappedRelation :  child.getInjectRelations()) {
+                Fragment resolvedRelation = resolveRelation(mappedRelation, pathMapping, treeData);
 //                Relation resolvedRelation = mappedRelation.getDelegate()
 //                        .applyNodeTransform(new NodeTransformSubst(resolvedMapping));
                 resolvedMappedRelations.add(resolvedRelation);
@@ -343,10 +343,10 @@ public class ElementGeneratorLateral {
         Collection<NodeQuery> children = current.roots();
         for (NodeQuery child : children) {
 
-            UnaryRelation filterRelation = child.getFilterRelation();
+            Fragment1 filterRelation = child.getFilterRelation();
             if (filterRelation != null) {
                 Map<Var, Node> varMap = Map.of(filterRelation.getVar(), child.constraints().asJenaNode());
-                Relation resolvedRelation = resolveRelation(MappedRelation.of(filterRelation, varMap), pathMapping, treeData);
+                Fragment resolvedRelation = resolveRelation(MappedFragment.of(filterRelation, varMap), pathMapping, treeData);
                 constraintElt = ElementUtils.mergeElements(constraintElt, resolvedRelation.getElement());
 
                 if (false) { // Old code - gets the variable name wrong
@@ -359,7 +359,7 @@ public class ElementGeneratorLateral {
                 String scopeName = relationName + nodeQueryVar.getName();
 
                 // Prepend the var scope to all filter variables
-                Relation finalRelation = FacetRelationUtils.renameVariables(filterRelation, nodeQueryVar, filterVar, scopeName, Collections.emptySet());
+                Fragment finalRelation = FacetRelationUtils.renameVariables(filterRelation, nodeQueryVar, filterVar, scopeName, Collections.emptySet());
 //                Relation finalRelation = filterRelation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(
 //                    v -> v.isVariable()
 //                        ? v.equals(filterVar)
@@ -389,7 +389,7 @@ public class ElementGeneratorLateral {
         // System.out.println("Elt: " + constraintElt);
 
         // Add injected relations
-        for (Relation rel : resolvedMappedRelations) {
+        for (Fragment rel : resolvedMappedRelations) {
             constraintElt = ElementUtils.mergeElements(constraintElt, rel.getElement());
         }
 
@@ -521,7 +521,7 @@ public class ElementGeneratorLateral {
     }
 
     /** Given a mappedRelation add the referenced paths to the treeData */
-    protected Relation resolveRelation(MappedRelation<Node> mappedRelation,
+    protected Fragment resolveRelation(MappedFragment<Node> mappedRelation,
             org.aksw.jenax.facete.treequery2.api.FacetPathMapping pathMapping,
             TreeData<ScopedFacetPath> treeData) {
         Map<Var, Node> mapping = mappedRelation.getMapping();
@@ -536,7 +536,7 @@ public class ElementGeneratorLateral {
                 resolvedMapping.put(k, v);
             }
         }
-        Relation rel = mappedRelation.getDelegate();
+        Fragment rel = mappedRelation.getDelegate();
         NodeTransform xform = new NodeTransformSubst(resolvedMapping);
         List<Var> vars = rel.getVars();
         boolean isQuery = rel.holdsQuery();
@@ -548,7 +548,7 @@ public class ElementGeneratorLateral {
         Query q = OpAsQuery.asQuery(op);
         Element elt = isQuery ? new ElementSubQuery(q) : q.getQueryPattern();
 
-        Relation resolvedRelation = new RelationImpl(elt, newVars);
+        Fragment resolvedRelation = new FragmentImpl(elt, newVars);
         return resolvedRelation;
     }
 

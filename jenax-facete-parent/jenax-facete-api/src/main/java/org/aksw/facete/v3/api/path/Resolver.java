@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import org.aksw.commons.collections.trees.TreeUtils;
 import org.aksw.jena_sparql_api.relationlet.RelationletBinary;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.apache.jena.sparql.path.P_Path0;
 
 public interface Resolver {
@@ -20,7 +20,7 @@ public interface Resolver {
     /**
      * Return this resolver's specification
      * of the RDF graph reached in forward or backward direction.
-     * Evaluation of each of the returned {@link TernaryRelation}s over an RDF graph
+     * Evaluation of each of the returned {@link Fragment3}s over an RDF graph
      * yields this spec's corresponding RDF graph.
      *
      *
@@ -28,7 +28,7 @@ public interface Resolver {
      * @param fwd
      * @return
      */
-    Collection<TernaryRelation> getRdfGraphSpec(boolean fwd);
+    Collection<Fragment3> getRdfGraphSpec(boolean fwd);
 
     default Resolver resolve(P_Path0 step) {
         Resolver result = resolve(step, null);
@@ -45,7 +45,7 @@ public interface Resolver {
 //	BinaryRelation getBinaryRelation(boolean fwd);
 
     @Deprecated
-    default Collection<BinaryRelation> getPaths() {
+    default Collection<Fragment2> getPaths() {
         throw new UnsupportedOperationException("This method should no longer be used");
     }
 }

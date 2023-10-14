@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.shape;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 public class OpDir2Base {
     private boolean isInverse;

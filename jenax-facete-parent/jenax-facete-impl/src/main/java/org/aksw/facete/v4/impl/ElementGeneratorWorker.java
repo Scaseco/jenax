@@ -30,7 +30,7 @@ import org.aksw.jenax.facete.treequery2.impl.FacetConstraints;
 import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_LogicalNot;
@@ -226,7 +226,7 @@ public class ElementGeneratorWorker {
 
         if (FacetStep.isTarget(c)) {
             // coreElt = propertyResolver.resolve(parentVar, secondaryNode, targetVar, isFwd);
-            Relation rel = propertyResolver.resolve(secondaryNode);
+            Fragment rel = propertyResolver.resolve(secondaryNode);
 
             // If the facet step is inverted then swap the first and last variables of the relation
             if (step.getDirection().isBackward()) {
@@ -258,7 +258,7 @@ public class ElementGeneratorWorker {
                 Var scopedVar = FacetPathMappingImpl.resolveVar(pathMapping, scopeName, targetVar, path).asVar();
                 varRename.put(v, scopedVar);
             }
-            Relation finalRel = rel.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(varRename::get));
+            Fragment finalRel = rel.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(varRename::get));
             coreElt = finalRel.getElement();
             // coreElt = ElementUtils.createElementTriple(parentVar, secondaryNode, targetVar, isFwd);
         } else {

@@ -1,7 +1,7 @@
 package org.aksw.jenax.arq.datashape.viewselector;
 
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.rdf.model.Resource;
 
 public interface ViewTemplate
@@ -14,7 +14,7 @@ public interface ViewTemplate
      *
      * @return
      */
-    UnaryRelation getCondition();
+    Fragment1 getCondition();
 
     /**
      * The SPARQL-based entity query which yields for a resource

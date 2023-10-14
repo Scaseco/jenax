@@ -16,10 +16,6 @@ import org.aksw.facete.v3.api.NodeFacetPath;
 import org.aksw.facete.v3.api.TreeData;
 import org.aksw.facete.v3.api.TreeQueryNode;
 import org.aksw.facete.v3.api.VarScope;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jenax.arq.util.node.NodeCustom;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.NodeUtils;
@@ -34,10 +30,14 @@ import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
@@ -113,7 +113,7 @@ public class ElementGenerator {
     public static ElementGenerator configure(ConstraintNode<NodeQuery> cn) {
         NodeQuery nq = cn.getRoot();
         RelationQuery rq = nq.relationQuery();
-        Relation baseRelation = rq.getRelation();
+        Fragment baseRelation = rq.getRelation();
         List<Var> rootVars = baseRelation.getVars();
         // org.aksw.jenax.facete.treequery2.impl.FacetConstraints<ConstraintNode<NodeQuery>> constraints = rq.getFacetConstraints();
 
@@ -150,7 +150,7 @@ public class ElementGenerator {
 
             // SetMultimap<ScopedFacetPath, Expr> constraintIndex = createConstraintIndex(constraints, treeData);
 
-            UnaryRelation baseConcept = new Concept(baseRelation.getElement(), rootVar);
+            Fragment1 baseConcept = new Concept(baseRelation.getElement(), rootVar);
 
           // Generator<Var> varGen = GeneratorFromFunction.createInt().map(i -> Var.alloc("vv" + i));
 
@@ -184,7 +184,7 @@ public class ElementGenerator {
 //      UnaryRelation baseConcept;
 //      FacetConstraints constraints;
 
-        Relation baseRelation = frq.baseRelation.get();
+        Fragment baseRelation = frq.baseRelation.get();
         List<Var> rootVars = baseRelation.getVars();
 
         FacetConstraints constraints = frq.constraints;
@@ -212,7 +212,7 @@ public class ElementGenerator {
 
             SetMultimap<ScopedFacetPath, Expr> constraintIndex = createConstraintIndex(constraints, treeData);
 
-            UnaryRelation baseConcept = new Concept(baseRelation.getElement(), rootVar);
+            Fragment1 baseConcept = new Concept(baseRelation.getElement(), rootVar);
 
           // Generator<Var> varGen = GeneratorFromFunction.createInt().map(i -> Var.alloc("vv" + i));
 
@@ -308,7 +308,7 @@ public class ElementGenerator {
 //        UnaryRelation baseConcept;
 //        FacetConstraints constraints;
 
-        Relation baseRelation = frq.baseRelation.get();
+        Fragment baseRelation = frq.baseRelation.get();
         List<Var> rootVars = baseRelation.getVars();
 
         FacetConstraints constraints = frq.constraints;
@@ -363,7 +363,7 @@ public class ElementGenerator {
                 }
             }
 
-            UnaryRelation baseConcept = new Concept(baseRelation.getElement(), rootVar);
+            Fragment1 baseConcept = new Concept(baseRelation.getElement(), rootVar);
             Predicate<FacetPath> isProjected = frq::isVisible;
             result = createQuery(baseConcept, treeData, constraintIndex, isProjected);
         }
@@ -393,7 +393,7 @@ public class ElementGenerator {
 //    }
 
 
-    public static MappedQuery createQuery(UnaryRelation baseConcept, TreeData<FacetPath> rawTreeData, SetMultimap<FacetPath, Expr> constraintIndex, Predicate<FacetPath> isProjected) {
+    public static MappedQuery createQuery(Fragment1 baseConcept, TreeData<FacetPath> rawTreeData, SetMultimap<FacetPath, Expr> constraintIndex, Predicate<FacetPath> isProjected) {
 
 //        Generator<Var> varGen = GeneratorFromFunction.createInt().map(i -> Var.alloc("vv" + i));
 
@@ -501,7 +501,7 @@ public class ElementGenerator {
 //  }
 
 
-    public UnaryRelation getAvailableValuesAt(ScopedFacetPath path, boolean applySelfConstraints) {
+    public Fragment1 getAvailableValuesAt(ScopedFacetPath path, boolean applySelfConstraints) {
         // FacetPath path = ElementGeneratorUtils.cleanPath(rawPath);
 
         SetMultimap<ScopedFacetPath, Expr> effectiveConstraints = applySelfConstraints
@@ -523,20 +523,20 @@ public class ElementGenerator {
         return new Concept(me.getElement(), var);
     }
 
-    public TernaryRelation createRelationFacetValue(ScopedFacetPath focus, ScopedFacetPath facetPath, Direction direction, UnaryRelation pFilter, UnaryRelation oFilter, boolean applySelfConstraints, boolean includeAbsent) {
-        Map<String, TernaryRelation> facetValues = createMapFacetsAndValues(facetPath, direction, false, applySelfConstraints, includeAbsent);
+    public Fragment3 createRelationFacetValue(ScopedFacetPath focus, ScopedFacetPath facetPath, Direction direction, Fragment1 pFilter, Fragment1 oFilter, boolean applySelfConstraints, boolean includeAbsent) {
+        Map<String, Fragment3> facetValues = createMapFacetsAndValues(facetPath, direction, false, applySelfConstraints, includeAbsent);
         // pFilter, oFilter,
 
         List<Element> elements = facetValues.values().stream()
-                .map(e -> RelationUtils.rename(e, Arrays.asList(Vars.s, Vars.p, Vars.o)))
-                .map(Relation::toTernaryRelation)
+                .map(e -> FragmentUtils.rename(e, Arrays.asList(Vars.s, Vars.p, Vars.o)))
+                .map(Fragment::toFragment3)
                 .map(e -> pFilter == null ? e : e.joinOn(e.getP()).with(pFilter))
-                .map(Relation::getElement)
+                .map(Fragment::getElement)
                 .collect(Collectors.toList());
 
         Element e = ElementUtils.unionIfNeeded(elements);
 
-        TernaryRelation result = new TernaryRelationImpl(e, Vars.s, Vars.p, Vars.o);
+        Fragment3 result = new Fragment3Impl(e, Vars.s, Vars.p, Vars.o);
         return result;
     }
 
@@ -545,9 +545,9 @@ public class ElementGenerator {
      *
      * The key of the map should probably be the facet FacetStep?!
      */
-    public Map<String, TernaryRelation> createMapFacetsAndValues(ScopedFacetPath facetOriginPath, Direction direction, boolean applySelfConstraints, boolean negated, boolean includeAbsent) {
+    public Map<String, Fragment3> createMapFacetsAndValues(ScopedFacetPath facetOriginPath, Direction direction, boolean applySelfConstraints, boolean negated, boolean includeAbsent) {
         // FacetPath facetOriginPath = ElementGeneratorUtils.cleanPath(rawFacetOriginPath);
-        Map<String, TernaryRelation> result = new HashMap<>();
+        Map<String, Fragment3> result = new HashMap<>();
 
         // TODO We could reuse a TreeData structure to avoid iterating all paths of all constraints?
         Set<ScopedFacetPath> constrainedPaths = constraintIndex.keySet();
@@ -569,7 +569,7 @@ public class ElementGenerator {
             List<Element> elts = ElementUtils.flatMergeList(baseElement, mr.getElement());
             elts.add(new ElementBind(Vars.p, NodeValue.makeNode(facetStep.getNode())));
 
-            TernaryRelation br = new TernaryRelationImpl(ElementUtils.groupIfNeeded(elts), focusVar, Vars.p, childVar);
+            Fragment3 br = new Fragment3Impl(ElementUtils.groupIfNeeded(elts), focusVar, Vars.p, childVar);
             String pStr = childPath.getParent() == null ? "" : childPath.getFacetPath().getFileName().toSegment().getNode().getURI();
 
             // Substitute the empty predicate by the empty string
@@ -588,8 +588,8 @@ public class ElementGenerator {
 
       // exclude all predicates that are constrained
       // FIXME Was getRemainingFacets
-        BinaryRelation brrx = getRemainingFacetsWithoutAbsent(facetOriginPath, direction, negated, includeAbsent);
-        TernaryRelation brr = new TernaryRelationImpl(brrx.getElement(), focusVar, brrx.getSourceVar(), brrx.getTargetVar());
+        Fragment2 brrx = getRemainingFacetsWithoutAbsent(facetOriginPath, direction, negated, includeAbsent);
+        Fragment3 brr = new Fragment3Impl(brrx.getElement(), focusVar, brrx.getSourceVar(), brrx.getTargetVar());
 
       // Build the constraint to remove all prior properties
         ExprList constrainedPredicates = new ExprList(result.keySet().stream()
@@ -601,7 +601,7 @@ public class ElementGenerator {
         if(!constrainedPredicates.isEmpty()) {
             List<Element> foo = brr.getElements();
             foo.add(new ElementFilter(new E_NotOneOf(new ExprVar(brrx.getSourceVar()), constrainedPredicates)));
-            brr = new TernaryRelationImpl(ElementUtils.groupIfNeeded(foo), brr.getS(), brr.getP(), brr.getO());
+            brr = new Fragment3Impl(ElementUtils.groupIfNeeded(foo), brr.getS(), brr.getP(), brr.getO());
         }
 
         result.put(null, brr);
@@ -624,7 +624,7 @@ public class ElementGenerator {
     }
 
 
-    public BinaryRelation getRemainingFacetsWithoutAbsent(ScopedFacetPath sourceFacetPath, Direction direction, boolean negated, boolean includeAbsent) {
+    public Fragment2 getRemainingFacetsWithoutAbsent(ScopedFacetPath sourceFacetPath, Direction direction, boolean negated, boolean includeAbsent) {
         FacetStep pStep = FacetStep.of(NodeUtils.ANY_IRI, direction, null, FacetStep.PREDICATE);
         FacetStep oStep = FacetStep.of(NodeUtils.ANY_IRI, direction, null, FacetStep.TARGET);
         ScopedFacetPath pPath = sourceFacetPath.resolve(pStep);
@@ -649,7 +649,7 @@ public class ElementGenerator {
 
         Var pVar = me.getVar(pPath);
         Var oVar = me.getVar(oPath);
-        BinaryRelation result = new BinaryRelationImpl(elt, pVar, oVar);
+        Fragment2 result = new Fragment2Impl(elt, pVar, oVar);
         return result;
     }
 

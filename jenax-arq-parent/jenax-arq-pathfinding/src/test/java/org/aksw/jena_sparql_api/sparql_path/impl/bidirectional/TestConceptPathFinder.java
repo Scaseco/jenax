@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinder;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;

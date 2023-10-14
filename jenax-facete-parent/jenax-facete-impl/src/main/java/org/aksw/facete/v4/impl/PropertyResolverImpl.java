@@ -5,17 +5,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jenax.arq.datashape.viewselector.EntityClassifier;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.path.core.FacetPath;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -65,10 +65,10 @@ public class PropertyResolverImpl
     // public static Map<String, BinaryRelation> userDefinedProperties = new HashMap<>();
 
     @Override
-    public Relation resolve(Node property) {
-        Relation result = null;
+    public Fragment resolve(Node property) {
+        Fragment result = null;
         if (NodeUtils.ANY_IRI.equals(property)) {
-            result = new TernaryRelationImpl(ElementUtils.createElementTriple(Vars.s, Vars.p, Vars.o), Vars.s, Vars.p, Vars.o);
+            result = new Fragment3Impl(ElementUtils.createElementTriple(Vars.s, Vars.p, Vars.o), Vars.s, Vars.p, Vars.o);
         }
 
         if (result == null && property.isURI()) {
@@ -78,12 +78,12 @@ public class PropertyResolverImpl
             if (str.startsWith(fnPrefix)) {
                 String fnIri = str.substring(fnPrefix.length());
                 Element elt = new ElementBind(Vars.o, new E_Function(fnIri, new ExprList(new ExprVar(Vars.s))));
-                result = new BinaryRelationImpl(elt, Vars.s, Vars.o);
+                result = new Fragment2Impl(elt, Vars.s, Vars.o);
             }
         }
 
         if (result == null) {
-            BinaryRelation relation = null;
+            Fragment2 relation = null;
             Model model = getVirtualProperties().getDefaultModel();
             RDFNode rdfNode = model.asRDFNode(property);
             if (rdfNode != null && rdfNode.isResource()) {
@@ -91,13 +91,13 @@ public class PropertyResolverImpl
                 String definition = Optional.ofNullable(r.getProperty(virtualPropertyDefinition)).map(Statement::getString).orElse(null);
                 if (definition != null) {
                     Query query = QueryFactory.create(definition);
-                    relation = RelationUtils.fromQuery(query).toBinaryRelation();
+                    relation = FragmentUtils.fromQuery(query).toFragment2();
 
 //                if (relation == null) {
 //                    relation = userDefinedProperties.get(str);
 //                }
 
-                    result = relation.toBinaryRelation();
+                    result = relation.toFragment2();
 //                        Map<Node, Node> remap = new HashMap<>();
 //                        remap.put(br.getSourceVar(), parentVar);
 //                        remap.put(br.getTargetVar(), targetVar);
@@ -109,14 +109,14 @@ public class PropertyResolverImpl
                     Element elt = result.getElement();
                     if (elt instanceof ElementSubQuery) {
                         elt = ((ElementSubQuery)result).getQuery().getQueryPattern();
-                        result = new BinaryRelationImpl(elt, relation.getSourceVar(), relation.getTargetVar());
+                        result = new Fragment2Impl(elt, relation.getSourceVar(), relation.getTargetVar());
                     }
                 }
             }
         }
 
         if (result == null) {
-            result = BinaryRelationImpl.create(property);
+            result = Fragment2Impl.create(property);
         }
         return result;
                 // resolve(Vars.s, property, Vars.o, true);
@@ -124,9 +124,9 @@ public class PropertyResolverImpl
 
     // XXX Use something nicer than incremented ids
     protected int nextPropertyId = 0;
-    protected Map<String, BinaryRelation> iriToRelation = new LinkedHashMap<>();
+    protected Map<String, Fragment2> iriToRelation = new LinkedHashMap<>();
 
-    public void put(String iri, BinaryRelation relation) {
+    public void put(String iri, Fragment2 relation) {
         iriToRelation.put(iri, relation);
     }
 
@@ -181,7 +181,7 @@ public class PropertyResolverImpl
 //        EntityQueryRx.execConstructEntitiesNg(conn::query, basic).forEach(quad -> System.out.println(quad));
 
 
-        Relation r = entityClassifier.createClassifyingRelation();
+        Fragment r = entityClassifier.createClassifyingRelation();
 
         Query query = r.toQuery();
         getVirtualProperties().getDefaultModel().createResource("urn:shaclShape").addProperty(virtualPropertyDefinition, query.toString());
@@ -202,7 +202,7 @@ public class PropertyResolverImpl
     // We could actually maintain an internal SHACL model
     /** Allocate a fresh property name for a given SPARQL Property path */
     public String allocate(Path path) {
-        BinaryRelation relation = BinaryRelationImpl.create(path);
+        Fragment2 relation = Fragment2Impl.create(path);
         String iri = "urn:x-jenax:custom-property-" + nextPropertyId++;
         put(iri, relation);
         return iri;
@@ -220,7 +220,7 @@ public class PropertyResolverImpl
             }
 
             if (result == null) {
-                BinaryRelation relation = null;
+                Fragment2 relation = null;
                 Model model = getVirtualProperties().getDefaultModel();
                 RDFNode rdfNode = model.asRDFNode(predicateNode);
                 if (rdfNode != null && rdfNode.isResource()) {
@@ -228,13 +228,13 @@ public class PropertyResolverImpl
                     String definition = Optional.ofNullable(r.getProperty(virtualPropertyDefinition)).map(Statement::getString).orElse(null);
                     if (definition != null) {
                         Query query = QueryFactory.create(definition);
-                        relation = RelationUtils.fromQuery(query).toBinaryRelation();
+                        relation = FragmentUtils.fromQuery(query).toFragment2();
 
     //                if (relation == null) {
     //                    relation = userDefinedProperties.get(str);
     //                }
 
-                        BinaryRelation br = relation.toBinaryRelation();
+                        Fragment2 br = relation.toFragment2();
                         Map<Node, Node> remap = new HashMap<>();
                         remap.put(br.getSourceVar(), parentVar);
                         remap.put(br.getTargetVar(), targetVar);

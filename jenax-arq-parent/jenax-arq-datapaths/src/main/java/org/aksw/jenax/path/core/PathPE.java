@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.aksw.commons.path.core.PathBase;
 import org.aksw.commons.path.core.PathOps;
-import org.aksw.jena_sparql_api.concepts.UnaryXExpr;
-import org.aksw.jena_sparql_api.concepts.UnaryXExprImpl;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExpr;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExprImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.expr.E_Equals;

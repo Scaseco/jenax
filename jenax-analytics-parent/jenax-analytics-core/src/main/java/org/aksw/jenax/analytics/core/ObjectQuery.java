@@ -2,7 +2,7 @@ package org.aksw.jenax.analytics.core;
 
 import java.util.Map;
 
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;
@@ -58,5 +58,5 @@ public interface ObjectQuery {
      *
      * @return The relation that acts as the source of bindings for this object query
      */
-    Relation getRelation();
+    Fragment getRelation();
 }

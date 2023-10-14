@@ -4,12 +4,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.ListServiceConcept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ReadWrite;

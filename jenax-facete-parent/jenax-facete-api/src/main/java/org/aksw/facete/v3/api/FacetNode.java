@@ -11,7 +11,7 @@ import org.aksw.facete.v3.api.traversal.TraversalNode;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetPathOps;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
@@ -191,7 +191,7 @@ public interface FacetNode
         return tmp;
     }
 
-    BinaryRelation getReachingRelation();
+    Fragment2 getReachingRelation();
 
     FacetNode root();
 

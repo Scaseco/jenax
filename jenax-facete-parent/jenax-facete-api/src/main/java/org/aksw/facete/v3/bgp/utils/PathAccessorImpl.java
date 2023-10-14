@@ -7,7 +7,7 @@ import org.aksw.facete.v3.bgp.api.BgpMultiNode;
 import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessor;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
@@ -61,15 +61,15 @@ public class PathAccessorImpl
     }
 
     @Override
-    public BinaryRelation getReachingRelation(BgpNode path) {
-        BinaryRelation result = BgpNode.getReachingRelation(path);
+    public Fragment2 getReachingRelation(BgpNode path) {
+        Fragment2 result = BgpNode.getReachingRelation(path);
         return result;
         //		return path.getReachingRelation();
     }
 
     @Override
     public boolean isReverse(BgpNode path) {
-        BinaryRelation br = getReachingRelation(path);
+        Fragment2 br = getReachingRelation(path);
         Element brE = br.getElement();
         Triple t = Objects.requireNonNull(ElementUtils.extractTriple(brE));
 
@@ -80,7 +80,7 @@ public class PathAccessorImpl
 
     @Override
     public String getPredicate(BgpNode path) {
-        BinaryRelation br = getReachingRelation(path);
+        Fragment2 br = getReachingRelation(path);
         Triple t = ElementUtils.extractTriple(br.getElement());
 
         Node node = t == null ? null : t.getPredicate();

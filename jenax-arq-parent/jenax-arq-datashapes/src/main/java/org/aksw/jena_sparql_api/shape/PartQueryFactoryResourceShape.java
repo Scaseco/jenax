@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api.shape;
 
 import org.aksw.jena_sparql_api.concept.parser.PartQueryFactory;
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.query.Query;
 
 public class PartQueryFactoryResourceShape

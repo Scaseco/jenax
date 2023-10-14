@@ -13,8 +13,8 @@ import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.Var;
@@ -106,8 +106,8 @@ public class ConstraintNodeImpl
 
         ScopedFacetPath sfp = getScopedFacetPath();
 
-        Relation baseRelation = root.relationQuery().getRelation();
-        UnaryRelation relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
+        Fragment baseRelation = root.relationQuery().getRelation();
+        Fragment1 relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
         relation = relation.prependOn(relation.getVars()).with(baseRelation).toUnaryRelation();
 
         RdfDataSource dataSource = null; //facetedQuery.dataSource();

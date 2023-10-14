@@ -11,11 +11,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessorRdf;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.graph.SuccessorsFunction;
@@ -44,12 +45,12 @@ public class PathToRelationMapper<P> {
     //protected Set<Triple> triples;
     protected PathAccessorRdf<P> pathAccessor;
     //protected Set<Element> elements;
-    protected Map<P, BinaryRelation> map;
+    protected Map<P, Fragment2> map;
     protected Set<Var> forbiddenVars;
     protected Generator<Var> varGen;
 
 
-    public Map<P, BinaryRelation> getMap() {
+    public Map<P, Fragment2> getMap() {
         return map;
     }
 
@@ -102,7 +103,7 @@ public class PathToRelationMapper<P> {
 //	}
 
     public Node getNode(P path) {
-        BinaryRelation br = getOrCreate(path);
+        Fragment2 br = getOrCreate(path);
         Var result = br.getTargetVar();
 //		Expr result = new ExprVar(var);
         return result;
@@ -110,7 +111,7 @@ public class PathToRelationMapper<P> {
 
     public PathToRelationMapper(
             PathAccessorRdf<P> pathAccessor,
-            Map<P, BinaryRelation> map,
+            Map<P, Fragment2> map,
             Set<Var> forbiddenVars,
             Generator<Var> varGen) {
         super();
@@ -129,7 +130,7 @@ public class PathToRelationMapper<P> {
 //		return result;
 //	}
 
-    public BinaryRelation getOverallRelation(P path) {
+    public Fragment2 getOverallRelation(P path) {
 
         // Initialize the segments in {@link map} for the given path
         getOrCreate(path);
@@ -141,7 +142,7 @@ public class PathToRelationMapper<P> {
         List<P> segments = Lists.newArrayList(Traverser.forTree(fn).depthFirstPostOrder(path));
         //Collections.reverse(segments);
 
-        List<BinaryRelation> brs = segments.stream()
+        List<Fragment2> brs = segments.stream()
             .map(map::get)
             // Filter out the root segment which corresponds to an empty path
             //.filter(x -> !BinaryRelation.isEmpty(x))
@@ -149,7 +150,7 @@ public class PathToRelationMapper<P> {
 
         List<Element> elts = brs.stream()
                 .filter(x -> !x.isEmpty())
-                .map(BinaryRelation::getElement)
+                .map(Fragment2::getElement)
                 .collect(Collectors.toList());
 
         Element elt = ElementUtils.groupIfNeeded(elts);
@@ -157,15 +158,15 @@ public class PathToRelationMapper<P> {
         Var o = Iterables.getLast(brs, null).getTargetVar();
 
 
-        BinaryRelation result = new BinaryRelationImpl(elt, s, o);
+        Fragment2 result = new Fragment2Impl(elt, s, o);
 
         //TreeUtils.inOrderSearch(path, path -> Streams.stream()));
 
         return result;
     }
 
-    public BinaryRelation getOrCreate(P path) {
-        BinaryRelation result = QueryFragment.toElement(path, pathAccessor, map, forbiddenVars, varGen);
+    public Fragment2 getOrCreate(P path) {
+        Fragment2 result = QueryFragment.toElement(path, pathAccessor, map, forbiddenVars, varGen);
         return result;
     }
 

@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.aksw.commons.beans.model.EntityOps;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.mapper.model.RdfMapper;
 import org.aksw.jena_sparql_api.mapper.proxy.MethodInterceptorRdf;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.RDFNode;

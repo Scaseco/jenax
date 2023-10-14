@@ -2,22 +2,22 @@ package org.aksw.jena_sparql_api.relationlet;
 
 import java.util.Set;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 
 public class RelationletBinary
     extends RelationletElementBase
 {
-    protected BinaryRelation br;
+    protected Fragment2 br;
     protected Set<Var> fixedVars;
 
-    public RelationletBinary(BinaryRelation br) {
+    public RelationletBinary(Fragment2 br) {
         super();
         this.br = br;
     }
 
-    public BinaryRelation getBinaryRelation() {
+    public Fragment2 getBinaryRelation() {
         return br;
     }
 

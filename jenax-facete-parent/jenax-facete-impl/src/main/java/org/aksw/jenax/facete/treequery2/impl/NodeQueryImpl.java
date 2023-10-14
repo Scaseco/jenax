@@ -15,9 +15,9 @@ import org.aksw.jenax.facete.treequery2.api.QueryContext;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.MappedRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.MappedFragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -39,23 +39,23 @@ public class NodeQueryImpl
     protected ConstraintNode<NodeQuery> constraintRoot;
 
     /** Upon query generation, inject the given graph pattern */
-    protected UnaryRelation filterRelation = null;
+    protected Fragment1 filterRelation = null;
 
 
     /**
      * Extra sparql fragments injected at this node
      * FIXME Each relation must carry a mapping for how its variables map to facet paths
      */
-    protected List<MappedRelation<Node>> injectRelations = new ArrayList<>();
+    protected List<MappedFragment<Node>> injectRelations = new ArrayList<>();
 
     @Override
-    public NodeQuery addInjectRelation(MappedRelation<Node> relation) {
+    public NodeQuery addInjectRelation(MappedFragment<Node> relation) {
         injectRelations.add(relation);
         return this;
     }
 
     @Override
-    public List<MappedRelation<Node>> getInjectRelations() {
+    public List<MappedFragment<Node>> getInjectRelations() {
         return injectRelations;
     }
 
@@ -77,13 +77,13 @@ public class NodeQueryImpl
 //    }
 
     @Override
-    public NodeQuery setFilterRelation(UnaryRelation filterRelation) {
+    public NodeQuery setFilterRelation(Fragment1 filterRelation) {
         this.filterRelation = filterRelation;
         return this;
     }
 
     @Override
-    public UnaryRelation getFilterRelation() {
+    public Fragment1 getFilterRelation() {
         return filterRelation;
     }
 
@@ -155,13 +155,13 @@ public class NodeQueryImpl
             FacetStep relationStep = FacetStep.of(step.getNode(), step.getDirection(), step.getAlias(), FacetStep.TUPLE);
             RelationQueryImpl tmp = (RelationQueryImpl)children.computeIfAbsent(relationStep, fs -> {
                 Node property = fs.getNode();
-                Relation baseRelation = relationQuery().getContext().getPropertyResolver().resolve(property);
+                Fragment baseRelation = relationQuery().getContext().getPropertyResolver().resolve(property);
 
                 if (step.getDirection().equals(Direction.BACKWARD)) {
                     if (baseRelation.getVars().size() != 2) {
                         throw new IllegalArgumentException("Reverse step via " + property + " did not resolve to a binary relation: " + baseRelation);
                     }
-                    baseRelation = baseRelation.toBinaryRelation().reverse();
+                    baseRelation = baseRelation.toFragment2().reverse();
                 }
 
                 Var sourceVar = FacetRelationUtils.resolveComponent(FacetStep.SOURCE, baseRelation);
@@ -172,7 +172,7 @@ public class NodeQueryImpl
 
                 String scopeName = cxt.getFieldIdGenerator().next();
                 Set<Var> usedVars = cxt.getUsedVars();
-                Relation relation = FacetRelationUtils.renameVariables(baseRelation, sourceVar, targetVar, scopeName, usedVars);
+                Fragment relation = FacetRelationUtils.renameVariables(baseRelation, sourceVar, targetVar, scopeName, usedVars);
                 usedVars.addAll(relation.getVarsMentioned());
 
                 Map<Var, Node> varToComponent = FacetRelationUtils.createVarToComponentMap(relation);

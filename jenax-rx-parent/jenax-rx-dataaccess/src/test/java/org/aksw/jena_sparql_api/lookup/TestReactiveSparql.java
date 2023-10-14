@@ -7,13 +7,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.delay.core.QueryExecutionFactoryDelay;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryDataset;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;

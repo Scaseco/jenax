@@ -2,10 +2,10 @@ package org.aksw.jena_sparql_api.shape;
 
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Property;
@@ -107,7 +107,7 @@ public class ResourceShapeBuilder {
     }
 
 
-    public ResourceShapeBuilder out(BinaryRelation relation) {
+    public ResourceShapeBuilder out(Fragment2 relation) {
         ResourceShapeBuilder result = nav(relation, false);
         return result;
     }
@@ -133,7 +133,7 @@ public class ResourceShapeBuilder {
     }
 
 
-    public ResourceShapeBuilder in(BinaryRelation relation) {
+    public ResourceShapeBuilder in(Fragment2 relation) {
         ResourceShapeBuilder result = nav(relation, true);
         return result;
     }
@@ -160,7 +160,7 @@ public class ResourceShapeBuilder {
 
 
     public ResourceShapeBuilder nav(Expr expr, boolean isInverse) {
-        BinaryRelation relation = new BinaryRelationImpl(new ElementFilter(expr), Vars.p, Vars.o);
+        Fragment2 relation = new Fragment2Impl(new ElementFilter(expr), Vars.p, Vars.o);
         ResourceShapeBuilder result = nav(relation, isInverse);
         return result;
     }
@@ -171,8 +171,8 @@ public class ResourceShapeBuilder {
         return result;
     }
 
-    public ResourceShapeBuilder nav(BinaryRelation relation, boolean isInverse) {
-        Map<BinaryRelation, ResourceShape> map = isInverse
+    public ResourceShapeBuilder nav(Fragment2 relation, boolean isInverse) {
+        Map<Fragment2, ResourceShape> map = isInverse
                 ? resourceShape.getIngoing()
                 : resourceShape.getOutgoing();
 

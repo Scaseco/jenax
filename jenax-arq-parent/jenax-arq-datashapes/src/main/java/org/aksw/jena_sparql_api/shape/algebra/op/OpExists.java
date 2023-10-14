@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.shape.algebra.op;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 public class OpExists
     extends OpRoleRestriction
 {
-    public OpExists(BinaryRelation role, Op filler) {
+    public OpExists(Fragment2 role, Op filler) {
         super(role, filler);
     }
 

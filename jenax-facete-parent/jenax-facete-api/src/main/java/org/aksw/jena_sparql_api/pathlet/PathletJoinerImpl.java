@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.facete.v3.api.path.Resolver;
 import org.aksw.facete.v3.api.path.StepImpl;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.relationlet.Relationlet;
 import org.aksw.jena_sparql_api.relationlet.RelationletBinary;
 import org.aksw.jena_sparql_api.relationlet.RelationletEntry;
@@ -21,7 +20,9 @@ import org.aksw.jena_sparql_api.relationlet.RelationletJoinerImpl;
 import org.aksw.jena_sparql_api.relationlet.VarRef;
 import org.aksw.jena_sparql_api.relationlet.VarRefStatic;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+
 import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
@@ -40,9 +41,9 @@ public class PathletJoinerImpl
     public static final Var srcJoinVar = Var.alloc("srcJoinVar");
     public static final Var tgtJoinVar = Var.alloc("tgtJoinVar");
 
-    public static final Pathlet emptyPathlet = newPathlet(BinaryRelationImpl.empty(Vars.s));
+    public static final Pathlet emptyPathlet = newPathlet(Fragment2Impl.empty(Vars.s));
 
-    public static Pathlet newPathlet(BinaryRelation br) {
+    public static Pathlet newPathlet(Fragment2 br) {
         return new PathletSimple(
                 br.getSourceVar(), br.getTargetVar(),
                 new RelationletBinary(br));
@@ -212,11 +213,11 @@ public class PathletJoinerImpl
 
     public RelationletEntry<PathletJoinerImpl> step(Object key, String alias, boolean createIfNotExists) {
         P_Path0 p = key instanceof P_Path0 ? (P_Path0)key : null; // Node(key);
-        BinaryRelation br;
+        Fragment2 br;
         Set<Var> pinnedVars = Collections.emptySet();
         Resolver subResolver = null;
         if(p == null) {
-            br = (BinaryRelation)key;
+            br = (Fragment2)key;
             subResolver = null;
         } else {
             if(resolver != null) {
@@ -229,7 +230,7 @@ public class PathletJoinerImpl
             } else {
                 Node n = p.getNode();
                 boolean isFwd = p.isForward();
-                br = BinaryRelationImpl.create(Vars.s, n, Vars.o, isFwd);
+                br = Fragment2Impl.create(Vars.s, n, Vars.o, isFwd);
             }
             // TODO Union the relations using (move the method)
             ///VirtualPartitionedquery.union()
@@ -275,7 +276,7 @@ public class PathletJoinerImpl
 //		return result;
 //	}
 
-    public RelationletEntry<PathletJoinerImpl> step(boolean createIfNotExists, Resolver subResolver, Object key, BinaryRelation br, Collection<Var> pinnedVars, String alias, Function<? super ElementGroup, ? extends Element> fn) {
+    public RelationletEntry<PathletJoinerImpl> step(boolean createIfNotExists, Resolver subResolver, Object key, Fragment2 br, Collection<Var> pinnedVars, String alias, Function<? super ElementGroup, ? extends Element> fn) {
         alias = alias == null ? "default" : alias;
 
         key = key == null ? "" + br : key;
@@ -330,7 +331,7 @@ public class PathletJoinerImpl
     //@Override
     public RelationletEntry<PathletJoinerImpl> optional(String label, boolean isLookup) {
 
-        RelationletEntry<PathletJoinerImpl> result = step(isLookup, resolver, "optional", BinaryRelationImpl.empty(), Collections.emptySet(), "default",
+        RelationletEntry<PathletJoinerImpl> result = step(isLookup, resolver, "optional", Fragment2Impl.empty(), Collections.emptySet(), "default",
                 x -> new ElementOptional(RelationletJoinerImpl.flatten(x)));
         return result;
 

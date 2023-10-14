@@ -4,7 +4,7 @@ import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprExists;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprExt;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprForAll;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprVisitor;
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 public class RestrictionExprVisitorSparql
     implements RestrictionExprVisitor<Concept>

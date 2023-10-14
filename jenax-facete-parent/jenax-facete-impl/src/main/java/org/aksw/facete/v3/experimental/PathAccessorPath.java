@@ -1,9 +1,10 @@
 package org.aksw.facete.v3.experimental;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessorRdf;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+
 import com.google.common.collect.Iterables;
 import org.apache.jena.sparql.path.P_Path0;
 
@@ -19,10 +20,10 @@ public abstract class PathAccessorPath<P>
     protected abstract P_Path0 getLastStep(P path);
 
     @Override
-    public BinaryRelation getReachingRelation(P path) {
+    public Fragment2 getReachingRelation(P path) {
         P_Path0 step = getLastStep(path);//Iterables.getLast(null);
 
-        BinaryRelation result = BinaryRelationImpl.createFwd(Vars.s, step.getNode(), Vars.o);
+        Fragment2 result = Fragment2Impl.createFwd(Vars.s, step.getNode(), Vars.o);
         return result;
     }
 

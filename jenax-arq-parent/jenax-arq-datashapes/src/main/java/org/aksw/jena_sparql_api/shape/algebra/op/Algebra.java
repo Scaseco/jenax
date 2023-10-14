@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.shape.algebra.op;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.shape.syntax.Element;
 import org.aksw.jena_sparql_api.shape.syntax.ElementVisitor;
 import org.aksw.jena_sparql_api.shape.syntax.ElementVisitorSparql;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.sparql.core.Var;
 
 public class Algebra {

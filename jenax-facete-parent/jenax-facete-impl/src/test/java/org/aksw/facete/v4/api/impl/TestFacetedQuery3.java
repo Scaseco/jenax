@@ -1,7 +1,6 @@
 package org.aksw.facete.v4.api.impl;
 
 import org.aksw.facete.v3.api.FacetedDataQuery;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.data_query.api.QuerySpec;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
@@ -9,6 +8,7 @@ import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.vocabulary.OWL;

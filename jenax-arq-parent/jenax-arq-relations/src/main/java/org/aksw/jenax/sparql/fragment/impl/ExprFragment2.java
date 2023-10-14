@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import org.apache.jena.sparql.core.Var;
 

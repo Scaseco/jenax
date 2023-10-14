@@ -1,7 +1,7 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 
 /**
  * A triple-based virtual predicate.
@@ -59,6 +59,6 @@ import org.aksw.jenax.sparql.relation.api.TernaryRelation;
  *
  */
 public class VirtualPredicate {
-	protected TernaryRelation condition;
-	protected BinaryRelation predicate;
+	protected Fragment3 condition;
+	protected Fragment2 predicate;
 }

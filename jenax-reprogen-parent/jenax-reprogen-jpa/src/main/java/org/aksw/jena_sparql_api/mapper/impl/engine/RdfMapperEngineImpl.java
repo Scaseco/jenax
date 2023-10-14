@@ -19,8 +19,6 @@ import org.aksw.commons.beans.model.PropertyOps;
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.util.reflect.ClassUtils;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateDiffUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
@@ -46,6 +44,8 @@ import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -1266,7 +1266,7 @@ public class RdfMapperEngineImpl
     }
 
     public PathResolver createResolver(Class<?> javaClass) {
-        PathFragment pathFragment = new PathFragment(BinaryRelationImpl.empty(Var.alloc("root")), javaClass, null, null);
+        PathFragment pathFragment = new PathFragment(Fragment2Impl.empty(Var.alloc("root")), javaClass, null, null);
         PathResolver result = new PathResolverImpl(pathFragment, this, null, null);
         return result;
     }

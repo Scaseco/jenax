@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
 public class FacetRelationUtils {
 
-    public static Map<Var, Node> createVarToComponentMap(Relation relation) {
+    public static Map<Var, Node> createVarToComponentMap(Fragment relation) {
         List<Node> components = Arrays.asList(FacetStep.SOURCE, FacetStep.PREDICATE, FacetStep.TARGET);
         Map<Var, Node> result = components.stream()
                 .map(c -> new SimpleEntry<>(resolveComponent(c, relation), c))
@@ -28,7 +28,7 @@ public class FacetRelationUtils {
     }
 
     /** Map a component value of SOURCE, TARGET, PREDICATE */
-    public static Var resolveComponent(Node component, Relation relation) {
+    public static Var resolveComponent(Node component, Fragment relation) {
         Var g, s, p, o;
         List<Var> vars = relation.getVars();
         int n = vars.size();
@@ -57,7 +57,7 @@ public class FacetRelationUtils {
     }
 
 
-    public static Relation renameVariables(Relation relation, Var originalSubjectVar, Var renamedSubjectVar, String scopePrefix, Set<Var> forbiddenVars) {
+    public static Fragment renameVariables(Fragment relation, Var originalSubjectVar, Var renamedSubjectVar, String scopePrefix, Set<Var> forbiddenVars) {
         Set<Var> vars = relation.getVarsMentioned();
         vars.remove(originalSubjectVar);
 
@@ -71,7 +71,7 @@ public class FacetRelationUtils {
             map.put(v, vv);
         }
 
-        Relation result = relation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(map::get));
+        Fragment result = relation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(map::get));
         return result;
     }
 

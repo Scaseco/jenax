@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.mapper.model.RdfType;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -218,9 +218,9 @@ public class RdfTypeMap
 
     public PathFragment resolve(String propertyName) {
         PathFragment result = "key".equals(propertyName)
-                ? new PathFragment(RelationUtils.createRelation(key, false), keyClazz, keyRdfType, null)
+                ? new PathFragment(FragmentUtils.createRelation(key, false), keyClazz, keyRdfType, null)
                 : "value".equals(propertyName)
-                        ? new PathFragment(RelationUtils.createRelation(value, false), keyClazz, valueRdfType, null)
+                        ? new PathFragment(FragmentUtils.createRelation(value, false), keyClazz, valueRdfType, null)
                         : null;
 
         return result;

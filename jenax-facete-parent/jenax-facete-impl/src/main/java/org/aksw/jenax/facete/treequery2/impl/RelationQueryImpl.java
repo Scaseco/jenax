@@ -16,7 +16,7 @@ import org.aksw.jenax.facete.treequery2.api.QueryContext;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.treequery2.old.NodeQueryOld;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.SortCondition;
@@ -33,7 +33,7 @@ public class RelationQueryImpl
      * May by a constant supplier or a dynamic one which e.g. resolves an IRI
      * against a {@link PropertyResolverImpl}.
      */
-    protected Supplier<Relation> relationSupplier;
+    protected Supplier<Fragment> relationSupplier;
 
     // XXX We can store a materialized version of the relation here that can be rebuild on demand
     // XXX We can also store a mapping of the variables of the original relation and their scoped versions
@@ -75,7 +75,7 @@ public class RelationQueryImpl
 //        this(parent, () -> relation, queryContext);
 //    }
 
-    public RelationQueryImpl(String scopeBaseName, NodeQuery parent, Supplier<Relation> relationSupplier, FacetStep reachingStep, QueryContext queryContext, Map<Var, Node> varToComponent) {
+    public RelationQueryImpl(String scopeBaseName, NodeQuery parent, Supplier<Fragment> relationSupplier, FacetStep reachingStep, QueryContext queryContext, Map<Var, Node> varToComponent) {
         super();
         this.scopeBaseName = scopeBaseName;
         this.parent = parent;
@@ -98,7 +98,7 @@ public class RelationQueryImpl
     }
 
     @Override
-    public Relation getRelation() {
+    public Fragment getRelation() {
         return relationSupplier.get();
     }
 
@@ -175,7 +175,7 @@ public class RelationQueryImpl
 
     @Override
     public List<NodeQuery> roots() {
-        Relation relation = relationSupplier.get();
+        Fragment relation = relationSupplier.get();
         List<Var> vars = relation.getVars();
         List<NodeQuery> result = vars.stream()
             .map(var -> roots.computeIfAbsent(var, this::newRoot))
@@ -186,7 +186,7 @@ public class RelationQueryImpl
     // Only return the immediate root or any path with tha variable?!
     @Override
     public NodeQuery nodeFor(Var var) {
-        Relation relation = relationSupplier.get();
+        Fragment relation = relationSupplier.get();
         List<Var> vars = relation.getVars();
         if (!vars.contains(var)) {
             throw new NoSuchElementException("Requested a node for variable " + var + " but this one does not exist. Available: " + vars);

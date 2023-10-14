@@ -11,9 +11,9 @@ import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.MappedRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.MappedFragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
@@ -39,8 +39,8 @@ public interface NodeQuery
      * that result set's column and this node's result set column.
      * If the filter pattern is a filter, then this node's result set is filtered by it.
      */
-    NodeQuery setFilterRelation(UnaryRelation relation);
-    UnaryRelation getFilterRelation();
+    NodeQuery setFilterRelation(Fragment1 relation);
+    Fragment1 getFilterRelation();
 
 
     /**
@@ -51,8 +51,8 @@ public interface NodeQuery
      * @param relation
      * @return
      */
-    NodeQuery addInjectRelation(MappedRelation<Node> relation);
-    List<MappedRelation<Node>> getInjectRelations();
+    NodeQuery addInjectRelation(MappedFragment<Node> relation);
+    List<MappedFragment<Node>> getInjectRelations();
 
     @Override
     default FacetPath getFacetPath() {

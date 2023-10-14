@@ -14,7 +14,7 @@ import org.aksw.jena_sparql_api.mapper.impl.type.PathResolver;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.PathVisitor;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.VPath;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 
@@ -80,7 +80,7 @@ public class PathResolverVarMapper
                 String targetAlias = aliasMapper.apply(path);
                 Var targetVar = Var.alloc(targetAlias);
 
-                BinaryRelation r = currentState.getRelation();
+                Fragment2 r = currentState.getRelation();
                 Map<Var, Var> varMap = new HashMap<>();
                 varMap.put(r.getSourceVar(), sourceVar);
                 varMap.put(r.getTargetVar(), targetVar);

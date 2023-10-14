@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.rx.lookup.LookupService;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.core.LookupServiceUtils;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jenax.arq.aggregation.AccBestLiteral;
@@ -19,7 +18,8 @@ import org.aksw.jenax.arq.aggregation.BestLiteralConfig;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
@@ -115,7 +115,7 @@ public class LabelUtils {
             PrefixMapping prefixMapping,
             int partitionSize) {
 
-        BinaryRelation labelRelation = BinaryRelationImpl.create(labelProperty);
+        Fragment2 labelRelation = Fragment2Impl.create(labelProperty);
         return LookupServiceUtils.createLookupService(conn, labelRelation)
               .partition(partitionSize)
               .filterKeys(k -> k.isURI())

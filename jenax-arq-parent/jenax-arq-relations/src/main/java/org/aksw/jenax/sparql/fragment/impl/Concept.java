@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParser;
 import org.aksw.jenax.stmt.parser.prologue.SparqlPrologueParserImpl;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
@@ -47,7 +47,7 @@ import com.google.common.collect.Streams;
  *
  */
 public class Concept
-    implements UnaryRelation
+    implements Fragment1
 {
     private Element element;//List<Element> elements;
     private Var var;

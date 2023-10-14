@@ -12,15 +12,16 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.range.CountInfo;
 import org.aksw.facete.v3.api.FacetValue;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.pathlet.Path;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
+
 import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -119,7 +120,7 @@ public interface DataQuery<T extends RDFNode> {
 
     Single<Model> execConstruct();
 
-    UnaryRelation fetchPredicates();
+    Fragment1 fetchPredicates();
 
     DataNode getRoot();
 
@@ -130,26 +131,26 @@ public interface DataQuery<T extends RDFNode> {
 
 
     // this is similar to source.joinOn(attrNames).with(relation)
-    DataQuery<T> filterUsing(Relation relation, String ... attrNames);
+    DataQuery<T> filterUsing(Fragment relation, String ... attrNames);
 
 
 
     // Return the same data query with intersection on the given concept
-    DataQuery<T> filter(UnaryRelation concept);
+    DataQuery<T> filter(Fragment1 concept);
 
     default DataQuery<T> filter(String exprStr) {
         Expr expr = ExprUtils.parse(exprStr);
         return filter(expr);
     }
 
-    public static UnaryRelation toUnaryFiler(Expr expr) {
+    public static Fragment1 toUnaryFiler(Expr expr) {
         Set<Var> vars = ExprVars.getVarsMentioned(expr);
         if(vars.size() != 1) {
             throw new IllegalArgumentException("Provided expression must contain exactly 1 variable");
         }
 
         Var var = Iterables.getFirst(vars, null);
-        UnaryRelation result = new Concept(new ElementFilter(expr), var);
+        Fragment1 result = new Concept(new ElementFilter(expr), var);
         return result;
     }
 
@@ -301,8 +302,8 @@ public interface DataQuery<T extends RDFNode> {
     }
 
 
-    default Relation baseRelation() {
-        return new RelationImpl(baseElement(), primaryKeyVars());
+    default Fragment baseRelation() {
+        return new FragmentImpl(baseElement(), primaryKeyVars());
     }
 
     List<Var> primaryKeyVars();

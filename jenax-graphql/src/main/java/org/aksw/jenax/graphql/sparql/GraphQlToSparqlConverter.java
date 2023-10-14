@@ -14,8 +14,6 @@ import java.util.Stack;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.util.range.RangeUtils;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
@@ -28,9 +26,11 @@ import org.aksw.jenax.io.json.graph.GraphToJsonPropertyMapper;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.MappedRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.MappedFragment;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
@@ -552,9 +552,9 @@ public class GraphQlToSparqlConverter {
         FacetPath facetPath = nodeQuery.getFacetPath();
 
         // Process sparql directives
-        List<UnaryRelation> filterRelations = new ArrayList<>();
+        List<Fragment1> filterRelations = new ArrayList<>();
         for (Directive dir : field.getDirectives()) {
-            Relation contrib = null;
+            Fragment contrib = null;
             boolean isInject = false;
             if (GraphQlSpecialKeys.sparql.equals(dir.getName())) {
                 contrib = tryParseSparqlQuery(cxt, dir, GraphQlSpecialKeys.fragment);
@@ -606,7 +606,7 @@ public class GraphQlToSparqlConverter {
                     // FIXME Only substitute in-scope variables - so apply scope rename first
                     // Rename.reverseVarRename(null)
                     // Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
-                    MappedRelation<Node> mr = MappedRelation.of(contrib, varMap);
+                    MappedFragment<Node> mr = MappedFragment.of(contrib, varMap);
                     // System.err.println("Resolved contrib: " + resolvedContrib);
                     nodeQuery.addInjectRelation(mr);
                     // TODO Register the resolved relation
@@ -616,26 +616,26 @@ public class GraphQlToSparqlConverter {
             }
         }
 
-        UnaryRelation filterRelation = filterRelations.stream().reduce((a, b) -> {
+        Fragment1 filterRelation = filterRelations.stream().reduce((a, b) -> {
             return a.joinOn(a.getVar()).with(b).toUnaryRelation();
         }).orElse(null);
         nodeQuery.setFilterRelation(filterRelation);
     }
 
-    public static Relation tryParseSparqlQuery(Context cxt, Directive dir, String argName) {
+    public static Fragment tryParseSparqlQuery(Context cxt, Directive dir, String argName) {
         String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument(argName))
             .map(Argument::getValue)
             .map(GraphQlUtils::toString)
             .orElse(null);
 
-        Relation result = null;
+        Fragment result = null;
         if (queryStr != null) {
             String base = cxt.getFinalBase();
             PrefixMapping pm = new PrefixMappingAdapter(cxt.getFinalPrefixMap());
             SparqlQueryParser parser = SparqlQueryParserImpl.create(
                     SparqlParserConfig.newInstance().setBaseURI(base).setPrefixMapping(pm));
             Query query = parser.apply(queryStr);
-            result = RelationUtils.fromQuery(query);
+            result = FragmentUtils.fromQuery(query);
         }
         return result;
     }

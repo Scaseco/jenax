@@ -2,7 +2,7 @@ package org.aksw.jenax.sparql.relation.query;
 
 import java.util.List;
 
-import org.aksw.jenax.sparql.relation.api.HasElement;
+import org.aksw.jenax.sparql.fragment.api.HasElement;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;

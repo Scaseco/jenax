@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.MapPaginator;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 public abstract class MapPaginatorSparqlQueryBase<K, V>
     extends ListPaginatorSparqlQueryBase<Entry<K, V>>

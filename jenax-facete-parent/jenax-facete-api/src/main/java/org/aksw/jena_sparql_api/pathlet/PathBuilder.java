@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.pathlet;
 
 import org.aksw.facete.v3.api.path.StepImpl;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.aksw.jenax.sparql.path.PathUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -50,7 +50,7 @@ public abstract class PathBuilder {
     }
 
     public Path fwd(org.apache.jena.sparql.path.Path path, String alias) {
-        return step(BinaryRelationImpl.create(path), alias);
+        return step(Fragment2Impl.create(path), alias);
     }
 
 
@@ -82,7 +82,7 @@ public abstract class PathBuilder {
     }
 
     public Path bwd(org.apache.jena.sparql.path.Path path, String alias) {
-        return step(BinaryRelationImpl.create(PathFactory.pathInverse(path)), alias);
+        return step(Fragment2Impl.create(PathFactory.pathInverse(path)), alias);
     }
 
 
@@ -98,7 +98,7 @@ public abstract class PathBuilder {
         return appendStep(new StepImpl("br", p, alias));
     }
 
-    public Path step(BinaryRelation br, String alias) {
+    public Path step(Fragment2 br, String alias) {
         return appendStep(new StepImpl("br", br, alias));
     }
 

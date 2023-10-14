@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +25,9 @@ import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+
 import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -81,7 +82,7 @@ public class ConceptUtils {
      *
      * @return
      */
-    public static UnaryRelation createPredicateQuery(UnaryRelation concept) {
+    public static Fragment1 createPredicateQuery(Fragment1 concept) {
         Collection<Var> vars = PatternVars.vars(concept.getElement());
         List<String> varNames = VarUtils.getVarNames(vars);
 
@@ -114,7 +115,7 @@ public class ConceptUtils {
      *
      * @return
      */
-    public static boolean isSubjectConcept(UnaryRelation r) {
+    public static boolean isSubjectConcept(Fragment1 r) {
         Element element = r.getElement();
         Var var = r.getVar();
 
@@ -151,7 +152,7 @@ public class ConceptUtils {
      * @param that
      * @return
      */
-    public static UnaryRelation makeDistinctFrom(UnaryRelation a, UnaryRelation that) {
+    public static Fragment1 makeDistinctFrom(Fragment1 a, Fragment1 that) {
 
         Set<String> thisVarNames = new HashSet<String>(VarUtils.getVarNames(PatternVars.vars(a.getElement())));
         Set<String> thatVarNames = new HashSet<String>(VarUtils.getVarNames(PatternVars.vars(that.getElement())));
@@ -216,9 +217,9 @@ public class ConceptUtils {
         return result;
     }
 
-    public static UnaryRelation createConceptFromRdfNodes(Iterable<? extends RDFNode> rdfNodes) {
+    public static Fragment1 createConceptFromRdfNodes(Iterable<? extends RDFNode> rdfNodes) {
         Iterable<Node> nodes = Streams.stream(rdfNodes).map(RDFNode::asNode).collect(Collectors.toList());
-        UnaryRelation result = ConceptUtils.createConcept(nodes);
+        Fragment1 result = ConceptUtils.createConcept(nodes);
         return result;
     }
 
@@ -262,7 +263,7 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Concept createRelatedConcept(Collection<Node> nodes, BinaryRelation relation) {
+    public static Concept createRelatedConcept(Collection<Node> nodes, Fragment2 relation) {
         Var sourceVar = relation.getSourceVar();
         Var targetVar = relation.getTargetVar();
         Element relationEl = relation.getElement();
@@ -278,7 +279,7 @@ public class ConceptUtils {
     }
 
 
-    public static Concept getRelatedConcept(Concept source, BinaryRelation relation) {
+    public static Concept getRelatedConcept(Concept source, Fragment2 relation) {
         Concept renamedSource = createRenamedSourceConcept(source, relation);
 
         Element merged = ElementUtils.mergeElements(renamedSource.getElement(), relation.getElement());
@@ -290,7 +291,7 @@ public class ConceptUtils {
     }
 
     // FIMXE Consolidate with QueryGenerationUtils.createQuryCount
-    public static Query createQueryCount(UnaryRelation concept, Var outputVar, Long itemLimit, Long rowLimit) {
+    public static Query createQueryCount(Fragment1 concept, Var outputVar, Long itemLimit, Long rowLimit) {
         Query subQuery = createQueryList(concept);
 
         if(rowLimit != null) {
@@ -318,7 +319,7 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Set<Var> getVarsMentioned(UnaryRelation concept) {
+    public static Set<Var> getVarsMentioned(Fragment1 concept) {
         Collection<Var> tmp = PatternVars.vars(concept.getElement());
         Set<Var> result = SetUtils.asSet(tmp);
         return result;
@@ -394,9 +395,9 @@ public class ConceptUtils {
 //        return result;
 //    }
 
-    public static UnaryRelation renameVar(UnaryRelation concept, Var targetVar) {
+    public static Fragment1 renameVar(Fragment1 concept, Var targetVar) {
 
-        UnaryRelation result;
+        Fragment1 result;
         if(concept.getVar().equals(targetVar)) {
             // Nothing to do since we are renaming the variable to itself
             result = concept;
@@ -461,13 +462,13 @@ public class ConceptUtils {
      * @param relation The relation; variables will remain unchanged
      * @return
      */
-    public static Concept createRenamedSourceConcept(Concept concept, BinaryRelation relation) {
+    public static Concept createRenamedSourceConcept(Concept concept, Fragment2 relation) {
         Concept attrConcept = new Concept(relation.getElement(), relation.getSourceVar());
         Concept result = createRenamedConcept(attrConcept, concept);
         return result;
     }
 
-    public static Concept createRenamedConcept(UnaryRelation concept, Map<Var, Var> varMap) {
+    public static Concept createRenamedConcept(Fragment1 concept, Map<Var, Var> varMap) {
         Var newVar = MapUtils.getOrElse(varMap, concept.getVar(), concept.getVar());
         Element newElement = ElementUtils.createRenamedElement(concept.getElement(), varMap);
 
@@ -609,7 +610,7 @@ public class ConceptUtils {
     }
 
 
-    public static Query createQueryList(UnaryRelation concept) {
+    public static Query createQueryList(Fragment1 concept) {
         Query result = createQueryList(concept, null, null);
         return result;
     }
@@ -637,7 +638,7 @@ public class ConceptUtils {
     }
 
 
-    public static Query createQueryList(UnaryRelation concept, Range<Long> range) {
+    public static Query createQueryList(Fragment1 concept, Range<Long> range) {
         long offset = QueryUtils.rangeToOffset(range);
         long limit = QueryUtils.rangeToLimit(range);
 
@@ -645,7 +646,7 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Query createQueryList(UnaryRelation concept, Long limit, Long offset) {
+    public static Query createQueryList(Fragment1 concept, Long limit, Long offset) {
         Query result = new Query();
         result.setQuerySelectType();
         result.setDistinct(true);
@@ -805,12 +806,12 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Var freshVar(UnaryRelation concept) {
+    public static Var freshVar(Fragment1 concept) {
         Var result = freshVar(concept, null);
         return result;
     }
 
-    public static Var freshVar(UnaryRelation concept, String baseVarName) {
+    public static Var freshVar(Fragment1 concept, String baseVarName) {
         baseVarName = baseVarName == null ? "c" : baseVarName;
 
         Set<Var> varsMentioned = concept.getVarsMentioned();
@@ -821,7 +822,7 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Concept createRenamedConcept(UnaryRelation concept, Var attrVar) {
+    public static Concept createRenamedConcept(Fragment1 concept, Var attrVar) {
         Var newVar = freshVar(concept);
         Map<Var, Var> varMap = new HashMap<>();
         varMap.put(attrVar, newVar);

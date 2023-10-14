@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.data_query.impl;
 import org.aksw.jena_sparql_api.data_query.api.NodePath;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessor;
 import org.aksw.jena_sparql_api.data_query.api.SPath;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 
 public class PathAccessorSPath
@@ -20,7 +20,7 @@ public class PathAccessorSPath
     }
 
     @Override
-    public BinaryRelation getReachingRelation(SPath path) {
+    public Fragment2 getReachingRelation(SPath path) {
         return path.getReachingBinaryRelation();
     }
 

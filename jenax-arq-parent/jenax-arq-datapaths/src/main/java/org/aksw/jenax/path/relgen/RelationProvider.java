@@ -1,7 +1,7 @@
 package org.aksw.jenax.path.relgen;
 
 import org.aksw.jenax.path.core.PathPE;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 
 
 /**
@@ -12,5 +12,5 @@ import org.aksw.jenax.sparql.relation.api.Relation;
  *
  */
 public interface RelationProvider {
-    Relation getRelation(PathPE absPath, PathPE block);
+    Fragment getRelation(PathPE absPath, PathPE block);
 }

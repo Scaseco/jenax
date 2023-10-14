@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +10,15 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
-import org.aksw.jena_sparql_api.concepts.RelationJoiner;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentJoiner;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
@@ -32,7 +32,7 @@ import org.apache.jena.sparql.syntax.ElementFilter;
 import com.google.common.collect.Sets;
 
 /**
- * A (SPARQL) relation is a unifying abstraction for queries and graph patterns which allows treating both as tables.
+ * A (SPARQL) fragment is a unifying abstraction for queries and graph patterns which allows treating both as tables.
  * Variables can be marked as "distinguished" which means that they will be projected when generating a relation's
  * effective SPARQL query.
  * Furthermore, the relation inferface declares several methods for constructing joins between relations.
@@ -41,7 +41,7 @@ import com.google.common.collect.Sets;
  * @author raven Mar 7, 2018
  *
  */
-public interface Relation
+public interface Fragment
     extends HasElement
 {
 
@@ -70,7 +70,7 @@ public interface Relation
     }
 
 
-    default Relation rename(Function<String, String> renameFn, Var ... constantVars) {
+    default Fragment rename(Function<String, String> renameFn, Var ... constantVars) {
 
         Collection<Var> constants = new HashSet<>(Arrays.asList(constantVars));
         Set<Var> vars = getVarsMentioned();
@@ -81,26 +81,26 @@ public interface Relation
         Element newElement = ElementUtils.createRenamedElement(getElement(), oldToNew);
         List<Var> newVars = getVars().stream().map(v -> oldToNew.getOrDefault(v, v)).collect(Collectors.toList());
 
-        Relation result = new RelationImpl(newElement, newVars);
+        Fragment result = new FragmentImpl(newElement, newVars);
         return result;
     }
 
     /**
      * Rename the variables of the relation to the given variables
      * In case of clashes, prior variables will be replaced with fresh ones.
-     * Delegates ot {@link RelationUtils#rename(Relation, List)}.
+     * Delegates ot {@link FragmentUtils#rename(Fragment, List)}.
      *
      * @param r
      * @param targetVars
      * @return
      */
-    default Relation rename(List<Var> targetVars) {
-        return RelationUtils.rename(this, targetVars);
+    default Fragment rename(List<Var> targetVars) {
+        return FragmentUtils.rename(this, targetVars);
     }
 
-    default UnaryRelation toUnaryRelation() {
+    default Fragment1 toUnaryRelation() {
         List<Var> vars = getVars();
-        UnaryRelation result;
+        Fragment1 result;
         if(vars.size() == 1) {
             Element e = getElement();
             result = new Concept(e, vars.get(0));
@@ -111,12 +111,12 @@ public interface Relation
         return result;
     }
 
-    default BinaryRelation toBinaryRelation() {
+    default Fragment2 toFragment2() {
         List<Var> vars = getVars();
-        BinaryRelation result;
+        Fragment2 result;
         if(vars.size() == 2) {
             Element e = getElement();
-            result = new BinaryRelationImpl(e, vars.get(0), vars.get(1));
+            result = new Fragment2Impl(e, vars.get(0), vars.get(1));
         } else {
             throw new UnsupportedOperationException();
         }
@@ -125,12 +125,12 @@ public interface Relation
     }
 
 
-    default TernaryRelation toTernaryRelation() {
+    default Fragment3 toFragment3() {
         List<Var> vars = getVars();
-        TernaryRelation result;
+        Fragment3 result;
         if(vars.size() == 3) {
             Element e = getElement();
-            result = new TernaryRelationImpl(e, vars.get(0), vars.get(1), vars.get(2));
+            result = new Fragment3Impl(e, vars.get(0), vars.get(1), vars.get(2));
         } else {
             throw new UnsupportedOperationException();
         }
@@ -179,19 +179,19 @@ public interface Relation
         return result;
     }
 
-    default Relation applyNodeTransform(NodeTransform nodeTransform) {
+    default Fragment applyNodeTransform(NodeTransform nodeTransform) {
         return applyDefaultNodeTransform(this, nodeTransform);
     }
 
     // TODO Move to relation utils
-    static Relation applyDefaultNodeTransform(Relation r, NodeTransform nodeTransform) {
+    static Fragment applyDefaultNodeTransform(Fragment r, NodeTransform nodeTransform) {
         List<Var> transformedVars = r.getVars().stream()
                 .map(v -> VarUtils.applyNodeTransform(v, nodeTransform))
                 .collect(Collectors.toList());
 
         Element transformedElement = ElementUtils.applyNodeTransform(r.getElement(), nodeTransform);
 
-        Relation result = new RelationImpl(transformedElement, transformedVars);
+        Fragment result = new FragmentImpl(transformedElement, transformedVars);
         return result;
     }
 
@@ -199,41 +199,41 @@ public interface Relation
     // Keeps all variables of this relation intact, and appends the element of another relation
     // TODO Better rename to appendOn(...) - join is misleading, as we are talking about a
     // syntactic transformation - which usually - but not always - corresponds to a join
-    default RelationJoiner joinOn(List<Var> vars) {
-        return new RelationJoiner(this, vars);
+    default FragmentJoiner joinOn(List<Var> vars) {
+        return new FragmentJoiner(this, vars);
     }
 
-    default RelationJoiner joinOn(Var ... vars) {
-        return RelationJoiner.from(this, vars);
+    default FragmentJoiner joinOn(Var ... vars) {
+        return FragmentJoiner.from(this, vars);
     }
 
     // Similar to joinOn - but *prepends* the elements of the other relation
-    default RelationJoiner prependOn(Var ... vars) {
+    default FragmentJoiner prependOn(Var ... vars) {
         return prependOn(Arrays.asList(vars)).filterRelationFirst(true);
     }
 
-    default RelationJoiner prependOn(List<Var> vars) {
-        return RelationJoiner.from(this, vars).filterRelationFirst(true);
+    default FragmentJoiner prependOn(List<Var> vars) {
+        return FragmentJoiner.from(this, vars).filterRelationFirst(true);
     }
 
-    default Relation project(List<Var> vars) {
-        return new RelationImpl(getElement(), vars);
+    default Fragment project(List<Var> vars) {
+        return new FragmentImpl(getElement(), vars);
     }
 
-    default Relation project(Var ... vars) {
+    default Fragment project(Var ... vars) {
         return project(Arrays.asList(vars));
     }
 
-    default Relation filter(Var var, Node node) {
+    default Fragment filter(Var var, Node node) {
         return filter(new E_Equals(ExprLib.nodeToExpr(var), ExprLib.nodeToExpr(node)));
     }
 
-    default Relation filter(Expr ... exprs) {
+    default Fragment filter(Expr ... exprs) {
         return filter(Arrays.asList(exprs));
     }
 
-    default Relation filter(Iterable<Expr> exprs) {
-        Relation result = !exprs.iterator().hasNext()
+    default Fragment filter(Iterable<Expr> exprs) {
+        Fragment result = !exprs.iterator().hasNext()
             ? this
             : filter(ExprUtils.andifyBalanced(exprs));
 
@@ -241,20 +241,20 @@ public interface Relation
     }
 
 
-    default Relation filter(Expr expr) {
+    default Fragment filter(Expr expr) {
         List<Element> elts = new ArrayList<>();
         elts.addAll(getElements());
         elts.add(new ElementFilter(expr));
         Element newElt = ElementUtils.groupIfNeeded(elts);
 
         List<Var> vars = getVars();
-        Relation result = new RelationImpl(newElt, vars);
+        Fragment result = new FragmentImpl(newElt, vars);
         return result;
 
     }
 
     default Query toQuery() {
-        Query result = RelationUtils.createQuery(this);
+        Query result = FragmentUtils.createQuery(this);
         return result;
 
 //        Query result = new Query();

@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.aksw.jena_sparql_api.concepts.PropertyRelation;
+import org.aksw.jenax.sparql.fragment.impl.PropertyRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;

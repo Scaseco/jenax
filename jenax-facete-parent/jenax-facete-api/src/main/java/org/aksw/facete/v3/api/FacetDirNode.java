@@ -1,7 +1,7 @@
 package org.aksw.facete.v3.api;
 
 import org.aksw.facete.v3.api.traversal.TraversalDirNode;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.rdf.model.RDFNode;
 
 public interface FacetDirNode
@@ -28,7 +28,7 @@ public interface FacetDirNode
     /** The relation of facet and facet value */
     // TODO We may want to make this a default method that derives the relation from\
     // a ternary focus, facet, value relation
-    BinaryRelation facetValueRelation();
+    Fragment2 facetValueRelation();
 
     /** Facets without counts, i.e. just the available predicates */
     FacetedDataQuery<RDFNode> facets(boolean includeAbsent);

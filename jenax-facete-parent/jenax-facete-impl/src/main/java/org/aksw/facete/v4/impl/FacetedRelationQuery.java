@@ -15,12 +15,12 @@ import org.aksw.facete.v3.api.TreeData;
 import org.aksw.facete.v3.api.TreeQuery;
 import org.aksw.facete.v3.api.TreeQueryImpl;
 import org.aksw.facete.v3.api.TreeQueryNode;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.algebra.Table;
@@ -37,12 +37,12 @@ import com.google.common.collect.HashBiMap;
  * A relation together with a tree structure much like a rooted construct query.
  */
 class TreeRelation {
-    protected Relation relation;
+    protected Fragment relation;
     protected TreeQuery tree;
     protected BiMap<TreeQueryNode, Var> pathToVar;
     // protected ListMultimap<TreeQueryNode, TreeQueryNode> foo;
 
-    public TreeRelation(Relation relation, TreeQuery tree, BiMap<TreeQueryNode, Var> pathToVar) {
+    public TreeRelation(Fragment relation, TreeQuery tree, BiMap<TreeQueryNode, Var> pathToVar) {
         super();
         this.relation = relation;
         this.tree = tree;
@@ -55,7 +55,7 @@ class TreeRelation {
     }
 
     /** Turn each variable of the relation into a property of the tree */
-    public static TreeRelation of(Relation relation) {
+    public static TreeRelation of(Fragment relation) {
         TreeQuery tree = new TreeQueryImpl();
         List<Var> vars = relation.getVars();
         BiMap<TreeQueryNode, Var> pathToVar = HashBiMap.create();
@@ -101,7 +101,7 @@ public class FacetedRelationQuery {
         TREE
     }
 
-    protected Supplier<Relation> baseRelation;
+    protected Supplier<Fragment> baseRelation;
 
     // Property connecting the root node of the query tree to the nodes that represent the initial variables
     public static final Node INITIAL_VAR = NodeFactory.createURI("urn:var");
@@ -143,11 +143,11 @@ public class FacetedRelationQuery {
         return isVisible.contains(node);
     }
 
-    public FacetedRelationQuery(Supplier<Relation> baseRelation) {
+    public FacetedRelationQuery(Supplier<Fragment> baseRelation) {
         this(baseRelation, "");
     }
 
-    public FacetedRelationQuery(Supplier<Relation> baseRelation, String scopeName) {
+    public FacetedRelationQuery(Supplier<Fragment> baseRelation, String scopeName) {
         super();
         this.baseRelation = baseRelation;
         this.scopeName = scopeName;
@@ -169,13 +169,13 @@ public class FacetedRelationQuery {
         return projection;
     }
 
-    public static FacetedRelationQuery of(Relation relation) {
+    public static FacetedRelationQuery of(Fragment relation) {
         return new FacetedRelationQuery(() -> relation);
     }
 
     /** Convenience function if there is only a single root variable */
     public FacetedQuery getFacetedQuery() {
-        Relation relation = baseRelation.get();
+        Fragment relation = baseRelation.get();
         Var rootVar = null;
         if (relation.getVars().size() == 1) {
             rootVar = relation.getVars().iterator().next();

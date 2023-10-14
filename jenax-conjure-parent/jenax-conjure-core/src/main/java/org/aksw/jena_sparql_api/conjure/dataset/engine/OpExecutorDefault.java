@@ -60,8 +60,8 @@ import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
@@ -590,7 +590,7 @@ public class OpExecutorDefault
 //
 //		}
 
-        List<TernaryRelation> views = new ArrayList<>();
+        List<Fragment3> views = new ArrayList<>();
         List<String> viewDefs = op.getViewDefs();
         for(String viewDef : viewDefs) {
             try(ByteArrayInputStream in = new ByteArrayInputStream(viewDef.getBytes())) {
@@ -602,7 +602,7 @@ public class OpExecutorDefault
                     throw new RuntimeException(e);
                 }
                 for(Query query : queries) {
-                    Collection<TernaryRelation> viewContribs = VirtualPartitionedQuery.toViews(query);
+                    Collection<Fragment3> viewContribs = VirtualPartitionedQuery.toViews(query);
                     views.addAll(viewContribs);
                 }
             } catch (IOException e1) {

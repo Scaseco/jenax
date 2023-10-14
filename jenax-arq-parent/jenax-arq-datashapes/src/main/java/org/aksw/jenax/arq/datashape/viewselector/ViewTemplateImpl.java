@@ -1,7 +1,7 @@
 package org.aksw.jenax.arq.datashape.viewselector;
 
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.rdf.model.Resource;
 
 public class ViewTemplateImpl
@@ -11,10 +11,10 @@ public class ViewTemplateImpl
         and possibly provides additional information in its model*/
     protected Resource metadata;
 
-    protected UnaryRelation condition;
+    protected Fragment1 condition;
     protected EntityQueryImpl entityQuery;
 
-    public ViewTemplateImpl(Resource metadata, UnaryRelation condition, EntityQueryImpl entityQuery) {
+    public ViewTemplateImpl(Resource metadata, Fragment1 condition, EntityQueryImpl entityQuery) {
         super();
         this.metadata = metadata;
         this.condition = condition;
@@ -27,7 +27,7 @@ public class ViewTemplateImpl
     }
 
     @Override
-    public UnaryRelation getCondition() {
+    public Fragment1 getCondition() {
         return condition;
     }
 

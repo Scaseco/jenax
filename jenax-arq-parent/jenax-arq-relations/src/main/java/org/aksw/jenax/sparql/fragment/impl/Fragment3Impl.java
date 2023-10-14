@@ -1,9 +1,9 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 
@@ -13,8 +13,8 @@ import org.apache.jena.sparql.syntax.Element;
  * @author raven Mar 7, 2018
  *
  */
-public class TernaryRelationImpl
-    implements TernaryRelation
+public class Fragment3Impl
+    implements Fragment3
 {
     protected Var s;
     protected Var p;
@@ -22,7 +22,7 @@ public class TernaryRelationImpl
 
     protected Element element;
 
-    public TernaryRelationImpl(Element element, Var s, Var p, Var o) {
+    public Fragment3Impl(Element element, Var s, Var p, Var o) {
         super();
         this.s = s;
         this.p = p;

@@ -1,21 +1,21 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.List;
 
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 
-public class RelationWrapperBase
-    implements Relation
+public class FragmentWrapperBase
+    implements Fragment
 {
-    protected Relation delegate;
+    protected Fragment delegate;
     
-    public RelationWrapperBase(Relation delegate) {
+    public FragmentWrapperBase(Fragment delegate) {
 		super();
 		this.delegate = delegate;
 	}
     
-    public Relation getDelegate() {
+    public Fragment getDelegate() {
 		return delegate;
 	}
 

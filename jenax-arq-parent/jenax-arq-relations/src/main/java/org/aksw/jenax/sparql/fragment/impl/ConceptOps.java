@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
@@ -64,7 +64,7 @@ public class ConceptOps {
     }
 
 
-    public static Concept forAllIfRolePresent(BinaryRelation role, Concept filler, Generator<Var> generator) {
+    public static Concept forAllIfRolePresent(Fragment2 role, Concept filler, Generator<Var> generator) {
 
         Concept result;
         if(filler == Concept.TOP) {
@@ -119,7 +119,7 @@ public class ConceptOps {
 //        return result;
 //    }
 
-    public static Concept exists(BinaryRelation relation, Concept filler, Generator<Var> generator) {
+    public static Concept exists(Fragment2 relation, Concept filler, Generator<Var> generator) {
         Concept targetConcept = relation.getTargetConcept();
         Concept aligned = align(filler, targetConcept, generator);
         Element x = ElementUtils.mergeElements(relation.getElement(), aligned.getElement());

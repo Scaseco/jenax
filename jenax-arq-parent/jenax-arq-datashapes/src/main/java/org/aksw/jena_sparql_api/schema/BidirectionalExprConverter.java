@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.schema;
 import java.util.Collection;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.concepts.UnaryXExpr;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExpr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.NodeValue;
 

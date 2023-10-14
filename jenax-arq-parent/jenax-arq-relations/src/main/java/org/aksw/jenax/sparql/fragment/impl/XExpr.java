@@ -1,13 +1,13 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Set;
 
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 
 /**
- * FIXME This class is indended to be analoguous to the {@link Relation} hierachy.
+ * FIXME This class is indended to be analoguous to the {@link Fragment} hierachy.
  * I.e. the intent is having annotated syntactic building blocks for
  * composing sparql queries 
  * 

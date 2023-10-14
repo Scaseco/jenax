@@ -4,10 +4,10 @@ import java.util.Map;
 
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 
 import com.google.common.collect.Range;

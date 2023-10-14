@@ -1,6 +1,6 @@
 package org.aksw.facete.v4.impl;
 
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.graph.Node;
 
 /**
@@ -15,5 +15,5 @@ public interface PropertyResolver {
      * @param property The property node for which to carry out a lookup
      * @return The relation that is the result of the lookup. Never null.
      */
-    Relation resolve(Node property);
+    Fragment resolve(Node property);
 }

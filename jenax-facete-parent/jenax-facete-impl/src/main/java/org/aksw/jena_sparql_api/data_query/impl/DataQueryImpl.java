@@ -27,8 +27,6 @@ import org.aksw.facete.v3.experimental.ResolverNodeImpl;
 import org.aksw.facete.v3.experimental.ResolverTemplate;
 import org.aksw.facete.v3.experimental.Resolvers;
 import org.aksw.jena_sparql_api.algebra.utils.AlgebraUtils;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.DataNode;
 import org.aksw.jena_sparql_api.data_query.api.DataQuery;
 import org.aksw.jena_sparql_api.data_query.api.DataQueryVarView;
@@ -51,9 +49,11 @@ import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -198,7 +198,7 @@ public class DataQueryImpl<T extends RDFNode>
     protected Long limit;
     protected Long offset;
 
-    protected UnaryRelation filter;
+    protected Fragment1 filter;
 
     protected List<Element> directFilters = new ArrayList<>();
 
@@ -217,7 +217,7 @@ public class DataQueryImpl<T extends RDFNode>
 
     public DataQueryImpl(
             RdfDataSource dataSource,
-            UnaryRelation baseRelation,
+            Fragment1 baseRelation,
             Template template,
             Class<T> resultClass) {
         this(
@@ -268,7 +268,7 @@ public class DataQueryImpl<T extends RDFNode>
     @Deprecated
     public DataQueryImpl(
             SparqlQueryConnection conn,
-            UnaryRelation baseRelation,
+            Fragment1 baseRelation,
             Template template,
             Class<T> resultClass) {
         this(
@@ -479,7 +479,7 @@ public class DataQueryImpl<T extends RDFNode>
 
 
     @Override
-    public DataQuery<T> filter(UnaryRelation concept) {
+    public DataQuery<T> filter(Fragment1 concept) {
         if(concept != null) {
             if(filter == null) {
                 filter = concept;
@@ -512,7 +512,7 @@ public class DataQueryImpl<T extends RDFNode>
      * Method is subject to be replaced with a more general mechanism based on Relationlets
      */
     @Override
-    public DataQuery<T> filterUsing(Relation relation, String... attrNames) {
+    public DataQuery<T> filterUsing(Fragment relation, String... attrNames) {
 
         if(relation != null) {
             List<Var> vars = Arrays.asList(attrNames).stream()
@@ -520,7 +520,7 @@ public class DataQueryImpl<T extends RDFNode>
                     .collect(Collectors.toList());
 
             List<Var> baseVars = new ArrayList<>(PatternVars.vars(baseElement));
-            baseElement = new RelationImpl(baseElement, baseVars).joinOn(vars).with(relation).getElement();
+            baseElement = new FragmentImpl(baseElement, baseVars).joinOn(vars).with(relation).getElement();
         }
         return this;
     }
@@ -607,7 +607,7 @@ public class DataQueryImpl<T extends RDFNode>
         if(false) {
         Var rootVar = (Var)mapper.getNode(root);
 
-        UnaryRelation tmp = new Concept(ElementUtils.groupIfNeeded(elts), rootVar);
+        Fragment1 tmp = new Concept(ElementUtils.groupIfNeeded(elts), rootVar);
         filter(tmp);
         } else {
             filterDirect(ElementUtils.groupIfNeeded(elts));
@@ -713,7 +713,7 @@ public class DataQueryImpl<T extends RDFNode>
 
         Element effectivePattern = filter == null
                 ? baseQueryPattern
-                : new RelationImpl(baseQueryPattern, new ArrayList<>(PatternVars.vars(baseQueryPattern))).joinOn(defaultVar).with(filter).getElement()
+                : new FragmentImpl(baseQueryPattern, new ArrayList<>(PatternVars.vars(baseQueryPattern))).joinOn(defaultVar).with(filter).getElement()
                 ;
 
         if(!directFilters.isEmpty()) {

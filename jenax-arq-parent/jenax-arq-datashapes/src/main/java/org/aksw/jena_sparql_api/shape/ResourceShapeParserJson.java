@@ -4,9 +4,9 @@ import java.util.Map.Entry;
 
 import org.aksw.gson.utils.JsonVisitor;
 import org.aksw.gson.utils.JsonWalker;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
@@ -137,7 +137,7 @@ public class ResourceShapeParserJson
             expr = new E_Equals(new ExprVar(Vars.p), NodeValue.makeNode(np));
         }
 
-        BinaryRelation relation = new BinaryRelationImpl(new ElementFilter(expr), Vars.p, Vars.o);
+        Fragment2 relation = new Fragment2Impl(new ElementFilter(expr), Vars.p, Vars.o);
 
         StepRelation result = new StepRelation(relation, isInverse);
         return result;

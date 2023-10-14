@@ -10,10 +10,10 @@ import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.impl.FacetedDataQueryImpl;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ScopedFacetPath;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -52,7 +52,7 @@ public class FacetDirNodeImpl
     }
 
     @Override
-    public BinaryRelation facetValueRelation() {
+    public Fragment2 facetValueRelation() {
         throw new UnsupportedOperationException();
     }
 
@@ -61,14 +61,14 @@ public class FacetDirNodeImpl
         FacetedQueryImpl fq = (FacetedQueryImpl)parent.query();
 
         ElementGenerator eltGen = ElementGenerator.configure(fq); // TODO Get rid of the cast
-        Relation baseRel = fq.relationQuery().baseRelation.get();
+        Fragment baseRel = fq.relationQuery().baseRelation.get();
         Var baseRelationVar = fq.getBaseVar(); // Should be the same as baseRel.asUnaryRelation().getVar() - Add test case to verify!
         eltGen.setBaseElement(baseRel.getElement());
 
         ScopedFacetPath sfp = ScopedFacetPath.of(baseRelationVar, parent.node.getFacetPath());
-        TernaryRelation relation = eltGen.createRelationFacetValue(null, sfp, org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), null, null, false, false);
+        Fragment3 relation = eltGen.createRelationFacetValue(null, sfp, org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), null, null, false, false);
 
-        UnaryRelation concept = relation.project(relation.getP()).toUnaryRelation();
+        Fragment1 concept = relation.project(relation.getP()).toUnaryRelation();
         FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(
                 parent.query().connection(),
                 concept.getElement(),
@@ -86,7 +86,7 @@ public class FacetDirNodeImpl
         // ElementGenerator.createQuery(parent.facetedQuery.relationQuery, x -> true);
         ElementGenerator eltGen = ElementGenerator.configure(parent.facetedQuery);
         ScopedFacetPath sfp = ScopedFacetPath.of(Vars.s, parent.node.getFacetPath());
-        TernaryRelation relation = eltGen.createRelationFacetValue(null, sfp, org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), null, null, false, false);
+        Fragment3 relation = eltGen.createRelationFacetValue(null, sfp, org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), null, null, false, false);
         System.out.println(relation);
         // Map<String, BinaryRelation> map = eltGen.createMapFacetsAndValues(parent.node.getFacetPath(), org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), false, false, false);
         //map.entrySet().forEach(x -> System.out.println("Entry: " + x));

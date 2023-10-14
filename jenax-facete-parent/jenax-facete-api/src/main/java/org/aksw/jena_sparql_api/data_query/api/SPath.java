@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.data_query.api;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 public interface SPath
     extends Selection
@@ -17,7 +17,7 @@ public interface SPath
 
     SPath get(String predicate, boolean reverse);
 
-    BinaryRelation getReachingBinaryRelation();
+    Fragment2 getReachingBinaryRelation();
 //	void setParent(Resource source);
 //	void setTarget(Resource target);
 

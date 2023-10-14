@@ -65,6 +65,7 @@ public class TableUtils {
     }
 
 
+    @Deprecated /** There is NodeTransformLib.transform() for tables */
     public static Table applyNodeTransform(Table table, NodeTransform transform) {
         List<Var> oldVars = table.getVars();
 

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import org.aksw.jenax.stmt.parser.element.SparqlElementParser;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParserImpl;
@@ -14,7 +14,7 @@ import org.apache.jena.sparql.syntax.Element;
  *
  */
 public class PropertyRelation
-    extends BinaryRelationImpl
+    extends Fragment2Impl
 {
     protected Var propertyVar;
 

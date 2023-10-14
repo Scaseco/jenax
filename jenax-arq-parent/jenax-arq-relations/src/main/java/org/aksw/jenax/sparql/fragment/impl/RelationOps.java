@@ -1,11 +1,11 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.Set;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
@@ -25,11 +25,11 @@ public class RelationOps {
 
 
 
-    public static BinaryRelation from(org.apache.jena.sparql.path.Path path) {
+    public static Fragment2 from(org.apache.jena.sparql.path.Path path) {
         TriplePath tp = new TriplePath(Vars.s, path, Vars.o);
         ElementPathBlock e = new ElementPathBlock();
         e.addTriplePath(tp);
-        BinaryRelation result = new BinaryRelationImpl(e, Vars.s, Vars.o);
+        Fragment2 result = new Fragment2Impl(e, Vars.s, Vars.o);
         return result;
     }
 
@@ -45,7 +45,7 @@ public class RelationOps {
      * @param relation
      * @return
      */
-    public static BinaryRelation forAllHavingTheSameValue(BinaryRelation role, Generator<Var> baseGenerator) {
+    public static Fragment2 forAllHavingTheSameValue(Fragment2 role, Generator<Var> baseGenerator) {
 //      Select ?x Count(?c) As ?cnt1{ ?a hasPartner/inCountry ?x } Group By ?s
 //      Select ?s ?x (Count(?c) As ?cnt2){ ?a hasPartner/inCountry ?x } Group By ?s ?x
 //      Filter(?cnt1 = ?cnt2)
@@ -88,7 +88,7 @@ public class RelationOps {
         e.addElement(new ElementSubQuery(qb));
         e.addElement(new ElementFilter(new E_Equals(new ExprVar(cnta), new ExprVar(cntb))));
 
-        BinaryRelation result = new BinaryRelationImpl(e, sourceVar, targetVar);
+        Fragment2 result = new Fragment2Impl(e, sourceVar, targetVar);
         return result;
     }
 }

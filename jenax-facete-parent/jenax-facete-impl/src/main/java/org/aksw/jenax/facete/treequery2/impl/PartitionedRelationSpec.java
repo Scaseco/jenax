@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.treequery2.old.NodeQueryOld;
 import org.apache.jena.sparql.core.Var;
 
@@ -18,7 +18,7 @@ public class PartitionedRelationSpec {
     // DONE means that RelationQuery supports the feature.
     protected Long limit; // DONE
     protected Long offset; // DONE
-    protected Relation baseElement; // DONE
+    protected Fragment baseElement; // DONE
 
     protected Map<FacetStep, Var> premappedPaths;
 
@@ -27,7 +27,7 @@ public class PartitionedRelationSpec {
     protected NodeQueryOld interPartitionSortConditions; // sort partitions
     protected List<FacetPath> intraPartitionSortConditions; // sort the values within partitions
 
-    protected UnaryRelation filter; // immediate filter or set intersection
+    protected Fragment1 filter; // immediate filter or set intersection
 
 
 

@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptOps;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
@@ -56,7 +56,7 @@ public class OpVisitorSparql
 
     @Override
     public Concept visit(OpExists op) {
-        BinaryRelation relation = op.getRole();
+        Fragment2 relation = op.getRole();
         Concept filler = op.getSubOp().accept(this);
         Concept result = ConceptOps.exists(relation, filler, generator);
         return result;
@@ -64,7 +64,7 @@ public class OpVisitorSparql
 
     @Override
     public Concept visit(OpForAll op) {
-        BinaryRelation relation = op.getRole();
+        Fragment2 relation = op.getRole();
         Concept filler = op.getSubOp().accept(this);
         Concept result = ConceptOps.forAllIfRolePresent(relation, filler, generator);
         return result;
@@ -114,7 +114,7 @@ public class OpVisitorSparql
     public Concept visit(OpFocus op) {
         Concept concept = op.getSubOp().accept(this);
         Path path = op.getPath();
-        BinaryRelation relation = BinaryRelationImpl.create(path);
+        Fragment2 relation = Fragment2Impl.create(path);
         Concept result = ConceptUtils.getRelatedConcept(concept, relation);
         return result;
     }

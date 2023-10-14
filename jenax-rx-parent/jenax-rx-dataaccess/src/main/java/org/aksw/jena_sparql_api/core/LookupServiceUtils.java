@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.LookupServiceTransformValue;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.lookup.LookupServiceSparqlQuery;
 import org.aksw.jenax.analytics.core.MappedConcept;
 import org.aksw.jenax.analytics.core.MappedQuery;
@@ -15,7 +13,9 @@ import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
 import org.aksw.jenax.arq.aggregation.FunctionResultSetAggregate;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -49,11 +49,11 @@ public class LookupServiceUtils {
 //        LookupService<Node, T> result = LookupServiceTransformValue.create(base, transform);
 //        return result;
 //    }
-    public static <T> LookupService<Node, List<Node>> createLookupService(QueryExecutionFactoryQuery qef, BinaryRelation relation) {
+    public static <T> LookupService<Node, List<Node>> createLookupService(QueryExecutionFactoryQuery qef, Fragment2 relation) {
         Var sourceVar = relation.getSourceVar();
 
         AggList<Node> agg = AggList.create(AggLiteral.create(BindingMapperProjectVar.create(relation.getTargetVar())));
-        Query query = RelationUtils.createQuery(relation);
+        Query query = FragmentUtils.createQuery(relation);
         MappedQuery<List<Node>> mappedQuery = MappedQuery.create(query, sourceVar, agg);
         LookupService<Node, List<Node>> result = LookupServiceUtils.createLookupService(qef, mappedQuery);
 

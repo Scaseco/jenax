@@ -1,9 +1,9 @@
 package org.aksw.facete.v3.api.path;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 public interface StepSpecFromRelement2
     extends StepSpec
 {
-    BinaryRelation getRelement();
+    Fragment2 getRelement();
 }

@@ -14,10 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
@@ -37,9 +33,13 @@ import org.aksw.jenax.model.shacl.domain.ShHasTargets;
 import org.aksw.jenax.model.shacl.domain.ShNodeShape;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.model.shacl.util.ShSparqlTargets;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -90,7 +90,7 @@ public class EntityClassifier {
     public static final Property classifier = ResourceFactory.createProperty("http://jsa.aksw.org/classifier");
 
 
-    protected Map<Node, Relation> idToCondition = new LinkedHashMap<>();
+    protected Map<Node, Fragment> idToCondition = new LinkedHashMap<>();
 
     //protected int entityKeyLength;
     protected List<Var> entityKeyVars;
@@ -104,7 +104,7 @@ public class EntityClassifier {
         this.entityKeyVars = entityKeyVars;
     }
 
-    public EntityClassifier addCondition(Node conditionId, Relation relation) {
+    public EntityClassifier addCondition(Node conditionId, Fragment relation) {
         idToCondition.put(conditionId, relation);
         return this;
     }
@@ -138,13 +138,13 @@ public class EntityClassifier {
      * @param candidates
      * @param idToCondition
      */
-    public Relation createClassifyingRelation() {
+    public Fragment createClassifyingRelation() {
 
 
         Set<Var> blacklist = new HashSet<>();
 //        blacklist.addAll(candidate.getVarsMentioned());
         blacklist.addAll(entityKeyVars);
-        for (Relation c : idToCondition.values()) {
+        for (Fragment c : idToCondition.values()) {
             blacklist.addAll(c.getVarsMentioned());
         }
 
@@ -156,14 +156,14 @@ public class EntityClassifier {
 
         List<Element> unionMembers = new ArrayList<>(idToCondition.size());
 
-        for (Entry<Node, ? extends Relation> e : idToCondition.entrySet()) {
+        for (Entry<Node, ? extends Fragment> e : idToCondition.entrySet()) {
             Node cId = e.getKey();
-            Relation c = e.getValue();
+            Fragment c = e.getValue();
 
             c = c.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(bnodeRemap::get));
 
 
-            Relation part = c.rename(entityKeyVars); // e.getVars()
+            Fragment part = c.rename(entityKeyVars); // e.getVars()
             List<Element> elts = part.getElements();
             elts.add(new ElementBind(conditionVar, NodeValue.makeNode(cId)));
             unionMembers.add(ElementUtils.groupIfNeeded(elts));
@@ -178,7 +178,7 @@ public class EntityClassifier {
 
         List<Var> finalVars = new ArrayList<>(entityKeyVars);
         finalVars.add(conditionVar);
-        Relation result = new RelationImpl(union, finalVars);
+        Fragment result = new FragmentImpl(union, finalVars);
         return result;
     }
 
@@ -194,7 +194,7 @@ public class EntityClassifier {
      * @param candidate
      * @return
      */
-    protected EntityGraphFragment createGraphFragmentGeneric(Relation candidate) {
+    protected EntityGraphFragment createGraphFragmentGeneric(Fragment candidate) {
         throw new RuntimeException("not implemented");
     }
 
@@ -210,7 +210,7 @@ public class EntityClassifier {
      * @return
      */
     public EntityGraphFragment createGraphFragment() {
-        BinaryRelation r = createClassifyingRelation().toBinaryRelation();
+        Fragment2 r = createClassifyingRelation().toFragment2();
 
         Var entityVar = r.getSourceVar();
         Var classVar = r.getTargetVar();
@@ -228,12 +228,12 @@ public class EntityClassifier {
     }
 
 
-    public Map<Node, Relation> getIdToCondition() {
+    public Map<Node, Fragment> getIdToCondition() {
         return idToCondition;
     }
 
 
-    public EntityQueryBasic toEntityQuery(Relation candidates) {
+    public EntityQueryBasic toEntityQuery(Fragment candidates) {
         return null;
         //new MapServiceSparqlQuery(qef, attrQuery, attrVar, isLeftJoin)
         ///createClassifyingRelation(candidates);
@@ -272,15 +272,15 @@ public class EntityClassifier {
     private static final Logger logger = LoggerFactory.getLogger(EntityClassifier.class);
 
 
-    public static UnaryRelation createConceptTargetSubjectsOf(Node node) {
+    public static Fragment1 createConceptTargetSubjectsOf(Node node) {
         return new Concept(ElementUtils.createElementTriple(Vars.s, node, Vars.o), Vars.s);
     }
 
-    public static UnaryRelation createConceptTargetObjectsOf(Node node) {
+    public static Fragment1 createConceptTargetObjectsOf(Node node) {
         return new Concept(ElementUtils.createElementTriple(Vars.s, node, Vars.o), Vars.o);
     }
 
-    public static UnaryRelation createConceptTargetClass(Node node) {
+    public static Fragment1 createConceptTargetClass(Node node) {
         return new Concept(ElementUtils.createElementPath(Vars.s, PathUtils.typeSubclassOf, node), Vars.s);
     }
 
@@ -309,7 +309,7 @@ public class EntityClassifier {
             if (query != null) {
                 System.out.println(query);
 
-                entityClassifier.addCondition(nodeShapeNode, RelationUtils.fromQuery(query));
+                entityClassifier.addCondition(nodeShapeNode, FragmentUtils.fromQuery(query));
             } else {
                 logger.warn("Unsupported shacl target type");
             }
@@ -318,28 +318,28 @@ public class EntityClassifier {
         Set<RDFNode> targetNodes = hasTargets.getTargetNodes();
         if (!targetNodes.isEmpty()) {
             Collection<Node> nodes = targetNodes.stream().map(RDFNode::asNode).collect(Collectors.toSet());
-            UnaryRelation r = Concept.create(nodes);
+            Fragment1 r = Concept.create(nodes);
             entityClassifier.addCondition(nodeShapeNode, r);
         }
 
         Set<RDFNode> targetClasses = hasTargets.getTargetClasses();
         for (RDFNode target : targetClasses) {
             // ?s rdf:type/rdfs:subClassOf* ?o
-            UnaryRelation r = createConceptTargetClass(target.asNode());
+            Fragment1 r = createConceptTargetClass(target.asNode());
             entityClassifier.addCondition(nodeShapeNode, r);
         }
 
         Set<RDFNode> targetSubjectsOf = hasTargets.getTargetSubjectsOf();
         for (RDFNode target : targetSubjectsOf) {
             // ?s rdf:type/rdfs:subClassOf* ?o
-            UnaryRelation r = createConceptTargetSubjectsOf(target.asNode());
+            Fragment1 r = createConceptTargetSubjectsOf(target.asNode());
             entityClassifier.addCondition(nodeShapeNode, r);
         }
 
         Set<RDFNode> targetObjectsOf = hasTargets.getTargetObjectsOf();
         for (RDFNode target : targetObjectsOf) {
             // ?s rdf:type/rdfs:subClassOf* ?o
-            UnaryRelation r = createConceptTargetObjectsOf(target.asNode());
+            Fragment1 r = createConceptTargetObjectsOf(target.asNode());
             entityClassifier.addCondition(nodeShapeNode, r);
         }
     }
@@ -406,13 +406,13 @@ public class EntityClassifier {
         EntityQueryRx.execConstructEntitiesNg(conn::query, basic).forEach(quad -> System.out.println(quad));
 
 
-        Relation r = entityClassifier.createClassifyingRelation();
+        Fragment r = entityClassifier.createClassifyingRelation();
 
-        UnaryRelation testConcept = ConceptUtils.createForRdfType("http://foo.bar/baz");
-        Relation s = testConcept.join().with(r, r.getVars().get(0)); //r.joinOn(r.getVars().get(0)).with(testConcept);
+        Fragment1 testConcept = ConceptUtils.createForRdfType("http://foo.bar/baz");
+        Fragment s = testConcept.join().with(r, r.getVars().get(0)); //r.joinOn(r.getVars().get(0)).with(testConcept);
 
 
-        Relation grouped =  RelationUtils.groupBy(s, s.getVars().iterator().next(), Vars.c, false);
+        Fragment grouped =  FragmentUtils.groupBy(s, s.getVars().iterator().next(), Vars.c, false);
         System.out.println("Grouped relation: " + grouped);
 
         Op op = Algebra.optimize(Algebra.compile(grouped.getElement()));

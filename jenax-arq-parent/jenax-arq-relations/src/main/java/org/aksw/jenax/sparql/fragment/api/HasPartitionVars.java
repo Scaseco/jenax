@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.List;
 

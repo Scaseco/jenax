@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.entity.graph.metamodel;
 
 import java.nio.charset.StandardCharsets;
 
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -23,7 +23,7 @@ public class ConceptManagerImpl
     }
 
     @Override
-    public Node getOrCreate(UnaryRelation concept) {
+    public Node getOrCreate(Fragment1 concept) {
 
         String queryStr = concept.toQuery().toString();;
         HashCode hashCode = Hashing.sha256().hashString(queryStr, StandardCharsets.UTF_8);

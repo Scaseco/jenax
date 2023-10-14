@@ -1,16 +1,16 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.RelationJoiner;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentJoiner;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 
-public interface UnaryRelation
-    extends Relation
+public interface Fragment1
+    extends Fragment
 {
     Var getVar();
 
@@ -19,7 +19,6 @@ public interface UnaryRelation
         Var v = getVar();
         return Collections.singletonList(v);
     }
-
 
     /**
      * Test whether this relation is isomorphic to
@@ -48,7 +47,7 @@ public interface UnaryRelation
         return result;
     }
 
-    default RelationJoiner join() {
+    default FragmentJoiner join() {
         return joinOn(getVar());
     }
 }

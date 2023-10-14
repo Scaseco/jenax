@@ -8,10 +8,11 @@ import org.aksw.facete.v3.api.FacetConstraint;
 import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.facete.v3.api.TreeQueryNode;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+
 import com.google.common.base.Preconditions;
 import org.apache.jena.sparql.core.Var;
 
@@ -98,21 +99,21 @@ public class FacetedQueryImpl
     }
 
     @Override
-    public FacetedQuery baseConcept(Supplier<? extends UnaryRelation> conceptSupplier) {
+    public FacetedQuery baseConcept(Supplier<? extends Fragment1> conceptSupplier) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public FacetedQuery baseConcept(UnaryRelation concept) {
+    public FacetedQuery baseConcept(Fragment1 concept) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public UnaryRelation baseConcept() {
+    public Fragment1 baseConcept() {
         Var rootVar = relationQuery.varToRoot.inverse().get(focus);
-        Relation r = relationQuery.baseRelation.get();
+        Fragment r = relationQuery.baseRelation.get();
         return r.project(rootVar).toUnaryRelation();
 
         // throw new UnsupportedOperationException("Use relationQuery().baseRelation()");

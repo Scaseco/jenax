@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.util.stream.CollapseRunsSpec;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -23,9 +23,10 @@ import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+
 import com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -57,8 +58,8 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 import com.google.common.collect.Sets;
 
-public class RelationUtils {
-    public static final TernaryRelation SPO = new TernaryRelationImpl(
+public class FragmentUtils {
+    public static final Fragment3 SPO = new Fragment3Impl(
             ElementUtils.createElementTriple(Vars.s, Vars.p, Vars.o),
             Vars.s, Vars.p, Vars.o);
 
@@ -69,7 +70,7 @@ public class RelationUtils {
      *
      * @return
      */
-    public static TernaryRelation createTernaryRelation(Node s, Node p, Node o) {
+    public static Fragment3 createTernaryRelation(Node s, Node p, Node o) {
         List<Expr> exprs = new ArrayList<>(3);
         List<Node> nodes = Arrays.asList(s, p, o);
 
@@ -89,7 +90,7 @@ public class RelationUtils {
             elt = ElementUtils.createElementGroup(elt, new ElementFilter(expr));
         }
 
-        return new TernaryRelationImpl(elt,
+        return new Fragment3Impl(elt,
                 Vars.s, Vars.p, Vars.o);
     }
 
@@ -101,11 +102,11 @@ public class RelationUtils {
      * @param targetVars
      * @return
      */
-    public static Relation rename(Relation r, List<Var> targetVars) {
+    public static Fragment rename(Fragment r, List<Var> targetVars) {
         List<Var> rVars = r.getVars();
         Map<Var, Node> map = createRenameVarMap(r.getVarsMentioned(), rVars, targetVars);
 
-        Relation result = r.applyNodeTransform(new NodeTransformSubst(map));
+        Fragment result = r.applyNodeTransform(new NodeTransformSubst(map));
 
         return result;
     }
@@ -122,11 +123,11 @@ public class RelationUtils {
      * @param targetNodes A list of vars (TODO Change type to var)
      * @return
      */
-    public static Element renameNodes(Relation r, List<? extends Node> targetNodes) {
+    public static Element renameNodes(Fragment r, List<? extends Node> targetNodes) {
         List<Var> tgtVars = targetNodes.stream().map(v -> (Var)v).collect(Collectors.toList());
 
         // Create a relation with an empty pattern from the target nodes
-        Relation joined = new RelationImpl(new ElementGroup(), tgtVars)
+        Fragment joined = new FragmentImpl(new ElementGroup(), tgtVars)
             .joinOn(tgtVars)
             .with(r);
         Element result = joined.getElement();
@@ -183,18 +184,18 @@ public class RelationUtils {
      * @param relations
      * @return
      */
-    public static Relation align(Collection<? extends Relation> relations, List<Var> vars) {
-        List<Relation> tmp = relations.stream()
+    public static Fragment align(Collection<? extends Fragment> relations, List<Var> vars) {
+        List<Fragment> tmp = relations.stream()
                 .map(r -> rename(r, vars))
                 .collect(Collectors.toList());
 
         List<Element> es = tmp.stream()
-                .map(Relation::getElement)
+                .map(Fragment::getElement)
                 .collect(Collectors.toList());
 
 
         Element e = ElementUtils.unionIfNeeded(es);
-        Relation result = new RelationImpl(e, vars);
+        Fragment result = new FragmentImpl(e, vars);
         return result;
     }
 
@@ -208,7 +209,7 @@ public class RelationUtils {
      * @param includeAbsent if true, unbound values count too
      * @return
      */
-    public static Relation groupBy(Relation r, Var aggVar, Var resultVar, boolean includeAbsent) {
+    public static Fragment groupBy(Fragment r, Var aggVar, Var resultVar, boolean includeAbsent) {
         Query query = new Query();
         query.setQuerySelectType();
         query.setQueryPattern(r.getElement());
@@ -237,7 +238,7 @@ public class RelationUtils {
             query.addGroupBy(groupVar);
         }
 
-        Relation result = new RelationImpl(new ElementSubQuery(query), newVars);
+        Fragment result = new FragmentImpl(new ElementSubQuery(query), newVars);
         return result;
     }
 
@@ -255,13 +256,13 @@ public class RelationUtils {
 //
 //    }
 
-    public static Relation fromQuery(String queryStr) {
+    public static Fragment fromQuery(String queryStr) {
         PrefixMapping pm = new PrefixMappingImpl();
         pm.setNsPrefixes(PrefixMapping.Extended);
         return fromQuery(queryStr, pm);
     }
 
-    public static Relation fromQuery(String queryStr, PrefixMapping prefixMapping) {
+    public static Fragment fromQuery(String queryStr, PrefixMapping prefixMapping) {
         Query query = new Query();
         query.setPrefixMapping(prefixMapping);
         // TODO Make parser configurable
@@ -270,12 +271,12 @@ public class RelationUtils {
 
         // parser.parse(query, queryStr);
 
-        Relation result = fromQuery(query);
+        Fragment result = fromQuery(query);
         return result;
     }
 
-    public static Relation fromQuery(Query query) {
-        Relation result;
+    public static Fragment fromQuery(Query query) {
+        Fragment result;
         if(query.isSelectType()) {
             List<Var> vars = query.getProjectVars();
 
@@ -284,12 +285,12 @@ public class RelationUtils {
                     ? new ElementSubQuery(query)
                     : query.getQueryPattern();
 
-            result = new RelationImpl(element, vars);
+            result = new FragmentImpl(element, vars);
         } else if(query.isConstructType()) {
             Template template = query.getConstructTemplate();
             List<Var> vars = new ArrayList<>(QuadPatternUtils.getVarsMentioned(template.getQuads()));
             Element element = query.getQueryPattern();
-            result = new RelationImpl(element, vars);
+            result = new FragmentImpl(element, vars);
         } else {
 
             throw new RuntimeException("SELECT or CONSTRUCT query form expected, instead got " + query);
@@ -300,7 +301,7 @@ public class RelationUtils {
 
 
 
-    public static Triple extractTriple(BinaryRelation relation) {
+    public static Triple extractTriple(Fragment2 relation) {
         Element e = relation.getElement();
         Triple result = ElementUtils.extractTriple(e);
         return result;
@@ -315,7 +316,7 @@ public class RelationUtils {
 //
 //    }
 
-    public static BinaryRelation and(BinaryRelation a, BinaryRelation b, boolean transformInPlaceIfApplicable) {
+    public static Fragment2 and(Fragment2 a, Fragment2 b, boolean transformInPlaceIfApplicable) {
         Element ae = a.getElement();
         Element be = b.getElement();
 
@@ -336,7 +337,7 @@ public class RelationUtils {
         }
         eg.addElement(ce);;
 
-        BinaryRelation result = new BinaryRelationImpl(eg, a.getSourceVar(), varMap.getOrDefault(b.getTargetVar(), a.getSourceVar()));
+        Fragment2 result = new Fragment2Impl(eg, a.getSourceVar(), varMap.getOrDefault(b.getTargetVar(), a.getSourceVar()));
 
         return result;
     }
@@ -350,7 +351,7 @@ public class RelationUtils {
      * @param transformInPlaceIfApplicable Add 'b' to to 'a' if a's element already is a union
      * @return
      */
-    public static BinaryRelation union(BinaryRelation a, BinaryRelation b, boolean transformInPlaceIfApplicable) {
+    public static Fragment2 union(Fragment2 a, Fragment2 b, boolean transformInPlaceIfApplicable) {
         Element ae = a.getElement();
 
         ElementUnion u;
@@ -376,20 +377,20 @@ public class RelationUtils {
         Element c = ElementUtils.createRenamedElement(b.getElement(), varMap);
         u.addElement(c);
 
-        BinaryRelation result = isInPlace ? a : new BinaryRelationImpl(u, a.getSourceVar(), a.getTargetVar());
+        Fragment2 result = isInPlace ? a : new Fragment2Impl(u, a.getSourceVar(), a.getTargetVar());
         return result;
     }
 
-    public static BinaryRelation createRelation(String propertyUri, boolean isInverse, PrefixMapping prefixMapping) {
+    public static Fragment2 createRelation(String propertyUri, boolean isInverse, PrefixMapping prefixMapping) {
 
         String p = prefixMapping == null ? propertyUri : prefixMapping.expandPrefix(propertyUri);
         Node node = NodeFactory.createURI(p);
-        BinaryRelation result = createRelation(node, isInverse);
+        Fragment2 result = createRelation(node, isInverse);
         return result;
     }
 
 
-    public static BinaryRelation createRelation(Node property, boolean isInverse) {
+    public static Fragment2 createRelation(Node property, boolean isInverse) {
 
         //Expr expr = new E_Equals(new ExprVar(Vars.p), ExprUtils.nodeToExpr(property));
 
@@ -399,18 +400,18 @@ public class RelationUtils {
 
         Element element = ElementUtils.createElement(t);
         //Element element = new ElementTriplesBlock(bgp);
-        BinaryRelation result = new BinaryRelationImpl(element, Vars.s, Vars.o);//createRelation(expr, isInverse);
+        Fragment2 result = new Fragment2Impl(element, Vars.s, Vars.o);//createRelation(expr, isInverse);
         return result;
     }
 
-    public static BinaryRelation createRelation(Property property, boolean isInverse) {
-        BinaryRelation result = createRelation(property.asNode(), isInverse);
+    public static Fragment2 createRelation(Property property, boolean isInverse) {
+        Fragment2 result = createRelation(property.asNode(), isInverse);
         return result;
     }
 
 
-    public static BinaryRelation createRelation(Expr expr, boolean isInverse) {
-        BinaryRelation result = new BinaryRelationImpl(new ElementFilter(expr), Vars.p, Vars.o);
+    public static Fragment2 createRelation(Expr expr, boolean isInverse) {
+        Fragment2 result = new Fragment2Impl(new ElementFilter(expr), Vars.p, Vars.o);
         return result;
     }
 
@@ -421,7 +422,7 @@ public class RelationUtils {
 //    }
 
 
-    public static Query createQuery(Relation relation) {
+    public static Query createQuery(Fragment relation) {
         // If the element is already a query, just limit the projection
         Element e = relation.getElement();
         List<Var> vars = relation.getVars();

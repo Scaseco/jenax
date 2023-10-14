@@ -18,6 +18,7 @@ import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -25,6 +26,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
+import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -71,6 +73,9 @@ public class ElementUtils {
 //        return result;
 //    }
 
+    public static ElementData create(Table table) {
+        return new ElementData(table.getVars(), Iter.toList(table.rows()));
+    }
 
     public static List<Element> getSubElements(Element element) {
         return ElementVisitorGetSubElements.getSubElements(element);

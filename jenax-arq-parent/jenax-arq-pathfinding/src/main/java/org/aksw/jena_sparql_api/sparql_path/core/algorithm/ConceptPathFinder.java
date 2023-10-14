@@ -8,17 +8,17 @@ import java.util.Set;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint;
 import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.path.PathUtils;
 import org.aksw.jenax.sparql.path.SimplePath;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -117,13 +117,13 @@ public class ConceptPathFinder {
         return joinSummaryModel;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, UnaryRelation sourceConcept, UnaryRelation tmpTargetConcept, int nPaths, int maxHops) {
+    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, int nPaths, int maxHops) {
         Model joinSummaryModel = createDefaultJoinSummaryModel(qef);
         List<SimplePath> result = findPaths(qef, sourceConcept, tmpTargetConcept, nPaths, maxHops, joinSummaryModel);
         return result;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, UnaryRelation sourceConcept, UnaryRelation tmpTargetConcept, int nPaths, int maxHops, Model joinSummaryModel) {
+    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, int nPaths, int maxHops, Model joinSummaryModel) {
 
         /*
         if(joinSummaryModel == null) {
@@ -131,7 +131,7 @@ public class ConceptPathFinder {
         }*/
 
 
-        UnaryRelation targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
+        Fragment1 targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
 
         logger.debug("Distinguished target concept: " + targetConcept);
 
@@ -146,7 +146,7 @@ public class ConceptPathFinder {
         // Retrieve properties of the source concept
         // Example: If our source concept is ?s a Type", we do not know which properties the concept has
 
-        UnaryRelation propertyConcept;
+        Fragment1 propertyConcept;
         if(sourceConcept.isSubjectConcept()) {
             List<Element> elements = sourceConcept.getElements();
             ElementTriplesBlock etb = (ElementTriplesBlock) elements.get(0);

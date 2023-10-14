@@ -6,14 +6,14 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import org.aksw.facete.v4.impl.PropertyResolverImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.facete.treequery2.impl.FacetConstraints;
 import org.aksw.jenax.facete.treequery2.impl.Partition;
 import org.aksw.jenax.facete.treequery2.impl.QueryContextImpl;
 import org.aksw.jenax.facete.treequery2.impl.RelationQueryImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.treequery2.old.NodeQueryOld;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
@@ -60,7 +60,7 @@ public interface RelationQuery
     /**
      * Returns the relation on which this RelationQuery is based.
      */
-    Relation getRelation();
+    Fragment getRelation();
 
 
     /** Extra relations that are joined with this relation */
@@ -113,11 +113,11 @@ public interface RelationQuery
         return of(() -> new Concept(new ElementGroup(), startVar));
     }
 
-    public static RelationQuery of(Relation relation) {
+    public static RelationQuery of(Fragment relation) {
         return of(() -> relation);
     }
 
-    public static RelationQuery of(Supplier<Relation> relation) {
+    public static RelationQuery of(Supplier<Fragment> relation) {
         return of(relation, new QueryContextImpl(new PropertyResolverImpl()));
     }
 
@@ -125,7 +125,7 @@ public interface RelationQuery
 //        return new RelationQueryImpl(() -> relation, queryContext);
 //    }
 
-    public static RelationQuery of(Supplier<Relation> relation, QueryContext queryContext) {
+    public static RelationQuery of(Supplier<Fragment> relation, QueryContext queryContext) {
         String scopeBaseName = queryContext.getFieldIdGenerator().next();
         return new RelationQueryImpl(scopeBaseName, null, relation, null, queryContext, new HashMap<>());
     }

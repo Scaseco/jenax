@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Algebra;

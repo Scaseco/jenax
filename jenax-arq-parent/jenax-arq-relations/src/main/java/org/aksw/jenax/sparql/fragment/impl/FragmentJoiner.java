@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.concepts;
+package org.aksw.jenax.sparql.fragment.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +18,8 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarUtils;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
@@ -31,11 +31,11 @@ import org.apache.jena.sparql.syntax.ElementOptional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
-public class RelationJoiner {
-    protected Relation attrRelation;
+public class FragmentJoiner {
+    protected Fragment attrRelation;
     protected List<Var> attrJoinVars;
 
-    protected Relation filterRelation;
+    protected Fragment filterRelation;
     protected List<Var> filterJoinVars;
 
     protected boolean filterRelationFirst;
@@ -55,11 +55,11 @@ public class RelationJoiner {
      */
     protected Map<Var, Boolean> varToOrigin = null;
 
-    public RelationJoiner(Relation attrRelation, List<Var> attrJoinVars) {
+    public FragmentJoiner(Fragment attrRelation, List<Var> attrJoinVars) {
         this(attrRelation, attrJoinVars, false);
     }
 
-    public RelationJoiner(Relation attrRelation, List<Var> attrJoinVars, boolean filterRelationFirst) {
+    public FragmentJoiner(Fragment attrRelation, List<Var> attrJoinVars, boolean filterRelationFirst) {
         super();
         this.attrRelation = attrRelation;
         this.attrJoinVars = attrJoinVars;
@@ -72,27 +72,27 @@ public class RelationJoiner {
 //		return result;
 //	}
 
-    public static RelationJoiner from(Relation r, Var ... vars) {
+    public static FragmentJoiner from(Fragment r, Var ... vars) {
         return from(r, Arrays.asList(vars));
     }
 
-    public static RelationJoiner from(Relation r, List<Var> vars) {
-        RelationJoiner result = new RelationJoiner(r, new ArrayList<>(vars));
+    public static FragmentJoiner from(Fragment r, List<Var> vars) {
+        FragmentJoiner result = new FragmentJoiner(r, new ArrayList<>(vars));
         return result;
     }
 
-    public RelationJoiner addAttrJoinVar(Var var) {
+    public FragmentJoiner addAttrJoinVar(Var var) {
         attrJoinVars.add(var);
         return this;
     }
 
-    public RelationJoiner filterRelationFirst(boolean onOrOff) {
+    public FragmentJoiner filterRelationFirst(boolean onOrOff) {
         this.filterRelationFirst = onOrOff;
         return this;
     }
 
 
-    public RelationJoiner projectSrcVars(Var ... vars) {
+    public FragmentJoiner projectSrcVars(Var ... vars) {
         varToOrigin = varToOrigin != null ? varToOrigin : new LinkedHashMap<>();
         for(Var v : vars) {
             Boolean prior = varToOrigin.put(v, true);
@@ -103,7 +103,7 @@ public class RelationJoiner {
         return this;
     }
 
-    public RelationJoiner projectTgtVars(Var ... vars) {
+    public FragmentJoiner projectTgtVars(Var ... vars) {
         varToOrigin = varToOrigin != null ? varToOrigin : new LinkedHashMap<>();
         for(Var v : vars) {
             Boolean prior = varToOrigin.put(v, false);
@@ -121,8 +121,8 @@ public class RelationJoiner {
      * @param joinVars If empty, all vars of c will be used for the join
      * @return
      */
-    public Relation with(Relation c, Var ... joinVars) {
-        Relation result;
+    public Fragment with(Fragment c, Var ... joinVars) {
+        Fragment result;
         if(c != null) {
             filterRelation = c;
             filterJoinVars = joinVars.length == 0 ? c.getVars() : Arrays.asList(joinVars);
@@ -135,7 +135,7 @@ public class RelationJoiner {
         //return this;
     }
 
-    public Relation with(UnaryRelation ur) {
+    public Fragment with(Fragment1 ur) {
         return with(ur, ur.getVar());
     }
 
@@ -144,11 +144,11 @@ public class RelationJoiner {
     // Maybe introduce some generic operation class?
     // relation.opOn(vars).joinWith(otherRelation)
     // relation.opOn(vars).yieldRenamedFilter(filterRelation)
-    public Relation yieldRenamedFilter(Relation c) {
+    public Fragment yieldRenamedFilter(Fragment c) {
         filterRelation = c;
         filterJoinVars = c.getVars();
 
-        Relation result = yieldRenamedFilterCore();
+        Fragment result = yieldRenamedFilterCore();
 
         return result;
     }
@@ -161,7 +161,7 @@ public class RelationJoiner {
      *
      * @return
      */
-    public Relation yieldRenamedFilterCore() {
+    public Fragment yieldRenamedFilterCore() {
         Set<Var> attrVarsMentioned = attrRelation.getVarsMentioned();
         Set<Var> filterVarsMentioned = filterRelation.getVarsMentioned();
 
@@ -175,7 +175,7 @@ public class RelationJoiner {
             .map(v -> varMap.getOrDefault(v, v))
             .collect(Collectors.toList());
 
-        Relation result = new RelationImpl(newFilterElement, newFilterVars);
+        Fragment result = new FragmentImpl(newFilterElement, newFilterVars);
         return result;
     }
 
@@ -199,7 +199,7 @@ public class RelationJoiner {
      * { ?s ?p ?o } { ?s ?p ?x }
      * @return
      */
-    public Relation get() {
+    public Fragment get() {
         List<Var> attrProjVars = varToOrigin == null ? attrRelation.getVars() : new ArrayList<>(varToOrigin.keySet());
 
         Set<Var> attrVarsMentioned = attrRelation.getVarsMentioned();
@@ -302,7 +302,7 @@ public class RelationJoiner {
                 // TODO We may want to apply normalization - e.g. detect a group with an empty bgb
                 canOmitJoin = true;
             } else if(filterRelation.getVars().size() == 1) {
-                UnaryRelation fr = filterRelation.toUnaryRelation();
+                Fragment1 fr = filterRelation.toUnaryRelation();
                 Var rawFilterVar = fr.getVar();
                 if(fr.isSubjectConcept()) {
 
@@ -339,7 +339,7 @@ public class RelationJoiner {
                     ? ElementUtils.groupIfNeeded(Iterables.concat(fes, aes))
                     : ElementUtils.groupIfNeeded(Iterables.concat(aes, fes));
 
-        Relation result = new RelationImpl(newElement, attrProjVars);
+        Fragment result = new FragmentImpl(newElement, attrProjVars);
         return result;
     }
 

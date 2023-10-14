@@ -1,4 +1,4 @@
-package org.aksw.jenax.sparql.relation.api;
+package org.aksw.jenax.sparql.fragment.api;
 
 import java.util.Set;
 
@@ -9,8 +9,8 @@ import org.apache.jena.sparql.core.Var;
  * @author raven
  *
  */
-public interface GeneralizedBinaryRelation
-	extends Relation
+public interface GeneralizedFragment2
+	extends Fragment
 {
 	Set<Var> getSourceVars();
 	Set<Var> getTargetVars();

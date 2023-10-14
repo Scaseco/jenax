@@ -11,7 +11,6 @@ import java.util.Set;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.jena_sparql_api.collection.observable.ObservableGraph;
 import org.aksw.jena_sparql_api.collection.observable.ObservableGraphImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.schema.NodeSchema;
@@ -28,6 +27,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFa
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
