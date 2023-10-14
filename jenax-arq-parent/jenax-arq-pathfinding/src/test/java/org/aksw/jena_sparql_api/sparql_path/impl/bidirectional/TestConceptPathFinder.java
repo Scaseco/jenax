@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.sparql_path.impl.bidirectional;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,9 +15,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.path.PathParser;
 import org.apache.jena.sparql.util.PrefixMapping2;
 import org.junit.Assert;
@@ -31,7 +28,7 @@ public class TestConceptPathFinder {
     private static final Logger logger = LoggerFactory.getLogger(TestConceptPathFinder.class);
 
     @Test
-    public void testConceptPathFinder01() throws IOException, ParseException {
+    public void testConceptPathFinder01() {
         PrefixMapping pm = PrefixMapping.Extended;
 
         // TODO Simply specification of reference paths such as by adding a Path.parse method
@@ -50,7 +47,7 @@ public class TestConceptPathFinder {
     }
 
     @Test
-    public void testConceptPathFinder02() throws IOException, ParseException {
+    public void testConceptPathFinder02() {
         PrefixMapping pm = new PrefixMapping2(PrefixMapping.Extended);
         pm.setNsPrefix("geo", "http://www.opengis.net/ont/geosparql#");
         pm.setNsPrefix("fp7", "http://fp7-pp.publicdata.eu/ontology/");
@@ -80,7 +77,7 @@ public class TestConceptPathFinder {
         Dataset ds,
         Fragment1 source,
         Fragment1 target,
-        int n) throws IOException, ParseException {
+        int n) {
         // Load some test data and create a sparql connection to it
         RDFConnection dataConnection = RDFConnectionFactory.connect(ds);
 
@@ -90,7 +87,7 @@ public class TestConceptPathFinder {
         // Note, that the summary could be loaded from any place, such as a file used for caching
         Model dataSummary = system.computeDataSummary(dataConnection).blockingGet();
 
-        RDFDataMgr.write(System.out, dataSummary, RDFFormat.TURTLE_PRETTY);
+        // RDFDataMgr.write(System.out, dataSummary, RDFFormat.TURTLE_PRETTY);
 
         // Build a path finder; for this, first obtain a factory from the system
         // set its attributes and eventually build the path finder.
