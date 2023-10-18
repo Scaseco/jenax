@@ -134,5 +134,4 @@ public interface QueryExecBuilderDelegate
             return qExec.ask();
         }
     }
-
 }

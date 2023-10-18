@@ -17,7 +17,7 @@ import org.aksw.jena_sparql_api.lookup.MapServiceSparqlQuery;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;
@@ -79,21 +79,21 @@ public class ShapedProperty {
         return result;
     }
 
-    public MapService<Concept, Node, ShapedNode> getValues() {
+    public MapService<Fragment1, Node, ShapedNode> getValues() {
         ResourceCache resourceCache = src.getResourceCache();
 //        ResourceState rs = resourceCache.get(src.getSourceNode());
         Set<Node> cachedValues = getCachedValues();
         QueryExecutionFactoryQuery conn = src.getConnection();
 
 
-        MapService<Concept, Node, Table> core;
+        MapService<Fragment1, Node, Table> core;
         // core = ListServiceFromList.wrap(cachedValues, null);
 
         Set<NodeSchema> tgtNodeSchemas = getTargetNodeSchemas();
 
         if (cachedValues != null) {
             List<Node> items = new ArrayList<>(cachedValues);
-            ListService<Concept, Node> listService = ListServiceFromList.wrap(items, (a, b) -> true);
+            ListService<Fragment1, Node> listService = ListServiceFromList.wrap(items, (a, b) -> true);
 
             // MapService<Concept, Node, Table> x;
 
@@ -125,7 +125,7 @@ public class ShapedProperty {
 
 
         // boolean result = set != null;
-        MapService<Concept, Node, ShapedNode> result = core.transformValues((k, v) -> {
+        MapService<Fragment1, Node, ShapedNode> result = core.transformValues((k, v) -> {
             ShapedNode r = ShapedNode.create(k, tgtNodeSchemas, resourceCache, conn);
             return r;
         });

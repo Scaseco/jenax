@@ -68,7 +68,7 @@ public class FacetDirNodeImpl
         ScopedFacetPath sfp = ScopedFacetPath.of(baseRelationVar, parent.node.getFacetPath());
         Fragment3 relation = eltGen.createRelationFacetValue(null, sfp, org.aksw.commons.util.direction.Direction.ofFwd(direction.isForward()), null, null, false, false);
 
-        Fragment1 concept = relation.project(relation.getP()).toUnaryRelation();
+        Fragment1 concept = relation.project(relation.getP()).toFragment1();
         FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(
                 parent.query().connection(),
                 concept.getElement(),

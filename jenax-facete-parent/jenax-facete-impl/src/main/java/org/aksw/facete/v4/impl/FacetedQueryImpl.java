@@ -114,7 +114,7 @@ public class FacetedQueryImpl
     public Fragment1 baseConcept() {
         Var rootVar = relationQuery.varToRoot.inverse().get(focus);
         Fragment r = relationQuery.baseRelation.get();
-        return r.project(rootVar).toUnaryRelation();
+        return r.project(rootVar).toFragment1();
 
         // throw new UnsupportedOperationException("Use relationQuery().baseRelation()");
     }

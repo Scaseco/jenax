@@ -11,12 +11,15 @@ import org.aksw.jenax.facete.treequery2.impl.FacetPathMappingImpl;
 import org.aksw.jenax.facete.treequery2.impl.OrderNodeImpl;
 import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
-import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.MappedFragment;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
+/**
+ * A view over a single column of a RelationQuery.
+ * Can be seen as a special form of a relation query where there is just a single variable.
+ */
 public interface NodeQuery
     extends FacetTraversable<NodeQuery>, HasSlice, Sortable<NodeQuery>
 {
@@ -39,8 +42,8 @@ public interface NodeQuery
      * that result set's column and this node's result set column.
      * If the filter pattern is a filter, then this node's result set is filtered by it.
      */
-    NodeQuery setFilterRelation(Fragment1 relation);
-    Fragment1 getFilterRelation();
+    NodeQuery setFilterFragment(Fragment1 relation);
+    Fragment1 getFilterFragment();
 
 
     /**
@@ -51,8 +54,8 @@ public interface NodeQuery
      * @param relation
      * @return
      */
-    NodeQuery addInjectRelation(MappedFragment<Node> relation);
-    List<MappedFragment<Node>> getInjectRelations();
+    NodeQuery addInjectFragment(MappedFragment<Node> relation);
+    List<MappedFragment<Node>> getInjectFragments();
 
     @Override
     default FacetPath getFacetPath() {

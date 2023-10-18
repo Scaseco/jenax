@@ -1,6 +1,8 @@
 package org.aksw.jenax.dataaccess.sparql.link.query;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
 import org.apache.jena.graph.Graph;
@@ -8,6 +10,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdfconnection.JenaConnectionException;
 import org.apache.jena.rdflink.LinkSparqlQuery;
+import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
@@ -30,6 +33,25 @@ public interface LinkSparqlQueryTmp
         return QueryFactory.create(query);
     }
 
+    static <T> T doQueryCompute(Transactional transactional, Supplier<QueryExec> qeSupp, Function<QueryExec, T> computation) {
+        T result = Txn.calculateRead(transactional, () -> {
+            try (QueryExec qExec = qeSupp.get()) {
+                T tmp = computation.apply(qExec);
+                return tmp;
+            }
+        });
+        return result;
+    }
+
+    static void doQueryRowSet(Transactional transactional, Supplier<QueryExec> qeSupp, Consumer<RowSet> resultSetAction) {
+        Txn.executeRead(transactional, ()-> {
+            try (QueryExec qExec = qeSupp.get()) {
+                RowSet rs = qExec.select();
+                resultSetAction.accept(rs);
+            }
+        });
+    }
+
     /**
      * Execute a SELECT query and process the RowSet with the handler code.
      * @param query
@@ -37,7 +59,7 @@ public interface LinkSparqlQueryTmp
      */
     @Override
     default void queryRowSet(String query, Consumer<RowSet> resultSetAction) {
-        queryRowSet(parse(query), resultSetAction);
+        doQueryRowSet(this, () -> query(query), resultSetAction);
     }
 
     /**
@@ -50,12 +72,7 @@ public interface LinkSparqlQueryTmp
         if ( ! query.isSelectType() )
             throw new JenaConnectionException("Query is not a SELECT query");
 
-        Txn.executeRead(this, ()-> {
-            try (QueryExec qExec = query(query) ) {
-                RowSet rs = qExec.select();
-                resultSetAction.accept(rs);
-            }
-        } );
+        doQueryRowSet(this, () -> query(query), resultSetAction);
     }
 
     /**
@@ -65,7 +82,7 @@ public interface LinkSparqlQueryTmp
      */
     @Override
     default void querySelect(String query, Consumer<Binding> rowAction) {
-        querySelect(parse(query), rowAction);
+        doQueryRowSet(this, () -> query(query), rs -> rs.forEachRemaining(rowAction));
     }
 
     /**
@@ -77,62 +94,53 @@ public interface LinkSparqlQueryTmp
     default void querySelect(Query query, Consumer<Binding> rowAction) {
         if ( ! query.isSelectType() )
             throw new JenaConnectionException("Query is not a SELECT query");
-        Txn.executeRead(this, ()->{
-            try ( QueryExec qExec = query(query) ) {
-                qExec.select().forEachRemaining(rowAction);
-            }
-        } );
+
+        doQueryRowSet(this, () -> query(query), rs -> rs.forEachRemaining(rowAction));
     }
 
     /** Execute a CONSTRUCT query and return as a Model */
     @Override
     default Graph queryConstruct(String query) {
-        return queryConstruct(parse(query));
+        return doQueryCompute(this, () -> query(query), QueryExec::construct);
     }
 
     /** Execute a CONSTRUCT query and return as a Model */
     @Override
     default Graph queryConstruct(Query query) {
-        return
-            Txn.calculateRead(this, ()->{
-                try ( QueryExec qExec = query(query) ) {
-                    return qExec.construct();
-                }
-            } );
+        if ( ! query.isConstructType() )
+            throw new JenaConnectionException("Query is not a CONSTRUCT query");
+
+        return doQueryCompute(this, () -> query(query), QueryExec::construct);
     }
 
     /** Execute a DESCRIBE query and return as a Model */
     @Override
     default Graph queryDescribe(String query) {
-        return queryDescribe(parse(query));
+        return doQueryCompute(this, () -> query(query), QueryExec::describe);
     }
 
     /** Execute a DESCRIBE query and return as a Model */
     @Override
     default Graph queryDescribe(Query query) {
-        return
-            Txn.calculateRead(this, ()->{
-                try ( QueryExec qExec = query(query) ) {
-                    return qExec.describe();
-                }
-            } );
+        if ( ! query.isDescribeType() )
+            throw new JenaConnectionException("Query is not a DESCRIBE query");
+
+        return doQueryCompute(this, () -> query(query), QueryExec::describe);
     }
 
     /** Execute a ASK query and return a boolean */
     @Override
     default boolean queryAsk(String query) {
-        return queryAsk(parse(query));
+        return doQueryCompute(this, () -> query(query), QueryExec::ask);
     }
 
     /** Execute a ASK query and return a boolean */
     @Override
     default boolean queryAsk(Query query) {
-        return
-            Txn.calculateRead(this, ()->{
-                try ( QueryExec qExec = query(query) ) {
-                    return qExec.ask();
-                }
-            } );
+        if ( ! query.isAskType() )
+            throw new JenaConnectionException("Query is not a ASK query");
+
+        return doQueryCompute(this, () -> query(query), QueryExec::ask);
     }
 
     /** Setup a SPARQL query execution.
@@ -160,18 +168,6 @@ public interface LinkSparqlQueryTmp
      */
     @Override
     default QueryExec query(String queryString) {
-        return query(parse(queryString));
+        return newQuery().query(queryString).build();
     }
-
-//
-//	@Override
-//	public default void querySelect(String query, Consumer<QuerySolution> rowAction) {
-//		this.queryRowSet(query, rs -> {
-//			while(rs.hasNext()) {
-//				QuerySolution qs = rs.next();
-//				rowAction.accept(qs);
-//			}
-//		});
-//	}
-
 }

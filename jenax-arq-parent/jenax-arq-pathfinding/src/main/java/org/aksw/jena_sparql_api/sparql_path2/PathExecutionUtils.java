@@ -19,7 +19,7 @@ import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.analytics.core.MappedConcept;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;
@@ -41,7 +41,7 @@ public class PathExecutionUtils {
 
         //MappedConcept<Graph> mc = ResourceShape.createMappedConcept(rsb.getResourceShape(), filter);
         MappedConcept<Graph> mc = ResourceShape.createMappedConcept(rsb.getResourceShape(), null, false);
-        MapService<Concept, Node, Graph> ls = MapServiceUtils.createListServiceAcc(qef, mc, false);
+        MapService<Fragment1, Node, Graph> ls = MapServiceUtils.createListServiceAcc(qef, mc, false);
         //Map<Node, Graph> nodeToGraph = ls.fetchData(null, null, null);
 
         // TODO Add a default fluent API

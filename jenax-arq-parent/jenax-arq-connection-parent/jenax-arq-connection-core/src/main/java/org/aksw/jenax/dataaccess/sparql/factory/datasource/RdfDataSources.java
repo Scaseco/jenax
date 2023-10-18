@@ -6,20 +6,21 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDelegateBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
-import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecOverRowSet;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
-import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetDelegateBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTmp;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -27,10 +28,7 @@ import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
-import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.system.Txn;
-
-import com.google.common.base.Preconditions;
 
 public class RdfDataSources {
 
@@ -78,6 +76,15 @@ public class RdfDataSources {
                 return r;
             }
         };
+    }
+
+    /**
+     * Wrap an RdfDataSource that any update link is wrapped.
+     */
+    public static RdfDataSource decorateUpdate(RdfDataSource dataSource, UpdateExecTransform updateExecTransform) {
+        LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
+        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        return result;
     }
 
     /**

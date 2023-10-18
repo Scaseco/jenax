@@ -6,7 +6,7 @@ import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 
@@ -14,7 +14,7 @@ import com.google.common.collect.Range;
 
 
 public class ListServiceConcept
-    implements MapService<Concept, Node, Node>
+    implements MapService<Fragment1, Node, Node>
 {
     protected QueryExecutionFactory qef;
 
@@ -24,7 +24,7 @@ public class ListServiceConcept
 
 
     @Override
-    public MapPaginator<Node, Node> createPaginator(Concept concept) {
+    public MapPaginator<Node, Node> createPaginator(Fragment1 concept) {
         MapPaginatorConcept result = new MapPaginatorConcept(qef, concept);
         return result;
     }
@@ -32,9 +32,9 @@ public class ListServiceConcept
 
     public static void main(String[] args) {
         QueryExecutionFactory qef = new QueryExecutionFactoryHttp("http://dbpedia.org/sparql");
-        MapService<Concept, Node, Node> ls = new ListServiceConcept(qef);
+        MapService<Fragment1, Node, Node> ls = new ListServiceConcept(qef);
 
-        Concept concept = ConceptUtils.listAllPredicates;
+        Fragment1 concept = ConceptUtils.listAllPredicates;
 
         Range<Long> countInfo;
 

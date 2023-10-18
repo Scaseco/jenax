@@ -139,6 +139,7 @@ public class AccJsonObject
         super.end(context);
     }
 
+    /** Internal method, use only for debugging/testing */
     public void addEdge(AccJsonEdge subAcc) {
         // TODO Lots of array copying!
         // We should add a builder for efficiet adds and derive the more efficient array version from it.

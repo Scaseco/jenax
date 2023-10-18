@@ -11,6 +11,7 @@ import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -53,9 +54,9 @@ public class ConceptOps {
     }
 
 
-    public static OrderedConcept applyOrder(Concept concept, OrderedConcept ordered, Generator<Var> generator) {
+    public static OrderedConcept applyOrder(Fragment1 concept, OrderedConcept ordered, Generator<Var> generator) {
         Map<Var, Var> varMap = createAlignedVarMap(concept, ordered.getConcept(), generator);
-        Concept tmp = intersect2(concept, ordered.getConcept(), varMap);
+        Fragment1 tmp = intersect2(concept, ordered.getConcept(), varMap);
 
         List<SortCondition> orderBy = /*NodeTransformLib.*/transform(new NodeTransformSubst(varMap), ordered.getOrderBy());
 
@@ -64,9 +65,9 @@ public class ConceptOps {
     }
 
 
-    public static Concept forAllIfRolePresent(Fragment2 role, Concept filler, Generator<Var> generator) {
+    public static Fragment1 forAllIfRolePresent(Fragment2 role, Fragment1 filler, Generator<Var> generator) {
 
-        Concept result;
+        Fragment1 result;
         if(filler == Concept.TOP) {
             result = exists(role, filler, generator);
         } else {
@@ -94,7 +95,7 @@ public class ConceptOps {
             pb.add(cntb, new ExprAggregator(Vars.y, new AggCountVar(targetEv)));
 
             // rename variables of the concept to make them different from the role
-            Concept aligned = align(filler, role.getTargetConcept(), generator);
+            Fragment1 aligned = align(filler, role.getTargetConcept(), generator);
             Element x = ElementUtils.mergeElements(roleElement, aligned.getElement());
 
             qb.setQueryPattern(x);
@@ -119,32 +120,32 @@ public class ConceptOps {
 //        return result;
 //    }
 
-    public static Concept exists(Fragment2 relation, Concept filler, Generator<Var> generator) {
-        Concept targetConcept = relation.getTargetConcept();
-        Concept aligned = align(filler, targetConcept, generator);
+    public static Fragment1 exists(Fragment2 relation, Fragment1 filler, Generator<Var> generator) {
+        Fragment1 targetConcept = relation.getTargetConcept();
+        Fragment1 aligned = align(filler, targetConcept, generator);
         Element x = ElementUtils.mergeElements(relation.getElement(), aligned.getElement());
-        Concept result = new Concept(x, relation.getSourceVar());
+        Fragment1 result = new Concept(x, relation.getSourceVar());
         return result;
 
         // Rename variables of the concept to make them distinct from those of the relation
     }
 
 
-    public static Concept align(Concept concept, Set<Var> vbs, Var vbJoinVar, Generator<Var> generator) {
+    public static Fragment1 align(Fragment1 concept, Set<Var> vbs, Var vbJoinVar, Generator<Var> generator) {
         Map<Var, Var> varMap = createAlignedVarMap(concept, vbs, vbJoinVar, generator);
-        Concept result = applyNodeTransform(concept, varMap);
+        Fragment1 result = applyNodeTransform(concept, varMap);
         return result;
     }
 
 
-    public static Concept applyNodeTransform(Concept concept, Map<? extends Node, ? extends Node> nodeMap) {
+    public static Fragment1 applyNodeTransform(Fragment1 concept, Map<? extends Node, ? extends Node> nodeMap) {
         NodeTransform nodeTransform = NodeTransformRenameMap.create(nodeMap);
 
-        Concept result = concept.applyNodeTransform(nodeTransform);
+        Fragment1 result = concept.applyNodeTransform(nodeTransform).toFragment1();
         return result;
     }
 
-    public static Map<Var, Var> createAlignedVarMap(Concept concept, Set<Var> vbs, Var vbJoinVar, Generator<Var> generator) {
+    public static Map<Var, Var> createAlignedVarMap(Fragment1 concept, Set<Var> vbs, Var vbJoinVar, Generator<Var> generator) {
         Set<Var> vas = concept.getVarsMentioned();
         Map<Var, Var> result = VarUtils.createDistinctVarMap(vas, vbs, true, generator);
 
@@ -154,7 +155,7 @@ public class ConceptOps {
         return result;
     }
 
-    public static Map<Var, Var> createAlignedVarMap(Concept concept, Concept forbiddenVars,  Generator<Var> generator) {
+    public static Map<Var, Var> createAlignedVarMap(Fragment1 concept, Fragment1 forbiddenVars,  Generator<Var> generator) {
         Var vb = forbiddenVars.getVar();
         Set<Var> vbs = forbiddenVars.getVarsMentioned();
         Map<Var, Var> result = createAlignedVarMap(concept, vbs, vb, generator);
@@ -163,29 +164,29 @@ public class ConceptOps {
     }
 
 
-    public static Concept align(Concept alignee, Concept forbiddenVars, Generator<Var> generator) {
+    public static Fragment1 align(Fragment1 alignee, Fragment1 forbiddenVars, Generator<Var> generator) {
         Set<Var> vbs = forbiddenVars.getVarsMentioned();
-        Concept result = align(alignee, vbs, forbiddenVars.getVar(), generator);
+        Fragment1 result = align(alignee, vbs, forbiddenVars.getVar(), generator);
         return result;
     }
 
-    public static Concept union(Stream<Concept> conceptStream) {
+    public static Fragment1 union(Stream<Fragment1> conceptStream) {
         // Note: x,y in order to pass in the identity as second arg, and rename its variables
         // rather than that of the provided concept
-        Concept result = conceptStream.reduce(Concept.BOTTOM, (x, y) -> ConceptOps.union(y, x, null));
+        Fragment1 result = conceptStream.reduce(Concept.BOTTOM, (x, y) -> ConceptOps.union(y, x, null));
         return result;
     }
 
-    public static Concept intersect(Stream<Concept> conceptStream) {
-        Concept result = conceptStream.reduce(Concept.TOP, (x, y) -> ConceptOps.intersect(y, x, (Generator<Var>)null));
+    public static Fragment1 intersect(Stream<Fragment1> conceptStream) {
+        Fragment1 result = conceptStream.reduce(Concept.TOP, (x, y) -> ConceptOps.intersect(y, x, (Generator<Var>)null));
         return result;
     }
 
-    public static Concept union(Concept concept, Concept filter, Generator<Var> generator) {
-        Concept result;
+    public static Fragment1 union(Fragment1 concept, Fragment1 filter, Generator<Var> generator) {
+        Fragment1 result;
 
         if(filter != null && filter != Concept.BOTTOM) {
-            Concept tmp = align(concept, filter, generator);
+            Fragment1 tmp = align(concept, filter, generator);
             Element e = ElementUtils.unionElements(concept.getElement(), tmp.getElement());
             result = new Concept(e, concept.getVar());
       } else {
@@ -196,11 +197,11 @@ public class ConceptOps {
 
     }
 
-    public static Concept intersect2(Concept concept, Concept filter, Map<Var, Var> varMap) {
-        Concept result;
+    public static Fragment1 intersect2(Fragment1 concept, Fragment1 filter, Map<Var, Var> varMap) {
+        Fragment1 result;
 
         if(filter != null) {
-            Concept tmp = varMap == null
+            Fragment1 tmp = varMap == null
                     ? filter
                     : ConceptOps.applyNodeTransform(filter, varMap);
 
@@ -214,9 +215,9 @@ public class ConceptOps {
 
     }
 
-    public static Concept intersect(Concept concept, Concept filter, Generator<Var> generator) {
+    public static Fragment1 intersect(Fragment1 concept, Fragment1 filter, Generator<Var> generator) {
 
-        Concept result;
+        Fragment1 result;
 
         //if(filter != null && !filter.isSubjectConcept() && filter != Concept.TOP) {
 //            Set<Var> vas = concept.getVarsMentioned();
@@ -233,7 +234,7 @@ public class ConceptOps {
 //            Concept tmp = filter.applyNodeTransform(nodeTransform);
 
         if(filter != null) {
-            Concept tmp = align(filter, concept, generator);
+            Fragment1 tmp = align(filter, concept, generator);
             Element e = ElementUtils.mergeElements(concept.getElement(), tmp.getElement());
             result = new Concept(e, concept.getVar());
         } else {

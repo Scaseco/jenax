@@ -43,12 +43,11 @@ import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.fragment.impl.OrderedConcept;
-
-import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
@@ -67,6 +66,7 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 
 
@@ -202,7 +202,7 @@ public class TypedQueryImpl<X>
 
 
         VExpression<?> filterEx = (VExpression<?>)criteriaQuery.getRestriction();
-        Concept filterConcept;
+        Fragment1 filterConcept;
         if(filterEx != null) {
             Expr expr = filterEx.accept(filterCompiler);
             filterCompiler.getElements().add(new ElementFilter(expr));
@@ -490,7 +490,7 @@ public class TypedQueryImpl<X>
         QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory();
 
         // TODO Using the resultVar here is a hack
-        ListService<Concept, Entry<Node, Node>> ls = new ListServiceConcept(qef);
+        ListService<Fragment1, Entry<Node, Node>> ls = new ListServiceConcept(qef);
         ListPaginator<Entry<Node, Node>> paginator = ls.createPaginator(new Concept(new ElementSubQuery(query), resultVar));
 
 

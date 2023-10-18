@@ -17,7 +17,6 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
@@ -126,7 +125,7 @@ public class ListServiceEntityQuery
     }
 
     public static EntityBaseQuery toBaseQuery(Iterable<? extends Node> nodes) {
-        Concept concept = ConceptUtils.createConcept(nodes);
+        Fragment1 concept = ConceptUtils.createConcept(nodes);
         EntityBaseQuery result = fromConcept(concept);
         return result;
     }

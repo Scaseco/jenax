@@ -66,7 +66,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.graph.Node;
@@ -168,7 +168,7 @@ public class MainSparqlPath2 {
                 }));
         MappedQuery<Map<Node, Number>> mappedQuery = MappedQuery.create(query, source, agg);
 
-        MapService<Concept, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
+        MapService<Fragment1, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
         LookupService<Node, Map<Node, Number>> result = LookupServiceListService.create(lsx);
 
         result = LookupServicePartition.create(result, 100, 4);
@@ -239,7 +239,7 @@ public class MainSparqlPath2 {
                 AggTransform.create(AggLiteral.create(BindingMapperProjectVar.create(Vars.x)), (node) -> (Number)node.getLiteralValue()));
         MappedQuery<Map<Node, Number>> mappedQuery = MappedQuery.create(query, Vars.s, agg);
 
-        MapService<Concept, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
+        MapService<Fragment1, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
         LookupService<Node, Map<Node, Number>> result = LookupServiceListService.create(lsx);
 
 

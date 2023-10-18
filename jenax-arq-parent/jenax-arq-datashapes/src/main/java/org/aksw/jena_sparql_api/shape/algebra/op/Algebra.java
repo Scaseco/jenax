@@ -5,7 +5,7 @@ import org.aksw.jena_sparql_api.shape.syntax.Element;
 import org.aksw.jena_sparql_api.shape.syntax.ElementVisitor;
 import org.aksw.jena_sparql_api.shape.syntax.ElementVisitorSparql;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.sparql.core.Var;
 
 public class Algebra {
@@ -16,10 +16,10 @@ public class Algebra {
         return result;
     }
 
-    public static Concept toConcept(Op op) {
+    public static Fragment1 toConcept(Op op) {
         Generator<Var> generator = VarGeneratorImpl2.create();
-        OpVisitor<Concept> opCompiler = new OpVisitorSparql(generator);
-        Concept result = op.accept(opCompiler);
+        OpVisitor<Fragment1> opCompiler = new OpVisitorSparql(generator);
+        Fragment1 result = op.accept(opCompiler);
         return result;
     }
 }

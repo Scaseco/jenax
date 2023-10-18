@@ -302,7 +302,7 @@ public class FragmentJoiner {
                 // TODO We may want to apply normalization - e.g. detect a group with an empty bgb
                 canOmitJoin = true;
             } else if(filterRelation.getVars().size() == 1) {
-                Fragment1 fr = filterRelation.toUnaryRelation();
+                Fragment1 fr = filterRelation.toFragment1();
                 Var rawFilterVar = fr.getVar();
                 if(fr.isSubjectConcept()) {
 

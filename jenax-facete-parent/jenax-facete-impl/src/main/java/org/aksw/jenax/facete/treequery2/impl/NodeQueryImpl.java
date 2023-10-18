@@ -49,13 +49,13 @@ public class NodeQueryImpl
     protected List<MappedFragment<Node>> injectRelations = new ArrayList<>();
 
     @Override
-    public NodeQuery addInjectRelation(MappedFragment<Node> relation) {
+    public NodeQuery addInjectFragment(MappedFragment<Node> relation) {
         injectRelations.add(relation);
         return this;
     }
 
     @Override
-    public List<MappedFragment<Node>> getInjectRelations() {
+    public List<MappedFragment<Node>> getInjectFragments() {
         return injectRelations;
     }
 
@@ -77,13 +77,13 @@ public class NodeQueryImpl
 //    }
 
     @Override
-    public NodeQuery setFilterRelation(Fragment1 filterRelation) {
+    public NodeQuery setFilterFragment(Fragment1 filterRelation) {
         this.filterRelation = filterRelation;
         return this;
     }
 
     @Override
-    public Fragment1 getFilterRelation() {
+    public Fragment1 getFilterFragment() {
         return filterRelation;
     }
 

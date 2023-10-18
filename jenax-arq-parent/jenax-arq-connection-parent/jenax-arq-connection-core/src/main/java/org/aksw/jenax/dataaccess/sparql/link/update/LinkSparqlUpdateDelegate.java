@@ -10,23 +10,23 @@ public interface LinkSparqlUpdateDelegate
     @Override
     LinkSparqlUpdate getDelegate();
 
-    @Override
-    default void update(Update update) {
-        newUpdate().update(update).execute();
-        // getDelegate().update(update);
-    }
-
-    @Override
-    default void update(UpdateRequest update) {
-        newUpdate().update(update).execute();
-        // getDelegate().update(update);
-    }
-
-    @Override
-    default void update(String updateString) {
-        newUpdate().update(updateString).execute();
-        // getDelegate().update(updateString);
-    }
+//    @Override
+//    default void update(Update update) {
+//        newUpdate().update(update).execute();
+//        // getDelegate().update(update);
+//    }
+//
+//    @Override
+//    default void update(UpdateRequest update) {
+//        newUpdate().update(update).execute();
+//        // getDelegate().update(update);
+//    }
+//
+//    @Override
+//    default void update(String updateString) {
+//        newUpdate().update(updateString).execute();
+//        // getDelegate().update(updateString);
+//    }
 
 //    @Override
 //    default UpdateExecBuilder newUpdate() {

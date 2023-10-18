@@ -132,7 +132,7 @@ public class EvaluationOfConstraints
     public CBinding eval(OpExtend op, CBinding input) {
         CBinding tmp = eval(op.getSubOp(), input);
         if (tmp == null) {
-            System.out.println("here");
+            System.err.println("WARN: sub op evaluated to null");
         }
         CBinding result = tmp.cloneObject();
         for (Entry<Var, Expr> entry : op.getVarExprList().getExprs().entrySet()) {

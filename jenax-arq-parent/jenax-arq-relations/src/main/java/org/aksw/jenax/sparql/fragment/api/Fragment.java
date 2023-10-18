@@ -98,7 +98,7 @@ public interface Fragment
         return FragmentUtils.rename(this, targetVars);
     }
 
-    default Fragment1 toUnaryRelation() {
+    default Fragment1 toFragment1() {
         List<Var> vars = getVars();
         Fragment1 result;
         if(vars.size() == 1) {

@@ -31,6 +31,8 @@ import com.google.common.collect.Multimap;
 // TODO There is already org.apache.jena.sparql.algebra.optimize.TransformFilterConjunction
 public class CnfUtils {
 
+    /** Returns the input unchanged, unless it is (const op var) which becomes (var op const).
+     * Use for (in-)equalities. */
     @SuppressWarnings("unchecked")
     public static <T extends ExprFunction2> T normalize(T expr) {
         Expr a = expr.getArg1();

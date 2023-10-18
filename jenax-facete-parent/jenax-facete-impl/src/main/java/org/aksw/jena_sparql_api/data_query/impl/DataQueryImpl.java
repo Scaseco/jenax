@@ -484,7 +484,7 @@ public class DataQueryImpl<T extends RDFNode>
             if(filter == null) {
                 filter = concept;
             } else {
-                filter = filter.joinOn(filter.getVar()).with(concept).toUnaryRelation();
+                filter = filter.joinOn(filter.getVar()).with(concept).toFragment1();
             }
         }
 

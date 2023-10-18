@@ -10,9 +10,8 @@ import org.aksw.jenax.sparql.fragment.impl.Concept;
  *
  * @param <T>
  */
+@Deprecated // To be replaced by MappedEntityFragment
 public class MappedConcept<T> {
-
-
     // Grouping is performed by the concepts' variable
     private Concept concept;
     private Agg<T> agg;
@@ -32,7 +31,7 @@ public class MappedConcept<T> {
     }
 
     public static <T> MappedConcept<T> create(Concept concept, Agg<T> agg) {
-        MappedConcept<T> result = new MappedConcept<T>(concept, agg);
+        MappedConcept<T> result = new MappedConcept<>(concept, agg);
         return result;
     }
 
@@ -53,7 +52,7 @@ public class MappedConcept<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        MappedConcept other = (MappedConcept) obj;
+        MappedConcept<?> other = (MappedConcept<?>) obj;
         if (agg == null) {
             if (other.agg != null)
                 return false;
@@ -71,6 +70,5 @@ public class MappedConcept<T> {
     public String toString() {
         return "MappedConcept [concept=" + concept + ", agg=" + agg + "]";
     }
-
 }
 

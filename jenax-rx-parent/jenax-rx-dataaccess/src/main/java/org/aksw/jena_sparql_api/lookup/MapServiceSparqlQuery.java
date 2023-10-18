@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.lookup;
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;
@@ -11,7 +11,7 @@ import org.apache.jena.sparql.core.Var;
 
 
 public class MapServiceSparqlQuery
-    implements MapService<Concept, Node, Table>
+    implements MapService<Fragment1, Node, Table>
 {
     protected QueryExecutionFactoryQuery qef;
     protected boolean isLeftJoin;
@@ -39,7 +39,7 @@ public class MapServiceSparqlQuery
     }
 
     @Override
-    public MapPaginator<Node, Table> createPaginator(Concept filterConcept) {
+    public MapPaginator<Node, Table> createPaginator(Fragment1 filterConcept) {
         MapPaginatorSparqlQuery result = new MapPaginatorSparqlQuery(qef, filterConcept, isLeftJoin, attrQuery, attrVar, forceSubQuery);
         return result;
     }

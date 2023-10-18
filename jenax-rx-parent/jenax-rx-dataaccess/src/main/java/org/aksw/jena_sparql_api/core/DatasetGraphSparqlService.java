@@ -8,7 +8,7 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.ListServiceConcept;
 import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -39,7 +39,7 @@ public class DatasetGraphSparqlService
     @Override
     public Iterator<Node> listGraphNodes() {
         QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory();
-        MapService<Concept, Node, Node> ls = new ListServiceConcept(qef);
+        MapService<Fragment1, Node, Node> ls = new ListServiceConcept(qef);
         Set<Node> nodes = ls.fetchData(ConceptUtils.listAllGraphs, null, null).keySet();
         return nodes.iterator();
     }

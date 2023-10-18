@@ -27,8 +27,6 @@ import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
-
-import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -62,19 +60,20 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.vocabulary.RDF;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 
 public class ConceptUtils {
-    public static final Concept subjectConcept = createSubjectConcept();
+    public static final Fragment1 subjectConcept = createSubjectConcept();
 
-    public static Concept listDeclaredProperties = Concept.create("?s a ?t . Filter(?t = <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> || ?t = <http://www.w3.org/2002/07/owl#ObjectProperty> || ?t = <http://www.w3.org/2002/07/owl#DataTypeProperty>)", "s");
-    public static Concept listDeclaredClasses = Concept.create("?s a ?t . Filter(?t = <http://www.w3.org/2000/01/rdf-schema#Class> || ?t = <http://www.w3.org/2002/07/owl#Class>)", "s");
-    public static Concept listUsedClasses = Concept.create("?s a ?t", "t");
+    public static Fragment1 listDeclaredProperties = Concept.create("?s a ?t . Filter(?t = <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> || ?t = <http://www.w3.org/2002/07/owl#ObjectProperty> || ?t = <http://www.w3.org/2002/07/owl#DataTypeProperty>)", "s");
+    public static Fragment1 listDeclaredClasses = Concept.create("?s a ?t . Filter(?t = <http://www.w3.org/2000/01/rdf-schema#Class> || ?t = <http://www.w3.org/2002/07/owl#Class>)", "s");
+    public static Fragment1 listUsedClasses = Concept.create("?s a ?t", "t");
 
-    public static Concept listAllPredicates = Concept.create("?s ?p ?o", "p");
-    public static Concept listAllGraphs = Concept.create("Graph ?g { ?s ?p ?o }", "g");
+    public static Fragment1 listAllPredicates = Concept.create("?s ?p ?o", "p");
+    public static Fragment1 listAllGraphs = Concept.create("Graph ?g { ?s ?p ?o }", "g");
 
 
     /**
@@ -106,7 +105,7 @@ public class ConceptUtils {
         }
         elements.add(new ElementTriplesBlock(bp));
 
-        Concept result = new Concept(elements, p);
+        Fragment1 result = new Concept(elements, p);
 
         return result;
     }
@@ -208,12 +207,12 @@ public class ConceptUtils {
 
         Var newVar = tmpVar != null ? tmpVar : a.getVar();
 
-        Concept result = new Concept(newElement, newVar);
+        Fragment1 result = new Concept(newElement, newVar);
         return result;
     }
 
-    public static Concept createConcept(Node ... nodes) {
-        Concept result = createConcept(Arrays.asList(nodes));
+    public static Fragment1 createConcept(Node ... nodes) {
+        Fragment1 result = createConcept(Arrays.asList(nodes));
         return result;
     }
 
@@ -223,7 +222,7 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Concept createConcept(Iterable<? extends Node> nodes) {
+    public static Fragment1 createConcept(Iterable<? extends Node> nodes) {
         ElementData data = new ElementData();
         data.add(Vars.s);
         for(Node node : nodes) {
@@ -231,18 +230,18 @@ public class ConceptUtils {
             data.add(binding);
         }
 
-        Concept result = new Concept(data, Vars.s);
+        Fragment1 result = new Concept(data, Vars.s);
         return result;
 
     }
 
-    public static Concept createFilterConcept(Node ... nodes) {
-        Concept result = createFilterConcept(Arrays.asList(nodes));
+    public static Fragment1 createFilterConcept(Node ... nodes) {
+        Fragment1 result = createFilterConcept(Arrays.asList(nodes));
         return result;
     }
 
 
-    public static Concept createFilterConcept(Iterable<Node> nodes) {
+    public static Fragment1 createFilterConcept(Iterable<Node> nodes) {
 
         int size = Iterables.size(nodes);
         Element el;
@@ -259,11 +258,11 @@ public class ConceptUtils {
             break;
         }
 
-        Concept result = new Concept(el, Vars.s);
+        Fragment1 result = new Concept(el, Vars.s);
         return result;
     }
 
-    public static Concept createRelatedConcept(Collection<Node> nodes, Fragment2 relation) {
+    public static Fragment1 createRelatedConcept(Collection<Node> nodes, Fragment2 relation) {
         Var sourceVar = relation.getSourceVar();
         Var targetVar = relation.getTargetVar();
         Element relationEl = relation.getElement();
@@ -274,19 +273,19 @@ public class ConceptUtils {
 
         Element resultEl = ElementUtils.mergeElements(relationEl, filterEl);
 
-        Concept result = new Concept(resultEl, targetVar);
+        Fragment1 result = new Concept(resultEl, targetVar);
         return result;
     }
 
 
-    public static Concept getRelatedConcept(Concept source, Fragment2 relation) {
-        Concept renamedSource = createRenamedSourceConcept(source, relation);
+    public static Fragment1 getRelatedConcept(Fragment1 source, Fragment2 relation) {
+        Fragment1 renamedSource = createRenamedSourceConcept(source, relation);
 
         Element merged = ElementUtils.mergeElements(renamedSource.getElement(), relation.getElement());
 
         Var targetVar = relation.getTargetVar();
 
-        Concept result = new Concept(merged, targetVar);
+        Fragment1 result = new Concept(merged, targetVar);
         return result;
     }
 
@@ -325,25 +324,25 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Concept createSubjectConcept() {
+    public static Fragment1 createSubjectConcept() {
         ElementTriplesBlock e = new ElementTriplesBlock();
         e.addTriple(Triples.spo);
-        Concept result = new Concept(e, Vars.s);
+        Fragment1 result = new Concept(e, Vars.s);
         return result;
     }
 
     /** Can be used for joining with empty patterns / substitution of variables */
-    public static Concept empty(Var var) {
-        Concept result = new Concept(new ElementGroup(), var);
+    public static Fragment1 empty(Var var) {
+        Fragment1 result = new Concept(new ElementGroup(), var);
         return result;
     }
 
-    public static Concept createForRdfType(String iriStr) {
+    public static Fragment1 createForRdfType(String iriStr) {
         return createForRdfType(NodeFactory.createURI(iriStr));
     }
 
-    public static Concept createForRdfType(Node type) {
-        Concept result = new Concept(
+    public static Fragment1 createForRdfType(Node type) {
+        Fragment1 result = new Concept(
                 ElementUtils.createElementTriple(Vars.s, RDF.Nodes.type, type),
                 Vars.s);
         return result;
@@ -377,7 +376,7 @@ public class ConceptUtils {
      * @param concept
      * @return
      */
-    public static Generator<Var> createGenerator(Concept concept) {
+    public static Generator<Var> createGenerator(Fragment1 concept) {
         Collection<Var> tmp = PatternVars.vars(concept.getElement());
         //List<String> varNames = VarUtils.getVarNames(tmp);
 
@@ -388,7 +387,7 @@ public class ConceptUtils {
     }
 
     // Create a fresh var that is not part of the concept
-//    public static Var freshVar(Concept concept) {
+//    public static Var freshVar(Fragment1 concept) {
 //        Generator gen = createGenerator(concept);
 //        String varName = gen.next();
 //        Var result = Var.alloc(varName);
@@ -421,7 +420,7 @@ public class ConceptUtils {
      * @return
      */
     /*
-    public static Concept listGraphs() {
+    public static Fragment1 listGraphs() {
 
         Triple triple = new Triple(Vars.s, Vars.p, Vars.o);
         BasicPattern bgp = new BasicPattern();
@@ -433,14 +432,14 @@ public class ConceptUtils {
 
         ElementNamedGraph eng = new ElementNamedGraph(Vars.g, group);
 
-        Concept result = new Concept(eng, Vars.g);
+        Fragment1 result = new Concept(eng, Vars.g);
         return result;
     }
     */
 
 
 
-    public static Map<Var, Var> createVarMap(Concept attrConcept, Concept filterConcept) {
+    public static Map<Var, Var> createVarMap(Fragment1 attrConcept, Fragment1 filterConcept) {
         Element attrElement = attrConcept.getElement();
         Element filterElement = filterConcept.getElement();
 
@@ -462,17 +461,17 @@ public class ConceptUtils {
      * @param relation The relation; variables will remain unchanged
      * @return
      */
-    public static Concept createRenamedSourceConcept(Concept concept, Fragment2 relation) {
-        Concept attrConcept = new Concept(relation.getElement(), relation.getSourceVar());
-        Concept result = createRenamedConcept(attrConcept, concept);
+    public static Fragment1 createRenamedSourceConcept(Fragment1 concept, Fragment2 relation) {
+        Fragment1 attrConcept = new Concept(relation.getElement(), relation.getSourceVar());
+        Fragment1 result = createRenamedConcept(attrConcept, concept);
         return result;
     }
 
-    public static Concept createRenamedConcept(Fragment1 concept, Map<Var, Var> varMap) {
+    public static Fragment1 createRenamedConcept(Fragment1 concept, Map<Var, Var> varMap) {
         Var newVar = MapUtils.getOrElse(varMap, concept.getVar(), concept.getVar());
         Element newElement = ElementUtils.createRenamedElement(concept.getElement(), varMap);
 
-        Concept result = new Concept(newElement, newVar);
+        Fragment1 result = new Concept(newElement, newVar);
 
         return result;
     }
@@ -485,7 +484,7 @@ public class ConceptUtils {
      * @param filterConcept The concept whose variables will be renamed such that it filters the attrConcept
      * @return
      */
-    public static Concept createRenamedConcept(Concept attrConcept, Concept filterConcept) {
+    public static Fragment1 createRenamedConcept(Fragment1 attrConcept, Fragment1 filterConcept) {
 
         Map<Var, Var> varMap = createVarMap(attrConcept, filterConcept);
 
@@ -493,12 +492,12 @@ public class ConceptUtils {
         Element filterElement = filterConcept.getElement();
         Element newFilterElement = ElementUtils.createRenamedElement(filterElement, varMap);
 
-        Concept result = new Concept(newFilterElement, attrVar);
+        Fragment1 result = new Concept(newFilterElement, attrVar);
 
         return result;
     }
 
-    public static Concept createCombinedConcept(Concept attrConcept, Concept filterConcept, boolean renameVars, boolean attrsOptional, boolean filterAsSubquery) {
+    public static Fragment1 createCombinedConcept(Fragment1 attrConcept, Fragment1 filterConcept, boolean renameVars, boolean attrsOptional, boolean filterAsSubquery) {
         // TODO Is it ok to rename vars here? // TODO The variables of baseConcept and tmpConcept must match!!!
         // Right now we just assume that.
         Var attrVar = attrConcept.getVar();
@@ -520,7 +519,7 @@ public class ConceptUtils {
             filterConcept = createRenamedConcept(filterConcept, varMap);
         }
 
-        Concept tmpConcept;
+        Fragment1 tmpConcept;
         if(renameVars) {
             tmpConcept = createRenamedConcept(attrConcept, filterConcept);
         } else {
@@ -569,7 +568,7 @@ public class ConceptUtils {
             e = attrElement;
         }
 
-        Concept result = new Concept(e, attrVar);
+        Fragment1 result = new Concept(e, attrVar);
 
         return result;
     }
@@ -616,7 +615,7 @@ public class ConceptUtils {
     }
 
     public static Query createQueryList(OrderedConcept orderedConcept, Range<Long> range) {
-        Concept concept = orderedConcept.getConcept();
+        Fragment1 concept = orderedConcept.getConcept();
         Query result = createQueryList(concept, range);
 
         for(SortCondition sc : orderedConcept.getOrderBy()) {
@@ -627,7 +626,7 @@ public class ConceptUtils {
     }
 
     public static Query createQueryList(OrderedConcept orderedConcept, Long limit, Long offset) {
-        Concept concept = orderedConcept.getConcept();
+        Fragment1 concept = orderedConcept.getConcept();
         Query result = createQueryList(concept, limit, offset);
 
         for(SortCondition sc : orderedConcept.getOrderBy()) {
@@ -668,14 +667,14 @@ public class ConceptUtils {
     }
 
 
-    public static Query createAttrQuery(Query attrQuery, Var attrVar, boolean isLeftJoin, Concept filterConcept, Long limit, Long offset, boolean forceSubQuery) {
+    public static Query createAttrQuery(Query attrQuery, Var attrVar, boolean isLeftJoin, Fragment1 filterConcept, Long limit, Long offset, boolean forceSubQuery) {
 
         //filterConcept.getElement()
         // TODO Deal with prefixes...
 
-        Concept attrConcept = new Concept(new ElementSubQuery(attrQuery), attrVar);
+        Fragment1 attrConcept = new Concept(new ElementSubQuery(attrQuery), attrVar);
 
-        Concept renamedFilterConcept = ConceptUtils.createRenamedConcept(attrConcept, filterConcept);
+        Fragment1 renamedFilterConcept = ConceptUtils.createRenamedConcept(attrConcept, filterConcept);
         //console.log('attrConcept: ' + attrConcept);
         //console.log('filterConcept: ' + filterConcept);
         //console.log('renamedFilterConcept: ' + renamedFilterConcept);
@@ -741,7 +740,7 @@ public class ConceptUtils {
 
             Element newFilterElement;
             if(requireSubQuery) {
-                Concept subConcept;
+                Fragment1 subConcept;
                 if(isLeftJoin) {
                     subConcept = renamedFilterConcept;
                 } else {
@@ -822,15 +821,15 @@ public class ConceptUtils {
         return result;
     }
 
-    public static Concept createRenamedConcept(Fragment1 concept, Var attrVar) {
+    public static Fragment1 createRenamedConcept(Fragment1 concept, Var attrVar) {
         Var newVar = freshVar(concept);
         Map<Var, Var> varMap = new HashMap<>();
         varMap.put(attrVar, newVar);
         varMap.put(concept.getVar(), attrVar);
-        Concept result = ConceptUtils.createRenamedConcept(concept, varMap);
+        Fragment1 result = ConceptUtils.createRenamedConcept(concept, varMap);
 
-//        Concept tmp = createRenamedConcept(concept, Collections.singletonMap(attrVar, newVar));
-//        Concept result = ConceptUtils.createRenamedConcept(tmp, Collections.singletonMap(tmp.getVar(), attrVar));
+//        Fragment1 tmp = createRenamedConcept(concept, Collections.singletonMap(attrVar, newVar));
+//        Fragment1 result = ConceptUtils.createRenamedConcept(tmp, Collections.singletonMap(tmp.getVar(), attrVar));
 
         return result;
     }

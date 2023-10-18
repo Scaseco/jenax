@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -31,9 +31,9 @@ public class MapPaginatorConcept
     implements MapPaginator<Node, Node>
 {
     protected QueryExecutionFactory qef;
-    protected Concept concept;
+    protected Fragment1 concept;
 
-    public MapPaginatorConcept(QueryExecutionFactory qef, Concept concept) {
+    public MapPaginatorConcept(QueryExecutionFactory qef, Fragment1 concept) {
         this.qef = qef;
         this.concept = concept;
     }
@@ -69,7 +69,7 @@ public class MapPaginatorConcept
         return result;
     }
 
-    public static Query createQueryCount(Concept concept, Long itemLimit, Long rowLimit, Var resultVar) {
+    public static Query createQueryCount(Fragment1 concept, Long itemLimit, Long rowLimit, Var resultVar) {
         Query subQuery = concept.asQuery();
 
         if(rowLimit != null) {

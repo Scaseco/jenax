@@ -166,7 +166,7 @@ public class FacetNodeImpl
         // Var resolvedVar =  FacetPathMappingImpl.resolveVar(pathMapping, sfp).asVar();
 
 
-        relation = relation.prependOn(relation.getVars()).with(baseRelation).toUnaryRelation();
+        relation = relation.prependOn(relation.getVars()).with(baseRelation).toFragment1();
 
         RdfDataSource dataSource = facetedQuery.dataSource();
         FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(

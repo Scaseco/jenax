@@ -19,7 +19,10 @@ import com.google.gson.JsonElement;
  * The AccJson objects can be seen as states in a state automaton, and this class drives
  * transitioning between the states based on the input.
  */
-public class AccJsonDriver {
+public class AccJsonDriver
+// its like an accumulator but depending on the context the final value may be absent (null) if it was in streaming mode
+// 	implements Accumulator<Quad, AccContext, >
+{
     protected AccJson currentState;
     protected Node currentSource;
 

@@ -108,7 +108,7 @@ public class ConstraintNodeImpl
 
         Fragment baseRelation = root.relationQuery().getRelation();
         Fragment1 relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
-        relation = relation.prependOn(relation.getVars()).with(baseRelation).toUnaryRelation();
+        relation = relation.prependOn(relation.getVars()).with(baseRelation).toFragment1();
 
         RdfDataSource dataSource = null; //facetedQuery.dataSource();
         FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(

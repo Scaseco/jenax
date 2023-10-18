@@ -9,5 +9,5 @@ public interface RelationFragment {
     public List<Var> getJoinVars();
     // protected EntityTemplate entityTemplate;
     // protected Element element;
-    public Fragment getRelation();
+    public Fragment getFragement();
 }

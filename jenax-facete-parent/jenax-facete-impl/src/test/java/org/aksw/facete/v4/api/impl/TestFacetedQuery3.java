@@ -7,6 +7,7 @@ import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
+import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.query.Query;
@@ -44,5 +45,20 @@ public class TestFacetedQuery3 {
 
         Query query = ElementGeneratorLateral.toQuery(nq);
         System.out.println(query);
+    }
+
+    @Test
+    public void test_02() {
+        NodeQuery nq = NodeQueryImpl.newRoot().fwd(RDF.type);
+
+        // TODO Somehow add an API that we can inject relations + custom aggregators (= MappedEntityFragments)
+
+        // Note: so far, relationQuery is never null
+        // nq.addEntityFragment()
+        // System.out.println(nq.relationQuery());
+
+        Query query = ElementGeneratorLateral.toQuery(nq);
+        System.out.println(query);
+
     }
 }

@@ -243,10 +243,11 @@ public class GraphQlToSparqlConverter {
 
             boolean isSingle = directives.containsKey("one");
 
-            String fieldIri = deriveFieldIri(context, fieldName);
-            FacetPath keyPath = fieldIri != null
-                    ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
-                    : resolver.resolveKeyToProperty(fieldName);
+//            String fieldIri = deriveFieldIri(context, fieldName);
+//            FacetPath keyPath = fieldIri != null
+//                    ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
+//                    : resolver.resolveKeyToProperty(fieldName);
+            FacetPath keyPath = resolveProperty(context, fieldName);
 
             if (keyPath != null) {
                 boolean isInverse = directives.containsKey(GraphQlSpecialKeys.inverse);
@@ -265,6 +266,7 @@ public class GraphQlToSparqlConverter {
 //                    fieldQuery.setFilterRelation(filterRelation.toUnaryRelation());
 //                }
 
+                // FIXME We need to handle the xid field to get a resources IRI / blank node label
                 if (keyPath.getNameCount() == 1) { // xid resolves to a zero-segment path
                     // Set up an accumulator for the facet path
 
@@ -321,21 +323,23 @@ public class GraphQlToSparqlConverter {
                 // tryUpdateContext(args);
                 // GraphQlUtils.tryU
 
-                for (Argument arg : field.getArguments()) {
-                    String argName = arg.getName();
+                if (false) {
+                    for (Argument arg : field.getArguments()) {
+                        String argName = arg.getName();
 
-                    FacetPath facetPath = resolveProperty(context, argName);
-                    NodeQuery argQuery = facetPath == null ? null : fieldQuery.resolve(facetPath);
+                        FacetPath facetPath = resolveProperty(context, argName);
+                        NodeQuery argQuery = facetPath == null ? null : fieldQuery.resolve(facetPath);
 
-                    Value<?> rawV = arg.getValue();
-                    if (rawV instanceof StringValue) {
-                        StringValue v = (StringValue)rawV;
-                        String str = v.getValue();
+                        Value<?> rawV = arg.getValue();
+                        if (rawV instanceof StringValue) {
+                            StringValue v = (StringValue)rawV;
+                            String str = v.getValue();
 
-                        org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
-                        argQuery.constraints().fwd(TO_STRING).enterConstraints()
-                            .eq(NodeFactory.createLiteral(str)).activate()
-                        .leaveConstraints();
+                            org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
+                            argQuery.constraints().fwd(TO_STRING).enterConstraints()
+                                .eq(NodeFactory.createLiteral(str)).activate()
+                            .leaveConstraints();
+                        }
                     }
                 }
             }
@@ -608,18 +612,18 @@ public class GraphQlToSparqlConverter {
                     // Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
                     MappedFragment<Node> mr = MappedFragment.of(contrib, varMap);
                     // System.err.println("Resolved contrib: " + resolvedContrib);
-                    nodeQuery.addInjectRelation(mr);
+                    nodeQuery.addInjectFragment(mr);
                     // TODO Register the resolved relation
                 } else {
-                    filterRelations.add(contrib.toUnaryRelation());
+                    filterRelations.add(contrib.toFragment1());
                 }
             }
         }
 
         Fragment1 filterRelation = filterRelations.stream().reduce((a, b) -> {
-            return a.joinOn(a.getVar()).with(b).toUnaryRelation();
+            return a.joinOn(a.getVar()).with(b).toFragment1();
         }).orElse(null);
-        nodeQuery.setFilterRelation(filterRelation);
+        nodeQuery.setFilterFragment(filterRelation);
     }
 
     public static Fragment tryParseSparqlQuery(Context cxt, Directive dir, String argName) {
@@ -650,10 +654,16 @@ public class GraphQlToSparqlConverter {
     }
 
     public FacetPath resolveProperty(Context cxt, String fieldName) {
-        String fieldIri = deriveFieldIri(cxt, fieldName);
-        FacetPath result = fieldIri != null
+        FacetPath result;
+        // For now it seems easier to handle the xid field here rather then in the property resolver
+        if ("xid".equals(fieldName)) {
+            result = FacetPath.newRelativePath();
+        } else {
+            String fieldIri = deriveFieldIri(cxt, fieldName);
+            result = fieldIri != null
                 ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
                 : resolver.resolveKeyToProperty(fieldName);
+        }
         return result;
     }
 

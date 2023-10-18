@@ -16,6 +16,7 @@ import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprExists;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprExt;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprForAll;
 import org.aksw.jena_sparql_api.concept.builder.api.RestrictionExprVisitor;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
 
@@ -27,26 +28,26 @@ import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
  *
  */
 public class ConceptExprVisitorSparql
-    implements ConceptExprVisitor<Concept>, RestrictionExprVisitor<Concept>
+    implements ConceptExprVisitor<Fragment1>, RestrictionExprVisitor<Fragment1>
 {
     @Override
-    public Concept visit(ConceptExprConcept ce) {
-        Concept result = ce.getConcept();
+    public Fragment1 visit(ConceptExprConcept ce) {
+        Fragment1 result = ce.getConcept();
         return result;
     }
 
     @Override
-    public Concept visit(ConceptExprConceptBuilder ce) {
+    public Fragment1 visit(ConceptExprConceptBuilder ce) {
         ConceptBuilder cb = ce.getConceptBuilder();
 
         ConceptExpr baseConceptExpr = cb.getBaseConceptExpr();
-        Concept baseConcept = baseConceptExpr == null
+        Fragment1 baseConcept = baseConceptExpr == null
                 ? null
                 : baseConceptExpr.accept(this);
 
-        Concept concept = createConceptFromRestrictions(cb);
+        Fragment1 concept = createConceptFromRestrictions(cb);
 
-        Concept result = baseConcept == null
+        Fragment1 result = baseConcept == null
                 ? concept
                 : ConceptOps.intersect(baseConcept, concept, null);
 
@@ -54,15 +55,15 @@ public class ConceptExprVisitorSparql
     }
 
     @Override
-    public Concept visit(ConceptExprExt cse) {
+    public Fragment1 visit(ConceptExprExt cse) {
         throw new UnsupportedOperationException("subclass the visitor to handle custom types");
     }
 
     @Override
-    public Concept visit(ConceptExprList ce) {
-        List<Concept> concepts = ce.getMembers().stream().map(x -> x.accept(this)).collect(Collectors.toList());
+    public Fragment1 visit(ConceptExprList ce) {
+        List<Fragment1> concepts = ce.getMembers().stream().map(x -> x.accept(this)).collect(Collectors.toList());
 
-        Concept result = ce.isUnionMode()
+        Fragment1 result = ce.isUnionMode()
                 ? ConceptOps.union(concepts.stream())
                 : ConceptOps.intersect(concepts.stream());
 
@@ -70,10 +71,10 @@ public class ConceptExprVisitorSparql
     }
 
 
-    public Concept createConceptFromRestrictions(ConceptBuilder cb) {
+    public Fragment1 createConceptFromRestrictions(ConceptBuilder cb) {
         Collection<RestrictionBuilder> rbs = cb.listRestrictions();
 
-        Concept result = rbs.stream()
+        Fragment1 result = rbs.stream()
             .map(rb -> rb.get())
             .map(re -> re.accept(this))
             .reduce(Concept.TOP, (a, b) -> ConceptOps.intersect(a, b, null));
@@ -82,23 +83,23 @@ public class ConceptExprVisitorSparql
     }
 
     @Override
-    public Concept visit(RestrictionExprExists re) {
-        Concept r = re.getRole().accept(this);
+    public Fragment1 visit(RestrictionExprExists re) {
+        Fragment1 r = re.getRole().accept(this);
 
         ConceptExpr fillerCe = re.getFiller();
-        Concept filler = fillerCe.accept(this);
+        Fragment1 filler = fillerCe.accept(this);
 
-        Concept result = ConceptOps.intersect(r, filler, null);
+        Fragment1 result = ConceptOps.intersect(r, filler, null);
         return result;
     }
 
     @Override
-    public Concept visit(RestrictionExprForAll re) {
+    public Fragment1 visit(RestrictionExprForAll re) {
         return null;
     }
 
     @Override
-    public Concept visit(RestrictionExprExt re) {
+    public Fragment1 visit(RestrictionExprExt re) {
         throw new UnsupportedOperationException("subclass the visitor to handle custom types");
     }
 }

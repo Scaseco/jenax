@@ -342,7 +342,7 @@ public class FacetedQueryGenerator<P> {
         Map<String, Fragment3> rawRelations3 = getFacetValuesCore(baseConcept, focusPath, facetOriginPath, null, null, isReverse, negated, false, false);
 
         Fragment3 tr = rawRelations3.get(null);
-        Fragment1 rawFacetConcept = tr.project(tr.getP()).toUnaryRelation();
+        Fragment1 rawFacetConcept = tr.project(tr.getP()).toFragment1();
 
 //		Map<String, TernaryRelation> rawRelation = Collections.singletonMap(null, rawRelations.get(null).));
         //Map<String, TernaryRelation> relations = Collections.singletonMap(null, rawBr);
@@ -353,7 +353,7 @@ public class FacetedQueryGenerator<P> {
 
         // This should make all variables of the facet concept
         // - except for ?p - distinct from the tmp
-        Fragment1 facetConcept = rawFacetConcept.rename(varName -> "opt_" + varName, Vars.p).toUnaryRelation();
+        Fragment1 facetConcept = rawFacetConcept.rename(varName -> "opt_" + varName, Vars.p).toFragment1();
 
         //UnaryRelation facetConcept = rawFacetConcept.joinOn(Vars.p).yieldRenamedFilter(rawFacetConcept).toUnaryRelation();
 
@@ -747,7 +747,7 @@ public class FacetedQueryGenerator<P> {
         List<Element> elements = relations.values().stream()
                 .map(e -> e.project(e.getP()))
                 .map(e -> FragmentUtils.rename(e, Arrays.asList(Vars.p)))
-                .map(Fragment::toUnaryRelation)
+                .map(Fragment::toFragment1)
                 .map(Fragment::getElement)
                 .collect(Collectors.toList());
 
@@ -1209,7 +1209,7 @@ public class FacetedQueryGenerator<P> {
         Fragment1 result = new Concept(ElementUtils.groupIfNeeded(elts), resultVar);
 
         //if(baseConcept != null) {
-            result = result.prependOn(rootVar).with(baseConcept).toUnaryRelation();
+            result = result.prependOn(rootVar).with(baseConcept).toFragment1();
         //}
 
         return result;

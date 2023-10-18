@@ -11,7 +11,7 @@ import com.google.gson.JsonElement;
 
 /**
  * Interface for accumulating a JSON object from a stream of triples (edges in a graph).
- * The accumulator is like a state in a state automaton:
+ * The accumulator is like a (stateful) state in a state automaton:
  * An accumulator receives an individual edge in order to decide whether it can transition to a child state.
  * If it can't then it returns null.
  * {@link AccJsonDriver} drives the lookup. If a state (=accumulator) cannot handle the edge, it searches whether
@@ -42,7 +42,7 @@ public interface AccJson {
      *
      * @param node The source node to which the next incoming edge(s) will connect to
      * @param context The context which holds the JSON serializers
-     * @param skipOutput When output should be disabled (used to skip over lists of items where just one was expected)
+     * @param skipOutput When output should be disabled (used e.g. to skip over lists of items where just one was expected)
      */
     void begin(Node node, AccContext context, boolean skipOutput) throws IOException;
 

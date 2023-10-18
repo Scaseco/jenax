@@ -10,7 +10,11 @@ public class GraphPartitionJoin
 {
     protected EntityGraphFragment entityGraphFragment;
 
-    protected List<Var> parentJoinVars; // if null the join will occur on the parent's partition vars
+    /**
+     * Which variables of the parent entityGraphFragment join with this element
+     * If null the join will occur on the parent's partition vars
+     */
+    protected List<Var> parentJoinVars;
     protected String lazyFetchGroupName;
 
     protected List<GraphPartitionJoin> subJoins;

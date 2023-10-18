@@ -15,8 +15,8 @@ import org.aksw.jena_sparql_api.shape.syntax.ElementFocus;
 import org.aksw.jena_sparql_api.shape.syntax.ElementForAll;
 import org.aksw.jena_sparql_api.shape.syntax.ElementGroup;
 import org.aksw.jena_sparql_api.shape.syntax.ElementType;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
-import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.RelationOps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -76,7 +76,7 @@ public class MainTestConceptBuilder {
 
 
 
-        Concept c = Algebra.toConcept(Algebra.compile(e));
+        Fragment1 c = Algebra.toConcept(Algebra.compile(e));
 
         System.out.println("CONCEPT: " + c);
 

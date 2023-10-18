@@ -324,7 +324,7 @@ public class ElementGeneratorLateral {
         List<Fragment> resolvedMappedRelations = new ArrayList<>();
         // Extract referenced paths from injected relations
         for (NodeQuery child : current.roots()) {
-            for (MappedFragment<Node> mappedRelation :  child.getInjectRelations()) {
+            for (MappedFragment<Node> mappedRelation :  child.getInjectFragments()) {
                 Fragment resolvedRelation = resolveRelation(mappedRelation, pathMapping, treeData);
 //                Relation resolvedRelation = mappedRelation.getDelegate()
 //                        .applyNodeTransform(new NodeTransformSubst(resolvedMapping));
@@ -343,7 +343,7 @@ public class ElementGeneratorLateral {
         Collection<NodeQuery> children = current.roots();
         for (NodeQuery child : children) {
 
-            Fragment1 filterRelation = child.getFilterRelation();
+            Fragment1 filterRelation = child.getFilterFragment();
             if (filterRelation != null) {
                 Map<Var, Node> varMap = Map.of(filterRelation.getVar(), child.constraints().asJenaNode());
                 Fragment resolvedRelation = resolveRelation(MappedFragment.of(filterRelation, varMap), pathMapping, treeData);

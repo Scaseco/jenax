@@ -276,7 +276,7 @@ public class VirtualPartitionedQuery {
      */
     public static Fragment1 unionUnary(Collection<? extends Fragment1> relations) {
         Fragment tmp = VirtualPartitionedQuery.union(relations, Collections.singletonList(Vars.s));
-        Fragment1 result = tmp.toUnaryRelation();
+        Fragment1 result = tmp.toFragment1();
         return result;
 
 //        Set<Var> mentionedVars = relations.stream()

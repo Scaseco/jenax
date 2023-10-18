@@ -7,6 +7,7 @@ import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -32,13 +33,11 @@ public class MapPaginatorSparqlQuery
 {
     private static final Logger logger = LoggerFactory.getLogger(MapPaginatorSparqlQuery.class);
 
-
     protected Query attrQuery;
     protected Var attrVar;
     protected boolean forceSubQuery;
 
-
-    public MapPaginatorSparqlQuery(QueryExecutionFactoryQuery qef, Concept filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
+    public MapPaginatorSparqlQuery(QueryExecutionFactoryQuery qef, Fragment1 filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
         super(qef, filterConcept, isLeftJoin);
         this.attrQuery = attrQuery;
         this.attrVar = attrVar;
@@ -52,7 +51,7 @@ public class MapPaginatorSparqlQuery
             filterConcept = ConceptUtils.createSubjectConcept();
         }
 
-        Concept countConcept;
+        Fragment1 countConcept;
         if(this.isLeftJoin) {
             Query query = ConceptUtils.createAttrQuery(this.attrQuery, this.attrVar, this.isLeftJoin, filterConcept, itemLimit, null, this.forceSubQuery);
 

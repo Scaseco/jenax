@@ -128,7 +128,7 @@ public class ConceptPathFinderBidirectionalUtils {
                     .prependOn(Vars.s)
                     .with(concept)
                     //.project(fragment.getVars())
-                    .toUnaryRelation();
+                    .toFragment1();
         }
 
         return result;
