@@ -6,7 +6,7 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.sparql.core.Transactional;
 
-public interface TransactionalDelegate
+public interface TransactionalWrapper
     extends Transactional
 {
     /** This method needs to be overridden for transaction support */

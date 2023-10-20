@@ -6,7 +6,7 @@ import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 
 public class UpdateExecBuilderWrapperBaseParse
-    extends UpdateExecBuilderDelegateBase
+    extends UpdateExecBuilderWrapperBase
 {
     public UpdateExecBuilderWrapperBaseParse(UpdateExecBuilder delegate) {
         super(delegate);

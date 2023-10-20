@@ -1,40 +1,40 @@
-package org.aksw.jenax.dataaccess.sparql.exec.update;
+package org.aksw.jenax.dataaccess.sparql.exec.query;
 
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.sparql.core.Transactional;
-import org.apache.jena.sparql.exec.UpdateExec;
+import org.apache.jena.sparql.exec.QueryExec;
 
-public class UpdateExecDecoratorTxn<T extends UpdateExec>
-    extends UpdateExecDecoratorBase<T>
+public class QueryExecWrapperTxn<T extends QueryExec>
+    extends QueryExecWrapperBase<T>
 {
     protected Transactional transactional;
 
     protected boolean startedTxnHere = false;
     protected Throwable seenThrowable = null;
 
-    public UpdateExecDecoratorTxn(T decoratee, Transactional transactional) {
-        super(decoratee);
+    public QueryExecWrapperTxn(T delegate, Transactional transactional) {
+        super(delegate);
         this.transactional = transactional;
     }
 
     @Override
-    protected void beforeExec() {
+    public void beforeExec() {
         super.beforeExec();
 
         if (!transactional.isInTransaction()) {
             startedTxnHere = true;
-            transactional.begin(ReadWrite.WRITE);
+            transactional.begin(ReadWrite.READ);
         }
     }
 
     @Override
-    protected void onException(Exception e) {
+    public void onException(Exception e) {
         seenThrowable = e;
         super.onException(e);
     }
 
     @Override
-    public void afterExec() {
+    public void close() {
         if (startedTxnHere) {
             try {
                 if (seenThrowable == null) {
@@ -46,11 +46,11 @@ public class UpdateExecDecoratorTxn<T extends UpdateExec>
                 transactional.end();
             }
         }
+        super.close();
     }
 
 
-    public static <T extends UpdateExec> UpdateExec wrap(T decoratee, Transactional transactional) {
-        return new UpdateExecDecoratorTxn<>(decoratee, transactional);
+    public static <T extends QueryExec> QueryExec wrap(T decoratee, Transactional transactional) {
+        return new QueryExecWrapperTxn<>(decoratee, transactional);
     }
-
 }

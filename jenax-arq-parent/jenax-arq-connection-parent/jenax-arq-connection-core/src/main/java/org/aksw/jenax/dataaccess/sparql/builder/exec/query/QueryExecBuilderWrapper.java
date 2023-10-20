@@ -16,7 +16,7 @@ import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 
-public interface QueryExecBuilderDelegate
+public interface QueryExecBuilderWrapper
     extends QueryExecBuilder, QueryExecModDelegate
 {
     @Override

@@ -1,57 +1,79 @@
-package org.aksw.jenax.dataaccess.sparql.execution.query;
+package org.aksw.jenax.dataaccess.sparql.exec.query;
 
 import java.util.Iterator;
 
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
+import org.apache.jena.query.Query;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.util.Context;
 
-
-/**
- * Adds beforeExec and afterExec methods that can be used
- * to allocate and release resources upon performing an execution.
- *
- * @author Claus Stadler
- *         <p/>
- *         Date: 7/26/11
- *         Time: 10:28 AM
- */
-public class QueryExecutionDecoratorBase<T extends QueryExecution>
-    implements QueryExecutionDecorator
+public interface QueryExecWrapper
+    extends QueryExec
 {
-    protected T decoratee;
+    QueryExec getDelegate();
 
-    public QueryExecutionDecoratorBase(T decoratee) {
-        super();
-        this.decoratee = decoratee;
+    @Override
+    default Context getContext() {
+        return getDelegate().getContext();
     }
 
     @Override
-    public T getDelegate() {
-        return decoratee;
-    }
-
-    protected void beforeExec() {
-
-    }
-
-    protected void afterExec() {
-
-    }
-
-    protected void onException(Exception e) {
+    default Query getQuery() {
+        return getDelegate().getQuery();
     }
 
     @Override
-    public ResultSet execSelect() {
+    default String getQueryString() {
+        return getDelegate().getQueryString();
+    }
+
+    @Override
+    default void close() {
+        getDelegate().close();
+    }
+
+    @Override
+    default boolean isClosed() {
+        return getDelegate().isClosed();
+    }
+
+    @Override
+    default void abort() {
+        getDelegate().abort();
+    }
+
+    default void beforeExec() {
+//        QueryExec delegate = getDecoratee();
+//        if (delegate instanceof QueryExecWrapper) {
+//            ((QueryExecWrapper)delegate).beforeExec();
+//        }
+    }
+
+    default void afterExec() {
+//        QueryExec delegate = getDecoratee();
+//        if (delegate instanceof QueryExecWrapper) {
+//            ((QueryExecWrapper)delegate).afterExec();
+//        }
+    }
+
+    default void onException(Exception e) {
+//        QueryExec delegate = getDecoratee();
+//        if (delegate instanceof QueryExecWrapper) {
+//            ((QueryExecWrapper)delegate).onException(e);
+//        }
+    }
+
+    @Override
+    default RowSet select() {
         beforeExec();
         try {
-            return decoratee.execSelect();
+            return getDelegate().select();
         } catch(Exception e) {
             onException(e);
             throw e;
@@ -62,10 +84,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Model execConstruct() {
+    default Graph construct() {
         beforeExec();
         try {
-            return decoratee.execConstruct();
+            return getDelegate().construct();
         } catch(Exception e) {
             onException(e);
             //throw new RuntimeException(e);
@@ -76,10 +98,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Model execConstruct(Model model) {
+    default Graph construct(Graph graph) {
         beforeExec();
         try {
-            return decoratee.execConstruct(model);
+            return getDelegate().construct(graph);
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -90,10 +112,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Model execDescribe() {
+    default Graph describe() {
         beforeExec();
         try {
-            return decoratee.execDescribe();
+            return getDelegate().describe();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -104,10 +126,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Model execDescribe(Model model) {
+    default Graph describe(Graph graph) {
         beforeExec();
         try {
-            return decoratee.execDescribe(model);
+            return getDelegate().describe(graph);
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -118,10 +140,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public boolean execAsk() {
+    default boolean ask() {
         beforeExec();
         try {
-            return decoratee.execAsk();
+            return getDelegate().ask();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -132,10 +154,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Iterator<Triple> execConstructTriples() {
+    default Iterator<Triple> constructTriples() {
         beforeExec();
         try {
-            return decoratee.execConstructTriples();
+            return getDelegate().constructTriples();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -146,10 +168,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Iterator<Triple> execDescribeTriples() {
+    default Iterator<Triple> describeTriples() {
         beforeExec();
         try {
-            return decoratee.execDescribeTriples();
+            return getDelegate().describeTriples();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -160,10 +182,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Iterator<Quad> execConstructQuads() {
+    default Iterator<Quad> constructQuads() {
         beforeExec();
         try {
-            return decoratee.execConstructQuads();
+            return getDelegate().constructQuads();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -174,10 +196,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Dataset execConstructDataset() {
+    default DatasetGraph constructDataset() {
         beforeExec();
         try {
-            return decoratee.execConstructDataset();
+            return getDelegate().constructDataset();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -188,10 +210,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Dataset execConstructDataset(Dataset dataset) {
+    default DatasetGraph constructDataset(DatasetGraph dataset) {
         beforeExec();
         try {
-            return decoratee.execConstructDataset(dataset);
+            return getDelegate().constructDataset(dataset);
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -202,10 +224,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public JsonArray execJson() {
+    default JsonArray execJson() {
         beforeExec();
         try {
-            return decoratee.execJson();
+            return getDelegate().execJson();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -216,10 +238,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
     }
 
     @Override
-    public Iterator<JsonObject> execJsonItems() {
+    default Iterator<JsonObject> execJsonItems() {
         beforeExec();
         try {
-            return decoratee.execJsonItems();
+            return getDelegate().execJsonItems();
         } catch(Exception e) {
             onException(e);
 //        	throw new RuntimeException(e);
@@ -229,9 +251,10 @@ public class QueryExecutionDecoratorBase<T extends QueryExecution>
         }
     }
 
+
     @Override
-    public String getQueryString() {
-        return decoratee.getQueryString();
+    default DatasetGraph getDataset() {
+        return getDelegate().getDataset();
     }
 
 }

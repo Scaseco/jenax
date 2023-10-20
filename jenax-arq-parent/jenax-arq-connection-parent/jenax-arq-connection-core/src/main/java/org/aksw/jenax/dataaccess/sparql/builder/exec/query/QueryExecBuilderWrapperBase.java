@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.builder.exec.query;
 
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
-public class QueryExecBuilderDelegateBase
-    implements QueryExecBuilderDelegate
+public class QueryExecBuilderWrapperBase
+    implements QueryExecBuilderWrapper
 {
     protected QueryExecBuilder delegate;
 
-    public QueryExecBuilderDelegateBase(QueryExecBuilder delegate) {
+    public QueryExecBuilderWrapperBase(QueryExecBuilder delegate) {
         super();
         this.delegate = delegate;
     }

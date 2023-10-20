@@ -7,6 +7,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_GreaterThan;
+import org.apache.jena.sparql.expr.E_GreaterThanOrEqual;
 import org.apache.jena.sparql.expr.E_LessThan;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
 import org.apache.jena.sparql.expr.Expr;
@@ -40,8 +41,8 @@ public class GeoExprUtils {
         NodeValue yMax = NodeValue.makeDecimal(bounds.getMaxY());
 
         Expr result = new E_LogicalAnd(
-            new E_LogicalAnd(new E_GreaterThan(lon, xMin), new E_LessThan(lon, xMax)),
-            new E_LogicalAnd(new E_GreaterThan(lat, yMin), new E_LessThan(lat, yMax))
+            new E_LogicalAnd(new E_GreaterThanOrEqual(lon, xMin), new E_LessThan(lon, xMax)),
+            new E_LogicalAnd(new E_GreaterThanOrEqual(lat, yMin), new E_LessThan(lat, yMax))
         );
 
         return result;

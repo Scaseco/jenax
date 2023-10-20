@@ -4,7 +4,7 @@ import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
 
 public class RowSetOverQueryExec
-	extends RowSetDelegateBase
+	extends RowSetWrapperBase
 {
 	protected QueryExec queryExec;
 

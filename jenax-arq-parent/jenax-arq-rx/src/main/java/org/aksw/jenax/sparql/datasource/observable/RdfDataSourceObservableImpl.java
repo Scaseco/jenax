@@ -3,7 +3,7 @@ package org.aksw.jenax.sparql.datasource.observable;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.binding.ResultTable;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFromDataset;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.apache.jena.query.Dataset;
@@ -20,7 +20,7 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 public class RdfDataSourceObservableImpl
-    extends RdfDataSourceDelegateBase
+    extends RdfDataSourceWrapperBase
     implements RdfDataSourceObservable
 {
     protected ObservableSourceImpl<Query, ResultTable> mapRx;

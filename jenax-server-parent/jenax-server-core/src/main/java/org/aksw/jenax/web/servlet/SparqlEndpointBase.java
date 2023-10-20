@@ -23,7 +23,8 @@ import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperTxn;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
@@ -54,6 +55,7 @@ import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,13 +173,12 @@ public abstract class SparqlEndpointBase {
                 e.addSuppressed(e2);
             }
             response.resume(e);
-
             throw new RuntimeException(e);
-            // return ;
         }
 
         // Wrap the query execution such that close() also closes the connection
-        QueryExecution qe = new QueryExecutionDecoratorBase<QueryExecution>(tmp) {
+        // Note: QueryExecutionWrapperTxn.wrap is not suitable because not every connection supports it
+        QueryExecution qe = new QueryExecutionWrapperBase<QueryExecution>(tmp) {
             @Override
             public void close() {
                 try {
@@ -189,35 +190,15 @@ public abstract class SparqlEndpointBase {
             }
         };
 
-//        asyncResponse
-//        .register(new CompletionCallback() {
-//
-//            @Override
-//            public void onComplete(Throwable arg0) {
-//                System.out.println("COMPLETE");
-//            }
-//        });
-
-        response
-        .register(new ConnectionCallback() {
+        response.register(new ConnectionCallback() {
             @Override
             public void onDisconnect(AsyncResponse disconnect) {
                 logger.debug("Client disconnected");
-
                 qe.abort();
-
-//                if(true) {
-//                disconnect.resume(
-//                    Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                    .entity("Connection Callback").build());
-//                } else {
-//                    disconnect.cancel();
-//                }
             }
         });
 
-        response
-        .register(new CompletionCallback() {
+        response.register(new CompletionCallback() {
             @Override
             public void onComplete(Throwable t) {
                 if(t == null) {
@@ -230,54 +211,20 @@ public abstract class SparqlEndpointBase {
             }
         });
 
-//        response
-//        .setTimeoutHandler(new TimeoutHandler() {
-//           @Override
-//           public void handleTimeout(AsyncResponse asyncResponse) {
-//               logger.debug("Timout on request");
-//               asyncResponse.resume(
-//                   Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                   .entity("Operation time out.").build());
-//          }
-//        });
-//
-//        response.setTimeout(600, TimeUnit.SECONDS);
-
-
         Response x = processQuery(qe, format);
         // Response x = Response.ok(result).type(mediaType).build();
         response.resume(x);
-        // response.resume(result);
-
-        /*
-        ThreadUtils.start(response, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    StreamingOutput result = processQuery(qe, format);
-                    response.resume(result);
-                } catch(Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        */
     }
 
-
     public static Consumer<OutputStream> createQueryProcessor(QueryExecution qe, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt) {
-
         Consumer<OutputStream> result = null;
-
         ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
-
         Query q = qe.getQuery();
 
         // Try to process the query with a result set language
         if (rswf != null) {
             result = out -> {
                 ResultSetWriter rsWriter = rswf.create(lang);
-
                 SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
                 if (sr.isBoolean()) {
                     boolean v = sr.getBooleanResult();
@@ -326,7 +273,6 @@ public abstract class SparqlEndpointBase {
                 throw new RuntimeException("Could not handle execution of query " + q + " with lang " + lang);
             }
         }
-
         return result;
     }
 
@@ -342,16 +288,6 @@ public abstract class SparqlEndpointBase {
             rdfFormat = SparqlQueryFmtsUtils.getRdfFormat(fmts, query);
         }
 
-//    	if (resultsFormat == null) {
-//    		Query query = qe.getQuery();
-//    		if (query != null) {
-//    			SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.createDefault());
-//    			lang = SparqlQueryFmtsUtils.getLang(fmts, query);
-//    		}
-//    	} else {
-//    		lang = ResultsFormat.convert(resultsFormat);
-//    	}
-//
         Response result;
         if (lang != null) {
             String contentTypeStr = lang.getContentType().getContentTypeStr();
@@ -371,29 +307,17 @@ public abstract class SparqlEndpointBase {
     }
 
     public void processUpdateAsync(AsyncResponse response, SparqlStmtUpdate stmt) { //String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris) {
+      RDFConnection conn = getConnection();
 
-
-      response
-      .register(new ConnectionCallback() {
+      response.register(new ConnectionCallback() {
           @Override
           public void onDisconnect(AsyncResponse disconnect) {
+              conn.abort();
               logger.debug("Client disconnected");
-
-              // TODO Abort
-              //qeAndType.getQueryExecution().abort();
-
-//              if(true) {
-//              disconnect.resume(
-//                  Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                  .entity("Connection Callback").build());
-//              } else {
-//                  disconnect.cancel();
-//              }
           }
       });
 
-      response
-      .register(new CompletionCallback() {
+      response.register(new CompletionCallback() {
           @Override
           public void onComplete(Throwable t) {
               if(t == null) {
@@ -401,39 +325,25 @@ public abstract class SparqlEndpointBase {
               } else {
                   logger.debug("Failed query execution");
               }
-              //qeAndType.getQueryExecution().close();
-              // TODO Close
           }
       });
 
-//      response
-//      .setTimeoutHandler(new TimeoutHandler() {
-//         @Override
-//         public void handleTimeout(AsyncResponse asyncResponse) {
-//             logger.debug("Timout on request");
-//             asyncResponse.resume(
-//                 Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                 .entity("Operation time out.").build());
-//        }
-//      });
-//
-//      response.setTimeout(600, TimeUnit.SECONDS);
-
-      try (RDFConnection conn = getConnection()) {
+      try {
           logger.debug("Opened connection: " + System.identityHashCode(conn));
-
-          if (stmt.isParsed()) {
-              conn.update(stmt.getUpdateRequest());
-          } else {
-              conn.update(stmt.getOriginalString());
-          }
-
+//          Txn.execute(conn, () -> {
+              if (stmt.isParsed()) {
+                  conn.update(stmt.getUpdateRequest());
+              } else {
+                  conn.update(stmt.getOriginalString());
+              }
+//          });
           String result = "{\"success\": true}";
           response.resume(result);
       } catch (Exception e) {
           response.resume(e);
+      } finally {
+          conn.close();
       }
-
   }
 }
 
@@ -712,3 +622,68 @@ public abstract class SparqlEndpointBase {
 //      @QueryParam("update") String updateString) {
 //  processStmtAsync(asyncResponse, null, updateString, null);
 //}
+
+//response
+//.setTimeoutHandler(new TimeoutHandler() {
+// @Override
+// public void handleTimeout(AsyncResponse asyncResponse) {
+//     logger.debug("Timout on request");
+//     asyncResponse.resume(
+//         Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//         .entity("Operation time out.").build());
+//}
+//});
+//
+//response.setTimeout(600, TimeUnit.SECONDS);
+// TODO Abort
+//qeAndType.getQueryExecution().abort();
+
+//if(true) {
+//disconnect.resume(
+//  Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//  .entity("Connection Callback").build());
+//} else {
+//  disconnect.cancel();
+//}
+
+// response.resume(result);
+
+/*
+ThreadUtils.start(response, new Runnable() {
+    @Override
+    public void run() {
+        try {
+            StreamingOutput result = processQuery(qe, format);
+            response.resume(result);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+});
+*/
+
+//response
+//.setTimeoutHandler(new TimeoutHandler() {
+// @Override
+// public void handleTimeout(AsyncResponse asyncResponse) {
+//     logger.debug("Timout on request");
+//     asyncResponse.resume(
+//         Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//         .entity("Operation time out.").build());
+//}
+//});
+//
+//response.setTimeout(600, TimeUnit.SECONDS);
+
+
+//if (resultsFormat == null) {
+//	Query query = qe.getQuery();
+//	if (query != null) {
+//		SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.createDefault());
+//		lang = SparqlQueryFmtsUtils.getLang(fmts, query);
+//	}
+//} else {
+//	lang = ResultsFormat.convert(resultsFormat);
+//}
+//
+

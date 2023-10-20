@@ -6,12 +6,12 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.RowSet;
 
-public class RowSetDelegateBase
+public class RowSetWrapperBase
 	implements RowSet
 {
     protected RowSet delegate;
 
-    public RowSetDelegateBase(RowSet delegate) {
+    public RowSetWrapperBase(RowSet delegate) {
         this.delegate = delegate;
     }
 

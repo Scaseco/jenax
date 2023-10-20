@@ -1,6 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.connection.query;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -9,7 +9,7 @@ import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TransactionalNull;
 
 public class SparqlQueryConnectionJsaBase<T extends QueryExecutionFactoryQuery>
-    implements TransactionalDelegate, SparqlQueryConnectionTmp
+    implements TransactionalWrapper, SparqlQueryConnectionTmp
 {
     protected T queryExecutionFactory;
     protected Transactional transactional;

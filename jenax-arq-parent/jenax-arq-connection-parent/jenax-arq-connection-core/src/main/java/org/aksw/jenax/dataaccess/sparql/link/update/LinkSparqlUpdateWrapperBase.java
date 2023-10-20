@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.link.update;
 
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 
-public abstract class LinkSparqlUpdateDelegateBase
-    implements LinkSparqlUpdateDelegate
+public abstract class LinkSparqlUpdateWrapperBase
+    implements LinkSparqlUpdateWrapper
 {
     protected LinkSparqlUpdate delegate;
 
-    public LinkSparqlUpdateDelegateBase(LinkSparqlUpdate delegate) {
+    public LinkSparqlUpdateWrapperBase(LinkSparqlUpdate delegate) {
         super();
         this.delegate = delegate;
     }

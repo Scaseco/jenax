@@ -12,7 +12,7 @@ import org.apache.jena.sparql.exec.RowSet;
  */
 public class QueryExecSelect
     extends QueryExecBaseSelect
-    implements QueryExecDecorator
+    implements QueryExecWrapper
 {
     protected QueryExec delegate;
 
@@ -48,11 +48,11 @@ public class QueryExecSelect
 
     @Override
     protected RowSet doSelect(Query selectQuery) {
-        return getDecoratee().select();
+        return getDelegate().select();
     }
 
     @Override
-    public QueryExec getDecoratee() {
+    public QueryExec getDelegate() {
         return delegate;
     }
 }

@@ -22,7 +22,7 @@ public class QueryExecFactoryOverQueryExecutionFactory
         this.closeDelegateOnClose = closeDelegate;
     }
 
-    public QueryExecutionFactory getDecoratee() {
+    public QueryExecutionFactory getDelegate() {
         return qef;
     }
 

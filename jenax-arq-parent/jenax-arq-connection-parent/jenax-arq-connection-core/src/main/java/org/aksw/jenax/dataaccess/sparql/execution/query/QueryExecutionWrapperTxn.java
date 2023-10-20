@@ -1,18 +1,25 @@
-package org.aksw.jenax.dataaccess.sparql.execution.update;
+package org.aksw.jenax.dataaccess.sparql.execution.query;
 
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.sparql.core.Transactional;
-import org.apache.jena.update.UpdateProcessor;
 
-public class UpdateProcessorDecoratorTxn<T extends UpdateProcessor>
-    extends UpdateProcessorDecoratorBase<T>
+/**
+ * A query execution that starts a transaction before the actual query execution
+ * and performs the commit/rollback action upon close.
+ *
+ * @author raven
+ *
+ */
+public class QueryExecutionWrapperTxn<T extends QueryExecution>
+    extends QueryExecutionWrapperBase<T>
 {
     protected Transactional transactional;
 
     protected boolean startedTxnHere = false;
     protected Throwable seenThrowable = null;
 
-    public UpdateProcessorDecoratorTxn(T decoratee, Transactional transactional) {
+    public QueryExecutionWrapperTxn(T decoratee, Transactional transactional) {
         super(decoratee);
         this.transactional = transactional;
     }
@@ -23,7 +30,7 @@ public class UpdateProcessorDecoratorTxn<T extends UpdateProcessor>
 
         if (!transactional.isInTransaction()) {
             startedTxnHere = true;
-            transactional.begin(ReadWrite.WRITE);
+            transactional.begin(ReadWrite.READ);
         }
     }
 
@@ -34,7 +41,7 @@ public class UpdateProcessorDecoratorTxn<T extends UpdateProcessor>
     }
 
     @Override
-    public void afterExec() {
+    public void close() {
         if (startedTxnHere) {
             try {
                 if (seenThrowable == null) {
@@ -46,11 +53,11 @@ public class UpdateProcessorDecoratorTxn<T extends UpdateProcessor>
                 transactional.end();
             }
         }
+        super.close();
     }
 
 
-    public static <T extends UpdateProcessor> UpdateProcessor wrap(T decoratee, Transactional transactional) {
-        return new UpdateProcessorDecoratorTxn<>(decoratee, transactional);
+    public static <T extends QueryExecution> QueryExecution wrap(T decoratee, Transactional transactional) {
+        return new QueryExecutionWrapperTxn<>(decoratee, transactional);
     }
-
 }

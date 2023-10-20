@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -24,7 +24,7 @@ import org.apache.jena.system.Txn;
  * It will be removed should Jena move these defaults to their own interface.
  */
 public interface LinkSparqlQueryTmp
-    extends TransactionalDelegate, LinkSparqlQuery
+    extends TransactionalWrapper, LinkSparqlQuery
 {
 
     // ---- SparqlQueryConnection

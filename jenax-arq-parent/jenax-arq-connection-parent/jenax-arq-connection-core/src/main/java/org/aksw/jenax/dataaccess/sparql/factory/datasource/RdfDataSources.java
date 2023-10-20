@@ -11,18 +11,21 @@ import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDeleg
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTmp;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.Transactional;
@@ -68,7 +71,7 @@ public class RdfDataSources {
     }
 
     public static RdfDataSource applyLinkTransform(RdfDataSource rdfDataSource, Function<? super RDFLink, ? extends RDFLink> linkXform) {
-        return new RdfDataSourceDelegateBase(rdfDataSource) {
+        return new RdfDataSourceWrapperBase(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection base = super.getConnection();
@@ -83,6 +86,26 @@ public class RdfDataSources {
      */
     public static RdfDataSource decorateUpdate(RdfDataSource dataSource, UpdateExecTransform updateExecTransform) {
         LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
+        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        return result;
+    }
+
+    /**
+     * Wrap a LinkSparqlQuery such that a possible write action is run when txn.begin() is invoked.
+     * The action is run before the transaction is started.
+     */
+    public static RdfDataSource decorateQueryBeforeTxnBegin(RdfDataSource dataSource, Runnable action) {
+        LinkSparqlQueryTransform componentTransform = link -> new LinkSparqlQueryWrapperBase(link) {
+            @Override
+            public void begin(TxnType type) {
+                action.run();
+                super.begin(type);
+            }
+            @Override
+            public void begin(ReadWrite readWrite) {
+                begin(TxnType.convert(readWrite));
+            }
+        };
         RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
         return result;
     }

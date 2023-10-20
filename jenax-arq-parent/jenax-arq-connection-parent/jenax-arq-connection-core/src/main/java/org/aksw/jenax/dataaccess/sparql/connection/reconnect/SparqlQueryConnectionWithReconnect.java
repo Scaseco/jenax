@@ -6,9 +6,9 @@ import java.util.function.Supplier;
 
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.healthcheck.HealthcheckRunner;
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionTmp;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
@@ -214,7 +214,7 @@ public class SparqlQueryConnectionWithReconnect
 
 
     public class QueryExecutionWithReconnect
-        extends QueryExecutionDecoratorBase<QueryExecution>
+        extends QueryExecutionWrapperBase<QueryExecution>
     {
         public QueryExecutionWithReconnect(QueryExecution decoratee) {
             super(decoratee);

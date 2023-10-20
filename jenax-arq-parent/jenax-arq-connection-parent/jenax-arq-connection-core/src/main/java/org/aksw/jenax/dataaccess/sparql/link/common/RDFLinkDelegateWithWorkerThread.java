@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.common.WorkerThreadBase;
 import org.aksw.jenax.dataaccess.sparql.link.query.IteratorDelegateWithWorkerThread;
 import org.apache.jena.atlas.json.JsonArray;
@@ -115,7 +115,7 @@ public class RDFLinkDelegateWithWorkerThread
 
     @Override
     public UpdateExecBuilder newUpdate() {
-        return new UpdateExecBuilderDelegateBase(getDelegate().newUpdate()) {
+        return new UpdateExecBuilderWrapperBase(getDelegate().newUpdate()) {
             @Override
             public UpdateExec build() {
                 UpdateExec tmp = submit(() -> delegate.build());

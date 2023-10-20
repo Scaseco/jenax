@@ -10,7 +10,7 @@ import java.util.Set;
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -29,7 +29,7 @@ import com.google.common.collect.Iterables;
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
 public class RdfDataSourceWithBnodeRewrite
-    extends RdfDataSourceDelegateBase
+    extends RdfDataSourceWrapperBase
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithBnodeRewrite.class);
 

@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.connection.dataset;
 
 import java.util.stream.Stream;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -14,7 +14,7 @@ import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.sparql.core.Quad;
 
 public abstract class RDFDatasetConnectionBase
-    implements TransactionalDelegate, RDFDatasetConnection
+    implements TransactionalWrapper, RDFDatasetConnection
 {
     protected SparqlQueryConnection queryConn;
     protected SparqlUpdateConnection updateConn;

@@ -18,7 +18,7 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
  * is a function from LinkSparqlQuery to LinkSparqlQuery.
  */
 public class LinkSparqlQueryQueryTransform
-    extends LinkSparqlQueryDelegateBase
+    extends LinkSparqlQueryWrapperBase
 {
     protected QueryTransform queryTransform;
     protected QueryExecTransform queryExecTransform;

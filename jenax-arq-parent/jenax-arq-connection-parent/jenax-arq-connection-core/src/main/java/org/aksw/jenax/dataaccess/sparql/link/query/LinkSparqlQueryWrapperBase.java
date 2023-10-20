@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.link.query;
 
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
-public class LinkSparqlQueryDelegateBase
-    implements LinkSparqlQueryDelegate
+public class LinkSparqlQueryWrapperBase
+    implements LinkSparqlQueryWrapper
 {
     protected LinkSparqlQuery delegate;
 
-    public LinkSparqlQueryDelegateBase(LinkSparqlQuery delegate) {
+    public LinkSparqlQueryWrapperBase(LinkSparqlQuery delegate) {
         super();
         this.delegate = delegate;
     }
@@ -16,5 +16,4 @@ public class LinkSparqlQueryDelegateBase
     public LinkSparqlQuery getDelegate() {
         return delegate;
     }
-
 }

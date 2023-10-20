@@ -8,18 +8,18 @@ import org.apache.jena.sparql.exec.QueryExec;
 public class QueryExecFactoryBackQuery
 	implements QueryExecFactory
 {
-	protected QueryExecFactoryQuery decoratee;
+	protected QueryExecFactoryQuery delegate;
 	protected Function<String, Query> queryParser;
 
 	public QueryExecFactoryBackQuery(QueryExecFactoryQuery decoratee, Function<String, Query> queryParser) {
 		super();
-		this.decoratee = decoratee;
+		this.delegate = decoratee;
 		this.queryParser = queryParser;
 	}
 
 	@Override
 	public QueryExec create(Query query) {
-		return decoratee.create(query);
+		return delegate.create(query);
 	}
 
 	@Override
@@ -31,8 +31,8 @@ public class QueryExecFactoryBackQuery
 
 	@Override
 	public void close() throws Exception {
-		if (decoratee instanceof AutoCloseable) {
-			((AutoCloseable)decoratee).close();
+		if (delegate instanceof AutoCloseable) {
+			((AutoCloseable)delegate).close();
 		}
 	}
 }

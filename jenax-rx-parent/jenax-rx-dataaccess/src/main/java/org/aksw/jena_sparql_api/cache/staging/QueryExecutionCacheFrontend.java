@@ -6,7 +6,7 @@ import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jena_sparql_api.cache.core.ModelProvider;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontend;
 import org.aksw.jena_sparql_api.cache.extra.CacheResource;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  *         Time: 4:11 PM
  */
 public class QueryExecutionCacheFrontend
-    extends QueryExecutionDecoratorBase<QueryExecution>
+    extends QueryExecutionWrapperBase<QueryExecution>
 {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecutionCacheFrontend.class);
 

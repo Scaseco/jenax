@@ -11,7 +11,7 @@ import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.sparql.algebra.transform2.Evaluation;
 import org.aksw.jenax.sparql.algebra.transform2.EvaluationCopy;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalLateral
-    extends RdfDataSourceDelegateBase
+    extends RdfDataSourceWrapperBase
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalLateral.class);
 

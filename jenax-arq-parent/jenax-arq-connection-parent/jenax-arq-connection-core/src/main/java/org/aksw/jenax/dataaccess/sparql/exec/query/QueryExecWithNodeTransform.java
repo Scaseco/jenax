@@ -18,7 +18,7 @@ import org.apache.jena.util.iterator.WrappedIterator;
 
 
 public class QueryExecWithNodeTransform
-    implements QueryExecDecorator
+    implements QueryExecWrapper
 {
     //protected Converter<Node, Node> nodeConverter;
     protected QueryExec decoratee;
@@ -30,19 +30,19 @@ public class QueryExecWithNodeTransform
     }
 
     @Override
-    public QueryExec getDecoratee() {
+    public QueryExec getDelegate() {
         return decoratee;
     }
 
     @Override
     public DatasetGraph getDataset() {
-        return getDecoratee().getDataset();
+        return getDelegate().getDataset();
         // return NodeTransformLib2.copyWithNodeTransform(nodeTransform, getDecoratee().getDataset());
     }
 
     @Override
     public RowSet select() {
-        return NodeTransformLib2.applyNodeTransform(nodeTransform, getDecoratee().select());
+        return NodeTransformLib2.applyNodeTransform(nodeTransform, getDelegate().select());
     }
 
     @Override
@@ -60,12 +60,12 @@ public class QueryExecWithNodeTransform
 
     @Override
     public Iterator<Triple> constructTriples() {
-        return WrappedIterator.create(getDecoratee().constructTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
+        return WrappedIterator.create(getDelegate().constructTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
     }
 
     @Override
     public Iterator<Quad> constructQuads() {
-        return WrappedIterator.create(getDecoratee().constructQuads()).mapWith(q -> NodeTransformLib.transform(nodeTransform, q));
+        return WrappedIterator.create(getDelegate().constructQuads()).mapWith(q -> NodeTransformLib.transform(nodeTransform, q));
     }
 
     @Override
@@ -82,22 +82,22 @@ public class QueryExecWithNodeTransform
 
     @Override
     public Iterator<Triple> describeTriples() {
-        return WrappedIterator.create(getDecoratee().describeTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
+        return WrappedIterator.create(getDelegate().describeTriples()).mapWith(t -> NodeTransformLib.transform(nodeTransform, t));
     }
 
     @Override
     public boolean ask() {
-        return getDecoratee().ask();
+        return getDelegate().ask();
     }
 
     @Override
     public JsonArray execJson() {
-        return getDecoratee().execJson();
+        return getDelegate().execJson();
     }
 
     @Override
     public Iterator<JsonObject> execJsonItems() {
-        return getDecoratee().execJsonItems();
+        return getDelegate().execJsonItems();
     }
 
 

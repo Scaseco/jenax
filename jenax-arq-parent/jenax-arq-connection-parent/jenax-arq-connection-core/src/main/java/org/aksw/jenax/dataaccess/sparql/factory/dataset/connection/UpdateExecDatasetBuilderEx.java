@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.exec.update.DatasetExecDecoratorTxn;
+import org.aksw.jenax.dataaccess.sparql.exec.update.DatasetExecWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateProcessorFactoryDataset;
 import org.apache.jena.atlas.logging.Log;
@@ -177,7 +177,7 @@ public class UpdateExecDatasetBuilderEx implements UpdateExecBuilder {
         // UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dataset, initialBinding, context, f);
         UpdateExec tmp = new UpdateExecDataset(updateRequest, dataset, initialBinding, cxt, f) {};
         // UpdateProcessor result = UpdateProcessorDecoratorTxn.wrap(tmp, dataset);
-        UpdateExec result = new DatasetExecDecoratorTxn<>(tmp, dataset);
+        UpdateExec result = new DatasetExecWrapperTxn<>(tmp, dataset);
 
 
         // UpdateProcessor result = updateProcessorFactory.create(updateRequest, dataset, context);

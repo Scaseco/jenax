@@ -11,7 +11,7 @@ public class QueryExecFactoryBackQueryWrapper
 		super(decoratee, queryParser);
 	}
 
-	public QueryExecFactoryQuery getDecoratee() {
-		return decoratee;
+	public QueryExecFactoryQuery getDelegate() {
+		return delegate;
 	}
 }

@@ -15,7 +15,7 @@ import org.apache.jena.update.UpdateRequest;
  * Supplied transformation functions may be null.
  */
 public class LinkSparqlUpdateUpdateTransform
-    extends LinkSparqlUpdateDelegateBase
+    extends LinkSparqlUpdateWrapperBase
 {
     protected Function<? super UpdateRequest, ? extends UpdateRequest> updateTransform;
     protected BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> updateExecTransform;
