@@ -6,7 +6,7 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
 public class QueryExecBuilderDelegateBaseParse
-    extends QueryExecBuilderDelegateBase
+    extends QueryExecBuilderWrapperBase
 {
     public QueryExecBuilderDelegateBaseParse(QueryExecBuilder delegate) {
         super(delegate);

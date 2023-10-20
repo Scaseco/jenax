@@ -21,7 +21,7 @@ import org.aksw.jenax.arq.util.syntax.QueryHash;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
-import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQueryDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
@@ -49,7 +49,7 @@ import io.reactivex.rxjava3.core.Flowable;
  * @author raven
  *
  */
-public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryDecoratorBase<QueryExecFactoryQuery> {
+public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryWrapperBase<QueryExecFactoryQuery> {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecFactoryQueryRangeCache.class);
 
     protected ObjectStore objectStore;

@@ -12,7 +12,7 @@ import org.apache.jena.sparql.exec.QueryExecAdapter;
 public class QueryExecFactories {
     public static QueryExecFactory adapt(QueryExecutionFactory qef) {
         QueryExecFactory result = qef instanceof QueryExecutionFactoryOverQueryExecFactory
-                ? ((QueryExecutionFactoryOverQueryExecFactory)qef).getDecoratee()
+                ? ((QueryExecutionFactoryOverQueryExecFactory)qef).getDelegate()
                 : new QueryExecFactoryOverQueryExecutionFactory(qef);
 
         return result;

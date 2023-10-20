@@ -4,7 +4,7 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.sparql.core.Transactional;
 
-public abstract class TransactionalDelegateWithWorkerThread<T extends Transactional>
+public abstract class TransactionalWrapperWithWorkerThread<T extends Transactional>
     extends WorkerThreadBase
     implements Transactional
 {

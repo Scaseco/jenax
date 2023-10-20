@@ -1,40 +1,40 @@
-package org.aksw.jenax.dataaccess.sparql.exec.query;
+package org.aksw.jenax.dataaccess.sparql.execution.update;
 
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.sparql.core.Transactional;
-import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.update.UpdateProcessor;
 
-public class QueryExecDecoratorTxn<T extends QueryExec>
-    extends QueryExecDecoratorBase<T>
+public class UpdateProcessorWrapperTxn<T extends UpdateProcessor>
+    extends UpdateProcessorWrapperBase<T>
 {
     protected Transactional transactional;
 
     protected boolean startedTxnHere = false;
     protected Throwable seenThrowable = null;
 
-    public QueryExecDecoratorTxn(T decoratee, Transactional transactional) {
+    public UpdateProcessorWrapperTxn(T decoratee, Transactional transactional) {
         super(decoratee);
         this.transactional = transactional;
     }
 
     @Override
-    public void beforeExec() {
+    protected void beforeExec() {
         super.beforeExec();
 
         if (!transactional.isInTransaction()) {
             startedTxnHere = true;
-            transactional.begin(ReadWrite.READ);
+            transactional.begin(ReadWrite.WRITE);
         }
     }
 
     @Override
-    public void onException(Exception e) {
+    protected void onException(Exception e) {
         seenThrowable = e;
         super.onException(e);
     }
 
     @Override
-    public void close() {
+    public void afterExec() {
         if (startedTxnHere) {
             try {
                 if (seenThrowable == null) {
@@ -46,11 +46,13 @@ public class QueryExecDecoratorTxn<T extends QueryExec>
                 transactional.end();
             }
         }
-        super.close();
+
+        super.afterExec();
     }
 
 
-    public static <T extends QueryExec> QueryExec wrap(T decoratee, Transactional transactional) {
-        return new QueryExecDecoratorTxn<>(decoratee, transactional);
+    public static <T extends UpdateProcessor> UpdateProcessor wrap(T decoratee, Transactional transactional) {
+        return new UpdateProcessorWrapperTxn<>(decoratee, transactional);
     }
+
 }

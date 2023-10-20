@@ -3,12 +3,12 @@ package org.aksw.jenax.dataaccess.sparql.factory.execution.query;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 
-public class QueryExecutionFactoryDecoratorBase<T extends QueryExecutionFactory>
+public class QueryExecutionFactoryWrapperBase<T extends QueryExecutionFactory>
     implements QueryExecutionFactory
 {
     protected T decoratee;
 
-    public QueryExecutionFactoryDecoratorBase(T decoratee) {
+    public QueryExecutionFactoryWrapperBase(T decoratee) {
         super();
         this.decoratee = decoratee;
     }

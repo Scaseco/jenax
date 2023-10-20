@@ -3,8 +3,8 @@ package org.aksw.jenax.dataaccess.sparql.connection.query;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
@@ -18,7 +18,7 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
  *
  */
 public class SparqlQueryConnectionWithExecFails
-    implements TransactionalDelegate, SparqlQueryConnectionTmp
+    implements TransactionalWrapper, SparqlQueryConnectionTmp
 {
     protected SparqlQueryConnection delegate;
     protected Function<? super Query, ? extends Throwable> queryToThrowable;
@@ -47,7 +47,7 @@ public class SparqlQueryConnectionWithExecFails
 
 
     public class QueryExecutionWithExecFails
-        extends QueryExecutionDecoratorBase<QueryExecution>
+        extends QueryExecutionWrapperBase<QueryExecution>
     {
         public QueryExecutionWithExecFails(QueryExecution delegate) {
             super(delegate);

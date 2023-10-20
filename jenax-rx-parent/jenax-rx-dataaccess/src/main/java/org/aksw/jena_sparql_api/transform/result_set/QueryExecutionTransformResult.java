@@ -6,7 +6,7 @@ import java.util.List;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -33,7 +33,7 @@ import org.apache.jena.vocabulary.RDF;
 
 
 public class QueryExecutionTransformResult
-    extends QueryExecutionDecoratorBase<QueryExecution>
+    extends QueryExecutionWrapperBase<QueryExecution>
 {
     //protected Converter<Node, Node> nodeConverter;
     protected NodeTransform nodeTransform;

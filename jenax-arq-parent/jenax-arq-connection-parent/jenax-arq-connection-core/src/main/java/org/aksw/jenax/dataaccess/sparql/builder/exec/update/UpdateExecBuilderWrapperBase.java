@@ -10,12 +10,12 @@ import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
-public class UpdateExecBuilderDelegateBase
+public class UpdateExecBuilderWrapperBase
     implements UpdateExecBuilder
 {
     protected UpdateExecBuilder delegate;
 
-    public UpdateExecBuilderDelegateBase(UpdateExecBuilder delegate) {
+    public UpdateExecBuilderWrapperBase(UpdateExecBuilder delegate) {
         super();
         this.delegate = delegate;
     }

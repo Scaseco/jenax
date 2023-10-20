@@ -1,6 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.link.common;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -12,7 +12,7 @@ import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.update.UpdateRequest;
 
 public interface RDFLinkDelegate
-    extends RDFLink, TransactionalDelegate
+    extends RDFLink, TransactionalWrapper
 {
     @Override
     RDFLink getDelegate();

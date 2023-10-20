@@ -4,7 +4,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
 
-public interface UpdateProcessorDecorator
+public interface UpdateProcessorWrapper
     extends UpdateProcessor
 {
     UpdateProcessor getDelegate();

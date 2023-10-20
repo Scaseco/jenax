@@ -7,7 +7,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.execution.query;
  *         Time: 12:53 PM
  */
 public class QueryExecutionFactoryDecorator
-    extends QueryExecutionFactoryDecoratorBase<QueryExecutionFactory>
+    extends QueryExecutionFactoryWrapperBase<QueryExecutionFactory>
 {
     public QueryExecutionFactoryDecorator(QueryExecutionFactory decoratee) {
         super(decoratee);

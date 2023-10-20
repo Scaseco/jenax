@@ -34,10 +34,11 @@ public interface RdfDataSource
      * Return a connection-less QueryExecutionFactory view of this data source.
      * Every QueryExecution created with the returned factory will obtain a fresh
      * connection using {@link #getConnection()} upon execution.
-     * The connection is closed when closing the {@link QueryExecution}
-     * (NOT the {@link org.apache.jena.query.QueryExecutionFactory})!
+     * The connection is closed when closing the {@link QueryExecution}.
      * Consequently, the use of connection pooling is recommended in cases where calling
      * {@link #getConnection()} is expensive.
+     * The behavior of {@link QueryExecutionFactory#close()} is implementation dependent.
+     * By default it is a no-op but it may close the data source.
      */
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);

@@ -1,13 +1,13 @@
 package org.aksw.jenax.dataaccess.sparql.connection.update;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
 
 public interface SparqlUpdateConnectionTmp
-    extends TransactionalDelegate, SparqlUpdateConnection
+    extends TransactionalWrapper, SparqlUpdateConnection
 {
     // ---- SparqlUpdateConnection
 

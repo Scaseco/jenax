@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.execution.query;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactory;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -46,7 +46,7 @@ public class QueryExecutionFactories {
         @Override
         public QueryExecution createQueryExecution(String queryString) {
             RDFConnection conn = dataSource.getConnection();
-            return new QueryExecutionDecoratorBase<QueryExecution>(conn.query(queryString)) {
+            return new QueryExecutionWrapperBase<QueryExecution>(conn.query(queryString)) {
                 @Override
                 public void close() {
                     try {
@@ -61,7 +61,7 @@ public class QueryExecutionFactories {
         @Override
         public QueryExecution createQueryExecution(Query query) {
             RDFConnection conn = dataSource.getConnection();
-            return new QueryExecutionDecoratorBase<QueryExecution>(conn.query(query)) {
+            return new QueryExecutionWrapperBase<QueryExecution>(conn.query(query)) {
                 @Override
                 public void close() {
                     try {

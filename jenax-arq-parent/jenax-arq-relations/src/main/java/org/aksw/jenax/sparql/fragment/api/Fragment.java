@@ -240,7 +240,6 @@ public interface Fragment
         return result;
     }
 
-
     default Fragment filter(Expr expr) {
         List<Element> elts = new ArrayList<>();
         elts.addAll(getElements());

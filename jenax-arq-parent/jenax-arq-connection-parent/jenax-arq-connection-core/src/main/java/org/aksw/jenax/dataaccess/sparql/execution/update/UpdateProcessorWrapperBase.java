@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.execution.update;
 
 import org.apache.jena.update.UpdateProcessor;
 
-public class UpdateProcessorDecoratorBase<T extends UpdateProcessor>
-    implements UpdateProcessorDecorator
+public class UpdateProcessorWrapperBase<T extends UpdateProcessor>
+    implements UpdateProcessorWrapper
 {
     protected T delegate;
 
-    public UpdateProcessorDecoratorBase(T delegate) {
+    public UpdateProcessorWrapperBase(T delegate) {
         super();
         this.delegate = delegate;
     }

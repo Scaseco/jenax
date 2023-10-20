@@ -14,7 +14,7 @@ public class LinkSparqlUpdateUtils {
      */
     public static LinkSparqlUpdateTransform newTransform(UpdateExecTransform updateExecTransform) {
         LinkSparqlUpdateTransform result = baseLink -> {
-            return new LinkSparqlUpdateDelegateBase(baseLink) {
+            return new LinkSparqlUpdateWrapperBase(baseLink) {
                 @Override
                 public UpdateExecBuilder newUpdate() {
                     return new UpdateExecBuilderWrapperBaseParse(getDelegate().newUpdate()) {

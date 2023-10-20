@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
@@ -15,7 +15,7 @@ import org.apache.jena.sparql.resultset.ResultSetException;
 import com.google.common.base.Supplier;
 
 public class QueryExecutionHttpWrapper
-    extends QueryExecutionDecoratorBase<QueryExecution>
+    extends QueryExecutionWrapperBase<QueryExecution>
 {
 
     public QueryExecutionHttpWrapper(QueryExecution decoratee) {

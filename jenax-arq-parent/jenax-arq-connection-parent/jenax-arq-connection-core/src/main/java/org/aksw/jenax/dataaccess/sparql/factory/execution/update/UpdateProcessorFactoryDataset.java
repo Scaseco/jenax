@@ -1,7 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.factory.execution.update;
 
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
-import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateProcessorDecoratorTxn;
+import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateProcessorWrapperTxn;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
@@ -71,7 +71,7 @@ public class UpdateProcessorFactoryDataset
         Binding initialBinding = BindingRoot.create();
 
         UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, cxt, f);
-        UpdateProcessor result = UpdateProcessorDecoratorTxn.wrap(tmp, dsg);
+        UpdateProcessor result = UpdateProcessorWrapperTxn.wrap(tmp, dsg);
 
 
         // UpdateProcessor result = updateProcessorFactory.create(updateRequest, dataset, context);

@@ -10,16 +10,10 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.Context;
 
-public interface QueryExecutionDecorator
+public interface QueryExecutionWrapper
     extends QueryExecution
 {
     QueryExecution getDelegate();
-
-    /** Legacy method */
-    @Deprecated
-    default QueryExecution getDecoratee() {
-        return getDelegate();
-    }
 
     default Optional<QueryExecution> tryGetDelegate() {
         QueryExecution delegate = getDelegate();
@@ -111,7 +105,7 @@ public interface QueryExecutionDecorator
             result = (X)this;
         }
         else {
-            result = QueryExecutionDecorator.unwrap(clazz, getDelegate());
+            result = QueryExecutionWrapper.unwrap(clazz, getDelegate());
         }
 
         return result;
@@ -119,8 +113,8 @@ public interface QueryExecutionDecorator
 
     @SuppressWarnings("unchecked")
     public static <X> X unwrap(Class<X> clazz, QueryExecution qe) {
-        Object tmp = qe instanceof QueryExecutionDecorator
-                ? ((QueryExecutionDecorator)qe).unwrap(clazz)
+        Object tmp = qe instanceof QueryExecutionWrapper
+                ? ((QueryExecutionWrapper)qe).unwrap(clazz)
                 : null;
         X result = (X)tmp;
         return result;

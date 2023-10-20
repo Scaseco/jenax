@@ -1,13 +1,13 @@
 package org.aksw.jenax.dataaccess.sparql.link.update;
 
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
 /** Default methods that delegate everything to the updateBuilder */
 public interface LinkSparqlUpdateTmp
-    extends TransactionalDelegate, LinkSparqlUpdate
+    extends TransactionalWrapper, LinkSparqlUpdate
 {
     @Override
     default void update(String updateString) {

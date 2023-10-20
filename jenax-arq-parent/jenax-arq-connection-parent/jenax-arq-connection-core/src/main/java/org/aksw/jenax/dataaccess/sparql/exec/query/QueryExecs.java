@@ -5,7 +5,7 @@ import org.apache.jena.sparql.exec.QueryExec;
 
 public class QueryExecs {
 	public static QueryExec withDetailedHttpMessages(QueryExec qe) {
-		return new QueryExecDecoratorBase<QueryExec>(qe) {
+		return new QueryExecWrapperBase<QueryExec>(qe) {
 			@Override
 			public void onException(Exception e) {
 				RuntimeException f = HttpExceptionUtils.makeHumanFriendly(e);

@@ -5,7 +5,7 @@ import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
-public interface LinkSparqlQueryDelegate
+public interface LinkSparqlQueryWrapper
     extends LinkSparqlQueryTmp
 {
     @Override

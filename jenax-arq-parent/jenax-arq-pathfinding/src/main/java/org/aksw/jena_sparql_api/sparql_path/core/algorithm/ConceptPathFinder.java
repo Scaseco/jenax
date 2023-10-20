@@ -14,6 +14,7 @@ import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -23,6 +24,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
@@ -61,11 +63,11 @@ public class ConceptPathFinder {
     private static final Logger logger = LoggerFactory.getLogger(ConceptPathFinder.class);
 
 
-    public static ResultSet getPropertyAdjacency(QueryExecutionFactory qef) {
+    public static ResultSet getPropertyAdjacency(QueryExecutionFactoryQuery qef) {
         //String queryStr = "Select Distinct ?x ?y { ?a ?x ?b . ?b ?y ?c }";
         // Exclude RDF memberships
-        String queryStr = "Select Distinct ?x ?y { ?a ?x ?b . ?b ?y ?c . Filter(!regex(str(?x), '^http://www.w3.org/1999/02/22-rdf-syntax-ns#_') && !regex(str(?y), '^http://www.w3.org/1999/02/22-rdf-syntax-ns#_')) }";
-        QueryExecution qe = qef.createQueryExecution(queryStr);
+        Query query = QueryFactory.create("Select Distinct ?x ?y { ?a ?x ?b . ?b ?y ?c . Filter(!regex(str(?x), '^http://www.w3.org/1999/02/22-rdf-syntax-ns#_') && !regex(str(?y), '^http://www.w3.org/1999/02/22-rdf-syntax-ns#_')) }");
+        QueryExecution qe = qef.createQueryExecution(query);
         ResultSet result = qe.execSelect();
 
         return result;
@@ -85,7 +87,7 @@ public class ConceptPathFinder {
     }
 
     /** Create a join summary that excludes joins of list membership properties (rdf:_1, etc) */
-    public static Model createDefaultJoinSummaryModel(QueryExecutionFactory qef) {
+    public static Model createDefaultJoinSummaryModel(QueryExecutionFactoryQuery qef) {
 
         ResultSet rs = getPropertyAdjacency(qef);
 
@@ -120,13 +122,13 @@ public class ConceptPathFinder {
         return joinSummaryModel;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops) {
+    public static List<SimplePath> findPaths(QueryExecutionFactoryQuery qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops) {
         Model joinSummaryModel = createDefaultJoinSummaryModel(qef);
         List<SimplePath> result = findPaths(qef, sourceConcept, tmpTargetConcept, nPaths, maxHops, joinSummaryModel);
         return result;
     }
 
-    public static List<SimplePath> findPaths(QueryExecutionFactory qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops, Model joinSummaryModel) {
+    public static List<SimplePath> findPaths(QueryExecutionFactoryQuery qef, Fragment1 sourceConcept, Fragment1 tmpTargetConcept, Long nPaths, Long maxHops, Model joinSummaryModel) {
 
         /*
         if(joinSummaryModel == null) {

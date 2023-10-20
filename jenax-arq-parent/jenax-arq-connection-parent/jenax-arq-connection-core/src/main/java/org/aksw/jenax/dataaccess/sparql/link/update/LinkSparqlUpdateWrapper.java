@@ -4,7 +4,7 @@ import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
-public interface LinkSparqlUpdateDelegate
+public interface LinkSparqlUpdateWrapper
     extends LinkSparqlUpdateTmp
 {
     @Override

@@ -13,7 +13,7 @@ import org.apache.jena.update.UpdateRequest;
 
 /** QueryExecBuilder base class which parses query strings and delegates them to the object based method*/
 public class UpdateExecBuilderWrapperWithTransform
-    extends UpdateExecBuilderDelegateBase
+    extends UpdateExecBuilderWrapperBase
 {
     protected Function<? super UpdateRequest, ? extends UpdateRequest> updateTransform;
     protected BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> updateExecTransform;

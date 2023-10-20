@@ -66,7 +66,7 @@ public class UpdateProcessorFactoryDataset
         Binding initialBinding = BindingRoot.create();
 
         UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f);
-        UpdateProcessor result = UpdateProcessorDecoratorTxn.wrap(tmp, dsg);
+        UpdateProcessor result = UpdateProcessorWrapperTxn.wrap(tmp, dsg);
 
 
         // UpdateProcessor result = updateProcessorFactory.create(updateRequest, dataset, context);

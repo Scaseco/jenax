@@ -1,7 +1,6 @@
 package org.aksw.jenax.web.server.boot;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.web.server.boot.FactoryBeanSparqlServer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
@@ -18,11 +17,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestSparqlServer {
-
-
     @Test
     public void testSparqlServer() throws Exception {
-
         Dataset dataset = DatasetFactory.create();
         RdfDataSource dataSource = () -> RDFConnectionFactory.connect(dataset);
 
@@ -37,21 +33,18 @@ public class TestSparqlServer {
         }
 
         RDFConnection conn = RDFConnectionFactory.connect("http://localhost:" + port + "/sparql");
-
         conn.update("INSERT DATA { <urn:x> <urn:x> <urn:x> }");
-
         Model actualModel = conn.queryConstruct(QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o }"));
-
         Model expectedModel = ModelFactory.createDefaultModel();
         Node x = NodeFactory.createURI("urn:x");
         expectedModel.getGraph().add(x, x, x);
 
         boolean isOk = expectedModel.isIsomorphicWith(actualModel);
         if (!isOk) {
-        	System.out.println("Incorrect actual data:");
+            System.out.println("Incorrect actual data:");
             RDFDataMgr.write(System.out, actualModel, RDFFormat.TURTLE_PRETTY);
 
-        	Assert.assertTrue(isOk);
+            Assert.assertTrue(isOk);
         }
 
         // FIXME Create a separate test as Jena 3.9.0 fails with this query because it picks the wrong content type
@@ -59,6 +52,5 @@ public class TestSparqlServer {
 
         server.stop();
         server.join();
-
     }
 }

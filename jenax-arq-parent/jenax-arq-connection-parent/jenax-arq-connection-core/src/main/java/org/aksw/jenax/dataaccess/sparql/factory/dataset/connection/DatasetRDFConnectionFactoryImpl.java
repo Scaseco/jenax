@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataset.connection;
 
 import java.util.function.Supplier;
 
-import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDelegateBase;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsaBase;
 import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateEngineFactoryProvider;
@@ -75,7 +75,7 @@ public class DatasetRDFConnectionFactoryImpl
 
                 public QueryExecutionBuilder newQuery() {
                     QueryExecDatasetBuilder core = QueryExecDatasetBuilder.create().dataset(dataset.asDatasetGraph());
-                    QueryExecBuilder adapter =  new QueryExecBuilderDelegateBase(core) {
+                    QueryExecBuilder adapter =  new QueryExecBuilderWrapperBase(core) {
                         public QueryExec build() {
 
                             QueryExecDatasetBuilder delegate = (QueryExecDatasetBuilder)getDelegate();
