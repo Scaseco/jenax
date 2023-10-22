@@ -31,6 +31,7 @@ import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
+import org.locationtech.jts.simplify.PolygonHullSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
 
 public class GeoSparqlExFunctions {
@@ -282,6 +283,18 @@ public class GeoSparqlExFunctions {
     public static GeometryWrapper makeValid(GeometryWrapper geomWrapper) {
         Geometry fixedGeometry = GeometryFixer.fix(geomWrapper.getParsingGeometry());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, fixedGeometry);
+        return result;
+    }
+
+    public static GeometryWrapper hullByAreaDelta(GeometryWrapper geomWrapper, boolean isOuter, double areaDeltaRatio) {
+        Geometry hull = PolygonHullSimplifier.hullByAreaDelta(geomWrapper.getParsingGeometry(), isOuter, areaDeltaRatio);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
+        return result;
+    }
+
+    public static GeometryWrapper hullByVertexNumberFraction(GeometryWrapper geomWrapper, boolean isOuter, double vertexNumFraction) {
+        Geometry hull = PolygonHullSimplifier.hull(geomWrapper.getParsingGeometry(), isOuter, vertexNumFraction);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
         return result;
     }
 
