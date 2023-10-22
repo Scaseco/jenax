@@ -286,12 +286,14 @@ public class GeoSparqlExFunctions {
         return result;
     }
 
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper hullByAreaDelta(GeometryWrapper geomWrapper, boolean isOuter, double areaDeltaRatio) {
         Geometry hull = PolygonHullSimplifier.hullByAreaDelta(geomWrapper.getParsingGeometry(), isOuter, areaDeltaRatio);
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
         return result;
     }
 
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper hullByVertexNumberFraction(GeometryWrapper geomWrapper, boolean isOuter, double vertexNumFraction) {
         Geometry hull = PolygonHullSimplifier.hull(geomWrapper.getParsingGeometry(), isOuter, vertexNumFraction);
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
