@@ -576,7 +576,7 @@ public class ElementGeneratorLateral {
         for (ShPropertyShape propertyShape : nodeShape.getProperties()) {
             Resource pathResource = propertyShape.getPath();
             Path sparqlPath = ShUtils.assemblePath(pathResource);
-            System.err.println("GOT PATH: " + sparqlPath);
+            // System.err.println("GOT PATH: " + sparqlPath);
 
 //            if (sparqlPath.toString().contains("sqlQuery")) {
 //                System.err.println("DEBUG POINT");

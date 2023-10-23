@@ -9,11 +9,9 @@ import java.util.Objects;
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class AccJsonObject
     extends AccJsonBase
@@ -56,7 +54,7 @@ public class AccJsonObject
 
         if (!skipOutput) {
             if (context.isMaterialize()) {
-                value = new JsonObject();
+                value = RdfElement.newObject(source); // new JsonObject();
             }
 
             if (context.isSerialize()) {
@@ -153,7 +151,7 @@ public class AccJsonObject
 
     @Override
     public PathJson getPath() {
-        String stepName = currentFieldAcc == null ? "(no active field)" : currentFieldAcc.getJsonKey();
+        String stepName = currentFieldAcc == null ? "(no active field)" : Objects.toString(currentFieldAcc.getJsonKey());
         return (parent != null ? parent.getPath() : PathJson.newRelativePath()).resolve(Step.of(stepName));
     }
 
@@ -163,7 +161,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void acceptContribution(JsonElement value, AccContext context) {
+    public void acceptContribution(RdfElement value, AccContext context) {
         throw new UnsupportedOperationException("This method should not be called on AccJsonNodeObject. It is AccJsonEdgeImpl that adds the contributions to an object.");
     }
 }

@@ -6,13 +6,9 @@ import java.util.Objects;
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.stream.JsonWriter;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
 public class AccJsonProperty
@@ -22,7 +18,7 @@ public class AccJsonProperty
     protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
-    protected String jsonKey;
+    protected Node jsonKey;
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
@@ -34,7 +30,7 @@ public class AccJsonProperty
     /** If true then no array is created. Any item after the first raises an error event. */
     protected boolean isSingle = false;
 
-    public AccJsonProperty(String jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
+    public AccJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
         super();
         this.matchFieldId = matchFieldId;
         this.jsonKey = jsonKey;
@@ -64,7 +60,7 @@ public class AccJsonProperty
     }
 
     @Override
-    public String getJsonKey() {
+    public Node getJsonKey() {
         return jsonKey;
     }
 
@@ -93,14 +89,14 @@ public class AccJsonProperty
             if (context.isMaterialize()) {
                 value = isSingle
                         ? null
-                        : new JsonArray();
+                        : RdfElement.newArray(); // new JsonArray();
             }
 
             if (context.isSerialize()) {
-                JsonWriter jsonWriter = context.getJsonWriter();
-                jsonWriter.name(jsonKey);
+                StructuredWriterRdf writer = context.getJsonWriter();
+                writer.name(jsonKey);
                 if (!isSingle) {
-                    jsonWriter.beginArray();
+                    writer.beginArray();
                 }
             }
         }
@@ -156,14 +152,14 @@ public class AccJsonProperty
                 // So we access the field directly
                 if (parent != null) {
                     // Turns null into JsonNull
-                    JsonElement elt = value == null ? JsonNull.INSTANCE : value;
+                    RdfElement elt = value == null ? RdfElement.nullValue() : value;
                     AccJsonObject acc = (AccJsonObject)parent;
-                    acc.value.getAsJsonObject().add(jsonKey, elt);
+                    acc.value.getAsObject().add(jsonKey, elt);
                 }
             }
 
             if (context.isSerialize()) {
-                JsonWriter jsonWriter = context.getJsonWriter();
+                StructuredWriterRdf jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
                     jsonWriter.endArray();
                 } else if (seenTargetCount == 0) {
@@ -180,7 +176,7 @@ public class AccJsonProperty
     }
 
     @Override
-    public void acceptContribution(JsonElement item, AccContext context) {
+    public void acceptContribution(RdfElement item, AccContext context) {
         ensureBegun();
         if (!skipOutput) {
             if (context.isMaterialize()) {
@@ -188,10 +184,10 @@ public class AccJsonProperty
                     if (value == null) {
                         value = item;
                     } else {
-                        // error
+                        // TODO Report an error
                     }
                 } else {
-                    value.getAsJsonArray().add(item);
+                    value.getAsArray().add(item);
                 }
             }
         }

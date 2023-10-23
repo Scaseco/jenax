@@ -24,6 +24,7 @@ import org.aksw.jenax.io.json.accumulator.AccJson;
 import org.aksw.jenax.io.json.accumulator.AccJsonDriver;
 import org.aksw.jenax.io.json.accumulator.AggJson;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
+import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -102,7 +103,6 @@ public class GraphQlExecImpl
 
         if (useAccumulators) {
             AggJson agg = jsonMapper.toAggregator();
-
             Supplier<Stream<Quad>> quadStreamSupplier = () -> SparqlRx
                     .execConstructQuads(() ->
                         // Produce quads by executing the construct query as a select one
@@ -114,17 +114,17 @@ public class GraphQlExecImpl
                                 )))
                     .blockingStream();
 
-
             result = new GraphQlDataProviderBase(name, metadata) {
                 @Override
                 public Stream<JsonElement> openStream() {
                     AccJson acc = agg.newAccumulator();
                     AccJsonDriver driver = AccJsonDriver.of(acc);
                     AccContext context = AccContext.materializing();
-
+                    RdfElementVisitorRdfToJson converter = new RdfElementVisitorRdfToJson();
                     Stream<Quad> quadStream = quadStreamSupplier.get();
                     Stream<JsonElement> r = driver.asStream(context, quadStream)
-                            .map(Entry::getValue);
+                            .map(Entry::getValue)
+                            .map(elt -> elt.accept(converter));
                     return r;
                 }
 

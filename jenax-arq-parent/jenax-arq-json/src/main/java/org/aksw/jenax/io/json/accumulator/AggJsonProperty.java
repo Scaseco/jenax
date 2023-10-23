@@ -6,16 +6,16 @@ public class AggJsonProperty
     implements AggJsonEdge
 {
     /** The property (json key) being aggregated */
-    protected String jsonKey;
+    protected Node jsonKey;
 
-    protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
+    protected Node matchFieldId; // AccJsonObject indexes AccJsonEdge instances by this attribute
     protected boolean isForward;
     protected boolean isSingle = false;
 
     /** The aggregator for the value */
     protected AggJsonNode targetAggregator;
 
-    protected AggJsonProperty(String jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    protected AggJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         super();
         this.jsonKey = jsonKey;
         this.matchFieldId = matchFieldId;
@@ -23,11 +23,11 @@ public class AggJsonProperty
         this.targetAggregator = targetAggregator;
     }
 
-    public static AggJsonProperty of(String jsonKey, Node matchFieldId, boolean isForward) {
+    public static AggJsonProperty of(Node jsonKey, Node matchFieldId, boolean isForward) {
         return of(jsonKey, matchFieldId, isForward, null);
     }
 
-    public static AggJsonProperty of(String jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    public static AggJsonProperty of(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         return new AggJsonProperty(jsonKey, matchFieldId, isForward, targetAggregator);
     }
 
@@ -45,7 +45,7 @@ public class AggJsonProperty
         return matchFieldId;
     }
 
-    public String getJsonKey() {
+    public Node getJsonKey() {
         return jsonKey;
     }
 

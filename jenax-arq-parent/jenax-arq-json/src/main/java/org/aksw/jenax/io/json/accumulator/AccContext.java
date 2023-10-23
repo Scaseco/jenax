@@ -4,26 +4,27 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 
 public class AccContext {
-    protected Gson gson;
-    protected JsonWriter jsonWriter;
+//    protected Gson gson;
+//    protected JsonWriter jsonWriter;
 
+    protected StructuredWriterRdf writer;
     protected AccJsonErrorHandler errorHandler = null;
 
-    public AccContext(Gson gson, JsonWriter jsonWriter, boolean materialize, boolean serialize) {
+    public AccContext(StructuredWriterRdf writer, boolean materialize, boolean serialize) {
         super();
-        this.gson = gson;
-        this.jsonWriter = jsonWriter;
+        this.writer = writer;
         this.materialize = materialize;
         this.serialize = serialize;
     }
 
     /** Create a context that only materializes */
     public static AccContext materializing() {
-        return new AccContext(null,  null,  true, false);
+        return new AccContext(null,  true, false);
     }
 
     public static AccContext serializing(Gson gson, JsonWriter jsonWriter) {
-        return new AccContext(gson,  jsonWriter,  false, true);
+        StructuredWriterRdf writer = new StructuredWriterRdfViaJson(gson, jsonWriter);
+        return new AccContext(writer, false, true);
     }
 
     public void setErrorHandler(AccJsonErrorHandler errorHandler) {
@@ -48,11 +49,16 @@ public class AccContext {
         return serialize;
     }
 
-    public Gson getGson() {
-        return gson;
+    public StructuredWriterRdf getJsonWriter() {
+        return writer;
     }
 
-    public JsonWriter getJsonWriter() {
-        return jsonWriter;
-    }
+//  public Gson getGson() {
+//  return gson;
+//}
+
+//public JsonWriter getJsonWriter() {
+//  return jsonWriter;
+//}
+
 }

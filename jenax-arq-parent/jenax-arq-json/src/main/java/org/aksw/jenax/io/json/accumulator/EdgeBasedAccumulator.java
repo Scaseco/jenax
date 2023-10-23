@@ -5,12 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.aksw.jenax.io.rdf.json.RdfArray;
+import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Quad;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
 
 
@@ -28,19 +31,19 @@ public class EdgeBasedAccumulator {
          * }
          */
 
-        AggJsonEdge actorEdge = AggJsonProperty.of("actor", NodeFactory.createURI("urn:actor"), true);
+        AggJsonEdge actorEdge = AggJsonProperty.of(NodeFactory.createLiteral("actor"), NodeFactory.createURI("urn:actor"), true);
         movieObject.addPropertyAggregator(actorEdge);
 
         AggJsonObject actorObject = new AggJsonObject();
         actorEdge.setTargetAgg(actorObject);
 
-        AggJsonEdge actorLabelEdge = AggJsonProperty.of("label", NodeFactory.createURI("urn:actorLabel"), true);
+        AggJsonEdge actorLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:actorLabel"), true);
         actorLabelEdge.setSingle(true);
         AggJsonLiteral actorLabelValue = new AggJsonLiteral();
         actorLabelEdge.setTargetAgg(actorLabelValue);
         actorObject.addPropertyAggregator(actorLabelEdge);
 
-        AggJsonEdge moveLabelEdge = AggJsonProperty.of("label", NodeFactory.createURI("urn:movieLabel"), true);
+        AggJsonEdge moveLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:movieLabel"), true);
         movieObject.addPropertyAggregator(moveLabelEdge);
 
         AggJsonLiteral movieLabelValue = new AggJsonLiteral();
@@ -51,16 +54,19 @@ public class EdgeBasedAccumulator {
 
         List<Quad> data = Arrays.asList(
             // movie0: label only for movie
+            create("urn:movie0", "urn:movie0", null, null),
             create("urn:movie0", "urn:movie0", "urn:movieLabel", "urn:movie[0].label[0]"),
 
             // movie1: labels for actors and movies
+            create("urn:movie1", "urn:movie1", null, null),
             create("urn:movie1", "urn:movie1", "urn:actor", "urn:actor1"),
             create("urn:movie1", "urn:actor1", "urn:actorLabel", "urn:actor[1].label[0]"),
             create("urn:movie1", "urn:actor1", "urn:actorLabel", "urn:actor[1].label[1]"),
             create("urn:movie1", "urn:movie1", "urn:movieLabel", "urn:movie[1].label[0]"),
             create("urn:movie1", "urn:movie1", "urn:movieLabel", "urn:movie[1].label[1]"),
-
-            // Movie0: label only for actor
+//
+//            // Movie0: label only for actor
+            create("urn:movie2", "urn:movie2", null, null),
             create("urn:movie2", "urn:movie2", "urn:actor", "urn:actor2"),
             create("urn:movie2", "urn:actor2", "urn:actorLabel", "urn:actor[2].label[0]")
 
@@ -79,7 +85,7 @@ public class EdgeBasedAccumulator {
         JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(System.out));
 
         // gson.fromJson(/null, null)
-        AccContext accContext = new AccContext(gson, writer, true, true);
+        AccContext accContext = new AccContext(new StructuredWriterRdfViaJson(gson, writer), true, true);
         accContext.setErrorHandler(ev -> {
             System.err.println("Error: " + ev);
         });
@@ -87,7 +93,8 @@ public class EdgeBasedAccumulator {
         // accContext.serialize = true;
         accContext.materialize = true;
 
-        JsonArray materialized = new JsonArray();
+        // JsonArray materialized = new JsonArray();
+        RdfArray materialized = new RdfArray();
         try {
             writer.beginArray();
             AccJsonDriver driver = AccJsonDriver.of(movieObject.newAccumulator());
@@ -99,11 +106,14 @@ public class EdgeBasedAccumulator {
         // writer.close(); // Don't close system.out
 
         System.out.println();
-        System.out.println("Materialized: " + gson.toJson(materialized));
+
+        JsonElement trueJson = materialized.accept(new RdfElementVisitorRdfToJson());
+
+        System.out.println("Materialized: " + gson.toJson(trueJson));
     }
 
     public static Quad create(String g, String s, String p, String o) {
-        return Quad.create(NodeFactory.createURI(g), NodeFactory.createURI(s), NodeFactory.createURI(p), NodeFactory.createURI(o));
+        return Quad.create(NodeFactory.createURI(g), NodeFactory.createURI(s), p == null ? Node.ANY : NodeFactory.createURI(p), o == null ? Node.ANY : NodeFactory.createURI(o));
     }
 }
 

@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonElement;
 
 /**
  * This class implements the driver for accumulating (json) objects from a sequence of edges (triples).
@@ -104,7 +104,7 @@ public class AccJsonDriver
         this.currentSource = null;
     }
 
-    public JsonElement getValue() {
+    public RdfElement getValue() {
         return currentState.getValue();
     }
 
@@ -127,7 +127,7 @@ public class AccJsonDriver
 
     // This method needs to go to the aggregator because it needs to create an accumulator specifically
     // for the stream
-    public Stream<Entry<Node, JsonElement>> asStream(AccContext cxt, Stream<Quad> quadStream) {
+    public Stream<Entry<Node, RdfElement>> asStream(AccContext cxt, Stream<Quad> quadStream) {
         Preconditions.checkArgument(!quadStream.isParallel(), "Json aggregation requires sequential stream");
 
         AccJsonDriver driver = this;
@@ -142,7 +142,7 @@ public class AccJsonDriver
                     }
                 });
 
-        Stream<Entry<Node, JsonElement>> result = StreamOperatorCollapseRuns.create(spec)
+        Stream<Entry<Node, RdfElement>> result = StreamOperatorCollapseRuns.create(spec)
             .transform(quadStream)
             .map(entry -> {
                 AccJsonDriver tmp = entry.getValue();

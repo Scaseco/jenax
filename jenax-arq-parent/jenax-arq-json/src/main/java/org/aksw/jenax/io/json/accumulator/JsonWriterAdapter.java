@@ -1,5 +1,6 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import com.google.gson.Gson;
@@ -23,79 +24,84 @@ public class JsonWriterAdapter
     }
 
     @Override
-    public JsonWriterGson beginArray() throws Exception {
+    public JsonWriterGson beginArray() throws IOException {
         delegate.beginArray();
         return this;
     }
 
     @Override
-    public JsonWriterGson endArray() throws Exception {
+    public JsonWriterGson endArray() throws IOException {
         delegate.endArray();
         return this;
     }
 
     @Override
-    public JsonWriterGson beginObject() throws Exception {
+    public JsonWriterGson beginObject() throws IOException {
         delegate.beginObject();
         return this;
     }
 
     @Override
-    public JsonWriterGson endObject() throws Exception {
+    public JsonWriterGson endObject() throws IOException {
         delegate.endObject();
         return this;
     }
 
     @Override
-    public JsonWriterGson name(String name) throws Exception {
+    public JsonWriterGson name(String name) throws IOException {
         delegate.name(name);
         return this;
     }
 
     @Override
-    public JsonWriterGson value(Boolean value) throws Exception {
+    public JsonWriterGson value(Boolean value) throws IOException {
         delegate.value(value);
         return this;
     }
 
     @Override
-    public JsonWriterGson value(Number value) throws Exception {
+    public JsonWriterGson value(Number value) throws IOException {
         delegate.value(value);
         return this;
     }
 
     @Override
-    public JsonWriterGson value(boolean value) throws Exception {
+    public JsonWriterGson value(boolean value) throws IOException {
         delegate.value(value);
         return this;
     }
 
     @Override
-    public JsonWriterGson value(double value) throws Exception {
+    public JsonWriterGson value(double value) throws IOException {
         delegate.value(value);
         return this;
     }
 
     @Override
-    public JsonWriterGson value(long value) throws Exception {
+    public JsonWriterGson value(long value) throws IOException {
         delegate.value(value);
         return this;
     }
     @Override
-    public JsonWriterGson nullValue() throws Exception {
+    public JsonWriterGson nullValue() throws IOException {
         delegate.nullValue();
         return this;
     }
 
     @Override
-    public JsonWriterGson value(String value) throws Exception {
+    public JsonWriterGson value(String value) throws IOException {
         delegate.value(value);
         return this;
     }
 
     @Override
-    public JsonWriterGson toJson(JsonElement value) throws Exception {
+    public JsonWriterGson toJson(JsonElement value) throws IOException {
         gson.toJson(value, delegate);
         return this;
+    }
+
+    @Override
+    public void flush() throws IOException {
+        delegate.flush();
     }
 }

@@ -11,6 +11,7 @@ import org.aksw.jenax.io.json.accumulator.AggJsonObject;
 import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -81,7 +82,8 @@ public class GraphToJsonNodeMapperObject
     public AggJsonNode toAggregator() {
         AggJsonObject result = AggJsonObject.of();
         propertyMappers.forEach((name, mapper) -> {
-            AggJsonProperty agg = mapper.toAggregator(name);
+            Node node = NodeFactory.createLiteral(name);
+            AggJsonProperty agg = mapper.toAggregator(node);
             result.addPropertyAggregator(agg);
         });
         return result;

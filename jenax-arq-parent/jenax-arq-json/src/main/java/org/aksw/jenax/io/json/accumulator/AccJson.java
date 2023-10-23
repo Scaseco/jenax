@@ -3,10 +3,9 @@ package org.aksw.jenax.io.json.accumulator;
 import java.io.IOException;
 
 import org.aksw.commons.path.json.PathJson;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-
-import com.google.gson.JsonElement;
 
 
 /**
@@ -24,7 +23,7 @@ public interface AccJson {
     PathJson getPath();
 
     /**
-     * Sets the parent of this accumulator.
+     * Sets the parent of this accumulator. Can only be called once.
      * This method should never be called by application code.
      *
      * @throws {@link IllegalStateException} if a parent has already been set.
@@ -32,6 +31,7 @@ public interface AccJson {
     void setParent(AccJson parent);
 
 
+    /** Get the parent of this accumulator. Null if there is none. */
     AccJson getParent();
 
     /**
@@ -68,12 +68,11 @@ public interface AccJson {
      * data assembled for the current node.
      * It is only valid to call this method after end().
      */
-    JsonElement getValue();
-
+    RdfElement getValue();
 
     /**
      * For materialization: Whenever end() is called on a state with materialization enabled, then
      * it passes its accumulated value to the parent using this method.
      */
-    void acceptContribution(JsonElement value, AccContext context);
+    void acceptContribution(RdfElement value, AccContext context);
 }

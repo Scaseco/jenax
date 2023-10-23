@@ -34,6 +34,11 @@ public interface UpdateExecWrapper
         }
     }
 
+    /**
+     * Gives a wrapper a change to perform an action before execution.
+     * This method should only be called by {@link #execute()}
+     * and never manually.
+     */
     default void beforeExec() {
 //        UpdateProcessor delegate = getDelegate();
 //        if (delegate instanceof UpdateExecWrapper) {
@@ -41,6 +46,11 @@ public interface UpdateExecWrapper
 //        }
     }
 
+    /**
+     * Gives a wrapper a change to perform an action after execution.
+     * This method should only be called by {@link #execute()}
+     * and never manually.
+     */
     default void afterExec() {
 //        UpdateProcessor delegate = getDelegate();
 //        if (delegate instanceof UpdateExecWrapper) {
@@ -48,6 +58,12 @@ public interface UpdateExecWrapper
 //        }
     }
 
+    /**
+     * Gives a wrapper a change to perform an action in case of an execution
+     * during execution.
+     * This method should only be called by {@link #execute()}
+     * and never manually.
+     */
     default void onException(Exception e) {
 //        UpdateProcessor delegate = getDelegate();
 //        if (delegate instanceof UpdateExecWrapper) {

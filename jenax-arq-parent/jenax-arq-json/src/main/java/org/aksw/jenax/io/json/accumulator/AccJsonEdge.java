@@ -6,7 +6,7 @@ public interface AccJsonEdge
     extends AccJson
 {
     Node getMatchFieldId();
-    String getJsonKey();
+    Node getJsonKey();
     boolean isForward();
 
 

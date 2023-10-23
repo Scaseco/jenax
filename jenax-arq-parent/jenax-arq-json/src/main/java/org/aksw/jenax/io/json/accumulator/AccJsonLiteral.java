@@ -4,13 +4,9 @@ import java.io.IOException;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
-import org.aksw.jenax.arq.json.RdfJsonUtils;
-import org.apache.jena.graph.Graph;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 
 public class AccJsonLiteral
     extends AccJsonBase
@@ -27,7 +23,7 @@ public class AccJsonLiteral
 
         // Always materialize literals
         // Only emit them when calling end()
-        value = RdfJsonUtils.toJson(Graph.emptyGraph, node, 0, 1, false);
+        value = RdfElement.newLiteral(node);
     }
 
     @Override
@@ -41,15 +37,16 @@ public class AccJsonLiteral
     public void end(AccContext context) throws IOException {
         ensureBegun();
         if (!skipOutput) {
-            JsonElement effectiveValue = value == null ? JsonNull.INSTANCE : value;
+            RdfElement effectiveValue = value == null ? RdfElement.nullValue() : value;
 
             if (context.isSerialize()) {
-                context.getGson().toJson(effectiveValue, context.getJsonWriter());
+                StructuredWriterRdf writer = context.getJsonWriter();
+                if (value == null) {
+                    writer.nullValue();
+                } else {
+                    writer.value(value.getAsLiteral().getNode());
+                }
             }
-
-//            if (context.isSerialize() && value == null) {
-//                context.getJsonWriter().nullValue();
-//            }
 
             if (context.isMaterialize() && parent != null) {
                 parent.acceptContribution(effectiveValue, context);
@@ -64,7 +61,7 @@ public class AccJsonLiteral
     }
 
     @Override
-    public void acceptContribution(JsonElement value, AccContext context) {
+    public void acceptContribution(RdfElement value, AccContext context) {
         throw new UnsupportedOperationException("Literals cannot expect json elemnts as contributions");
     }
 }

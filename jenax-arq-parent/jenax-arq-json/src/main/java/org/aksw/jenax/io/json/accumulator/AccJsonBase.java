@@ -2,10 +2,10 @@ package org.aksw.jenax.io.json.accumulator;
 
 import java.io.IOException;
 
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonElement;
 
 public abstract class AccJsonBase
     implements AccJson
@@ -13,7 +13,8 @@ public abstract class AccJsonBase
     protected AccJson parent;
 
     /** The materialized value - requires materialization to be enabled in the context */
-    protected JsonElement value = null;
+    // protected JsonElement value = null;
+    protected RdfElement value = null;
     protected Node oldSourceNode; // Old value stored for debugging
 
 
@@ -44,7 +45,7 @@ public abstract class AccJsonBase
     }
 
     @Override
-    public JsonElement getValue() {
+    public RdfElement getValue() {
         // if (currentSourceNode != null) {
         if (hasBegun) {
             throw new IllegalStateException("getValue() must only be called after end()");

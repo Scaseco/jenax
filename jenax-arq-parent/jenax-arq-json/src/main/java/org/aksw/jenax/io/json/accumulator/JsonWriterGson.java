@@ -1,37 +1,44 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import java.io.IOException;
+
 import com.google.gson.JsonElement;
 
 /**
  * The motivation for this abstraction was to have a JsonWriter which can assemble JsonObjects.
  * It turns out that guava has the JsonTreeWriter (an internal but public class) which does the job.
  */
-public interface JsonWriterGson {
+public interface JsonWriterGson
+    extends StructuredWriter
+{
+    @Override
+    JsonWriterGson beginArray() throws IOException;
 
-    JsonWriterGson beginArray() throws Exception;
+    @Override
+    JsonWriterGson endArray() throws IOException;
 
-    JsonWriterGson endArray() throws Exception;
+    @Override
+    JsonWriterGson beginObject() throws IOException;
 
-    JsonWriterGson beginObject() throws Exception;
+    @Override
+    JsonWriterGson endObject() throws IOException;
 
-    JsonWriterGson endObject() throws Exception;
+    JsonWriterGson name(String name) throws IOException;
 
-    JsonWriterGson name(String name) throws Exception;
+    JsonWriterGson value(Boolean value) throws IOException;
 
-    JsonWriterGson value(Boolean value) throws Exception;
+    JsonWriterGson value(Number value) throws IOException;
 
-    JsonWriterGson value(Number value) throws Exception;
+    JsonWriterGson value(boolean value) throws IOException;
 
-    JsonWriterGson value(boolean value) throws Exception;
+    JsonWriterGson value(double value) throws IOException;
 
-    JsonWriterGson value(double value) throws Exception;
+    JsonWriterGson value(long value) throws IOException;
 
-    JsonWriterGson value(long value) throws Exception;
+    JsonWriterGson nullValue() throws IOException;
 
-    JsonWriterGson nullValue() throws Exception;
-
-    JsonWriterGson value(String value) throws Exception;
+    JsonWriterGson value(String value) throws IOException;
 
     /** Extension */
-    JsonWriterGson toJson(JsonElement value) throws Exception;
+    JsonWriterGson toJson(JsonElement value) throws IOException;
 }

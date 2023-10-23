@@ -172,7 +172,7 @@ public class GraphToJsonPropertyMapper
                 + isUniqueLang + ", maxCount=" + maxCount + ", isHidden=" + isHidden + "]";
     }
 
-    public AggJsonProperty toAggregator(String jsonKey) {
+    public AggJsonProperty toAggregator(Node jsonKey) {
         AggJsonNode targetAgg = targetNodeMapper.toAggregator();
 
         // It should be fairly easy to extend AggJsonProperty such that the TripleFilter can be passed to it
