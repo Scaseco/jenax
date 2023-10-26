@@ -12,9 +12,11 @@ import java.util.TreeSet;
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.util.math.Lehmer;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
-import com.google.common.collect.Sets;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
@@ -26,6 +28,7 @@ import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 
+import com.google.common.collect.Sets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
@@ -36,8 +39,16 @@ import com.google.common.io.BaseEncoding;
  * A hasher for SPARQL queries that keeps track of separate hash codes for the
  * body, the projection and the permutation of the projection.
  *
- * @author raven
+ * The hash for
+ * <pre>
+ * SELECT COUNT(?p) { ?s ?p ?o } GROUP BY STR(?o) LIMIT 10 OFFSET 2
+ * </pre>
+ * is
+ * <pre>
+ * ftiGBh8SJSZ89mbO9FOsCtHSSD1t3nqqTox3JNisfvI/MD9wyw/1/2+10
+ * </pre>
  *
+ * @author raven
  */
 public class QueryHash {
     protected Query query;
@@ -95,20 +106,20 @@ public class QueryHash {
         HashFunction bodyHashFn = Hashing.sha256();
         HashFunction projHashFn = Hashing.murmur3_32_fixed();
 
-        // Full clone because we need a copy of the aggregator registration
+        // Clone the query because we need a copy of the aggregator registration
         // Query bodyQuery = query.cloneQuery();
         Query bodyQuery = QueryTransformOps.shallowCopy(query);
         VarExprList proj = bodyQuery.getProject();
 
         Comparator<Var> cmp = Comparator.comparing(Object::toString);
         if (bodyQuery.isConstructType()) {
+            // XXX Use visible vars via algebra rather than mentioned vars of the query pattern?
             Set<Var> pvars = SetUtils.asSet(PatternVars.vars(bodyQuery.getQueryPattern()));
 
             Template template = bodyQuery.getConstructTemplate();
             List<Quad> quads = template.getQuads();
             Set<Var> vars = new TreeSet<>(cmp);
             vars.addAll(QuadPatternUtils.getVarsMentioned(quads));
-
             Set<Var> effProj = Sets.intersection(vars, pvars);
 
             bodyQuery.setQuerySelectType();
@@ -121,6 +132,9 @@ public class QueryHash {
         bodyQuery.setQuerySelectType();
 
         // VarExprList baseProj = new VarExprList(proj);
+        // Add the aggregator expressions to the projection:
+        // Queries that only differ by projection of the group by expressions
+        // only differ by the lehmer code
         if (bodyQuery.hasGroupBy()) {
             VarExprList vel = bodyQuery.getGroupBy();
             proj.addAll(vel);
@@ -128,7 +142,12 @@ public class QueryHash {
             bodyQuery.setQueryResultStar(true);
         }
 
+        // Ensure result variables are properly set
         bodyQuery.resetResultVars();
+
+        // Get the visible vars as a base for computing the lehmer value
+        Op op = Algebra.compile(bodyQuery);
+        Set<Var> visibleVars = OpVars.visibleVars(op);
 
         Set<Var> nonAggVars = new TreeSet<>(cmp);
         Set<Var> aggVars = new TreeSet<>(cmp);
@@ -154,7 +173,6 @@ public class QueryHash {
             Expr e = expr == null ? ev : new E_Equals(ev, expr);
 
             String str = ExprUtils.fmtSPARQL(e);
-
             projStrs.add(str);
         }
 
@@ -194,7 +212,7 @@ public class QueryHash {
 //		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
 //		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
 
-        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?p) { ?s ?p ?o } GROUP BY STR(?o) LIMIT 10")));
+        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?p) { ?s ?p ?o } GROUP BY STR(?o) LIMIT 10 OFFSET 2")));
 
 //        Collection<String> items = Arrays.asList("d", "c", "b", "a");
 //        BigInteger value = Lehmer.lehmerValue(items, Comparator.naturalOrder());
