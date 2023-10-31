@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
@@ -21,9 +22,13 @@ import org.aksw.commons.util.math.Lehmer;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.query.SortCondition;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
@@ -33,9 +38,11 @@ import org.apache.jena.sparql.expr.ExprVars;
 import org.apache.jena.sparql.expr.aggregate.Aggregator;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
+import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.PatternVars;
+import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.FmtUtils;
@@ -66,6 +73,7 @@ class LehmerHash {
         return lehmer;
     }
 }
+
 
 /**
  * A hasher for SPARQL queries that keeps track of separate hash codes for the
@@ -249,7 +257,7 @@ public class QueryHash {
         Set<Var> patternVars = (Set<Var>)PatternVars.vars(new LinkedHashSet<>(), queryPattern);
 
         Generator<Var> patternVarGen = VarGeneratorImpl2.create("v");
-        patternVars.forEach(v -> relabel.put(v, nextVar(v, patternVarGen)));
+        patternVars.forEach(v -> getOrNext(relabel, v, patternVarGen));
         allVars.addAll(patternVars);
 
         NodeTransform xform = new NodeTransformSubst(relabel);
@@ -273,51 +281,101 @@ public class QueryHash {
         }
 
         // Group By
-
         Generator<Var> groupByVarGen = VarGeneratorImpl2.create("g");
         VarExprList newGroupBy = transform(query.getGroupBy(), relabel, groupByVarGen, groupByHashFn);
         newQuery.getGroupBy().addAll(newGroupBy);
 
         // Having
-
+        Generator<Var> havingVarGen = VarGeneratorImpl2.create("h");
         if (query.hasHaving()) {
-            List<Expr> newHavingExprs = transform(query.getHavingExprs(), relabel, patternVarGen);
+            List<Expr> newHavingExprs = transform(query.getHavingExprs(), relabel, havingVarGen);
             newHavingExprs.forEach(newQuery::addHavingCondition);
         }
 
         // Order By
+        Generator<Var> orderByVarGen = VarGeneratorImpl2.create("o");
         if (query.hasOrderBy()) {
+            NodeTransform xform2 = nodeTransform(relabel, orderByVarGen);
             List<SortCondition> newOrderBy = query.getOrderBy().stream()
-                .map(sc -> NodeTransformLib2.transform(xform, sc))
+                .map(sc -> NodeTransformLib2.transform(xform2, sc))
                 .collect(Collectors.toList());
             newOrderBy.forEach(newQuery::addOrderBy);
         }
 
         // Projection
-        if (!query.isQueryResultStar()) {
-            VarExprList newProject = transform(query.getProject(), relabel, patternVarGen, projectHashFn);
-            newQuery.getProject().addAll(newProject);
+        Generator<Var> projectVarGen = VarGeneratorImpl2.create("p");
+
+        QueryUtils.setQueryType(newQuery, query.queryType());
+
+        switch (query.queryType()) {
+        case SELECT:
+            newQuery.setQueryResultStar(query.isQueryResultStar());
+            if (!query.isQueryResultStar()) {
+                VarExprList newProject = transform(query.getProject(), relabel, projectVarGen, projectHashFn);
+                newQuery.getProject().addAll(newProject);
+            }
+            break;
+        case CONSTRUCT:
+            Template newTemplate = transform(query.getConstructTemplate(), relabel, projectVarGen);
+            newQuery.setConstructTemplate(newTemplate);
+            break;
+        case ASK:
+            break;
+        case DESCRIBE:
+            List<Node> nodes = query.getResultURIs().stream()
+                .map(n -> transform(n, relabel, projectVarGen))
+                .collect(Collectors.toList());
+            nodes.forEach(newQuery::addDescribeNode);
+            break;
+        case CONSTRUCT_JSON:
+            Map<String, Node> newJsonMapping = query.getJsonMapping().entrySet().stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> transform(e.getValue(), relabel, projectVarGen)));
+            newJsonMapping.forEach(newQuery::addJsonMapping);
+            break;
+        default:
+            throw new RuntimeException("Unknown query type: " + query.queryType());
         }
+
 
 
         HashCode bodyHashCode = queryPatternHashFn.hashString(newQuery.getQueryPattern().toString(), StandardCharsets.UTF_8);
 
 //        System.out.println(bodyHashCode);
 
-        LehmerHash aggHash = hash(aggHashFn, newQuery.getAggregators().stream().map(ExprUtils::fmtSPARQL).collect(Collectors.toList()));
+        LehmerHash aggHash = hash(aggHashFn, newQuery.getAggregators(), ExprUtils::fmtSPARQL);
 
         LehmerHash groupByHash = toHashCode(newQuery.getGroupBy());
 //        System.out.println(groupByHash);
 
 
-        LehmerHash havingHash = hash(havingHashFn, newQuery.getHavingExprs().stream().map(ExprUtils::fmtSPARQL).collect(Collectors.toList()));
+        LehmerHash havingHash = hash(havingHashFn, newQuery.getHavingExprs(), ExprUtils::fmtSPARQL);
 
 
-        LehmerHash orderByHash = hash(orderByHashFn, newQuery.getOrderBy().stream().map(QueryHash::fmt).collect(Collectors.toList()));
+        LehmerHash orderByHash = hash(orderByHashFn, newQuery.getOrderBy(), QueryHash::fmt);
 
 //        System.out.println(orderByHash);
-        LehmerHash projecHash = toHashCode(newQuery.getProject());
 //        System.out.println(projecHash);
+
+        LehmerHash projectHash;
+        switch (query.queryType()) {
+        case SELECT:
+            projectHash = toHashCode(newQuery.getProject());
+            break;
+        case CONSTRUCT:
+            projectHash = hash(projectHashFn, newQuery.getConstructTemplate().getQuads(), FmtUtils::stringForQuad);
+            break;
+        case ASK:
+            projectHash = LehmerHash.of(HashCode.fromInt(0), BigInteger.valueOf(0));
+            break;
+        case DESCRIBE:
+            projectHash = hash(projectHashFn, query.getResultURIs(), NodeFmtLib::strTTL);
+            break;
+        case CONSTRUCT_JSON:
+            projectHash = hash(projectHashFn, query.getJsonMapping().entrySet(), Objects::toString);
+            break;
+        default:
+            throw new RuntimeException("Unknown query type: " + query.queryType());
+        }
 
 
         // Var Mapping
@@ -332,8 +390,13 @@ public class QueryHash {
         newQuery.setLimit(query.getLimit());
         newQuery.setOffset(query.getOffset());
 
-        return new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projecHash, relabelHash);
+        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash);
 
+        System.out.println("Original Query:\n" + query);
+        System.out.println("Harmonized Query:\n" + newQuery);
+        System.out.println("Hash: " + result);
+
+        return result;
 //
 //        Set<Var> groupByVars = new LinkedHashSet<>();
 //        Set<Var> orderByVars = new LinkedHashSet<>();
@@ -427,7 +490,6 @@ public class QueryHash {
         for (ExprAggregator ea : eas) {
             vel.add(ea.getVar(), ea);
         }
-
         VarExprList newVel = transform(vel, relabel, varGen, hashFn);
         List<ExprAggregator> result = VarExprListUtils.streamVarExprs(newVel)
             .map(e -> {
@@ -458,7 +520,7 @@ public class QueryHash {
         Set<Var> mentionedVars = new LinkedHashSet<>();
         ExprVars.varsMentioned(mentionedVars, e);
         for (Var mv : mentionedVars) {
-            relabel.computeIfAbsent(mv, x -> nextVar(x, varGen));
+            getOrNext(relabel, mv, varGen);
         }
         Expr result = NodeTransformLib.transform(new NodeTransformSubst(relabel), e);
         return result;
@@ -476,21 +538,26 @@ public class QueryHash {
 
             ExprVars.varsMentioned(mentionedVars, e);
             for (Var mv : mentionedVars) {
-                relabel.computeIfAbsent(mv, x -> nextVar(x, varGen));
+                getOrNext(relabel, mv, varGen);
             }
             Expr newExpr = NodeTransformLib.transform(new NodeTransformSubst(relabel), e);
             // Hash the expression itself
             String str = ExprUtils.fmtSPARQL(newExpr);
             HashCode hashCode = hashFn.hashString(str, StandardCharsets.UTF_8);
 
-            String newVarName = getSpecialPrefix(v) + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+            String newVarName = getSpecialPrefix(v) + str(hashCode);
             Var newVar = Var.alloc(newVarName);
             relabel.put(v, newVar);
             result = Map.entry(newVar, newExpr);
         } else {
-            Var newVar = relabel.computeIfAbsent(v, x -> nextVar(x, varGen));
+            Var newVar = getOrNext(relabel, v, varGen);
             result = new SimpleEntry<>(newVar, null);
         }
+        return result;
+    }
+
+    public static Var getOrNext(Map<Var, Var> relabel, Var v, Generator<Var> varGen) {
+        Var result = relabel.computeIfAbsent(v, x -> nextVar(x, varGen));
         return result;
     }
 
@@ -513,6 +580,26 @@ public class QueryHash {
         return result;
     }
 
+    public static NodeTransform nodeTransform(Map<Var, Var> relabel, Generator<Var> varGen) {
+        return node -> transform(node, relabel, varGen);
+    }
+
+    public static Node transform(Node node, Map<Var, Var> relabel, Generator<Var> varGen) {
+        Node r = node;
+        if (node.isVariable()) {
+            Var v = (Var)node;
+            r = getOrNext(relabel, v, varGen);
+        }
+        return r;
+    }
+
+    public static Template transform(Template template, Map<Var, Var> relabel, Generator<Var> varGen) {
+        NodeTransform xform = node -> transform(node, relabel, varGen);
+        List<Quad> quads = template.getQuads().stream()
+            .map(q -> NodeTransformLib.transform(xform, q))
+            .collect(Collectors.toList());
+        return new Template(new QuadAcc(quads));
+    }
 
     public static ExprAggregator transform(ExprAggregator ea, Map<Var, Var> relabel, Generator<Var> varGen, HashFunction hashFn) {
         // Relabel variables of the expression
@@ -520,7 +607,7 @@ public class QueryHash {
 
         ExprVars.varsMentioned(mentionedVars, ea.getAggregator().getExprList());
         for (Var mv : mentionedVars) {
-            relabel.computeIfAbsent(mv, x -> nextVar(x, varGen));
+            getOrNext(relabel, mv, varGen);
         }
 
         ExprList newExprList = NodeTransformLib.transform(new NodeTransformSubst(relabel), ea.getAggregator().getExprList());
@@ -545,20 +632,20 @@ public class QueryHash {
     public static LehmerHash toHashCode(VarExprList vel) {
         HashFunction hashFn = Hashing.murmur3_32_fixed();
         List<String> elements = VarExprListUtils.streamVarExprs(vel).map(Object::toString).collect(Collectors.toList());
-        return hash(hashFn, elements);
+        return hash(hashFn, elements, Objects::toString);
     }
 
 //    public static <S, T extends Comparable<T>> Entry<HashCode, BigInteger> hashIndirect(HashFunction hashFn, Collection<S> elements, Function<S, T> mapper) {
 //    }
 
-    public static <T extends Comparable<T>> LehmerHash hash(HashFunction hashFn, Collection<T> elements) {
-        List<HashCode> hashCodes = elements.stream().map(element -> {
-            String str = Objects.toString(element);
+    public static <T> LehmerHash hash(HashFunction hashFn, Collection<T> elements, Function<T, String> toString) {
+        List<String> strs = elements == null ? List.of() : elements.stream().map(toString::apply).collect(Collectors.toList());
+        List<HashCode> hashCodes = strs.stream().map(str -> {
             HashCode r = hashFn.hashString(str, StandardCharsets.UTF_8);
             return r;
         }).collect(Collectors.toList());
         HashCode hashCode = hashCodes.isEmpty() ? HashCode.fromInt(0) : Hashing.combineUnordered(hashCodes);
-        BigInteger lehmerValue = Lehmer.lehmerValue(elements, Comparator.naturalOrder());
+        BigInteger lehmerValue = Lehmer.lehmerValue(strs, Comparator.naturalOrder());
         return LehmerHash.of(hashCode, lehmerValue);
     }
 
@@ -659,10 +746,19 @@ public class QueryHash {
         return BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
     }
 
+    protected String getQueryTypePrefix(QueryType queryType) {
+        // (a)sk, (c)onstruct, (d)escribe, (j)son, (s)elect
+        return Character.toString(queryType.name().charAt(0)).toLowerCase();
+    }
 
     @Override
     public String toString() {
+        Query query = getHarmonizedQuery();
+        String sliceHash = query.hasOffset() ? "" + query.getOffset() : "";
+        sliceHash += query.hasLimit() ? "+" + query.getLimit() : "";
+
         String baseHash =
+            getQueryTypePrefix(harmonizedQuery.queryType()) + "/" +
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
             str(getHavingHash().getHash()) + "/" +
@@ -670,14 +766,13 @@ public class QueryHash {
             str(getOrderByHash().getHash()) + "/" +
             getGroupByHash().getLehmer() + "/" +
             getHavingHash().getLehmer() + "/" +
-            getProjecHash().getLehmer() + "/" +
-            getOrderByHash().getLehmer() + "/" +
+            // Omit projection hash on ask queries
+            (!harmonizedQuery.isAskType()
+                    ? getProjecHash().getLehmer() + "/" +
+                        getOrderByHash().getLehmer() + "/"
+                    : "") +
             str(getRelabelHash())
             ;
-
-        Query query = getHarmonizedQuery();
-        String sliceHash = query.hasOffset() ? "" + query.getOffset() : "";
-        sliceHash += query.hasLimit() ? "+" + query.getLimit() : "";
 
         return baseHash + (sliceHash.isEmpty() ? "" : "/" + sliceHash);
 

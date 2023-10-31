@@ -23,9 +23,9 @@ import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.query.OpVisitorTriplesQuads;
 import org.aksw.jenax.arq.util.query.TransformCollectOps;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
-import com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
@@ -37,7 +37,6 @@ import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpGraph;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
-import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Quad;
@@ -71,8 +70,29 @@ import org.apache.jena.sparql.util.PrefixMapping2;
 
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
 
 public class QueryUtils {
+
+    /**
+     * Set the query type on a given query.
+     *
+     * @param query The query on which to set the query type
+     * @param queryType The query type to set
+     * @return The given query
+     */
+    public static Query setQueryType(Query query, QueryType queryType) {
+        switch (queryType) {
+        case ASK: query.setQueryAskType(); break;
+        case CONSTRUCT: query.setQueryConstructType(); break;
+        case DESCRIBE: query.setQueryDescribeType(); break;
+        case CONSTRUCT_JSON: query.setQueryJsonType(); break;
+        case SELECT: query.setQuerySelectType(); break;
+        default:
+             throw new IllegalArgumentException("Unknown query type: " + queryType);
+        }
+        return query;
+    }
 
     public static Query applyElementTransform(Query beforeQuery, Function<? super Element, ? extends Element> transform) {
         Query result = QueryTransformOps.shallowCopy(beforeQuery);

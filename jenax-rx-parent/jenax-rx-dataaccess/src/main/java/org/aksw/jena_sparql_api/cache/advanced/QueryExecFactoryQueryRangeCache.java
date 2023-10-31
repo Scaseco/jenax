@@ -32,6 +32,7 @@ import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,17 +71,17 @@ public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryWrappe
     public QueryExec create(Query query) {
         Range<Long> requestRange = QueryUtils.toRange(query);
 
-        QueryHash hash = QueryHash.createHash(query);
-
-        Query bodyQueryWithoutSlice = hash.getBodyQuery();
+        Query bodyQueryWithoutSlice = QueryTransformOps.shallowCopy(query); // hash.getBodyQuery();
         bodyQueryWithoutSlice.setOffset(Query.NOLIMIT);
         bodyQueryWithoutSlice.setLimit(Query.NOLIMIT);
 
+        QueryHash hash = QueryHash.createHash(bodyQueryWithoutSlice);
 //        HashCode hashCode = Hashing.sha256().hashString(queryWithoutSlice.toString(), StandardCharsets.UTF_8);
 //        String str = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
 
-        String bodyHash = hash.getBodyHashStr();
-        String projHash = hash.getProjHashStr();
+        String queryHash = hash.toString();
+//        String bodyHash = hash.getBodyHashStr();
+//        String projHash = hash.getProjHashStr();
 
         logger.debug("Query w/o slice: " + bodyQueryWithoutSlice);
         logger.debug("Query hash: " + hash + " " + requestRange);
@@ -89,7 +90,8 @@ public class QueryExecFactoryQueryRangeCache extends QueryExecFactoryQueryWrappe
 
         ListPaginator<Binding> frontend;
         try {
-            Path<String> objectStorePath = PathStr.newRelativePath(bodyHash).resolve(projHash);
+            // The query hash may contain slashes which are parsed into path segments
+            Path<String> objectStorePath = PathStr.parse(queryHash);
             frontend = queryToCache.get(objectStorePath, () -> {
                 ListPaginator<Binding> backend = new ListPaginatorSparql(bodyQueryWithoutSlice, decoratee);
                 // SequentialReaderSource<Binding[]> dataSource =
