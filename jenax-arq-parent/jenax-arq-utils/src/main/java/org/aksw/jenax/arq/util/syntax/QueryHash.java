@@ -29,6 +29,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryType;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
@@ -110,11 +111,15 @@ public class QueryHash {
     protected LehmerHash havingHash;
     protected LehmerHash orderByHash;
     protected LehmerHash projecHash;
+    protected LehmerHash defaultGraphHash;
+    protected LehmerHash namedGraphHash;
     protected HashCode relabelHash;
 
     public QueryHash(Query originalQuery, Query harmonizedQuery, HashCode bodyHashCode, LehmerHash aggHash,
             LehmerHash groupByHash, LehmerHash havingHash, LehmerHash orderByHash, LehmerHash projecHash,
-            HashCode relabelHash) {
+            HashCode relabelHash,
+            LehmerHash defaultGraphHash,
+            LehmerHash namedGraphHash) {
         super();
         this.originalQuery = originalQuery;
         this.harmonizedQuery = harmonizedQuery;
@@ -125,6 +130,8 @@ public class QueryHash {
         this.orderByHash = orderByHash;
         this.projecHash = projecHash;
         this.relabelHash = relabelHash;
+        this.defaultGraphHash = defaultGraphHash;
+        this.namedGraphHash = namedGraphHash;
     }
 
     public Query getOriginalQuery() {
@@ -161,6 +168,14 @@ public class QueryHash {
 
     public HashCode getRelabelHash() {
         return relabelHash;
+    }
+
+    public LehmerHash getDefaultGraphHash() {
+        return defaultGraphHash;
+    }
+
+    public LehmerHash getNamedGraphHash() {
+        return namedGraphHash;
     }
 
 //    public String getBodyHashStr() {
@@ -236,6 +251,7 @@ public class QueryHash {
     public static QueryHash createHash(Query query) {
         HashFunction queryPatternHashFn = Hashing.sha256();
         HashFunction aggHashFn = Hashing.murmur3_32_fixed();
+        HashFunction datasetDescriptionHashFn = Hashing.farmHashFingerprint64();
         HashFunction orderByHashFn = Hashing.murmur3_32_fixed();
         HashFunction havingHashFn = Hashing.murmur3_32_fixed();
         HashFunction groupByHashFn = Hashing.murmur3_32_fixed();
@@ -303,10 +319,22 @@ public class QueryHash {
             newOrderBy.forEach(newQuery::addOrderBy);
         }
 
+        // Query type, default and named graphs
+        QueryUtils.setQueryType(newQuery, query.queryType());
+
+        DatasetDescription dd = query.getDatasetDescription();
+        if (dd != null) {
+            dd.getDefaultGraphURIs().forEach(newQuery::addGraphURI);
+            dd.getNamedGraphURIs().forEach(newQuery::addNamedGraphURI);
+        } else {
+            dd = new DatasetDescription();
+        }
+
+        LehmerHash defaultGraphHash = hash(datasetDescriptionHashFn, dd.getDefaultGraphURIs(), Object::toString);
+        LehmerHash namedGraphHash = hash(datasetDescriptionHashFn, dd.getNamedGraphURIs(), Object::toString);
+
         // Projection
         Generator<Var> projectVarGen = VarGeneratorImpl2.create("p");
-
-        QueryUtils.setQueryType(newQuery, query.queryType());
 
         switch (query.queryType()) {
         case SELECT:
@@ -336,6 +364,7 @@ public class QueryHash {
         default:
             throw new RuntimeException("Unknown query type: " + query.queryType());
         }
+
 
 
 
@@ -391,7 +420,7 @@ public class QueryHash {
         newQuery.setLimit(query.getLimit());
         newQuery.setOffset(query.getOffset());
 
-        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash);
+        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash, defaultGraphHash, namedGraphHash);
 
 //        System.out.println("Original Query:\n" + query);
 //        System.out.println("Harmonized Query:\n" + newQuery);
@@ -803,7 +832,11 @@ public class QueryHash {
                     ? str(getProjecHash().getLehmer()) + "/" +
                         str(getOrderByHash().getLehmer()) + "/"
                     : "") +
-            str(getRelabelHash())
+            str(getRelabelHash()) +
+            str(getDefaultGraphHash().getHash()) + "/" +
+            str(getDefaultGraphHash().getLehmer()) + "/" +
+            str(getNamedGraphHash().getHash()) + "/" +
+            str(getNamedGraphHash().getLehmer());
             ;
 
         return baseHash + (sliceHash.isEmpty() ? "" : "/" + sliceHash);
@@ -818,8 +851,8 @@ public class QueryHash {
 //		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
 //		System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
 
-        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s COUNT(?p) { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?y) ?x { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
+        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
+        System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
         // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (?x AS ?y) { ?s ?p ?o } LIMIT 10 OFFSET 2")));
 
 //        Collection<String> items = Arrays.asList("d", "c", "b", "a");
