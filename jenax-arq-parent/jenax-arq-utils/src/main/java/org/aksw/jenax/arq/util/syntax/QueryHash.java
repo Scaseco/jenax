@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -392,9 +393,9 @@ public class QueryHash {
 
         QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash);
 
-        System.out.println("Original Query:\n" + query);
-        System.out.println("Harmonized Query:\n" + newQuery);
-        System.out.println("Hash: " + result);
+//        System.out.println("Original Query:\n" + query);
+//        System.out.println("Harmonized Query:\n" + newQuery);
+//        System.out.println("Hash: " + result);
 
         return result;
 //
@@ -743,7 +744,38 @@ public class QueryHash {
 //    }
 
     public static String str(HashCode hashCode) {
-        return BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+        return str(hashCode.asBytes());
+    }
+
+    /** Return a copy of the byte array with any leading 0s removed */
+    public static byte[] trim(byte[] rawBytes) {
+        int n = rawBytes.length;
+        int i = 0;
+        for (i = 0; i < n; ++i) {
+            if (rawBytes[i] != 0) {
+                break;
+            }
+        }
+        byte[] result = Arrays.copyOfRange(rawBytes, i, n);
+        return result;
+    }
+
+    /**
+     * Create a base64url encoded string from the trimmed byte array.
+     * If the trimmed byte array is empty, then a single 0 byte is used instead.
+     */
+    public static String str(byte[] rawBytes) {
+        byte[] bytes = trim(rawBytes);
+        if (bytes.length == 0) {
+            bytes = new byte[] { 0 };
+        }
+        BaseEncoding encoding = BaseEncoding.base64Url().omitPadding();
+        String result = encoding.encode(bytes);
+        return result;
+    }
+
+    public String str(BigInteger value) {
+        return str(value.toByteArray());
     }
 
     protected String getQueryTypePrefix(QueryType queryType) {
@@ -758,18 +790,18 @@ public class QueryHash {
         sliceHash += query.hasLimit() ? "+" + query.getLimit() : "";
 
         String baseHash =
-            getQueryTypePrefix(harmonizedQuery.queryType()) + "/" +
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
             str(getHavingHash().getHash()) + "/" +
+            getQueryTypePrefix(harmonizedQuery.queryType()) + "/" +
             str(getProjecHash().getHash()) + "/" +
             str(getOrderByHash().getHash()) + "/" +
-            getGroupByHash().getLehmer() + "/" +
-            getHavingHash().getLehmer() + "/" +
+            str(getGroupByHash().getLehmer()) + "/" +
+            str(getHavingHash().getLehmer()) + "/" +
             // Omit projection hash on ask queries
             (!harmonizedQuery.isAskType()
-                    ? getProjecHash().getLehmer() + "/" +
-                        getOrderByHash().getLehmer() + "/"
+                    ? str(getProjecHash().getLehmer()) + "/" +
+                        str(getOrderByHash().getLehmer()) + "/"
                     : "") +
             str(getRelabelHash())
             ;
