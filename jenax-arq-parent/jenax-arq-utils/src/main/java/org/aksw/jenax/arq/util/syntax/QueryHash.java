@@ -817,7 +817,6 @@ public class QueryHash {
         Query query = getHarmonizedQuery();
         String sliceHash = query.hasOffset() ? "" + query.getOffset() : "";
         sliceHash += query.hasLimit() ? "+" + query.getLimit() : "";
-
         String baseHash =
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
@@ -838,7 +837,6 @@ public class QueryHash {
             str(getNamedGraphHash().getHash()) + "/" +
             str(getNamedGraphHash().getLehmer());
             ;
-
         return baseHash + (sliceHash.isEmpty() ? "" : "/" + sliceHash);
 
         // return "QueryStringHashCode [Original Query:\n" + query + "BodyQuery:\n" + bodyQuery + ", bodyHash=" + getBodyHashStr() + ", projHash=" + getProjHashStr()
