@@ -17,6 +17,7 @@ import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.riot.other.G;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
@@ -138,14 +139,26 @@ public class NodeTransformLib2 {
     }
 
     public static Graph applyNodeTransform(NodeTransform nodeTransform, Graph graph) {
+        // debug
+        List<Triple> triples = null;
+        if (true) {
+            if (triples == null) {
+                triples = graph.find().toList();
+            } else {
+                // Will be entered when dropping the frame in debug mode
+                triples.forEach(graph::add);
+            }
+            // graph = g;
+        }
+
         List<Triple> inserts = new ArrayList<>();
 
         ExtendedIterator<Triple> it = graph.find();
         try {
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 Triple before = it.next();
                 Triple after = NodeTransformLib.transform(nodeTransform, before);
-                if(!after.equals(before)) {
+                if (!after.equals(before)) {
                     it.remove();
                     inserts.add(after);
                 }

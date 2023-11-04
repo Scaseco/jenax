@@ -30,6 +30,7 @@ import org.apache.jena.query.QueryType;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
@@ -114,12 +115,14 @@ public class QueryHash {
     protected LehmerHash defaultGraphHash;
     protected LehmerHash namedGraphHash;
     protected HashCode relabelHash;
+    protected HashCode prologueHash;
 
     public QueryHash(Query originalQuery, Query harmonizedQuery, HashCode bodyHashCode, LehmerHash aggHash,
             LehmerHash groupByHash, LehmerHash havingHash, LehmerHash orderByHash, LehmerHash projecHash,
             HashCode relabelHash,
             LehmerHash defaultGraphHash,
-            LehmerHash namedGraphHash) {
+            LehmerHash namedGraphHash,
+            HashCode prologueHash) {
         super();
         this.originalQuery = originalQuery;
         this.harmonizedQuery = harmonizedQuery;
@@ -132,6 +135,7 @@ public class QueryHash {
         this.relabelHash = relabelHash;
         this.defaultGraphHash = defaultGraphHash;
         this.namedGraphHash = namedGraphHash;
+        this.prologueHash = prologueHash;
     }
 
     public Query getOriginalQuery() {
@@ -176,6 +180,10 @@ public class QueryHash {
 
     public LehmerHash getNamedGraphHash() {
         return namedGraphHash;
+    }
+
+    public HashCode getPrologueHash() {
+        return prologueHash;
     }
 
 //    public String getBodyHashStr() {
@@ -257,6 +265,7 @@ public class QueryHash {
         HashFunction groupByHashFn = Hashing.murmur3_32_fixed();
         HashFunction projectHashFn = Hashing.murmur3_32_fixed();
         HashFunction varMapHashFn = Hashing.murmur3_32_fixed();
+        HashFunction prologueHashFn = Hashing.murmur3_32_fixed();
 
         Map<Var, Var> relabel = new LinkedHashMap<>();
         Set<Var> allVars = new LinkedHashSet<>();
@@ -365,9 +374,6 @@ public class QueryHash {
             throw new RuntimeException("Unknown query type: " + query.queryType());
         }
 
-
-
-
         HashCode bodyHashCode = queryPatternHashFn.hashString(newQuery.getQueryPattern().toString(), StandardCharsets.UTF_8);
 
 //        System.out.println(bodyHashCode);
@@ -407,7 +413,6 @@ public class QueryHash {
             throw new RuntimeException("Unknown query type: " + query.queryType());
         }
 
-
         // Var Mapping
         HashCode relabelHash = Hashing.combineUnordered(relabel.entrySet().stream()
                 .map(Objects::toString)
@@ -420,81 +425,31 @@ public class QueryHash {
         newQuery.setLimit(query.getLimit());
         newQuery.setOffset(query.getOffset());
 
-        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash, defaultGraphHash, namedGraphHash);
+        // Prologue (Base + Prefix Mapping)
+        Prologue prologue = query.getPrologue();
+        Set<Entry<String, String>> prefixes = prologue.getPrefixMapping().getNsPrefixMap().entrySet();
+
+        // Jena does usually not preserve order of prefixes, therefore combine unordered.
+        HashCode prefixesHash = prefixes.isEmpty()
+            ? HashCode.fromInt(0)
+            : Hashing.combineUnordered(prefixes.stream()
+                .map(Objects::toString)
+                .map(str -> prologueHashFn.hashString(str, StandardCharsets.UTF_8))
+                .collect(Collectors.toList()));
+
+        // Only consider explicitly set bases
+        HashCode baseHash = prologue.explicitlySetBaseURI()
+                ? prologueHashFn.hashString(query.getBaseURI(), StandardCharsets.UTF_8)
+                : HashCode.fromInt(0);
+        HashCode prologueHash = Hashing.combineOrdered(Arrays.asList(baseHash, prefixesHash));
+
+        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash, defaultGraphHash, namedGraphHash, prologueHash);
 
 //        System.out.println("Original Query:\n" + query);
 //        System.out.println("Harmonized Query:\n" + newQuery);
 //        System.out.println("Hash: " + result);
 
         return result;
-//
-//        Set<Var> groupByVars = new LinkedHashSet<>();
-//        Set<Var> orderByVars = new LinkedHashSet<>();
-//        Set<Var> havingVars = new LinkedHashSet<>();
-//        Set<Var> projVars = new LinkedHashSet<>();
-//
-//        if (query.hasGroupBy()) {
-//            groupByVars = VarExprListUtils.getVarsMentioned(query.getGroupBy());
-//        }
-//
-//        if (query.hasHaving()) {
-//            query.getHavingExprs().forEach(e -> ExprVars.varsMentioned(havingVars, e));
-//        }
-//
-//        if (query.hasOrderBy()) {
-//            ExprVars.varsMentioned(orderByVars, query.getOrderBy());
-//        }
-//
-//        VarExprListUtils.varsMentioned(projVars, query.getProject());
-//
-//
-//        Generator<Var> groupByVarGen = VarGeneratorImpl2.create("g");
-//        Sets.difference(groupByVars, allVars).forEach(v -> relabel.put(v, groupByVarGen.next()));
-//        allVars.addAll(groupByVars);
-//
-//        Generator<Var> orderByVarGen = VarGeneratorImpl2.create("o");
-//        Sets.difference(orderByVars, allVars).forEach(v -> relabel.put(v, orderByVarGen.next()));
-//        allVars.addAll(groupByVars);
-//
-//        for (ExprAggregator ea : query.getAggregators()) {
-//            NodeTransformLib.transform(null, ea);
-//        }
-//
-//        Generator<Var> projVarGen = VarGeneratorImpl2.create("p");
-//        Sets.difference(projVars, allVars).forEach(v -> relabel.put(v, projVarGen.next()));
-//        allVars.addAll(projVars);
-//
-//
-//
-//        // group by expressions (hash the exprs + lehmer)
-//        VarExprList newGroupBy = VarExprListUtils.transform(query.getGroupBy(), xform);
-//        Entry<HashCode, BigInteger> groupByHash = toHashCode(newGroupBy);
-//        System.out.println(groupByHash);
-//
-//        // having
-//        List<Expr> havingExprs = query.getHavingExprs();
-//        // query.toString()
-//
-//        // order by
-//        List<String> newOrderBy = query.getOrderBy().stream().map(sc -> {
-//            SortCondition newSc = NodeTransformLib2.transform(xform, sc);
-//            String r = fmt(newSc);
-//            return r;
-//        }).collect(Collectors.toList());
-//
-//
-//        Entry<HashCode, BigInteger> orderByHash = hash(orderByHashFn, newOrderBy);
-//        System.out.println(orderByHash);
-//
-//
-//        // aggregators
-//
-//        // basic projection (not considering expressions)
-//
-//
-//
-//        System.out.println(newQueryPattern);
-//
     }
 
     /** Format a sort condition */
@@ -634,13 +589,15 @@ public class QueryHash {
     public static ExprAggregator transform(ExprAggregator ea, Map<Var, Var> relabel, Generator<Var> varGen, HashFunction hashFn) {
         // Relabel variables of the expression
         Set<Var> mentionedVars = new LinkedHashSet<>();
-
-        ExprVars.varsMentioned(mentionedVars, ea.getAggregator().getExprList());
-        for (Var mv : mentionedVars) {
-            getOrNext(relabel, mv, varGen);
+        ExprList exprList = ea.getAggregator().getExprList();
+        ExprList newExprList = null;
+        if (exprList != null) {
+            ExprVars.varsMentioned(mentionedVars, exprList);
+            for (Var mv : mentionedVars) {
+                getOrNext(relabel, mv, varGen);
+            }
+            newExprList = NodeTransformLib.transform(new NodeTransformSubst(relabel), exprList);
         }
-
-        ExprList newExprList = NodeTransformLib.transform(new NodeTransformSubst(relabel), ea.getAggregator().getExprList());
         Aggregator newAgg = ea.getAggregator().copy(newExprList);
         String str = newAgg.asSparqlExpr(FmtUtils.sCxt());
         HashCode hashCode = hashFn.hashString(str, StandardCharsets.UTF_8);
@@ -835,7 +792,8 @@ public class QueryHash {
             str(getDefaultGraphHash().getHash()) + "/" +
             str(getDefaultGraphHash().getLehmer()) + "/" +
             str(getNamedGraphHash().getHash()) + "/" +
-            str(getNamedGraphHash().getLehmer());
+            str(getNamedGraphHash().getLehmer()) + "/" +
+            str(getPrologueHash())
             ;
         return baseHash + (sliceHash.isEmpty() ? "" : "/" + sliceHash);
 
