@@ -11,7 +11,34 @@ import org.apache.jena.sparql.path.P_Path0;
 public class PathPP
     extends PathBase<P_Path0, PathPP>
 {
-     public PathPP(PathOps<P_Path0, PathPP> pathOps, boolean isAbsolute, List<P_Path0> segments) {
+    private static final long serialVersionUID = 1L;
+
+    public PathPP(PathOps<P_Path0, PathPP> pathOps, boolean isAbsolute, List<P_Path0> segments) {
         super(pathOps, isAbsolute, segments);
+    }
+
+    /** Static convenience shorthands */
+    public static PathPP newAbsolutePath(P_Path0 segment) {
+        return PathOpsPP.get().newAbsolutePath(segment);
+    }
+
+    public static PathPP newAbsolutePath(P_Path0 ... segments) {
+        return PathOpsPP.get().newAbsolutePath(segments);
+    }
+
+    public static PathPP newAbsolutePath(List<P_Path0> segments) {
+        return PathOpsPP.get().newAbsolutePath(segments);
+    }
+
+    public static PathPP newRelativePath(P_Path0 segment) {
+        return PathOpsPP.get().newRelativePath(segment);
+    }
+
+    public static PathPP newRelativePath(P_Path0 ... segments) {
+        return PathOpsPP.get().newRelativePath(segments);
+    }
+
+    public static PathPP newRelativePath(List<P_Path0> segments) {
+        return PathOpsPP.get().newRelativePath(segments);
     }
 }

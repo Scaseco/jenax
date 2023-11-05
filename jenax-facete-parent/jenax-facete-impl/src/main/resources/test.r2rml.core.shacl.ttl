@@ -1,0 +1,141 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+@prefix rs: <http://aksw.org/ns/r2rml/shapes#> .
+
+
+## r2rml namespace declaration
+rs:rr sh:declare [ sh:prefix "rr" ; sh:namespace "http://www.w3.org/ns/r2rml#"  ] .
+
+## TermMaps - with rule to prevent incorrectly matching RefObjectMaps
+rs:TermMapSparqlTarget
+  a sh:SPARQLTarget ;
+  sh:prefixes rs:rr ;
+  sh:select
+"""SELECT ?this {
+    { [] rr:graphMap|rr:subjectMap|rr:predicateMap ?this }
+  UNION
+    { [] rr:objectMap ?this FILTER NOT EXISTS { ?this rr:parentTriplesMap [] } }
+}""" ;
+  .
+
+
+rs:ObjectMapSparqlTarget
+  a sh:SPARQLTarget ;
+  sh:prefixes rs:rr ;
+  sh:select "SELECT ?this { [] rr:objectMap ?this FILTER NOT EXISTS { ?this rr:parentTriplesMap [] } }" ;
+  .
+
+
+rs:HasGraphSparqlTarget
+  a sh:SPARQLTarget ;
+  sh:prefixes rs:rr ;
+  sh:select "SELECT ?this { [] rr:subjectMap|rr:predicateObjectMap ?this }" ;
+  .
+
+
+rs:TermMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "TermMap Shape" ;
+  sh:target rs:TermMapSparqlTarget ;
+  sh:property [ sh:path rr:termType ; sh:minCount 0 ; sh:maxCount 1 ] ;
+  sh:xone (
+    [ sh:property [ sh:path rr:column   ; sh:minCount 1 ; sh:maxCount 1 ] ]
+    [ sh:property [ sh:path rr:template ; sh:minCount 1 ; sh:maxCount 1 ] ]
+    [ sh:property [ sh:path rr:constant ; sh:minCount 1 ; sh:maxCount 1 ] ]
+  ) ;
+  sh:property [ sh:path rr:datatype ; sh:minCount 0 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path rr:language ; sh:minCount 0 ; sh:maxCount 1 ] ;
+  .
+
+
+rs:SubjectMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "SubjectMap Shape" ;
+  sh:targetObjectsOf rr:subjectMap ;
+  sh:property [
+    sh:path rr:termType ;
+    sh:in ( rr:IRI rr:BlankNode ) ;
+  ] ;
+  .
+
+rs:PredicateMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "PredicateMap Shape" ;
+  sh:targetObjectsOf rr:predicateMap ;
+  sh:property [
+    sh:path rr:termType ;
+    sh:in ( rr:IRI ) ;
+  ] ;
+  .
+
+rs:ObjectMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "ObjectMap Shape" ;
+  sh:target rs:ObjectMapSparqlTarget ;
+  sh:property [
+    sh:path rr:termType ;
+    sh:in ( rr:IRI rr:BlankNode rr:Literal ) ;
+  ] .
+
+
+rs:TriplesMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "TriplesMap Shape" ;
+  sh:targetClass rr:TriplesMap ;
+  sh:xone (
+    [ sh:property [ sh:path rr:subject    ; sh:minCount 1 ; sh:maxCount 1 ] ]
+    [ sh:property [ sh:path rr:subjectMap ; sh:minCount 1 ; sh:maxCount 1 ] ]
+  ) ;
+  sh:property [ sh:path rr:predicateObjectMap ; sh:minCount 0 ] ;
+
+  # A constant triple does not demand a logical table specification
+  sh:property [ sh:path rr:logicalTable ; sh:minCount 0 ; sh:maxCount 1 ] ;
+
+  # A constant triple does not demand a logical table specification
+  sh:property [ sh:path rr:sqlVersion ; sh:minCount 0 ] ;
+  .
+
+# HasGraphShape is an implicit base class of
+# SubjectMaps and PredicateObjectMaps as these two can carry graph mappings
+rs:HasGraphShape
+  a sh:NodeShape ;
+  rdfs:label "HasGraph Shape" ;
+  sh:target rs:HasGraphSparqlTarget ;
+  sh:property [ sh:path rr:graph    ; sh:minCount 0 ] ;
+  sh:property [ sh:path rr:graphMap ; sh:minCount 0 ] ;
+  .
+
+
+rs:LogicalTableShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "LogicalTable Shape" ;
+  sh:targetObjectsOf rr:logicalTable ;
+  sh:xone(
+    [ sh:property [ sh:path rr:sqlQuery  ; rr:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ]
+    [ sh:property [ sh:path rr:tableName ; rr:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ] ]
+  ) ;
+  .
+
+rs:RefObjectMapShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "RefObjectMapShape Shape" ;
+  sh:targetSubjectsOf rr:parentTriplesMap ;
+  sh:property [ sh:path rr:parentTriplesMap ; sh:minCount 0 ; sh:maxCount 1 ] ;
+  sh:property [ sh:path rr:joinCondition    ; sh:minCount 0 ] ;
+  .
+
+rs:JoinShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Join Shape" ;
+  sh:targetObjectsOf rr:joinCondition ;
+  sh:property [ sh:path rr:parent ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  sh:property [ sh:path rr:child  ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+  .
+
+
+

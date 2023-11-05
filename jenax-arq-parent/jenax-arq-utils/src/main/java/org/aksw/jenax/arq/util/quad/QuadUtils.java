@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
 import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeQuad;
@@ -30,6 +29,7 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.util.NodeUtils;
 
 public class QuadUtils {
 
@@ -178,7 +178,7 @@ public class QuadUtils {
     }
 
     public static Set<Var> getVarsMentioned(Quad quad) {
-        return NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
+        return org.aksw.jenax.arq.util.node.NodeUtils.getVarsMentioned(Arrays.asList(quadToArray(quad)));
     }
 
     public static Map<Node, Set<Quad>> partitionByGraph(Iterable<Quad> quads) {

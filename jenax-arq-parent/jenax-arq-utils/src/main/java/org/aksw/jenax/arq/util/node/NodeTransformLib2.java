@@ -13,9 +13,11 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.riot.other.G;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
@@ -30,12 +32,14 @@ import org.apache.jena.sparql.expr.E_IRI;
 import org.apache.jena.sparql.expr.E_IsBlank;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformSubstitute;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.graph.NodeTransformExpr;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -43,6 +47,13 @@ import org.apache.jena.util.iterator.WrappedIterator;
 
 /** Note transforms not captured by {@link NodeTransformLib} such as Bindings, Graphs, Models, Datsets, ... */
 public class NodeTransformLib2 {
+
+    /** Supports variables in contrast to {@link NodeTransformLib#transform(NodeTransform, Expr) }*/
+    public static Expr transform(NodeTransform nodeTransform, Expr expr) {
+        ExprTransform exprTransform = new NodeTransformExpr(nodeTransform);
+        Expr result = ExprTransformer.transform(exprTransform, expr);
+        return result;
+    }
 
     /** Wrap a node transform such the input node is returned whenever otherwise null would be returned */
     public static NodeTransform wrapWithNullAsIdentity(NodeTransform xform) {
@@ -119,15 +130,35 @@ public class NodeTransformLib2 {
         return out;
     }
 
+    public static SortCondition transform(NodeTransform nodeTransform, SortCondition sortCondition) {
+        Expr before = sortCondition.getExpression();
+        Expr after = transform(nodeTransform, before);
+        int dir = sortCondition.getDirection();
+        SortCondition result = new SortCondition(after, dir);
+        return result;
+    }
+
     public static Graph applyNodeTransform(NodeTransform nodeTransform, Graph graph) {
+        // debug
+        List<Triple> triples = null;
+        if (true) {
+            if (triples == null) {
+                triples = graph.find().toList();
+            } else {
+                // Will be entered when dropping the frame in debug mode
+                triples.forEach(graph::add);
+            }
+            // graph = g;
+        }
+
         List<Triple> inserts = new ArrayList<>();
 
         ExtendedIterator<Triple> it = graph.find();
         try {
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 Triple before = it.next();
                 Triple after = NodeTransformLib.transform(nodeTransform, before);
-                if(!after.equals(before)) {
+                if (!after.equals(before)) {
                     it.remove();
                     inserts.add(after);
                 }
@@ -315,10 +346,10 @@ public class NodeTransformLib2 {
     }
 
     /**
-     * Create a node transformer from an expression
+     * Create a NodeTransform that evaluates an expression for each passed in node.
      *
-     * @param expr
-     * @param v
+     * @param expr The expression to evaluate.
+     * @param v The variable in expr which to substitute with the input node.
      * @return
      */
     public static NodeTransform createNodeTransform(Expr expr, Var v) {

@@ -7,13 +7,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.delay.core.QueryExecutionFactoryDelay;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
@@ -60,7 +60,7 @@ public class TestReactiveSparql {
         DelayerDefault delayer = new DelayerDefault(5000);
         delayer.setLastRequestTime(System.currentTimeMillis());
 
-        MapService<Concept, Node, Table> ms = new MapServiceSparqlQuery(
+        MapService<Fragment1, Node, Table> ms = new MapServiceSparqlQuery(
                 new QueryExecutionFactoryDelay(new QueryExecutionFactoryDataset(dataset), delayer),
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);
@@ -82,7 +82,7 @@ public class TestReactiveSparql {
         DelayerDefault delayer = new DelayerDefault(5000);
         delayer.setLastRequestTime(System.currentTimeMillis());
 
-        MapService<Concept, Node, Table> ms = new MapServiceSparqlQuery(
+        MapService<Fragment1, Node, Table> ms = new MapServiceSparqlQuery(
                 new QueryExecutionFactoryDelay(new QueryExecutionFactoryDataset(dataset), delayer),
                 QueryFactory.create("SELECT * { ?s ?p ?o }"),
                 Vars.s);

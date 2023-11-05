@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -178,7 +178,7 @@ public class PathConstraint {
         return result;
     }
 
-    public static Concept getPathConstraintsSimple(UnaryRelation concept) {
+    public static Concept getPathConstraintsSimple(Fragment1 concept) {
         Model model = ModelFactory.createDefaultModel();
 
 

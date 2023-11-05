@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.prefix.PrefixMappingTrie;
-import org.apache.jena.ext.com.google.common.io.Resources;
+import com.google.common.io.Resources;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;

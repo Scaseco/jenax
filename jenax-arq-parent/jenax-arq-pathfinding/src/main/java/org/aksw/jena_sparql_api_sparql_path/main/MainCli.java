@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinder;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.path.SimplePath;
 
 //class EdgeTransition
@@ -62,7 +62,7 @@ public class MainCli {
 
         Concept tmpTargetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat", "s");
 
-        ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10, 10);
+        ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10l, 10l);
     }
 
     public static void main(String[] args) throws IOException, SQLException {
@@ -76,7 +76,7 @@ public class MainCli {
 
         Concept tmpTargetConcept = Concept.create("?s <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?lon ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat", "s");
 
-        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10, 10);
+        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, tmpTargetConcept, 10l, 10l);
         System.out.println(paths);
     }
 

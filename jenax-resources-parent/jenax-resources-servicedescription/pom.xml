@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.aksw.jenax</groupId>
         <artifactId>jenax-resources-parent</artifactId>
-        <version>4.8.0-2</version>
+        <version>4.9.0-1</version>
     </parent>
 
     <dependencies>

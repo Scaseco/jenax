@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.view_matcher;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.Var;
 

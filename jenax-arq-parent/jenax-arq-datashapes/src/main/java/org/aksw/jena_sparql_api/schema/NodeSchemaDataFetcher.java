@@ -15,14 +15,14 @@ import org.aksw.jena_sparql_api.entity.graph.metamodel.MainPlaygroundResourceMet
 import org.aksw.jena_sparql_api.entity.graph.metamodel.PredicateStats;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceMetamodel;
 import org.aksw.jena_sparql_api.entity.graph.metamodel.ResourceState;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryDataset;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryDataset;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -350,7 +350,7 @@ public class NodeSchemaDataFetcher {
             }
         }
 
-        for (DirectedFilteredTriplePattern dftp : schema.getGenericPatterns()) {
+        for (TripleFilter dftp : schema.getGenericPatterns()) {
             // Align the variable naming
             // Map<Var, Var> var
 

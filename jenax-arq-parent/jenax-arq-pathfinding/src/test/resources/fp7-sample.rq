@@ -1,0 +1,13 @@
+# Create a sample for a project from the fp7 dataset
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fp7: <http://fp7-pp.publicdata.eu/ontology/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT { ?s ?p ?o }
+{
+  SELECT * {
+    { SELECT DISTINCT ?project { ?project a fp7:Project ; rdfs:label "LOD2" } LIMIT 1 }
+    ?project !<urn:foo>* ?s .
+    ?s ?p ?o
+  }
+}

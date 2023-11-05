@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Set;
 
-import org.aksw.commons.path.core.PathOpsStr;
+import org.aksw.commons.path.core.PathStr;
 import org.aksw.commons.txn.api.Txn;
 import org.aksw.commons.txn.api.TxnMgr;
 import org.aksw.commons.txn.api.TxnResourceApi;
@@ -41,19 +41,19 @@ public class TxnMgrTests {
             Txn a = txnMgr.newTxn("txn-a", true, true);
             Txn b = txnMgr.newTxn("txn-b", true, true);
 
-            TxnResourceApi r1a = a.getResourceApi(PathOpsStr.newRelativePath("r1"));
+            TxnResourceApi r1a = a.getResourceApi(PathStr.newRelativePath("r1"));
             r1a.declareAccess();
             r1a.getTxnResourceLock().writeLock().lock();
 
-            TxnResourceApi r2b = b.getResourceApi(PathOpsStr.newRelativePath("r2"));
+            TxnResourceApi r2b = b.getResourceApi(PathStr.newRelativePath("r2"));
             r2b.declareAccess();
             r2b.getTxnResourceLock().writeLock().lock();
 
-            TxnResourceApi r2a = a.getResourceApi(PathOpsStr.newRelativePath("r2"));
+            TxnResourceApi r2a = a.getResourceApi(PathStr.newRelativePath("r2"));
             r2a.declareAccess();
             //r2a.getTxnResourceLock().writeLock().tryLock(1, TimeUnit.SECONDS);
 
-            TxnResourceApi r1b = b.getResourceApi(PathOpsStr.newRelativePath("r1"));
+            TxnResourceApi r1b = b.getResourceApi(PathStr.newRelativePath("r1"));
             r1b.declareAccess();
     //		r1b.getTxnResourceLock().writeLock().lock();
 

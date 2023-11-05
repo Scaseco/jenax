@@ -10,24 +10,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.aksw.commons.collections.SetUtils;
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.rx.util.FlowableUtils;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.aggregation.AccGraph2;
-import org.aksw.jenax.arq.connection.link.QueryExecFactories;
-import org.aksw.jenax.arq.connection.link.QueryExecFactoryQuery;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -463,10 +464,10 @@ public class SparqlRx {
                 .doOnNext(i -> currentValue[0] = i)
                 .doOnCancel(() -> isCancelled[0] = true)
                 .map(i -> Maps.immutableEntry((int)(i / 3), i))
-                .lift(FlowableOperatorSequentialGroupBy.<Entry<Integer, Integer>, Integer, List<Integer>>create(
+                .lift(FlowableOperatorCollapseRuns.<Entry<Integer, Integer>, Integer, List<Integer>>create(CollapseRunsSpec.create(
                         Entry::getKey,
                         groupKey -> new ArrayList<>(),
-                        (acc, e) -> acc.add(e.getValue())));
+                        (acc, e) -> acc.add(e.getValue()))));
 
         Predicate<Entry<Integer, List<Integer>>> p = e -> e.getKey().equals(1);
         list.takeUntil(p).subscribe(x -> System.out.println("Item: " + x));
@@ -696,6 +697,10 @@ public class SparqlRx {
         return execConstructGrouped(q -> conn.query(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
     }
 
+    public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(RdfDataSource dataSource, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
+        return execConstructGrouped(q -> QueryExecutionFactories.of(dataSource).createQueryExecution(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
+    }
+
 
     public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(Function<Query, QueryExecution> qeSupp, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
         if(rootNode.isVariable() && !primaryKeyVars.contains(rootNode)) {
@@ -711,10 +716,10 @@ public class SparqlRx {
             // For future reference: If we get an empty results by using the query object, we probably have wrapped a variable with NodeValue.makeNode.
             .execSelectRaw(() -> qeSupp.apply(clone))
             //.groupBy(createGrouper(primaryKeyVars, false)::apply)
-            .lift(FlowableOperatorSequentialGroupBy.<Binding, Binding, AccGraph2>create(
+            .lift(FlowableOperatorCollapseRuns.<Binding, Binding, AccGraph2>create(CollapseRunsSpec.create(
                     grouper::apply,
                     groupKey -> new AccGraph2(template),
-                    AccGraph2::accumulate))
+                    AccGraph2::accumulate)))
             .map(keyAndAcc -> {
                 Binding groupKey = keyAndAcc.getKey();
                 AccGraph2 accGraph = keyAndAcc.getValue();

@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.util.syntax;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,10 +11,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.expr.ExprUtils;
-import org.apache.jena.ext.com.google.common.collect.HashMultimap;
-import org.apache.jena.ext.com.google.common.collect.SetMultimap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.core.Var;
@@ -31,45 +31,53 @@ import org.apache.jena.sparql.expr.ExprVars;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.NodeTransform;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+
 public class VarExprListUtils {
 
     /** Evaluate an expression list against a binding. Code taken from {@link QueryIterAssign}. */
     public static Binding eval(VarExprList exprs, Binding binding, FunctionEnv execCxt) {
-    	
-    	// Profiling suggested that internally using a mutable binding performs better than repeated snapshots 
-    	BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
+
+        // Profiling suggested that internally using a mutable binding performs much better than
+        //  repeated snapshots using BindingBuilder
         // BindingBuilder b = Binding.builder(binding);
-        for ( Var v : exprs.getVars() ) {
+        BindingOverMapMutable mb = BindingOverMapMutable.copyOf(binding);
+        for (Var v : exprs.getVars()) {
             // if "binding", not "b" used, we get (Lisp) "let"
             // semantics, not the desired "let*" semantics
             Node n = exprs.get(v, mb, execCxt);
-
-            if ( n == null )
-                // Expression failed to evaluate - no assignment
-                continue;
-
-            // Check is already has a value; if so, must be sameValueAs
-            if ( mb.contains(v) ) {
-                // Optimization may linearize to push a stream through an (extend).
-//                if ( false && mustBeNewVar )
-//                    throw new QueryExecException("Already set: " + v);
+            if (n != null) {
+                // Check is already has a value; if so, must be sameValueAs
                 Node n2 = mb.get(v);
-                if ( !n2.sameValueAs(n) )
-                    //throw new QueryExecException("Already set: "+v) ;
-                    // Error in single assignment.
-                    return null ;
-                continue ;
-            }
-            try {
-                // Add same.
-                mb.add(v, n) ;
-            } catch (ARQInternalErrorException ex) {
-                throw ex;
+                if (n2 != null) {
+                    // Optimization may linearize to push a stream through an (extend).
+    //                if ( false && mustBeNewVar )
+    //                    throw new QueryExecException("Already set: " + v);
+                    if (n2.sameValueAs(n)) {
+                        continue;
+                    } else {
+                        //throw new QueryExecException("Already set: "+v) ;
+                        // Error in single assignment.
+                        return null ;
+                    }
+                }
+                try {
+                    // Add same.
+                    mb.add(v, n) ;
+                } catch (ARQInternalErrorException ex) {
+                    throw ex;
+                }
             }
         }
-        
+
         Binding result = BindingBuilder.create().addAll(mb).build();
         return result;
+    }
+
+    /** Stream all variables in order of their declaration with the corresponding expression (which may be null) */
+    public static Stream<Entry<Var, Expr>> streamVarExprs(VarExprList vel) {
+        return vel.getVars().stream().map(v -> new SimpleEntry<>(v, vel.getExpr(v)));
     }
 
     /** Return a new VarExprList that contains all variables of 'var' and any corresponding definition from 'vel' */
@@ -272,11 +280,13 @@ public class VarExprListUtils {
         return acc;
     }
 
+    /** Only extract variables from the expressions */
     public static Set<Var> getVarsMentionedInBody(VarExprList vel) {
         Set<Var> result = varsMentionedInBody(new LinkedHashSet<>(), vel);
         return result;
     }
 
+    /** Only extract variables from the expressions */
     public static <T extends Collection<Var>> T varsMentionedInBody(T acc, VarExprList vel) {
         for(Entry<Var, Expr> entry : vel.getExprs().entrySet()) {
             Expr e = entry.getValue();
@@ -292,9 +302,17 @@ public class VarExprListUtils {
         return result;
     }
 
+    /** Iterates the var expression entries in order (first var then expression) and
+     * adds all mentioned variables to the accumulator
+     */
     public static <T extends Collection<Var>> T varsMentioned(T acc, VarExprList vel) {
-        definedVars(acc, vel);
-        varsMentionedInBody(acc, vel);
+        for (Var v : vel.getVars()) {
+            Expr e = vel.getExpr(v);
+            acc.add(v);
+            if (e != null) {
+                ExprVars.varsMentioned(acc, e);
+            }
+        }
         return acc;
     }
 
@@ -320,6 +338,17 @@ public class VarExprListUtils {
         return ExprTransformer.transform(exprTransform, expr) ;
     }
 
+    public static VarExprList transform(VarExprList vel, NodeTransform nodeTransform) {
+        VarExprList result = new VarExprList();
+        for (Var v : vel.getVars()) {
+            Expr e = vel.getExpr(v);
+            Var newV = (Var)nodeTransform.apply(v);
+            Expr newExpr = e == null ? null : ExprUtils.applyNodeTransform(e, nodeTransform);
+            result.add(newV, newExpr);
+        }
+        return result;
+    }
+
     public static Map<Var, Expr> applyNodeTransform(Map<Var, Expr> varExpr, NodeTransform nodeTransform)
     {
         Map<Var, Expr> result = varExpr.entrySet().stream()
@@ -333,8 +362,7 @@ public class VarExprListUtils {
         return result;
     }
 
-
-    // Copied from package org.apache.jena.sparql.algebra.ApplyTransformVisitor;
+    /** Copied from package org.apache.jena.sparql.algebra.ApplyTransformVisitor */
     public static VarExprList transform(VarExprList varExpr, ExprTransform exprTransform)
     {
         List<Var> vars = varExpr.getVars() ;

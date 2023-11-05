@@ -10,8 +10,10 @@ import org.aksw.jena_sparql_api.data_query.api.DataQuery;
 import org.aksw.jena_sparql_api.data_query.api.ResolverDirNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverMultiNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverNode;
-import org.aksw.jenax.arq.connection.SparqlQueryConnectionTmp;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionTmp;
+import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Resource;
@@ -37,13 +39,17 @@ public class ResolverDirNodeImpl
         return resolver;
     }
 
-    public Collection<TernaryRelation> getContrib() {
-        Collection<TernaryRelation> result = resolver.getRdfGraphSpec(isFwd);
+    public Collection<Fragment3> getContrib() {
+        Collection<Fragment3> result = resolver.getRdfGraphSpec(isFwd);
         return result;
     }
 
     @Override
-    protected ResolverMultiNodeImpl viaImpl(Resource property) {
+    protected ResolverMultiNodeImpl viaImpl(Resource property, Node component) {
+        if (component != null && !FacetStep.isTarget(component)) {
+            throw new UnsupportedOperationException("Support for referencing components not implemented");
+        }
+
         return new ResolverMultiNodeImpl(this, property, conn);
     }
 
@@ -52,7 +58,7 @@ public class ResolverDirNodeImpl
 //	}
 
     public Query rewrite(Query query) {
-        Collection<TernaryRelation> views = getContrib();
+        Collection<Fragment3> views = getContrib();
 
         Query result = VirtualPartitionedQuery.rewrite(views, query);
 

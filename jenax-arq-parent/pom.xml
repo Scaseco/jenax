@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>4.8.0-2</version>
+		<version>4.9.0-1</version>
 	</parent>
 
 	<modules>
@@ -40,10 +40,6 @@
 		<module>jenax-arq-views</module>
 		<module>jenax-arq-fromasfilter</module>
 		<module>jenax-arq-sameas</module>
-
-		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure is not ideal -->
-		<!-- maybe its better to have udf build on the top level functionbinder module -->
-		<module>jenax-arq-udf</module>
 
 		<!-- some parts of algebra depend on udf rather than plain arq -->
 		<module>jenax-arq-algebra</module>

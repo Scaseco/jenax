@@ -30,7 +30,7 @@ public class ServletSparqlServiceImpl
     @Context
     protected HttpServletRequest req;
 
-    /** The connection factory in mandatory */
+    /** The connection factory is mandatory. It creates RDFConnections from the http request. */
     @Autowired
     protected RdfConnectionFactory sparqlConnectionFactory;
 
@@ -54,8 +54,6 @@ public class ServletSparqlServiceImpl
         return result;
     }
 
-
-
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Response executeRequestXml()
@@ -63,6 +61,7 @@ public class ServletSparqlServiceImpl
 
         // InputStream r = new ClassPathResource("snorql/index.html").getInputStream();
         InputStream r = new ClassPathResource("yasgui/index.html").getInputStream();
+        // System.out.println(IOUtils.toString(r, StandardCharsets.UTF_8));
         Response result;
         if(r == null) {
             result = Response.ok("SPARQL HTML front end not configured", MediaType.TEXT_HTML).build();
@@ -70,7 +69,6 @@ public class ServletSparqlServiceImpl
             result = Response.ok(r, MediaType.TEXT_HTML).build();
         }
 
-//        Response result = Response.te
 //        Response result = Response.status(Status.NOT_FOUND).build();
         return result;
     }

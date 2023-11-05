@@ -6,8 +6,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParser;
 import org.aksw.jenax.stmt.parser.element.SparqlElementParserImpl;
 import org.apache.jena.query.Syntax;
@@ -38,8 +38,8 @@ public class SparqlRelationParserImpl
     }
 
     @Override
-    public BinaryRelation apply(String input) {
-        BinaryRelation result = parse(input, elementParser);
+    public Fragment2 apply(String input) {
+        Fragment2 result = parse(input, elementParser);
         return result;
     }
 
@@ -47,7 +47,7 @@ public class SparqlRelationParserImpl
     public static Pattern VAR_PATTERN = Pattern.compile(VAR_PATTERN_STR);
     //public static Pattern VAR_PATTERN = Pattern.compile("\\s*(" + VAR_PATTERN_STR + "\\s+" + VAR_PATTERN_STR + ")\\s*");
 
-    public static BinaryRelation parse(String relationStr, Function<String, Element> elementParser) {
+    public static Fragment2 parse(String relationStr, Function<String, Element> elementParser) {
         String[] splits = relationStr.split("\\|", 2);
         if(splits.length != 2) {
             throw new RuntimeException("Invalid string: " + relationStr);
@@ -73,7 +73,7 @@ public class SparqlRelationParserImpl
 
         Element element = elementParser.apply(elementStr);
 
-        BinaryRelation result = new BinaryRelationImpl(element, sourceVar, targetVar);
+        Fragment2 result = new Fragment2Impl(element, sourceVar, targetVar);
 
         return result;
     }

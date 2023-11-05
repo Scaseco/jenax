@@ -2,8 +2,11 @@ package org.aksw.jena_sparql_api.mapper.impl.type;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -37,6 +40,9 @@ import org.aksw.jenax.annotation.reprogen.MappedBy;
 import org.aksw.jenax.annotation.reprogen.MultiValued;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Syntax;
@@ -57,8 +63,6 @@ import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
-
-import com.google.common.base.Strings;
 
 public class RdfTypeFactoryImpl
     implements RdfTypeFactory
@@ -261,16 +265,19 @@ public class RdfTypeFactoryImpl
         rdfClass.setPopulated(true);
     }
 
-
     public String getIri(EntityOps entityOps, PropertyOps pd) {
 
         String propertyName = pd.getName();
 
         Optional<Iri> iriOpt = Optional.ofNullable(pd.findAnnotation(Iri.class));
-        String iriStr = iriOpt
+        List<String> iris = iriOpt
                 .map(Iri::value)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+        Preconditions.checkArgument(iris.size() <= 1, "Currently @Iri is only supporting with a most one argument");
+        String iriStr = iris.stream()
                 .map(iriExprStr -> resolveIriExpr(iriExprStr, null))
-                .orElse(null);
+                .findFirst().orElse(null);
 
         Optional<IriNs> propertyIriNsOpt = Optional.ofNullable(pd.findAnnotation(IriNs.class));
 
@@ -283,12 +290,15 @@ public class RdfTypeFactoryImpl
             effectiveIriNsOpt = classIriNs;
         }
 
-        String iriNsStr = effectiveIriNsOpt
+        List<String> iriNsStrs = effectiveIriNsOpt
                 .map(IriNs::value)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+        Preconditions.checkArgument(iriNsStrs.size() <= 1, "Currently @IriNs is only supported with at most one argument");
+        String iriNsStr = iriNsStrs.stream()
                 .map(iriNsExprStr -> iriNsExprStr + (iriNsExprStr.contains(":") ? "" : ":") + propertyName)
                 .map(iriNsExprStr -> resolveIriExpr(iriNsExprStr, null))
-                .orElse(null);
-
+                .findFirst().orElse(null);
 
         if(iriNsStr != null) {
             if(!Strings.isNullOrEmpty(iriStr)) {

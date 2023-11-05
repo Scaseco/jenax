@@ -7,8 +7,6 @@ import org.aksw.commons.rx.lookup.ListService;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.commons.rx.lookup.MapServiceFromListService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx.EntityQueryProcessed;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRxBuilder;
@@ -17,9 +15,10 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityBaseQuery;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryBasic;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.RDFNode;
@@ -121,12 +120,12 @@ public class ListServiceEntityQuery
         return result;
     }
 
-    public static EntityBaseQuery fromConcept(UnaryRelation rel) {
+    public static EntityBaseQuery fromConcept(Fragment1 rel) {
         return EntityBaseQuery.create(rel.getVar(), rel.asQuery());
     }
 
     public static EntityBaseQuery toBaseQuery(Iterable<? extends Node> nodes) {
-        Concept concept = ConceptUtils.createConcept(nodes);
+        Fragment1 concept = ConceptUtils.createConcept(nodes);
         EntityBaseQuery result = fromConcept(concept);
         return result;
     }

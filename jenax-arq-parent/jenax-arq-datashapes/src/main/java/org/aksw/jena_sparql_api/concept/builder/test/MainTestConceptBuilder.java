@@ -6,8 +6,6 @@ import java.util.Map;
 import org.aksw.jena_sparql_api.concept.builder.api.NodeBuilder;
 import org.aksw.jena_sparql_api.concept.builder.impl.NodeBuilderFluent;
 import org.aksw.jena_sparql_api.concept.builder.utils.Exprs;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationOps;
 import org.aksw.jena_sparql_api.shape.algebra.op.Algebra;
 import org.aksw.jena_sparql_api.shape.syntax.Element;
 import org.aksw.jena_sparql_api.shape.syntax.ElementEnumeration;
@@ -17,7 +15,9 @@ import org.aksw.jena_sparql_api.shape.syntax.ElementFocus;
 import org.aksw.jena_sparql_api.shape.syntax.ElementForAll;
 import org.aksw.jena_sparql_api.shape.syntax.ElementGroup;
 import org.aksw.jena_sparql_api.shape.syntax.ElementType;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.RelationOps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
@@ -40,7 +40,7 @@ public class MainTestConceptBuilder {
         //Function<String, Element> elementParser = SparqlElementParserImpl.create(Syntax.syntaxARQ, prologue);
 
 
-        Map<Node, BinaryRelation> virtualPredicates = new HashMap<>();
+        Map<Node, Fragment2> virtualPredicates = new HashMap<>();
         Node mypred = NodeFactory.createURI("http://transitive");
         //virtualPredicates.put(mypred, Relation.create("?s foaf:knows+ ?o", "s", "o", elementParser));
         //pm.getLocalPrefixMapping().
@@ -76,7 +76,7 @@ public class MainTestConceptBuilder {
 
 
 
-        Concept c = Algebra.toConcept(Algebra.compile(e));
+        Fragment1 c = Algebra.toConcept(Algebra.compile(e));
 
         System.out.println("CONCEPT: " + c);
 

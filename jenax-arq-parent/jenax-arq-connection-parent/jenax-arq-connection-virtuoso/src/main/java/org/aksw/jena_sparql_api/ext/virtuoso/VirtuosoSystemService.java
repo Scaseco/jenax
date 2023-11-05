@@ -13,7 +13,7 @@ import java.util.prefs.Preferences;
 
 import org.aksw.jena_sparql_api.core.service.SparqlBasedSystemService;
 import org.aksw.jena_sparql_api.io.utils.AbstractSystemService;
-import org.aksw.jenax.arq.connection.RDFConnectionModular;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;

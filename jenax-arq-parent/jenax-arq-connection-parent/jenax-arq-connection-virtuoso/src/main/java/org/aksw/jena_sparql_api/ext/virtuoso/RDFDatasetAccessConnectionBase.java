@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.ext.virtuoso;
 
-import org.aksw.jenax.arq.connection.TransactionalDelegate;
+import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.Model;
@@ -8,7 +8,7 @@ import org.apache.jena.rdfconnection.RDFDatasetAccessConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public abstract class RDFDatasetAccessConnectionBase
-    implements RDFDatasetAccessConnection, TransactionalDelegate
+    implements RDFDatasetAccessConnection, TransactionalWrapper
 {
     protected abstract SparqlQueryConnection getQueryConnection();
 

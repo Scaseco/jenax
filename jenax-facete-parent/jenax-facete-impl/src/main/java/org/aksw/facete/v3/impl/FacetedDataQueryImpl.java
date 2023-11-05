@@ -4,9 +4,10 @@ import java.util.List;
 
 import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.api.FacetedQuery;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.data_query.impl.DataQueryImpl;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -31,17 +32,36 @@ public class FacetedDataQueryImpl<T extends RDFNode>
     extends DataQueryImpl<T>
     implements FacetedDataQuery<T>
 {
+    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseQueryPattern, Var rootVar, Template template,
+            Class<T> resultClass) {
+        super(dataSource, baseQueryPattern, rootVar, template, resultClass);
+    }
 
+    @Deprecated
+    public FacetedDataQueryImpl(RdfDataSource dataSource, Fragment1 baseRelation, Template template,
+            Class<T> resultClass) {
+        super(dataSource, baseRelation, template, resultClass);
+    }
+
+    @Deprecated
+    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseElement, List<Var> primaryKeyVars,
+            Node superRootNode, Var defaultVar, Template template, Class<T> resultClass) {
+        super(dataSource, baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
+    }
+
+    @Deprecated
     public FacetedDataQueryImpl(SparqlQueryConnection conn, Element baseQueryPattern, Var rootVar, Template template,
             Class<T> resultClass) {
         super(conn, baseQueryPattern, rootVar, template, resultClass);
     }
 
-    public FacetedDataQueryImpl(SparqlQueryConnection conn, UnaryRelation baseRelation, Template template,
+    @Deprecated
+    public FacetedDataQueryImpl(SparqlQueryConnection conn, Fragment1 baseRelation, Template template,
             Class<T> resultClass) {
         super(conn, baseRelation, template, resultClass);
     }
 
+    @Deprecated
     public FacetedDataQueryImpl(SparqlQueryConnection conn, Element baseElement, List<Var> primaryKeyVars,
             Node superRootNode, Var defaultVar, Template template, Class<T> resultClass) {
         super(conn, baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
@@ -56,7 +76,7 @@ public class FacetedDataQueryImpl<T extends RDFNode>
         Element el = this.baseElement();
         Var var = this.getDefaultVar();
 
-        UnaryRelation rel = new Concept(el, var);
+        Fragment1 rel = new Concept(el, var);
 
         fq.baseConcept(rel);
 

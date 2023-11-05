@@ -18,12 +18,12 @@ import org.aksw.commons.collection.observable.ObservableMap;
 import org.aksw.commons.collection.observable.ObservableMapImpl;
 import org.aksw.commons.collection.observable.ObservableValue;
 import org.aksw.commons.collection.observable.ObservableValueFromObservableCollection;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
-import org.apache.jena.ext.com.google.common.collect.HashMultimap;
-import org.apache.jena.ext.com.google.common.collect.Multimap;
-import org.apache.jena.ext.com.google.common.collect.Multimaps;
-import org.apache.jena.ext.com.google.common.collect.Streams;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -74,13 +74,13 @@ public class GraphChangeWithBaseGraph
 
 
 
-    public ObservableCollection<Node> createSetField(Node sourceNode, DirectedFilteredTriplePattern dftp) {
+    public ObservableCollection<Node> createSetField(Node sourceNode, TripleFilter dftp) {
 
         ObservableCollection<Node> set = SetOfNodesFromGraph.create(baseGraph, dftp);
         return set;
     }
 
-    public ObservableValue<Node> createValueField(Node sourceNode, DirectedFilteredTriplePattern dftp) {
+    public ObservableValue<Node> createValueField(Node sourceNode, TripleFilter dftp) {
         ObservableCollection<Node> set = createSetField(sourceNode, dftp);
         ObservableValue<Node> result = ObservableValueFromObservableCollection.decorate(set);
         return result;
@@ -244,7 +244,7 @@ public class GraphChangeWithBaseGraph
      * the set view and e.g. a triple based view
      **/
     public ObservableCollection<Node> createSetForPredicate(Node source, Node predicate, boolean isForward) {
-        DirectedFilteredTriplePattern dftp = DirectedFilteredTriplePattern.create(source, predicate, isForward);
+        TripleFilter dftp = TripleFilter.create(source, predicate, isForward);
         return createSetField(source, dftp);
     }
 

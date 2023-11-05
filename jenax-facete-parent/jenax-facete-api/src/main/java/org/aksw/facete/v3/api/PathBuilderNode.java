@@ -3,7 +3,7 @@ package org.aksw.facete.v3.api;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.aksw.facete.v3.bgp.api.BinaryRelation;;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;;
 
 /**
  * What should be the nature of this class?
@@ -19,7 +19,7 @@ import org.aksw.facete.v3.bgp.api.BinaryRelation;;
 public class PathBuilderNode<T> {
 
     //Supplier<Map<String, Relation>>
-    Supplier<Map<String, BinaryRelation>> relationSupplier;
+    Supplier<Map<String, Fragment2>> relationSupplier;
 
 
 //	PathBuilderNode<T> as(String name) {

@@ -3,18 +3,18 @@ package com.eccenca.access_control.triple_based.core;
 import java.util.List;
 
 import org.aksw.commons.collections.PolaritySet;
-import org.aksw.jena_sparql_api.concepts.XExpr;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.impl.XExpr;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 
 public class GenericLayer {
     protected List<Var> vars;
-    protected Relation relation;
+    protected Fragment relation;
     protected XExpr expr;
     protected PolaritySet<Binding> valueSet;
 
-    public GenericLayer(Relation relation) {
+    public GenericLayer(Fragment relation) {
         this.relation = relation;
     }
 
@@ -24,10 +24,10 @@ public class GenericLayer {
     public void setVars(List<Var> vars) {
         this.vars = vars;
     }
-    public Relation getRelation() {
+    public Fragment getRelation() {
         return relation;
     }
-    public void setRelation(Relation relation) {
+    public void setRelation(Fragment relation) {
         this.relation = relation;
     }
     public XExpr getExpr() {
@@ -43,7 +43,7 @@ public class GenericLayer {
         this.valueSet = valueSet;
     }
 
-    public static GenericLayer create(Relation relation) {
+    public static GenericLayer create(Fragment relation) {
         return new GenericLayer(relation);
     }
 

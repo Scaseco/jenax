@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.LookupService;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;

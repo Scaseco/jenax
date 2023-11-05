@@ -31,10 +31,6 @@ import org.aksw.commons.collections.utils.StreamUtils;
 import org.aksw.commons.rx.lookup.ListPaginator;
 import org.aksw.commons.rx.lookup.ListService;
 import org.aksw.commons.util.range.RangeUtils;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptOps;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.OrderedConcept;
 import org.aksw.jena_sparql_api.lookup.ListServiceConcept;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineBatched;
 import org.aksw.jena_sparql_api.mapper.impl.type.PathResolver;
@@ -43,11 +39,15 @@ import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.VExpression;
 import org.aksw.jena_sparql_api.mapper.jpa.criteria.expr.VPath;
 import org.aksw.jena_sparql_api.mapper.model.TypeDecider;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.OrderedConcept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
@@ -66,6 +66,7 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 
 
@@ -201,7 +202,7 @@ public class TypedQueryImpl<X>
 
 
         VExpression<?> filterEx = (VExpression<?>)criteriaQuery.getRestriction();
-        Concept filterConcept;
+        Fragment1 filterConcept;
         if(filterEx != null) {
             Expr expr = filterEx.accept(filterCompiler);
             filterCompiler.getElements().add(new ElementFilter(expr));
@@ -489,7 +490,7 @@ public class TypedQueryImpl<X>
         QueryExecutionFactory qef = sparqlService.getQueryExecutionFactory();
 
         // TODO Using the resultVar here is a hack
-        ListService<Concept, Entry<Node, Node>> ls = new ListServiceConcept(qef);
+        ListService<Fragment1, Entry<Node, Node>> ls = new ListServiceConcept(qef);
         ListPaginator<Entry<Node, Node>> paginator = ls.createPaginator(new Concept(new ElementSubQuery(query), resultVar));
 
 

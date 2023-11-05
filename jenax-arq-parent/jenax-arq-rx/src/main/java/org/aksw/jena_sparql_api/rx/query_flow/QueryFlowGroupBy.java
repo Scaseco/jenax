@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.aksw.commons.rx.util.RxUtils;
 import org.apache.jena.atlas.lib.Pair;
-import org.apache.jena.ext.com.google.common.collect.Multimap;
-import org.apache.jena.ext.com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;

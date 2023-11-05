@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.aksw.facete.v3.api.path.Resolver;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.expr.E_NotOneOf;
@@ -25,10 +25,10 @@ public interface DataQueryVarView<T extends RDFNode> {
     Resolver getResolver();
 
 
-    DataQuery<T> filterUsing(Relation relation, String ... attrNames);
+    DataQuery<T> filterUsing(Fragment relation, String ... attrNames);
 
     // Return the same data query with intersection on the given concept
-    DataQuery<T> filter(UnaryRelation concept);
+    DataQuery<T> filter(Fragment1 concept);
 
     default DataQuery<T> filter(String exprStr) {
         Expr expr = ExprUtils.parse(exprStr);

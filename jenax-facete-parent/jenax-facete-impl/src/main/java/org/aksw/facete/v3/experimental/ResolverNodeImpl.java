@@ -7,7 +7,7 @@ import org.aksw.jena_sparql_api.data_query.api.DataQuery;
 import org.aksw.jena_sparql_api.data_query.api.ResolverDirNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverMultiNode;
 import org.aksw.jena_sparql_api.data_query.api.ResolverNode;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -40,8 +40,8 @@ public class ResolverNodeImpl
     }
 
     @Override
-    public Collection<BinaryRelation> getPaths() {
-        Collection<BinaryRelation> result = resolver.getPaths();
+    public Collection<Fragment2> getPaths() {
+        Collection<Fragment2> result = resolver.getPaths();
         return result;
     }
 

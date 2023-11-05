@@ -44,6 +44,9 @@ import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformSubst;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 /* MODIFIED VERSION WITH FIX FOR PROJECTIONS AND AGGREGATIONS (VarExprList)
+ * Original QueryTransformOps does not e.g. substitute ?p in SELECT COUNT(?p) { ... }
+ * This version does.
+ */
 
 /** Support for transformation of query abstract syntax. */
 

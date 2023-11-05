@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.concept.parser;
 import java.util.List;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;

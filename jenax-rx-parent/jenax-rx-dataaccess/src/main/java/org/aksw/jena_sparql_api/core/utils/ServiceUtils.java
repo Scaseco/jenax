@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.aksw.commons.util.range.CountInfo;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.OrderedConcept;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.OrderedConcept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -48,13 +49,13 @@ public class ServiceUtils {
         return result;
     }
 
-    public static List<Node> fetchList(SparqlQueryConnection qef, UnaryRelation concept, Long limit, Long offset) {
+    public static List<Node> fetchList(SparqlQueryConnection qef, Fragment1 concept, Long limit, Long offset) {
         Query query = ConceptUtils.createQueryList(concept, limit, offset);
         List<Node> result = fetchList(qef, query, concept.getVar());
         return result;
     }
 
-    public static List<Node> fetchList(SparqlQueryConnection qef, UnaryRelation concept) {
+    public static List<Node> fetchList(SparqlQueryConnection qef, Fragment1 concept) {
         Query query = ConceptUtils.createQueryList(concept);
         List<Node> result = fetchList(qef, query, concept.getVar());
         return result;
@@ -77,7 +78,7 @@ public class ServiceUtils {
     }
 
 
-    public static Integer fetchInteger(QueryExecutionFactory qef, Query query, Var v) {
+    public static Integer fetchInteger(QueryExecutionFactoryQuery qef, Query query, Var v) {
         //System.out.println(query);
         QueryExecution qe = qef.createQueryExecution(query);
         Integer result = fetchInteger(qe, v);
@@ -162,7 +163,7 @@ public class ServiceUtils {
         return result;
     }
 
-    public static Range<Long> fetchCountQuery(QueryExecutionFactory sparqlService, Query query, Long itemLimit, Long rowLimit) {
+    public static Range<Long> fetchCountQuery(QueryExecutionFactoryQuery sparqlService, Query query, Long itemLimit, Long rowLimit) {
 
         //Var outputVar = Var.alloc("_count_"); //ConceptUtils.freshVar(concept);
 

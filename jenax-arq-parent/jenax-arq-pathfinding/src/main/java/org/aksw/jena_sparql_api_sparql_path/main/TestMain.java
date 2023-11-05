@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinder;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.path.SimplePath;
 
 
@@ -32,7 +32,7 @@ public class TestMain {
 
         Concept targetConcept = Concept.create("?g ?y ?x . Filter(?y = <http://www.w3.org/2003/01/geo/wgs84_pos#lat> || ?y = <http://www.w3.org/2003/01/geo/wgs84_pos#long>)", "g");
 
-        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10, 10);
+        List<SimplePath> paths = ConceptPathFinder.findPaths(qef, sourceConcept, targetConcept, 10l, 10l);
 
         System.out.println("Got " + paths.size() + " results:");
         for(SimplePath path : paths) {

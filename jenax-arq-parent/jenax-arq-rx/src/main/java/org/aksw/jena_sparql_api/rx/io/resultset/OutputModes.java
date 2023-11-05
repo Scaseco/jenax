@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.rx.io.resultset;
 import java.util.Collection;
 
 import org.aksw.jenax.stmt.core.SparqlStmt;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.query.Query;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;

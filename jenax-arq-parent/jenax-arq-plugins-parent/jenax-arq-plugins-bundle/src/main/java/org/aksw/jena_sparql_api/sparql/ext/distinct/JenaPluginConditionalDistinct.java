@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.distinct;
 
-import java.awt.font.OpenType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

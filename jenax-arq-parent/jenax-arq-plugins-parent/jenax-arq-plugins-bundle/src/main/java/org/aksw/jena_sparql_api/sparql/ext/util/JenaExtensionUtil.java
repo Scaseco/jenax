@@ -1,8 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.util;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-
+import org.aksw.jena_sparql_api.sparql.ext.binding.JenaExtensionBinding;
 import org.aksw.jena_sparql_api.sparql.ext.collection.array.JenaExtensionArray;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.JenaExtensionCollection;
 import org.aksw.jena_sparql_api.sparql.ext.collection.set.JenaExtensionSet;
@@ -10,23 +8,13 @@ import org.aksw.jena_sparql_api.sparql.ext.csv.JenaExtensionCsv;
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.JenaExtensionDuration;
 import org.aksw.jena_sparql_api.sparql.ext.fs.JenaExtensionFs;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaExtensionJson;
-import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
 import org.aksw.jena_sparql_api.sparql.ext.number.JenaExtensionNumber;
 import org.aksw.jena_sparql_api.sparql.ext.prefix.JenaExtensionPrefix;
 import org.aksw.jena_sparql_api.sparql.ext.str.JenaExtensionString;
 import org.aksw.jena_sparql_api.sparql.ext.sys.JenaExtensionSys;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jena_sparql_api.sparql.ext.xml.JenaExtensionXml;
-import org.aksw.jenax.arq.functionbinder.FunctionBinder;
-import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
-import org.aksw.jenax.arq.util.node.NodeList;
-import org.aksw.jenax.arq.util.node.NodeListImpl;
-import org.apache.jena.graph.Node;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionRegistry;
-
-import com.google.gson.JsonElement;
 
 public class JenaExtensionUtil {
 //    public static void registerAll() {
@@ -46,6 +34,7 @@ public class JenaExtensionUtil {
         JenaExtensionSet.addPrefixes(pm);
         JenaExtensionJson.addPrefixes(pm);
 
+        JenaExtensionBinding.addPrefixes(pm);
 
         JenaExtensionDuration.addPrefixes(pm);
         // JenaExtensionOsrm.

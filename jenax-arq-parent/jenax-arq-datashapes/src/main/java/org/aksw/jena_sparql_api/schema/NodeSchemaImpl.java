@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Node;
 
 import com.google.common.collect.HashBasedTable;
@@ -17,7 +17,7 @@ public class NodeSchemaImpl
     protected Table<Node, Boolean, PropertySchema> predicateViews = HashBasedTable.create();
 
     /** Generic triple triple patterns where the predicate may be a variable */
-    protected Set<DirectedFilteredTriplePattern> triplePatterns = new LinkedHashSet<>();
+    protected Set<TripleFilter> triplePatterns = new LinkedHashSet<>();
 
 
     public PropertySchema createPropertySchema(Node predicate, boolean isForward) {
@@ -27,7 +27,7 @@ public class NodeSchemaImpl
         return spec;
     }
 
-    public Set<DirectedFilteredTriplePattern> getGenericPatterns() {
+    public Set<TripleFilter> getGenericPatterns() {
         return triplePatterns;
     }
 

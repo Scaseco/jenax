@@ -7,10 +7,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
@@ -24,13 +24,13 @@ public class MapFromBinaryRelation
     extends AbstractMap<RDFNode, Collection<RDFNode>>
 {
     protected Model model;
-    protected BinaryRelation relation;
+    protected Fragment2 relation;
 
     // TODD Maybe a Plan object would be a better basis for the map - the plan would
     // already be precomputed and consider all optimizations
 
 
-    public MapFromBinaryRelation(Model model, BinaryRelation relation) {
+    public MapFromBinaryRelation(Model model, Fragment2 relation) {
         super();
         this.model = model;
         this.relation = relation;
@@ -45,7 +45,7 @@ public class MapFromBinaryRelation
         Collection<RDFNode> result = null;
         if(key instanceof RDFNode) {
             RDFNode k = (RDFNode)key;
-            BinaryRelation br = relation.joinOn(relation.getSourceVar()).with(ConceptUtils.createFilterConcept(k.asNode())).toBinaryRelation();
+            Fragment2 br = relation.joinOn(relation.getSourceVar()).with(ConceptUtils.createFilterConcept(k.asNode())).toFragment2();
 
             result = Optional.ofNullable(fetch(model, br)).map(f -> f.map(Entry::getValue).toList().blockingGet()).orElse(null);
         }
@@ -70,8 +70,8 @@ public class MapFromBinaryRelation
         return map.entrySet();
     }
 
-    public static Flowable<Entry<RDFNode, RDFNode>> fetch(Model model, BinaryRelation relation) {
-        Query query = RelationUtils.createQuery(relation);
+    public static Flowable<Entry<RDFNode, RDFNode>> fetch(Model model, Fragment2 relation) {
+        Query query = FragmentUtils.createQuery(relation);
 
         Flowable<Entry<RDFNode, RDFNode>> result = SparqlRx.execSelect(() -> QueryExecutionFactory.create(query, model))
             .map(qs -> Maps.immutableEntry(

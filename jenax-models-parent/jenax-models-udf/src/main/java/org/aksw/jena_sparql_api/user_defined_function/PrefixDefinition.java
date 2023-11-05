@@ -1,0 +1,26 @@
+package org.aksw.jena_sparql_api.user_defined_function;
+
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.model.shacl.domain.ShPrefixDeclaration;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.shared.PrefixMapping;
+
+/** Superseded by {@link ShPrefixDeclaration} */
+@Deprecated
+public interface PrefixDefinition
+    extends Resource
+{
+    @Iri("http://ns.aksw.org/jena/udf/prefix")
+    String getPrefix();
+
+    @Iri("http://ns.aksw.org/jena/udf/iri")
+    Resource getIri();
+
+    default PrefixMapping addTo(PrefixMapping pm) {
+        String prefix = getPrefix();
+        Resource r = getIri();
+        String iri = r.getURI();
+        pm.setNsPrefix(prefix, iri);
+        return pm;
+    }
+}

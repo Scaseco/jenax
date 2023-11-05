@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.shape.algebra.op;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 public class OpForAll
     extends OpRoleRestriction
 {
-    public OpForAll(BinaryRelation role, Op filler) {
+    public OpForAll(Fragment2 role, Op filler) {
         super(role, filler);
     }
 

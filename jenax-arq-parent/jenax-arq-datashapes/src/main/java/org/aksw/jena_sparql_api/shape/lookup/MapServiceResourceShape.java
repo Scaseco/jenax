@@ -5,18 +5,18 @@ import org.aksw.commons.rx.lookup.ListServiceMapWrapper;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jenax.analytics.core.MappedConcept;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 
 public class MapServiceResourceShape
-    implements MapService<Concept, Node, Graph>
+    implements MapService<Fragment1, Node, Graph>
 {
     private QueryExecutionFactoryQuery qef;
     private ResourceShape resourceShape;
@@ -32,7 +32,7 @@ public class MapServiceResourceShape
     }
 
     @Override
-    public MapPaginator<Node, Graph> createPaginator(Concept filterConcept) {
+    public MapPaginator<Node, Graph> createPaginator(Fragment1 filterConcept) {
         MappedConcept<Graph> mappedConcept = ResourceShape.createMappedConcept(resourceShape, filterConcept, false);
         MapPaginatorMappedConcept<Graph> result = new MapPaginatorMappedConcept<>(qef, null, isLeftJoin, mappedConcept);
         return result;
@@ -45,10 +45,10 @@ public class MapServiceResourceShape
 
 
 
-    public static ListService<Concept, Resource> createListService(QueryExecutionFactoryQuery qef, ResourceShape resourceShape, boolean isLeftJoin) {
+    public static ListService<Fragment1, Resource> createListService(QueryExecutionFactoryQuery qef, ResourceShape resourceShape, boolean isLeftJoin) {
         MapServiceResourceShape base = create(qef, resourceShape, isLeftJoin);
 
-        ListService<Concept, Resource> result = ListServiceMapWrapper.create(base, ResourceUtils::asResource);
+        ListService<Fragment1, Resource> result = ListServiceMapWrapper.create(base, ResourceUtils::asResource);
 
 //        (node, graph) -> {
 //            Model model = ModelFactory.createModelForGraph(graph);

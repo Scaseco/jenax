@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.apache.jena.atlas.json.JsonObject;
-import org.apache.jena.ext.com.google.common.collect.Iterators;
+import com.google.common.collect.Iterators;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.algebra.table.TableN;

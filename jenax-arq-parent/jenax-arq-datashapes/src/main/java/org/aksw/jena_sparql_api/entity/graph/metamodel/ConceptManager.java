@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.entity.graph.metamodel;
 
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Node;
 
 /**
@@ -12,5 +12,5 @@ import org.apache.jena.graph.Node;
  *
  */
 public interface ConceptManager {
-    Node getOrCreate(UnaryRelation concept);
+    Node getOrCreate(Fragment1 concept);
 }

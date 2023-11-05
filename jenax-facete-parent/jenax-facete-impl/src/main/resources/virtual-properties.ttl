@@ -1,0 +1,32 @@
+PREFIX eg: <http://www.example.org/>
+PREFIX norse: <https://w3id.org/aksw/norse#>
+
+# TODO Switch to shacl vocab for sparql queries (sh:select)
+
+norse:mostSpecificType
+  a norse:CustomProperty ;
+  norse:sparqlElement
+"""
+SELECT ?s ?mostSpecificType {
+  ?s a ?mostSpecificType .
+  FILTER NOT EXISTS {
+    # There must not be another type on ?s that is more specific than current ?mostSpecificType
+    ?s a ?anotherType .
+    ?anotherType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ ?mostSpecificType .
+    FILTER NOT EXISTS {
+      # Another type is NOT more specific if it is also a parent of the current ?mostSpecificType (cycle in the hierarchy)
+      ?mostSpecificType <http://www.w3.org/2000/01/rdf-schema#subClassOf>+ ?anotherType .
+    }
+  }
+}
+""" .
+
+
+norse:listItems
+  a norse:CustomProperty ;
+  norse:sparqlElement
+"""
+SELECT ?s ?item {
+  ?s <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>*/<http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?item .
+}
+""" .

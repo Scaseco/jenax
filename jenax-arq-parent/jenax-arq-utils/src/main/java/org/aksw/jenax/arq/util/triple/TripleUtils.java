@@ -126,6 +126,10 @@ public class TripleUtils {
         return createMatch(source, predicate.getNode(), predicate.isForward());
     }
 
+    public static Triple createMatch(Triple triple, boolean isForward) {
+        return isForward ? triple : swap(triple);
+    }
+
     /**
      * Create a matcher for triples having a certain predicate and a source node.
      * If 'isForward' is true then the subject acts as the source otherwise its the object.
@@ -145,8 +149,8 @@ public class TripleUtils {
 
     public static Triple create(Node s, Node p, Node o, boolean isForward) {
         Triple result = isForward
-            ? new Triple(s, p, o)
-            : new Triple(o, p, s);
+            ? Triple.create(s, p, o)
+            : Triple.create(o, p, s);
 
         return result;
     }
@@ -198,7 +202,7 @@ public class TripleUtils {
 //    }
 
     public static Triple swap(Triple t) {
-        Triple result = new Triple(t.getObject(), t.getPredicate(), t.getSubject());
+        Triple result = Triple.create(t.getObject(), t.getPredicate(), t.getSubject());
         return result;
     }
 

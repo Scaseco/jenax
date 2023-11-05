@@ -10,15 +10,20 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>4.8.0-2</version>
+		<version>4.9.0-1</version>
 	</parent>
 
 	<modules>
+		<module>jenax-models-shacl</module>
 		<module>jenax-models-foaf</module>
 		<module>jenax-models-prov</module>
 		<module>jenax-models-dcat-api</module>
 		<module>jenax-models-entityinfo</module>
 		<module>jenax-models-csvw</module>
+		<module>jenax-models-d2rq</module>
+		<module>jenax-models-table</module>
+		<module>jenax-models-void</module>
+		<module>jenax-models-udf</module>
 	</modules>
 </project>
 

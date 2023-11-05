@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.jena.ext.com.google.common.collect.ForwardingList;
+import com.google.common.collect.ForwardingList;
 import org.apache.jena.graph.Node;
 
 public class NodeListImpl

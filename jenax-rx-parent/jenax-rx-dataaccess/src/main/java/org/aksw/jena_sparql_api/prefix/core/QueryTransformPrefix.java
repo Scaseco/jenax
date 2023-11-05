@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.prefix.core;
 
-import org.aksw.jena_sparql_api.core.QueryTransform;
+import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.apache.jena.query.Query;
 import org.apache.jena.shared.PrefixMapping;
 

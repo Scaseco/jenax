@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.compare;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.commons.collections.diff.ListDiff;
+import org.aksw.commons.util.io.out.OutputStreamUtils;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.arq.util.binding.ResultSetCompareUtils;
 import org.aksw.jenax.arq.util.binding.TableUtils;
@@ -15,6 +15,7 @@ import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QuerySolution;
@@ -64,6 +65,19 @@ public class QueryExecutionCompare
         return result;
     }
 
+    public static Diff<Dataset> compareDataset(Dataset a, Dataset b) {
+        Diff<Dataset> result = new Diff<>(DatasetFactory.create(), DatasetFactory.create(), DatasetFactory.create());
+
+        result.getAdded().asDatasetGraph().addAll(b.asDatasetGraph());
+        a.asDatasetGraph().find().forEachRemaining(result.getAdded().asDatasetGraph()::delete);
+
+        result.getRemoved().asDatasetGraph().addAll(a.asDatasetGraph());
+        b.asDatasetGraph().find().forEachRemaining(result.getRemoved().asDatasetGraph()::delete);
+
+        return result;
+    }
+
+
     private boolean isOrdered; // Whether the result sets are ordered
     private QueryExecution a;
     private QueryExecution b;
@@ -73,6 +87,7 @@ public class QueryExecutionCompare
 
     private Diff<Table> resultSetDiff = null; // The diff after the query execution
     private ModelDiff modelDiff = null;
+    private Diff<Dataset> datasetDiff = null;
     private Diff<Boolean> askDiff = null;
 
 
@@ -222,7 +237,6 @@ public class QueryExecutionCompare
             logger.debug("Excessive:\n" + ResultSetFormatter.asText(rsa));
             logger.debug("Missing:\n" + ResultSetFormatter.asText(rsb));
         }
-
     }
 
     public void logResultSet() {
@@ -237,10 +251,21 @@ public class QueryExecutionCompare
         logger.debug("Missing:\n" + toString(modelDiff.getRemoved(), RDFFormat.TURTLE_PRETTY));
     }
 
+    public void logDataset() {
+        log(datasetDiff.getAdded().asDatasetGraph().size(), datasetDiff.getRemoved().asDatasetGraph().size());
+
+        logger.debug("Query: " + query);
+        logger.debug("Excessive:\n" + toString(datasetDiff.getAdded(), RDFFormat.TRIG_PRETTY));
+        logger.debug("Missing:\n" + toString(datasetDiff.getRemoved(), RDFFormat.TRIG_PRETTY));
+    }
+
     public static String toString(Model model, RDFFormat format) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        RDFDataMgr.write(baos, model, format);
-        String result = baos.toString();
+        String result = OutputStreamUtils.toStringUtf8(out -> RDFDataMgr.write(out, model, format));
+        return result;
+    }
+
+    public static String toString(Dataset dataset, RDFFormat format) {
+        String result = OutputStreamUtils.toStringUtf8(out -> RDFDataMgr.write(out, dataset, format));
         return result;
     }
 
@@ -467,17 +492,34 @@ public class QueryExecutionCompare
 
     @Override
     public Iterator<Quad> execConstructQuads() {
-        throw new RuntimeException("Not implemented yet");
+        Dataset tmp = execConstructDataset();
+        Iterator<Quad> result = tmp.asDatasetGraph().find();
+        return result;
     }
 
     @Override
     public Dataset execConstructDataset() {
-        throw new RuntimeException("Not implemented yet");
+        return execConstructDataset(DatasetFactory.create());
     }
 
     @Override
     public Dataset execConstructDataset(Dataset dataset) {
-        throw new RuntimeException("Not implemented yet");
+        Dataset x;
+        Dataset y;
+        try {
+             x = a.execConstructDataset();
+             y = b.execConstructDataset();
+        } catch(RuntimeException e) {
+            // Set diff in order to indicate that the execution was performed
+            datasetDiff = new Diff<>(DatasetFactory.create(), DatasetFactory.create(), DatasetFactory.create());
+            throw e;
+        }
+
+        datasetDiff = compareDataset(x, y);
+
+        logDataset();
+
+        return x;
     }
 
     @Override

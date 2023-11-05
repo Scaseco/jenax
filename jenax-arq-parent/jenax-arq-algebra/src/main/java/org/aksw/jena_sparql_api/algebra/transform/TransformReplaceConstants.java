@@ -76,7 +76,7 @@ public class TransformReplaceConstants
     public static Op transform(Op op, Predicate<Node> testTransform) {
         return transform(op, (x, i) -> {
             boolean tmp = testTransform.test(x);
-            SubstitutionStrategy r = tmp ? SubstitutionStrategy.SUSTITUTE_AND_FILTER : SubstitutionStrategy.RETAIN;
+            SubstitutionStrategy r = tmp ? SubstitutionStrategy.SUBSTITUTE_AND_FILTER : SubstitutionStrategy.RETAIN;
             return r;
         });
     }
@@ -121,7 +121,7 @@ public class TransformReplaceConstants
             // Graph component has index 3 (s=0, p=1, o=2, g=3)
             SubstitutionStrategy r = (i == 3 && Quad.isDefaultGraph(node))
                     ? defaultGraphSubstitutionStrategy
-                    : SubstitutionStrategy.SUSTITUTE_AND_FILTER;
+                    : SubstitutionStrategy.SUBSTITUTE_AND_FILTER;
 
             return r;
         };
@@ -140,7 +140,7 @@ public class TransformReplaceConstants
         Map<Node, Var> result = new LinkedHashMap<>();
 
         for(Node node : inNodes) {
-            Node n = transform(nodeToVar, node, generator, null, SubstitutionStrategy.SUSTITUTE_AND_FILTER);
+            Node n = transform(nodeToVar, node, generator, null, SubstitutionStrategy.SUBSTITUTE_AND_FILTER);
             if(n.isVariable() && !n.equals(node)) {
                 result.put(node, (Var)n);
             }

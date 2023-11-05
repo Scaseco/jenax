@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.prefix;
 
 import java.util.List;
 
-import org.aksw.jenax.arq.util.exec.FunctionEnvUtils;
+import org.aksw.jenax.arq.util.exec.query.FunctionEnvUtils;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;

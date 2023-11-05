@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -19,16 +20,18 @@ import java.util.stream.StreamSupport;
 
 import org.aksw.commons.util.algebra.ExprFilter;
 import org.aksw.commons.util.algebra.GenericFactorizer;
+import org.aksw.commons.util.obj.ObjectUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
-import org.apache.jena.ext.com.google.common.collect.Lists;
-import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarAlloc;
+import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
+import org.apache.jena.sparql.expr.E_LogicalNot;
 import org.apache.jena.sparql.expr.E_LogicalOr;
 import org.apache.jena.sparql.expr.E_NotOneOf;
 import org.apache.jena.sparql.expr.E_OneOf;
@@ -51,6 +54,8 @@ import org.apache.jena.sparql.graph.NodeTransformExpr;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 
 /**
@@ -69,6 +74,8 @@ public class ExprUtils {
      */
     // public static Expr makeNode(Node node) { }
 
+
+    /** Generic accessor for expressions. Used for common sub-expression elimination (CSE). */
     public static class ExprOps
         implements org.aksw.commons.util.algebra.ExprOps<Expr, Var>
     {
@@ -84,6 +91,24 @@ public class ExprUtils {
 
     public static ExprOps getExprOps() {
         return exprOps;
+    }
+
+    /** If the given expression is !bound(x) then returns x, null otherwise. */
+    public static Expr getIsNotBoundArg(Expr expr) {
+        Expr result = ObjectUtils.tryCastAs(E_LogicalNot.class, expr)
+            .flatMap(not -> ObjectUtils.tryCastAs(E_Bound.class, not.getArg()))
+//            .flatMap(bound -> ObjectUtils.tryCastAs(ExprVar.class, bound.getArg()))
+//            .map(exprVar -> exprVar.asVar())
+            .orElse(null);
+        return result;
+    }
+
+    /** Return the set of nodes mentioned in a path */
+    public static Set<Node> nodesMentioned(Expr expr) {
+        NodeTransformCollectNodes nodeTransform = new NodeTransformCollectNodes();
+        expr.applyNodeTransform(nodeTransform);
+        Set<Node> result = nodeTransform.getNodes();
+        return result;
     }
 
     public static class ContainsExprAggregator

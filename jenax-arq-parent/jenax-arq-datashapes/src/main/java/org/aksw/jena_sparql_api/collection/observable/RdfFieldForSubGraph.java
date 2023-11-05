@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.collection.observable;
 
 import org.aksw.commons.collection.observable.ObservableCollection;
-import org.aksw.jena_sparql_api.relation.DirectedFilteredTriplePattern;
 import org.aksw.jena_sparql_api.schema.PropertySchema;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Node;
 
 
@@ -17,14 +17,14 @@ public class RdfFieldForSubGraph
     implements RdfField
 {
     protected GraphChange graph;
-    protected DirectedFilteredTriplePattern dftp;
+    protected TripleFilter dftp;
 
     protected boolean isDeleted = false;
     protected boolean isIntensional = false;
 
 
 
-    public RdfFieldForSubGraph(GraphChange graph, DirectedFilteredTriplePattern dftp) {
+    public RdfFieldForSubGraph(GraphChange graph, TripleFilter dftp) {
         super();
         this.graph = graph;
         this.dftp = dftp;

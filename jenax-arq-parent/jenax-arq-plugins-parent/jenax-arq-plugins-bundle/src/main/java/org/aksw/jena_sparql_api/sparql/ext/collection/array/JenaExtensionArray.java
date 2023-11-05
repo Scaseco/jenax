@@ -4,20 +4,22 @@ import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionExplode;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.norse.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 
 public class JenaExtensionArray {
-    public static final String NS = "http://jsa.aksw.org/fn/array/";
+    public static final String NS = NorseTerms.NS + "array.";
+    public static final String LEGACY_NS = "http://jsa.aksw.org/fn/array/";
 
 
     public static void register() {
         loadDefs(FunctionRegistry.get());
 
         AggregateRegistry.register(
-                NS + "collect",
+                LEGACY_NS + "collect",
                 SparqlLibArrayAgg.wrap1(SparqlLibArrayAgg::aggNodeList));
     }
 
@@ -38,12 +40,12 @@ public class JenaExtensionArray {
 
         binder.registerAll(SparqlLibArrayFn.class);
 
-        PropertyFunctionRegistry.get().put(NS + "unnest", PF_CollectionUnnest.class);
-        PropertyFunctionRegistry.get().put(NS + "explode", PF_CollectionExplode.class);
+        PropertyFunctionRegistry.get().put(LEGACY_NS + "unnest", PF_CollectionUnnest.class);
+        PropertyFunctionRegistry.get().put(LEGACY_NS + "explode", PF_CollectionExplode.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {
-        pm.setNsPrefix("array", NS);
+        pm.setNsPrefix("array", LEGACY_NS);
     }
 
 }

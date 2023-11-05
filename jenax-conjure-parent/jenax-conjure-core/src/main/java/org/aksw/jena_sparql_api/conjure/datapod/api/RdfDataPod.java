@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.conjure.datapod.api;
 
-import org.aksw.jenax.connection.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;

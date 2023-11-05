@@ -2,12 +2,10 @@ package org.aksw.jena_sparql_api.data_query.util;
 
 import java.util.Arrays;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.arq.util.var.VarUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Exists;
@@ -15,6 +13,8 @@ import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_LogicalOr;
 import org.apache.jena.sparql.expr.E_Regex;
 import org.apache.jena.sparql.expr.E_Str;
+import org.apache.jena.sparql.expr.E_StrContains;
+import org.apache.jena.sparql.expr.E_StrLowerCase;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -43,7 +43,7 @@ public class KeywordSearchUtils {
      * @param relation
      * @returns
      */
-    public static Concept createConceptRegex(BinaryRelation relation, String searchString, boolean includeSubject) {
+    public static Concept createConceptRegex(Fragment2 relation, String searchString, boolean includeSubject) {
         Concept result = includeSubject
             ? createConceptRegexIncludeSubject(relation, searchString)
             : createConceptRegexLabelOnly(relation, searchString);
@@ -51,7 +51,7 @@ public class KeywordSearchUtils {
         return result;
     }
 
-    public static Concept createConceptRegexLabelOnly(BinaryRelation relation, String searchString) {
+    public static Concept createConceptRegexLabelOnly(Fragment2 relation, String searchString) {
 
         Concept result;
         if(searchString != null) {
@@ -71,7 +71,7 @@ public class KeywordSearchUtils {
 
 
 
-    public static Concept createConceptRegexIncludeSubject(BinaryRelation relation, String searchString) {
+    public static Concept createConceptRegexIncludeSubject(Fragment2 relation, String searchString) {
         Concept result;
 
         if(searchString != null) {
@@ -143,7 +143,7 @@ public class KeywordSearchUtils {
      * @param searchString
      * @return
      */
-    public static Concept createConceptExistsRegexIncludeSubject(BinaryRelation relation, String searchString) {
+    public static Concept createConceptExistsRegexIncludeSubject(Fragment2 relation, String searchString) {
         Concept result;
 
         if(searchString != null) {
@@ -176,7 +176,7 @@ public class KeywordSearchUtils {
      * ?s ?p ?o // relation
      * Filter(<bif:contains>(?o, 'searchString')
      */
-    public static Concept createConceptBifContains(BinaryRelation relation, String searchString) {
+    public static Concept createConceptBifContains(Fragment2 relation, String searchString) {
         Concept result;
 
         if(searchString != null) {
@@ -203,7 +203,7 @@ public class KeywordSearchUtils {
 
 
     /** Create a FILTER (EXISTS (...)) expression that filters a set of resources down to those matching the keyword */
-    public static Concept createConceptExistsRegex(BinaryRelation relation, String searchString, boolean includeSubject) {
+    public static Concept createConceptExistsRegex(Fragment2 relation, String searchString, boolean includeSubject) {
         Concept result = includeSubject
             ? createConceptExistsRegexIncludeSubject(relation, searchString)
             : createConceptExistsRegexLabelOnly(relation, searchString);
@@ -211,9 +211,7 @@ public class KeywordSearchUtils {
         return result;
     }
 
-
-    public static Concept createConceptExistsRegexLabelOnly(BinaryRelation relation, String searchString) {
-
+    public static Concept createConceptExistsRegexLabelOnly(Fragment2 relation, String searchString) {
         Concept result;
         if(searchString != null) {
             Element element = new ElementFilter(new E_Exists(ElementUtils.groupIfNeeded(
@@ -227,13 +225,32 @@ public class KeywordSearchUtils {
         } else {
             result = null;
         }
+        return result;
+    }
+
+    public static Concept createConceptExistsStrConstainsLabelOnly(Fragment2 relation, String searchString) {
+
+        String str = searchString.toLowerCase();
+        Concept result;
+        if(searchString != null) {
+            Element element = new ElementFilter(new E_Exists(ElementUtils.groupIfNeeded(
+                    relation.getElement(),
+                    new ElementFilter(new E_StrContains(
+                            new E_StrLowerCase(new E_Str(new ExprVar(relation.getTargetVar()))),
+                            NodeValue.makeString(str)
+                            )))));
+
+            result = new Concept(element, relation.getSourceVar());
+        } else {
+            result = null;
+        }
 
         return result;
     }
 
     public static void main(String[] args) {
-        System.out.println(KeywordSearchUtils.createConceptExistsRegexIncludeSubject(BinaryRelationImpl.create(RDFS.Nodes.label), "test"));
-        System.out.println(KeywordSearchUtils.createConceptExistsRegexLabelOnly(BinaryRelationImpl.create(RDFS.Nodes.label), "test"));
+        System.out.println(KeywordSearchUtils.createConceptExistsRegexIncludeSubject(Fragment2Impl.create(RDFS.Nodes.label), "test"));
+        System.out.println(KeywordSearchUtils.createConceptExistsRegexLabelOnly(Fragment2Impl.create(RDFS.Nodes.label), "test"));
     }
 
 }

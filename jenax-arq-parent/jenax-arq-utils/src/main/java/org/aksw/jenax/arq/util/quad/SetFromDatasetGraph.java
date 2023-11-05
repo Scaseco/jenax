@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;

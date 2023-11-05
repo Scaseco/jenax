@@ -11,8 +11,12 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
+# Reuse of shacl's prefix vocabulary
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
 r:prefixMapping
-  o:ns ("fn" fn:)
+  # sh:declare [ sh:prefix "fn" ; sh:namespace fn: ] # shacl apparently does not allow for the shorthand
+  sh:declare [ sh:prefix "fn" ; sh:namespace "http://ns.aksw.org/function/" ]
   .
 
 o:UserDefinedFunction
@@ -105,25 +109,25 @@ fn:typeError
 
 fn:encodeBnodeIri
   a o:UserDefinedFunction ;
-  o:prefixMapping r:prefixMapping ;
+  sh:prefixes r:prefixMapping ;
   o:simpleDefinition ("URI(CONCAT(fn:bnodePrefix(), fn:unparseBid(fn:bidOf(?x))))" "x") ;
   .
 
 fn:isBnodeIri
   a o:UserDefinedFunction ;
-  o:prefixMapping r:prefixMapping;
+  sh:prefixes r:prefixMapping;
   o:simpleDefinition ("ISURI(?x) && STRSTARTS(STR(?x), fn:bnodePrefix())" "x") ;
   .
 
 fn:decodeBnodeIri
   a o:UserDefinedFunction ;
-  o:prefixMapping r:prefixMapping ;
+  sh:prefixes r:prefixMapping ;
   o:simpleDefinition ("IF(fn:isBnodeIri(?x), fn:parseBid(STRAFTER(STR(?x), fn:bnodePrefix())), fn:typeError())" "x") ;
   .
 
 fn:forceBnodeIri
   a o:UserDefinedFunction ;
-  o:prefixMapping r:prefixMapping ;
+  sh:prefixes r:prefixMapping ;
   o:simpleDefinition ("IF(ISBLANK(?x), fn:encodeBnodeIri(?x), ?x)" "x") ;
   .
 

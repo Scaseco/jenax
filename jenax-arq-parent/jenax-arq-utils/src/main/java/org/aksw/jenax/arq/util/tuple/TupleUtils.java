@@ -3,7 +3,6 @@ package org.aksw.jenax.arq.util.tuple;
 import org.aksw.commons.tuple.bridge.TupleBridge;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
@@ -25,23 +24,17 @@ public class TupleUtils {
      */
     public static <T> Binding tupleToBinding(TupleBridge<T, Node> accessor, T pattern, T assignment) {
         BindingBuilder builder = BindingFactory.builder();
+        boolean isConsistent = true;
         for (int i = 0; i < accessor.getDimension(); ++i) {
             Node nodeOrVar = accessor.get(pattern, i);
             Node node = accessor.get(assignment, i);
-
-            if (NodeUtils.isNullOrAny(node)) {
-                // nothing to do
-            } else if (nodeOrVar.isVariable()) {
-                builder.add((Var)nodeOrVar, node);
-            } else {
-                if (!nodeOrVar.equals(node)) {
-                    builder = null;
-                    break;
-                }
+            isConsistent = NodeUtils.put(builder, nodeOrVar, node);
+            if (!isConsistent) {
+                break;
             }
         }
-
-        Binding result = builder == null ? null : builder.build();
+        Binding result = isConsistent ? builder.build() : null;
         return result;
     }
+
 }

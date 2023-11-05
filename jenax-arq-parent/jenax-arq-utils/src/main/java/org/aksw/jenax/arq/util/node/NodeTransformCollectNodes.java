@@ -14,7 +14,7 @@ import org.apache.jena.sparql.graph.NodeTransform;
 public class NodeTransformCollectNodes
     implements NodeTransform
 {
-    public Set<Node> nodes = new LinkedHashSet<Node>();
+    public Set<Node> nodes = new LinkedHashSet<>();
 
     @Override
     public Node apply(Node node) {

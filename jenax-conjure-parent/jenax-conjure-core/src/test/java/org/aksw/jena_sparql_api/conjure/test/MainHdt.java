@@ -10,7 +10,7 @@ import org.aksw.commons.util.ref.RefImpl;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.RdfDataPodHdtImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jenax.arq.util.triple.GraphUtils;
-import org.apache.jena.ext.com.google.common.base.Stopwatch;
+import com.google.common.base.Stopwatch;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;

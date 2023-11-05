@@ -11,7 +11,7 @@ import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDatasetImpl;
 import org.aksw.jenax.sparql.rx.op.ResultSetMappers;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
-import org.apache.jena.ext.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;

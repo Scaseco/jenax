@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.core;
 
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.impl.GraphBase;
 import org.apache.jena.query.Query;

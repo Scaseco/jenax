@@ -18,22 +18,22 @@ import java.util.stream.Stream;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.jena.jgrapht.PseudoGraphJenaModel;
 import org.aksw.jena_sparql_api.algebra.utils.AlgebraUtils;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraintBase;
 import org.aksw.jena_sparql_api.sparql_path.core.VocabPath;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.aksw.jenax.sparql.path.PathUtils;
 import org.aksw.jenax.sparql.path.SimplePath;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
@@ -114,11 +114,11 @@ public class ConceptPathFinderBidirectionalUtils {
      *
      * @return
      */
-    public static UnaryRelation createUnboundAwareTypeQuery(UnaryRelation concept) {
+    public static Fragment1 createUnboundAwareTypeQuery(Fragment1 concept) {
 //        Set<Var> vars = concept.getVarsMentioned();
 //        Var s = concept.getVar();
 
-        UnaryRelation result;
+        Fragment1 result;
         if(concept.isSubjectConcept()) {
             result = Concept.parse("?t { ?s a ?t }");
         } else {
@@ -128,7 +128,7 @@ public class ConceptPathFinderBidirectionalUtils {
                     .prependOn(Vars.s)
                     .with(concept)
                     //.project(fragment.getVars())
-                    .toUnaryRelation();
+                    .toFragment1();
         }
 
         return result;
@@ -142,8 +142,8 @@ public class ConceptPathFinderBidirectionalUtils {
 
     public static Flowable<SimplePath> findPathsCore(
             SparqlQueryConnection conn,
-            UnaryRelation sourceConcept,
-            UnaryRelation tmpTargetConcept,
+            Fragment1 sourceConcept,
+            Fragment1 tmpTargetConcept,
             Long nPaths,
             Long maxLength,
             org.apache.jena.graph.Graph baseDataSummary,
@@ -157,11 +157,11 @@ public class ConceptPathFinderBidirectionalUtils {
 
 
 
-        UnaryRelation targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
+        Fragment1 targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
 
         logger.debug("Distinguished target concept: " + targetConcept);
 
-        UnaryRelation typeConcept = createUnboundAwareTypeQuery(sourceConcept);
+        Fragment1 typeConcept = createUnboundAwareTypeQuery(sourceConcept);
 
         Query typeQuery = typeConcept.asQuery();
         logger.debug("Property query: " + typeQuery);
@@ -402,11 +402,11 @@ public class ConceptPathFinderBidirectionalUtils {
 
     public static Predicate<SimplePath> createSparqlPathValidator(
         SparqlQueryConnection conn,
-        UnaryRelation sourceConcept,
-        UnaryRelation tmpTargetConcept) {
+        Fragment1 sourceConcept,
+        Fragment1 tmpTargetConcept) {
 
 
-        UnaryRelation targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
+        Fragment1 targetConcept = ConceptUtils.makeDistinctFrom(tmpTargetConcept, sourceConcept);
 
 
         //List<Path> paths = callback.getCandidates();
@@ -519,15 +519,15 @@ public class ConceptPathFinderBidirectionalUtils {
     }
 
 
-    public static boolean validatePath(SparqlQueryConnection conn, UnaryRelation sourceConcept, UnaryRelation targetConcept, SimplePath path, Generator<Var> generator) {
+    public static boolean validatePath(SparqlQueryConnection conn, Fragment1 sourceConcept, Fragment1 targetConcept, SimplePath path, Generator<Var> generator) {
 
         List<Element> pathElements = SimplePath.pathToElements(path, sourceConcept.getVar(), targetConcept.getVar(), generator);
 
         Var sourceVar = sourceConcept.getVar();
         Var targetVar = pathElements.isEmpty() ? sourceVar : targetConcept.getVar();
 
-        UnaryRelation src = sourceConcept;
-        UnaryRelation tgt = targetConcept;
+        Fragment1 src = sourceConcept;
+        Fragment1 tgt = targetConcept;
         Var sourceJoinVar = sourceVar;
         Var targetJoinVar = targetVar;
 
@@ -546,7 +546,7 @@ public class ConceptPathFinderBidirectionalUtils {
 //        	System.out.println("DEBUG POINT Equal var");
 //        }
 
-        BinaryRelation pathRelation = new BinaryRelationImpl(ElementUtils.groupIfNeeded(pathElements), sourceVar, targetVar);
+        Fragment2 pathRelation = new Fragment2Impl(ElementUtils.groupIfNeeded(pathElements), sourceVar, targetVar);
         Element group = pathRelation
             .prependOn(sourceJoinVar).with(src)
             .joinOn(targetJoinVar).with(tgt)

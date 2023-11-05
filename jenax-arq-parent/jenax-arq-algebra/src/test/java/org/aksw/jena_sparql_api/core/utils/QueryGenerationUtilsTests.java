@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.core.Var;
@@ -15,9 +16,6 @@ import org.junit.Test;
 
 
 public class QueryGenerationUtilsTests {
-    public static final Var s = Var.alloc("s");
-    public static final Var p = Var.alloc("p");
-
 
     public static void eval(
             String inputStr,
@@ -49,7 +47,7 @@ public class QueryGenerationUtilsTests {
         eval(
             "SELECT ?s (COUNT(DISTINCT ?o) AS ?c) { ?s ?p ?o } GROUP BY ?s ?p",
             input -> {
-                Query actual = QueryGenerationUtils.project(input, Arrays.asList(s));
+                Query actual = QueryGenerationUtils.project(input, Arrays.asList(Vars.s));
                 return actual;
             },
             "SELECT ?s { ?s ?p ?o } GROUP BY ?s ?p"
@@ -61,7 +59,7 @@ public class QueryGenerationUtilsTests {
         eval(
             "SELECT ?s ?p (COUNT(DISTINCT ?o) AS ?c) { ?s ?p ?o } GROUP BY ?s ?p",
             input -> {
-                List<Var> vars = Arrays.asList(s);
+                List<Var> vars = Arrays.asList(Vars.s);
                 Query actual = QueryGenerationUtils.project(input, true, vars);
                 return actual;
             },
@@ -75,7 +73,7 @@ public class QueryGenerationUtilsTests {
         eval(
             "SELECT ?s ?p (COUNT(DISTINCT ?o) AS ?c) { ?s ?p ?o } GROUP BY ?s ?p",
             input -> {
-                List<Var> vars = Arrays.asList(s, p, Var.alloc("c"));
+                List<Var> vars = Arrays.asList(Vars.s, Vars.p, Var.alloc("c"));
                 Query actual = QueryGenerationUtils.project(input, true, vars);
                 return actual;
             },
@@ -88,7 +86,7 @@ public class QueryGenerationUtilsTests {
         eval(
             "SELECT ?s ?p (COUNT(DISTINCT ?o) AS ?c) { ?s ?p ?o } GROUP BY ?s ?p",
             input -> {
-                List<Var> vars = Arrays.asList(s, p);
+                List<Var> vars = Arrays.asList(Vars.s, Vars.p);
                 Query actual = QueryGenerationUtils.project(input, true, vars);
                 return actual;
             },
@@ -188,7 +186,8 @@ public class QueryGenerationUtilsTests {
                  Entry<Var, Query> count = QueryGenerationUtils.createQueryCountCore(input, null, null);
                  return count.getValue();
              },
-             "SELECT (COUNT(DISTINCT ?s) AS ?c_1) { ?s ?p ?o }"
+             "SELECT (COUNT(*) AS ?c_1) { SELECT DISTINCT ?s { ?s ?p ?o } }"
+             // "SELECT (COUNT(DISTINCT ?s) AS ?c_1) { ?s ?p ?o }"
          );
     }
 

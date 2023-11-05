@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 import org.aksw.commons.beans.model.PropertyOps;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.mapper.impl.type.EntityFragment;
 import org.aksw.jena_sparql_api.mapper.impl.type.PathFragment;
 import org.aksw.jena_sparql_api.mapper.impl.type.PlaceholderInfo;
@@ -19,7 +17,9 @@ import org.aksw.jena_sparql_api.mapper.impl.type.ResourceFragment;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
@@ -190,15 +190,15 @@ public class RdfMapperPropertyMulti
         boolean isMatchingProperty = propertyOps.getName().equals(propertyName);
 
         if(isMatchingProperty) {
-            BinaryRelation relation;
+            Fragment2 relation;
             if(typeConverter == null) {
-                relation = RelationUtils.createRelation(predicate.asNode(), false);
+                relation = FragmentUtils.createRelation(predicate.asNode(), false);
             } else {
                 ElementGroup group = new ElementGroup();
                 group.addElement(ElementUtils.createElement(new Triple(Vars.s, predicate.asNode(), Vars.x)));
                 Expr expr = typeConverter.toJava(new ExprVar(Vars.x));
                 group.addElement(new ElementBind(Vars.o, expr));
-                relation = new BinaryRelationImpl(group, Vars.s, Vars.o);
+                relation = new Fragment2Impl(group, Vars.s, Vars.o);
             }
 
 

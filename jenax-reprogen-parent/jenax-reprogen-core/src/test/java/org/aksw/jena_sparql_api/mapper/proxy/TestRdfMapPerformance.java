@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.commons.util.benchmark.BenchmarkUtils;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
@@ -54,20 +55,20 @@ public class TestRdfMapPerformance {
             Map<Integer, Integer> javaMap = new HashMap<>();
             {
                 Random rand = new Random(0);
-                System.err.println("JavaMap Ops/Sec (by time limit): " + BenchmarkUtils.benchmarkOpsPerSecByTimeLimit(() -> javaMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
+                System.err.println("JavaMap Ops/Sec (by time limit): " + BenchmarkUtils.opsPerSecByTimeLimit(() -> javaMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
             }
 
             Map<Integer, Integer> rdfMap = ModelFactory.createDefaultModel().createResource().as(RMap.class).getMap();
             {
                 Random rand = new Random(0);
-                System.err.println("RdfMap Ops/Sec (by time limit): " + BenchmarkUtils.benchmarkOpsPerSecByTimeLimit(() -> rdfMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
+                System.err.println("RdfMap Ops/Sec (by time limit): " + BenchmarkUtils.opsPerSecByTimeLimit(() -> rdfMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
             }
 
             Model model = ModelFactory.createDefaultModel();
             Resource resource = model.createResource();
             {
                 Random rand = new Random(0);
-                System.err.println("PlainModel Ops/Sec (by time limit): " + BenchmarkUtils.benchmarkOpsPerSecByTimeLimit(() -> {
+                System.err.println("PlainModel Ops/Sec (by time limit): " + BenchmarkUtils.opsPerSecByTimeLimit(() -> {
                     RDFNode k = ResourceFactory.createTypedLiteral(rand.nextInt(MAX_KEY));
                     Set<Resource> nodes = model.listSubjectsWithProperty(RDFS.label, k)
                         .filterKeep(s -> !model.listSubjectsWithProperty(RDFS.seeAlso, s).toList().isEmpty()).toSet();
@@ -92,13 +93,13 @@ public class TestRdfMapPerformance {
             Map<Integer, Integer> javaMap = new HashMap<>();
             {
                 Random rand = new Random(0);
-                System.err.println("JavaMap Ops/Sec (by iterations): " + BenchmarkUtils.benchmarkOpsPerSecByIterations(numIterations, () -> javaMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
+                System.err.println("JavaMap Ops/Sec (by iterations): " + BenchmarkUtils.opsPerSecByIterations(numIterations, () -> javaMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
             }
 
             Map<Integer, Integer> rdfMap = ModelFactory.createDefaultModel().createResource().as(RMap.class).getMap();
             {
                 Random rand = new Random(0);
-                System.err.println("RdfMap Ops/Sec (by iterations): " + BenchmarkUtils.benchmarkOpsPerSecByIterations(numIterations, () -> rdfMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
+                System.err.println("RdfMap Ops/Sec (by iterations): " + BenchmarkUtils.opsPerSecByIterations(numIterations, () -> rdfMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
             }
 
             Assert.assertEquals(javaMap, rdfMap);

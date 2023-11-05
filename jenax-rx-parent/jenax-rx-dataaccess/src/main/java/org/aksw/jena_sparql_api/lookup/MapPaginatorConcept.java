@@ -3,9 +3,11 @@ package org.aksw.jena_sparql_api.lookup;
 import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.MapPaginator;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -31,9 +33,9 @@ public class MapPaginatorConcept
     implements MapPaginator<Node, Node>
 {
     protected QueryExecutionFactory qef;
-    protected Concept concept;
+    protected Fragment1 concept;
 
-    public MapPaginatorConcept(QueryExecutionFactory qef, Concept concept) {
+    public MapPaginatorConcept(QueryExecutionFactory qef, Fragment1 concept) {
         this.qef = qef;
         this.concept = concept;
     }
@@ -69,7 +71,8 @@ public class MapPaginatorConcept
         return result;
     }
 
-    public static Query createQueryCount(Concept concept, Long itemLimit, Long rowLimit, Var resultVar) {
+    @Deprecated // Use QueryGeneration utils
+    public static Query createQueryCount(Fragment1 concept, Long itemLimit, Long rowLimit, Var resultVar) {
         Query subQuery = concept.asQuery();
 
         if(rowLimit != null) {
@@ -100,26 +103,30 @@ public class MapPaginatorConcept
      */
     @Override
     public Single<Range<Long>> fetchCount(Long itemLimit, Long rowLimit) {
-        Var c = Var.alloc("_c_");
         Long limit = itemLimit == null ? null : itemLimit + 1;
-        Query query = createQueryCount(concept, limit, rowLimit, c);
-
-        //if(true) { return null; }
+        Query baseQuery = concept.toQuery();
+        baseQuery.setDistinct(true);
+        Entry<Var, Query> e = QueryGenerationUtils.createQueryCount(baseQuery, limit, rowLimit);
+        Var countVar = e.getKey();
+        Query query = e.getValue();
 
         Single<Range<Long>> result = SparqlRx.execSelectRaw(() -> qef.createQueryExecution(query))
-            .map(b -> b.get(c))
-            .map(countNode -> ((Number)countNode.getLiteralValue()).longValue())
-            .map(count -> {
+            .map(b -> {
+                Node countNode =  b.get(countVar);
+                Number n = NodeUtils.getNumber(countNode);
+                long count = n.longValue();
                 boolean hasMoreItems = false;
                 if(itemLimit != null && count > itemLimit) {
                     count = itemLimit;
                     hasMoreItems = true;
                 }
-
                 Range<Long> r = hasMoreItems ? Range.atLeast(itemLimit) : Range.singleton(count);
                 return r;
             })
-            .single(null);
+            .singleOrError();
+        // Note: Counting should always return exactly one result
+        // If it doesn't it might be either to a bug in the triple store or maybe the jena
+        // query doesn't have the count aggregator registered properly at the query
 
         return result;
     }

@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.aksw.commons.io.util.FileUtils;
 import org.aksw.commons.io.util.PathUtils;
-import org.aksw.commons.path.core.PathOpsStr;
+import org.aksw.commons.path.core.PathStr;
 import org.aksw.commons.rx.op.RxOps;
 import org.aksw.commons.txn.api.Txn;
 import org.aksw.commons.txn.api.TxnMgr;
@@ -176,7 +176,7 @@ public class DatasetGraphFromTxnMgr
     public static org.aksw.commons.path.core.Path<String> getStoreBaseSegments(TxnMgr txnMgr) {
         String[] segments = PathUtils.getPathSegments(
                 txnMgr.getRootPath().relativize(txnMgr.getResRepo().getRootPath()));
-        org.aksw.commons.path.core.Path<String> result = PathOpsStr.newRelativePath(segments);
+        org.aksw.commons.path.core.Path<String> result = PathStr.newRelativePath(segments);
 
         return result;
     }
@@ -660,7 +660,7 @@ public class DatasetGraphFromTxnMgr
         String[] keyRaw = PathUtils.getPathSegments(
                 txnMgr.getRootPath().relativize(path));
 
-        org.aksw.commons.path.core.Path<String> key = PathOpsStr.newRelativePath(keyRaw);
+        org.aksw.commons.path.core.Path<String> key = PathStr.newRelativePath(keyRaw);
         return key;
     }
 

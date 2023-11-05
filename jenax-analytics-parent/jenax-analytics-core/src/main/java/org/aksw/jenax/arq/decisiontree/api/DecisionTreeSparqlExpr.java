@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.decisiontree.api;
 
 import java.util.Collection;
 
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;

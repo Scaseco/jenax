@@ -34,11 +34,11 @@ public class WebAppInitializerSparqlServiceUtils {
             ServletRegistration.Dynamic servlet = servletContext.addServlet("sparqlServiceServlet", new ServletContainer());
             //servlet.setInitParameter("contextConfigLocation", "workaround-for-JERSEY-2038");
             servlet.setInitParameter(ServerProperties.PROVIDER_CLASSNAMES, String.join(",",
-                    ServletSparqlServiceImpl.class.getCanonicalName()
-                    ,QueryExceptionProvider.class.getCanonicalName()
-                    , UnwrapRuntimeExceptionProvider.class.getCanonicalName()
-                    ,UncaughtExceptionProvider.class.getCanonicalName()
-                    ));
+                    ServletSparqlServiceImpl.class.getCanonicalName(),
+                    QueryExceptionProvider.class.getCanonicalName(),
+                    UnwrapRuntimeExceptionProvider.class.getCanonicalName(),
+                    UncaughtExceptionProvider.class.getCanonicalName()
+            ));
 //            servlet.setInitParameter(ServletProperties.FILTER_FORWARD_ON_404, "true");
 //            servlet.setInitParameter(ServletProperties.FILTER_STATIC_CONTENT_REGEX, ".*(html|css|js)");
             servlet.addMapping("/sparql/*");
@@ -46,6 +46,7 @@ public class WebAppInitializerSparqlServiceUtils {
             servlet.setLoadOnStartup(1);
         }
 
+        // Dispatcher servlet is used to serve the html/js/css resources
         {
             AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
 //            dispatcherContext.register(WebMvcConfigSnorql.class);

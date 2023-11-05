@@ -1,14 +1,13 @@
 package org.aksw.jenax.arq.util.lang;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.jena.atlas.web.AcceptList;
 import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.atlas.web.MediaType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
@@ -18,6 +17,13 @@ import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
 import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
 import org.apache.jena.sys.JenaSystem;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
+import static org.apache.jena.atlas.iterator.Iter.findFirst;
+
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
  *
@@ -26,7 +32,37 @@ import org.apache.jena.sys.JenaSystem;
  */
 public class RDFLanguagesEx {
 
-    static { JenaSystem.init(); }
+    // TODO Make this configurable via an RDF dataset?
+    private static Map<Lang, Lang> subLangMap = new HashMap<>();
+
+    static {
+        JenaSystem.init();
+        subLangMap.put(Lang.NTRIPLES, Lang.TURTLE);
+        subLangMap.put(Lang.TURTLE, Lang.TRIG);
+        subLangMap.put(Lang.NQUADS, Lang.TRIG);
+    }
+
+    public static Map<Lang, Lang> getSubLangMap() {
+        return subLangMap;
+    }
+
+    public static Stream<Lang> streamSubLangs(Lang lang) {
+        Map<Lang, Lang> subLangMap = getSubLangMap();
+        Multimap<Lang, Lang> mm = Multimaps.invertFrom(Multimaps.forMap(subLangMap), ArrayListMultimap.create());
+        Iterable<Lang> it = Traverser.forTree(mm::get).breadthFirst(lang);
+        return Streams.stream(it);
+    }
+
+//  TODO Turn this into a test case
+//    public static void main(String[] args) {
+//        System.out.println(streamSubLangs(Lang.RDFXML).collect(Collectors.toSet()));
+//    }
+
+    /** Return a set of languages which includes all the input ones and in addition */
+    public static Set<Lang> expandWithSubLangs(Iterable<Lang> langs) {
+        Set<Lang> result = Streams.stream(langs).flatMap(l -> Stream.concat(Stream.of(l), streamSubLangs(l))).collect(Collectors.toCollection(LinkedHashSet::new));
+        return result;
+    }
 
     // public static Collection<Lang> basicQuadLangs = Arrays.asList(Lang.TRIG, Lang.NQUADS)
 
@@ -145,6 +181,27 @@ public class RDFLanguagesEx {
         return result;
     }
 
+    public static List<String> getPrimaryContentTypes(Iterable<Lang> langs) {
+        List<String> cts = new ArrayList<>();
+        for (Lang l:
+        langs) {
+            ContentType contentType = l.getContentType();
+            if (contentType != null) {
+                cts.add(contentType.getContentTypeStr());
+            }
+        }
+        return cts;
+    }
+
+    public static Set<String> getAllContentTypes(Iterable<Lang> langs) {
+        Set<String> result = new LinkedHashSet<>();
+        for (Lang l:
+        langs) {
+            result.addAll(getAllContentTypes(l));
+        }
+        return result;
+    }
+
 
     /**
      * Simple helper to check whether any of a lang's labels match a given one.
@@ -209,6 +266,69 @@ public class RDFLanguagesEx {
                 .orElseThrow(() -> new RuntimeException("No lang found for label " + label));
 
         return result;
+    }
+
+    public static Lang findLangMatchingAcceptList(AcceptList acceptableContentTypes, List<Lang> resultSetFormats, Lang fallback) {
+        MediaType rsMatch = AcceptList.match(acceptableContentTypes, AcceptList.create(
+                getPrimaryContentTypes(resultSetFormats)
+                .toArray(String[]::new)));
+        if (rsMatch == null) {
+            rsMatch = AcceptList.match(acceptableContentTypes, AcceptList.create(
+                    getAllContentTypes(resultSetFormats)
+                    .toArray(String[]::new)));
+        }
+        if (rsMatch != null) {
+            MediaType finalRsMatch = rsMatch;
+            return findFirst(resultSetFormats.iterator(), p -> matchesContentType(p,
+                    finalRsMatch.getContentTypeStr())).orElse(fallback);
+        }
+        return fallback;
+    }
+
+
+    public static Collection<String> listOutFormats() {
+        LinkedList<String> list = new LinkedList<>();
+        RDFLanguages.getRegisteredLanguages().stream().sorted(Comparator.comparing(Lang::getName)).forEach(l -> {
+            list.add(listOutFormatsAddCts(l.getName(), l));
+        });
+        RDFWriterRegistry.registered().stream().sorted(Comparator.comparing(RDFFormat::toString)).forEach(f -> {
+            list.add(listOutFormatsAddCts(f.toString(), f.getLang()));
+        });
+
+        return list;
+    }
+
+    private static String listOutFormatsAddCts(String mainName, Lang l) {
+        StringBuilder s = new StringBuilder();
+        s.append(mainName);
+        if (l != null) {
+            ContentType primaryCt = l.getContentType();
+            List<String> cts = new LinkedList<>();
+            List<String> names = new LinkedList<>();
+            String name = l.getName();
+            if (!name.equalsIgnoreCase(mainName)) {
+                names.add(name);
+            }
+            l.getAltNames().stream().filter(Objects::nonNull)
+                    .filter(Predicate.not(mainName::equalsIgnoreCase))
+                    .filter(e -> names.stream().noneMatch(e::equalsIgnoreCase))
+                    .forEach(names::add);
+
+            if (primaryCt != null) {
+                cts.add(primaryCt.getContentTypeStr());
+            }
+            l.getAltContentTypes().stream().filter(Objects::nonNull)
+                    .filter(Predicate.not(cts::contains)).forEach(cts::add);
+            if (!names.isEmpty() || !cts.isEmpty()) {
+                s.append('\t');
+                s.append(String.join(",", names));
+            }
+            if (!cts.isEmpty()) {
+                s.append('\t');
+                s.append(String.join(",", cts));
+            }
+        }
+        return s.toString();
     }
 
 

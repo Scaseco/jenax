@@ -10,6 +10,7 @@ import org.apache.jena.sparql.function.FunctionEnv;
  *
  * Primarily used to bridge jena and aksw aggregators.
  */
+@Deprecated // No longer needed as our Aggregator framework now natively supports context objects such as FunctionEnv
 public class BindingEnv {
     protected Binding binding;
     protected FunctionEnv functionEnv;

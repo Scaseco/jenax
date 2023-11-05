@@ -6,14 +6,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.E_Coalesce;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
 import org.apache.jena.sparql.expr.E_LogicalNot;
@@ -24,7 +25,64 @@ import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 
+import com.github.jsonldjava.shaded.com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
+import com.google.common.graph.Traverser;
+
 public class DnfUtils {
+
+    /**
+     * Similar to OpVars.fixedVars - but analyzes a boolean expression.
+     * Returns the set of variables that must be bound for the expression to be satisfiable.
+     * Internally converts the expression to a CNF and checks for which variables are required in all clauses.
+     * A variable is not required if it is used in
+     * - !bound(?x)
+     * - coalesce(?x)
+     * - does not appear in a clause at all.
+     */
+    public static Set<Var> fixedVars(Expr expr) {
+        Set<Set<Expr>> clauses = DnfUtils.toSetDnf(expr);
+        Set<Var> fixedVars = null;
+        for (Set<Expr> clause : clauses) {
+            Set<Var> fixedVarsOfClause = fixedVarsClause(clause);
+            if (fixedVars == null) {
+                fixedVars = fixedVarsOfClause;
+            } else {
+                fixedVars.retainAll(fixedVarsOfClause);
+            }
+        }
+        if (fixedVars == null) {
+            fixedVars = Collections.emptySet();
+        }
+        return fixedVars;
+    }
+
+    /**
+     * Return a set of fixed variables in the given clause.
+     * Best effort approach: If any expression in the clause contains !bound or coalesce then all mentioned variables
+     * are considered non-fixed.
+     * Any variable x appearing in coalesce(x) or !bound(x) is <b>not</b> considered fixed.
+     * Assumes the input is a clause of a DNF.
+     */
+    public static Set<Var> fixedVarsClause(Iterable<? extends Expr> clause) {
+        Set<Var> fixedVars = new LinkedHashSet<>();
+        Set<Var> nonFixedVars = new LinkedHashSet<>();
+        for (Expr expr : clause) {
+            Set<Var> varsMentioned = expr.getVarsMentioned();
+            boolean containsCoalesceOrNotBound =
+                Streams.stream(Traverser.forTree(ExprUtils::getSubExprs).depthFirstPreOrder(expr))
+                    .anyMatch(x -> x instanceof E_Coalesce || ExprUtils.getIsNotBoundArg(x) != null);
+
+            if (containsCoalesceOrNotBound) {
+                nonFixedVars.addAll(varsMentioned);
+            } else {
+                fixedVars.addAll(varsMentioned);
+            }
+        }
+        fixedVars.removeAll(nonFixedVars);
+        return fixedVars;
+    }
 
 
     public static Expr toExpr(Iterable<? extends Iterable<Expr>> ors) {

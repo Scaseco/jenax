@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.shape.algebra.op;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 public class OpSparqlConcept
     extends Op0

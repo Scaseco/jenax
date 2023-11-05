@@ -261,4 +261,9 @@ public class FacetConstraintImpl
         RDFDataMgr.write(System.out, m, RDFFormat.TURTLE_FLAT);
 
     }
+
+    @Override
+    public void unlink() {
+        // Anything to do?
+    }
 }

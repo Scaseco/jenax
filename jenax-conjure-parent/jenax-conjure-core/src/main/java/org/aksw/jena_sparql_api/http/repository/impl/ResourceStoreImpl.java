@@ -27,7 +27,7 @@ import org.aksw.jena_sparql_api.http.repository.api.RdfHttpResourceFile;
 import org.aksw.jena_sparql_api.http.repository.api.ResourceStore;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;

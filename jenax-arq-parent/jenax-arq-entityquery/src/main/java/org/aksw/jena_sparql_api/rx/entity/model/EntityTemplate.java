@@ -20,11 +20,8 @@ import org.apache.jena.sparql.syntax.Template;
  * - a set of nodes can be marked as 'entity nodes' which are starting points for traversing the template.
  * - every blank node can be mapped to a tuple of expressions whose evaluation over a binding
  *   yields an identity of the blank node.
- * 
- * 
- * 
- * @author raven
  *
+ * @author raven
  */
 public interface EntityTemplate {
 

@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.shape.syntax;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 
 public class ElementSparqlConcept
     extends Element0

@@ -1,7 +1,7 @@
 package org.aksw.jenax.arq.engine.quad;
 
-import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactory;
-import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
+import org.aksw.jenax.dataaccess.sparql.factory.dataset.connection.DatasetRDFConnectionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.dataset.connection.DatasetRDFConnectionFactoryBuilder;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.util.Context;

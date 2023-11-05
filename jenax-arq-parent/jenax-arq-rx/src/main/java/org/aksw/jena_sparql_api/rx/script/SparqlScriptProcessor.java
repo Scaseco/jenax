@@ -16,6 +16,7 @@ import org.aksw.jenax.stmt.util.SparqlStmtIterator;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -142,6 +143,9 @@ public class SparqlScriptProcessor {
     public static final String cwdKey = "cwd=";
     public static final String cwdResetCwd = "cwd";
 
+    public static final String graphKey = "graph=";
+    public static final String graphResetKey = "graph";
+
     private static final Logger logger = LoggerFactory.getLogger(SparqlScriptProcessor.class);
 
     protected Function<? super Prologue, ? extends SparqlStmtParser> sparqlParserFactory; //  SparqlStmtParser sparqlParser ;
@@ -152,6 +156,9 @@ public class SparqlScriptProcessor {
      */
     protected PrefixMapping globalPrefixes;
     protected Path cwd = null;
+
+    /** Graph name in which to insert triples */
+    protected Node targetGraph = null;
     protected List<Entry<SparqlStmt, Provenance>> sparqlStmts = new ArrayList<>();
     protected List<Function<? super SparqlStmt, ? extends SparqlStmt>> postTransformers = new ArrayList<>();
 
@@ -283,13 +290,22 @@ public class SparqlScriptProcessor {
             logger.info("Unpinned working directory");
 
             cwd = null;
+        } else if (filename.startsWith(graphKey)) {
+            String targetGraphStr = filename.substring(graphKey.length()).trim();
+            targetGraph = targetGraphStr == null || targetGraphStr.isBlank()
+                    ? null
+                    : NodeFactory.createURI(targetGraphStr);
+            logger.info("Pinned target graph to " + targetGraph);
+        } else if (filename.equals(graphResetKey)) {
+            targetGraph = null;
+            logger.info("Unpinned target graph");
         } else {
 
             boolean isProcessed = false;
             Collection<Entry<Lang, Throwable>> rdfErrorCollector = new ArrayList<>();
             loadAsRdf: try {
                 Provenance prov = new Provenance(filename);
-                UpdateRequest ur = tryLoadFileAsUpdateRequest(filename, globalPrefixes, rdfErrorCollector);
+                UpdateRequest ur = tryLoadFileAsUpdateRequest(filename, targetGraph, globalPrefixes, rdfErrorCollector);
 
                 if (ur == null)
                     break loadAsRdf;
@@ -416,7 +432,7 @@ public class SparqlScriptProcessor {
     }
 
 
-    public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
+    public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, Node targetGraph, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
         UpdateRequest result = null;
 
         // TODO We should map to filename through the stream manager
@@ -478,7 +494,7 @@ public class SparqlScriptProcessor {
                 }
 
                 // String fileUrl = "file://" + Paths.get(filename).toAbsolutePath().normalize().toString();
-                result = new UpdateRequest(new UpdateLoad(filename, (Node)null));
+                result = new UpdateRequest(new UpdateLoad(filename, targetGraph));
             }
         }
         return result;

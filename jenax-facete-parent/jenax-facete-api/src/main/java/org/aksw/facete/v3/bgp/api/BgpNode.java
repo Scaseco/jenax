@@ -11,10 +11,10 @@ import java.util.Optional;
 
 import org.aksw.facete.v3.api.Direction;
 import org.aksw.facete.v3.api.traversal.TraversalNode;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.aksw.jenax.sparql.path.PathUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -92,12 +92,12 @@ public interface BgpNode
 
 
 
-    public static BinaryRelation getReachingRelation(BgpNode state) {
-        BinaryRelation result;
+    public static Fragment2 getReachingRelation(BgpNode state) {
+        Fragment2 result;
 
         BgpMultiNode parent = state.parent();
         if(parent == null) {
-            result = new BinaryRelationImpl(new ElementGroup(), Vars.s, Vars.o);
+            result = new Fragment2Impl(new ElementGroup(), Vars.s, Vars.o);
         } else {
 
 //			boolean isReverse = false;
@@ -125,13 +125,13 @@ public interface BgpNode
         return result;
     }
 
-    public static BinaryRelation create(Node node, Direction dir) {
+    public static Fragment2 create(Node node, Direction dir) {
         //ElementUtils.createElement(triple)
         Triple t = BACKWARD.equals(dir)
                 ? new Triple(Vars.o, node, Vars.s)
                 : new Triple(Vars.s, node, Vars.o);
 
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElement(t), Vars.s, Vars.o);
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(t), Vars.s, Vars.o);
         return result;
     }
 

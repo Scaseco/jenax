@@ -7,15 +7,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.CompletionCallback;
 import javax.ws.rs.container.ConnectionCallback;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
@@ -23,7 +23,8 @@ import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperTxn;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
@@ -31,11 +32,19 @@ import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
+import org.apache.jena.atlas.web.AcceptList;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFWriter;
+import org.apache.jena.riot.RDFWriterBuilder;
+import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.riot.resultset.ResultSetWriter;
 import org.apache.jena.riot.resultset.ResultSetWriterFactory;
@@ -43,7 +52,10 @@ import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.riot.system.StreamRDFWriter;
-import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,195 +79,63 @@ public abstract class SparqlEndpointBase {
 
     protected abstract RDFConnection getConnection();
 
+    protected void executeAsync(AsyncResponse asyncResponse, String acceptHeaders, String queryString, String updateString) {
+        AcceptList acceptList = new AcceptList(acceptHeaders);
+        SparqlResultFmts fmts = SparqlResultFmtsImpl.forContentTypes(acceptList);
+        processStmtAsync(asyncResponse, queryString, updateString, fmts);
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
+    //@Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
     public void executeWildcardPost(
             @Suspended AsyncResponse asyncResponse,
+            @Context HttpHeaders headers,
             @FormParam("query") String queryString,
             @FormParam("update") String updateStr) {
-        processStmtAsync(asyncResponse, queryString, updateStr, SparqlResultFmtsImpl.DEFAULT);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateStr);
     }
+
 
     @POST
     @Consumes(WebContent.contentTypeSPARQLQuery)
-    @Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
+    //@Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
     public void executeQueryWildcardPostDirect(
             @Suspended AsyncResponse asyncResponse,
+            @Context HttpHeaders headers,
             String queryString) {
-        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.DEFAULT);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, null);
     }
 
     @GET
-    @Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
+//    @Produces({MediaType.TEXT_PLAIN, WebContent.contentTypeNTriples, WebContent.contentTypeTurtle, WebContent.contentTypeTriG})
     public void executeQueryText(
             @Suspended AsyncResponse asyncResponse,
+            @Context HttpHeaders headers,
             @QueryParam("query") String queryString,
             @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.DEFAULT);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateString);
     }
-
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
-    public void executeQueryJson(
-            @Suspended AsyncResponse asyncResponse,
-            @QueryParam("query") String queryString,
-            @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.JSON);
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
-    public void executeQueryJsonPost(
-            @Suspended AsyncResponse asyncResponse,
-            @FormParam("query") String queryString,
-            @FormParam("update") String updateStr) {
-        if(queryString == null) {
-            queryString = updateStr;
-        }
-        processStmtAsync(asyncResponse, queryString, updateStr, SparqlResultFmtsImpl.JSON);
-    }
-
-    @POST
-    @Consumes(WebContent.contentTypeSPARQLQuery)
-    @Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
-    public void executeQueryJsonPostDirect(
-            @Suspended AsyncResponse asyncResponse,
-            String queryString) {
-        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.JSON);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_XML)
-    public void executeQueryXml(
-            @Suspended AsyncResponse asyncResponse,
-            @QueryParam("query") String queryString,
-            @QueryParam("update") String updateString) {
-        if(queryString == null && updateString == null) {
-            StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-            asyncResponse.resume(Response.status(Status.BAD_REQUEST).entity(so).build()); // TODO: Return some error HTTP code
-        } else {
-            processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-        }
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_XML)
-    public void executeQueryXmlPostAsync(
-            @Suspended AsyncResponse asyncResponse,
-            @FormParam("query") String queryString,
-            @FormParam("update") String updateString) {
-
-        if(queryString == null) {
-            queryString = updateString;
-        }
-
-        if(queryString == null) {
-            StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-            asyncResponse.resume(Response.ok(so).build()); // TODO: Return some error HTTP code
-        } else {
-            processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-        }
-    }
-
-    @GET
-    @Produces("application/rdf+xml") //HttpParams.contentTypeRDFXML)
-    public void executeQueryRdfXml(
-            @Suspended AsyncResponse asyncResponse,
-            @QueryParam("query") String queryString,
-            @QueryParam("update") String updateString
-            ) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces("application/rdf+xml")// HttpParams.contentTypeRDFXML)
-    public void executeQueryRdfXmlPost(
-            @Suspended AsyncResponse asyncResponse,
-            @FormParam("query") String queryString,
-            @FormParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-    }
-
-    @POST
-    @Consumes(WebContent.contentTypeSPARQLQuery)
-    @Produces("application/rdf+xml")
-    public void executeQueryRdfXmlPostDirect(
-            @Suspended AsyncResponse asyncResponse,
-            String queryString) {
-        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.XML);
-    }
-
-
-    @GET
-    @Produces(WebContent.contentTypeResultsXML)
-    public void executeQueryResultSetXml(
-            @Suspended AsyncResponse asyncResponse,
-            @QueryParam("query") String queryString,
-            @QueryParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(WebContent.contentTypeResultsXML)
-    public void executeQueryResultSetXmlPost(
-            @Suspended AsyncResponse asyncResponse,
-            @FormParam("query") String queryString,
-            @FormParam("update") String updateString) {
-        processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
-    }
-
-    @POST
-    @Consumes(WebContent.contentTypeSPARQLQuery)
-    @Produces(WebContent.contentTypeResultsXML)
-    public void executeQueryResultSetXmlPostDirect(
-            @Suspended AsyncResponse asyncResponse,
-            String queryString) {
-        processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.XML);
-    }
-
-
-
-    /*
-     * UPDATE
-     */
-
-
-//    @GET
-//    @Consumes(WebContent.contentTypeSPARQLUpdate)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public void executeUpdateGet(
-//            @Suspended AsyncResponse asyncResponse,
-//            @QueryParam("update") String updateString) {
-//        processStmtAsync(asyncResponse, null, updateString, null);
-//    }
-
-
 
     @POST
     @Consumes(WebContent.contentTypeSPARQLUpdate)
-    @Produces(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
     public void executeUpdatePost(
             @Suspended AsyncResponse asyncResponse,
+            @Context HttpHeaders headers,
             String updateString) {
-        processStmtAsync(asyncResponse, null, updateString, null);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), null, updateString);
     }
 
 
 
     public void processStmtAsync(AsyncResponse response, String queryStr, String updateStr, SparqlResultFmts format) {
         if(queryStr == null && updateStr == null) {
-            throw new RuntimeException("No query/update statement provided");
+            throw new QueryException("No query/update statement provided");
         }
 
-        if (queryStr != null && updateStr != null) {
-            throw new RuntimeException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
+        if (queryStr != null && updateStr != null && !updateStr.equals(queryStr)) {
+            throw new QueryException(String.format("Both 'query' and 'update' statement strings provided in a single request; query=%s update=%s", queryStr, updateStr));
         }
 
         String stmtStr = queryStr != null ? queryStr : updateStr;
@@ -293,13 +173,12 @@ public abstract class SparqlEndpointBase {
                 e.addSuppressed(e2);
             }
             response.resume(e);
-
             throw new RuntimeException(e);
-            // return ;
         }
 
         // Wrap the query execution such that close() also closes the connection
-        QueryExecution qe = new QueryExecutionDecoratorBase<QueryExecution>(tmp) {
+        // Note: QueryExecutionWrapperTxn.wrap is not suitable because not every connection supports it
+        QueryExecution qe = new QueryExecutionWrapperBase<QueryExecution>(tmp) {
             @Override
             public void close() {
                 try {
@@ -311,35 +190,15 @@ public abstract class SparqlEndpointBase {
             }
         };
 
-//        asyncResponse
-//        .register(new CompletionCallback() {
-//
-//            @Override
-//            public void onComplete(Throwable arg0) {
-//                System.out.println("COMPLETE");
-//            }
-//        });
-
-        response
-        .register(new ConnectionCallback() {
+        response.register(new ConnectionCallback() {
             @Override
             public void onDisconnect(AsyncResponse disconnect) {
                 logger.debug("Client disconnected");
-
                 qe.abort();
-
-//                if(true) {
-//                disconnect.resume(
-//                    Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                    .entity("Connection Callback").build());
-//                } else {
-//                    disconnect.cancel();
-//                }
             }
         });
 
-        response
-        .register(new CompletionCallback() {
+        response.register(new CompletionCallback() {
             @Override
             public void onComplete(Throwable t) {
                 if(t == null) {
@@ -352,118 +211,95 @@ public abstract class SparqlEndpointBase {
             }
         });
 
-//        response
-//        .setTimeoutHandler(new TimeoutHandler() {
-//           @Override
-//           public void handleTimeout(AsyncResponse asyncResponse) {
-//               logger.debug("Timout on request");
-//               asyncResponse.resume(
-//                   Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                   .entity("Operation time out.").build());
-//          }
-//        });
-//
-//        response.setTimeout(600, TimeUnit.SECONDS);
-
-
         Response x = processQuery(qe, format);
         // Response x = Response.ok(result).type(mediaType).build();
         response.resume(x);
-        // response.resume(result);
-
-        /*
-        ThreadUtils.start(response, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    StreamingOutput result = processQuery(qe, format);
-                    response.resume(result);
-                } catch(Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        */
     }
 
+    public static Consumer<OutputStream> createQueryProcessor(QueryExecution qe, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt) {
+        Consumer<OutputStream> result = null;
+        ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
+        Query q = qe.getQuery();
 
-    public static Consumer<OutputStream> createQueryProcessor(QueryExecution qe, Lang lang, Context cxt) {
+        // Try to process the query with a result set language
+        if (rswf != null) {
+            result = out -> {
+                ResultSetWriter rsWriter = rswf.create(lang);
+                SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
+                if (sr.isBoolean()) {
+                    boolean v = sr.getBooleanResult();
+                    rsWriter.write(out, v, cxt);
+                } else if (sr.isJson()) {
+                    // TODO: set proper json Content-type
+                    ResultSetFormatter.output(out, sr.getJsonItems());
+                } else {
+                    rsWriter.write(out, sr.getResultSet(), cxt);
+                }
+            };
+        } else if (fmt != null) {
+            // Try to process the query with a triple / quad language
+            if (StreamRDFWriter.registered(fmt)) {
+                result = out -> {
+                    StreamRDF writer = StreamRDFWriter.getWriterStream(out, fmt, cxt);
+                    writer.start();
 
-    	Consumer<OutputStream> result = null;
+                    SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
+                    if (sr.isQuads()) {
+                        StreamRDFOps.sendQuadsToStream(sr.getQuads(), writer);
+                    } else if (sr.isTriples()) {
+                        StreamRDFOps.sendTriplesToStream(sr.getTriples(), writer);
+                    }
 
-    	ResultSetWriterFactory rswf = ResultSetWriterRegistry.getFactory(lang);
+                    writer.finish();
+                };
+            } else if (RDFWriterRegistry.contains(lang)) {
+                logger.warn("Warning! Running non-streaming RDF writer " + fmt.toString() + " and building in-memory model");
+                result = out -> {
+                    SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
+                    RDFWriterBuilder writerBuilder = RDFWriter.create();
+                    if (sr.isQuads()) {
+                        DatasetGraph dsg = DatasetGraphFactory.createGeneral();
+                        sr.getQuads().forEachRemaining(dsg::add);
+                        writerBuilder.source(dsg);
+                    } else if (sr.isTriples()) {
+                        Graph graph = GraphFactory.createPlainGraph();
+                        sr.getTriples().forEachRemaining(graph::add);
+                        writerBuilder.source(graph);
+                    }
 
-		Query q = qe.getQuery();
-
-		// Try to process the query with a result set language
-		if (rswf != null) {
-			result = out -> {
-				ResultSetWriter rsWriter = rswf.create(lang);
-
-				SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
-				if (sr.isBoolean()) {
-					boolean v = sr.getBooleanResult();
-					rsWriter.write(out, v, cxt);
-				} else {
-					rsWriter.write(out, sr.getResultSet(), cxt);
-				}
-			};
-    	} else {
-    		// Try to process the query with a triple / quad language
-    		if (StreamRDFWriter.registered(lang)) {
-    			result = out -> {
-	    			StreamRDF writer = StreamRDFWriter.getWriterStream(out, lang, cxt);
-	    			writer.start();
-
-	    			SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
-	    			if (sr.isQuads()) {
-	    				StreamRDFOps.sendQuadsToStream(sr.getQuads(), writer);
-	    			} else if (sr.isTriples()) {
-	    				StreamRDFOps.sendTriplesToStream(sr.getTriples(), writer);
-	    			}
-
-	    			writer.finish();
-    			};
-    		} else {
-    			throw new RuntimeException("Could not handle execution of query " + q + " with lang " + lang);
-    		}
-    	}
-
-		return result;
+                    writerBuilder.format(fmt).context(cxt).output(out);
+                };
+            } else {
+                throw new RuntimeException("Could not handle execution of query " + q + " with lang " + lang);
+            }
+        }
+        return result;
     }
 
     public Response processQuery(QueryExecution qe, SparqlResultFmts format)
     {
-    	Lang lang = null;
+        Lang lang = null;
+        RDFFormat rdfFormat = null;
 
-		Query query = qe.getQuery();
-		if (query != null) {
-			SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(format);
-			lang = SparqlQueryFmtsUtils.getLang(fmts, query);
-		}
+        Query query = qe.getQuery();
+        if (query != null) {
+            SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(format);
+            lang = SparqlQueryFmtsUtils.getLang(fmts, query);
+            rdfFormat = SparqlQueryFmtsUtils.getRdfFormat(fmts, query);
+        }
 
-//    	if (resultsFormat == null) {
-//    		Query query = qe.getQuery();
-//    		if (query != null) {
-//    			SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.createDefault());
-//    			lang = SparqlQueryFmtsUtils.getLang(fmts, query);
-//    		}
-//    	} else {
-//    		lang = ResultsFormat.convert(resultsFormat);
-//    	}
-//
-    	Response result;
-    	if (lang != null) {
-	    	String contentTypeStr = lang.getContentType().getContentTypeStr();
-	    	StreamingOutput processor = createQueryProcessor(qe, lang, null)::accept;
-	    	result = Response.ok(processor, contentTypeStr).build();
-    	} else {
-    		// Send the query to the backend and determine the response content type from
-    		// the backend's content type
-    		throw new RuntimeException("Cannot handle unparsed query yet");
-    	}
+        Response result;
+        if (lang != null) {
+            String contentTypeStr = lang.getContentType().getContentTypeStr();
+            StreamingOutput processor = createQueryProcessor(qe, lang, rdfFormat, org.apache.jena.sparql.util.Context.create())::accept;
+            result = Response.ok(processor, contentTypeStr).build();
+        } else {
+            // Send the query to the backend and determine the response content type from
+            // the backend's content type
+            throw new RuntimeException("Cannot handle unparsed query yet");
+        }
 
-    	return result;
+        return result;
     }
 
     public UpdateProcessor createUpdateProcessor(SparqlStmtUpdate stmt) { //UpdateRequest updateRequest);
@@ -471,29 +307,17 @@ public abstract class SparqlEndpointBase {
     }
 
     public void processUpdateAsync(AsyncResponse response, SparqlStmtUpdate stmt) { //String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris) {
+      RDFConnection conn = getConnection();
 
-
-      response
-      .register(new ConnectionCallback() {
+      response.register(new ConnectionCallback() {
           @Override
           public void onDisconnect(AsyncResponse disconnect) {
+              conn.abort();
               logger.debug("Client disconnected");
-
-              // TODO Abort
-              //qeAndType.getQueryExecution().abort();
-
-//              if(true) {
-//              disconnect.resume(
-//                  Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                  .entity("Connection Callback").build());
-//              } else {
-//                  disconnect.cancel();
-//              }
           }
       });
 
-      response
-      .register(new CompletionCallback() {
+      response.register(new CompletionCallback() {
           @Override
           public void onComplete(Throwable t) {
               if(t == null) {
@@ -501,119 +325,365 @@ public abstract class SparqlEndpointBase {
               } else {
                   logger.debug("Failed query execution");
               }
-              //qeAndType.getQueryExecution().close();
-              // TODO Close
           }
       });
 
-//      response
-//      .setTimeoutHandler(new TimeoutHandler() {
-//         @Override
-//         public void handleTimeout(AsyncResponse asyncResponse) {
-//             logger.debug("Timout on request");
-//             asyncResponse.resume(
-//                 Response.status(Response.Status.SERVICE_UNAVAILABLE)
-//                 .entity("Operation time out.").build());
-//        }
-//      });
-//
-//      response.setTimeout(600, TimeUnit.SECONDS);
-
-      try (RDFConnection conn = getConnection()) {
+      try {
           logger.debug("Opened connection: " + System.identityHashCode(conn));
-
-          if (stmt.isParsed()) {
-              conn.update(stmt.getUpdateRequest());
-          } else {
-              conn.update(stmt.getOriginalString());
-          }
-
+//          Txn.execute(conn, () -> {
+              if (stmt.isParsed()) {
+                  conn.update(stmt.getUpdateRequest());
+              } else {
+                  conn.update(stmt.getOriginalString());
+              }
+//          });
           String result = "{\"success\": true}";
           response.resume(result);
       } catch (Exception e) {
           response.resume(e);
+      } finally {
+          conn.close();
       }
-
   }
-
-
-
-//  @POST
-//  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//  @Produces(MediaType.TEXT_PLAIN)
-//  public void executeQueryTextPost(
-//          @Suspended AsyncResponse asyncResponse,
-//          @FormParam("query") String queryString,
-//          @FormParam("update") String updateString) {
-//      processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.TXT);
-//  }
-
-
-
-
-//  @GET
-//  @Produces(MediaType.APPLICATION_JSON)
-//  public void executeUpdateGet(@Suspended final AsyncResponse asyncResponse,
-//          @QueryParam("update") String updateRequestStr)
-//      throws Exception
-//  {
-//      processUpdateAsync(asyncResponse, new SparqlStmtUpdate(updateRequestStr));
-//  }
-
-
-//  @POST
-//  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//  @Produces(MediaType.APPLICATION_JSON)
-//  public void executeUpdatePost(@Suspended final AsyncResponse asyncResponse,
-//          @FormParam("update") String updateRequestStr)
-//      throws Exception
-//  {
-//      processUpdateAsync(asyncResponse, new SparqlStmtUpdate(updateRequestStr));
-//  }
-
-//  public void executeUpdateAny(@Suspended final AsyncResponse asyncResponse,
-//          String serviceUri,
-//          String queryString,
-//          List<String> usingGraphUris,
-//          List<String> usingNamedGraphUris)
-//      throws Exception
-//  {
-//      if(queryString == null) {
-//          StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
-//          asyncResponse.resume(Response.status(Status.BAD_REQUEST).entity(so).build()); // TODO: Return some error HTTP code
-//      } else {
-//          processUpdateAsync(asyncResponse, serviceUri, queryString, usingGraphUris, usingNamedGraphUris);
-//      }
-//  }
-
-
-//  public UpdateProcessor createUpdateProcessor(String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris) {
-//      HttpAuthenticator authenticator = AuthenticatorUtils.parseAuthenticator(req);
-//
-//      SparqlServiceFactory ssf = getSparqlServiceFactory();
-//      UpdateProcessor result = createUpdateProcessor(ssf, serviceUri, requestStr, usingGraphUris, usingNamedGraphUris, authenticator);
-//      return result;
-//  }
-//
-//  public UpdateProcessor createUpdateProcessor(String updateRequestStr) {
-//      throw new RuntimeException("For update requests, this method must be overriden");
-//  }
-//
-//  public static UpdateProcessor createUpdateProcessor(SparqlServiceFactory ssf, String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris, HttpAuthenticator authenticator) {
-//      // TODO Should we use UsingList or DatasetDescription? The latter feels more natural to use.
-////    UsingList usingList = new UsingList();
-////    usingList.addAllUsing(NodeUtils.convertToNodes(usingGraphUris));
-////    usingList.addAllUsingNamed(NodeUtils.convertToNodes(usingNamedGraphUris));
-//      DatasetDescription datasetDescription = new DatasetDescription(usingGraphUris, usingNamedGraphUris);
-//
-//
-//      SparqlService sparqlService = ssf.createSparqlService(serviceUri, datasetDescription, authenticator);
-//
-//      UpdateExecutionFactory uef = sparqlService.getUpdateExecutionFactory();
-//
-//      UpdateRequest updateRequest = UpdateRequestUtils.parse(requestStr);
-//      UpdateProcessor result = uef.createUpdateProcessor(updateRequest);
-//      return result;
-//  }
 }
+
+
+
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(MediaType.TEXT_PLAIN)
+//public void executeQueryTextPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.TXT);
+//}
+
+
+
+
+//@GET
+//@Produces(MediaType.APPLICATION_JSON)
+//public void executeUpdateGet(@Suspended final AsyncResponse asyncResponse,
+//      @QueryParam("update") String updateRequestStr)
+//  throws Exception
+//{
+//  processUpdateAsync(asyncResponse, new SparqlStmtUpdate(updateRequestStr));
+//}
+
+
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(MediaType.APPLICATION_JSON)
+//public void executeUpdatePost(@Suspended final AsyncResponse asyncResponse,
+//      @FormParam("update") String updateRequestStr)
+//  throws Exception
+//{
+//  processUpdateAsync(asyncResponse, new SparqlStmtUpdate(updateRequestStr));
+//}
+
+//public void executeUpdateAny(@Suspended final AsyncResponse asyncResponse,
+//      String serviceUri,
+//      String queryString,
+//      List<String> usingGraphUris,
+//      List<String> usingNamedGraphUris)
+//  throws Exception
+//{
+//  if(queryString == null) {
+//      StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
+//      asyncResponse.resume(Response.status(Status.BAD_REQUEST).entity(so).build()); // TODO: Return some error HTTP code
+//  } else {
+//      processUpdateAsync(asyncResponse, serviceUri, queryString, usingGraphUris, usingNamedGraphUris);
+//  }
+//}
+
+
+//public UpdateProcessor createUpdateProcessor(String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris) {
+//  HttpAuthenticator authenticator = AuthenticatorUtils.parseAuthenticator(req);
+//
+//  SparqlServiceFactory ssf = getSparqlServiceFactory();
+//  UpdateProcessor result = createUpdateProcessor(ssf, serviceUri, requestStr, usingGraphUris, usingNamedGraphUris, authenticator);
+//  return result;
+//}
+//
+//public UpdateProcessor createUpdateProcessor(String updateRequestStr) {
+//  throw new RuntimeException("For update requests, this method must be overriden");
+//}
+//
+//public static UpdateProcessor createUpdateProcessor(SparqlServiceFactory ssf, String serviceUri, String requestStr, List<String> usingGraphUris, List<String> usingNamedGraphUris, HttpAuthenticator authenticator) {
+//  // TODO Should we use UsingList or DatasetDescription? The latter feels more natural to use.
+////UsingList usingList = new UsingList();
+////usingList.addAllUsing(NodeUtils.convertToNodes(usingGraphUris));
+////usingList.addAllUsingNamed(NodeUtils.convertToNodes(usingNamedGraphUris));
+//  DatasetDescription datasetDescription = new DatasetDescription(usingGraphUris, usingNamedGraphUris);
+//
+//
+//  SparqlService sparqlService = ssf.createSparqlService(serviceUri, datasetDescription, authenticator);
+//
+//  UpdateExecutionFactory uef = sparqlService.getUpdateExecutionFactory();
+//
+//  UpdateRequest updateRequest = UpdateRequestUtils.parse(requestStr);
+//  UpdateProcessor result = uef.createUpdateProcessor(updateRequest);
+//  return result;
+//}
+
+
+//@GET
+//@Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
+//public void executeQueryJson(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.JSON);
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
+//public void executeQueryJsonPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateStr) {
+//  if(queryString == null) {
+//      queryString = updateStr;
+//  }
+//  processStmtAsync(asyncResponse, queryString, updateStr, SparqlResultFmtsImpl.JSON);
+//}
+//
+//@POST
+//@Consumes(WebContent.contentTypeSPARQLQuery)
+//@Produces({MediaType.APPLICATION_JSON, WebContent.contentTypeResultsJSON})
+//public void executeQueryJsonPostDirect(
+//      @Suspended AsyncResponse asyncResponse,
+//      String queryString) {
+//  processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.JSON);
+//}
+//
+//@GET
+//@Produces(MediaType.APPLICATION_XML)
+//public void executeQueryXml(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString) {
+//  if(queryString == null && updateString == null) {
+//      StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
+//      asyncResponse.resume(Response.status(Status.BAD_REQUEST).entity(so).build()); // TODO: Return some error HTTP code
+//  } else {
+//      processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//  }
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(MediaType.APPLICATION_XML)
+//public void executeQueryXmlPostAsync(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//
+//  if(queryString == null) {
+//      queryString = updateString;
+//  }
+//
+//  if(queryString == null) {
+//      StreamingOutput so = StreamingOutputString.create("<error>No query specified. Append '?query=&lt;your SPARQL query&gt;'</error>");
+//      asyncResponse.resume(Response.ok(so).build()); // TODO: Return some error HTTP code
+//  } else {
+//      processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//  }
+//}
+//
+//@GET
+//@Produces("application/rdf+xml") //HttpParams.contentTypeRDFXML)
+//public void executeQueryRdfXml(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString
+//      ) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces("application/rdf+xml")// HttpParams.contentTypeRDFXML)
+//public void executeQueryRdfXmlPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//}
+//
+//@POST
+//@Consumes(WebContent.contentTypeSPARQLQuery)
+//@Produces("application/rdf+xml")
+//public void executeQueryRdfXmlPostDirect(
+//      @Suspended AsyncResponse asyncResponse,
+//      String queryString) {
+//  processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.XML);
+//}
+//
+//
+//@GET
+//@Produces(WebContent.contentTypeResultsXML)
+//public void executeQueryResultSetXml(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(WebContent.contentTypeResultsXML)
+//public void executeQueryResultSetXmlPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.XML);
+//}
+//
+//@POST
+//@Consumes(WebContent.contentTypeSPARQLQuery)
+//@Produces(WebContent.contentTypeResultsXML)
+//public void executeQueryResultSetXmlPostDirect(
+//      @Suspended AsyncResponse asyncResponse,
+//      String queryString) {
+//  processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.XML);
+//}
+//
+//@GET
+//@Produces(WebContent.contentTypeTextCSV)
+//public void executeQueryResultSetCsv(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createCsv());
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(WebContent.contentTypeTextCSV)
+//public void executeQueryResultSetCsvPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createCsv());
+//}
+//
+//@POST
+//@Consumes(WebContent.contentTypeSPARQLQuery)
+//@Produces(WebContent.contentTypeTextCSV)
+//public void executeQueryResultSetCsvPostDirect(
+//      @Suspended AsyncResponse asyncResponse,
+//      String queryString) {
+//  processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.createCsv());
+//}
+//
+//
+//@GET
+//@Produces(WebContent.contentTypeTextTSV)
+//public void executeQueryResultSetTsv(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("query") String queryString,
+//      @QueryParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createTsv());
+//}
+//
+//@POST
+//@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//@Produces(WebContent.contentTypeTextTSV)
+//public void executeQueryResultSetTsvPost(
+//      @Suspended AsyncResponse asyncResponse,
+//      @FormParam("query") String queryString,
+//      @FormParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, queryString, updateString, SparqlResultFmtsImpl.createTsv());
+//}
+//
+//@POST
+//@Consumes(WebContent.contentTypeSPARQLQuery)
+//@Produces(WebContent.contentTypeTextTSV)
+//public void executeQueryResultSetTsvPostDirect(
+//      @Suspended AsyncResponse asyncResponse,
+//      String queryString) {
+//  processStmtAsync(asyncResponse, queryString, null, SparqlResultFmtsImpl.createTsv());
+//}
+
+
+/*
+* UPDATE
+*/
+
+
+//@GET
+//@Consumes(WebContent.contentTypeSPARQLUpdate)
+//@Produces(MediaType.APPLICATION_JSON)
+//public void executeUpdateGet(
+//      @Suspended AsyncResponse asyncResponse,
+//      @QueryParam("update") String updateString) {
+//  processStmtAsync(asyncResponse, null, updateString, null);
+//}
+
+//response
+//.setTimeoutHandler(new TimeoutHandler() {
+// @Override
+// public void handleTimeout(AsyncResponse asyncResponse) {
+//     logger.debug("Timout on request");
+//     asyncResponse.resume(
+//         Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//         .entity("Operation time out.").build());
+//}
+//});
+//
+//response.setTimeout(600, TimeUnit.SECONDS);
+// TODO Abort
+//qeAndType.getQueryExecution().abort();
+
+//if(true) {
+//disconnect.resume(
+//  Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//  .entity("Connection Callback").build());
+//} else {
+//  disconnect.cancel();
+//}
+
+// response.resume(result);
+
+/*
+ThreadUtils.start(response, new Runnable() {
+    @Override
+    public void run() {
+        try {
+            StreamingOutput result = processQuery(qe, format);
+            response.resume(result);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+});
+*/
+
+//response
+//.setTimeoutHandler(new TimeoutHandler() {
+// @Override
+// public void handleTimeout(AsyncResponse asyncResponse) {
+//     logger.debug("Timout on request");
+//     asyncResponse.resume(
+//         Response.status(Response.Status.SERVICE_UNAVAILABLE)
+//         .entity("Operation time out.").build());
+//}
+//});
+//
+//response.setTimeout(600, TimeUnit.SECONDS);
+
+
+//if (resultsFormat == null) {
+//	Query query = qe.getQuery();
+//	if (query != null) {
+//		SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.createDefault());
+//		lang = SparqlQueryFmtsUtils.getLang(fmts, query);
+//	}
+//} else {
+//	lang = ResultsFormat.convert(resultsFormat);
+//}
+//
 

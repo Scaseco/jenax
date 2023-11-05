@@ -7,15 +7,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessorRdf;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -259,13 +259,13 @@ public class QueryFragment {
 //	}
 
 
-    public static <P> void toElement(Iterable<P> paths, PathAccessorRdf<P> accessor, Set<Element> elements, Map<P, BinaryRelation> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
+    public static <P> void toElement(Iterable<P> paths, PathAccessorRdf<P> accessor, Set<Element> elements, Map<P, Fragment2> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
         for(P path : paths) {
             toElement(path, accessor, pathToNode, forbiddenVars, varGen);
         }
     }
 
-    public static <P> Var getOrCreateAlias(P path, PathAccessorRdf<P> accessor, Map<P, BinaryRelation> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
+    public static <P> Var getOrCreateAlias(P path, PathAccessorRdf<P> accessor, Map<P, Fragment2> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
         varGen = VarGeneratorBlacklist.create(varGen, forbiddenVars);
 
         String tmp = accessor.getAlias(path);
@@ -277,7 +277,7 @@ public class QueryFragment {
 //				path = null;
 //			}
 
-            BinaryRelation br = pathToNode.get(path);
+            Fragment2 br = pathToNode.get(path);
             tmp = br != null ? br.getTargetVar().getName() : varGen.next().getName();
         }
 
@@ -287,8 +287,8 @@ public class QueryFragment {
         return result;
     }
 
-    public static <P> BinaryRelation toElement(P path, PathAccessorRdf<P> accessor, Map<P, BinaryRelation> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
-        BinaryRelation result = pathToNode.get(path);
+    public static <P> Fragment2 toElement(P path, PathAccessorRdf<P> accessor, Map<P, Fragment2> pathToNode, Set<Var> forbiddenVars, Generator<Var> varGen) {
+        Fragment2 result = pathToNode.get(path);
 
         // If the relation segment has not been created for the path, compute it for the parent first
         if(result == null) {
@@ -298,18 +298,18 @@ public class QueryFragment {
             if(parentPath == null) {
 
                 Var s = getOrCreateAlias(path, accessor, pathToNode, forbiddenVars, varGen);
-                result = new BinaryRelationImpl(new ElementGroup(), s, s);
+                result = new Fragment2Impl(new ElementGroup(), s, s);
 
             } else {
                 //boolean isReverse = accessor.isReverse(path);
 
-                BinaryRelation parentSegment = toElement(parentPath, accessor, pathToNode, forbiddenVars, varGen);
+                Fragment2 parentSegment = toElement(parentPath, accessor, pathToNode, forbiddenVars, varGen);
                 Var s = parentSegment.getTargetVar();
 
                 // Obtain the alias for the given node
                 Var o = getOrCreateAlias(path, accessor, pathToNode, forbiddenVars, varGen);
 
-                BinaryRelation br = accessor.getReachingRelation(path);
+                Fragment2 br = accessor.getReachingRelation(path);
                 //br = isReverse ? br.reverse() : br;
 
 //				Set<Var> usedVars = elements.stream()
@@ -328,7 +328,7 @@ public class QueryFragment {
 
                 Element segment = ElementUtils.createRenamedElement(br.getElement(), map);
 
-                result = new BinaryRelationImpl(segment, s, o);
+                result = new Fragment2Impl(segment, s, o);
             }
 
             pathToNode.put(path, result);

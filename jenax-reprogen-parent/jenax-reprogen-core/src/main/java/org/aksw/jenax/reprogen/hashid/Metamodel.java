@@ -53,7 +53,7 @@ public class Metamodel {
     }
 
 
-    public void registerProxyClass(Class<?> originalClass, Class<?> proxyClass) {
+    public synchronized void registerProxyClass(Class<?> originalClass, Class<?> proxyClass) {
         originalClassToProxyClass.put(originalClass, proxyClass);
     }
 
@@ -62,7 +62,7 @@ public class Metamodel {
         return result;
     }
 
-    public ClassDescriptor getOrCreate(Class<?> clazz) {
+    public synchronized ClassDescriptor getOrCreate(Class<?> clazz) {
         ClassDescriptor result = classToDescriptor.computeIfAbsent(clazz, c -> new ClassDescriptor(clazz));
         return result;
     }

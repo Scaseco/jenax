@@ -2,6 +2,7 @@
 title: Datatype Extensions
 parent: RDF/SPARQL Plugins
 nav_order: 10
+toc: true
 ---
 
 This module adds RDF datatype extensions for ARQ constructs, such as queries, expressions and bindings.

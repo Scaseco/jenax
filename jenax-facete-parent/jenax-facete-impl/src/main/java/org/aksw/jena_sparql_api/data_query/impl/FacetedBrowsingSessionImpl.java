@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.PathAccessor;
 import org.aksw.jena_sparql_api.data_query.api.SPath;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -71,7 +71,7 @@ public class FacetedBrowsingSessionImpl {
      * @param isReverse
      * @return
      */
-//	public Flowable<Entry<Node, Range<Long>>> getFacetsAndCounts(SPath path, boolean isReverse, Concept pConstraint) {
+//	public Flowable<Entry<Node, Range<Long>>> getFacetsAndCounts(SPath path, boolean isReverse, Fragment1 pConstraint) {
 //		BinaryRelation br = createQueryFacetsAndCounts(path, isReverse, pConstraint);
 //
 //
@@ -85,8 +85,8 @@ public class FacetedBrowsingSessionImpl {
 //			.map(b -> new SimpleEntry<>(b.get(br.getSourceVar()), Range.singleton(((Number)b.get(br.getTargetVar()).getLiteral().getValue()).longValue())));
 //	}
 
-    public BinaryRelation createQueryFacetsAndCounts(SPath path, boolean isReverse, Concept pConstraint) {
-        Map<String, BinaryRelation> relations = null;
+    public Fragment2 createQueryFacetsAndCounts(SPath path, boolean isReverse, Fragment1 pConstraint) {
+        Map<String, Fragment2> relations = null;
         //		Map<String, BinaryRelation> relations = queryGenerator.createMapFacetsAndValues(path, isReverse, false);
 
         // Align the relations
@@ -120,8 +120,8 @@ public class FacetedBrowsingSessionImpl {
     }
 
 
-    public Flowable<Cell<Node, Node, Range<Long>>> getFacetValues(SPath facetPath, boolean isReverse, Concept pFilter, Concept oFilter) {
-        TernaryRelation tr = createQueryFacetValues(facetPath, isReverse, pFilter, oFilter);
+    public Flowable<Cell<Node, Node, Range<Long>>> getFacetValues(SPath facetPath, boolean isReverse, Fragment1 pFilter, Fragment1 oFilter) {
+        Fragment3 tr = createQueryFacetValues(facetPath, isReverse, pFilter, oFilter);
         Query query = tr.toQuery();
 //		Query query = RelationUtils.createQuery(tr);
 
@@ -133,23 +133,23 @@ public class FacetedBrowsingSessionImpl {
 
     }
 
-    public TernaryRelation createQueryFacetValues(SPath facetPath, boolean isReverse, Concept pFilter, Concept oFilter) {
+    public Fragment3 createQueryFacetValues(SPath facetPath, boolean isReverse, Fragment1 pFilter, Fragment1 oFilter) {
 
-        Map<String, TernaryRelation> facetValues = queryGenerator.getFacetValuesCore(null, focus, facetPath, pFilter, oFilter, isReverse, false, false, false);
+        Map<String, Fragment3> facetValues = queryGenerator.getFacetValuesCore(null, focus, facetPath, pFilter, oFilter, isReverse, false, false, false);
 
         Var countVar = Vars.c;
         List<Element> elements = facetValues.values().stream()
-                .map(e -> RelationUtils.rename(e, Arrays.asList(Vars.s, Vars.p, Vars.o)))
-                .map(Relation::toTernaryRelation)
+                .map(e -> FragmentUtils.rename(e, Arrays.asList(Vars.s, Vars.p, Vars.o)))
+                .map(Fragment::toFragment3)
                 .map(e -> e.joinOn(e.getP()).with(pFilter))
-                .map(e -> RelationUtils.groupBy(e, Vars.s, countVar, false))
-                .map(Relation::getElement)
+                .map(e -> FragmentUtils.groupBy(e, Vars.s, countVar, false))
+                .map(Fragment::getElement)
                 .collect(Collectors.toList());
 
 
         Element e = ElementUtils.unionIfNeeded(elements);
 
-        TernaryRelation result = new TernaryRelationImpl(e, Vars.p, Vars.o, countVar);
+        Fragment3 result = new Fragment3Impl(e, Vars.p, Vars.o, countVar);
 
 
 
@@ -172,7 +172,7 @@ public class FacetedBrowsingSessionImpl {
      *
      * @param filter
      */
-//	public getFacetValuesAndCounts(Concept filter) {
+//	public getFacetValuesAndCounts(Fragment1 filter) {
 //		Map<String, TernaryRelation> map = facetValues.entrySet().stream()
 //		.collect(Collectors.toMap(Entry::getKey, e -> FacetedQueryGenerator.countFacetValues(e.getValue(), -1)));
 //

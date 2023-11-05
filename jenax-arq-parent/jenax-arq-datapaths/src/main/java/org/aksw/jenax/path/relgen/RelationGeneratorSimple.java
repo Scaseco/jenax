@@ -1,6 +1,6 @@
 package org.aksw.jenax.path.relgen;
 
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 
 /**
  * A relation generator that returns the same relation on
@@ -12,19 +12,19 @@ import org.aksw.jenax.sparql.relation.api.Relation;
 public class RelationGeneratorSimple
     extends RelationGeneratorBase
 {
-    protected Relation template;
+    protected Fragment template;
 
-    public RelationGeneratorSimple(Relation template) {
+    public RelationGeneratorSimple(Fragment template) {
         super();
         this.template = template;
     }
 
-    public static RelationGeneratorSimple create(Relation template) {
+    public static RelationGeneratorSimple create(Fragment template) {
         return new RelationGeneratorSimple(template);
     }
 
     @Override
-    protected Relation nextInstance() {
+    protected Fragment nextInstance() {
         return template;
     }
 

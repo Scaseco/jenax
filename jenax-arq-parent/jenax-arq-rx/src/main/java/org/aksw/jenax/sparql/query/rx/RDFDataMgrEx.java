@@ -24,9 +24,9 @@ import java.util.stream.Stream;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFIterator;
-import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
+import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.arq.util.streamrdf.StreamRDFWriterEx;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
@@ -35,8 +35,8 @@ import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
-import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
-import org.apache.jena.ext.com.google.common.collect.Multimap;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
@@ -248,6 +248,16 @@ public class RDFDataMgrEx {
         return probeLang(in, candidates, true, errorCollector);
     }
 
+    /**
+     * Determine the RDF content of the given input stream. The returned input stream buffers the given stream if needed.
+     * Only the returned stream should be used after using this function.
+     *
+     * The following example shows how to obtain a Lang from the probing result:
+     * <pre>
+     * TypedInputStream tin = RDFDataMgrEx.probeLang(in, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
+     * Lang lang = RDFLanguages.contentTypeToLang(tis.getContentType());
+     * </pre>
+     */
     public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
         return probeLang(in, candidates, new ArrayList<>());
     }

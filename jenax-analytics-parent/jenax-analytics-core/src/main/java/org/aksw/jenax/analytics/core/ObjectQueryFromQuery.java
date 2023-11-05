@@ -3,8 +3,8 @@ package org.aksw.jenax.analytics.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.expr.ExprList;
@@ -30,10 +30,10 @@ public class ObjectQueryFromQuery
     }
 
     @Override
-    public Relation getRelation() {
+    public Fragment getRelation() {
         // return RelationUtils.fromQuery(query);
         Query asSelect = query.cloneQuery();
         asSelect.setQuerySelectType();
-        return RelationUtils.fromQuery(asSelect);
+        return FragmentUtils.fromQuery(asSelect);
     }
 }

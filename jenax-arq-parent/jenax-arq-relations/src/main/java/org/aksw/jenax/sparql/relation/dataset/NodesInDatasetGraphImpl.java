@@ -1,7 +1,7 @@
 package org.aksw.jenax.sparql.relation.dataset;
 
 import org.aksw.jenax.arq.util.binding.TableUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkFactory;
@@ -14,7 +14,7 @@ public class NodesInDatasetGraphImpl
     implements NodesInDatasetGraph
 {
     protected DatasetGraph datasetGraph;
-    protected BinaryRelation graphAndNodeSelector;
+    protected Fragment2 graphAndNodeSelector;
 
     @Override
     public DatasetGraph getDatasetGraph() {
@@ -22,7 +22,7 @@ public class NodesInDatasetGraphImpl
     }
 
     @Override
-    public BinaryRelation getGraphAndNodeSelector() {
+    public Fragment2 getGraphAndNodeSelector() {
         return graphAndNodeSelector;
     }
 

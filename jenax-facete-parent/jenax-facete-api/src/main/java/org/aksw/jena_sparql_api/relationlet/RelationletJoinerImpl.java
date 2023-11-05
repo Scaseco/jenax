@@ -27,7 +27,7 @@ import org.aksw.facete.v3.api.path.NestedVarMap;
 import org.aksw.facete.v3.api.path.NestedVarMapImpl;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.syntax.Element;
@@ -337,7 +337,7 @@ public class RelationletJoinerImpl<T extends Relationlet>
         joins.add(join);
     }
 
-    public Relation effective() {
+    public Fragment effective() {
         return null;
     }
 

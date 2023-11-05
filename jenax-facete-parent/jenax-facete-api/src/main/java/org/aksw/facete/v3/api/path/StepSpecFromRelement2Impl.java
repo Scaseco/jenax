@@ -1,19 +1,19 @@
 package org.aksw.facete.v3.api.path;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 public class StepSpecFromRelement2Impl
     implements StepSpecFromRelement2
 {
-    protected BinaryRelation br;
+    protected Fragment2 br;
 
-    public StepSpecFromRelement2Impl(BinaryRelation br) {
+    public StepSpecFromRelement2Impl(Fragment2 br) {
         super();
         this.br = br;
     }
 
     @Override
-    public BinaryRelation getRelement() {
+    public Fragment2 getRelement() {
         return br;
     }
 

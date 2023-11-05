@@ -4,10 +4,10 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.util.FlowableEx;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -43,6 +43,9 @@ interface TraitConnectionBuilder {
 }
 
 
+/**
+ * LookupService for SPARQL SELECT queries
+ */
 public class LookupServiceSparqlQuery
     implements LookupService<Node, Table>
 {

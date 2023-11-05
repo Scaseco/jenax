@@ -7,14 +7,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.jena.geosparql.assembler.VocabGeoSPARQL;
+import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.parsers.wkt.WKTWriter;
+import org.apache.jena.geosparql.implementation.vocabulary.Geo;
+import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -46,7 +51,6 @@ public class RdfJsonUtils {
             result.add(jsonElement);
         }
         return result;
-
     }
 
     public static JsonArray toJson(ResultSet rs, int maxDepth, boolean flat) {
@@ -79,15 +83,21 @@ public class RdfJsonUtils {
     }
 
     public static JsonElement toJson(RDFNode rdfNode, int depth, int maxDepth, boolean flat) {
+        Graph g = rdfNode.getModel().getGraph();
+        Node node = rdfNode.asNode();
+        JsonElement result = toJson(g, node, depth, maxDepth, flat);
+        return result;
+    }
+
+    public static JsonElement toJson(Graph graph, Node node, int depth, int maxDepth, boolean flat) {
         JsonElement result;
 
         if(depth >= maxDepth) {
             // TODO We could add properties indicating that data was cut off here
             result = null; // new JsonObject();
-        } else if(rdfNode == null) {
+        } else if(node == null) {
             result = JsonNull.INSTANCE;
-        } else if(rdfNode.isLiteral()) {
-            Node node = rdfNode.asNode();
+        } else if(node.isLiteral()) {
             Object obj = node.getLiteralValue();
             //boolean isNumber =//NodeMapperRdfDatatype.canMapCore(node, Number.class);
             //if(isNumber) {
@@ -102,50 +112,57 @@ public class RdfJsonUtils {
                 Boolean value = (Boolean) obj;
                 result = new JsonPrimitive(value);
             } else if(obj instanceof GeometryWrapper) {
-                WKTReader wktReader = new WKTReader();
-                try {
-                    final Geometry geom = wktReader.read(rdfNode.asLiteral().getLexicalForm());
-
+                // TODO Add an extension point for custom datatypes
+                GeometryWrapper w = (GeometryWrapper)obj;
+                String datatypeUri = node.getLiteralDatatypeURI();
+                switch (datatypeUri) {
+                case Geo.WKT:
+                    result = new JsonPrimitive(WKTWriter.write(w));
+                    break;
+                case Geo.GEO_JSON:
                     GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
+                    Geometry geom = w.getParsingGeometry();
                     String jsonString = geoJsonWriter.write(geom);
                     Gson gson = new Gson();
                     result = gson.fromJson(jsonString, JsonObject.class);
-                } catch (ParseException e) {
-                    throw new RuntimeException("Invalid WKT : " + rdfNode);
+                    break;
+                default:
+                    result = new JsonPrimitive(node.getLiteralLexicalForm());
+                    break;
                 }
             } else {
-
-                String value = rdfNode.asLiteral().getLexicalForm() ; // Objects.toString(obj);
+                String value = node.getLiteralLexicalForm(); // Objects.toString(obj);
                 result = new JsonPrimitive(value ) ; //+ "^^" + obj.getClass().getCanonicalName());
 //				throw new RuntimeException("Unsupported literal: " + rdfNode);
             }
-        } else if(rdfNode.isResource()) {
+        } else if(!node.isLiteral()) { // if node is a resource
             JsonObject tmp = new JsonObject();
-            Resource r = rdfNode.asResource();
+            // Resource r = rdfNode.asResource();
 
-            if(r.isURIResource()) {
-                tmp.addProperty("id", r.getURI());
+            if(node.isURI()) {
+                tmp.addProperty("id", node.getURI());
                 tmp.addProperty("id_type", "uri");
-            } else if(r.isAnon()) {
-                tmp.addProperty("id", r.getId().getLabelString());
+            } else if(node.isBlank()) {
+                tmp.addProperty("id", node.getBlankNodeLabel());
                 tmp.addProperty("id_type", "bnode");
             }
 
-            List<Statement> stmts = r.listProperties().toList();
+            // List<Statement> stmts = r.listProperties().toList();
+            List<Triple> stmts = graph.find(node, Node.ANY, Node.ANY).toList();
 
 
 
-            Map<Property, List<RDFNode>> pos = stmts.stream()
-                    .collect(Collectors.groupingBy(Statement::getPredicate,
-                            Collectors.mapping(Statement::getObject, Collectors.toList())));
+            Map<Node, List<Node>> pos = stmts.stream()
+                    .collect(Collectors.groupingBy(Triple::getPredicate,
+                            Collectors.mapping(Triple::getObject, Collectors.toList())));
 
-            for(Entry<Property, List<RDFNode>> e : pos.entrySet()) {
+            for(Entry<Node, List<Node>> e : pos.entrySet()) {
                 JsonArray arr = new JsonArray();
-                Property p = e.getKey();
+                Node p = e.getKey();
                 String k = p.getLocalName();
 
-                for(RDFNode o : e.getValue()) {
-                    JsonElement v = toJson(o, depth + 1, maxDepth, flat);
+                for(Node o : e.getValue()) {
+                    JsonElement v = toJson(graph, o, depth + 1, maxDepth, flat);
                     if (v != null)
                     arr.add(v);
                 }
@@ -159,7 +176,7 @@ public class RdfJsonUtils {
             }
             result = tmp;
         } else {
-            throw new RuntimeException("Unknown node type: " + rdfNode);
+            throw new RuntimeException("Unknown node type: " + node);
         }
 
         return result;

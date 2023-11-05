@@ -10,9 +10,11 @@ import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.facete.v3.api.FacetedQueryResource;
 import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.facete.v3.bgp.api.XFacetedQuery;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -25,8 +27,9 @@ public class FacetedQueryImpl
     implements FacetedQueryResource
 {
     // The actual state is stored in a model rooted in a certain resource
-    protected SparqlQueryConnection conn;
-    protected Supplier<? extends UnaryRelation> conceptSupplier;
+    // protected SparqlQueryConnection conn;
+    protected RdfDataSource dataSource;
+    protected Supplier<? extends Fragment1> conceptSupplier;
 
 //	protected Function<? super Resource, ? extends UnaryRelation> conceptParser;
 
@@ -66,16 +69,21 @@ public class FacetedQueryImpl
         }
     }
 
-    public static FacetedQueryImpl create(XFacetedQuery modelRoot, SparqlQueryConnection conn) {
+    public static FacetedQueryImpl create(XFacetedQuery modelRoot, RdfDataSource rdfDataSource) {
         initResource(modelRoot);
 
-        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, conn);
+        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, rdfDataSource);
     }
 
-    public FacetedQueryImpl(XFacetedQuery modelRoot, Supplier<? extends UnaryRelation> conceptSupplier, SparqlQueryConnection conn) {
+    public static FacetedQueryImpl create(XFacetedQuery modelRoot, SparqlQueryConnection conn) {
+        initResource(modelRoot);
+        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, RdfDataEngines.ofQueryConnection(conn));
+    }
+
+    public FacetedQueryImpl(XFacetedQuery modelRoot, Supplier<? extends Fragment1> conceptSupplier, RdfDataSource rdfDataSource) {
         this.modelRoot = modelRoot;
         this.conceptSupplier = conceptSupplier;
-        this.conn = conn;
+        this.dataSource = rdfDataSource;
     }
 
 //	public FacetedQueryImpl() {
@@ -116,31 +124,31 @@ public class FacetedQueryImpl
     }
 
     @Override
-    public FacetedQuery baseConcept(Supplier<? extends UnaryRelation> conceptSupplier) {
+    public FacetedQuery baseConcept(Supplier<? extends Fragment1> conceptSupplier) {
         this.conceptSupplier = conceptSupplier;
         return this;
     }
 
     @Override
-    public FacetedQuery baseConcept(UnaryRelation concept) {
+    public FacetedQuery baseConcept(Fragment1 concept) {
         return baseConcept(() -> concept);
     }
 
     @Override
-    public UnaryRelation baseConcept() {
-        UnaryRelation result = conceptSupplier.get();
+    public Fragment1 baseConcept() {
+        Fragment1 result = conceptSupplier.get();
         return result;
     }
 
     @Override
-    public FacetedQuery connection(SparqlQueryConnection conn) {
-        this.conn = conn;
+    public FacetedQuery dataSource(RdfDataSource dataSource) {
+        this.dataSource = dataSource;
         return this;
     }
 
     @Override
-    public SparqlQueryConnection connection() {
-        return conn;
+    public RdfDataSource dataSource() {
+        return this.dataSource;
     }
 
     @Override

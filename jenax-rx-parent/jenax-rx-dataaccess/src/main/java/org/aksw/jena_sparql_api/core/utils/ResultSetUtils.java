@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jenax.arq.util.exec.QueryExecutionAdapter;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionAdapter;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;

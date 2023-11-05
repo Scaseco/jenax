@@ -1,0 +1,18 @@
+PREFIX v: <http://rdfs.org/ns/void#>
+
+CONSTRUCT {
+  <env://D>
+    v:propertyPartition ?l .
+
+  ?l
+    v:property ?p .
+}
+{
+  {
+    SELECT ?p
+      (IRI(CONCAT(STR(<env:B>), '/pp/', ENCODE_FOR_URI(STR(?p)))) AS ?l)
+    {
+      SELECT DISTINCT ?p { ?s ?p ?o }
+    }
+  }
+}

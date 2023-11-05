@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
@@ -10,8 +11,8 @@ import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.sparql.ARQInternalErrorException;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.geojson.fork.GeoJsonReader;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.locationtech.jts.io.geojson.fork.GeoJsonReader;
 
 public class RDFDatatypeGeoJSON extends GeometryDatatype {
 
@@ -24,6 +25,10 @@ public class RDFDatatypeGeoJSON extends GeometryDatatype {
      * A static instance of WKTDatatype.
      */
     public static final RDFDatatypeGeoJSON INSTANCE = new RDFDatatypeGeoJSON();
+
+    public static RDFDatatype get() {
+        return INSTANCE;
+    }
 
     /**
      * private constructor - single global instance.

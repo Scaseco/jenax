@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.commons.collections.IteratorUtils;
-import org.aksw.jenax.arq.util.exec.QueryExecSimple;
+import org.aksw.jenax.arq.util.exec.query.QueryExecSimple;
+import org.aksw.jenax.norse.NorseTerms;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -23,6 +24,7 @@ public class MoreQueryExecUtils {
         PrefixMapping result = new PrefixMappingImpl();
         result.setNsPrefixes(SSE.getPrefixMapRead()); // afn, and such (not the right apf though!)
         result.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
+        result.setNsPrefix("norse", NorseTerms.NS);
         JenaExtensionUtil.addPrefixes(result);
 
         return result;

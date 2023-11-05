@@ -1,8 +1,9 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
-import org.apache.jena.ext.com.google.common.base.Ascii;
-import org.apache.jena.ext.com.google.common.io.BaseEncoding;
+import org.apache.jena.datatypes.RDFDatatype;
+import com.google.common.base.Ascii;
+import com.google.common.io.BaseEncoding;
 import org.apache.jena.geosparql.implementation.DimensionInfo;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.GeometryDatatype;
@@ -36,12 +37,16 @@ public class RDFDatatypeWkbLiteral extends GeometryDatatype {
      */
     public static final RDFDatatypeWkbLiteral INSTANCE = new RDFDatatypeWkbLiteral();
 
+    public static RDFDatatype get() {
+        return INSTANCE;
+    }
+
     public RDFDatatypeWkbLiteral() {
-    	this(URI);
+        this(URI);
     }
 
     public RDFDatatypeWkbLiteral(String uri) {
-    	this(uri, new WKBReader(CustomGeometryFactory.theInstance()), new WKBWriter());
+        this(uri, new WKBReader(CustomGeometryFactory.theInstance()), new WKBWriter());
     }
 
     public RDFDatatypeWkbLiteral(String uri, WKBReader wkbReader, WKBWriter wkbWriter) {
@@ -69,7 +74,7 @@ public class RDFDatatypeWkbLiteral extends GeometryDatatype {
         if (geometry instanceof GeometryWrapper) {
             GeometryWrapper geometryWrapper = (GeometryWrapper) geometry;
             byte[] bytes = wkbWriter.write(geometryWrapper.getParsingGeometry());
-        	String str = BaseEncoding.base64().encode(bytes);
+            String str = BaseEncoding.base64().encode(bytes);
             return str;
         } else {
             throw new DatatypeFormatException("Object to unparse WKBDatatype is not a GeometryWrapper: " + geometry);
@@ -79,19 +84,19 @@ public class RDFDatatypeWkbLiteral extends GeometryDatatype {
     @Override
     public GeometryWrapper read(String geometryLiteral) {
 
-    	byte[] bytes = BaseEncoding.base64().decode(geometryLiteral);
-    	Geometry geometry;
-		try {
-			geometry = wkbReader.read(bytes);
-			String tmpGeoStr = wktWriter.write(geometry);
-	        WKTReader wktReader = WKTReader.extract(tmpGeoStr);
-	        String srsURI = wktReader.getSrsURI();
-	        DimensionInfo dimensionInfo = wktReader.getDimensionInfo();
+        byte[] bytes = BaseEncoding.base64().decode(geometryLiteral);
+        Geometry geometry;
+        try {
+            geometry = wkbReader.read(bytes);
+            String tmpGeoStr = wktWriter.write(geometry);
+            WKTReader wktReader = WKTReader.extract(tmpGeoStr);
+            String srsURI = wktReader.getSrsURI();
+            DimensionInfo dimensionInfo = wktReader.getDimensionInfo();
 
-	        return new GeometryWrapper(geometry, srsURI, WKTDatatype.URI, dimensionInfo, tmpGeoStr);
-		} catch (ParseException e) {
-			throw new DatatypeFormatException("Failed to parse geometry literal " + Ascii.truncate(geometryLiteral, 124, "..."), e);
-		}
+            return new GeometryWrapper(geometry, srsURI, WKTDatatype.URI, dimensionInfo, tmpGeoStr);
+        } catch (ParseException e) {
+            throw new DatatypeFormatException("Failed to parse geometry literal " + Ascii.truncate(geometryLiteral, 124, "..."), e);
+        }
     }
 
     @Override

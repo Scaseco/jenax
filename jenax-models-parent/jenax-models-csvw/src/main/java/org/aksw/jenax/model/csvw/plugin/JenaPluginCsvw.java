@@ -1,6 +1,7 @@
 package org.aksw.jenax.model.csvw.plugin;
 
 import org.aksw.jenax.model.csvw.domain.api.Dialect;
+import org.aksw.jenax.model.csvw.domain.api.Table;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -24,7 +25,7 @@ public class JenaPluginCsvw
 
     public static void init(Personality<RDFNode> p) {
         JenaPluginUtils.registerResourceClasses(
-            Dialect.class
+            Dialect.class, Table.class
         );
     }
 }

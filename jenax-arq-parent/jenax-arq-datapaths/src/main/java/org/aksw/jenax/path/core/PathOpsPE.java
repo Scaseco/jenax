@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathOps;
-import org.aksw.jena_sparql_api.concepts.UnaryXExpr;
-import org.aksw.jena_sparql_api.concepts.UnaryXExprImpl;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExpr;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExprImpl;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Coalesce;
 import org.apache.jena.sparql.expr.E_Equals;
@@ -55,12 +55,6 @@ public class PathOpsPE
         return INSTANCE;
     }
 
-
-    /** Convenience static shorthand for .get().newRoot() */
-    public static PathPE newAbsolutePath() {
-        return get().newRoot();
-    }
-
     public static PathPE newRelativePath() {
         return get().newPath(false, Collections.emptyList());
     }
@@ -83,11 +77,6 @@ public class PathOpsPE
     @Override
     public PathPE newPath(boolean isAbsolute, List<UnaryXExpr> segments) {
         return new PathPE(this, isAbsolute, segments);
-    }
-
-    @Override
-    public PathPE newPath(UnaryXExpr element) {
-        return newPath(false, Collections.singletonList(element));
     }
 
     @Override

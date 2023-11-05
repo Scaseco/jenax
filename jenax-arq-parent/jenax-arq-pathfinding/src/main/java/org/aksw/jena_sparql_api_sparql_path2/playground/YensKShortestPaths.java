@@ -20,7 +20,7 @@ import org.aksw.jena_sparql_api.sparql_path2.Nfa;
 import org.aksw.jena_sparql_api.sparql_path2.NfaExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.Pair;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
-import org.apache.jena.ext.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class YensKShortestPaths {
 //

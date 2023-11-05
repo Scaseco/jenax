@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinder;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderBase;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderFactorySummaryBase;
@@ -15,8 +13,10 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint3;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.path.SimplePath;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
@@ -84,7 +84,7 @@ public class ConceptPathFinderSystem3
         public ConceptPathFinder build() {
             return new ConceptPathFinderBase(dataSummary.getGraph(), dataConnection) {
                 @Override
-                public PathSearch<SimplePath> createSearch(UnaryRelation sourceConcept, UnaryRelation targetConcept) {
+                public PathSearch<SimplePath> createSearch(Fragment1 sourceConcept, Fragment1 targetConcept) {
 
                     return new PathSearchSparqlBase(dataConnection, sourceConcept, targetConcept) {
 

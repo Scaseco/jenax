@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.data_query.impl;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.data_query.api.SPath;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -72,12 +72,12 @@ public class SPathImpl
     }
 
     @Override
-    public BinaryRelation getReachingBinaryRelation() {
+    public Fragment2 getReachingBinaryRelation() {
         boolean isReverse = isReverse();
         //Node p = getPredicate().asNode();
         String pStr = getPredicate();
         Node p = NodeFactory.createURI(pStr);
-        BinaryRelation result = new BinaryRelationImpl(ElementUtils.createElement(QueryFragment.createTriple(isReverse, Vars.s, p, Vars.o)), Vars.s, Vars.o);
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(QueryFragment.createTriple(isReverse, Vars.s, p, Vars.o)), Vars.s, Vars.o);
         return result;
     }
 

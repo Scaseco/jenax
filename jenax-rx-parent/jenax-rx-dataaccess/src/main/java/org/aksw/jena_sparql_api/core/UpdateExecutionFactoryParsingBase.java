@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.core;
 
-import org.aksw.jenax.arq.connection.core.UpdateExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecutionFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;

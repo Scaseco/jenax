@@ -4,8 +4,8 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.graph.Node;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -13,9 +13,9 @@ import io.reactivex.rxjava3.core.Flowable;
 public class LookupServiceListService<V>
     implements LookupService<Node, V>
 {
-    private MapService<Concept, Node, V> listService;
+    private MapService<Fragment1, Node, V> listService;
 
-    public LookupServiceListService(MapService<Concept, Node, V> listService) {
+    public LookupServiceListService(MapService<Fragment1, Node, V> listService) {
         super();
         this.listService = listService;
     }
@@ -44,7 +44,7 @@ public class LookupServiceListService<V>
             jena_jira_bug_1484_message_displayed = true;
         }
 
-         Concept concept = ConceptUtils.createConcept(nodes);
+        Fragment1 concept = ConceptUtils.createConcept(nodes);
         //Concept concept = ConceptUtils.createFilterConcept(nodes);
 
         // TODO update once list service also uses futures or flows
@@ -55,7 +55,7 @@ public class LookupServiceListService<V>
     }
 
 
-    public static <V> LookupServiceListService<V> create(MapService<Concept, Node, V> listService) {
+    public static <V> LookupServiceListService<V> create(MapService<Fragment1, Node, V> listService) {
         LookupServiceListService<V> result = new LookupServiceListService<>(listService);
         return result;
     }

@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.UnaryXExpr;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.path.core.PathOpsPE;
 import org.aksw.jenax.path.core.PathPE;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.UnaryXExpr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
@@ -29,10 +29,10 @@ public abstract class RelationGeneratorBase
 
     /** Relations that have been traversed by the path -
      *  does not include the current relation */
-    protected List<Relation> pastRelations = new ArrayList<>();
+    protected List<Fragment> pastRelations = new ArrayList<>();
 
     /** The current relation */
-    protected Relation relation;
+    protected Fragment relation;
 
     // A hash updated upon requesting a new relation; hash is based on the seen path segments
     // Note the hash is really per relation and not per column.
@@ -74,7 +74,7 @@ public abstract class RelationGeneratorBase
      * @param index
      * @return
      */
-    protected abstract Relation nextInstance();
+    protected abstract Fragment nextInstance();
 
 
     public RelationGeneratorBase() {
@@ -82,7 +82,7 @@ public abstract class RelationGeneratorBase
         reset();
     }
 
-    public Relation process(PathPE path) {
+    public Fragment process(PathPE path) {
         if (path.isAbsolute()) {
             reset();
         }
@@ -90,7 +90,7 @@ public abstract class RelationGeneratorBase
         ensureInit();
 
 
-        Relation result = relation;
+        Fragment result = relation;
 
         for (UnaryXExpr segment : path.getSegments()) {
             result = process(segment);
@@ -104,7 +104,7 @@ public abstract class RelationGeneratorBase
         pastRelations.clear();
         relation = null;
         columnIdx = 0;
-        relationStartAbsPath = PathOpsPE.newAbsolutePath();
+        relationStartAbsPath = PathOpsPE.get().newAbsolutePath();
         relPath = PathOpsPE.newRelativePath();
         updateHash();
     }
@@ -118,7 +118,7 @@ public abstract class RelationGeneratorBase
             Var pastLastVar = null;
 
             if (relation != null) {
-                Relation pastItem = relation.filter(conditions);
+                Fragment pastItem = relation.filter(conditions);
                 pastLastVar = pastItem.getVars().get(pastItem.getVars().size() - 1);
                 pastRelations.add(pastItem);
             }
@@ -176,7 +176,7 @@ public abstract class RelationGeneratorBase
     }
 
 
-    public Relation process(UnaryXExpr segment) {
+    public Fragment process(UnaryXExpr segment) {
 
         ensureInit();
 
@@ -196,7 +196,7 @@ public abstract class RelationGeneratorBase
             conditions.add(expr);
         }
 
-        Relation r = relation.filter(conditions);
+        Fragment r = relation.filter(conditions);
 
         ensureInit();
 
@@ -208,12 +208,12 @@ public abstract class RelationGeneratorBase
         return relation.getVars().get(columnIdx);
     }
 
-    public List<Relation> getPastRelations() {
+    public List<Fragment> getPastRelations() {
         return pastRelations;
     }
 
 
-    public UnaryRelation getCurrentConcept() {
+    public Fragment1 getCurrentConcept() {
         return new Concept(assemble(), getCurrentVar());
     }
 

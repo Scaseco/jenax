@@ -3,22 +3,21 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<!-- <parent> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-parent</artifactId> 
-		<version>4.5.0-1-SNAPSHOT</version> </parent> <artifactId>jenax-bom</artifactId> -->
+	<!-- <parent> <groupId>org.aksw.jenax</groupId>
+	<artifactId>jenax-parent</artifactId> 
+		<version>4.5.0-1-SNAPSHOT</version> </parent>
+	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>4.8.0-2</version>
+	<version>4.9.0-1</version>
 	<packaging>pom</packaging>
-	
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
 	<url>https://github.com/Scaseco/jenax</url>
-
 	<issueManagement>
 		<url>https://github.com/Scaseco/jenax/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
-
 	<licenses>
 		<license>
 			<name>Apache License 2.0</name>
@@ -26,14 +25,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-
 	<scm>
 		<url>https://github.com/Scaseco/jenax</url>
 		<connection>scm:git:git://github.com/Scaseco/jenax.git</connection>
 		<developerConnection>scm:git:git@github.com:Scaseco/jenax.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-
 	<developers>
 		<developer>
 			<name>Claus Stadler</name>
@@ -42,13 +39,11 @@
 			<organizationUrl>http://aksw.org</organizationUrl>
 		</developer>
 	</developers>
-
-	
 	<modules>
 		<module>..</module>
 	</modules>
 	<properties>
-		<jena.version>4.8.0</jena.version>
+		<jena.version>4.9.0</jena.version>
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
@@ -72,12 +67,18 @@
 		<tika.version>2.1.0</tika.version>
 		<spring.version>5.3.2</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
-		<aksw.commons.version>0.9.5</aksw.commons.version>
+		<aksw-commons.version>0.9.7</aksw-commons.version>
 		<javax.xml.version>2.3.1</javax.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
-		<jts.version>1.18.1</jts.version>
+		<jts.version>1.19.0</jts.version>
 		<gson.version>2.9.0</gson.version>
 		<annotation-api.version>1.3.2</annotation-api.version>
+		<topbraid.shacl.version>1.4.2</topbraid.shacl.version>
+
+		<velocity-engine.version>2.3</velocity-engine.version>
+		<pebble.version>3.2.1</pebble.version>
+		<graphql.version>21.1</graphql.version>
+
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
 		<!-- <jetty-plugin.version>8.1.10.v20130312</jetty-plugin.version> -->
@@ -87,7 +88,8 @@
 		<!-- Project Settings -->
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
-		<!-- <java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
+		<!--
+		<java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
 		<file.encoding>UTF-8</file.encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -95,6 +97,35 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Shacl to HTML template rending -->
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-engine-core</artifactId>
+				<version>${velocity-engine.version}</version>
+				<!--				<type>pom</type>-->
+				<!--				<scope>import</scope>-->
+			</dependency>
+
+			<dependency>
+				<groupId>com.graphql-java</groupId>
+				<artifactId>graphql-java</artifactId>
+				<version>${graphql.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.pebbletemplates</groupId>
+				<artifactId>pebble</artifactId>
+				<version>${pebble.version}</version>
+			</dependency>
+
+			<!--
+			<dependency>
+				<groupId>io.pebbletemplates</groupId>
+				<artifactId>pebble</artifactId>
+				<version>3.2.1</version>
+			</dependency>
+			-->
+
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
@@ -123,6 +154,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-resources-servicedescription</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -146,7 +182,8 @@
 				<artifactId>kryo</artifactId>
 				<version>${kryo.version}</version>
 			</dependency>
-			<!-- resolves dep conflict between hadoop and de.javakaffee:kryo-serializers 
+			<!-- resolves dep conflict between hadoop and
+			de.javakaffee:kryo-serializers 
 				and tika -->
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
@@ -220,7 +257,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-plugins-qudtlib</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-shacl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -236,6 +283,11 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-prov</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-table</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -280,6 +332,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-d2rq</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-tika</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -303,7 +360,8 @@
 				<artifactId>jenax-arq-pathfinding</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>org.aksw.jenax</groupId> <artifactId>jenax-arq-analytics-core</artifactId> 
+			<!-- <dependency> <groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-analytics-core</artifactId> 
 				<version>${project.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -332,7 +390,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-udf</artifactId>
+				<artifactId>jenax-models-udf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-void</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -432,6 +495,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-resources-void</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-utils</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -487,11 +555,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-models-csvw</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-facete-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -508,7 +571,7 @@
 			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>shacl</artifactId>
-				<version>1.3.2</version>
+				<version>${topbraid.shacl.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.apache.jena</groupId>
@@ -532,25 +595,30 @@
 				<artifactId>jaxb-api</artifactId>
 				<version>${javax.xml.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>com.sun.xml.bind</groupId> <artifactId>jaxb-impl</artifactId> 
-				<version>${javax.xml.version}</version> </dependency> <dependency> <groupId>com.sun.xml.bind</groupId> 
+			<!-- <dependency> <groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId> 
+				<version>${javax.xml.version}</version> </dependency> <dependency>
+			<groupId>com.sun.xml.bind</groupId> 
 				<artifactId>jaxb-core</artifactId> <version>${javax.xml.version}</version> 
 				</dependency> -->
-			<!-- <dependency> <groupId>org.glassfish.jaxb</groupId> <artifactId>jaxb-runtime</artifactId> 
+			<!-- <dependency> <groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId> 
 				<version>2.3.1</version> </dependency> -->
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
-			<!-- <dependency> <groupId>javax.xml.bind</groupId> <artifactId>jaxb-core</artifactId> 
+			<!-- <dependency> <groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId> 
 				<version>2.3.0.1</version> </dependency> -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-distribution</artifactId>
 				<version>5.1.4</version>
 			</dependency>
-			<!-- Never depend on the logging implementations unless in test cases 
+			<!-- Never depend on the logging implementations unless in test
+			cases 
 				or test modules -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -578,7 +646,8 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 			<!-- Modules -->
-			<!-- Make the test configuration available across all modules - especially 
+			<!-- Make the test configuration available across all modules -
+			especially 
 				the log4j.properties file -->
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
@@ -591,6 +660,13 @@
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>${jena.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -598,30 +674,24 @@
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.rdfhdt</groupId>
-				<artifactId>hdt-jena</artifactId>
-				<version>2.1.2</version>
-			</dependency>
-			<!-- <dependency> -->
-			<!-- <groupId>eu.wdaqua</groupId> -->
-			<!-- <artifactId>hdt-jena</artifactId> -->
-			<!-- <version>2.1</version> -->
-			<!-- </dependency> -->
-			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-dboe-storage</artifactId>
+				<artifactId>jena-shacl</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-			<!-- Needed by some parts of jena since 3.15.0 -->
 			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.15</version>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-serviceenhancer</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-dboe-storage</artifactId>
+				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -634,11 +704,6 @@
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.ini4j</groupId>
-				<artifactId>ini4j</artifactId>
-				<version>0.5.4</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-core</artifactId>
 				<version>${jena.version}</version>
@@ -648,14 +713,50 @@
 				<artifactId>jena-iri</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>org.apache.jena</groupId> <artifactId>jena-sdb</artifactId> 
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-fuseki-core</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-tdb2</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.rdfhdt</groupId>
+				<artifactId>hdt-jena</artifactId>
+				<version>2.1.2</version>
+			</dependency>
+			<!-- <dependency> -->
+			<!-- <groupId>eu.wdaqua</groupId> -->
+			<!-- <artifactId>hdt-jena</artifactId> -->
+			<!-- <version>2.1</version> -->
+			<!-- </dependency> -->
+			<!-- Needed by some parts of jena since 3.15.0 -->
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.15</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ini4j</groupId>
+				<artifactId>ini4j</artifactId>
+				<version>0.5.4</version>
+			</dependency>
+			<!-- <dependency> <groupId>org.apache.jena</groupId>
+			<artifactId>jena-sdb</artifactId>
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
 				<groupId>com.hp.hpl.jena</groupId> <artifactId>jena</artifactId> </exclusion> 
 				<exclusion> <groupId>com.hp.hpl.jena</groupId> <artifactId>iri</artifactId> 
-				</exclusion> <exclusion> <groupId>com.hp.hpl.jena</groupId> <artifactId>arq</artifactId> 
-				</exclusion> <exclusion> <groupId>junit</groupId> <artifactId>junit</artifactId> 
-				</exclusion> <exclusion> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
-				</exclusion> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+				</exclusion> <exclusion> <groupId>com.hp.hpl.jena</groupId>
+			<artifactId>arq</artifactId> 
+				</exclusion> <exclusion> <groupId>junit</groupId>
+			<artifactId>junit</artifactId> 
+				</exclusion> <exclusion> <groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId> 
+				</exclusion> <exclusion> <groupId>log4j</groupId>
+			<artifactId>log4j</artifactId> 
 				</exclusion> </exclusions> </dependency> -->
 			<dependency>
 				<groupId>net.postgis</groupId>
@@ -667,10 +768,12 @@
 			<!-- <artifactId>patricia-trie</artifactId> -->
 			<!-- <version>0.6</version> -->
 			<!-- </dependency> -->
-			<!-- <dependency> <groupId>org.jgrapht</groupId> <artifactId>jgrapht-core</artifactId> 
+			<!-- <dependency> <groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-core</artifactId> 
 				<version>${jgrapht.version}</version> </dependency> -->
 			<!-- Present for playground and potential demos -->
-			<!-- <dependency> <groupId>org.jgrapht</groupId> <artifactId>jgrapht-ext</artifactId> 
+			<!-- <dependency> <groupId>org.jgrapht</groupId>
+			<artifactId>jgrapht-ext</artifactId> 
 				<version>${jgrapht.version}</version> </dependency> -->
 			<!-- Java8 stream utilities, such as zip -->
 			<dependency>
@@ -745,7 +848,8 @@
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
-				<!-- Used for @Configuration annotation so we can inject an ApplicationContext 
+				<!-- Used for @Configuration annotation so we can inject an
+				ApplicationContext 
 					into servlets -->
 				<!-- Heavily used by mapper-proxy module -->
 				<groupId>cglib</groupId>
@@ -758,6 +862,13 @@
 				<version>1.12.3</version>
 			</dependency>
 			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${jetty.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
@@ -780,10 +891,56 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-security</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-io</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util-ajax</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlets</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-xml</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-plus</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-jndi</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-annotations</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>apache-jsp</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
-			<!-- <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-jsp</artifactId> 
+			<!-- <dependency> <groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jsp</artifactId> 
 				<version>${jetty.version}</version> <type>jar</type> <scope>compile</scope> 
 				</dependency> -->
 			<!-- <dependency> -->
@@ -793,14 +950,16 @@
 			<!-- <type>jar</type> -->
 			<!-- <scope>compile</scope> -->
 			<!-- </dependency> -->
-			<!-- <dependency> <groupId>org.hibernate.javax.persistence</groupId> <artifactId>hibernate-jpa-2.0-api</artifactId> 
+			<!-- <dependency> <groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId> 
 				<version>1.0.1.Final</version> </dependency> -->
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
 				<version>2.2.0</version>
 			</dependency>
-			<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+			<!-- <dependency> <groupId>log4j</groupId>
+			<artifactId>log4j</artifactId> 
 				<version>1.2.17</version> <scope>test</scope> </dependency> -->
 			<!-- <dependency> -->
 			<!-- <groupId>org.slf4j</groupId> -->
@@ -812,36 +971,56 @@
 			<!-- <artifactId>slf4j-ext</artifactId> -->
 			<!-- <version>1.7.25</version> -->
 			<!-- </dependency> -->
-			<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
+			<!-- <dependency> <groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId> 
 				<version>1.7.10</version> <scope>test</scope> </dependency> -->
 			<!-- AKSW Commons -->
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-bom</artifactId>
-				<version>${aksw.commons.version}</version>
+				<version>${aksw-commons.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<!-- <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-objectstore</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-models-csvw-domain</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-utils</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-paths</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-txn</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-collectors</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-rx</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-beans</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-collections</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-lambdas-serializable</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-io-process-pipes</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> <dependency> <groupId>org.aksw.commons</groupId> 
-				<artifactId>aksw-commons-io-utils</artifactId> <version>${aksw.commons.version}</version> 
-				</dependency> <dependency> <groupId>org.aksw.commons</groupId> <artifactId>aksw-commons-io-syscalls</artifactId> 
-				<version>${aksw.commons.version}</version> </dependency> -->
+			<!-- <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-objectstore</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-models-csvw-domain</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-utils</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-paths</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-txn</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-collectors</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-rx</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-beans</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-collections</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-lambdas-serializable</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-process-pipes</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> <dependency>
+			<groupId>org.aksw.commons</groupId> 
+				<artifactId>aksw-commons-io-utils</artifactId>
+			<version>${aksw-commons.version}</version> 
+				</dependency> <dependency> <groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-io-syscalls</artifactId> 
+				<version>${aksw-commons.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
@@ -880,7 +1059,8 @@
 				<!--<scope>runtime</scope> -->
 			</dependency>
 			<!-- JDBC Connection Pooling -->
-			<!-- <dependency> <groupId>com.jolbox</groupId> <artifactId>bonecp</artifactId> 
+			<!-- <dependency> <groupId>com.jolbox</groupId>
+			<artifactId>bonecp</artifactId> 
 				<version>0.8.0.RELEASE</version> </dependency> -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -909,7 +1089,8 @@
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
 			</dependency>
-			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer thing 
+			<!-- TODO Move this to jenax-arq-datasets-difs (would be one fewer
+			thing 
 				to maintain separately) -->
 			<dependency>
 				<groupId>org.aksw.thirdparty.com.sshtools</groupId>
@@ -968,24 +1149,25 @@
 				<!-- <version>2.21.5</version> -->
 				<version>2.12.11</version>
 			</dependency>
-			<!-- This creates a cyclic dependency; in essence it means that the hadoop/kyro 
+			<!-- This creates a cyclic dependency; in essence it means that the
+			hadoop/kyro 
 				stuff would have to go t -->
-			<!-- <dependency> <groupId>net.sansa-stack</groupId> <artifactId>sansa-spark-jena-java_2.12</artifactId> 
-				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
-				<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
+			<!-- <dependency> <groupId>net.sansa-stack</groupId>
+			<artifactId>sansa-spark-jena-java_2.12</artifactId> 
+				<version>0.8.0-RC2-SNAPSHOT</version> <exclusions> <exclusion>
+			<groupId>log4j</groupId> 
+				<artifactId>log4j</artifactId> </exclusion> <exclusion>
+			<groupId>org.slf4j</groupId> 
 				<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>jena-tdb2</artifactId>
-				<version>${jena.version}</version>
-			</dependency>
-			<!-- When commons-compress just isn't enough (e.g. when there is need 
+			<!-- When commons-compress just isn't enough (e.g. when there is
+			need 
 				for splittable bzip2 decoding) -->
 			<dependency>
 				<groupId>org.apache.hadoop</groupId>
 				<artifactId>hadoop-common</artifactId>
 				<version>${hadoop.version}</version>
-				<!-- <exclusions> <exclusion> <groupId>*</groupId> <artifactId>*</artifactId> 
+				<!-- <exclusions> <exclusion> <groupId>*</groupId>
+				<artifactId>*</artifactId> 
 					</exclusion> </exclusions> -->
 				<!-- Exclude web stuff (jetty, jersey)from hadoop -->
 				<exclusions>
@@ -1025,13 +1207,15 @@
 						<groupId>com.sun.jersey</groupId>
 						<artifactId>jersey-server</artifactId>
 					</exclusion>
-					<!-- <exclusion> <groupId>ch.qos.reload4j</groupId> <artifactId>reload4j</artifactId> 
+					<!-- <exclusion> <groupId>ch.qos.reload4j</groupId>
+					<artifactId>reload4j</artifactId> 
 						</exclusion> -->
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-reload4j</artifactId>
 					</exclusion>
-					<!-- <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+					<!-- <exclusion> <groupId>log4j</groupId>
+					<artifactId>log4j</artifactId> 
 						</exclusion> -->
 					<exclusion>
 						<groupId>org.slf4j</groupId>
@@ -1041,8 +1225,10 @@
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
-					<!-- <exclusion> <groupId>org.codehaus.woodstox</groupId> <artifactId>stax2-api</artifactId> 
-						</exclusion> <exclusion> <groupId>com.fasterxml.woodstox</groupId> <artifactId>woodstox-core</artifactId> 
+					<!-- <exclusion> <groupId>org.codehaus.woodstox</groupId>
+					<artifactId>stax2-api</artifactId> 
+						</exclusion> <exclusion> <groupId>com.fasterxml.woodstox</groupId>
+					<artifactId>woodstox-core</artifactId> 
 						</exclusion> -->
 				</exclusions>
 			</dependency>
@@ -1102,7 +1288,8 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
 				<version>${spring.version}</version>
-				<!-- Jena pulls in jcl-over-slf4j, so we don't need to add it ourselves -->
+				<!-- Jena pulls in jcl-over-slf4j, so we don't need to add it
+				ourselves -->
 				<exclusions>
 					<exclusion>
 						<groupId>commons-logging</groupId>
@@ -1237,7 +1424,8 @@
 				<version>2.7.0</version>
 			</dependency>
 			<!-- experimental dependencies -->
-			<!-- <dependency> <groupId>org.quartz-scheduler</groupId> <artifactId>quartz</artifactId> 
+			<!-- <dependency> <groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId> 
 				<version>2.3.0</version> </dependency> -->
 			<!--
 			<dependency>
@@ -1261,7 +1449,8 @@
 			<!-- <artifactId>opencsv</artifactId> -->
 			<!-- <version>4.0</version> -->
 			<!-- </dependency> -->
-			<!-- For CommandLineUtils.translateCommandline in sparql-ext csv parsing -->
+			<!-- For CommandLineUtils.translateCommandline in sparql-ext csv
+			parsing -->
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-utils</artifactId>
@@ -1326,8 +1515,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
-		<build>
+	<build>
 		<plugins>
 			<!-- That's a sledge hammer solution - but at least it works ... -->
 			<plugin>
@@ -1342,7 +1530,6 @@
 					<autoVersionSubmodules>true</autoVersionSubmodules>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
 				<artifactId>gitflow-maven-plugin</artifactId>
@@ -1353,21 +1540,20 @@
 					</gitFlowConfig>
 				</configuration>
 			</plugin>
-
 			<!--Maven Compiler Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<!-- <source>${maven.compiler.source}</source> <target>${maven.compiler.target}</target> -->
+					<!-- <source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target> -->
 					<release>11</release>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-
-
-			<!-- Solution from http://stackoverflow.com/questions/4725668/how-to-deploy-snapshot-with-sources-and-javadoc -->
+			<!-- Solution from
+			http://stackoverflow.com/questions/4725668/how-to-deploy-snapshot-with-sources-and-javadoc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -1382,7 +1568,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -1399,14 +1584,13 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M1</version>
-				<!-- <configuration> <skipTests>false</skipTests> </configuration> -->
+				<!-- <configuration> <skipTests>false</skipTests>
+				</configuration> -->
 			</plugin>
-
 			<!-- <plugin> -->
 			<!-- <groupId>org.mortbay.jetty</groupId> -->
 			<!-- <artifactId>jetty-maven-plugin</artifactId> -->
@@ -1421,23 +1605,29 @@
 			<!-- <reload>manual</reload> -->
 			<!-- </configuration> -->
 			<!-- </plugin> -->
-
-			<!-- It may be useful to be able to create fat jars on demand during development,
-				but with the shade plugin as is, it would upload them as part of every deployment/release
+			<!-- It may be useful to be able to create fat jars on demand during
+			development,
+				but with the shade plugin as is, it would upload them as part of every
+			deployment/release
 				- therefore its disabled as of now -->
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-shade-plugin</artifactId>
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
 				<version>2.4.3</version> <executions> <execution> <phase>package</phase>
-				<goals> <goal>shade</goal> </goals> <configuration> <createDependencyReducedPom>false</createDependencyReducedPom>
-				<shadedArtifactAttached>true</shadedArtifactAttached> <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
-				<attach>false</attach> <descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef>
+				<goals> <goal>shade</goal> </goals> <configuration>
+			<createDependencyReducedPom>false</createDependencyReducedPom>
+				<shadedArtifactAttached>true</shadedArtifactAttached>
+			<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+				<attach>false</attach> <descriptorRefs>
+			<descriptorRef>jar-with-dependencies</descriptorRef>
 				</descriptorRefs> <filters> <filter> <artifact>*:*</artifact> <excludes>
-				<exclude>META-INF/*.SF</exclude> <exclude>META-INF/*.DSA</exclude> <exclude>META-INF/*.RSA</exclude>
-				</excludes> </filter> </filters> <transformers> <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"
+				<exclude>META-INF/*.SF</exclude> <exclude>META-INF/*.DSA</exclude>
+			<exclude>META-INF/*.RSA</exclude>
+				</excludes> </filter> </filters> <transformers> <transformer
+			implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"
 				/> </transformers> </configuration> </execution> </executions> </plugin> -->
 		</plugins>
 		<pluginManagement>
 			<plugins>
-
 				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -1483,7 +1673,8 @@
 							<phase>generate-sources</phase>
 							<configuration>
 								<processors>
-									<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+									<processor>
+										org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
 								</processors>
 							</configuration>
 						</execution>
@@ -1494,27 +1685,21 @@
 							<artifactId>hibernate-jpamodelgen</artifactId>
 							<version>5.3.6.Final</version>
 						</dependency>
-
 						<dependency>
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
 							<version>${javax.xml.version}</version>
 						</dependency>
 						<dependency>
-
 							<groupId>javax.annotation</groupId>
 							<artifactId>javax.annotation-api</artifactId>
 							<version>1.3.1</version>
 						</dependency>
-
-
 					</dependencies>
 				</plugin>
-
 			</plugins>
 		</pluginManagement>
 	</build>
-	
 	<profiles>
 		<profile>
 			<id>release</id>

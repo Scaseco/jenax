@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.rdf.collections.ListFromRDFList;
 import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
 import org.aksw.jenax.arq.dataset.impl.DatasetOneNgImpl;
@@ -18,8 +17,9 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.GraphVarImpl;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
@@ -78,7 +78,7 @@ public class GraphEntityUtils {
 
 
     public static List<Node> findEntities(Dataset dataset, List<Node> nodes, boolean isOpen) {
-        UnaryRelation ur = createRelationForCompositeId(nodes, isOpen);
+        Fragment1 ur = createRelationForCompositeId(nodes, isOpen);
         // Wrap the relation with a GRAPH ?s { ... } element
         ur = new Concept(new ElementNamedGraph(ur.getVar(), ur.getElement()), ur.getVar());
         Query query = ur.asQuery();
@@ -144,15 +144,15 @@ public class GraphEntityUtils {
         return r;
     }
 
-    public static UnaryRelation createRelationForEntity(List<Node> nodes, boolean isOpen) {
-        UnaryRelation ur = createRelationForCompositeId(nodes, isOpen);
+    public static Fragment1 createRelationForEntity(List<Node> nodes, boolean isOpen) {
+        Fragment1 ur = createRelationForCompositeId(nodes, isOpen);
         // Wrap the relation with a GRAPH ?s { ... } element
         ur = new Concept(new ElementNamedGraph(ur.getVar(), ur.getElement()), ur.getVar());
 
         return ur;
     }
 
-    public static UnaryRelation createRelationForCompositeId(List<Node> nodes, boolean open) {
+    public static Fragment1 createRelationForCompositeId(List<Node> nodes, boolean open) {
 
         // GraphVarImpl treats variables as constant rdf nodes
         Model m = ModelFactory.createModelForGraph(new GraphVarImpl());
@@ -166,7 +166,7 @@ public class GraphEntityUtils {
 
         NodeTransform subst = n -> n.isBlank() ? Var.alloc(n.getBlankNodeLabel()) : n;
 
-        UnaryRelation result = new Concept(
+        Fragment1 result = new Concept(
                 ElementUtils.createElementTriple(m.getGraph().find()
                         .mapWith(t -> NodeTransformLib.transform(subst, t))
                         .toList()),

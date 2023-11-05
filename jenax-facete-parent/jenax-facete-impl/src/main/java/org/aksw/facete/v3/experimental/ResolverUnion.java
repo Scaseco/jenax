@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import org.aksw.facete.v3.api.path.Resolver;
 import org.aksw.facete.v3.api.path.ResolverBase;
 import org.aksw.jena_sparql_api.relationlet.RelationletBinary;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.apache.jena.sparql.path.P_Path0;
 
 public class ResolverUnion
@@ -32,8 +32,8 @@ public class ResolverUnion
     }
 
     @Override
-    public Collection<TernaryRelation> getRdfGraphSpec(boolean fwd) {
-        List<TernaryRelation> result = resolvers.stream()
+    public Collection<Fragment3> getRdfGraphSpec(boolean fwd) {
+        List<Fragment3> result = resolvers.stream()
                 .flatMap(resolver -> resolver.getRdfGraphSpec(fwd).stream())
                 .collect(Collectors.toList());
 
@@ -47,10 +47,10 @@ public class ResolverUnion
     }
 
     @Override
-    public Collection<BinaryRelation> getPaths() {
-        List<BinaryRelation> result = resolvers.stream()
+    public Collection<Fragment2> getPaths() {
+        List<Fragment2> result = resolvers.stream()
                 .flatMap(resolver -> {
-                    Collection<BinaryRelation> tmp = resolver.getPaths();
+                    Collection<Fragment2> tmp = resolver.getPaths();
                     return tmp.stream();
                 })
                 .collect(Collectors.toList());

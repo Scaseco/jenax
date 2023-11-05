@@ -4,27 +4,27 @@ import java.util.Set;
 
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.commons.rx.lookup.MapServiceTransformItem;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.analytics.core.MappedConcept;
 import org.aksw.jenax.analytics.core.MappedQuery;
 import org.aksw.jenax.arq.aggregation.Agg;
 import org.aksw.jenax.arq.aggregation.FunctionResultSetAggregate;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.relation.query.PartitionedQuery1;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Var;
 
 public class MapServiceUtils {
-    public static <T> MapService<Concept, Node, T> createListServiceMappedQuery(QueryExecutionFactoryQuery qef, MappedQuery<T> mappedQuery, boolean isLeftJoin) {
-        MapService<Concept, Node, T> result = createListServiceAcc(qef, mappedQuery, isLeftJoin);
+    public static <T> MapService<Fragment1, Node, T> createListServiceMappedQuery(QueryExecutionFactoryQuery qef, MappedQuery<T> mappedQuery, boolean isLeftJoin) {
+        MapService<Fragment1, Node, T> result = createListServiceAcc(qef, mappedQuery, isLeftJoin);
         return result;
     }
 
-    public static <T> MapService<Concept, Node, T> createListServiceAcc(QueryExecutionFactoryQuery qef, MappedQuery<T> mappedQuery, boolean isLeftJoin) {
+    public static <T> MapService<Fragment1, Node, T> createListServiceAcc(QueryExecutionFactoryQuery qef, MappedQuery<T> mappedQuery, boolean isLeftJoin) {
 
         PartitionedQuery1 partQuery = mappedQuery.getPartQuery();
         Query query = partQuery.getQuery();
@@ -57,13 +57,13 @@ public class MapServiceUtils {
 
         MapServiceSparqlQuery ls = new MapServiceSparqlQuery(qef, query, partVar, isLeftJoin);
         FunctionResultSetAggregate<T> fn = new FunctionResultSetAggregate<T>(agg);
-        MapServiceTransformItem<Concept, Node, Table, T> result = MapServiceTransformItem.create(ls, fn);
+        MapServiceTransformItem<Fragment1, Node, Table, T> result = MapServiceTransformItem.create(ls, fn);
 
         return result;
     }
 
 
-    public static <T> MapService<Concept, Node, T> createListServiceAcc(QueryExecutionFactoryQuery qef, MappedConcept<T> mappedConcept, boolean isLeftJoin) {
+    public static <T> MapService<Fragment1, Node, T> createListServiceAcc(QueryExecutionFactoryQuery qef, MappedConcept<T> mappedConcept, boolean isLeftJoin) {
 
         Concept concept = mappedConcept.getConcept();
         Query query = ConceptUtils.createQueryList(concept);
@@ -88,13 +88,13 @@ public class MapServiceUtils {
 
         MapServiceSparqlQuery ls = new MapServiceSparqlQuery(qef, query, concept.getVar(), isLeftJoin);
         FunctionResultSetAggregate<T> fn = new FunctionResultSetAggregate<T>(agg);
-        MapServiceTransformItem<Concept, Node, Table, T> result = MapServiceTransformItem.create(ls, fn);
+        MapServiceTransformItem<Fragment1, Node, Table, T> result = MapServiceTransformItem.create(ls, fn);
 
         return result;
     }
 
-    public static <T> MapService<Concept, Node, T> createListServiceMappedConcept(QueryExecutionFactoryQuery qef, MappedConcept<T> mappedConcept, boolean isLeftJoin) {
-        MapService<Concept, Node, T> result = createListServiceAcc(qef, mappedConcept, isLeftJoin);
+    public static <T> MapService<Fragment1, Node, T> createListServiceMappedConcept(QueryExecutionFactoryQuery qef, MappedConcept<T> mappedConcept, boolean isLeftJoin) {
+        MapService<Fragment1, Node, T> result = createListServiceAcc(qef, mappedConcept, isLeftJoin);
 
         // Add a transformer that actually retrieves the value from the acc structure
 //        ListService<Concept, Node, T> result = new ListServiceTransformItem(ls, function(accEntries) {

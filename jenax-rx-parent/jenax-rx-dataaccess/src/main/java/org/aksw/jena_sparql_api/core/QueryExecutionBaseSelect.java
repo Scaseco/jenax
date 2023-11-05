@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.aksw.commons.collections.SetUtils;
 import org.aksw.commons.collections.SinglePrefetchIterator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Node;
@@ -93,7 +93,7 @@ class TestQueryExecutionBaseSelect
  *
  */
 public abstract class QueryExecutionBaseSelect
-        extends QueryExecutionDecoratorBase<QueryExecution>
+        extends QueryExecutionWrapperBase<QueryExecution>
         implements QueryExecution
 {
     private static final Logger logger = LoggerFactory

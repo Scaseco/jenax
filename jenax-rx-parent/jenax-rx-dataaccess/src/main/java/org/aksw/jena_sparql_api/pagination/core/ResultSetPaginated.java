@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.aksw.commons.collections.PrefetchIterator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.atlas.lib.Closeable;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;

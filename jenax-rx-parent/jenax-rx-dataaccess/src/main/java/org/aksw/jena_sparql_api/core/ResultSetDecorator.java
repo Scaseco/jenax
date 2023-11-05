@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.core;
 
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
@@ -66,5 +67,10 @@ public class ResultSetDecorator
     @Override
     public void close() {
         decoratee.close();
+    }
+
+    @Override
+    public void forEachRemaining(Consumer<? super QuerySolution> action) {
+        decoratee.forEachRemaining(action);
     }
 }

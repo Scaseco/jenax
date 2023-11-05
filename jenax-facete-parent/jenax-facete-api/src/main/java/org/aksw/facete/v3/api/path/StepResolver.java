@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.facete.v3.api.AliasedPathStep;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
-import org.aksw.jenax.sparql.relation.api.Relation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
@@ -84,12 +84,12 @@ class AliasedPathResolver {
 
 
 
-class MappedRelation {
-    // Remapping of variables
-    //BiMap<Var, Var> map;
-    Map<Var, Var> innerToOuter;
-    Relation r;
-}
+//class MappedRelation {
+//    // Remapping of variables
+//    //BiMap<Var, Var> map;
+//    Map<Var, Var> innerToOuter;
+//    Relation r;
+//}
 
 //interface Step {
 //	Relation apply(Relation step);
@@ -98,21 +98,21 @@ class MappedRelation {
 interface StepRelation
 //	extends Step
 {
-    Relation getRelation();
+    Fragment getRelation();
 }
 
 class StepRelationImpl
     implements StepRelation {
 
-    protected Relation r;
+    protected Fragment r;
 
 //	@Override
-    public Relation apply(Relation step) {
+    public Fragment apply(Fragment step) {
         return r;
     }
 
     @Override
-    public Relation getRelation() {
+    public Fragment getRelation() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -120,8 +120,8 @@ class StepRelationImpl
 
 
 class OptionalStep {
-    public Relation apply(Relation r) {
-        return new RelationImpl(new ElementOptional(r.getElement()), r.getVars());
+    public Fragment apply(Fragment r) {
+        return new FragmentImpl(new ElementOptional(r.getElement()), r.getVars());
     }
 }
 
@@ -131,7 +131,7 @@ class OptionalStep {
 //}
 
 class V {
-    protected Relation r;
+    protected Fragment r;
 }
 
 class E
@@ -155,7 +155,7 @@ public class StepResolver {
 
 
     public static Element joinGraphToElement(Graph<V, E> joinGraph, V root) {
-        Map<V, Relation> vToRelation = new HashMap<>();
+        Map<V, Fragment> vToRelation = new HashMap<>();
 
         //joinGraph.addV
         Set<E> edges = joinGraph.outgoingEdgesOf(root);
@@ -183,7 +183,7 @@ public class StepResolver {
 
     public AliasedPathResolver resolve(AliasedPathStep step) {
         boolean isOptional = step.isOptional();
-        Relation r = step.getRelation();
+        Fragment r = step.getRelation();
 
         List<Var> vars = r.getVars();
         String alias = step.getAlias();

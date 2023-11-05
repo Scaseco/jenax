@@ -218,7 +218,6 @@ public class ResourceInDatasetImpl
         return result;
     }
 
-
     public ResourceInDatasetImpl(Dataset dataset, String graphName, Node node) {
         super(node, (EnhGraph)DatasetUtils.getDefaultOrNamedModel(dataset, graphName));
         this.dataset = dataset;

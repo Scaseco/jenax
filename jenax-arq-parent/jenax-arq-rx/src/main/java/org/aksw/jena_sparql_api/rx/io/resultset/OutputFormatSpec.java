@@ -2,9 +2,9 @@ package org.aksw.jena_sparql_api.rx.io.resultset;
 
 import java.util.Collection;
 
-import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
+import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.resultset.ResultSetLang;
@@ -68,6 +68,10 @@ public class OutputFormatSpec {
         if (outFormat != null) {
             if ("json".equalsIgnoreCase(outFormat)) {
                 outputMode = OutputMode.JSON;
+            } else if ("list".equalsIgnoreCase(outFormat) || "help".equalsIgnoreCase(outFormat)) {
+                throw new IllegalStateException(
+                        "Available out formats:\n"
+                                + String.join("\n", RDFLanguagesEx.listOutFormats()));
             } else {
 
                 try {

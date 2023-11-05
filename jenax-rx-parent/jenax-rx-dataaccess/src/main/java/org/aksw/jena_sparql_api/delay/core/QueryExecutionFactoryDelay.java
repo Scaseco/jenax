@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
-import org.aksw.jena_sparql_api.transform.QueryExecutionFactoryDecorator;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryDecorator;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 

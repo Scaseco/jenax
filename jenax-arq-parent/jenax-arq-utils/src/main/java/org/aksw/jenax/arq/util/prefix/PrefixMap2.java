@@ -23,6 +23,14 @@ public class PrefixMap2
         this.local = Objects.requireNonNull(local);;
     }
 
+    public PrefixMap getGlobal() {
+        return global;
+    }
+
+    public PrefixMap getLocal() {
+        return local;
+    }
+
     @Override
     public String get(String prefix) {
         String result = local.get(prefix);

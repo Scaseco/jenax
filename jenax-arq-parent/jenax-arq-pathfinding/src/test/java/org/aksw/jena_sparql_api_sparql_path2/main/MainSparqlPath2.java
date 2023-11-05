@@ -25,7 +25,6 @@ import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletPath;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.core.GraphSparqlService;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
@@ -41,7 +40,7 @@ import org.aksw.jena_sparql_api.sparql_path2.PathCompiler;
 import org.aksw.jena_sparql_api.sparql_path2.PathExecutionUtils;
 import org.aksw.jena_sparql_api.sparql_path2.PredicateClass;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionFactoryKShortestPaths;
-import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionKShortestPaths;
+import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionPathFinder;
 import org.aksw.jena_sparql_api.sparql_path2.ValueSet;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlServiceFactory;
@@ -58,13 +57,16 @@ import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.AggMap;
 import org.aksw.jenax.arq.aggregation.AggTransform;
 import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.stmt.core.SparqlParserConfig;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.graph.Node;
@@ -105,14 +107,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
-
-
 public class MainSparqlPath2 {
 
     private static final Logger logger = LoggerFactory.getLogger(MainSparqlPath2.class);
 
     public static SparqlService proxySparqlService(SparqlService coreSparqlService, SparqlStmtParserImpl sparqlStmtParser, Prologue prologue) {
-
         GraphSparqlService graph = new GraphSparqlService(coreSparqlService);
         Model model = ModelFactory.createModelForGraph(graph);
 
@@ -128,9 +127,10 @@ public class MainSparqlPath2 {
                 .end()
                 .create();
 
+        RdfDataSource dataSource = () -> result.getRDFConnection();
 
         // context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
-        context.put(PropertyFunctionKShortestPaths.SPARQL_SERVICE, coreSparqlService);
+        context.put(RDFLinkUtils.symRdfDataSource, dataSource);
 
         return result;
     }
@@ -168,7 +168,7 @@ public class MainSparqlPath2 {
                 }));
         MappedQuery<Map<Node, Number>> mappedQuery = MappedQuery.create(query, source, agg);
 
-        MapService<Concept, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
+        MapService<Fragment1, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
         LookupService<Node, Map<Node, Number>> result = LookupServiceListService.create(lsx);
 
         result = LookupServicePartition.create(result, 100, 4);
@@ -239,7 +239,7 @@ public class MainSparqlPath2 {
                 AggTransform.create(AggLiteral.create(BindingMapperProjectVar.create(Vars.x)), (node) -> (Number)node.getLiteralValue()));
         MappedQuery<Map<Node, Number>> mappedQuery = MappedQuery.create(query, Vars.s, agg);
 
-        MapService<Concept, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
+        MapService<Fragment1, Node, Map<Node, Number>> lsx = MapServiceUtils.createListServiceMappedQuery(qef, mappedQuery, false);
         LookupService<Node, Map<Node, Number>> result = LookupServiceListService.create(lsx);
 
 
@@ -324,7 +324,7 @@ public class MainSparqlPath2 {
         return result;
     }
 
-    public static void main(String[] args) {
+    public static void main2(String[] args) {
         String pathExprStr = "^<p1>|(^(<p2>/<p3>))";
         Path path = PathParser.parse(pathExprStr, PrefixMapping.Extended);
         Nfa<Integer, LabeledEdge<Integer, PredicateClass>> nfa = PathCompiler.compileToNfa(path);
@@ -333,9 +333,9 @@ public class MainSparqlPath2 {
 
     }
 
-    public static void mainOld(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws InterruptedException, IOException {
 
-        PropertyFunctionRegistry.get().put(PropertyFunctionKShortestPaths.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
+        PropertyFunctionRegistry.get().put(PropertyFunctionPathFinder.DEFAULT_IRI, new PropertyFunctionFactoryKShortestPaths(ss -> null));
 
         String queryStr;
 

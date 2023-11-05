@@ -12,7 +12,7 @@ public interface FacetNodeResource
 	FacetNodeResource parent();
 	
 	@Override
-	ConstraintFacade<? extends FacetNodeResource> constraints();
+	ConstraintFacade<? extends FacetNodeResource> enterConstraints();
 
 	static Property reachingProperty(FacetNode fn) {
 		final FacetNodeResource fnr = fn.as(FacetNodeResource.class);

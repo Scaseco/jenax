@@ -76,7 +76,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.enhanced.EnhGraph;
-import org.apache.jena.ext.com.google.common.base.CaseFormat;
+import com.google.common.base.CaseFormat;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Literal;
@@ -1528,8 +1528,8 @@ public class MapperProxyUtils {
                 writeMethods.put(beanPropertyName, method);
             }
 
-            P_Path0 path = AnnotationUtils.derivePathFromMethod(method, pm);
-            if(path != null) {
+            List<P_Path0> ps = AnnotationUtils.derivePathsFromMethod(method, pm);
+            for (P_Path0 path : ps) {
                 paths.put(beanPropertyName, path);
             }
         }

@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.commons.util.range.CountInfo;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
@@ -36,22 +36,22 @@ public class CountUtils {
         return result;
     }
 
-    public static Map<Node, BinaryRelation> createQueriesPreCountCore(
-        Map<Node, BinaryRelation> overrides,
-        TernaryRelation defaultRelation, // TODO Maybe use a lambda Function<Node, BinaryRelation> instead
+    public static Map<Node, Fragment2> createQueriesPreCountCore(
+        Map<Node, Fragment2> overrides,
+        Fragment3 defaultRelation, // TODO Maybe use a lambda Function<Node, BinaryRelation> instead
         Var countVar,
         Collection<Node> properties) {
 
 
-        Map<Node, BinaryRelation> result = new HashMap<>();
+        Map<Node, Fragment2> result = new HashMap<>();
 
         // Use the default relation for every property that is not in the overrides map
         for(Node p : properties) {
-            BinaryRelation r = overrides.get(p);
+            Fragment2 r = overrides.get(p);
 
             if(r == null) {
-                TernaryRelation tr = null; //defaultRelation.filterP(p);
-                BinaryRelation br = new BinaryRelationImpl(tr.getElement(), tr.getS(), tr.getO());
+                Fragment3 tr = null; //defaultRelation.filterP(p);
+                Fragment2 br = new Fragment2Impl(tr.getElement(), tr.getS(), tr.getO());
                 result.put(p, br);
             } else {
                 result.put(p, r);

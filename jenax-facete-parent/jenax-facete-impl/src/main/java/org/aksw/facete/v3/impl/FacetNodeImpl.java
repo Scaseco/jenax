@@ -18,8 +18,8 @@ import org.aksw.facete.v3.bgp.impl.BgpNodeUtils;
 import org.aksw.facete.v3.bgp.utils.PathAccessorImpl;
 import org.aksw.jena_sparql_api.data_query.impl.FacetedQueryGenerator;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Statement;
@@ -85,8 +85,8 @@ public class FacetNodeImpl
 
 
     @Override
-    public BinaryRelation getReachingRelation() {
-        BinaryRelation result = BgpNode.getReachingRelation(state);
+    public Fragment2 getReachingRelation() {
+        Fragment2 result = BgpNode.getReachingRelation(state);
         return result;
     }
 
@@ -142,7 +142,7 @@ public class FacetNodeImpl
 
         BgpNode focus = query().focus().state();
 
-        UnaryRelation c = qgen.getConceptForAtPath(focus, this.state, applySelfConstraints);
+        Fragment1 c = qgen.getConceptForAtPath(focus, this.state, applySelfConstraints);
 
         //System.out.println("Available values: " + c);
 
@@ -198,7 +198,7 @@ public class FacetNodeImpl
     }
 
     @Override
-    public ConstraintFacade<? extends FacetNodeResource> constraints() {
+    public ConstraintFacade<? extends FacetNodeResource> enterConstraints() {
         return new ConstraintFacadeImpl<FacetNodeResource>(this);
     }
 
@@ -259,7 +259,7 @@ public class FacetNodeImpl
             FacetedQueryGenerator<BgpNode> qgen = new FacetedQueryGenerator<>(new PathAccessorImpl(this.state.getModel()));
             query.constraints().forEach(c -> qgen.addConstraint(c.expr()));
 
-            UnaryRelation c = qgen.getConceptForAtPath(this.query.focus().state(), this.state, false);
+            Fragment1 c = qgen.getConceptForAtPath(this.query.focus().state(), this.state, false);
             result = this.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(this))
                     + "{" + c + "}";
         }
@@ -296,4 +296,17 @@ public class FacetNodeImpl
         Direction result = parent == null ? null : parent.getDirection();
         return result;
     }
+
+    @Override
+    public String reachingAlias() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Node targetComponent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

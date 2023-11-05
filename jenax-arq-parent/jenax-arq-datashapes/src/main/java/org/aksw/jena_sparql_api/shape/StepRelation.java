@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.shape;
 
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 
 /**
  * Combine an expression with a direction
@@ -8,16 +8,16 @@ import org.aksw.jenax.sparql.relation.api.BinaryRelation;
  *
  */
 public class StepRelation {
-    private final BinaryRelation relation;
+    private final Fragment2 relation;
     private final boolean isInverse;
     
-    public StepRelation(BinaryRelation expr, boolean isInverse) {
+    public StepRelation(Fragment2 expr, boolean isInverse) {
         super();
         this.relation = expr;
         this.isInverse = isInverse;
     }
 
-    public BinaryRelation getRelation() {
+    public Fragment2 getRelation() {
         return relation;
     }
 

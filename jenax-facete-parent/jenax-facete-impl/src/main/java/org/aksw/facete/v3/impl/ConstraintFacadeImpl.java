@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.aksw.commons.collections.ConvertingCollection;
+import org.aksw.commons.collections.ConvertingSet;
 import org.aksw.facete.v3.api.ConstraintFacade;
 import org.aksw.facete.v3.api.FacetConstraint;
+import org.aksw.facete.v3.api.FacetConstraintControl;
 import org.aksw.facete.v3.api.FacetNodeResource;
 import org.aksw.facete.v3.api.HLFacetConstraint;
 import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
@@ -40,11 +42,14 @@ public class ConstraintFacadeImpl<B extends FacetNodeResource>
     }
 
     @Override
-    public Collection<FacetConstraint> list() {
+    public Collection<FacetConstraintControl> list() {
         // TODO Only list the constraints for the parent facet node
 
         Resource modelRoot = parent.query().modelRoot();
-        Set<FacetConstraint> set = new SetFromPropertyValues<>(modelRoot, Vocab.constraint, FacetConstraint.class);
+        Set<FacetConstraintControl> set =
+                new ConvertingSet<>(
+                        new SetFromPropertyValues<>(modelRoot, Vocab.constraint, FacetConstraint.class),
+                        Converter.from(x -> (FacetConstraintControl)x, y -> (FacetConstraint)y));
 
         return set;
     }
@@ -179,9 +184,9 @@ public class ConstraintFacadeImpl<B extends FacetNodeResource>
 
     @Override
     public Collection<HLFacetConstraint<? extends ConstraintFacade<B>>> listHl() {
-        Collection<FacetConstraint> lowLevel = list();
+        Collection<FacetConstraintControl> lowLevel = list();
 
-        ConvertingCollection<HLFacetConstraint<? extends ConstraintFacade<B>>, FacetConstraint, ?> result = new ConvertingCollection<>(lowLevel, Converter.from(
+        ConvertingCollection<HLFacetConstraint<? extends ConstraintFacade<B>>, FacetConstraintControl, ?> result = new ConvertingCollection<>(lowLevel, Converter.from(
             ll -> new HLFacetConstraintImpl<>(this, parent, ll),
             hl -> hl.state()
         ));

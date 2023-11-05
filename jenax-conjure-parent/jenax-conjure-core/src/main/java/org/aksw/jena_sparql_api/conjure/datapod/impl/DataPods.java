@@ -1,11 +1,14 @@
 package org.aksw.jena_sparql_api.conjure.datapod.impl;
 
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.http.HttpClient;
+import java.net.http.HttpClient.Builder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import org.aksw.commons.io.util.UriUtils;
 import org.aksw.commons.util.ref.Ref;
@@ -15,6 +18,8 @@ import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRef;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefVisitor;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfAuthBasic;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfAuthBearerToken;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRef;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
@@ -24,23 +29,27 @@ import org.aksw.jena_sparql_api.http.repository.api.HttpResourceRepositoryFromFi
 import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
-import org.aksw.jenax.arq.connection.core.RDFConnectionUtils;
-import org.aksw.jenax.arq.connection.dataset.DatasetRDFConnectionFactoryBuilder;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.dataset.connection.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.jena.http.auth.AuthEnv;
+import org.apache.jena.http.auth.AuthLib;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.util.ResourceUtils;
@@ -238,29 +247,105 @@ public class DataPods {
         List<String> defaultGraphs = dataRef.getDefaultGraphs();
         List<String> namedGraphs = dataRef.getNamedGraphs();
 
-        RdfDataPod result = fromSparqlEndpoint(serviceUrl, defaultGraphs, namedGraphs);
+        Object auth = dataRef.getAuth();
+
+        RdfDataPod result = fromSparqlEndpoint(serviceUrl, defaultGraphs, namedGraphs, auth);
         return result;
     }
 
-    public static RdfDataPod fromSparqlEndpoint(String serviceUrl, List<String> defaultGraphs, List<String> namedGraphs) {
+    public static RdfDataPod fromSparqlEndpoint(String serviceUrl, List<String> defaultGraphs, List<String> namedGraphs, Object auth) {
 
         Objects.requireNonNull(serviceUrl, "Service URL must not be null");
 
-        Supplier<RDFConnection> supplier = () -> RDFConnectionRemote.create()
-                .destination(serviceUrl)
-                .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
-                .build();
+        // Make immutable copies of the arguments
+        List<String> defaultGraphsCpy = defaultGraphs == null ? null : new ArrayList<>(defaultGraphs);
+        List<String> namedGraphsCpy = namedGraphs == null ? null : new ArrayList<>(namedGraphs);
 
-        RdfDataPod result = fromConnectionSupplier(supplier);
+        Authenticator authenticator = null;
+        if (auth instanceof RdfAuthBasic) {
+            RdfAuthBasic authData = (RdfAuthBasic)auth;
+            String username = authData.getUsername();
+            String password = authData.getPassword();
+            authenticator = AuthLib.authenticator(username, password);
+        }
+
+        if (auth instanceof RdfAuthBearerToken) {
+            RdfAuthBearerToken authData = (RdfAuthBearerToken)auth;
+            String bearerToken = authData.getBearerToken();
+            // tmpHttpRequestModifier = builder -> builder.setHeader(HttpNames.hAuthorization, "Bearer " + bearerToken);
+            // FIXME BIG SECURITY ISSUE - users on the same endpoint will override their bearer token - so they
+            // might see data they shouldn't have access to
+            // Needs a PR to Jena - e.g. RDFConnectionBuilderHttp might need a way to inject http request mods
+            AuthEnv.get().setBearerToken(serviceUrl, bearerToken);
+        }
+
+        Builder httpClientBuilder = HttpClient.newBuilder();
+        if (authenticator != null) {
+            httpClientBuilder = httpClientBuilder.authenticator(authenticator);
+        }
+
+        HttpClient httpClient = httpClientBuilder.build();
+
+
+        RdfDataPod result = new RdfDataPod() {
+
+            @Override
+            public RDFConnection getConnection() {
+
+                RDFConnectionRemoteBuilder rdfConnectionBuilder = RDFConnectionRemote.create()
+                        .destination(serviceUrl)
+                        .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
+                        ;
+
+                // FIXME We cannot set default / named graphs on the remote builder
+
+                rdfConnectionBuilder = rdfConnectionBuilder.httpClient(httpClient);
+
+                RDFConnection r = rdfConnectionBuilder.build();
+
+                r = RDFConnectionUtils.wrapWithQueryTransform(r,
+                    query -> {
+                        boolean updateDefaultGraphs = query.getGraphURIs().isEmpty() && defaultGraphsCpy != null && !defaultGraphsCpy.isEmpty();
+                        boolean updateNamedGraphs = query.getNamedGraphURIs().isEmpty() && namedGraphsCpy != null && !namedGraphsCpy.isEmpty();
+                        Query res;
+                        if (updateDefaultGraphs || updateNamedGraphs) {
+                            res = query.cloneQuery();
+                            if (updateDefaultGraphs) {
+                                res.getGraphURIs().addAll(defaultGraphsCpy);
+                            }
+                            if (updateNamedGraphs) {
+                                res.getNamedGraphURIs().addAll(namedGraphsCpy);
+                            }
+                        } else {
+                            res = query;
+                        }
+                        return res;
+                    });
+
+                return r;
+            }
+
+            @Override
+            public void close() throws Exception {
+                // Java 21 - https://stackoverflow.com/questions/53919721/close-java-http-client
+                // httpClient.close();
+            }
+
+            @Override
+            public boolean isMutable() {
+                return true;
+            }
+        };
+
+        // RdfDataPod result = fromDataSource(dataSource);
         return result;
     }
 
-
-    public static RdfDataPod fromConnectionSupplier(Supplier<? extends RDFConnection> supplier) {
+    public static RdfDataPod fromDataSource(RdfDataSource supplier) {
         return new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                RDFConnection result = supplier.get();
+                RDFConnection result = supplier.getConnection();
                 return result;
             }
         };

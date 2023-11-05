@@ -18,7 +18,7 @@ import org.aksw.commons.io.util.PathUtils;
 import org.aksw.commons.io.util.SymLinkUtils;
 import org.aksw.commons.io.util.UriToPathUtils;
 import org.aksw.commons.io.util.symlink.SymbolicLinkStrategy;
-import org.aksw.commons.path.core.PathOpsStr;
+import org.aksw.commons.path.core.PathStr;
 import org.aksw.commons.txn.api.Txn;
 import org.aksw.commons.txn.api.TxnResourceApi;
 import org.aksw.commons.txn.impl.FileSyncImpl;
@@ -28,7 +28,6 @@ import org.aksw.commons.util.array.Array;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.difs.index.api.DatasetGraphIndexPlugin;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.jena.ext.com.google.common.io.MoreFiles;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
@@ -42,6 +41,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import com.google.common.io.MoreFiles;
 
 
 /**
@@ -270,7 +270,7 @@ public class DatasetGraphIndexerFromFileSystem
     {
         Path baseFolder = txn.getTxnMgr().getRootPath();
         String[] indexLinkId = PathUtils.getPathSegments(baseFolder.relativize(linkFile));
-        TxnResourceApi txnResApi = txn.getResourceApi(PathOpsStr.newRelativePath(indexLinkId));
+        TxnResourceApi txnResApi = txn.getResourceApi(PathStr.newRelativePath(indexLinkId));
 
         txnResApi.declareAccess();
         txnResApi.lock(true);
@@ -361,7 +361,7 @@ public class DatasetGraphIndexerFromFileSystem
                 String[] tmp = PathUtils.getPathSegments(txn.getTxnMgr().getRootPath().relativize(tgtBasePath).normalize());
                 tmp = ArrayUtils.addAll(tmp, tgtRelPath);
                 tmp = ArrayUtils.add(tmp, "data.trig");
-                org.aksw.commons.path.core.Path<String> allSegments = PathOpsStr.newRelativePath(tmp);
+                org.aksw.commons.path.core.Path<String> allSegments = PathStr.newRelativePath(tmp);
 
                 // Compute prefix/suffix
                 Path file = Paths.get(tgtFilename);
@@ -419,7 +419,7 @@ public class DatasetGraphIndexerFromFileSystem
                             // TODO Get the base name
                             String[] indexLinkId = PathUtils.getPathSegments(baseFolder.relativize(deletePath).normalize());
 
-                            TxnResourceApi txnResApi = txn.getResourceApi(PathOpsStr.newRelativePath(indexLinkId));
+                            TxnResourceApi txnResApi = txn.getResourceApi(PathStr.newRelativePath(indexLinkId));
                             txnResApi.declareAccess();
                             txnResApi.lock(true);
                             txnResApi.getFileSync().markForDeletion();
@@ -495,7 +495,7 @@ public class DatasetGraphIndexerFromFileSystem
         // Path tgtRelPath = tgtRelFile.getParent();
         // The file name is part of the resource key
         String[] segments = PathUtils.getPathSegments(tgtRelFile);
-        org.aksw.commons.path.core.Path<String> result = PathOpsStr.newRelativePath(segments);
+        org.aksw.commons.path.core.Path<String> result = PathStr.newRelativePath(segments);
         return result;
     }
 

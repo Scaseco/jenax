@@ -5,14 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.commons.collections.generator.Generator;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptOps;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
@@ -23,7 +24,7 @@ import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.vocabulary.RDF;
 
 public class OpVisitorSparql
-    implements OpVisitor<Concept>
+    implements OpVisitor<Fragment1>
 {
     protected PathExVisitorSparql pathVisitor;
     protected Generator<Var> generator;
@@ -33,97 +34,97 @@ public class OpVisitorSparql
     }
 
     @Override
-    public Concept visit(OpAssign op) {
+    public Fragment1 visit(OpAssign op) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Concept visit(OpAnd op) {
-        Concept a = op.getLeft().accept(this);
-        Concept b = op.getRight().accept(this);
-        Concept result = ConceptOps.intersect(a, b, generator);
+    public Fragment1 visit(OpAnd op) {
+        Fragment1 a = op.getLeft().accept(this);
+        Fragment1 b = op.getRight().accept(this);
+        Fragment1 result = ConceptOps.intersect(a, b, generator);
         return result;
     }
 
     @Override
-    public Concept visit(OpUnion op) {
-        Concept a = op.getLeft().accept(this);
-        Concept b = op.getRight().accept(this);
-        Concept result = ConceptOps.union(a, b, generator);
+    public Fragment1 visit(OpUnion op) {
+        Fragment1 a = op.getLeft().accept(this);
+        Fragment1 b = op.getRight().accept(this);
+        Fragment1 result = ConceptOps.union(a, b, generator);
         return result;
     }
 
     @Override
-    public Concept visit(OpExists op) {
-        BinaryRelation relation = op.getRole();
-        Concept filler = op.getSubOp().accept(this);
-        Concept result = ConceptOps.exists(relation, filler, generator);
+    public Fragment1 visit(OpExists op) {
+        Fragment2 relation = op.getRole();
+        Fragment1 filler = op.getSubOp().accept(this);
+        Fragment1 result = ConceptOps.exists(relation, filler, generator);
         return result;
     }
 
     @Override
-    public Concept visit(OpForAll op) {
-        BinaryRelation relation = op.getRole();
-        Concept filler = op.getSubOp().accept(this);
-        Concept result = ConceptOps.forAllIfRolePresent(relation, filler, generator);
+    public Fragment1 visit(OpForAll op) {
+        Fragment2 relation = op.getRole();
+        Fragment1 filler = op.getSubOp().accept(this);
+        Fragment1 result = ConceptOps.forAllIfRolePresent(relation, filler, generator);
         return result;
     }
 
     @Override
-    public Concept visit(OpSparqlConcept op) {
-        Concept result = op.getConcept();
+    public Fragment1 visit(OpSparqlConcept op) {
+        Fragment1 result = op.getConcept();
         return result;
     }
 
     @Override
-    public Concept visit(OpType op) {
+    public Fragment1 visit(OpType op) {
         Node node = op.getType();
         Element e = ElementUtils.createElement(new Triple(Vars.s, RDF.type.asNode(), node));
-        Concept result = new Concept(e, Vars.s);
+        Fragment1 result = new Concept(e, Vars.s);
         return result;
     }
 
     @Override
-    public Concept visit(OpTop op) {
-        Concept result = Concept.TOP;//ConceptUtils.createSubjectConcept();
+    public Fragment1 visit(OpTop op) {
+        Fragment1 result = Concept.TOP;//ConceptUtils.createSubjectConcept();
         return result;
     }
 
     @Override
-    public Concept visit(OpConcept op) {
-        Concept result = op.getConcept();
+    public Fragment1 visit(OpConcept op) {
+        Fragment1 result = op.getConcept();
         return result;
     }
 
     @Override
-    public Concept visit(OpFilter op) {
+    public Fragment1 visit(OpFilter op) {
         Expr expr = op.getExpr();
-        Concept concept = op.getSubOp().accept(this);
+        Fragment1 concept = op.getSubOp().accept(this);
         Var conceptVar = concept.getVar();
         Map<Var, Var> varMap = Collections.singletonMap(Vars.lodash, conceptVar);
 
         Expr newExpr = ExprUtils.applyNodeTransform(expr, varMap);
         Element newElement = ElementUtils.mergeElements(concept.getElement(), new ElementFilter(newExpr));
 
-        Concept result = new Concept(newElement, conceptVar);
+        Fragment1 result = new Concept(newElement, conceptVar);
         return result;
     }
 
     @Override
-    public Concept visit(OpFocus op) {
-        Concept concept = op.getSubOp().accept(this);
+    public Fragment1 visit(OpFocus op) {
+        Fragment1 concept = op.getSubOp().accept(this);
         Path path = op.getPath();
-        BinaryRelation relation = BinaryRelationImpl.create(path);
-        Concept result = ConceptUtils.getRelatedConcept(concept, relation);
+        Fragment2 relation = Fragment2Impl.create(path);
+        Fragment1 result = ConceptUtils.getRelatedConcept(concept, relation);
         return result;
     }
 
     @Override
-    public Concept visit(OpEnumeration op) {
+    public Fragment1 visit(OpEnumeration op) {
         List<Node> nodes = op.getNodes();
 
-        Concept result = ConceptUtils.createConcept(nodes);
+        Fragment1 result = ConceptUtils.createConcept(nodes);
         return result;
     }
 

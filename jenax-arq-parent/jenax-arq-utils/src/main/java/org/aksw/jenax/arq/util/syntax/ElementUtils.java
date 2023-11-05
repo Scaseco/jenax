@@ -15,8 +15,10 @@ import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -24,6 +26,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
+import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -70,6 +73,9 @@ public class ElementUtils {
 //        return result;
 //    }
 
+    public static ElementData create(Table table) {
+        return new ElementData(table.getVars(), Iter.toList(table.rows()));
+    }
 
     public static List<Element> getSubElements(Element element) {
         return ElementVisitorGetSubElements.getSubElements(element);
@@ -113,6 +119,9 @@ public class ElementUtils {
         return createElement(Triple.create(s, p, o));
     }
 
+    public static ElementTriplesBlock createElementTriple(Node s, Node p, Node o, boolean isForward) {
+        return createElement(TripleUtils.create(s, p, o, isForward));
+    }
 
     public static ElementPathBlock createElementPath(Node s, Path p, Node o) {
         ElementPathBlock result = createElementPath(new TriplePath(s, p, o));
@@ -359,7 +368,9 @@ public class ElementUtils {
     @Deprecated // Use TransformElementLib.transform instead
     public static Element applyNodeTransformBackport(Element element, NodeTransform nodeTransform) {
         ElementTransform elementTransform = new ElementTransformSubst2(nodeTransform);//new ElementTransformSubst2(nodeTransform);
-        ExprTransform exprTransform = new ExprTransformNodeElement(nodeTransform, elementTransform);
+
+        // Need to use backport version because of substitution in aggregators
+        ExprTransform exprTransform = new org.aksw.jenax.util.backport.syntaxtransform.ExprTransformNodeElement(nodeTransform, elementTransform);
 
         Element result = org.aksw.jenax.util.backport.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
 
@@ -487,6 +498,30 @@ public class ElementUtils {
             result = e;
         }
 
+        return result;
+    }
+
+    public static Element flatMerge(Element... elts) {
+        return flatMerge(Arrays.asList(elts));
+    }
+
+    public static Element flatMerge(Iterable<Element> elts) {
+        Element result = ElementUtils.groupIfNeeded(flatMergeList(elts));
+        return result;
+    }
+
+    public static List<Element> flatMergeList(Element... elts) {
+        return flatMergeList(Arrays.asList(elts));
+    }
+
+    public static List<Element> flatMergeList(Iterable<? extends Element> elts) {
+        List<Element> result = new ArrayList<>();
+        for (Element elt : elts) {
+            if (elt != null) {
+                List<Element> contrib = ElementUtils.toElementList(elt);
+                result.addAll(contrib);
+            }
+        }
         return result;
     }
 

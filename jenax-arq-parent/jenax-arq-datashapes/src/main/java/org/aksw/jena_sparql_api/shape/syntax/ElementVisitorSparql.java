@@ -2,7 +2,6 @@ package org.aksw.jena_sparql_api.shape.syntax;
 
 import java.util.List;
 
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.shape.algebra.op.Op;
 import org.aksw.jena_sparql_api.shape.algebra.op.OpAnd;
 import org.aksw.jena_sparql_api.shape.algebra.op.OpConcept;
@@ -13,7 +12,8 @@ import org.aksw.jena_sparql_api.shape.algebra.op.OpFocus;
 import org.aksw.jena_sparql_api.shape.algebra.op.OpForAll;
 import org.aksw.jena_sparql_api.shape.algebra.op.OpTop;
 import org.aksw.jena_sparql_api.shape.algebra.op.OpType;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 
 public class ElementVisitorSparql
     implements ElementVisitor<Op>
@@ -118,7 +118,7 @@ public class ElementVisitorSparql
 
     @Override
     public OpExists visit(ElementExists el) {
-        BinaryRelation relation = BinaryRelationImpl.create(el.getPath());
+        Fragment2 relation = Fragment2Impl.create(el.getPath());
         Op op = el.getFiller().accept(this);
         OpExists result = new OpExists(relation, op);
         return result;
@@ -126,7 +126,7 @@ public class ElementVisitorSparql
 
     @Override
     public Op visit(ElementForAll el) {
-        BinaryRelation relation = BinaryRelationImpl.create(el.getPath());
+        Fragment2 relation = Fragment2Impl.create(el.getPath());
         Op op = el.getFiller().accept(this);
         OpForAll result = new OpForAll(relation, op);
         return result;

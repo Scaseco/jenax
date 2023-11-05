@@ -12,5 +12,7 @@ public interface RdfHttpEntity {
 
     InputStream open() throws IOException;
 
+
+    // CompletableFuture<?> write(Consumer<OutputStream> writer);
 //    WriteProgress put(InputStream in);
 }

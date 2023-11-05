@@ -8,20 +8,22 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.relation.dataset.GraphNameAndNode;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDatasetImpl;
-import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
+
+import com.google.common.base.Strings;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -90,11 +92,11 @@ public class FlowOfRdfNodesInDatasetsOps {
      */
     public static FlowableTransformer<ResourceInDataset, NodesInDataset> groupedResourceInDataset() {
         return upstream -> upstream
-                .lift(FlowableOperatorSequentialGroupBy.<ResourceInDataset, Dataset, List<ResourceInDataset>>create(
+                .lift(FlowableOperatorCollapseRuns.create(CollapseRunsSpec.<ResourceInDataset, Dataset, List<ResourceInDataset>>create(
                         ResourceInDataset::getDataset,
                         (k1, k2) -> k1 == k2 || k1.asDatasetGraph() == k2.asDatasetGraph(),
                         key -> new ArrayList<>(),
-                        (list, item) -> list.add(item)))
+                        (list, item) -> { list.add(item); return list; })))
                 .map(Entry::getValue)
 //                .compose(Transformers.<ResourceInDataset>toListWhile(
 //                        (list, t) -> {

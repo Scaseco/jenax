@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.commons.collections.ConvertingCollection;
+import org.aksw.commons.collections.maps.EntryConverterByKey;
 import org.aksw.commons.collections.sets.SetFromCollection;
 
 import com.google.common.base.Converter;

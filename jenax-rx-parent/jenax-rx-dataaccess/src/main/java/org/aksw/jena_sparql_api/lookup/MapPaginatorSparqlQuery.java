@@ -1,12 +1,15 @@
 package org.aksw.jena_sparql_api.lookup;
 
+import java.util.List;
 import java.util.Map.Entry;
 
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -30,13 +33,11 @@ public class MapPaginatorSparqlQuery
 {
     private static final Logger logger = LoggerFactory.getLogger(MapPaginatorSparqlQuery.class);
 
-
     protected Query attrQuery;
     protected Var attrVar;
     protected boolean forceSubQuery;
 
-
-    public MapPaginatorSparqlQuery(QueryExecutionFactoryQuery qef, Concept filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
+    public MapPaginatorSparqlQuery(QueryExecutionFactoryQuery qef, Fragment1 filterConcept, boolean isLeftJoin, Query attrQuery, Var attrVar, boolean forceSubQuery) {
         super(qef, filterConcept, isLeftJoin);
         this.attrQuery = attrQuery;
         this.attrVar = attrVar;
@@ -50,7 +51,7 @@ public class MapPaginatorSparqlQuery
             filterConcept = ConceptUtils.createSubjectConcept();
         }
 
-        Concept countConcept;
+        Fragment1 countConcept;
         if(this.isLeftJoin) {
             Query query = ConceptUtils.createAttrQuery(this.attrQuery, this.attrVar, this.isLeftJoin, filterConcept, itemLimit, null, this.forceSubQuery);
 
@@ -115,11 +116,22 @@ public class MapPaginatorSparqlQuery
 //      Node[] prior = {null};
 //      PublishProcessor<Node> boundaryIndicator = PublishProcessor.create();
 
-      return SparqlRx.execSelectRaw(qef, query)
-              .lift(FlowableOperatorSequentialGroupBy.<Binding, Node, Table>create(
+      Flowable<Entry<Node, Table>> result = SparqlRx.execSelectRaw(qef, query)
+              .lift(FlowableOperatorCollapseRuns.<Binding, Node, Table>create(CollapseRunsSpec.create(
                       b -> b.get(attrVar),
                       groupKey -> new TableN(),
-                      Table::addBinding));
+                      Table::addBinding)));
+
+      if (false) {
+          List<Entry<Node, Table>> items = result.toList().blockingGet();
+          System.out.println("Query: " + query);
+          List<Binding> bindings = SparqlRx.execSelectRaw(qef, query).toList().blockingGet();
+          System.out.println("Raw Bindings: " + bindings);
+          System.out.println("Items: " + items);
+          result = Flowable.fromIterable(items);
+      }
+
+      return result;
 //      return ReactiveSparqlUtils.groupByOrdered(
 //    		  ReactiveSparqlUtils.execSelect(() -> qef.createQueryExecution(query)),
 //    		  b -> b.get(attrVar))

@@ -19,11 +19,13 @@ import org.apache.jena.riot.lang.LabelToNode;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterNT;
+import org.apache.jena.riot.out.NodeFormatterTTL;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.expr.NodeValue;
 
 import com.google.common.collect.Iterables;
@@ -31,10 +33,15 @@ import com.google.common.collect.Streams;
 
 public class NodeUtils {
 
-    /** Placeholder constants to denote a 'null' node */
+    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
+    public static final NodeFormatter ttlFormatter = new NodeFormatterTTL();
+
+    /** Placeholder constants to denote a 'null' node - the absence of a value */
     public static final String nullUri = "http://null.null/null";
     public static final Node nullUriNode = NodeFactory.createURI(nullUri);
 
+    public static final String ANY_IRI_STR = "urn:x-jenax:any";
+    public static final Node ANY_IRI = NodeFactory.createURI(ANY_IRI_STR);
 
     /** Constants for use with {@link #getDatatypeIri(Node)}
         Conflates the term type into a datatype: Under this perspective, IRIs and
@@ -94,9 +101,12 @@ public class NodeUtils {
         return node == null || Node.ANY.equals(node);
     }
 
-    /** This method is unfortunately private in {@link Triple} at least in jena 3.16 */
+    /** Method now exists in Jena's NodeUtils.
+     * This method was private in {@link Triple} at least in jena 3.16
+     */
+    @Deprecated
     public static Node nullToAny(Node n) {
-        return n == null ? Node.ANY : n;
+        return org.apache.jena.sparql.util.NodeUtils.nullToAny(n);
     }
 
     public static Node anyToNull(Node n) {
@@ -214,8 +224,6 @@ public class NodeUtils {
         return number;
     }
 
-    public static final NodeFormatter ntFormatter = new NodeFormatterNT();
-
     /** Variant of {@link NodeFmtLib#strNodesNT(Node...)} that yield nul as UNDEF */
     public static String strNodesWithUndef(BiConsumer<IndentedWriter, Node> output, Node...nodes) {
         IndentedLineBuffer sw = new IndentedLineBuffer();
@@ -231,6 +239,31 @@ public class NodeUtils {
             output.accept(sw, n);
         }
         return sw.toString();
+    }
+
+    public static Node parseNode(String str) {
+        Node result = null;
+        // NodeFmtLib.strNodes encodes labels - so we need to decode them
+        LabelToNode decoder = LabelToNode.createUseLabelEncoded();
+
+        Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
+        if (tokenizer.hasNext()) {
+            Token token = tokenizer.next() ;
+            Node node = token.asNode() ;
+//            if ( node == null )
+//                throw new RiotException("Bad RDF Term: " + str) ;
+
+            if (node != null) {
+                if (node.isBlank()) {
+                    String label = node.getBlankNodeLabel();
+                    node = decoder.get(null, label);
+                }
+            }
+
+            result = node;
+        }
+
+        return result;
     }
 
     /** Parse a sequence of nodes into the provided collection */
@@ -265,6 +298,45 @@ public class NodeUtils {
         Node result = graphName == null || graphName.isBlank() || graphName.equalsIgnoreCase("default")
                 ? Quad.defaultGraphIRI
                 : NodeFactory.createURI(graphName);
+        return result;
+    }
+
+    /** Serialize and deserialize (print/parse) a node. Returns true iff the result is the same (term-equality) as the input. */
+    public static boolean isValid(Node node) {
+        boolean result = false;
+        try {
+            if (node != null) {
+                String str = NodeFmtLib.strNT(node);
+                List<Node> nodes = parseNodes(str, new ArrayList<>());
+                if (nodes.size() == 1) {
+                    Node actual = nodes.get(0);
+                    result = node.equals(actual); // NodeCmp.compareRDFTerms(node, actual) == 0;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return result;
+    }
+
+    /** Throws an {@link IllegalArgumentException} if {@link #isValid(Node)} returns false. */
+    public static void validate(Node node) {
+        if (!isValid(node)) {
+            throw new IllegalArgumentException("Node does not print/parse: " + node);
+        }
+    }
+
+    public static boolean put(BindingBuilder builder, Node nodeOrVar, Node node) {
+        boolean result = true;
+        if (NodeUtils.isNullOrAny(node)) {
+            // nothing to do
+        } else if (nodeOrVar.isVariable()) {
+            builder.add((Var)nodeOrVar, node);
+        } else {
+            if (!nodeOrVar.equals(node)) {
+                result = false;
+            }
+        }
         return result;
     }
 }

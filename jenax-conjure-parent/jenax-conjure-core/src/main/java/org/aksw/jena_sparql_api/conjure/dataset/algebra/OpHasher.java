@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.conjure.entity.algebra.HashUtils;
-import org.apache.jena.ext.com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ComparisonChain;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;

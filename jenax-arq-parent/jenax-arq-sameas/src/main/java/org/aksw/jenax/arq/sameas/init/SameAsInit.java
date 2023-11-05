@@ -15,7 +15,7 @@ import org.aksw.jenax.arq.uniondefaultgraph.assembler.UnionDefaultGraphVocab;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphRDFSReduced;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphSameAs;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphUnionDefaultGraph;
-import org.aksw.jenax.arq.util.exec.QueryExecUtils;
+import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.assemblers.AssemblerGroup;

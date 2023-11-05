@@ -30,22 +30,25 @@ import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.apache.commons.io.IOUtils;
+import org.apache.jena.fuseki.DEF;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.WebContent;
 
-
-/** Adjust wildcard accept header with a specific one based on the sparql query / update type */
+/**
+ * Adjust wildcard accept header with a specific one based on the sparql query / update type
+ */
 @WebFilter
 public class SparqlStmtTypeAcceptHeaderFilter
-    implements Filter
-{
-    /** The parser defaults to jena's arq parser */
+        implements Filter {
+    /**
+     * The parser defaults to jena's arq parser
+     */
     protected SparqlStmtParser sparqlStmtParser;
 
     public SparqlStmtTypeAcceptHeaderFilter(SparqlStmtParser sparqlStmtParser) {
-		super();
-		this.sparqlStmtParser = sparqlStmtParser;
-	}
+        super();
+        this.sparqlStmtParser = sparqlStmtParser;
+    }
 
 //    public SparqlStmtParser getSparqlStmtParser() {
 //    	return sparqlStmtParser == null ? SparqlEndpointBase;
@@ -57,8 +60,8 @@ public class SparqlStmtTypeAcceptHeaderFilter
             throws IOException, ServletException {
 
 
-        HttpServletRequest req = (HttpServletRequest)request;
-        HttpServletResponse res = (HttpServletResponse)response;
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
 
         String payload = null;
 
@@ -68,82 +71,92 @@ public class SparqlStmtTypeAcceptHeaderFilter
         // If we don't do it here, jersey will consume the data and we won't be able to access it here anymore
         Enumeration<String> it = req.getHeaders("Accept");
         boolean isWildcard = true;
+        boolean isSparqlRequest = false;
+        org.apache.jena.atlas.web.MediaType type = null;
         while (it.hasMoreElements()) {
-        	String item = it.nextElement();
-        	if (!item.equals("*/*")) {
-        		isWildcard = false;
-        	}
+            String item = it.nextElement();
+            if (!item.equals("*/*")) {
+                isWildcard = false;
+            }
+            if (!isSparqlRequest) {
+                type = org.apache.jena.atlas.web.MediaType.createFromContentType(item);
+                if (DEF.constructOffer.match(type) != null
+                        || DEF.quadsOffer.match(type) != null
+                        || DEF.rdfOffer.match(type) != null
+                        || DEF.rsOfferTable.match(type) != null
+                        || DEF.rsOfferBoolean.match(type) != null) {
+                    isSparqlRequest = true;
+                }
+            }
         }
 
-        boolean isSparqlRequest = false;
-
         // HttpServletRequest subReq = req;
-        if (isWildcard) {
-        	List<String> strs = new ArrayList<>();
+        if (isWildcard || isSparqlRequest) {
+            List<String> strs = new ArrayList<>();
 
-        	String contentTypeStr = req.getContentType();
-        	boolean isSparqlPayload = WebContent.contentTypeSPARQLQuery.equals(contentTypeStr) || WebContent.contentTypeSPARQLUpdate.equals(contentTypeStr);
-        	if (isSparqlPayload) {
-        		isSparqlRequest = true;
+            String contentTypeStr = req.getContentType();
+            boolean isSparqlPayload = WebContent.contentTypeSPARQLQuery.equals(contentTypeStr) || WebContent.contentTypeSPARQLUpdate.equals(contentTypeStr);
+            if (isSparqlPayload) {
+                isSparqlRequest = true;
 
-        		// req = new ContentCachingRequestWrapper(req);
-        		try (InputStream in = req.getInputStream()) {
-        			payload = IOUtils.toString(in, StandardCharsets.UTF_8);
-        		}
-            	strs.add(payload);
+                // req = new ContentCachingRequestWrapper(req);
+                try (InputStream in = req.getInputStream()) {
+                    payload = IOUtils.toString(in, StandardCharsets.UTF_8);
+                }
+                strs.add(payload);
             } else {
-	        	Map<String, String[]> params = req.getParameterMap();
+                Map<String, String[]> params = req.getParameterMap();
 
-	        	List<String> queryValues = Optional.ofNullable(params.get("query")).map(Arrays::asList).orElse(Collections.emptyList());
-	    	    List<String> updateValues = Optional.ofNullable(params.get("update")).map(Arrays::asList).orElse(Collections.emptyList());
+                List<String> queryValues = Optional.ofNullable(params.get("query")).map(Arrays::asList).orElse(Collections.emptyList());
+                List<String> updateValues = Optional.ofNullable(params.get("update")).map(Arrays::asList).orElse(Collections.emptyList());
 
-	        	strs.addAll(queryValues);
-	        	strs.addAll(updateValues);
+                strs.addAll(queryValues);
+                strs.addAll(updateValues);
 
-	        	isSparqlRequest = !strs.isEmpty();
+                isSparqlRequest = !strs.isEmpty();
             }
 
-        	if (isSparqlRequest) {
-        		SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.DEFAULT);
+            String acceptTypeStr = type != null ? type.toHeaderString() : null;
+            if (isSparqlRequest) {
+                SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(SparqlResultFmtsImpl.DEFAULT);
 
-        		String str = strs.size() == 1 ? strs.iterator().next() : null;
+                String str = strs.size() == 1 ? strs.iterator().next() : null;
 
-        		String acceptTypeStr = null;;
-        		if (str != null) {
-	        		SparqlStmt stmt = sparqlStmtParser.apply(str);
-	        		if (stmt.isParsed()) {
-	        			if (stmt.isQuery()) {
-	        				Lang lang = SparqlQueryFmtsUtils.getLang(fmts, stmt.getQuery());
-	        				acceptTypeStr = lang.getContentType().getContentTypeStr();
-	        			}
-		        	}
-        		}
+                if (str != null && (acceptTypeStr == null || isWildcard)) {
+                    SparqlStmt stmt = sparqlStmtParser.apply(str);
+                    if (stmt.isParsed()) {
+                        if (stmt.isQuery()) {
+                            Lang lang = SparqlQueryFmtsUtils.getLang(fmts, stmt.getQuery());
+                            acceptTypeStr = lang.getContentType().getContentTypeStr();
+                        }
+                    }
+                }
+            }
 
-        		// Fallback to json; in any case we don't want text/html which might
-        		// redirect to the HTML frontend
-        		if (acceptTypeStr == null) {
-        			acceptTypeStr = MediaType.APPLICATION_JSON;
-        		}
+            // Fallback to json; in any case we don't want text/html which might
+            // redirect to the HTML frontend
+            if (acceptTypeStr == null || isWildcard) {
+                acceptTypeStr = MediaType.APPLICATION_JSON;
+            }
 
-				HeaderMapRequestWrapper tmp = new HeaderMapRequestWrapper(req, true);
-				tmp.addHeader("Accept", acceptTypeStr);
-				req = tmp;
+            HeaderMapRequestWrapper tmp = new HeaderMapRequestWrapper(req, true);
+            tmp.addHeader("Accept", acceptTypeStr);
+            req = tmp;
 
-        	}
         }
 
         // If the payload has been read then re-set it via a wrapper
-		if (payload != null) {
-			byte[] bytes = payload.getBytes();
-			req = new RepeatablePayloadReadWrapper(req, StandardCharsets.UTF_8, () -> new ByteArrayInputStream(bytes));
-		}
-
+        if (payload != null) {
+            byte[] bytes = payload.getBytes();
+            req = new RepeatablePayloadReadWrapper(req, StandardCharsets.UTF_8, () -> new ByteArrayInputStream(bytes));
+        }
 
         chain.doFilter(req, res);
     }
 
     @Override
-    public void destroy() { }
+    public void destroy() {
+    }
 
     @Override
     public void init(FilterConfig arg0) throws ServletException {

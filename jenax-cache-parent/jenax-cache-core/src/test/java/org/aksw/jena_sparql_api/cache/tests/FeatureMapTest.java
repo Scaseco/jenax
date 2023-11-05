@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.collections.FeatureMap;
 import org.aksw.commons.collections.FeatureMapImpl;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 

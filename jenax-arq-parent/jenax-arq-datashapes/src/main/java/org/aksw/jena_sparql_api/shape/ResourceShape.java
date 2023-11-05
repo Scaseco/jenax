@@ -14,9 +14,6 @@ import org.aksw.commons.collections.MapUtils;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.jena_sparql_api.concept.builder.api.ConceptExpr;
-import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptOps;
 import org.aksw.jena_sparql_api.core.LookupServiceUtils;
 import org.aksw.jenax.analytics.core.MappedConcept;
 import org.aksw.jenax.arq.aggregation.Agg;
@@ -29,8 +26,12 @@ import org.aksw.jenax.arq.util.triple.Triples;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
-import org.aksw.jenax.sparql.relation.api.BinaryRelation;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptOps;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -141,8 +142,8 @@ public class ResourceShape {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceShape.class);
 
-    private Map<BinaryRelation, ResourceShape> out = new HashMap<BinaryRelation, ResourceShape>();
-    private Map<BinaryRelation, ResourceShape> in = new HashMap<BinaryRelation, ResourceShape>();
+    private Map<Fragment2, ResourceShape> out = new HashMap<Fragment2, ResourceShape>();
+    private Map<Fragment2, ResourceShape> in = new HashMap<Fragment2, ResourceShape>();
 
     private ConceptExpr expr;
 
@@ -151,11 +152,11 @@ public class ResourceShape {
         return result;
     }
 
-    public Map<BinaryRelation, ResourceShape> getOutgoing() {
+    public Map<Fragment2, ResourceShape> getOutgoing() {
         return out;
     }
 
-    public Map<BinaryRelation, ResourceShape> getIngoing() {
+    public Map<Fragment2, ResourceShape> getIngoing() {
         return in;
     }
 
@@ -166,27 +167,28 @@ public class ResourceShape {
     }
 
 
-    public static List<Concept> collectConcepts(ResourceShape source, boolean includeGraph) {
-        List<Concept> result = new ArrayList<Concept>();
+    public static List<Fragment1> collectConcepts(ResourceShape source, boolean includeGraph) {
+        List<Fragment1> result = new ArrayList<>();
         collectConcepts(result, source, includeGraph);
         return result;
     }
 
-    public static void collectConcepts(Collection<Concept> result, ResourceShape source, boolean includeGraph) {
+    public static void collectConcepts(Collection<Fragment1> result, ResourceShape source, boolean includeGraph) {
         Generator<Var> vargen = VarGeneratorImpl2.create("v");
 
         collectConcepts(result, source, vargen, includeGraph);
     }
 
-    public static void collectConcepts(Collection<Concept> result, ResourceShape source, Generator<Var> vargen, boolean includeGraph) {
+    public static void collectConcepts(Collection<Fragment1> result, ResourceShape source, Generator<Var> vargen, boolean includeGraph) {
+        // Concept baseConcept = new Concept(null, Vars.x);
         Concept baseConcept = new Concept((Element)null, Vars.x);
         collectConcepts(result, baseConcept, source, vargen, includeGraph);
     }
 
-    public static void collectConcepts(Collection<Concept> result, Concept baseConcept, ResourceShape source, Generator<Var> vargen, boolean includeGraph) {
+    public static void collectConcepts(Collection<Fragment1> result, Fragment1 baseConcept, ResourceShape source, Generator<Var> vargen, boolean includeGraph) {
 
-        Map<BinaryRelation, ResourceShape> outgoing = source.getOutgoing();
-        Map<BinaryRelation, ResourceShape> ingoing = source.getIngoing();
+        Map<Fragment2, ResourceShape> outgoing = source.getOutgoing();
+        Map<Fragment2, ResourceShape> ingoing = source.getIngoing();
 
         collectConcepts(result, baseConcept, outgoing, false, vargen, includeGraph);
         collectConcepts(result, baseConcept, ingoing, true, vargen, includeGraph);
@@ -194,41 +196,41 @@ public class ResourceShape {
         //collectConcepts(result, null, source,);
     }
 
-    public static void collectConcepts(Collection<Concept> result, Concept baseConcept, Map<BinaryRelation, ResourceShape> map, boolean isInverse, Generator<Var> vargen, boolean includeGraph) {
+    public static void collectConcepts(Collection<Fragment1> result, Fragment1 baseConcept, Map<Fragment2, ResourceShape> map, boolean isInverse, Generator<Var> vargen, boolean includeGraph) {
 
 //        Var baseVar = baseConcept.getVar();
 
         {
-            Set<BinaryRelation> raw = map.keySet();
-            Collection<BinaryRelation> opt = group(raw);
+            Set<Fragment2> raw = map.keySet();
+            Collection<Fragment2> opt = group(raw);
 
-            for(BinaryRelation relation : opt) {
+            for(Fragment2 relation : opt) {
                 //Concept sc = new Concept(relation.getElement(), baseVar);
-                Concept sc = baseConcept;
-                Concept item = createConcept(sc, vargen, relation, isInverse, includeGraph);
+                Fragment1 sc = baseConcept;
+                Fragment1 item = createConcept(sc, vargen, relation, isInverse, includeGraph);
                 result.add(item);
             }
         }
 
 
-        Multimap<ResourceShape, BinaryRelation> groups = HashMultimap.create();
+        Multimap<ResourceShape, Fragment2> groups = HashMultimap.create();
 
-        for(Entry<BinaryRelation, ResourceShape> entry : map.entrySet()) {
+        for(Entry<Fragment2, ResourceShape> entry : map.entrySet()) {
             groups.put(entry.getValue(), entry.getKey());
         }
 
-        for(Entry<ResourceShape, Collection<BinaryRelation>> group : groups.asMap().entrySet()) {
+        for(Entry<ResourceShape, Collection<Fragment2>> group : groups.asMap().entrySet()) {
             ResourceShape target = group.getKey();
-            Collection<BinaryRelation> raw = group.getValue();
+            Collection<Fragment2> raw = group.getValue();
 
-            Collection<BinaryRelation> opt = group(raw);
+            Collection<Fragment2> opt = group(raw);
 
 
-            for(BinaryRelation relation : opt) {
+            for(Fragment2 relation : opt) {
                 //Concept sc = new Concept(relation.getElement(), baseVar);
-                Concept sc = baseConcept;
+                Fragment1 sc = baseConcept;
 
-                Concept item = createConcept(sc, vargen, relation, isInverse, includeGraph);
+                Fragment1 item = createConcept(sc, vargen, relation, isInverse, includeGraph);
 
                 //result.add(item);
 
@@ -243,15 +245,15 @@ public class ResourceShape {
     }
 
 
-    public static List<BinaryRelation> group(Collection<BinaryRelation> relations) {
-        List<BinaryRelation> result = new ArrayList<BinaryRelation>();
+    public static List<Fragment2> group(Collection<Fragment2> relations) {
+        List<Fragment2> result = new ArrayList<Fragment2>();
 
 
         Set<Node> concretePredicates = new HashSet<Node>();
         Set<Expr> simpleExprs = new HashSet<Expr>();
 
         // Find all relations that are simply ?p = expr
-        for(BinaryRelation relation : relations) {
+        for(Fragment2 relation : relations) {
             Var s = relation.getSourceVar();
 //            Var t = relation.getTargetVar();
             Element e = relation.getElement();
@@ -275,7 +277,7 @@ public class ResourceShape {
 
         if(!simpleExprs.isEmpty()) {
             Expr orified = ExprUtils.orifyBalanced(simpleExprs);
-            BinaryRelation r = asRelation(orified);
+            Fragment2 r = asRelation(orified);
             result.add(r);
         }
 
@@ -291,7 +293,7 @@ public class ResourceShape {
                     ? new E_OneOf(ep, exprs)
                     : new E_Equals(ep, exprs.get(0));
 
-            BinaryRelation r = asRelation(ex);
+            Fragment2 r = asRelation(ex);
             result.add(r);
         }
 
@@ -299,9 +301,9 @@ public class ResourceShape {
     }
 
 
-    public static BinaryRelation asRelation(Expr expr) {
+    public static Fragment2 asRelation(Expr expr) {
         ElementFilter e = new ElementFilter(expr);
-        BinaryRelation result = new BinaryRelationImpl(e, Vars.p, Vars.o);
+        Fragment2 result = new Fragment2Impl(e, Vars.p, Vars.o);
 
         return result;
     }
@@ -311,8 +313,8 @@ public class ResourceShape {
         return null;
     }
 
-    public static Query createQuery(ResourceShape resourceShape, Concept filter, boolean includeGraph) {
-        List<Concept> concepts = ResourceShape.collectConcepts(resourceShape, includeGraph);
+    public static Query createQuery(ResourceShape resourceShape, Fragment1 filter, boolean includeGraph) {
+        List<Fragment1> concepts = ResourceShape.collectConcepts(resourceShape, includeGraph);
 
         Query result = createQuery(concepts, filter);
         return result;
@@ -326,18 +328,18 @@ public class ResourceShape {
      * @return
      */
     @Deprecated
-    public static Query createQueryConstruct(List<Concept> concepts, Concept filter) {
+    public static Query createQueryConstruct(List<Fragment1> concepts, Concept filter) {
 
         Template template = new Template(BasicPattern.wrap(Collections.singletonList(Triples.spo)));
 
-        List<Concept> tmps = new ArrayList<Concept>();
-        for(Concept concept : concepts) {
-            Concept tmp = ConceptOps.intersect(concept, filter, null);
+        List<Fragment1> tmps = new ArrayList<>();
+        for(Fragment1 concept : concepts) {
+            Fragment1 tmp = ConceptOps.intersect(concept, filter, null);
             tmps.add(tmp);
         }
 
         List<Element> elements = new ArrayList<Element>();
-        for(Concept concept : tmps) {
+        for(Fragment1 concept : tmps) {
             Element e = concept.getElement();
             elements.add(e);
         }
@@ -373,14 +375,14 @@ public class ResourceShape {
 //        return result;
 //    }
 
-    public static MappedConcept<DatasetGraph> createMappedConcept2(ResourceShape resourceShape, Concept filter, boolean includeGraph) {
+    public static MappedConcept<DatasetGraph> createMappedConcept2(ResourceShape resourceShape, Fragment1 filter, boolean includeGraph) {
         Query query = createQuery(resourceShape, filter, includeGraph);
         logger.debug("Created query from resource shape: " + query);
         MappedConcept<DatasetGraph> result = createMappedConcept2(query);
         return result;
     }
 
-    public static MappedConcept<Graph> createMappedConcept(ResourceShape resourceShape, Concept filter, boolean includeGraph) {
+    public static MappedConcept<Graph> createMappedConcept(ResourceShape resourceShape, Fragment1 filter, boolean includeGraph) {
         Query query = createQuery(resourceShape, filter, includeGraph);
         logger.debug("Created query from resource shape: " + query);
         MappedConcept<Graph> result = createMappedConcept(query);
@@ -416,16 +418,16 @@ public class ResourceShape {
         return result;
     }
 
-    public static Query createQuery(List<Concept> concepts, Concept filter) {
+    public static Query createQuery(List<Fragment1> concepts, Fragment1 filter) {
 
-        List<Concept> tmps = new ArrayList<Concept>();
-        for(Concept concept : concepts) {
-            Concept tmp = ConceptOps.intersect(concept, filter, null);
+        List<Fragment1> tmps = new ArrayList<>();
+        for(Fragment1 concept : concepts) {
+            Fragment1 tmp = ConceptOps.intersect(concept, filter, null);
             tmps.add(tmp);
         }
 
-        List<Element> elements = new ArrayList<Element>();
-        for(Concept concept : tmps) {
+        List<Element> elements = new ArrayList<>();
+        for(Fragment1 concept : tmps) {
             Element e = concept.getElement();
 
             // Check if the Vars.g is part of the element - if not, create a sub query that remaps ?s to ?g
@@ -481,7 +483,7 @@ public class ResourceShape {
      * @param isInverse
      * @return
      */
-    public static Concept createConcept(Concept baseConcept, Generator<Var> vargen, BinaryRelation predicateRelation, boolean isInverse, boolean includeGraph) {
+    public static Fragment1 createConcept(Fragment1 baseConcept, Generator<Var> vargen, Fragment2 predicateRelation, boolean isInverse, boolean includeGraph) {
         Var sourceVar;
 
         Var baseVar = baseConcept.getVar();

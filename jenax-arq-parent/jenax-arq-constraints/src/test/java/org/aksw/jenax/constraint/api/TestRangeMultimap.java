@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.jenax.constraint.index.RangeMultimaps;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 

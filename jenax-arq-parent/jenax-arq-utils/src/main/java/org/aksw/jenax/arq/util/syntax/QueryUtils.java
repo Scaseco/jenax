@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
+import org.aksw.commons.util.range.LongRanges;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
@@ -22,9 +23,9 @@ import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.aksw.jenax.arq.util.query.OpVisitorTriplesQuads;
 import org.aksw.jenax.arq.util.query.TransformCollectOps;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
-import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
@@ -67,12 +68,31 @@ import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
-import com.google.common.collect.BoundType;
-import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
 
 public class QueryUtils {
+
+    /**
+     * Set the query type on a given query.
+     *
+     * @param query The query on which to set the query type
+     * @param queryType The query type to set
+     * @return The given query
+     */
+    public static Query setQueryType(Query query, QueryType queryType) {
+        switch (queryType) {
+        case ASK: query.setQueryAskType(); break;
+        case CONSTRUCT: query.setQueryConstructType(); break;
+        case DESCRIBE: query.setQueryDescribeType(); break;
+        case CONSTRUCT_JSON: query.setQueryJsonType(); break;
+        case SELECT: query.setQuerySelectType(); break;
+        default:
+             throw new IllegalArgumentException("Unknown query type: " + queryType);
+        }
+        return query;
+    }
 
     public static Query applyElementTransform(Query beforeQuery, Function<? super Element, ? extends Element> transform) {
         Query result = QueryTransformOps.shallowCopy(beforeQuery);
@@ -88,8 +108,8 @@ public class QueryUtils {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOpTmp = transform.apply(beforeOp);
 
-        //Set<Var> afterOpVars = OpVars.visibleVars(afterOp);
-//		Op op = NodeTransformLib.transform(new NodeTransformBNodesToVariables(), afterOp);
+        // Set<Var> afterOpVars = OpVars.visibleVars(afterOp);
+        // Op op = NodeTransformLib.transform(new NodeTransformBNodesToVariables(), afterOp);
 
         // Rename.reverseVarRename(afterOp, true);
         Collection<Var> mentionedVars = OpVars.mentionedVars(beforeOp);
@@ -156,6 +176,11 @@ public class QueryUtils {
 //        afterQueryTmp.setQueryPattern(eltAfter);
 
         Query result = QueryUtils.restoreQueryForm(afterQueryTmp, beforeQuery);
+
+        // Testing whether this helps to resolve issues with EXISTS blocks
+//        String tmp = result.toString(Syntax.syntaxARQ);
+//        result = QueryFactory.create(tmp, Syntax.syntaxARQ);
+//        System.err.println("Created: " + result);
 
         return result;
     }
@@ -342,7 +367,9 @@ public class QueryUtils {
         Op beforeOp = Algebra.compile(beforeQuery);
         Op afterOp = xform.apply(beforeOp);// Transformer.transform(xform, beforeOp);
         Query afterQuery = OpAsQuery.asQuery(afterOp);
-        afterQuery.getPrefixMapping().setNsPrefixes(beforeQuery.getPrefixMapping());
+
+        // Prefixes are restored in restoreQueryForm!
+        // afterQuery.getPrefixMapping().setNsPrefixes(beforeQuery.getPrefixMapping());
 
         Query result = restoreQueryForm(afterQuery, beforeQuery);
 //		if(beforeQuery.isConstructType()) {
@@ -655,37 +682,6 @@ public class QueryUtils {
         return result;
     }
 
-
-    /**
-     * Transform a range w.r.t. a discrete domain such that any lower bound is closed and the upper bound
-     * is open. As a result, a zero-length range is represented by [x..x)
-     *
-     * @param <T>
-     * @param range
-     * @param domain
-     * @return
-     */
-    public static <T extends Comparable<T>> Range<T> makeClosedOpen(Range<T> range, DiscreteDomain<T> domain) {
-        ContiguousSet<T> set = ContiguousSet.create(range, domain);
-
-        Range<T> result = set.isEmpty()
-                ? Range.closedOpen(range.lowerEndpoint(), range.lowerEndpoint())
-                : ContiguousSet.create(range, domain).range(BoundType.CLOSED, BoundType.OPEN);
-//
-//        T lower = closedLowerEndpointOrNull(range, domain);
-//        T upper = openUpperEndpointOrNull(range, domain);
-//
-//        Range<T> result = lower == null
-//                ? upper == null
-//                    ? Range.all()
-//                    : Range.upTo(upper, BoundType.OPEN)
-//                : upper == null
-//                    ? Range.atLeast(lower)
-//                    : Range.closedOpen(lower, upper);
-
-        return result;
-    }
-
     /**
      * Limit the query to the given range, relative to its own given range
      *
@@ -727,50 +723,38 @@ public class QueryUtils {
 
     //public static LimitAndOffset rangeToLimitAndOffset(Range<Long> range)
 
-    public static <T extends Comparable<T>> T closedLowerEndpointOrNull(Range<T> range, DiscreteDomain<T> domain) {
-        T result = !range.hasLowerBound()
-                ? null
-                : range.lowerBoundType().equals(BoundType.CLOSED)
-                    ? range.lowerEndpoint()
-                    : domain.next(range.lowerEndpoint());
-
+    /**
+     * Returns true iff the argument is non null, not equal to Query.NOLIMIT and greater than 0
+     * This function returns true for any negative value unless it is equal to Query.NOLIMIT.
+     */
+    public static boolean hasNonZeroOffset(Long offset) {
+        boolean result = false;
+        if (offset != null) {
+            long val = offset.longValue();
+            result = val > 0 && val != Query.NOLIMIT;
+        }
         return result;
     }
 
-    public static <T extends Comparable<T>> T openUpperEndpointOrNull(Range<T> range, DiscreteDomain<T> domain) {
-        T result = !range.hasUpperBound()
-                ? null
-                : range.upperBoundType().equals(BoundType.CLOSED)
-                    ? domain.next(range.upperEndpoint())
-                    : range.upperEndpoint();
-
+    /** Returns true iff the argument is neither: null, Query.NOLIMIT nor Long.MAX_VALUE */
+    public static boolean hasLimit(Long limit) {
+        boolean result = false;
+        if (limit != null) {
+            long val = limit.longValue();
+            result = val != Query.NOLIMIT && val != Long.MAX_VALUE;
+        }
         return result;
     }
-
 
     public static long rangeToOffset(Range<Long> range) {
-        Long tmp = range == null
-                ? null
-                : closedLowerEndpointOrNull(range, DiscreteDomain.longs());
-
+        Long tmp = LongRanges.rangeToOffset(range);
         long result = tmp == null || tmp == 0 ? Query.NOLIMIT : tmp;
         return result;
     }
 
-    /**
-     *
-     * @param range
-     * @return
-     */
     public static long rangeToLimit(Range<Long> range) {
-        range = range == null ? null : makeClosedOpen(range, DiscreteDomain.longs());
-
-        long result = range == null || !range.hasUpperBound()
-            ? Query.NOLIMIT
-            : DiscreteDomain.longs().distance(range.lowerEndpoint(), range.upperEndpoint())
-                // If the upper bound is closed such as [x, x] then the result is the distance plus 1
-                + (range.upperBoundType().equals(BoundType.CLOSED) ? 1 : 0);
-
+        Long tmp = LongRanges.rangeToLimit(range);
+        long result = tmp == null ? Query.NOLIMIT : tmp;
         return result;
     }
 
@@ -800,8 +784,11 @@ public class QueryUtils {
      * @return
      */
     public static Range<Long> subRange(Range<Long> _parent, Range<Long> _child) {
-        Range<Long> parent = makeClosedOpen(_parent, DiscreteDomain.longs());
-        Range<Long> child = makeClosedOpen(_child, DiscreteDomain.longs());
+//        Range<Long> parent = makeClosedOpen(_parent, DiscreteDomain.longs());
+//        Range<Long> child = makeClosedOpen(_child, DiscreteDomain.longs());
+
+        Range<Long> parent = _parent.canonical(DiscreteDomain.longs());
+        Range<Long> child = _child.canonical(DiscreteDomain.longs());
 
         Range<Long> shiftedChild = org.aksw.commons.util.range.RangeUtils.map(child, e -> e + parent.lowerEndpoint());
 

@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.url;
 
-import org.aksw.jena_sparql_api.sparql.ext.init.NorseTerms;
+import org.aksw.jenax.norse.NorseTerms;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.Expr;

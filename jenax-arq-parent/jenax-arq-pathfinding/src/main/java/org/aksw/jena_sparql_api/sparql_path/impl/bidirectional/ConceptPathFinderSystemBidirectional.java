@@ -7,8 +7,8 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint2;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.path.SimplePath;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
@@ -44,7 +44,7 @@ public class ConceptPathFinderSystemBidirectional
             return new ConceptPathFinderBase(dataSummary.getGraph(), dataConnection) {
 
                 @Override
-                public PathSearch<SimplePath> createSearch(UnaryRelation sourceConcept, UnaryRelation targetConcept) {
+                public PathSearch<SimplePath> createSearch(Fragment1 sourceConcept, Fragment1 targetConcept) {
                     return new PathSearchSparqlBase(dataConnection, sourceConcept, targetConcept) {
                         @Override
                         public Flowable<SimplePath> execCore() {

@@ -12,7 +12,6 @@ public class RdfEntryK
     extends RdfEntryOwnerBase<RDFNode, Resource>
 {
     // Note: These properties could be read from a map resource
-    protected Property keyProperty;
 
     public RdfEntryK(Node n, EnhGraph g, Property ownerProperty, Property keyProperty) {
         super(n, g, ownerProperty, keyProperty);

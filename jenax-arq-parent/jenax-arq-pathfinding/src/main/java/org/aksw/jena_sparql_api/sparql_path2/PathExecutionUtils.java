@@ -1,7 +1,10 @@
 package org.aksw.jena_sparql_api.sparql_path2;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.aksw.commons.jena.jgrapht.LabeledEdge;
 import org.aksw.commons.jena.jgrapht.LabeledEdgeImpl;
@@ -10,20 +13,23 @@ import org.aksw.commons.rx.lookup.LookupServiceFilterKey;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletImpl;
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.lookup.LookupServiceListService;
 import org.aksw.jena_sparql_api.lookup.MapServiceUtils;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
 import org.aksw.jena_sparql_api.shape.ResourceShapeBuilder;
 import org.aksw.jenax.analytics.core.MappedConcept;
-import org.aksw.jenax.connection.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 public class PathExecutionUtils {
+    private static final Logger logger = LoggerFactory.getLogger(PathExecutionUtils.class);
 
     /**
      * A function that creates a lookup service for a given qef and predicate class
@@ -35,7 +41,7 @@ public class PathExecutionUtils {
 
         //MappedConcept<Graph> mc = ResourceShape.createMappedConcept(rsb.getResourceShape(), filter);
         MappedConcept<Graph> mc = ResourceShape.createMappedConcept(rsb.getResourceShape(), null, false);
-        MapService<Concept, Node, Graph> ls = MapServiceUtils.createListServiceAcc(qef, mc, false);
+        MapService<Fragment1, Node, Graph> ls = MapServiceUtils.createListServiceAcc(qef, mc, false);
         //Map<Node, Graph> nodeToGraph = ls.fetchData(null, null, null);
 
         // TODO Add a default fluent API
@@ -65,18 +71,41 @@ public class PathExecutionUtils {
         return result;
     }
 
-    public static void executePath(Path path, Node startNode, Node targetNode, QueryExecutionFactoryQuery qef, Function<NestedPath<Node, Node>, Boolean> pathCallback) {
+    // Better to check for non-simple path upon adding another vertex as a contribution
+    @Deprecated // Use NestedPath.containsVertex to check presence of a vertex upon contribution
+    public static boolean isSimplePath(NestedPath<?, ?> path) {
+        boolean result = true;
+        Set<Object> vertices = new HashSet<>();
+        NestedPath<?, ?> current = path;
+        while (current != null) {
+            Object vertex = current.getCurrent();
+            if (vertices.contains(vertex)) {
+                result = false;
+                break;
+            } else {
+                vertices.add(vertex);
+            }
+            current = path.getParentLink().map(ParentLink::getTarget).orElse(null);
+        }
+
+        return result;
+    }
+
+    public static void executePath(Path path, Node startNode, Node targetNode,
+            QueryExecutionFactoryQuery qef,
+            Function<NestedPath<Node, Node>, Boolean> pathCallback) {
 
         Nfa<Integer, LabeledEdge<Integer, PredicateClass>> nfa = PathCompiler.compileToNfa(path);
 
         org.jgrapht.Graph<Integer, LabeledEdge<Integer, PredicateClass>> nfaGraph = nfa.getGraph();
 
-        System.out.println("NFA");
-        System.out.println(nfa);
-        for(LabeledEdge<Integer, PredicateClass> edge : nfaGraph.edgeSet()) {
-            System.out.println(edge);
+        if (logger.isDebugEnabled()) {
+            logger.debug("NFA:");
+            logger.debug("" + nfa);
+            for(LabeledEdge<Integer, PredicateClass> edge : nfaGraph.edgeSet()) {
+                logger.debug("" + edge);
+            }
         }
-
 //        PartialNfa<Integer, Path> peek = nfaCompiler.peek();
 
         //QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://dbpedia.org/sparql", "http://dbpedia.org").config().selectOnly().end().create();
@@ -106,10 +135,12 @@ public class PathExecutionUtils {
 //
 //            //Map<Node, Graph> nodeToGraph = lsls.apply(nodes);
 //        };
+        Predicate<NestedPath<Node, Node>> pathFilter = targetNode == null
+                ? np -> true
+                : np -> np.getCurrent().equals(targetNode);
 
-        while(!frontier.isEmpty()) {
-
-            boolean abort = NfaExecutionUtils.collectPaths(nfa, frontier, LabeledEdgeImpl::isEpsilon, pathCallback);
+        while (!frontier.isEmpty()) {
+            boolean abort = NfaExecutionUtils.collectPaths(nfa, frontier, LabeledEdgeImpl::isEpsilon, pathFilter, pathCallback);
             if(abort) {
                 break;
             }
@@ -124,7 +155,11 @@ public class PathExecutionUtils {
 
                     //getMatchingTriplets.apply(trans, nestedPath))
             TripletLookup<LabeledEdge<Integer, PredicateClass>, Node, Node, Node> getMatchingTriplets =
-                    (trans, vToNestedPaths) -> PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize).fetchMap(vToNestedPaths.keySet());
+                    (trans, vToNestedPaths) -> {
+                        LookupService<Node, Set<Triplet<Node, Node>>> ls = PathExecutionUtils.createLookupService(qef, trans.getLabel()).partition(resourceBatchSize);
+                        Map<Node, Set<Triplet<Node, Node>>> r = ls.fetchMap(vToNestedPaths.keySet());
+                        return r;
+                    };
                   //.collect(Collectors.toSet());
 //            BiFunction<
 //                LabeledEdge<Integer, PredicateClass>,
@@ -142,6 +177,7 @@ public class PathExecutionUtils {
                     getMatchingTriplets,
                     nestedPath -> nestedPath.getCurrent(),
                     p -> false
+                    // PathExecutionUtils::isSimplePath
                     );
             //System.out.println("advancing...");
             frontier = nextFrontier;

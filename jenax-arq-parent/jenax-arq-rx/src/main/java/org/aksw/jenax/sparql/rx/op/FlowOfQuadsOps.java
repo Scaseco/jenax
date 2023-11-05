@@ -7,7 +7,8 @@ import java.util.Map.Entry;
 import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.rx.function.RxFunction;
-import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
+import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -56,10 +57,10 @@ public class FlowOfQuadsOps {
                 SerializableFunction<Quad, Node> grouper,
                 SerializableSupplier<? extends DatasetGraph> graphSupplier) {
 
-        return FlowableOperatorSequentialGroupBy.<Quad, Node, DatasetGraph>create(
+        return FlowableOperatorCollapseRuns.<Quad, Node, DatasetGraph>create(CollapseRunsSpec.create(
                 grouper::apply,
                 groupKey -> graphSupplier.get(),
-                DatasetGraph::add).transformer()::apply;
+                DatasetGraph::add)).transformer()::apply;
     }
 
     public static RxFunction<Quad, Entry<Node, Graph>> groupConsecutiveQuadsToGraph(
@@ -67,19 +68,19 @@ public class FlowOfQuadsOps {
             SerializableFunction<Quad, Triple> toTriple,
             SerializableSupplier<? extends Graph> graphSupplier) {
 
-        return FlowableOperatorSequentialGroupBy.<Quad, Node, Graph>create(
+        return FlowableOperatorCollapseRuns.<Quad, Node, Graph>create(CollapseRunsSpec.create(
                 grouper::apply,
                 groupKey -> graphSupplier.get(),
-                (graph, quad) -> graph.add(toTriple.apply(quad))).transformer()::apply;
+                (graph, quad) -> graph.add(toTriple.apply(quad)))).transformer()::apply;
     }
 
     public static RxFunction<Quad, Entry<Node, List<Quad>>> groupToList()
     {
-        return FlowableOperatorSequentialGroupBy.<Quad, Node, List<Quad>>create(
+        return FlowableOperatorCollapseRuns.<Quad, Node, List<Quad>>create(CollapseRunsSpec.create(
                 Quad::getGraph,
                 graph -> new ArrayList<>(),
                 (list, item) -> list.add(item)
-           ).transformer()::apply;
+           )).transformer()::apply;
     }
 
 }

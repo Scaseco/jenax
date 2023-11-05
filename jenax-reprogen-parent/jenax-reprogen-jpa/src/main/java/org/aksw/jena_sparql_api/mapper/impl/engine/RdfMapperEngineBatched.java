@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.mapper.impl.type.PathResolver;
 import org.aksw.jena_sparql_api.mapper.model.RdfTypeFactory;
 import org.aksw.jena_sparql_api.mapper.model.TypeDecider;
 import org.aksw.jenax.connectionless.SparqlService;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Prologue;
 

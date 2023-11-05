@@ -3,7 +3,7 @@ package org.aksw.jena_sparql_api.delay.core;
 import java.util.Iterator;
 
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
-import org.aksw.jenax.connection.query.QueryExecutionDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *         <p/>
  *         Date: 7/26/11 Time: 10:57 AM
  */
-public class QueryExecutionDelay extends QueryExecutionDecoratorBase<QueryExecution>
+public class QueryExecutionDelay extends QueryExecutionWrapperBase<QueryExecution>
 {
     private static final Logger logger = LoggerFactory
             .getLogger(QueryExecutionDelay.class);

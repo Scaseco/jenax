@@ -13,19 +13,19 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
-import org.aksw.jena_sparql_api.concepts.RelationImpl;
-import org.aksw.jena_sparql_api.concepts.RelationUtils;
-import org.aksw.jena_sparql_api.concepts.TernaryRelationImpl;
-import org.aksw.jena_sparql_api.concepts.XExpr;
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.sparql.relation.api.Relation;
-import org.aksw.jenax.sparql.relation.api.TernaryRelation;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment3;
+import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
+import org.aksw.jenax.sparql.fragment.impl.XExpr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -259,9 +259,9 @@ public class VirtualPartitionedQuery {
 //		System.out.println(ResourceUtils.listPropertyValues(root, step).toList());
 //	}
 
-    public static TernaryRelation unionTernary(Collection<? extends TernaryRelation> items) {
-        Relation tmp = union(items, Arrays.asList(Vars.s, Vars.p, Vars.o));
-        TernaryRelation result = tmp.toTernaryRelation();
+    public static Fragment3 unionTernary(Collection<? extends Fragment3> items) {
+        Fragment tmp = union(items, Arrays.asList(Vars.s, Vars.p, Vars.o));
+        Fragment3 result = tmp.toFragment3();
         return result;
     }
 
@@ -274,9 +274,9 @@ public class VirtualPartitionedQuery {
      * @param relations
      * @return
      */
-    public static UnaryRelation unionUnary(Collection<? extends UnaryRelation> relations) {
-        Relation tmp = VirtualPartitionedQuery.union(relations, Collections.singletonList(Vars.s));
-        UnaryRelation result = tmp.toUnaryRelation();
+    public static Fragment1 unionUnary(Collection<? extends Fragment1> relations) {
+        Fragment tmp = VirtualPartitionedQuery.union(relations, Collections.singletonList(Vars.s));
+        Fragment1 result = tmp.toFragment1();
         return result;
 
 //        Set<Var> mentionedVars = relations.stream()
@@ -308,20 +308,20 @@ public class VirtualPartitionedQuery {
 //        return result;
     }
 
-    public static Relation union(Collection<? extends Relation> items, List<Var> proj) {
+    public static Fragment union(Collection<? extends Fragment> items, List<Var> proj) {
 
         // TODO Handle the case where items is empty
         // Option 1: Inject FILTER(false) (but this does not project vars)
         // Option 2: Inject VALUES(proj) { }
 
         List<Element> elements = items.stream()
-                .map(e -> RelationUtils.rename(e, proj))
-                .map(Relation::getElement)
+                .map(e -> FragmentUtils.rename(e, proj))
+                .map(Fragment::getElement)
                 .collect(Collectors.toList());
 
         Element e = ElementUtils.unionIfNeeded(elements);
 
-        Relation result = new RelationImpl(e, proj);
+        Fragment result = new FragmentImpl(e, proj);
         return result;
     }
 
@@ -348,10 +348,10 @@ public class VirtualPartitionedQuery {
 //	}
 //
 
-    public static Query rewrite(Collection<TernaryRelation> views, Query query) {
+    public static Query rewrite(Collection<Fragment3> views, Query query) {
 //		Resolver resolver = createResolver(view, viewVar);
 //		Query result = rewrite(resolver, true, query);
-        TernaryRelation tr = unionTernary(views);
+        Fragment3 tr = unionTernary(views);
 //		System.out.println(tr);
 
         GenericLayer layer = GenericLayer.create(tr);
@@ -402,7 +402,7 @@ public class VirtualPartitionedQuery {
      *
      *
      */
-    public static Collection<TernaryRelation> toViews(Query query) {
+    public static Collection<Fragment3> toViews(Query query) {
         if(!query.isConstructType() || query.isConstructQuad()) {
             throw new RuntimeException("Construct query (without quads) expected");
         }
@@ -412,7 +412,7 @@ public class VirtualPartitionedQuery {
         Set<Var> visibleVars = OpVars.visibleVars(op);
         Generator<Var> gen = VarGeneratorBlacklist.create(visibleVars);
 
-        Collection<TernaryRelation> result = new ArrayList<>();
+        Collection<Fragment3> result = new ArrayList<>();
         Template template = query.getConstructTemplate();
         //BasicPattern bgp = template.getBGP();
         //TransformReplaceConstants.transform(new OpBGP(bgp));
@@ -443,7 +443,7 @@ public class VirtualPartitionedQuery {
             }
 
 
-            TernaryRelation tr = new TernaryRelationImpl(newE,
+            Fragment3 tr = new Fragment3Impl(newE,
                     (Var)newT.getSubject(),
                     (Var)newT.getPredicate(),
                     (Var)newT.getObject());

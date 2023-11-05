@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplate;
-import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplateImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;

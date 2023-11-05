@@ -22,8 +22,10 @@ public class IRIxResolverUtils {
      * For this purpose {@link IRIxJena#create(String)} is used.
      */
     public static IRIxResolver newIRIxResolverAsGiven(String baseIri) {
-        IRIxResolver result = baseIri == null
-                ? IRIxResolver.create().noBase().resolve(false).allowRelative(true).build()
+        
+    	IRIxResolver result = baseIri == null
+    			// Note: resolve(true) is intended to allow resolution against future base IRIs should they be set - such as by encountering BASE during a parse of turtle
+                ? IRIxResolver.create().noBase().resolve(true).allowRelative(true).build()
                 : IRIxResolver.create().base(baseIri).resolve(true).allowRelative(true).build();
 
         // "Fix" the resolver - we want to resolve relative base URLs "as given"

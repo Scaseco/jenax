@@ -19,7 +19,7 @@ public class JenaExtensionDuration {
     }
 
     public static void loadDefs(FunctionRegistry registry) {
-        FunctionBinder binder = new FunctionBinder(registry);
+        FunctionBinder binder = new FunctionBinder(() -> registry);
         binder.registerAll(DurationFunctionsJena.class);
 
 //        FunctionGenerator generator = binder.getFunctionGenerator();
