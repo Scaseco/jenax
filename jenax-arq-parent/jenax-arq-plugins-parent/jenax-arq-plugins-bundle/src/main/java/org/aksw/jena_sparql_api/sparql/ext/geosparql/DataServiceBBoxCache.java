@@ -1,5 +1,11 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
+import java.util.concurrent.CompletableFuture;
+
+import org.aksw.commons.collections.quadtree.LooseQuadTree;
+import org.aksw.commons.rx.lookup.MapService;
+import org.locationtech.jts.geom.Envelope;
+
 /**
  * Adds a quad tree cache to the lookup service.
  *
@@ -7,20 +13,20 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
  * The 'tiled' workflow starts from the current viewport.
  */
 public class DataServiceBBoxCache<C, T>
-//    // implements ListService
-{ // = Class.create(DataService, {
-//    protected ListService<Envelope, T> listServiceBBox;
-//    protected LooseQuadTree<T> quadTree;
-//    protected long maxGlobalItemCount;
-//    protected long maxItemsPerTileCount;
-//    protected int aquireDepth;
-//
+//    implements ListService<C, T>
+{
+    protected MapService<Envelope, T, T> listServiceBBox;
+    protected LooseQuadTree<T> quadTree;
+    protected long maxGlobalItemCount;
+    protected long maxItemsPerTileCount;
+    protected int aquireDepth;
+
 //    protected Map<QuadTreeNode<T>, Single<Long>> countTasks;
 //    protected Map<QuadTreeNode<T>, > dataFetchingTasks;
 //
 //
-//    /** Future whether there are few enough items to fetch them all at once */
-//    protected CompletableFuture<Boolean> checkedFetchAllAtOnce;
+    /** Future whether there are few enough items to fetch them all at once */
+    protected CompletableFuture<Boolean> checkedFetchAllAtOnce;
 //
 //
 ////    public void create() {
