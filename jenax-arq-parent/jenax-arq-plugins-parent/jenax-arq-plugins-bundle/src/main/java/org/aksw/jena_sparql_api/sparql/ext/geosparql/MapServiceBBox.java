@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
+import org.aksw.commons.util.benchmark.BenchmarkUtils;
 import org.aksw.jena_sparql_api.lookup.MapPaginatorConcept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
@@ -14,6 +15,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.vocabulary.XSD;
 import org.locationtech.jts.geom.Envelope;
 
 
@@ -48,18 +50,27 @@ public class MapServiceBBox
     }
 
     public static void main(String[] args) {
-        RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2"));
+        RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/coypu/events.coypu.10000.ttl"));
+        System.out.println("data loaded.");
+
+        // RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2"));
         // Fragment1 concept = ConceptUtils.createForRdfType("http://fp7-pp.publicdata.eu/ontology/Project");
         Fragment1 concept = ConceptUtils.createSubjectConcept();
-        GeoConstraintFactory gcf = GeoConstraintFactoryWgs.create();
+        GeoConstraintFactory gcf = GeoConstraintFactoryWgs.of("https://schema.coypu.org/global#hasLatitude", "https://schema.coypu.org/global#hasLongitude", XSD.xfloat.getURI());
         MapService<Envelope, Node, Node> mapService = new MapServiceBBox(ds, concept, gcf);
-        Envelope bounds = new Envelope(0, 65, 0, 75);
-        MapPaginator<Node, Node> paginator = mapService.createPaginator(bounds);
-        System.out.println("Count: " + paginator.fetchCount(null, null).blockingGet());
-        Map<?, ?> map = paginator.fetchMap();
-        for (Object item : map.keySet()) {
-            System.out.println(item);
-        }
-        System.out.println("Item count: " + map.keySet().size());
+        Envelope bounds = new Envelope(1, 65, 1, 75);
+//        MapPaginator<Node, Node> paginator = mapService.createPaginator(bounds);
+//        System.out.println("Count: " + paginator.fetchCount(null, null).blockingGet());
+//        Map<?, ?> map = paginator.fetchMap();
+//        for (Object item : map.keySet()) {
+//            System.out.println(item);
+//        }
+//        System.out.println("Item count: " + map.keySet().size());
+
+        DataServiceBBoxCache<Node, Node> service = new DataServiceBBoxCache<>(mapService, 1000, 100, 2);
+        service.runWorkflow(bounds).forEach(x -> {
+            System.out.println(x);
+            System.out.println(x.getData());
+        });
     }
 }

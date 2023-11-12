@@ -5,6 +5,7 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -30,6 +31,13 @@ public class GeoConstraintFactoryWgs
         // this.fragment = fragment;
         this.fragment = fragment;
         this.castNode = castNode;
+    }
+
+    public static GeoConstraintFactoryWgs of(String xPropertyIri, String yPropertyIri, String castIri) {
+        Node xProperty = NodeFactory.createURI(xPropertyIri);
+        Node yProperty = NodeFactory.createURI(yPropertyIri);
+        Node castNode = castIri == null ? null : NodeFactory.createURI(castIri);
+        return of(xProperty, yProperty, castNode);
     }
 
     public static GeoConstraintFactoryWgs of(Node xProperty, Node yProperty, Node castNode) {
