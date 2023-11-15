@@ -16,10 +16,10 @@ import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTmp;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.apache.jena.query.Query;
@@ -27,8 +27,6 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdflink.RDFLink;
-import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
@@ -70,7 +68,7 @@ public class RdfDataSources {
         return result;
     }
 
-    public static RdfDataSource applyLinkTransform(RdfDataSource rdfDataSource, Function<? super RDFLink, ? extends RDFLink> linkXform) {
+    public static RdfDataSource applyLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
         return new RdfDataSourceWrapperBase(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
@@ -117,7 +115,7 @@ public class RdfDataSources {
      */
     public static LinkSparqlQueryTransform execQueryViaSelect(Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform result = baseLink -> {
-            return new LinkSparqlQueryTmp() {
+            return new LinkSparqlQueryWrapperBase(baseLink) {
                 @Override
                 public QueryExecBuilder newQuery() {
                     return new QueryExecBuilderDelegateBaseParse(baseLink.newQuery()) {
@@ -135,21 +133,11 @@ public class RdfDataSources {
                             if (doConvert) {
                                 r = QueryExecSelect.of(seenQuery, q -> delegate.query(q).build());
                             } else {
-                                r = delegate.query(seenQuery).build();
+                                r = getDelegate().query(seenQuery).build();
                             }
                             return r;
                         }
                     };
-                }
-
-                @Override
-                public void close() {
-                    baseLink.close();
-                }
-
-                @Override
-                public Transactional getDelegate() {
-                    return baseLink;
                 }
             };
         };

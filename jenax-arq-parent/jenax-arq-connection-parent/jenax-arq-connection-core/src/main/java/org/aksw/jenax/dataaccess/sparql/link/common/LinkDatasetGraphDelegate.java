@@ -6,7 +6,7 @@ import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraph;
 
 public interface LinkDatasetGraphDelegate
-    extends LinkDatasetGraphTmp
+    extends LinkDatasetGraphBase
 {
     @Override
     LinkDatasetGraph getDelegate();

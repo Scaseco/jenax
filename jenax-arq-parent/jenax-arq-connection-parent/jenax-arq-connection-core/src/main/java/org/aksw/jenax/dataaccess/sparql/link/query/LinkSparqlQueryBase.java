@@ -23,7 +23,7 @@ import org.apache.jena.system.Txn;
  * Possibly temporary interface; DO NOT reference it directly.
  * It will be removed should Jena move these defaults to their own interface.
  */
-public interface LinkSparqlQueryTmp
+public interface LinkSparqlQueryBase
     extends TransactionalWrapper, LinkSparqlQuery
 {
 

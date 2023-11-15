@@ -33,19 +33,19 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.UpdateRequest;
 
-public class RDFLinkDelegateWithWorkerThread
+public class RDFLinkWrapperWithWorkerThread
     extends WorkerThreadBase
     implements RDFLink
 {
     protected RDFLink delegate;
 
-    public RDFLinkDelegateWithWorkerThread(RDFLink delegate) {
+    public RDFLinkWrapperWithWorkerThread(RDFLink delegate) {
         super();
         this.delegate = delegate;
     }
 
     public static RDFLink wrap(RDFLink delegate) {
-        return new RDFLinkDelegateWithWorkerThread(delegate);
+        return new RDFLinkWrapperWithWorkerThread(delegate);
     }
 
     public RDFLink getDelegate() {
@@ -74,7 +74,8 @@ public class RDFLinkDelegateWithWorkerThread
 
     @Override
     public void abort() {
-        submit(() -> getDelegate().abort());
+        // submit(() -> getDelegate().abort());
+        getDelegate().abort();
     }
 
     @Override
@@ -104,7 +105,7 @@ public class RDFLinkDelegateWithWorkerThread
 
     @Override
     public QueryExec query(Query query) {
-        return submit(() -> new QueryExecDelegate(getDelegate().query(query)));
+        return submit(() -> new QueryExecWrapper(getDelegate().query(query)));
     }
 
     // TODO The builder needs to be wrapped!
@@ -119,7 +120,7 @@ public class RDFLinkDelegateWithWorkerThread
             @Override
             public UpdateExec build() {
                 UpdateExec tmp = submit(() -> delegate.build());
-                return new UpdateExecDelegate(tmp);
+                return new UpdateExecWrapper(tmp);
             }
         };
     }
@@ -227,12 +228,12 @@ public class RDFLinkDelegateWithWorkerThread
         }
     }
 
-    class UpdateExecDelegate
+    class UpdateExecWrapper
         implements UpdateExec {
 
         protected UpdateExec delegate;
 
-        public UpdateExecDelegate(UpdateExec delegate) {
+        public UpdateExecWrapper(UpdateExec delegate) {
             super();
             this.delegate = delegate;
         }
@@ -243,12 +244,12 @@ public class RDFLinkDelegateWithWorkerThread
         }
     }
 
-    class QueryExecBuilderDelegate
+    class QueryExecBuilderWrapper
         implements QueryExecBuilder {
 
         protected QueryExecBuilder delegate;
 
-        public QueryExecBuilderDelegate(QueryExecBuilder delegate) {
+        public QueryExecBuilderWrapper(QueryExecBuilder delegate) {
             super();
             this.delegate = delegate;
         }
@@ -326,16 +327,16 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public QueryExec build() {
-            return submit(() -> new QueryExecDelegate(delegate.build()));
+            return submit(() -> new QueryExecWrapper(delegate.build()));
         }
     }
 
-    class QueryExecDelegate
+    class QueryExecWrapper
         implements QueryExec
     {
         protected QueryExec delegate;
 
-        public QueryExecDelegate(QueryExec delegate) {
+        public QueryExecWrapper(QueryExec delegate) {
             super();
             this.delegate = delegate;
         }
@@ -416,7 +417,8 @@ public class RDFLinkDelegateWithWorkerThread
 
         @Override
         public void abort() {
-            submit(() -> getDelegate().abort());
+            // submit(() -> getDelegate().abort());
+            getDelegate().abort();
         }
 
         @Override

@@ -1,4 +1,4 @@
-package org.aksw.jenax.dataaccess.sparql.exec.query;
+package org.aksw.jenax.dataaccess.sparql.builder.exec.query;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,21 +6,26 @@ import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecMod;
 import org.apache.jena.sparql.util.Context;
 
-public interface QueryExecModDelegate
+public interface QueryExecModWrapper<T extends QueryExecMod>
     extends QueryExecMod
 {
     QueryExecMod getDelegate();
 
-    @Override
-    default QueryExecMod initialTimeout(long timeout, TimeUnit timeUnit) {
-        getDelegate().initialTimeout(timeout, timeUnit);
-        return this;
+    @SuppressWarnings("unchecked")
+    default T self() {
+        return (T)this;
     }
 
     @Override
-    default QueryExecMod overallTimeout(long timeout, TimeUnit timeUnit) {
+    default T initialTimeout(long timeout, TimeUnit timeUnit) {
+        getDelegate().initialTimeout(timeout, timeUnit);
+        return self();
+    }
+
+    @Override
+    default T overallTimeout(long timeout, TimeUnit timeUnit) {
         getDelegate().overallTimeout(timeout, timeUnit);
-        return this;
+        return self();
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;
 import org.apache.jena.query.ARQ;
@@ -230,9 +231,9 @@ public class RDFConnectionUtils {
         return result[0];
     }
 
-    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, Function<? super RDFLink, ? extends RDFLink> linkDecorator) {
+    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, RDFLinkTransform linkTransform) {
         RDFLink oldLink = RDFLinkAdapter.adapt(conn);
-        RDFLink newLink = linkDecorator.apply(oldLink);
+        RDFLink newLink = linkTransform.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
     }

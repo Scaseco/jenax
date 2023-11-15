@@ -6,7 +6,7 @@ import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
 /** Default methods that delegate everything to the updateBuilder */
-public interface LinkSparqlUpdateTmp
+public interface LinkSparqlUpdateBase
     extends TransactionalWrapper, LinkSparqlUpdate
 {
     @Override

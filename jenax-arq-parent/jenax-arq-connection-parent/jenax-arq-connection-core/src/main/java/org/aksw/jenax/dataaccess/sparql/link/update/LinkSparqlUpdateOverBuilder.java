@@ -9,7 +9,7 @@ import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
 public class LinkSparqlUpdateOverBuilder
-    implements LinkSparqlUpdateTmp
+    implements LinkSparqlUpdateBase
 {
     protected Supplier<UpdateExecBuilder> updateExecBuilderFactory;
     protected Transactional transactional;

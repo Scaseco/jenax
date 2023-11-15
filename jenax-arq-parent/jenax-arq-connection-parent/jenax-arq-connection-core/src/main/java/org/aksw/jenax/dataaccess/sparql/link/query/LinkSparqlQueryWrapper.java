@@ -6,7 +6,7 @@ import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
 public interface LinkSparqlQueryWrapper
-    extends LinkSparqlQueryTmp
+    extends LinkSparqlQueryBase
 {
     @Override
     LinkSparqlQuery getDelegate();

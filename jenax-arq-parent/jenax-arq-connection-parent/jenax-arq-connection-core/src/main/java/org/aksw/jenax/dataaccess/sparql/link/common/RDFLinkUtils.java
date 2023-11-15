@@ -288,11 +288,11 @@ public class RDFLinkUtils {
         return result;
     }
 
-    public static RDFLink apply(RDFLink link, LinkSparqlQueryTransform decorizer) {
+    public static RDFLink apply(RDFLink link, LinkSparqlQueryTransform transform) {
         LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(link);
         LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(link);
         LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(link);
-        LinkSparqlQuery newQueryLink = decorizer.apply(queryLink);
+        LinkSparqlQuery newQueryLink = transform.apply(queryLink);
         RDFLink result = new RDFLinkModular(newQueryLink, updateLink, dgLink);
         return result;
     }

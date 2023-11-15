@@ -8,6 +8,7 @@ import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJs
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineDecoratorBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.query.Dataset;
@@ -70,6 +71,11 @@ public class RdfDataEngines {
                 closeAction.close();
             }
         }
+    }
+
+    public static RdfDataEngine transform(RdfDataEngine dataEngine, RdfDataSourceTransform transform) {
+        RdfDataSource dataSource = transform.apply(dataEngine);
+        return of(dataSource, dataEngine::close);
     }
 
     /** Decorate an RdfDataEngine with an rdfDataSource decorator */
