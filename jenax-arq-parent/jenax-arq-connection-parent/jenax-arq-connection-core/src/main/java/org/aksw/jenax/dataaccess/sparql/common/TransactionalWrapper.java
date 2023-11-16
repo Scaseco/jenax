@@ -1,7 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.common;
 
-import java.util.Optional;
-
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.sparql.core.Transactional;
@@ -12,55 +10,80 @@ public interface TransactionalWrapper
     /** This method needs to be overridden for transaction support */
     Transactional getDelegate();
 
+    /**
+     * Overriding this method allows for providing handling transaction-related operations
+     * separately from other aspects of the delegate.
+     */
+    default Transactional getTransactionalDelegate() {
+        Transactional result = getDelegate();
+        return result;
+    }
+
     @Override
     default boolean isInTransaction() {
-        return getDelegate().isInTransaction();
+        Transactional delegate = getTransactionalDelegate();
+        boolean result = delegate == null ? false : delegate.isInTransaction();
+        return result;
     }
 
     @Override
     default void begin(ReadWrite readWrite) {
-        Optional.ofNullable(getDelegate()).ifPresent(transactional -> transactional.begin(readWrite));
+        Transactional delegate = getTransactionalDelegate();
+        if (delegate != null) {
+            delegate.begin(readWrite);
+        }
     }
 
     @Override
     default void commit() {
-        Optional.ofNullable(getDelegate()).ifPresent(Transactional::commit);
+        Transactional delegate = getTransactionalDelegate();
+        if (delegate != null) {
+            delegate.commit();
+        }
     }
 
     @Override
     default void abort() {
-        Optional.ofNullable(getDelegate()).ifPresent(Transactional::abort);
+        Transactional delegate = getTransactionalDelegate();
+        if (delegate != null) {
+            delegate.abort();
+        }
     }
 
     @Override
     default void end() {
-        Optional.ofNullable(getDelegate()).ifPresent(Transactional::end);
+        Transactional delegate = getTransactionalDelegate();
+        if (delegate != null) {
+            delegate.end();
+        }
     }
-
 
     @Override
     default void begin(TxnType type) {
-        Optional.ofNullable(getDelegate()).ifPresent(transactional -> transactional.begin(type));
+        Transactional delegate = getTransactionalDelegate();
+        if (delegate != null) {
+            delegate.begin(type);
+        }
     }
 
     @Override
     default boolean promote(Promote mode) {
-        return Optional.ofNullable(getDelegate())
-                .map(transactional -> transactional.promote(mode))
-                .orElse(false);
+        Transactional delegate = getTransactionalDelegate();
+        boolean result = delegate == null ? false : delegate.promote(mode);
+        return result;
     }
 
     @Override
     default ReadWrite transactionMode() {
-        return Optional.ofNullable(getDelegate())
-                .map(Transactional::transactionMode)
-                .orElse(null);
+        Transactional delegate = getTransactionalDelegate();
+        ReadWrite result = delegate == null ? null : delegate.transactionMode();
+        return result;
     }
 
     @Override
     default TxnType transactionType() {
-        return Optional.ofNullable(getDelegate())
-                .map(Transactional::transactionType)
-                .orElse(null);
+        Transactional delegate = getTransactionalDelegate();
+        TxnType result = delegate == null ? null : delegate.transactionType();
+        return result;
     }
 }

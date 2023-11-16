@@ -37,6 +37,7 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.http.Service;
@@ -328,8 +329,10 @@ public class RDFConnectionUtils {
         }
 
         try {
-            // Detach from the network stream.
-            rowSet = link.newQuery().query(query).select().materialize();
+            try (QueryExec qe = builder.build()) {
+                // Detach from the network stream.
+                rowSet = qe.select().materialize();
+            }
         } catch (RuntimeException ex) {
             if ( silent ) {
                 // logger.warn("SERVICE " + NodeFmtLib.strTTL(opService.getService()) + " : " + ex.getMessage(), ex);

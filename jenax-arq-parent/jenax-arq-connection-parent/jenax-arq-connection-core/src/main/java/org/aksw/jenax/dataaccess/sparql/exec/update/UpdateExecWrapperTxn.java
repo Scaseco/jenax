@@ -49,9 +49,7 @@ public class UpdateExecWrapperTxn<T extends UpdateProcessor>
         }
     }
 
-
     public static <T extends UpdateProcessor> UpdateExec wrap(T decoratee, Transactional transactional) {
         return new UpdateExecWrapperTxn<>(decoratee, transactional);
     }
-
 }

@@ -22,6 +22,22 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
         this.context = context;
     }
 
+    public TimeUnit getInitialTimeoutUnit() {
+        return initialTimeoutUnit;
+    }
+
+    public long getInitialTimeoutValue() {
+        return initialTimeoutValue;
+    }
+
+    public long getOverallTimeoutValue() {
+        return overallTimeoutValue;
+    }
+
+    public TimeUnit getOverallTimeoutUnit() {
+        return overallTimeoutUnit;
+    }
+
     @SuppressWarnings("unchecked")
     protected T self() {
         return (T)this;
@@ -59,6 +75,11 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
             dst.initialTimeout(overallTimeoutValue, overallTimeoutUnit);
         }
 
-        dst.getContext().putAll(context);
+        if (context != null) {
+            Context dstCxt = dst.getContext();
+            if (dstCxt != null) {
+                dstCxt.putAll(context);
+            }
+        }
     }
 }

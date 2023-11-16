@@ -1,7 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.connection.dataset;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import org.aksw.jenax.dataaccess.sparql.common.MultiplexUtils;
 import org.aksw.jenax.dataaccess.sparql.common.TransactionalMultiplex;
@@ -17,7 +17,7 @@ public class RDFDatasetConnectionMultiplex
          this(Arrays.asList(delegates));
     }
 
-    public RDFDatasetConnectionMultiplex(Collection<? extends RDFDatasetConnection> delegates) {
+    public RDFDatasetConnectionMultiplex(List<? extends RDFDatasetConnection> delegates) {
         super(delegates);
     }
 

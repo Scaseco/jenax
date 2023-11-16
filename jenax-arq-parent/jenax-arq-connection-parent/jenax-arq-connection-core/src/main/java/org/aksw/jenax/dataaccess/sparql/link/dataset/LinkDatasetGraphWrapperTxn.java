@@ -1,28 +1,32 @@
-package org.aksw.jenax.dataaccess.sparql.exec.query;
+package org.aksw.jenax.dataaccess.sparql.link.dataset;
 
 import org.apache.jena.query.ReadWrite;
+import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.sparql.core.Transactional;
-import org.apache.jena.sparql.exec.QueryExec;
 
-public class QueryExecWrapperTxn<T extends QueryExec>
-    extends QueryExecWrapperBase<T>
+public class LinkDatasetGraphWrapperTxn<T extends LinkDatasetGraph>
+    extends LinkDatasetGraphWrapperBase<T>
 {
     protected Transactional transactional;
     protected boolean startedTxnHere = false;
     protected Throwable seenThrowable = null;
 
-    public QueryExecWrapperTxn(T delegate, Transactional transactional) {
+    public LinkDatasetGraphWrapperTxn(T delegate, Transactional transactional) {
         super(delegate);
         this.transactional = transactional;
     }
 
     @Override
+    public Transactional getTransactionalDelegate() {
+        return transactional;
+    }
+
+    @Override
     public void beforeExec() {
         super.beforeExec();
-
         if (!transactional.isInTransaction()) {
             startedTxnHere = true;
-            transactional.begin(ReadWrite.READ);
+            transactional.begin(ReadWrite.WRITE);
         }
     }
 
@@ -48,8 +52,7 @@ public class QueryExecWrapperTxn<T extends QueryExec>
         super.close();
     }
 
-
-    public static <T extends QueryExec> QueryExec wrap(T decoratee, Transactional transactional) {
-        return new QueryExecWrapperTxn<>(decoratee, transactional);
+    public static <T extends LinkDatasetGraph> LinkDatasetGraph wrap(T decoratee, Transactional transactional) {
+        return new LinkDatasetGraphWrapperTxn<>(decoratee, transactional);
     }
 }

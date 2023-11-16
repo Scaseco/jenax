@@ -1,9 +1,12 @@
 package org.aksw.jenax.dataaccess.sparql.factory.execution.query;
 
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactory;
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -101,5 +104,15 @@ public class QueryExecutionFactories {
 //		        return result;
 //		    }
         }
+    }
+
+    protected static final Query datasetHashQuery = SparqlStmtMgr.loadQuery("probe-dataset-hash-simple.rq");
+
+    public static String fetchDatasetHash(QueryExecutionFactoryQuery qef) {
+        String result = QueryExecutionUtils.fetchNode(qef::createQueryExecution, datasetHashQuery)
+                .map(Node::getLiteralLexicalForm)
+                .map(String::toLowerCase)
+                .orElse(null);
+        return result;
     }
 }

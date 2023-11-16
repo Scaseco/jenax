@@ -1,4 +1,4 @@
-package org.aksw.jenax.dataaccess.sparql.link.common;
+package org.aksw.jenax.dataaccess.sparql.link.dataset;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;

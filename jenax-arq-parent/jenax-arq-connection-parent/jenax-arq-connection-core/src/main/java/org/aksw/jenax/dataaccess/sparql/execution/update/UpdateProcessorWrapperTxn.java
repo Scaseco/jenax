@@ -25,6 +25,12 @@ public class UpdateProcessorWrapperTxn<T extends UpdateProcessor>
             startedTxnHere = true;
             transactional.begin(ReadWrite.WRITE);
         }
+//        else {
+//        	ReadWrite mode = transactional.transactionMode();
+//        	if (ReadWrite.READ.equals(mode)) {
+//        		throw new JenaTransactionException("");
+//        	}
+//        }
     }
 
     @Override
@@ -49,7 +55,6 @@ public class UpdateProcessorWrapperTxn<T extends UpdateProcessor>
 
         super.afterExec();
     }
-
 
     public static <T extends UpdateProcessor> UpdateProcessor wrap(T decoratee, Transactional transactional) {
         return new UpdateProcessorWrapperTxn<>(decoratee, transactional);

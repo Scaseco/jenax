@@ -5,6 +5,12 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
+/**
+ * Base implementation of a QueryExecBuilderWrapper that immediately parses
+ * query strings when creating a query exec builder.
+ * Note, that query strings can still be passed to {@link QueryExecBuilder#query(String)} and
+ * {@link QueryExecBuilder#query(String, Syntax)}.
+ */
 public class QueryExecBuilderDelegateBaseParse
     extends QueryExecBuilderWrapperBase
 {

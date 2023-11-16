@@ -16,6 +16,7 @@ import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
@@ -156,6 +157,11 @@ public class RdfDataSources {
     public static RdfDataSource execQueryViaSelect(RdfDataSource dataSource, Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform decorizer = execQueryViaSelect(convertToSelect);
         RdfDataSource result = RdfDataSources.applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
+        return result;
+    }
+
+    public static String fetchDatasetHash(RdfDataSource dataSource) {
+        String result = QueryExecutionFactories.fetchDatasetHash(dataSource.asQef());
         return result;
     }
 }

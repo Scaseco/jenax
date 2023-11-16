@@ -26,6 +26,26 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         super(context);
     }
 
+    public Query getQuery() {
+        return query;
+    }
+
+    public String getQueryString() {
+        return queryString;
+    }
+
+    public Syntax getQuerySyntax() {
+        return querySyntax;
+    }
+
+    public BindingBuilder getSubstitution() {
+        return substitution;
+    }
+
+    /**
+     * Attempt to create a query object from this builder's state.
+     * Each invocation parses the query anew.
+     */
     public Query getParsedQuery() {
         Query result = query != null
                 ? query
