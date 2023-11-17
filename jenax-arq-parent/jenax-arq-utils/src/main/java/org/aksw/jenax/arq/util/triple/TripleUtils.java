@@ -23,6 +23,7 @@ import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.util.ModelUtils;
 
 public class TripleUtils {
 
@@ -38,6 +39,9 @@ public class TripleUtils {
         return streamNodes(t).iterator();
     }
 
+    public static boolean isValidAsStatement(Triple t) {
+        return ModelUtils.isValidAsStatement(t.getSubject(), t.getPredicate(), t.getObject());
+    }
 
     /** Access a triple's component by a zero-based index in order s, p, o.
      * Raises {@link IndexOutOfBoundsException} for any index outside of the range [0, 2]*/
@@ -243,7 +247,6 @@ public class TripleUtils {
         return result;
     }
 
-
     public static String md5sum(Triple triple) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         NTriplesWriter.write(baos, Collections.singleton(triple).iterator());
@@ -252,5 +255,4 @@ public class TripleUtils {
 
         return result;
     }
-
 }
