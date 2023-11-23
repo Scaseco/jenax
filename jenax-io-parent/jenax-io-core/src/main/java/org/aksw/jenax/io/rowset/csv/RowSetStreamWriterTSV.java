@@ -6,7 +6,6 @@ import java.util.List;
 import org.aksw.jenax.io.rowset.core.RowSetStreamWriter;
 import org.aksw.jenax.io.rowset.core.RowSetStreamWriterBuilderBase;
 import org.aksw.jenax.io.rowset.core.RowSetStreamWriterFactory;
-import org.aksw.jenax.io.rowset.csv.RowSetStreamWriterCSV.RowSetStreamWriterBuilderCSV;
 import org.apache.jena.atlas.io.AWriter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.out.NodeFormatter;

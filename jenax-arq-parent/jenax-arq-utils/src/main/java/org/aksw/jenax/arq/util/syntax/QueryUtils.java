@@ -51,6 +51,7 @@ import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
+import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.apache.jena.sparql.syntax.Element;
@@ -68,6 +69,7 @@ import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
@@ -323,6 +325,29 @@ public class QueryUtils {
         result.setConstructTemplate(new Template(new QuadAcc(new ArrayList<>(quadPatterns))));
         result.setQueryPattern(ElementUtils.unionIfNeeded(elements));
 
+        return result;
+    }
+
+    /**
+     * Derive a select query that projects only the variables mentioned in the construct query template.
+     * If the template does not mention any variables then SELECT * is used instead.
+     * @param query
+     * @return
+     */
+    public static Query constructToSelect(Query query) {
+        Preconditions.checkArgument(query.isConstructType(), "Not a construct query.");
+        Template template = query.getConstructTemplate();
+        Set<Var> vars = QuadPatternUtils.getVarsMentioned(template.getQuads());
+
+        Query result = QueryTransformOps.shallowCopy(query);
+        result.setQuerySelectType();
+        if (vars.isEmpty()) {
+            result.setQueryResultStar(true);
+        } else {
+            result.setQueryResultStar(false);
+            result.getProject().clear();
+            result.addProjectVars(vars);
+        }
         return result;
     }
 
