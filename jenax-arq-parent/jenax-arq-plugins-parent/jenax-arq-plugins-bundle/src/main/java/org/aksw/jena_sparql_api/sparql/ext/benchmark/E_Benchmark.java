@@ -58,7 +58,6 @@ public class E_Benchmark
             result = null;
         } else {
             NodeValue nv = NodeValue.makeNode(node);
-
             if(nv.isString()) {
                 String queryStr = nv.getString();
                 result = benchmark(conn, queryStr, includeResultSet);
@@ -135,7 +134,7 @@ public class E_Benchmark
 
 
         long ms = sw.stop().elapsed(TimeUnit.NANOSECONDS);
-        BigDecimal s = new BigDecimal(ms).divide(new BigDecimal(1000000000l));
+        BigDecimal s = new BigDecimal(ms).divide(new BigDecimal(1_000_000_000l));
 
         JsonObject json = new JsonObject();
         json.addProperty("time", s);

@@ -11,8 +11,6 @@ import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.mgt.Explain.InfoLevel;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.MappingRegistry;
-import org.apache.jena.sparql.util.Symbol;
 
 import picocli.CommandLine.Option;
 
