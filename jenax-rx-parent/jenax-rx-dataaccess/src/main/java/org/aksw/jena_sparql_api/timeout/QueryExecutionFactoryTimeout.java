@@ -10,6 +10,8 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 
 /**
+ * Broken with Jena5 - Use QueryExecBuilder for timeout functionality
+ *
  * A query execution factory, which sets a given timeout
  * on all created query executions
  *
@@ -60,9 +62,9 @@ public class QueryExecutionFactoryTimeout
         // Note maxRetrieval time implies a setting of max execution time
         if(maxExecutionTime != null) {
             if(maxRetrievalTime != null) {
-                qe.setTimeout(maxExecutionTime.getTime(), maxExecutionTime.getTimeUnit(), maxRetrievalTime.getTime(), maxRetrievalTime.getTimeUnit());
+                // qe.setTimeout(maxExecutionTime.getTime(), maxExecutionTime.getTimeUnit(), maxRetrievalTime.getTime(), maxRetrievalTime.getTimeUnit());
             } else {
-                qe.setTimeout(maxExecutionTime.getTime(), maxExecutionTime.getTimeUnit());
+                // qe.setTimeout(maxExecutionTime.getTime(), maxExecutionTime.getTimeUnit());
             }
         }
     }

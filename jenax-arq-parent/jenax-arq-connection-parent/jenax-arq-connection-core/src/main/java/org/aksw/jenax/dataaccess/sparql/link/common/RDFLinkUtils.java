@@ -10,9 +10,11 @@ import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateRequest;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUpdateTransform;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateWrapperBase;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
@@ -22,6 +24,8 @@ import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
 import org.apache.jena.sparql.util.Context;
@@ -80,6 +84,57 @@ public class RDFLinkUtils {
         return wrapWithContextMutator(rawConn, cxt -> {});
     }
 
+    /** Return a new link that applies the given contextMutator whenever a new builder is requested */
+    public static LinkSparqlQuery wrapQueryWithContextMutator(LinkSparqlQuery baseLink, Consumer<Context> contextMutator) {
+        return new LinkSparqlQueryWrapperBase(baseLink) {
+            @Override
+            public QueryExecBuilder newQuery() {
+                QueryExecBuilder r = baseLink.newQuery();
+                Context cxt = new Context();
+                contextMutator.accept(cxt);
+                cxt.keys().forEach(key -> {
+                    Object val = cxt.get(key);
+                    r.set(key, val);
+                });
+                return r;
+            }
+        };
+    }
+
+    /** Return a new link that applies the given contextMutator whenever a new builder is requested */
+    public static LinkSparqlUpdate wrapUpdateWithContextMutator(LinkSparqlUpdate baseLink, Consumer<Context> contextMutator) {
+        return new LinkSparqlUpdateWrapperBase(baseLink) {
+            @Override
+            public UpdateExecBuilder newUpdate() {
+                UpdateExecBuilder r = baseLink.newUpdate();
+                Context cxt = new Context();
+                contextMutator.accept(cxt);
+                cxt.keys().forEach(key -> {
+                    Object val = cxt.get(key);
+                    r.set(key, val);
+                });
+                return r;
+            }
+        };
+    }
+
+    /** If the argument is an RDFLinkModular then return it, otherwise create an RDFLinkModular with the given link in all of its positions */
+    public static RDFLinkModular asModular(RDFLink link) {
+        RDFLinkModular result = link instanceof RDFLinkModular
+            ? (RDFLinkModular)link
+            : new RDFLinkModular(link, link, link);
+        return result;
+    }
+
+    public static RDFLink wrapWithContextMutator(RDFLink link, Consumer<Context> contextMutator) {
+        RDFLinkModular tmp = asModular(link);
+        RDFLinkModular result = new RDFLinkModular(
+                wrapQueryWithContextMutator(tmp.queryLink(), contextMutator),
+                wrapUpdateWithContextMutator(tmp.updateLink(), contextMutator),
+                tmp.datasetLink());
+        return result;
+    }
+
     /**
      * Places the connection object as a symbol into to context,
      * so that custom functions - notably E_Benchmark can
@@ -94,60 +149,60 @@ public class RDFLinkUtils {
     // Ideally replace with wrapWithPostProcessor
     // ISSUE: With the connection interface we cannot mutate the context of update requests
     // Hence the existance of this method is still justified
-    public static RDFLink wrapWithContextMutator(RDFLink rawConn, Consumer<Context> contextMutator) {
-        RDFLink[] result = {null};
-
-        LinkSparqlUpdate tmp = unwrapLinkSparqlUpdate(rawConn);
-//        Dataset dataset = tmp instanceof RDFLinkDataset
-//                ? getDataset((RDFLinkDataset)tmp)
-//                : null;
-
-        result[0] =
-            new RDFLinkModular(rawConn, rawConn, rawConn) {
-                public QueryExec query(Query query) {
-                    return postProcess(rawConn.query(query));
-                }
-
-                @Override
-                public QueryExec query(String queryString) {
-                    return postProcess(rawConn.query(queryString));
-                }
-
-
-                @Override
-                public void update(UpdateRequest update) {
-                    rawConn.update(update);
-//			        checkOpen();
-//			        Txn.executeWrite(dataset, () -> {
-//                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
-//                        UpdateProcessor up = postProcess(tmp);
-//                        up.execute();
-//			        });
-                }
-
-                public UpdateProcessor postProcess(UpdateProcessor qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-
-                public QueryExec postProcess(QueryExec qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-            };
-
-        return result[0];
-    }
+//    public static RDFLink wrapWithContextMutatorOld(RDFLink rawConn, Consumer<Context> contextMutator) {
+//        RDFLink[] result = {null};
+//
+//        LinkSparqlUpdate tmp = unwrapLinkSparqlUpdate(rawConn);
+////        Dataset dataset = tmp instanceof RDFLinkDataset
+////                ? getDataset((RDFLinkDataset)tmp)
+////                : null;
+//
+//        result[0] =
+//            new RDFLinkModular(rawConn, rawConn, rawConn) {
+//                public QueryExec query(Query query) {
+//                    return postProcess(rawConn.query(query));
+//                }
+//
+//                @Override
+//                public QueryExec query(String queryString) {
+//                    return postProcess(rawConn.query(queryString));
+//                }
+//
+//
+//                @Override
+//                public void update(UpdateRequest update) {
+//                    rawConn.update(update);
+////			        checkOpen();
+////			        Txn.executeWrite(dataset, () -> {
+////                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
+////                        UpdateProcessor up = postProcess(tmp);
+////                        up.execute();
+////			        });
+//                }
+//
+//                public UpdateProcessor postProcess(UpdateProcessor qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//
+//                public QueryExec postProcess(QueryExec qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//            };
+//
+//        return result[0];
+//    }
 
     public static RDFLink wrapWithQueryTransform(
             RDFLink conn,

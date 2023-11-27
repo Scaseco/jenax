@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
-import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
@@ -35,10 +34,7 @@ import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
@@ -60,11 +56,13 @@ import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Extensions to help open an InputStream of unknown content using probing against languages registered to the Jena riot system.
@@ -537,18 +535,18 @@ public class RDFDataMgrEx {
         return result;
     }
 
-    public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-        InputStream combined = prependWithPrefixes(in, prefixMapping);
-        RDFIterator<Triple> it = RDFDataMgrRx.createIteratorTriples(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-        return it;
-    }
-
-
-    public static RDFIterator<Quad> createIteratorQuads(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-        InputStream combined = prependWithPrefixes(in, prefixMapping);
-        RDFIterator<Quad> it = RDFDataMgrRx.createIteratorQuads(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-        return it;
-    }
+//    public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
+//        InputStream combined = prependWithPrefixes(in, prefixMapping);
+//        RDFIterator<Triple> it = RDFDataMgrRx.createIteratorTriples(combined, lang, null, (thread, throwable) -> {}, thread -> {});
+//        return it;
+//    }
+//
+//
+//    public static RDFIterator<Quad> createIteratorQuads(PrefixMapping prefixMapping, InputStream in, Lang lang) {
+//        InputStream combined = prependWithPrefixes(in, prefixMapping);
+//        RDFIterator<Quad> it = RDFDataMgrRx.createIteratorQuads(combined, lang, null, (thread, throwable) -> {}, thread -> {});
+//        return it;
+//    }
 
     public static Dataset parseTrigAgainstDataset(Dataset dataset, PrefixMapping prefixMapping, InputStream in) {
         // Add namespaces from the spec

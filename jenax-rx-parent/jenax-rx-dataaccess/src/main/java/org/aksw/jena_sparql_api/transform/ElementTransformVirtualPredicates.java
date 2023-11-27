@@ -217,12 +217,12 @@ public class ElementTransformVirtualPredicates
 
     public static Element createElementForVariablePredicate(Var pVar, Node s, Node o, Map<Node, Fragment2> virtualPredicates, Generator<Var> varGen)
     {
-        Triple orig = new Triple(s, pVar, o);
+        Triple orig = Triple.create(s, pVar, o);
         ElementUtils.createElement(orig);
 
         List<Element> unionMembers = new ArrayList<Element>();
 
-        unionMembers.add(ElementUtils.createElement(new Triple(s, pVar, o)));
+        unionMembers.add(ElementUtils.createElement(Triple.create(s, pVar, o)));
 
         for(Entry<Node, Fragment2> entry : virtualPredicates.entrySet()) {
             Node pRef = entry.getKey();

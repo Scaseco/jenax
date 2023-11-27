@@ -17,7 +17,6 @@ import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShiel
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionLocal;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
@@ -42,7 +41,6 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -162,6 +160,13 @@ public class RDFConnectionUtils {
     }
 
 
+    public static RDFConnection wrapWithContextMutator(RDFConnection rawConn, Consumer<Context> contextMutator) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(rawConn);
+        RDFLink newLink = RDFLinkUtils.wrapWithContextMutator(oldLink, contextMutator);
+        RDFConnection result = RDFConnectionAdapter.adapt(newLink);
+        return result;
+    }
+
 
     /**
      * Places the connection object as a symbol into to context,
@@ -177,59 +182,59 @@ public class RDFConnectionUtils {
     // Ideally replace with wrapWithPostProcessor
     // ISSUE: With the connection interface we cannot mutate the context of update requests
     // Hence the existance of this method is still justified
-    public static RDFConnection wrapWithContextMutator(RDFConnection rawConn, Consumer<Context> contextMutator) {
-        RDFConnection[] result = {null};
-
-        SparqlUpdateConnection tmp = unwrapUpdateConnection(rawConn);
-        Dataset dataset = tmp instanceof RDFConnectionLocal
-                ? getDataset((RDFConnectionLocal)tmp)
-                : null;
-
-        result[0] =
-            new RDFConnectionModular(rawConn, rawConn, rawConn) {
-                public QueryExecution query(Query query) {
-                    return postProcess(rawConn.query(query));
-                }
-
-                @Override
-                public QueryExecution query(String queryString) {
-                    return postProcess(rawConn.query(queryString));
-                }
-
-
-                @Override
-                public void update(UpdateRequest update) {
-//			        checkOpen();
-//			        Txn.executeWrite(dataset, () -> {
-                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
-                        UpdateProcessor up = postProcess(tmp);
-                        up.execute();
-//			        });
-                }
-
-                public UpdateProcessor postProcess(UpdateProcessor qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-
-                public QueryExecution postProcess(QueryExecution qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-            };
-
-        return result[0];
-    }
+//    public static RDFConnection wrapWithContextMutatorOld(RDFConnection rawConn, Consumer<Context> contextMutator) {
+//        RDFConnection[] result = {null};
+//
+//        SparqlUpdateConnection tmp = unwrapUpdateConnection(rawConn);
+//        Dataset dataset = tmp instanceof RDFConnectionLocal
+//                ? getDataset((RDFConnectionLocal)tmp)
+//                : null;
+//
+//        result[0] =
+//            new RDFConnectionModular(rawConn, rawConn, rawConn) {
+//                public QueryExecution query(Query query) {
+//                    return postProcess(rawConn.query(query));
+//                }
+//
+//                @Override
+//                public QueryExecution query(String queryString) {
+//                    return postProcess(rawConn.query(queryString));
+//                }
+//
+//
+//                @Override
+//                public void update(UpdateRequest update) {
+////			        checkOpen();
+////			        Txn.executeWrite(dataset, () -> {
+//                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
+//                        UpdateProcessor up = postProcess(tmp);
+//                        up.execute();
+////			        });
+//                }
+//
+//                public UpdateProcessor postProcess(UpdateProcessor qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//
+//                public QueryExecution postProcess(QueryExecution qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//            };
+//
+//        return result[0];
+//    }
 
     public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, RDFLinkTransform linkTransform) {
         RDFLink oldLink = RDFLinkAdapter.adapt(conn);

@@ -1,12 +1,31 @@
 package org.aksw.jena_sparql_api.rx.script;
 
-import com.google.common.base.StandardSystemProperty;
-import com.google.common.collect.Lists;
-import org.aksw.jena_sparql_api.rx.RDFIterator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystemException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
+import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
-import org.aksw.jenax.stmt.core.*;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserWrapperSelectShortForm;
@@ -35,17 +54,8 @@ import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileSystemException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -428,9 +438,7 @@ public class SparqlScriptProcessor {
                 }
             }
         }
-
     }
-
 
     public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, Node targetGraph, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
         UpdateRequest result = null;
@@ -448,7 +456,6 @@ public class SparqlScriptProcessor {
             // Unwrap the input stream for less overhead
             InputStream in = tmpIn.getInputStream();
 
-
             String contentType = tmpIn.getContentType();
             if (contentType == null) {
                 logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
@@ -460,38 +467,19 @@ public class SparqlScriptProcessor {
             //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
             if(rdfLang != null) {
 
-                RDFIterator<?> itTmp;
+                Lang finalLang;
                 // FIXME Validate we are really using turtle/trig here
                 if(RDFLanguages.isTriples(rdfLang)) {
-                    itTmp = RDFDataMgrEx.createIteratorTriples(globalPrefixes, in, Lang.TTL);
+                    finalLang = Lang.TTL;
                 } else if(RDFLanguages.isQuads(rdfLang)) {
-                    itTmp = RDFDataMgrEx.createIteratorQuads(globalPrefixes, in, Lang.TRIG);
+                    finalLang = Lang.TRIG;
                 } else {
                     throw new RuntimeException("Unknown lang: " + rdfLang);
                 }
 
-
-                int window = 100;
-                try (RDFIterator<?> it = itTmp) {
-                    int remaining = window;
-                    while (it.hasNext()) {
-                        --remaining;
-                        if (remaining == 0) {
-                            PrefixMap pm = it.getPrefixes();
-                            // FIXME This log message should display how many prefixes were actually gathered from the file
-                            //  The total number of prefixes includes preconfigured ones
-                            logger.info("A total of " + pm.size() + " prefixes known after processing " + filename);
-                            globalPrefixes.setNsPrefixes(pm.getMapping());
-                            break;
-                        }
-
-                        if (it.prefixesChanged()) {
-                            remaining = 100;
-                        }
-
-                        it.next();
-                    }
-                }
+                PrefixMap newPrefixes = PrefixUtils.readPrefixes(null, in, finalLang);
+                logger.info("A total of " + newPrefixes.size() + " prefixes known after processing " + filename);
+                globalPrefixes.setNsPrefixes(newPrefixes.getMapping());
 
                 // String fileUrl = "file://" + Paths.get(filename).toAbsolutePath().normalize().toString();
                 result = new UpdateRequest(new UpdateLoad(filename, targetGraph));

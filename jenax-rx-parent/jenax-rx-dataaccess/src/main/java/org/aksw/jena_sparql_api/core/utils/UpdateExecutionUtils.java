@@ -29,6 +29,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateExecution
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -36,7 +37,6 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
@@ -245,7 +245,7 @@ public class UpdateExecutionUtils {
         if(updateRequest.getOperations().isEmpty()) {
             // Create a fake update request
             UpdateRequest update = UpdateFactory.create("PREFIX ex: <http://example.org/> INSERT { ex:_s ex:_p ex:_o } WHERE { ex:_s ex:_p ex:_o }");
-            result = org.apache.jena.update.UpdateExecutionFactory.create(update, DatasetGraphFactory.createGeneral());
+            result = org.apache.jena.update.UpdateExecutionFactory.create(update, DatasetFactory.createGeneral());
             result.execute();
         } else {
             result = uef.createUpdateProcessor(updateRequest);

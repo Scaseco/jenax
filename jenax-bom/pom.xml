@@ -67,7 +67,7 @@
 		<hadoop.version>3.3.4</hadoop.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.1.0</tika.version>
-		<spring.version>5.3.2</spring.version>
+		<spring.version>5.3.31</spring.version>
 		<spring.batch.version>4.3.1</spring.batch.version>
 		<aksw-commons.version>0.9.8-SNAPSHOT</aksw-commons.version>
 		<javax.xml.version>2.3.1</javax.xml.version>
@@ -88,8 +88,8 @@
 		<!-- <jetty.jsp.version>9.2.22.v20170606</jetty.jsp.version> -->
 		<javaee-api.version>6.0</javaee-api.version>
 		<!-- Project Settings -->
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
+		<!-- <maven.compiler.target>17</maven.compiler.target> -->
 		<!--
 		<java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
 		<file.encoding>UTF-8</file.encoding>
@@ -1546,11 +1546,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.11.0</version>
 				<configuration>
 					<!-- <source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target> -->
-					<release>11</release>
+					<release>${maven.compiler.release}</release>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
