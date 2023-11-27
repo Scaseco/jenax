@@ -6,7 +6,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
+import com.google.common.collect.Streams;
 
 /**
  * An interface for traversal of all of a node's successors w.r.t. an

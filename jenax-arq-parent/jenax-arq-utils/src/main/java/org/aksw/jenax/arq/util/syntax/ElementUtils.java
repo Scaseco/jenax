@@ -188,7 +188,7 @@ public class ElementUtils {
             Node s = MapUtils.getOrElse(map, Vars.s, Node.ANY);
             Node p = MapUtils.getOrElse(map, Vars.p, Node.ANY);
             Node o = MapUtils.getOrElse(map, Vars.o, Node.ANY);
-            result = new Triple(s, p, o);
+            result = Triple.create(s, p, o);
         } else {
             List<Triple> triples = extractTriples(e);
             if(triples.size() == 1) {

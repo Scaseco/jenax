@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.NiceIterator;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 /**
  * Iterator that forwards calls to another iterator. If it turns out that .remove() is not supported,

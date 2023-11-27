@@ -25,7 +25,7 @@ public class CmdMixinArq
     @Option(names = { "--set" }, description="Set ARQ options (key=value)", mapFallbackValue="true")
     public Map<String, String> arqOptions = new HashMap<>();
 
-    @Option(names = { "--rdf10" }, description = "RDF 1.0 mode; e.g. xsd:string on literals matter", defaultValue = "false")
+    @Option(names = { "--rdf10" }, description = "RDF 1.0 mode; e.g. xsd:string on literals matter (no longer supported by Jena5)", defaultValue = "false")
     public boolean useRdf10 = false;
 
     @Option(names = { "--geoindex" },  description = "Build Geoindex")
@@ -34,7 +34,7 @@ public class CmdMixinArq
 
     /** Sets global options - does not configure context-specific options  */
     public static void configureGlobal(CmdMixinArq cmd) {
-        JenaRuntime.isRDF11 = !cmd.useRdf10;
+        // JenaRuntime.isRDF11 = !cmd.useRdf10;
 
         if (cmd.explain) {
             ARQ.setExecutionLogging(InfoLevel.ALL);

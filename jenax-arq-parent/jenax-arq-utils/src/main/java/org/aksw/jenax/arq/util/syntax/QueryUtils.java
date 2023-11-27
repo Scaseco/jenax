@@ -51,7 +51,6 @@ import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
-import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.apache.jena.sparql.syntax.Element;
@@ -215,9 +214,9 @@ public class QueryUtils {
         }
 
         Query result;
-        int tgtQueryType = proto.getQueryType();
+        QueryType tgtQueryType = proto.queryType();
         switch(tgtQueryType) {
-        case Query.QueryTypeSelect:
+        case SELECT:
             result = query.cloneQuery();
 
             Set<Var> expectedVars = new LinkedHashSet<>(proto.getProjectVars());
@@ -243,15 +242,15 @@ public class QueryUtils {
                 result.setResultVars();
             }
             break;
-        case Query.QueryTypeConstruct:
+        case CONSTRUCT:
             // If the projection uses expressions, create a sub query
             result = selectToConstruct(query, proto.getConstructTemplate());
             break;
-        case Query.QueryTypeAsk:
+        case ASK:
             result = query.cloneQuery();
             result.setQueryAskType();
             break;
-        case Query.QueryTypeDescribe:
+        case DESCRIBE:
             result = query.cloneQuery();
             result.setQueryDescribeType();
             for(Node node : proto.getResultURIs()) {
@@ -261,7 +260,7 @@ public class QueryUtils {
                 result.addDescribeNode(var);
             }
             break;
-        case Query.QueryTypeJson:
+        case CONSTRUCT_JSON:
             result = query.cloneQuery();
             result.setQueryJsonType();
             proto.getJsonMapping().entrySet()

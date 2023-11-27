@@ -35,10 +35,10 @@ import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.impl.SeekableFromBlock;
 import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
 import org.aksw.commons.util.ref.Ref;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
-
-import com.github.jsonldjava.shaded.com.google.common.primitives.Ints;
+import com.google.common.primitives.Ints;
 
 
 public class MainPlaygroundScanFile {

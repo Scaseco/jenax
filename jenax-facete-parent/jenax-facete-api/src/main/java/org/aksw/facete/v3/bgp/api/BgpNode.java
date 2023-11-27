@@ -128,8 +128,8 @@ public interface BgpNode
     public static Fragment2 create(Node node, Direction dir) {
         //ElementUtils.createElement(triple)
         Triple t = BACKWARD.equals(dir)
-                ? new Triple(Vars.o, node, Vars.s)
-                : new Triple(Vars.s, node, Vars.o);
+                ? Triple.create(Vars.o, node, Vars.s)
+                : Triple.create(Vars.s, node, Vars.o);
 
         Fragment2 result = new Fragment2Impl(ElementUtils.createElement(t), Vars.s, Vars.o);
         return result;

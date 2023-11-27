@@ -16,6 +16,7 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
+import org.apache.jena.sparql.util.Context;
 
 /**
  * Jena function implementation that delegates to a backing Java method.
@@ -54,7 +55,7 @@ public class FunctionAdapter
     }
 
     @Override
-    public void build(String uri, ExprList args) {
+    public void build(String uri, ExprList args, Context context) {
 
     }
 

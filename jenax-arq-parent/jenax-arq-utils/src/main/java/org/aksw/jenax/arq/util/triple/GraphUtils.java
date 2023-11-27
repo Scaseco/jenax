@@ -136,11 +136,11 @@ public class GraphUtils {
         try {
             StringBuilder sb = new StringBuilder();
             sb.append("<x:s> <x:p> ");
-            sb.append(NodeFmtLib.str(t.getObject()));
+            sb.append(NodeFmtLib.strNT(t.getObject()));
             sb.append(" .");
             String str = sb.toString();
             Quad q = NTripleUtils.parseNQuadsString(str);
-            Triple r = new Triple(t.getSubject(), t.getPredicate(), q.getObject());
+            Triple r = Triple.create(t.getSubject(), t.getPredicate(), q.getObject());
             return r;
         } catch(Exception e) {
             return null;

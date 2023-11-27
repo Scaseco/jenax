@@ -33,8 +33,8 @@ import org.apache.jena.vocabulary.RDFS;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import com.google.common.base.Converter;
+import com.google.common.collect.Lists;
 
 
 /**

@@ -11,7 +11,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 
 /** An element with a mapping of FacetPaths to ElementAccs and their variables */
 public class MappedElement {
@@ -24,7 +24,7 @@ public class MappedElement {
     protected Element element;
 
     public MappedElement() {
-    	this(new TreeDataMap<>(), new HashMap<>(), new ElementGroup());
+        this(new TreeDataMap<>(), new HashMap<>(), new ElementGroup());
     }
 
     public MappedElement(TreeDataMap<ScopedFacetPath, ElementAcc> eltPathToAcc, Map<ScopedFacetPath, Var> pathToVar, Element element) {
@@ -33,16 +33,16 @@ public class MappedElement {
         this.pathToVar = pathToVar;
         this.element = element;
     }
-    
+
     public MappedElement putAll(MappedElement src) {
-    	this.pathToVar.putAll(src.pathToVar);
-    	TreeDataMap<ScopedFacetPath, ElementAcc> srcTree = src.getEltPathToAcc();
-    	this.eltPathToAcc.putAll(srcTree);
-    	List<Element> a = ElementUtils.toElementList(element);
-    	List<Element> b = ElementUtils.toElementList(src.getElement());
-    	Element newElt = ElementUtils.groupIfNeeded(Iterables.concat(a, b));
-    	this.element = newElt;    	
-    	return this;
+        this.pathToVar.putAll(src.pathToVar);
+        TreeDataMap<ScopedFacetPath, ElementAcc> srcTree = src.getEltPathToAcc();
+        this.eltPathToAcc.putAll(srcTree);
+        List<Element> a = ElementUtils.toElementList(element);
+        List<Element> b = ElementUtils.toElementList(src.getElement());
+        Element newElt = ElementUtils.groupIfNeeded(Iterables.concat(a, b));
+        this.element = newElt;
+        return this;
     }
 
     public TreeDataMap<ScopedFacetPath, ElementAcc> getEltPathToAcc() {

@@ -3,10 +3,11 @@ package org.aksw.jenax.arq.util.node;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
+
+import com.google.common.collect.Maps;
 
 /**
  * Envsubst (environment substitution) for nodes:
@@ -65,11 +66,19 @@ public class NodeEnvsubst {
             Node value = lookup.apply(key);
             if(value != null) {
                 result = isUri
-                    ? NodeFactory.createURI(value.toString(false))
+                    ? NodeFactory.createURI(nodeToString(value)) //value.toString(false))
                     : value; // NodeFactory.createLiteral(value);
             }
         }
 
+        return result;
+    }
+
+    public static String nodeToString(Node node) {
+        String result =
+                node.isURI() ? node.getURI() :
+                node.isLiteral() ? node.getLiteralLexicalForm() :
+                node.toString();
         return result;
     }
 

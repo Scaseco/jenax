@@ -3,8 +3,7 @@ package org.aksw.jena_sparql_api.legacy;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.github.jsonldjava.shaded.com.google.common.base.Predicate;
+import java.util.function.Predicate;
 
 
 /**

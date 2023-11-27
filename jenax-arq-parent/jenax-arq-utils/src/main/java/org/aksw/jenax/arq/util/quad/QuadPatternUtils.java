@@ -14,6 +14,7 @@ import java.util.TreeSet;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeTransformSignaturize;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -28,8 +29,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
-import org.apache.jena.sparql.util.NodeComparator;
-import org.apache.jena.sparql.util.TripleComparator;
+import org.apache.jena.sparql.util.NodeCmp;
 
 public class QuadPatternUtils {
 
@@ -141,11 +141,11 @@ public class QuadPatternUtils {
 
     public static Map<Node, Set<Triple>> indexSorted(Iterable<Quad> quads)
     {
-        Map<Node, Set<Triple>> result = new TreeMap<Node, Set<Triple>>(new NodeComparator());
+        Map<Node, Set<Triple>> result = new TreeMap<Node, Set<Triple>>(NodeCmp::compareRDFTerms);
         for(Quad q : quads) {
             Set<Triple> triples = result.get(q.getGraph());
             if(triples == null) {
-                triples = new TreeSet<Triple>(new TripleComparator());
+                triples = new TreeSet<Triple>(TripleUtils::compareRDFTerms);
                 result.put(q.getGraph(), triples);
             }
 
@@ -216,13 +216,13 @@ public class QuadPatternUtils {
 
     /** Returns true iff all quads in the pattern are in the default graph */
     public static boolean isDefaultGraphOnly(Iterable<? extends Quad> quadPattern) {
-    	boolean result = true;
-    	for (Quad quad : quadPattern) {
-    		if (!QuadUtils.isDefaultGraph(quad)) {
-    			result = false;
-    			break;
-    		}
-    	}
-    	return result;
+        boolean result = true;
+        for (Quad quad : quadPattern) {
+            if (!QuadUtils.isDefaultGraph(quad)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 }

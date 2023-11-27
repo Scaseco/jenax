@@ -14,10 +14,10 @@ import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.syntax.ElementFilter;
-import org.apache.jena.sparql.util.ExprUtils;
 
 
 /**
@@ -148,7 +148,7 @@ public class ResourceShapeBuilder {
 
 
     public ResourceShapeBuilder nav(Node property, boolean isInverse) {
-        Expr expr = new E_Equals(new ExprVar(Vars.p), ExprUtils.nodeToExpr(property));
+        Expr expr = new E_Equals(new ExprVar(Vars.p), ExprLib.nodeToExpr(property));
         ResourceShapeBuilder result = nav(expr, isInverse);
         return result;
     }

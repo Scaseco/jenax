@@ -1,7 +1,6 @@
 package org.aksw.jenax.sparql.expr.optimize.util;
 
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,10 +13,6 @@ import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.datatypes.xsd.impl.RDFLangString;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.E_Equals;
-import org.apache.jena.sparql.expr.E_GreaterThan;
-import org.apache.jena.sparql.expr.E_GreaterThanOrEqual;
-import org.apache.jena.sparql.expr.E_LessThan;
-import org.apache.jena.sparql.expr.E_LessThanOrEqual;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
 import org.apache.jena.sparql.expr.E_StrConcat;
 import org.apache.jena.sparql.expr.Expr;
@@ -44,13 +39,10 @@ public class ConcatAssignments {
 
     public static final Logger logger = LoggerFactory.getLogger(ConcatAssignments.class);
 
-
     public static final NodeValue TYPE_BLANK = NodeValue.makeInteger(0);
     public static final NodeValue TYPE_URI = NodeValue.makeInteger(1);
     public static final NodeValue TYPE_PLAIN_LITERAL = NodeValue.makeInteger(2);
     public static final NodeValue TYPE_TYPED_LITERAL = NodeValue.makeInteger(3);
-
-
 
     public static Expr getTypeOrExpr(Expr expr) {
         Expr result = null;
@@ -261,7 +253,7 @@ public class ConcatAssignments {
 
         if(node.isBlank()) {
             type = 0;
-            val = node.getBlankNodeId().getLabelString();
+            val = node.getBlankNodeLabel();
         } else if(node.isURI()) {
             type = 1;
             val = node.getURI();

@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jenax.arq.util.var.Vars;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -31,6 +29,9 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class UserDefinedFunctions {
     private static final Logger logger = LoggerFactory.getLogger(UserDefinedFunctions.class);
@@ -63,7 +64,7 @@ public class UserDefinedFunctions {
     public static String forceIri(Resource r) {
         String result = r.isURIResource()
                 ? r.getURI()
-                : "_:" + r.getId().getBlankNodeId().getLabelString();
+                : "_:" + r.getId().getLabelString();
 
         Objects.requireNonNull(result, "Could not craft IRI from " + r);
 

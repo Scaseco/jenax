@@ -27,6 +27,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.util.NodeCmp;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
@@ -67,7 +68,7 @@ public class NodeUtils {
                 : o2 == null ? 1 : NodeValue.compareAlways(NodeValue.makeNode(o1), NodeValue.makeNode(o2));
         } catch (Exception e) {
             // RDF terms with mismatch in lexical value / datatype cause an exception
-            result = org.apache.jena.sparql.util.NodeUtils.compareRDFTerms(o1, o2);
+            result = NodeCmp.compareRDFTerms(o1, o2);
         }
         return result;
     }

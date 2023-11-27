@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.util.NodeUtils;
+import org.apache.jena.sparql.util.NodeCmp;
 
 /**
  * A wrapper that makes Nodes comparable by rdf term equivalence.
@@ -47,7 +47,7 @@ public class ComparableNode
      */
     @Override
     public int compareTo(ComparableNode that) {
-        int result = NodeUtils.compareRDFTerms(node, that.node);
+        int result = NodeCmp.compareRDFTerms(node, that.node);
         return result;
     }
 

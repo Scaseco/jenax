@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.util.triple;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.util.ModelUtils;
+import org.apache.jena.sparql.util.NodeCmp;
 
 public class TripleUtils {
 
@@ -168,7 +170,7 @@ public class TripleUtils {
         Node s = nodes[0];
         Node p = nodes[1];
         Node o = nodes[2];
-        Triple result = new Triple(s, p, o);
+        Triple result = Triple.create(s, p, o);
         return result;
     }
 
@@ -221,7 +223,7 @@ public class TripleUtils {
     }
 
     public static Triple listToTriple(List<Node> nodes) {
-        return new Triple(nodes.get(0), nodes.get(1), nodes.get(2));
+        return Triple.create(nodes.get(0), nodes.get(1), nodes.get(2));
     }
 
     public static List<Node> tripleToList(Triple triple)
@@ -255,4 +257,32 @@ public class TripleUtils {
 
         return result;
     }
+
+    public static int compareRDFTerms(Triple o1, Triple o2) {
+        return compare(o1, o2, NodeCmp::compareRDFTerms);
+    }
+
+//    public static int compareByValue(Triple o1, Triple o2) {
+//    	return compare(o1, o2, NodeValueCmp::compareByValue);
+//    }
+
+    /**
+     * Compare two triples by their nodes.
+     *
+     * @implNote
+     *   This is jena4's TripleComparator.
+     * */
+    public static int compare(Triple o1, Triple o2, Comparator<Node> nc) {
+        int toReturn = nc.compare(o1.getSubject(), o2.getSubject());
+        if (toReturn == 0)
+        {
+            toReturn = nc.compare(o1.getPredicate(), o2.getPredicate());
+            if (toReturn == 0)
+            {
+                toReturn = nc.compare(o1.getObject(), o2.getObject());
+            }
+        }
+        return toReturn;
+    }
+
 }

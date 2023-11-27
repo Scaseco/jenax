@@ -7,7 +7,7 @@ import java.io.Serializable;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.expr.ExprNotComparableException;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.util.NodeUtils;
+import org.apache.jena.sparql.util.NodeCmp;
 
 /**
  * A wrapper that makes NodeValues comparable by their value.
@@ -74,7 +74,7 @@ public class ComparableNodeValue
         try {
             result = NodeValue.compare(nodeValue, that.nodeValue);
         } catch (ExprNotComparableException e) {
-            result = NodeUtils.compareRDFTerms(this.node, that.node);
+            result = NodeCmp.compareRDFTerms(this.node, that.node);
         }
 
         return result;

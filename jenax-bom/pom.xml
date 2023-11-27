@@ -43,7 +43,9 @@
 		<module>..</module>
 	</modules>
 	<properties>
-		<jena.version>4.10.0</jena.version>
+		<!-- <jena.version>4.10.0</jena.version> -->
+		<jena.version>5.0.0-SNAPSHOT</jena.version>
+
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
@@ -86,8 +88,8 @@
 		<!-- <jetty.jsp.version>9.2.22.v20170606</jetty.jsp.version> -->
 		<javaee-api.version>6.0</javaee-api.version>
 		<!-- Project Settings -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<!--
 		<java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
 		<file.encoding>UTF-8</file.encoding>

@@ -62,7 +62,7 @@ public class QueryToJenaGraph {
     //public static unionToGraph(DirectedGraph<Node, LabeledEdge<Node, Node>>)
 
     public static void addEdge(Graph graph, Node source, Node edgeLabel, Node target) {
-        graph.add(new Triple(source, edgeLabel, target));
+        graph.add(Triple.create(source, edgeLabel, target));
     }
 
     public static Node addQuad(Graph graph, Quad quad, Map<Quad, Node> quadToNode, Supplier<Node> nodeSupplier) {
@@ -136,7 +136,7 @@ public class QueryToJenaGraph {
             ExprFunction ef = expr.getFunction();
             String fnId = ExprUtils.getFunctionId(ef);
 
-            graph.add(new Triple(result, RDFS.label.asNode(), NodeFactory.createLiteral(fnId)));
+            graph.add(Triple.create(result, RDFS.label.asNode(), NodeFactory.createLiteral(fnId)));
 
 
             List<Expr> args = ef.getArgs();
@@ -158,7 +158,7 @@ public class QueryToJenaGraph {
 
                 Node p = isCommutative ? NodeFactory.createURI("arg://any") : NodeFactory.createURI("arg://" + i);
 
-                graph.add(new Triple(result, p, argNode));
+                graph.add(Triple.create(result, p, argNode));
             }
 
         } else if(expr.isVariable()){

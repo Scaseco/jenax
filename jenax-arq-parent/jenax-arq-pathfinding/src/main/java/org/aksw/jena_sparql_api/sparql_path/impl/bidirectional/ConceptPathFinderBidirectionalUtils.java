@@ -187,11 +187,11 @@ public class ConceptPathFinderBidirectionalUtils {
 //        		.toSet();
 //
 //        	for(Node type : types) {
-//                Triple triple = new Triple(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), type);
+//                Triple triple = Triple.create(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), type);
 //                ext.add(triple);
 //        	}
 
-            Triple triple = new Triple(VocabPath.start.asNode(), VocabPath.connectsWith.asNode(), node);
+            Triple triple = Triple.create(VocabPath.start.asNode(), VocabPath.connectsWith.asNode(), node);
             ext.add(triple);
 
 //			System.out.println("JoinSummaryTriple: " + triple);
@@ -234,7 +234,7 @@ public class ConceptPathFinderBidirectionalUtils {
         logger.debug("Got " + candidates.size() + " candidate target nodes"); // + " candidates: " + candidates);
 
         for(Node candidate : candidates) {
-            Triple triple = new Triple(candidate, VocabPath.connectsWith.asNode(), VocabPath.end.asNode());
+            Triple triple = Triple.create(candidate, VocabPath.connectsWith.asNode(), VocabPath.end.asNode());
             ext.add(triple);
         }
 

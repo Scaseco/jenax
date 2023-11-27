@@ -193,7 +193,7 @@ public class FacetDirNodeImpl
 
 
         BasicPattern bgp = new BasicPattern();
-        bgp.add(new Triple(br.getSourceVar(), Vocab.facetCount.asNode(), br.getTargetVar()));
+        bgp.add(Triple.create(br.getSourceVar(), Vocab.facetCount.asNode(), br.getTargetVar()));
         Template template = new Template(bgp);
 
         FacetedDataQuery<FacetCount> result = new FacetedDataQueryImpl<>(
@@ -333,9 +333,9 @@ public class FacetDirNodeImpl
 
         BasicPattern bgp = new BasicPattern();
         Node superRoot = NodeFactory.createBlankNode();
-        bgp.add(new Triple(superRoot, Vocab.predicate.asNode(), tr.getS()));
-        bgp.add(new Triple(superRoot, MapVocab.value.asNode(), tr.getP()));
-        bgp.add(new Triple(superRoot, Vocab.facetCount.asNode(), tr.getO()));
+        bgp.add(Triple.create(superRoot, Vocab.predicate.asNode(), tr.getS()));
+        bgp.add(Triple.create(superRoot, MapVocab.value.asNode(), tr.getP()));
+        bgp.add(Triple.create(superRoot, Vocab.facetCount.asNode(), tr.getO()));
         Template template = new Template(bgp);
 
         FacetedDataQuery<FacetValueCount> result = new FacetedDataQueryImpl<>(

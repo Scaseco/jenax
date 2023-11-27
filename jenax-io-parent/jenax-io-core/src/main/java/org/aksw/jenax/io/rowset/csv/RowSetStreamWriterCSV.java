@@ -117,7 +117,7 @@ public class RowSetStreamWriterCSV implements RowSetStreamWriter {
         else if (n.isURI())
             str = n.getURI();
         else if (n.isBlank())
-            str = "_:" + n.getBlankNodeId().getLabelString();
+            str = "_:" + n.getBlankNodeLabel();
             // str = bnodes.asString(n);
 
         str = csvSafe(str);

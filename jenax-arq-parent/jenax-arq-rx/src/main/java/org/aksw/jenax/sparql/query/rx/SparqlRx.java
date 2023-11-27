@@ -53,6 +53,7 @@ import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.exec.http.QueryExecHTTP;
+import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
@@ -504,7 +505,7 @@ public class SparqlRx {
         for(int j = 0; j < 10; ++j) {
             int i[] = { 0 };
             System.out.println("HERE");
-            execSelectRaw(() -> org.apache.jena.query.QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql",
+            execSelectRaw(() -> QueryExecutionHTTP.service("http://dbpedia.org/sparql",
                     "SELECT * { ?s a <http://dbpedia.org/ontology/Person> }"))
                             .takeUntil(b -> i[0] == 10).subscribe(x -> {
                                 i[0]++;

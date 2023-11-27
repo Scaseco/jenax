@@ -92,7 +92,7 @@ public class ConceptUtils {
         Var o = Var.alloc(gen.next());
 
 
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
 
         BasicPattern bp = new BasicPattern();
         bp.add(triple);

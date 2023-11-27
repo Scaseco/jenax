@@ -66,7 +66,7 @@ public class LabelUtils {
         Expr propFilter = ExprUtils.oneOf(p, prefPreds);
 
         ElementGroup els = new ElementGroup();
-        els.addTriplePattern(new Triple(s, p, o));
+        els.addTriplePattern(Triple.create(s, p, o));
         els.addElementFilter(new ElementFilter(propFilter));
         els.addElementFilter(new ElementFilter(langConstraint));
 

@@ -128,8 +128,15 @@ public class RdfDataEngines {
         return of(rdfDataSource, null);
     }
 
+    /**
+     * Wrap an {@link RdfDataSource} with a close action to create an RdfDataEngine.
+     *
+     * If the provided data source is already an RdfDataEngine and the close action should just delegate to it
+     * do not use the lambda <pre>() -> dataEngine.close()</pre> because it introduces needless wrapping.
+     * In this case use null.
+     */
     public static RdfDataEngine of(RdfDataSource rdfDataSource, AutoCloseable closeAction) {
-        RdfDataEngine result = rdfDataSource instanceof RdfDataEngine
+        RdfDataEngine result = rdfDataSource instanceof RdfDataEngine && (closeAction == null || closeAction == rdfDataSource)
                 ? (RdfDataEngine)rdfDataSource
                 : new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
 

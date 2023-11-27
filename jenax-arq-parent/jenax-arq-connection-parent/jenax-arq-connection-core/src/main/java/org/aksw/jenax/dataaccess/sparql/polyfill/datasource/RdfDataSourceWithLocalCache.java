@@ -43,6 +43,11 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementService;
+import org.apache.jena.sparql.syntax.ElementSubQuery;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,13 +90,18 @@ public class RdfDataSourceWithLocalCache
         System.out.println(rewritten);
     }
 
-
-
     public RdfDataSourceWithLocalCache(RdfDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
     }
 
+    /**
+     * Create an (empty) dataset with a special ServiceExecutorRegistry that handles
+     * caching and remote requests.
+     *
+     * @param delegate
+     * @return
+     */
     public static Dataset createProxyDataset(RdfDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
@@ -114,6 +124,7 @@ public class RdfDataSourceWithLocalCache
     public RDFConnection getConnection() {
         RDFConnection base = RDFConnection.connect(proxyDataset);
         RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, OpRewriteInjectCacheOps::rewriteQuery);
+        // RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, TransformInjectCacheOps::rewriteQuery);
         return result;
     }
 
@@ -144,7 +155,11 @@ public class RdfDataSourceWithLocalCache
         return result;
     }
 
-    /** Rewriter that injects caching operations after group by operations */
+
+    /**
+     * Rewriter that injects cache ops as the parent of group by ops.
+     * Note, that all group by results are pulled into the client.
+     */
     public static class OpRewriteInjectCacheOps
         implements OpRewriter<Entry<Op, Boolean>> {
 
@@ -353,4 +368,113 @@ public class RdfDataSourceWithLocalCache
             return result;
         }
     }
+
+
+    /**
+     * Broken query rewrite based on the syntax level. The problem is that we need to take care of
+     * which parts are executed remotely and which ones are executed in the client.
+     * This cannot be cleanly done without the semantics of the algebra: if we have an ElementGroup
+     * of which some elements can be cached and other not, then how can we ensure apply the correct transformation
+     * if not converting to the algebra first?
+     */
+    public static class TransformInjectCacheOpsBroken {
+
+        public static boolean canWrapWithCache(Query query) {
+            boolean result = query.hasGroupBy() || query.hasAggregators();
+            return result;
+        }
+
+        public static Query rewriteQuery(Query query) {
+            Query result = query;
+
+            boolean doWrapAsSubQuery = false;
+            Element queryPattern = null;
+            if (query.isSelectType()) {
+                doWrapAsSubQuery = canWrapWithCache(query);
+                if (doWrapAsSubQuery) {
+                    queryPattern = new ElementSubQuery(query);
+                } else {
+                    queryPattern = query.getQueryPattern();
+                }
+            }
+
+            if (queryPattern != null) {
+                Element newElt = rewriteInjectCache(queryPattern);
+                if (queryPattern != newElt) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Original query:\n" + query);
+                    }
+                    if (doWrapAsSubQuery) {
+                        if (newElt instanceof ElementSubQuery) {
+                            result = ((ElementSubQuery)newElt).getQuery();
+                        } else {
+                            result = new Query();
+                            result.setQuerySelectType();
+                            result.setQueryResultStar(true);
+                            result.setQueryPattern(newElt);
+                        }
+                    } else {
+                        result = QueryTransformOps.shallowCopy(query);
+                        result.setQueryPattern(newElt);
+                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Rewritten query:\n" + result);
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static Element rewriteInjectCacheSubQuery(ElementSubQuery elt) {
+            Element result;
+            Query query = elt.getQuery();
+
+            if (canWrapWithCache(query)) {
+    //    		Query newQuery = new Query();
+    //    		newQuery.setQuerySelectType();
+    //    		newQuery.setQueryResultStar(true);
+                result = new ElementService("cache:env://REMOTE", elt);
+            } else {
+                Query oldQuery = elt.getQuery();
+                Query newQuery = rewriteQuery(elt.getQuery());
+                result = oldQuery == newQuery
+                    ? elt
+                    : new ElementSubQuery(newQuery);
+            }
+
+            return result;
+        }
+
+        public static Element rewriteInjectCache(Element elt) {
+            Element result;
+            if (elt instanceof ElementGroup) {
+                result = rewriteInjectCacheGroup((ElementGroup)elt);
+            } else if (elt instanceof ElementSubQuery) {
+                result = rewriteInjectCacheSubQuery((ElementSubQuery)elt);
+            } else {
+                result = elt;
+            }
+            return result;
+        }
+
+        public static Element rewriteInjectCacheGroup(ElementGroup elts) {
+            ElementGroup result = new ElementGroup();
+            boolean change = false;
+            for (Element elt : elts.getElements()) {
+                Element newElt = rewriteInjectCache(elt);
+                if (newElt != elt) {
+                    change = true;
+                }
+                result.addElement(newElt);
+            }
+
+            if (!change) {
+                result = elts;
+            }
+            return result;
+        }
+    }
 }
+
+
+
