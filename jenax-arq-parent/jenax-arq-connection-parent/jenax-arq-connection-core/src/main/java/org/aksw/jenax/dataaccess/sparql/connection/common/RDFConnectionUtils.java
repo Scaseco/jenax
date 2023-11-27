@@ -207,7 +207,6 @@ public class RDFConnectionUtils {
 //			        });
                 }
 
-
                 public UpdateProcessor postProcess(UpdateProcessor qe) {
                     Context cxt = qe.getContext();
                     if(cxt != null) {
