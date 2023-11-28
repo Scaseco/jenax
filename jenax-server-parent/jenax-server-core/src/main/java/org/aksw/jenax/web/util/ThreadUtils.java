@@ -1,6 +1,6 @@
 package org.aksw.jenax.web.util;
 
-import javax.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.AsyncResponse;
 
 public class ThreadUtils {
 

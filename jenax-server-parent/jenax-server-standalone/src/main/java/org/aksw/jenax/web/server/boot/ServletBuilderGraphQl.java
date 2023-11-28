@@ -1,9 +1,6 @@
 package org.aksw.jenax.web.server.boot;
 
-import javax.servlet.ServletRegistration;
-
 import org.aksw.jenax.graphql.api.GraphQlExecFactory;
-import org.aksw.jenax.web.frontend.WebMvcConfigYasgui;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
 import org.aksw.jenax.web.provider.UnwrapRuntimeExceptionProvider;
@@ -12,9 +9,9 @@ import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
+
+import jakarta.servlet.ServletRegistration;
 
 public class ServletBuilderGraphQl
     implements ServletBuilder

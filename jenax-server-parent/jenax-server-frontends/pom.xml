@@ -96,6 +96,33 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
         </dependency>
+        
+        <dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-webapp</artifactId>
+		</dependency>
+
+        <dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
+		</dependency>
+
+        <dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-plus</artifactId>
+		</dependency>
+
+        <dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-annotations</artifactId>
+		</dependency>
+
+        <dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-apache-jsp</artifactId>
+		</dependency>
+
+        <!--
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
@@ -120,7 +147,7 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>apache-jsp</artifactId>
         </dependency>
-
+-->
         <!-- <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-jsp</artifactId>
             </dependency> -->
 

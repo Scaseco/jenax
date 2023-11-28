@@ -2,11 +2,11 @@ package org.aksw.jenax.web.util;
 
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.springframework.web.bind.ServletRequestUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class DatasetDescriptionRequestUtils {
     public static DatasetDescription extractDatasetDescriptionAny(HttpServletRequest req) {

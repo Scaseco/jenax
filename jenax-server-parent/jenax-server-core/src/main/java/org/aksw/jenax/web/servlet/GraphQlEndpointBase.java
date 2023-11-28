@@ -2,21 +2,21 @@ package org.aksw.jenax.web.servlet;
 
 import java.util.Objects;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.CompletionCallback;
-import javax.ws.rs.container.ConnectionCallback;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.aksw.jenax.graphql.api.GraphQlExec;
 import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
 import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.CompletionCallback;
+import jakarta.ws.rs.container.ConnectionCallback;
+import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 public abstract class GraphQlEndpointBase {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlEndpointBase.class);

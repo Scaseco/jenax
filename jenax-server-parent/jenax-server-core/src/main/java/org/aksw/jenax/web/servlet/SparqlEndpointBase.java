@@ -3,28 +3,12 @@ package org.aksw.jenax.web.servlet;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.CompletionCallback;
-import javax.ws.rs.container.ConnectionCallback;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperTxn;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
@@ -55,10 +39,24 @@ import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.graph.GraphFactory;
-import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.CompletionCallback;
+import jakarta.ws.rs.container.ConnectionCallback;
+import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 
 /**
