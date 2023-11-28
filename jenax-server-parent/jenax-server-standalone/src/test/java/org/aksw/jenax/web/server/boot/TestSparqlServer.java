@@ -1,6 +1,7 @@
 package org.aksw.jenax.web.server.boot;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
@@ -9,7 +10,6 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.eclipse.jetty.server.Server;
@@ -20,11 +20,14 @@ public class TestSparqlServer {
     @Test
     public void testSparqlServer() throws Exception {
         Dataset dataset = DatasetFactory.create();
-        RdfDataSource dataSource = () -> RDFConnectionFactory.connect(dataset);
+        RdfDataSource dataSource = () -> RDFConnection.connect(dataset);
 
         int port = 7529;
-        Server server = new FactoryBeanSparqlServer()
-                .setSparqlServiceFactory(dataSource)
+        Server server = ServerBuilder.newBuilder()
+                .addServletBuilder(ServletBuilderSparql.newBuilder()
+                        .setSparqlStmtParser(SparqlStmtParserImpl.create())
+                        .setSparqlServiceFactory(dataSource)
+                )
                 .setPort(port)
                 .create();
 
@@ -32,7 +35,7 @@ public class TestSparqlServer {
             Thread.sleep(1000);
         }
 
-        RDFConnection conn = RDFConnectionFactory.connect("http://localhost:" + port + "/sparql");
+        RDFConnection conn = RDFConnection.connect("http://localhost:" + port + "/sparql");
         conn.update("INSERT DATA { <urn:x> <urn:x> <urn:x> }");
         Model actualModel = conn.queryConstruct(QueryFactory.create("CONSTRUCT WHERE { ?s ?p ?o }"));
         Model expectedModel = ModelFactory.createDefaultModel();

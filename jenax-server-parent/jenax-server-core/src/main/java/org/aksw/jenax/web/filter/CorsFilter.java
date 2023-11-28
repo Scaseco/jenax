@@ -26,7 +26,6 @@ public class CorsFilter
 {
     private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {

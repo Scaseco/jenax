@@ -26,9 +26,7 @@ public class WebAppInitUtils {
     }
 
     public static void defaultSetup(ServletContext servletContext, WebApplicationContext rootContext) {
-
-//
-//        // Manage the lifecycle of the root application context
+        // Manage the lifecycle of the root application context
         servletContext.addListener(new ContextLoaderListener(rootContext));
         servletContext.addListener(new RequestContextListener());
 
@@ -47,7 +45,6 @@ public class WebAppInitUtils {
             fr.setAsyncSupported(true);
         //  fr.setInitParameter("dispatcher", "REQUEST");
         }
-
     }
 
 }

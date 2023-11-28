@@ -836,14 +836,6 @@
 			</dependency>
 			<!-- Jetty -->
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-bom</artifactId>
-				<version>${jetty.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-
-			<dependency>
 				<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
 				<artifactId>jetty-ee${ee.version}-bom</artifactId>
 				<version>${jetty.version}</version>
