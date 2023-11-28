@@ -62,8 +62,8 @@
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-vfs2.version>2.9.0</commons-vfs2.version>
 		<ver.commons-math>3.6.1</ver.commons-math>
-		<slf4j.version>1.7.36</slf4j.version>
-		<log4j.version>2.19.0</log4j.version>
+		<slf4j.version>2.0.9</slf4j.version>
+		<log4j.version>2.21.0</log4j.version>
 		<hadoop.version>3.3.4</hadoop.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.1.0</tika.version>
@@ -622,31 +622,6 @@
 			<!-- Never depend on the logging implementations unless in test
 			cases 
 				or test modules -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jul-to-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-ext</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
 			<!-- Modules -->
 			<!-- Make the test configuration available across all modules -
 			especially 
@@ -661,13 +636,6 @@
 				<groupId>com.nurkiewicz.asyncretry</groupId>
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>apache-jena-libs</artifactId>
-				<version>${jena.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
@@ -866,13 +834,6 @@
 			<!-- Jetty -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-bom</artifactId>
-				<version>${jetty.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
@@ -984,6 +945,40 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>${jena.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${jetty.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-bom</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+
 			<!-- <dependency> <groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-objectstore</artifactId> 
 				<version>${aksw-commons.version}</version> </dependency> <dependency>
