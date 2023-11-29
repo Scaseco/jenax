@@ -37,15 +37,6 @@
 	</modules>
 
 	<properties>
-		<!-- This property is used in :jenax-facete-impl for a plugin -->
-		<javax.xml.version>2.3.1</javax.xml.version>
-
-		<!-- Project Settings -->
-		<!-- <java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
-		<file.encoding>UTF-8</file.encoding>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
 	</properties>
 
 	<dependencyManagement>
