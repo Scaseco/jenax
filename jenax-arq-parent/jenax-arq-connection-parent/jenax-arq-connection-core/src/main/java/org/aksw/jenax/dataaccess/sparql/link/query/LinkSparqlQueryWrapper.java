@@ -1,10 +1,11 @@
 package org.aksw.jenax.dataaccess.sparql.link.query;
 
-import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkSparqlQuery;
-import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
+/**
+ * Wrapper that delegates all query methods to the delegate's {@link LinkSparqlQueryBase#newQuery()} method.
+ */
 public interface LinkSparqlQueryWrapper
     extends LinkSparqlQueryBase
 {
@@ -19,10 +20,5 @@ public interface LinkSparqlQueryWrapper
     @Override
     default void close() {
         getDelegate().close();
-    }
-
-    @Override
-    default QueryExec query(Query query) {
-        return getDelegate().query(query);
     }
 }

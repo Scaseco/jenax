@@ -19,14 +19,10 @@ import org.apache.jena.system.Txn;
 /**
  * Mix-in that provides default implementation of all methods based on {@link #query(Query)}
  * which in turn is based on {@link #newQuery()}.
- *
- * Possibly temporary interface; DO NOT reference it directly.
- * It will be removed should Jena move these defaults to their own interface.
  */
 public interface LinkSparqlQueryBase
     extends TransactionalWrapper, LinkSparqlQuery
 {
-
     // ---- SparqlQueryConnection
 
     default Query parse(String query) {
