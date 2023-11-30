@@ -1,6 +1,7 @@
 package org.aksw.jenax.web.servlet;
 
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
@@ -8,14 +9,13 @@ import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
-import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
-import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
-import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.AcceptList;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
@@ -125,8 +125,6 @@ public abstract class SparqlEndpointBase {
         executeAsync(asyncResponse, headers.getHeaderString("Accept"), null, updateString);
     }
 
-
-
     public void processStmtAsync(AsyncResponse response, String queryStr, String updateStr, SparqlResultFmts format) {
         if(queryStr == null && updateStr == null) {
             throw new QueryException("No query/update statement provided");
@@ -150,44 +148,16 @@ public abstract class SparqlEndpointBase {
         }
     }
 
-    public void processQueryAsync(
-            AsyncResponse response,
-            SparqlStmtQuery stmt,
-            SparqlResultFmts format) {
+    public void processQueryAsync(AsyncResponse response, SparqlStmtQuery stmt, SparqlResultFmts format) {
+        Object abortLock = new Object();
+        boolean[] isAborted = { false };
+        QueryExecution[] activeQe = { null };
 
-        RDFConnection conn = getConnection();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Opened connection: " + System.identityHashCode(conn));
-        }
-
-        QueryExecution tmp;
-        try {
-            tmp = stmt.isParsed()
-                ? conn.query(stmt.getQuery())
-                : conn.query(stmt.getOriginalString());
-
-        } catch (Exception e) {
-            try {
-                conn.close();
-            } catch (Exception e2) {
-                e.addSuppressed(e2);
-            }
-            response.resume(e);
-            throw new RuntimeException(e);
-        }
-
-        // Wrap the query execution such that close() also closes the connection
-        // Note: QueryExecutionWrapperTxn.wrap is not suitable because not every connection supports it
-        QueryExecution qe = new QueryExecutionWrapperBase<QueryExecution>(tmp) {
-            @Override
-            public void close() {
-                try {
-                    super.close();
-                } finally {
-                    conn.close();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Closed connection: " + System.identityHashCode(conn));
-                    }
+        Consumer<QueryExecution> qeCallback = qe -> {
+            synchronized (abortLock) {
+                activeQe[0] = qe;
+                if (isAborted[0]) {
+                    qe.abort();
                 }
             }
         };
@@ -198,7 +168,13 @@ public abstract class SparqlEndpointBase {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Client disconnected");
                 }
-                qe.abort();
+                synchronized (abortLock) {
+                    isAborted[0] = true;
+                    QueryExecution qe = activeQe[0];
+                    if (qe != null) {
+                        qe.abort();
+                    }
+                }
             }
         });
 
@@ -219,90 +195,108 @@ public abstract class SparqlEndpointBase {
             }
         });
 
-        Response x = processQuery(qe, format);
+        // Set up a QueryExecutionFactory view which runs each query on
+        // its own connection and closes the connection upon termination of the QueryExecution
+        RdfDataSource dataSource = () -> getConnection();
+        QueryExecutionFactory qef = dataSource.asQef();
+
+        Response x = processQuery(qef, stmt, format, qeCallback);
         // Response x = Response.ok(result).type(mediaType).build();
         response.resume(x);
     }
 
-    public static Consumer<OutputStream> createQueryProcessor(QueryExecution qe, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt) {
-        Consumer<OutputStream> emitter = null;
-        ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
-        Query q = qe.getQuery();
+    public static QueryExecution exec(QueryExecutionFactory qef, SparqlStmtQuery stmt) {
+        QueryExecution result = stmt.isParsed()
+                ? qef.createQueryExecution(stmt.getQuery())
+                : qef.createQueryExecution(stmt.getOriginalString());
+        return result;
+    }
 
-        // Try to process the query with a result set language
+    /**
+     * Return a lambda that executes the query and writes the result to the output stream.
+     *
+     */
+    public static Consumer<OutputStream> createQueryProcessor(QueryExecutionFactory qef, SparqlStmtQuery stmt, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt,
+            Consumer<QueryExecution> qeCallback) {
+        Consumer<OutputStream> result = null;
+        ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
+
+        Query parsedQuery = stmt.isParsed() ? stmt.getQuery() : null;
+
         if (rswf != null) {
-            emitter = out -> {
-                ResultSetWriter rsWriter = rswf.create(lang);
-                SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
-                if (sr.isBoolean()) {
-                    boolean v = sr.getBooleanResult();
-                    rsWriter.write(out, v, cxt);
-                } else if (sr.isJson()) {
-                    // TODO: set proper json Content-type
-                    ResultSetFormatter.output(out, sr.getJsonItems());
-                } else {
-                    rsWriter.write(out, sr.getResultSet(), cxt);
+            // Try to process the query with a result set language
+            result = out -> {
+                try (QueryExecution qe = exec(qef, stmt)) {
+                    qeCallback.accept(qe);
+                    ResultSetWriter rsWriter = rswf.create(lang);
+                    Objects.requireNonNull(rsWriter);
+                    // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
+                    if (parsedQuery.isAskType()) {
+                        boolean v = qe.execAsk();
+                        rsWriter.write(out, v, cxt);
+                    } else if (parsedQuery.isJsonType()) {
+                        // TODO: set proper json Content-type
+                        ResultSetFormatter.output(out, qe.execJsonItems());
+                    } else {
+                        rsWriter.write(out, qe.execSelect(), cxt);
+                    }
                 }
             };
         } else if (fmt != null) {
             // Try to process the query with a triple / quad language
             if (StreamRDFWriter.registered(fmt)) {
-                emitter = out -> {
+                result = out -> {
                     StreamRDF writer = StreamRDFWriter.getWriterStream(out, fmt, cxt);
+                    Objects.requireNonNull(writer);
                     writer.start();
+                    try (QueryExecution qe = exec(qef, stmt)) {
+                        qeCallback.accept(qe);
+                        // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
+                        if (parsedQuery.isConstructQuad()) {
+                            StreamRDFOps.sendQuadsToStream(qe.execConstructQuads(), writer);
+                        } else { // if (parsedQuery.isConstructType()) {
+                            StreamRDFOps.sendTriplesToStream(qe.execConstructTriples(), writer);
+                        }
 
-                    SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
-                    if (sr.isQuads()) {
-                        StreamRDFOps.sendQuadsToStream(sr.getQuads(), writer);
-                    } else if (sr.isTriples()) {
-                        StreamRDFOps.sendTriplesToStream(sr.getTriples(), writer);
+                        writer.finish();
                     }
-
-                    writer.finish();
                 };
             } else if (RDFWriterRegistry.contains(lang)) {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Warning! Running non-streaming RDF writer " + fmt.toString() + " and building in-memory model");
                 }
-                emitter = out -> {
-                    SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
-                    RDFWriterBuilder writerBuilder = RDFWriter.create();
-                    if (sr.isQuads()) {
-                        DatasetGraph dsg = DatasetGraphFactory.createGeneral();
-                        sr.getQuads().forEachRemaining(dsg::add);
-                        writerBuilder.source(dsg);
-                    } else if (sr.isTriples()) {
-                        Graph graph = GraphFactory.createPlainGraph();
-                        sr.getTriples().forEachRemaining(graph::add);
-                        writerBuilder.source(graph);
+                result = out -> {
+                    try (QueryExecution qe = exec(qef, stmt)) {
+                        qeCallback.accept(qe);
+                        // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
+                        RDFWriterBuilder writerBuilder = RDFWriter.create();
+                        if (parsedQuery.isConstructQuad()) {
+                            DatasetGraph dsg = DatasetGraphFactory.createGeneral();
+                            // sr.getQuads().forEachRemaining(dsg::add);
+                            qe.execConstructQuads().forEachRemaining(dsg::add);
+                            writerBuilder.source(dsg);
+                        } else { // if (sr.isTriples()) {
+                            Graph graph = GraphFactory.createPlainGraph();
+                            // sr.getTriples().forEachRemaining(graph::add);
+                            qe.execConstructTriples().forEachRemaining(graph::add);
+                            writerBuilder.source(graph);
+                        }
+                        writerBuilder.format(fmt).context(cxt).output(out);
                     }
-
-                    writerBuilder.format(fmt).context(cxt).output(out);
                 };
             } else {
-                throw new RuntimeException("Could not handle execution of query " + q + " with lang " + lang);
+                throw new RuntimeException("Could not handle execution of query " + stmt + " with lang " + lang);
             }
         }
-
-        // Ensure to always close the query execution once writing the output completes (regardless whether normally or exceptionally)
-        Consumer<OutputStream> finalEmitter = emitter;
-        Consumer<OutputStream> result = out -> {
-            try {
-                finalEmitter.accept(out);
-            } finally {
-                qe.close();
-            }
-        };
-
         return result;
     }
 
-    public Response processQuery(QueryExecution qe, SparqlResultFmts format)
+    public Response processQuery(QueryExecutionFactory qef, SparqlStmtQuery stmt, SparqlResultFmts format, Consumer<QueryExecution> qeCallback)
     {
         Lang lang = null;
         RDFFormat rdfFormat = null;
 
-        Query query = qe.getQuery();
+        Query query = stmt.getQuery();
         if (query != null) {
             SparqlQueryFmts fmts = new SparqlQueryFmtOverResultFmt(format);
             lang = SparqlQueryFmtsUtils.getLang(fmts, query);
@@ -312,12 +306,13 @@ public abstract class SparqlEndpointBase {
         Response result;
         if (lang != null) {
             String contentTypeStr = lang.getContentType().getContentTypeStr();
-            StreamingOutput processor = createQueryProcessor(qe, lang, rdfFormat, org.apache.jena.sparql.util.Context.create())::accept;
+            StreamingOutput processor = createQueryProcessor(qef, stmt , lang, rdfFormat, org.apache.jena.sparql.util.Context.create(), qeCallback)::accept;
             result = Response.ok(processor, contentTypeStr).build();
         } else {
             // Send the query to the backend and determine the response content type from
             // the backend's content type
-            throw new RuntimeException("Cannot handle unparsed query yet");
+            // throw new RuntimeException("Cannot handle unparsed query yet");
+            throw new RuntimeException("Parse error: ", stmt.getParseException());
         }
 
         return result;
@@ -715,4 +710,55 @@ ThreadUtils.start(response, new Runnable() {
 //	lang = ResultsFormat.convert(resultsFormat);
 //}
 //
-
+//protected QueryExecution createQueryExecution(AsyncResponse response,
+//SparqlStmtQuery stmt,
+//SparqlResultFmts format) {
+//
+//RDFConnection conn = getConnection();
+//if (logger.isDebugEnabled()) {
+//logger.debug("Opened connection: " + System.identityHashCode(conn));
+//}
+//
+//QueryExecution tmp;
+//try {
+//tmp = stmt.isParsed()
+//  ? conn.query(stmt.getQuery())
+//  : conn.query(stmt.getOriginalString());
+//
+//} catch (Exception e) {
+//try {
+//  conn.close();
+//} catch (Exception e2) {
+//  e.addSuppressed(e2);
+//}
+//response.resume(e);
+//throw new RuntimeException(e);
+//}
+//
+//// Wrap the query execution such that close() also closes the connection
+//// Note: QueryExecutionWrapperTxn.wrap is not suitable because not every connection supports it
+//QueryExecution qe = new QueryExecutionWrapperBase<QueryExecution>(tmp) {
+//@Override
+//public void close() {
+//  try {
+//      super.close();
+//  } finally {
+//      conn.close();
+//      if (logger.isDebugEnabled()) {
+//          logger.debug("Closed connection: " + System.identityHashCode(conn));
+//      }
+//  }
+//}
+//};
+//
+//return qe;
+//}
+//} catch (Exception e) {
+//try {
+//  conn.close();
+//} catch (Exception e2) {
+//  e.addSuppressed(e2);
+//}
+//response.resume(e);
+//throw new RuntimeException(e);
+//

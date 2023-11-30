@@ -57,9 +57,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.Lists;
 
-
 /**
- * Super-convenient SPARQL statement loader. Probes arguments whether they are inline SPARQL statements or refer to files.
+ * Convenient SPARQL statement loader. Probes arguments whether they are inline SPARQL statements or refer to files.
  * Referred files may contain RDF or sequences of SPARQL statements.
  * RDF files are loaded fully into memory as UpdateModify statements.
  *
@@ -324,7 +323,9 @@ public class SparqlScriptProcessor {
 
                 isProcessed = true;
             } catch (Exception e) {
-                logger.debug("Probing " + filename + " as RDF data file failed", e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Probing verdict is 'not an RDF file' for " + filename, e);
+                }
             }
 
             Collection<Throwable> stmtErrorCollector = new ArrayList<>();
@@ -458,9 +459,13 @@ public class SparqlScriptProcessor {
 
             String contentType = tmpIn.getContentType();
             if (contentType == null) {
-                logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
+                if (logger.isInfoEnabled()) {
+                    logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
+                }
             } else {
-                logger.info("Detected data format: " + contentType);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Detected data format: " + contentType);
+                }
             }
             Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
 
@@ -478,7 +483,9 @@ public class SparqlScriptProcessor {
                 }
 
                 PrefixMap newPrefixes = PrefixUtils.readPrefixes(null, in, finalLang);
-                logger.info("A total of " + newPrefixes.size() + " prefixes known after processing " + filename);
+                if (logger.isInfoEnabled()) {
+                    logger.info("A total of " + newPrefixes.size() + " prefixes known after processing " + filename);
+                }
                 globalPrefixes.setNsPrefixes(newPrefixes.getMapping());
 
                 // String fileUrl = "file://" + Paths.get(filename).toAbsolutePath().normalize().toString();
@@ -502,7 +509,9 @@ public class SparqlScriptProcessor {
 
 
             String contentType = tmpIn.getContentType();
-            logger.info("Detected format: " + contentType);
+            if (logger.isInfoEnabled()) {
+                logger.info("Detected format: " + contentType);
+            }
             Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
 
             //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
@@ -533,7 +542,9 @@ public class SparqlScriptProcessor {
                         globalPrefixes.setNsPrefixes(m);
                     }
 
-                    logger.info("Gathering prefixes from named graphs...");
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Gathering prefixes from named graphs...");
+                    }
                     int i = 0;
                     Iterator<String> it = tmp.listNames();
                     while(it.hasNext()) {
@@ -544,7 +555,9 @@ public class SparqlScriptProcessor {
                             globalPrefixes.setNsPrefixes(m);
                         }
                     }
-                    logger.info("Gathered prefixes from " + i + " named graphs");
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Gathered prefixes from " + i + " named graphs");
+                    }
 
                     result = UpdateRequestUtils.createUpdateRequest(tmp, null);
 

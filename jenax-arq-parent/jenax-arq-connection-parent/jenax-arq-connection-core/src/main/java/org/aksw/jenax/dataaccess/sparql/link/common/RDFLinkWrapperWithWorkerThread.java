@@ -40,8 +40,9 @@ public class RDFLinkWrapperWithWorkerThread
     protected RDFLink delegate;
 
     public RDFLinkWrapperWithWorkerThread(RDFLink delegate) {
-        super();
-        this.delegate = delegate;
+        this(delegate, null);
+//        super();
+//        this.delegate = delegate;
     }
 
     public RDFLinkWrapperWithWorkerThread(RDFLink delegate, ExecutorService executorService) {

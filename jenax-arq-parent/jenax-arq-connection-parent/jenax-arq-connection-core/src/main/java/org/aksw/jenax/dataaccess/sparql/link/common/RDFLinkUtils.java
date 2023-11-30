@@ -7,7 +7,12 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperTxn;
+import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperTxn;
+import org.aksw.jenax.dataaccess.sparql.link.dataset.LinkDatasetGraphWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
@@ -17,14 +22,15 @@ import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUpdateTransf
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateWrapperBase;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkModular;
+import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
@@ -299,6 +305,35 @@ public class RDFLinkUtils {
 
         RDFLink result = new RDFLinkModular(lq, updateLink, ld);
         return result;
+    }
+
+    public static RDFLink wrapWithAutoTxn(RDFLink rdfLink, Transactional transactional) {
+        RDFLinkModular mod = asModular(rdfLink);
+        return new RDFLinkModular(
+            new LinkSparqlQueryWrapperBase(mod.queryLink()) {
+                @Override
+                public QueryExecBuilder newQuery() {
+                    return new QueryExecBuilderWrapperBase(getDelegate().newQuery()) {
+                        @Override
+                        public QueryExec build() {
+                            return QueryExecWrapperTxn.wrap(getDelegate().build(), transactional);
+                        }
+                    };
+                }
+            },
+            new LinkSparqlUpdateWrapperBase(mod.updateLink()) {
+                @Override
+                public UpdateExecBuilder newUpdate() {
+                    return new UpdateExecBuilderWrapperBase(getDelegate().newUpdate()) {
+                        @Override
+                        public UpdateExec build() {
+                            return UpdateExecWrapperTxn.wrap(getDelegate().build(), transactional);
+                        }
+                    };
+                }
+            },
+            LinkDatasetGraphWrapperTxn.wrap(mod.datasetLink(), transactional)
+        );
     }
 
 

@@ -174,7 +174,7 @@ public class PrefixUtils {
                         // Repeated prefixes count as non-prefix-events
                         ++nonPrefixEventCount;
                     } else {
-                        dst.add(eventPrefix, priorIri);
+                        dst.add(eventPrefix, eventIri);
                         nonPrefixEventCount = 0;
                     }
                 } else {

@@ -2,10 +2,10 @@ package org.aksw.jenax.dataaccess.sparql.datasource;
 
 import org.apache.jena.rdfconnection.RDFConnection;
 
-public interface RdfDataSourceWrapper
+public interface RdfDataSourceWrapper<T extends RdfDataSource>
     extends RdfDataSource
 {
-    RdfDataSource getDelegate();
+    T getDelegate();
 
     @Override
     default RDFConnection getConnection() {

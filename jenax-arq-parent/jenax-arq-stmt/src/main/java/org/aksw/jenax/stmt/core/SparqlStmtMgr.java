@@ -78,13 +78,13 @@ public class SparqlStmtMgr {
     }
 
     public static void execSparql(Dataset dataset, String filenameOrURI, Function<String, String> envLookup) {
-        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+        try(RDFConnection conn = RDFConnection.connect(dataset)) {
             execSparql(conn, filenameOrURI, envLookup);
         }
     }
 
     public static void execSparql(Model model, String filenameOrURI, Map<String, String> envMap) {
-        try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model))) {
+        try(RDFConnection conn = RDFConnection.connect(DatasetFactory.wrap(model))) {
             execSparql(conn, filenameOrURI, envMap == null ? null : envMap::get);
         }
     }

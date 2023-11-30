@@ -306,7 +306,6 @@ public class RDFConnectionUtils {
             varMapping = new HashMap<>();
             Set<Var> originalVars = OpVars.visibleVars(opService);
             Set<Var> remoteVars = OpVars.visibleVars(opRestored);
-
             for (Var v : originalVars) {
                 if (v.getName().contains("/")) {
                     // A variable which was scope renamed so has a different name

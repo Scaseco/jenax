@@ -4,6 +4,7 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.sparql.core.Transactional;
 
+/** Wrapper that automatically starts a transaction if there is no active one on the link */
 public class LinkDatasetGraphWrapperTxn<T extends LinkDatasetGraph>
     extends LinkDatasetGraphWrapperBase<T>
 {

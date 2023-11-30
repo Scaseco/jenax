@@ -23,6 +23,7 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ReadWrite;
@@ -69,7 +70,7 @@ public class RdfDataSources {
         return result;
     }
 
-    public static RdfDataSource applyLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
+    public static RdfDataSource wrapWithLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
         return new RdfDataSourceWrapperBase(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
@@ -85,13 +86,14 @@ public class RdfDataSources {
      */
     public static RdfDataSource decorateUpdate(RdfDataSource dataSource, UpdateExecTransform updateExecTransform) {
         LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
-        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        RdfDataSource result = wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
         return result;
     }
 
     /**
      * Wrap a LinkSparqlQuery such that a possible write action is run when txn.begin() is invoked.
      * The action is run before the transaction is started.
+     * Can be used to update e.g. the spatial index before a read transaction.
      */
     public static RdfDataSource decorateQueryBeforeTxnBegin(RdfDataSource dataSource, Runnable action) {
         LinkSparqlQueryTransform componentTransform = link -> new LinkSparqlQueryWrapperBase(link) {
@@ -105,7 +107,7 @@ public class RdfDataSources {
                 begin(TxnType.convert(readWrite));
             }
         };
-        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        RdfDataSource result = wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
         return result;
     }
 
@@ -156,12 +158,24 @@ public class RdfDataSources {
      */
     public static RdfDataSource execQueryViaSelect(RdfDataSource dataSource, Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform decorizer = execQueryViaSelect(convertToSelect);
-        RdfDataSource result = RdfDataSources.applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
+        RdfDataSource result = RdfDataSources.wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
         return result;
     }
 
     public static String fetchDatasetHash(RdfDataSource dataSource) {
         String result = QueryExecutionFactories.fetchDatasetHash(dataSource.asQef());
+        return result;
+    }
+
+    /**
+     * If the dataset supports transactions then return a wrapped datasource that starts
+     * transactions when none is active.
+     * This method checks transaction support only immediately.
+     */
+    public static RdfDataSource wrapWithAutoTxn(RdfDataSource dataSource, Dataset dataset) {
+        RdfDataSource result = dataset.supportsTransactions()
+            ? RdfDataSources.wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.wrapWithAutoTxn(link, dataset))
+            : dataSource;
         return result;
     }
 }

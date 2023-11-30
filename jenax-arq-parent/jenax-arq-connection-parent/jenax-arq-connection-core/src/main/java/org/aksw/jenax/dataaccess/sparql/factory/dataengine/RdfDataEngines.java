@@ -7,10 +7,14 @@ import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsa;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineDecoratorBase;
+import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
@@ -118,6 +122,18 @@ public class RdfDataEngines {
         }
     }
 
+    /** Return a new RdfDataEngine which applies the given transformation to each created link */
+    public static RdfDataEngine wrapWithLinkTransform(RdfDataEngine dataEngine, RDFLinkTransform xform) {
+        return new RdfDataEngineWrapperBase<RdfDataEngine>(dataEngine) {
+            @Override
+            public RDFConnection getConnection() {
+                RDFConnection base = getDelegate().getConnection();
+                RDFConnection result = RDFConnectionUtils.wrapWithLinkDecorator(base, xform);
+                return result;
+            }
+        };
+    }
+
     public static RdfDataEngine adapt(QueryExecutionFactory qef) {
         return new RdfDataEngineOverQueryExecutionFactory(qef);
     }
@@ -173,5 +189,13 @@ public class RdfDataEngines {
                 return result;
             }
         };
+    }
+
+    public static RdfDataEngine wrapWithAutoTxn(RdfDataEngine dataEngine, Dataset dataset) {
+        return of(RdfDataSources.wrapWithAutoTxn(dataEngine, dataset), dataEngine);
+    }
+
+    public static RdfDataEngine wrapWithWorkerThread(RdfDataEngine dataEngine) {
+        return wrapWithLinkTransform(dataEngine, RDFLinkWrapperWithWorkerThread::wrap);
     }
 }
