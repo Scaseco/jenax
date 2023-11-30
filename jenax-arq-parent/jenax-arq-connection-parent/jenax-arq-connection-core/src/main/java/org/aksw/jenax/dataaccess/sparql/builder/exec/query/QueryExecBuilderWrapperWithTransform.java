@@ -6,9 +6,9 @@ import org.apache.jena.query.Query;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
-/** QueryExecBuilder base class which parses query strings and delegates them to the object based method*/
+/** QueryExecBuilder base class which parses query strings and delegates them to the object based method */
 public class QueryExecBuilderWrapperWithTransform
-    extends QueryExecBuilderDelegateBaseParse
+    extends QueryExecBuilderWrapperBaseParse
 {
     protected QueryTransform queryTransform;
     protected QueryExecTransform queryExecTransform;

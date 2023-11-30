@@ -74,8 +74,10 @@ public class RDFLinkWrapperWithWorkerThread
 
     @Override
     public void abort() {
-        // submit(() -> getDelegate().abort());
-        getDelegate().abort();
+        // This is not a query execution abort - but a transaction abort
+        // So we need to call this method from the right thread
+        submit(() -> getDelegate().abort());
+        // getDelegate().abort();
     }
 
     @Override

@@ -11,10 +11,10 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
  * Note, that query strings can still be passed to {@link QueryExecBuilder#query(String)} and
  * {@link QueryExecBuilder#query(String, Syntax)}.
  */
-public class QueryExecBuilderDelegateBaseParse
+public class QueryExecBuilderWrapperBaseParse
     extends QueryExecBuilderWrapperBase
 {
-    public QueryExecBuilderDelegateBaseParse(QueryExecBuilder delegate) {
+    public QueryExecBuilderWrapperBaseParse(QueryExecBuilder delegate) {
         super(delegate);
     }
 

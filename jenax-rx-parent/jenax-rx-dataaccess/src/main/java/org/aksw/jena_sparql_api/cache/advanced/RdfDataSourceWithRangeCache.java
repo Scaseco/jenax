@@ -52,7 +52,6 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
-import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +113,7 @@ public class RdfDataSourceWithRangeCache
             @Override
             public QueryExecBuilder newQuery() {
                 // XXX Ideally the context would expose a possible underlying dataset's context
-                return new QueryExecBuilderCustomBase<>(new Context()) {
+                return new QueryExecBuilderCustomBase<>() {
                     @Override
                     public QueryExec build() {
                         QueryExec r = createQueryExec(this);
@@ -131,7 +130,7 @@ public class RdfDataSourceWithRangeCache
         LinkSparqlUpdate linkUpdate = new LinkSparqlUpdateBase() {
             @Override
             public UpdateExecBuilder newUpdate() {
-                return new UpdateExecBuilderCustomBase<UpdateExecBuilder>(new Context()) {
+                return new UpdateExecBuilderCustomBase<UpdateExecBuilder>() {
                     @Override
                     public UpdateExec build() {
                         return createUpdateExec(baseLink, this);

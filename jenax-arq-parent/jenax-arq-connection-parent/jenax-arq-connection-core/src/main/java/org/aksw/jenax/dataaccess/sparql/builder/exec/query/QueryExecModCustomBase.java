@@ -5,21 +5,27 @@ import java.util.concurrent.TimeUnit;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecMod;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.ContextAccumulator;
 
 public abstract class QueryExecModCustomBase<T extends QueryExecMod>
     implements QueryExecMod
 {
-    protected Context context;
+    // Use ContextAccumulator?
+    protected ContextAccumulator contextAccumulator;
 
-    protected long initialTimeoutValue;
+    protected long initialTimeoutValue = -1;
     protected TimeUnit initialTimeoutUnit;
 
-    protected long overallTimeoutValue;
+    protected long overallTimeoutValue = -1;
     protected TimeUnit overallTimeoutUnit;
 
-    public QueryExecModCustomBase(Context context) {
+    public QueryExecModCustomBase() {
+        this(ContextAccumulator.newBuilder());
+    }
+
+    public QueryExecModCustomBase(ContextAccumulator contextAccumulator) {
         super();
-        this.context = context;
+        this.contextAccumulator = contextAccumulator;
     }
 
     public TimeUnit getInitialTimeoutUnit() {
@@ -59,7 +65,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
 
     @Override
     public Context getContext() {
-        return context;
+        return contextAccumulator.context();
     }
 
     @Override
@@ -75,6 +81,8 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
             dst.initialTimeout(overallTimeoutValue, overallTimeoutUnit);
         }
 
+        // XXX Only apply added settings
+        Context context = getContext();
         if (context != null) {
             Context dstCxt = dst.getContext();
             if (dstCxt != null) {

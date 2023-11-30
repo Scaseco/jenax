@@ -156,7 +156,9 @@ public abstract class SparqlEndpointBase {
             SparqlResultFmts format) {
 
         RDFConnection conn = getConnection();
-        logger.debug("Opened connection: " + System.identityHashCode(conn));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Opened connection: " + System.identityHashCode(conn));
+        }
 
         QueryExecution tmp;
         try {
@@ -183,7 +185,9 @@ public abstract class SparqlEndpointBase {
                     super.close();
                 } finally {
                     conn.close();
-                    logger.debug("Closed connection: " + System.identityHashCode(conn));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Closed connection: " + System.identityHashCode(conn));
+                    }
                 }
             }
         };
@@ -191,7 +195,9 @@ public abstract class SparqlEndpointBase {
         response.register(new ConnectionCallback() {
             @Override
             public void onDisconnect(AsyncResponse disconnect) {
-                logger.debug("Client disconnected");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Client disconnected");
+                }
                 qe.abort();
             }
         });
@@ -200,9 +206,13 @@ public abstract class SparqlEndpointBase {
             @Override
             public void onComplete(Throwable t) {
                 if(t == null) {
-                    logger.debug("Successfully completed query execution");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Successfully completed query execution");
+                    }
                 } else {
-                    logger.debug("Failed query execution");
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed query execution");
+                    }
                 }
                 // Redundant close
                 // qeAndType.getQueryExecution().close();
@@ -251,7 +261,9 @@ public abstract class SparqlEndpointBase {
                     writer.finish();
                 };
             } else if (RDFWriterRegistry.contains(lang)) {
-                logger.warn("Warning! Running non-streaming RDF writer " + fmt.toString() + " and building in-memory model");
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Warning! Running non-streaming RDF writer " + fmt.toString() + " and building in-memory model");
+                }
                 result = out -> {
                     SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
                     RDFWriterBuilder writerBuilder = RDFWriter.create();
@@ -311,7 +323,9 @@ public abstract class SparqlEndpointBase {
           @Override
           public void onDisconnect(AsyncResponse disconnect) {
               conn.abort();
-              logger.debug("Client disconnected");
+              if (logger.isDebugEnabled()) {
+                  logger.debug("Client disconnected");
+              }
           }
       });
 
@@ -319,15 +333,21 @@ public abstract class SparqlEndpointBase {
           @Override
           public void onComplete(Throwable t) {
               if(t == null) {
-                  logger.debug("Successfully completed query execution");
+                  if (logger.isDebugEnabled()) {
+                      logger.debug("Successfully completed query execution");
+                  }
               } else {
-                  logger.debug("Failed query execution");
+                  if (logger.isDebugEnabled()) {
+                      logger.debug("Failed query execution");
+                  }
               }
           }
       });
 
       try {
-          logger.debug("Opened connection: " + System.identityHashCode(conn));
+          if (logger.isDebugEnabled()) {
+              logger.debug("Opened connection: " + System.identityHashCode(conn));
+          }
 //          Txn.execute(conn, () -> {
               if (stmt.isParsed()) {
                   conn.update(stmt.getUpdateRequest());

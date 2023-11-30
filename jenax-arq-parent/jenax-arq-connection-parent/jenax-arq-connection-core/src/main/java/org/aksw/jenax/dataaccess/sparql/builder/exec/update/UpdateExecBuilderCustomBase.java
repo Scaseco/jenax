@@ -7,6 +7,7 @@ import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.util.Context;
+import org.apache.jena.sparql.util.ContextAccumulator;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateFactory;
@@ -20,10 +21,15 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
     protected String updateString;
 
     protected BindingBuilder substitution = BindingFactory.builder();
-    protected Context context;
+    protected ContextAccumulator contextAccumulator;
 
-    public UpdateExecBuilderCustomBase(Context context) {
-        this.context = context;
+    public UpdateExecBuilderCustomBase() {
+        this(ContextAccumulator.newBuilder());
+    }
+
+    public UpdateExecBuilderCustomBase(ContextAccumulator context) {
+        super();
+        this.contextAccumulator = context;
     }
 
     public UpdateRequest getUpdateRequest() {
@@ -43,7 +49,7 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
     }
 
     public Context getContext() {
-        return context;
+        return contextAccumulator.context();
     }
 
     /**
@@ -93,19 +99,24 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
 
     @Override
     public UpdateExecBuilder set(Symbol symbol, Object value) {
-        context.set(symbol, value);
+        contextAccumulator.set(symbol, value);
         return self();
     }
 
     @Override
     public UpdateExecBuilder set(Symbol symbol, boolean value) {
-        context.set(symbol, value);
+        contextAccumulator.set(symbol, value);
         return self();
     }
 
     @Override
     public UpdateExecBuilder context(Context context) {
-        this.context.putAll(context);
+        if (context != null) {
+            for (Symbol key : context.keys()) {
+                this.contextAccumulator.set(key, context.get(key));
+            }
+        }
+        // this.contextAccumulator.putAll(context);
         return self();
     }
 
@@ -135,8 +146,8 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
             dst.substitution(binding);
         }
 
-        if (context != null) {
-            dst.context(context);
+        if (contextAccumulator != null) {
+            dst.context(contextAccumulator.context());
         }
     }
 }

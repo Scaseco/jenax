@@ -9,10 +9,17 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 
+/**
+ * Base class for custom QueryExecBuilders.
+ * Tracks all configurations in protected attributes which can be accessed by subclasses.
+ *
+ * @param <T> The QueryExecBuilder type for fluent chains (typically {@link QueryExecBuilder}, but may be a custom sub-class).
+ */
 public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
     extends QueryExecModCustomBase<T>
     implements QueryExecBuilder
@@ -20,10 +27,10 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
     protected Query query;
     protected String queryString;
     protected Syntax querySyntax;
-    protected BindingBuilder substitution;
+    protected BindingBuilder substitution = BindingFactory.builder();
 
-    public QueryExecBuilderCustomBase(Context context) {
-        super(context);
+    public QueryExecBuilderCustomBase() {
+        super();
     }
 
     public Query getQuery() {
@@ -49,7 +56,9 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
     public Query getParsedQuery() {
         Query result = query != null
                 ? query
-                : QueryFactory.create(queryString, querySyntax);
+                : queryString != null
+                    ? QueryFactory.create(queryString, querySyntax)
+                    : null;
         return result;
     }
 
@@ -91,7 +100,11 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
 
     @Override
     public QueryExecBuilder context(Context context) {
-        Context.mergeCopy(getContext(), context);
+        if (context != null) {
+            for (Symbol key : context.keys()) {
+                this.contextAccumulator.set(key, context.get(key));
+            }
+        }
         return self();
     }
 

@@ -92,10 +92,10 @@ public class RDFLinkUtils {
                 QueryExecBuilder r = baseLink.newQuery();
                 Context cxt = new Context();
                 contextMutator.accept(cxt);
-                cxt.keys().forEach(key -> {
+                for (Symbol key : cxt.keys()) {
                     Object val = cxt.get(key);
                     r.set(key, val);
-                });
+                }
                 return r;
             }
         };
@@ -118,7 +118,10 @@ public class RDFLinkUtils {
         };
     }
 
-    /** If the argument is an RDFLinkModular then return it, otherwise create an RDFLinkModular with the given link in all of its positions */
+    /**
+     * If the argument is an RDFLinkModular then return it as is
+     * otherwise create an RDFLinkModular with the given link in all of its positions.
+     */
     public static RDFLinkModular asModular(RDFLink link) {
         RDFLinkModular result = link instanceof RDFLinkModular
             ? (RDFLinkModular)link

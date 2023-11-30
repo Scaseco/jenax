@@ -32,20 +32,20 @@ public class LinkSparqlQueryQueryTransform
         this.queryExecTransform = queryExecTransform;
     }
 
-    @Override
-    public QueryExec query(Query query) {
-        Query effectiveQuery = queryTransform == null
-                ? query
-                : queryTransform.apply(query);
-
-        QueryExec qe = getDelegate().query(effectiveQuery);
-
-        QueryExec result = queryExecTransform == null
-                ? qe
-                : queryExecTransform.apply(qe);
-
-        return result;
-    }
+//    @Override
+//    public QueryExec query(Query query) {
+//        Query effectiveQuery = queryTransform == null
+//                ? query
+//                : queryTransform.apply(query);
+//
+//        QueryExec qe = getDelegate().query(effectiveQuery);
+//
+//        QueryExec result = queryExecTransform == null
+//                ? qe
+//                : queryExecTransform.apply(qe);
+//
+//        return result;
+//    }
 
     @Override
     public QueryExecBuilder newQuery() {

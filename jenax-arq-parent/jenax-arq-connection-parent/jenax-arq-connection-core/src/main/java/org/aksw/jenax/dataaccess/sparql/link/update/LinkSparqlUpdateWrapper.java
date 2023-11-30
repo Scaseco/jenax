@@ -1,8 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.link.update;
 
 import org.apache.jena.rdflink.LinkSparqlUpdate;
-import org.apache.jena.update.Update;
-import org.apache.jena.update.UpdateRequest;
 
 public interface LinkSparqlUpdateWrapper
     extends LinkSparqlUpdateBase

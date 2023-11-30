@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
-import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDelegateBaseParse;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
@@ -119,7 +119,7 @@ public class RdfDataSources {
             return new LinkSparqlQueryWrapperBase(baseLink) {
                 @Override
                 public QueryExecBuilder newQuery() {
-                    return new QueryExecBuilderDelegateBaseParse(baseLink.newQuery()) {
+                    return new QueryExecBuilderWrapperBaseParse(baseLink.newQuery()) {
                         protected Query seenQuery = null;
                         @Override
                         public QueryExecBuilder query(Query query) {
