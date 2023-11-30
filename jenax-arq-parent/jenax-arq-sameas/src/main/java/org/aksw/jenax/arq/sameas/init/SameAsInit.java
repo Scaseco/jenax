@@ -19,6 +19,7 @@ import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.assemblers.AssemblerGroup;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdfs.SetupRDFS;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.assembler.AssemblerUtils;
@@ -63,18 +64,21 @@ public class SameAsInit
         Pattern servicePattern = Pattern.compile("^" + Pattern.quote(serviceName) + "($|:)");
         ServiceExecutorRegistry.get().addSingleLink(
             (opExec, opOrig, binding, execCxt, chain) -> {
-                QueryIterator r;
-                String uri = opExec.getService().getURI();
-                Matcher m = servicePattern.matcher(uri);
-
-                if (m.find()) {
-                    if (m.end() < uri.length()) {
-                        throw new RuntimeException("Trailing characters found after '" + m.group() + "': " + uri.substring(m.end()));
+                QueryIterator r = null;
+                Node node = opExec.getService();
+                if (node != null && node.isURI()) {
+                    String uri = node.getURI();
+                    Matcher m = servicePattern.matcher(uri);
+                    if (m.find()) {
+                        if (m.end() < uri.length()) {
+                            throw new RuntimeException("Trailing characters found after '" + m.group() + "': " + uri.substring(m.end()));
+                        }
+                        // Inherit union default graph if backed by tdb
+                        DatasetGraph adhocDs = wrapper.apply(execCxt);
+                        r = QueryExecUtils.execute(opExec.getSubOp(), adhocDs, binding, execCxt.getContext());
                     }
-                    // Inherit union default graph if backed by tdb
-                    DatasetGraph adhocDs = wrapper.apply(execCxt);
-                    r = QueryExecUtils.execute(opExec.getSubOp(), adhocDs, binding, execCxt.getContext());
-                } else {
+                }
+                if (r == null) {
                     r = chain.createExecution(opExec, opOrig, binding, execCxt);
                 }
                 return r;
