@@ -74,10 +74,10 @@ public class UpdateExecDatasetBuilderEx<T extends UpdateExecDatasetBuilderEx<T>>
         // Merge the contexts
         Context finalCxt = Context.setupContextForDataset(cxt, dataset);
         Binding initialBinding = BindingRoot.create();
-        UpdateExec tmp = new UpdateExecDataset(updateRequest, dataset, initialBinding, finalCxt, f) {};
+        UpdateExec result = new UpdateExecDataset(updateRequest, dataset, initialBinding, finalCxt, f) {};
 
         // FIXME The Txn wrapper is far not ideal here I suppose?
-        UpdateExec result = new DatasetExecWrapperTxn<>(tmp, dataset);
+        // UpdateExec result = new DatasetExecWrapperTxn<>(tmp, dataset);
         return result;
     }
 }

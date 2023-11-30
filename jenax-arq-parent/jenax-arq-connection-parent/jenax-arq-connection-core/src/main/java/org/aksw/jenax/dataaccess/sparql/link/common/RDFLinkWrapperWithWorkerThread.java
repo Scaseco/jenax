@@ -44,6 +44,11 @@ public class RDFLinkWrapperWithWorkerThread
         this.delegate = delegate;
     }
 
+    public RDFLinkWrapperWithWorkerThread(RDFLink delegate, ExecutorService executorService) {
+        super(executorService);
+        this.delegate = delegate;
+    }
+
     public static RDFLink wrap(RDFLink delegate) {
         return new RDFLinkWrapperWithWorkerThread(delegate);
     }

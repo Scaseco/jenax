@@ -225,13 +225,13 @@ public abstract class SparqlEndpointBase {
     }
 
     public static Consumer<OutputStream> createQueryProcessor(QueryExecution qe, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt) {
-        Consumer<OutputStream> result = null;
+        Consumer<OutputStream> emitter = null;
         ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
         Query q = qe.getQuery();
 
         // Try to process the query with a result set language
         if (rswf != null) {
-            result = out -> {
+            emitter = out -> {
                 ResultSetWriter rsWriter = rswf.create(lang);
                 SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, q);
                 if (sr.isBoolean()) {
@@ -247,7 +247,7 @@ public abstract class SparqlEndpointBase {
         } else if (fmt != null) {
             // Try to process the query with a triple / quad language
             if (StreamRDFWriter.registered(fmt)) {
-                result = out -> {
+                emitter = out -> {
                     StreamRDF writer = StreamRDFWriter.getWriterStream(out, fmt, cxt);
                     writer.start();
 
@@ -264,7 +264,7 @@ public abstract class SparqlEndpointBase {
                 if (logger.isWarnEnabled()) {
                     logger.warn("Warning! Running non-streaming RDF writer " + fmt.toString() + " and building in-memory model");
                 }
-                result = out -> {
+                emitter = out -> {
                     SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, null);
                     RDFWriterBuilder writerBuilder = RDFWriter.create();
                     if (sr.isQuads()) {
@@ -283,6 +283,17 @@ public abstract class SparqlEndpointBase {
                 throw new RuntimeException("Could not handle execution of query " + q + " with lang " + lang);
             }
         }
+
+        // Ensure to always close the query execution once writing the output completes (regardless whether normally or exceptionally)
+        Consumer<OutputStream> finalEmitter = emitter;
+        Consumer<OutputStream> result = out -> {
+            try {
+                finalEmitter.accept(out);
+            } finally {
+                qe.close();
+            }
+        };
+
         return result;
     }
 
