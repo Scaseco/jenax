@@ -39,10 +39,10 @@ import com.google.gson.JsonObject;
  * This function is similar to a service clause but it only produces benchmark result json object.
  *
  */
-public class F_BenchmarkOld
+public class FN_BenchmarkOld
     extends FunctionBase1
 {
-    private static final Logger logger = LoggerFactory.getLogger(F_BenchmarkOld.class);
+    private static final Logger logger = LoggerFactory.getLogger(FN_BenchmarkOld.class);
 
     @Override
     protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {

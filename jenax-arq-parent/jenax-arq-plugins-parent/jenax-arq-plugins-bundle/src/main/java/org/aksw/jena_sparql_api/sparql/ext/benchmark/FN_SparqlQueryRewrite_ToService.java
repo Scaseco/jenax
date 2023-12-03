@@ -22,7 +22,7 @@ import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
  * The main transformation is encode the original query's FROM (NAMED) clauses in the
  * default-graph-uri and named-graph-uri in the query string of the given service URI.
  */
-public class F_SparqlQueryRewrite_ToService
+public class FN_SparqlQueryRewrite_ToService
     extends FunctionBase2
 {
     @Override
@@ -35,7 +35,7 @@ public class F_SparqlQueryRewrite_ToService
         Query baseQuery = QueryFactory.create(queryStr);
         DatasetDescription dd = baseQuery.getDatasetDescription();
         String finalUriStr = serviceUriStr;
-        if (!dd.isEmpty()) {
+        if (dd != null && !dd.isEmpty()) {
             try {
                 URI uri = new URI(serviceUriStr);
                 List<Entry<String, String>> args = UriUtils.parseQueryStringAsList(uri.getQuery());

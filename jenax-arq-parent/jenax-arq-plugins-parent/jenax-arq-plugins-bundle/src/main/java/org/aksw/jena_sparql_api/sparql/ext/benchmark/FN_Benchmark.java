@@ -56,10 +56,10 @@ import io.opencensus.common.Function;
  * }
  * </pre>
  */
-public class F_Benchmark
+public class FN_Benchmark
     extends FunctionBase
 {
-    private static final Logger logger = LoggerFactory.getLogger(F_Benchmark.class);
+    private static final Logger logger = LoggerFactory.getLogger(FN_Benchmark.class);
 
     /** Called by super.{@link #exec(List, FunctionEnv)} */
 //    @Override

@@ -1,10 +1,10 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
-import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_BenchmarkOld;
-import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_SparqlQueryRewrite_ToService;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_CompareResultSet;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_NextLong;
-import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_Benchmark;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.FN_Benchmark;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.FN_BenchmarkOld;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.FN_SparqlQueryRewrite_ToService;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryBenchmark;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryExecSelect;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
@@ -29,20 +29,21 @@ public class JenaExtensionSys {
 
         FunctionRegistry registry = FunctionRegistry.get();
 
-        registry.put(ns + "benchmarkOld", F_BenchmarkOld.class);
-        registry.put(NorseTerms.NS + "sys."+ "benchmark", F_Benchmark.class);
+        registry.put(ns + "benchmarkOld", FN_BenchmarkOld.class);
+        registry.put(NorseTerms.NS + "sys." + "benchmark", FN_Benchmark.class);
+        registry.put(NorseTerms.NS + "sys." + " err.print", FN_PrintErr.class);
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
-        registry.put(NorseLambdaTerms.fnOf, F_LambdaOf.class);
-        registry.put(NorseLambdaTerms.fnCall, F_LambdaCall.class);
-        registry.put(NorseLambdaTerms.mapComputeIfAbsent, F_MapComputeIfAbsent.class);
+        registry.put(NorseLambdaTerms.fnOf, FN_LambdaOf.class);
+        registry.put(NorseLambdaTerms.fnCall, FN_LambdaCall.class);
+        registry.put(NorseLambdaTerms.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
 
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
 
-        registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", F_SparqlQueryRewrite_ToService.class);
+        registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", FN_SparqlQueryRewrite_ToService.class);
 
     }
 

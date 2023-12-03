@@ -29,7 +29,7 @@ import com.google.common.collect.Tables;
  * @author raven
  *
  */
-public class F_MapComputeIfAbsent
+public class FN_MapComputeIfAbsent
     extends FunctionBase3
 {
     // public static final String tagLambdaOf = "lambdaOf";
@@ -40,7 +40,7 @@ public class F_MapComputeIfAbsent
     public static Table<NodeValue, NodeValue, NodeValue> getOrCreateTable(Context cxt) {
         Table<NodeValue, NodeValue, NodeValue> result;
         if ((result = cxt.get(symTable)) == null) {
-            synchronized (F_MapComputeIfAbsent.class) {
+            synchronized (FN_MapComputeIfAbsent.class) {
                 if ((result = cxt.get(symTable)) == null) {
                     result = Tables.newCustomTable(new ConcurrentHashMap<>(), ConcurrentHashMap::new);
                     cxt.set(symTable, result);

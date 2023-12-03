@@ -16,10 +16,10 @@ import org.apache.jena.sparql.function.FunctionEnv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class F_SparqlQueryRewrite_CacheGroupBy
+public class FN_SparqlQueryRewrite_CacheGroupBy
     extends FunctionBase
 {
-    private static final Logger logger = LoggerFactory.getLogger(F_Benchmark.class);
+    private static final Logger logger = LoggerFactory.getLogger(FN_Benchmark.class);
 
     /** Called by super.{@link #exec(List, FunctionEnv)} */
 //    @Override

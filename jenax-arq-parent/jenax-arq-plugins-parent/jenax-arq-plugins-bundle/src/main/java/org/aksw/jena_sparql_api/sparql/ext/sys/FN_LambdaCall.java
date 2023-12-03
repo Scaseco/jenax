@@ -9,7 +9,7 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
 import org.apache.jena.sparql.function.FunctionEnv;
 
-public class F_LambdaCall
+public class FN_LambdaCall
     extends FunctionBase
 {
     @Override

@@ -36,7 +36,7 @@ import org.apache.jena.sparql.function.FunctionEnv;
  * @author raven
  *
  */
-public class F_LambdaOf
+public class FN_LambdaOf
     extends FunctionBase
 {
     public static void main(String[] args) {
@@ -76,7 +76,7 @@ public class F_LambdaOf
         }
     }
 
-    public F_LambdaOf() {
+    public FN_LambdaOf() {
     }
 
     @Override
