@@ -159,7 +159,6 @@ public class F_Benchmark
         json.addProperty("size", resultSetSize);
 
         return json;
-
     }
 }
 

@@ -217,6 +217,7 @@ public class QueryUtils {
         QueryType tgtQueryType = proto.queryType();
         switch(tgtQueryType) {
         case SELECT:
+            // XXX Is a shallow clone sufficient? result = QueryTransformOps.shallowCopy(query)
             result = query.cloneQuery();
 
             Set<Var> expectedVars = new LinkedHashSet<>(proto.getProjectVars());

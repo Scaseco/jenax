@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_BenchmarkOld;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_SparqlQueryRewrite_ToService;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_CompareResultSet;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_NextLong;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_Benchmark;
@@ -40,6 +41,9 @@ public class JenaExtensionSys {
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
+
+        registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", F_SparqlQueryRewrite_ToService.class);
+
     }
 
     public static void addPrefixes(PrefixMapping pm) {
