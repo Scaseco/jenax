@@ -31,7 +31,7 @@ public class JenaExtensionSys {
 
         registry.put(ns + "benchmarkOld", FN_BenchmarkOld.class);
         registry.put(NorseTerms.NS + "sys." + "benchmark", FN_Benchmark.class);
-        registry.put(NorseTerms.NS + "sys." + " err.print", FN_PrintErr.class);
+        registry.put(NorseTerms.NS + "sys." + "err.print", FN_PrintErr.class);
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
