@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
-import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
@@ -33,11 +32,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class E_Benchmark
+/**
+ * Function for benchmarking a sparql query on a given endpoint and obtain
+ * the statistics as an RDF literal holding a JSON object.
+ *
+ * This function is similar to a service clause but it only produces benchmark result json object.
+ *
+ */
+public class F_BenchmarkOld
     extends FunctionBase1
 {
-    private static final Logger logger = LoggerFactory.getLogger(E_Benchmark.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(F_BenchmarkOld.class);
 
     @Override
     protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
@@ -76,7 +81,9 @@ public class E_Benchmark
         }
 
         if(conn == null) {
-            logger.info("No connection in context, falling back to dataset");
+            if (logger.isInfoEnabled()) {
+                logger.info("No connection in context, falling back to dataset");
+            }
             DatasetGraph dsg = env.getDataset();
             if(dsg != null) {
                 Dataset ds = DatasetFactory.wrap(dsg);
@@ -96,7 +103,9 @@ public class E_Benchmark
         }
 
         if(conn == null) {
-            logger.info("No connection in context, falling back to dataset");
+            if (logger.isInfoEnabled()) {
+                logger.info("No connection in context, falling back to dataset");
+            }
             DatasetGraph dsg = env.getDataset();
             if(dsg != null) {
                 Dataset ds = DatasetFactory.wrap(dsg);
@@ -113,7 +122,9 @@ public class E_Benchmark
             throw new RuntimeException("No connection or dataset specified in context");
         }
 
-        logger.info("Benchmarking query: " + queryStr);
+        if (logger.isInfoEnabled()) {
+            logger.info("Benchmarking query: " + queryStr);
+        }
 
         Stopwatch sw = Stopwatch.createStarted();
         Long resultSetSize = null;
@@ -128,7 +139,9 @@ public class E_Benchmark
             }
 
         } catch(Exception e) {
-            logger.warn("Failure executing benchmark request", e);
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failure executing benchmark request", e);
+            }
             throw new ExprTypeException("Failure executing benchmark request", e);
         }
 

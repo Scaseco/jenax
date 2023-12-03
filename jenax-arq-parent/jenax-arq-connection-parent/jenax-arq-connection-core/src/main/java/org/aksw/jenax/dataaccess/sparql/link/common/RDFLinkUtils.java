@@ -46,7 +46,10 @@ public class RDFLinkUtils {
     @Deprecated // Data source is the better abstraction!
     public static final Symbol CONNECTION_SYMBOL = Symbol.create("http://jsa.aksw.org/connection");
 
-
+    /**
+     * A data source for making sub-sparql queries. Care needs to be taken to avoid deadlocks:
+     * If the original connection is in a write transaction, then sub-queries may block.
+     */
     public static final Symbol symRdfDataSource = Symbol.create("https://w3id.org/aksw/jenax#rdfDataSource");
 
     public static RDFLink withCloseShield(RDFLink link) {

@@ -52,9 +52,9 @@ public class PropertyFunctionFactoryBenchmark
         public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object,
                 ExecutionContext execCxt) {
 
-            RDFConnection conn = E_Benchmark.getConnection(execCxt);
+            RDFConnection conn = F_BenchmarkOld.getConnection(execCxt);
             boolean includeResultSet = object.getArgListSize() >= 3;
-            JsonObject json = E_Benchmark.benchmark(conn, subject, includeResultSet);
+            JsonObject json = F_BenchmarkOld.benchmark(conn, subject, includeResultSet);
 
             QueryIterator result;
             if(json == null) {

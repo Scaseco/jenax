@@ -1,12 +1,14 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
-import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_Benchmark;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_BenchmarkOld;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_CompareResultSet;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.E_NextLong;
+import org.aksw.jena_sparql_api.sparql.ext.benchmark.F_Benchmark;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryBenchmark;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryExecSelect;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.norse.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -26,7 +28,8 @@ public class JenaExtensionSys {
 
         FunctionRegistry registry = FunctionRegistry.get();
 
-        registry.put(ns + "benchmark", E_Benchmark.class);
+        registry.put(ns + "benchmarkOld", F_BenchmarkOld.class);
+        registry.put(NorseTerms.NS + "sys."+ "benchmark", F_Benchmark.class);
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 

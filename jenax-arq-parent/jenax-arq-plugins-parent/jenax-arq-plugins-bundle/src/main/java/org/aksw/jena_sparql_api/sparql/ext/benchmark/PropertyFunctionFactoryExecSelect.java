@@ -58,7 +58,7 @@ public class PropertyFunctionFactoryExecSelect
                 ExecutionContext execCxt) {
             QueryIterator result;
 
-            RDFConnection conn = E_Benchmark.getConnection(execCxt);
+            RDFConnection conn = F_BenchmarkOld.getConnection(execCxt);
 
             if(subject.isVariable()) {
                 result = IterLib.noResults(execCxt);//.result(binding, execCxt);

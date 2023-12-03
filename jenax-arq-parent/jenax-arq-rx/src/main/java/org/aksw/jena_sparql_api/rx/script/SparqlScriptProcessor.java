@@ -68,7 +68,6 @@ import com.google.common.collect.Lists;
  * Prefixes from an input source carry over to the next. Hence, if an RDF file is loaded, its prefixes can be used in
  * subsequent SPARQL statements without need for declaration.
  *
- *
  * For example assuming that mydata defines a foo prefix
  * ad-hoc querying becomes possible simply using the arguments ["people.ttl", "?s { ?s a foaf:Person }"]
  *

@@ -63,7 +63,6 @@ public class RdfDataSourceWithLocalCache
 
     public static final String REMOTE_IRI = "env://REMOTE";
     public static final Node REMOTE_NODE = NodeFactory.createURI(REMOTE_IRI);
-
     public static final Node CACHE_NODE = NodeFactory.createURI("cache:");
 
     /** Requests go to this dataset which is configured to delegate SERVICE >env://REMOTE> requests to the delegate data source */
@@ -371,13 +370,16 @@ public class RdfDataSourceWithLocalCache
 
 
     /**
+     * FIXME This class is not 'broken' but it serves the purpose where the underlying service supports
+     * caching with the service enhancer plugin.
+     *
      * Broken query rewrite based on the syntax level. The problem is that we need to take care of
      * which parts are executed remotely and which ones are executed in the client.
      * This cannot be cleanly done without the semantics of the algebra: if we have an ElementGroup
      * of which some elements can be cached and other not, then how can we ensure apply the correct transformation
      * if not converting to the algebra first?
      */
-    public static class TransformInjectCacheOpsBroken {
+    public static class TransformInjectCacheSyntax {
 
         public static boolean canWrapWithCache(Query query) {
             boolean result = query.hasGroupBy() || query.hasAggregators();
@@ -433,7 +435,8 @@ public class RdfDataSourceWithLocalCache
     //    		Query newQuery = new Query();
     //    		newQuery.setQuerySelectType();
     //    		newQuery.setQueryResultStar(true);
-                result = new ElementService("cache:env://REMOTE", elt);
+                // result = new ElementService("cache:env://REMOTE", elt);
+                result = new ElementService("cache:", elt);
             } else {
                 Query oldQuery = elt.getQuery();
                 Query newQuery = rewriteQuery(elt.getQuery());
