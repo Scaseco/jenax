@@ -50,8 +50,9 @@
 		<jetty.version>12.0.3</jetty.version>
 		<jakarta.xml.version>4.0.0</jakarta.xml.version>
 		<jaxb.version>2.3.1</jaxb.version>
+		<rs-api.version>3.1.0</rs-api.version>
 		<javax.xml.version>2.3.1</javax.xml.version> <!-- legacy; superseded by
-		jakarta.xml; used by a plugin in jenax-facete-impl -->
+		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
 		<!-- <jena.version>4.10.0</jena.version> -->
 		<jena.version>5.0.0-SNAPSHOT</jena.version>
@@ -1219,7 +1220,7 @@
 			<dependency>
 				<groupId>jakarta.ws.rs</groupId>
 				<artifactId>jakarta.ws.rs-api</artifactId>
-				<version>3.1.0</version>
+				<version>${rs-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
