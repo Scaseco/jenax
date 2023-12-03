@@ -54,15 +54,20 @@ public class F_SparqlQueryRewrite_ToService
         modifiedBaseQuery.getPrefixMapping().clearNsPrefixMap();
         modifiedBaseQuery.getGraphURIs().clear();
         modifiedBaseQuery.getNamedGraphURIs().clear();
+        modifiedBaseQuery.setLimit(Query.NOLIMIT);
+        modifiedBaseQuery.setOffset(Query.NOLIMIT);
 
         Query newQuery = new Query();
         newQuery.setQuerySelectType();
         newQuery.setQueryResultStar(true);
         newQuery.setQueryPattern(new ElementService(finalUriStr, new ElementSubQuery(modifiedBaseQuery)));
 
+        // XXX possibly create a more light-weight version of restoreQueryForm
         Query finalQuery = QueryUtils.restoreQueryForm(newQuery, baseQuery);
         finalQuery.getGraphURIs().clear();
         finalQuery.getNamedGraphURIs().clear();
+        finalQuery.setLimit(baseQuery.getLimit());
+        finalQuery.setOffset(baseQuery.getOffset());
 
         return NodeValue.makeString(finalQuery.toString());
     }
