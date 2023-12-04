@@ -18,7 +18,6 @@ public class JenaExtensionSys {
     public static String ns = "http://jsa.aksw.org/fn/sys/";
 
     public static void register() {
-
         PropertyFunctionRegistry pfRegistry = PropertyFunctionRegistry.get();
 
         pfRegistry.put(ns + "benchmark", new PropertyFunctionFactoryBenchmark());
@@ -44,7 +43,6 @@ public class JenaExtensionSys {
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
 
         registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", FN_SparqlQueryRewrite_ToService.class);
-
     }
 
     public static void addPrefixes(PrefixMapping pm) {
