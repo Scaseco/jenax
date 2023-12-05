@@ -7,8 +7,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+import org.aksw.commons.util.stack_trace.StackTraceUtils;
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.atlas.lib.Lib;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -107,7 +109,7 @@ public class FN_Benchmark
         JsonObject json = benchmarkResultSet(
                 () -> QueryExecUtils.execute(opService, env.getDataset(), BindingFactory.empty(), env.getContext()),
                 it -> ResultSetFactory.create(it, vars),
-                (it, rs) -> rs.close(),
+                (it, rs) -> { if (rs != null) { rs.close(); } },
                 false);
 
         if(json == null) {
@@ -120,11 +122,15 @@ public class FN_Benchmark
     public static <T> JsonObject benchmarkResultSet(
             Callable<T> resultSetProviderFactory, Function<? super T, ResultSet> providerToResultSet, BiConsumer<? super T, ResultSet> closeProvider, boolean includeResultSet) {
         Long resultSetSize = null;
+        String errorMessage = null;
         ResultSetRewindable rsw = null;
         Stopwatch sw = Stopwatch.createStarted();
+
+        T provider = null;
+        ResultSet rs = null;
         try {
-            T provider = resultSetProviderFactory.call();
-            ResultSet rs = providerToResultSet.apply(provider);
+            provider = resultSetProviderFactory.call();
+            rs = providerToResultSet.apply(provider);
             if(includeResultSet) {
                 rsw = ResultSetFactory.copyResults(rs);
             } else {
@@ -134,7 +140,18 @@ public class FN_Benchmark
             if (logger.isWarnEnabled()) {
                 logger.warn("Failure executing benchmark request", e);
             }
-            throw new ExprTypeException("Failure executing benchmark request", e);
+            // throw new ExprTypeException("Failure executing benchmark request", e);
+            errorMessage = ExceptionUtils.getStackTrace(e);
+        } finally {
+            if (provider != null) {
+                try {
+                    closeProvider.accept(provider, rs);
+                } catch (Exception e2) {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Failure while closing resources", e2);
+                    }
+                }
+            }
         }
 
         long ms = sw.stop().elapsed(TimeUnit.NANOSECONDS);
@@ -156,7 +173,13 @@ public class FN_Benchmark
             json.add("result", el);
         }
 
-        json.addProperty("size", resultSetSize);
+        if (resultSetSize != null) {
+            json.addProperty("size", resultSetSize);
+        }
+
+        if (errorMessage != null) {
+            json.addProperty("error", errorMessage);
+        }
 
         return json;
     }
