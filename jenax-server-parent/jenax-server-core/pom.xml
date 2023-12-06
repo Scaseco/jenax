@@ -161,8 +161,8 @@
 		<!-- </dependency> -->
 		
 		<dependency>
-			<groupId>org.eclipse.jetty.ee10</groupId>
-			<artifactId>jetty-ee10-servlet</artifactId>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
 		</dependency>
 
 		<!-- <dependency> -->
@@ -200,11 +200,13 @@
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-fuseki-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		-->
 
 		<!-- <dependency> -->
 		<!-- <groupId>javax.servlet</groupId> -->

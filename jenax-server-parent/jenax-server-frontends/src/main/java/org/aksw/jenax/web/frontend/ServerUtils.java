@@ -8,16 +8,14 @@ import java.nio.file.Paths;
 import java.security.ProtectionDomain;
 import java.util.Objects;
 
-import org.eclipse.jetty.ee10.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.ee10.plus.webapp.PlusConfiguration;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler.ServletContextApi;
-import org.eclipse.jetty.ee10.webapp.Configuration;
-import org.eclipse.jetty.ee10.webapp.Configurations;
-import org.eclipse.jetty.ee10.webapp.JettyWebXmlConfiguration;
-import org.eclipse.jetty.ee10.webapp.MetaInfConfiguration;
-import org.eclipse.jetty.ee10.webapp.WebAppContext;
-import org.eclipse.jetty.ee10.webapp.WebInfConfiguration;
-import org.eclipse.jetty.ee10.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.ee9.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee9.nested.ContextHandler.APIContext;
+import org.eclipse.jetty.ee9.plus.webapp.PlusConfiguration;
+import org.eclipse.jetty.ee9.webapp.JettyWebXmlConfiguration;
+import org.eclipse.jetty.ee9.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.ee9.webapp.WebAppContext;
+import org.eclipse.jetty.ee9.webapp.WebInfConfiguration;
+import org.eclipse.jetty.ee9.webapp.WebXmlConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.slf4j.Logger;
@@ -127,11 +125,15 @@ public class ServerUtils {
         WebAppContext webAppContext = new WebAppContext();
 
 //        Configurations.setKnown(
-//                "org.eclipse.jetty.ee10.webapp.JettyWebXmlConfiguration",
-//                "org.eclipse.jetty.ee10.annotations.AnnotationConfiguration");
+//                "org.eclipse.jetty.ee9.webapp.JettyWebXmlConfiguration",
+//                "org.eclipse.jetty.ee9.annotations.AnnotationConfiguration");
 
         ServletContext servletContext = webAppContext.getServletContext();
-        ServletContextApi api = (ServletContextApi)servletContext;
+        // ee9:
+        APIContext api = (APIContext)servletContext;
+
+        // ee10:
+        // ServletContextApi api = (ServletContextApi)servletContext;
 
         // Needed to support spring's ContextLoaderListener
         api.setExtendedListenerTypes(true);

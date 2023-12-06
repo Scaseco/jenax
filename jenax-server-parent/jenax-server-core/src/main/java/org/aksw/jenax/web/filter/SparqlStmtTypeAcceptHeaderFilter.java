@@ -19,7 +19,6 @@ import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.fuseki.DEF;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.WebContent;
 
