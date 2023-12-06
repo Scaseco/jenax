@@ -42,6 +42,10 @@ public class JenaExtensionSys {
         binder.register(ns + "getenv", System.class, "getenv", String.class);
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
 
+        // binder.register(NorseTerms.NS + "sys.sleep", Thread.class, "sleep", Long.TYPE);
+        // binder.register(NorseTerms.NS + "sys.sleep", NorseSysFunctions.class, "sleep", Long.TYPE);
+        binder.registerAll(NorseSysFunctions.class);
+
         registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", FN_SparqlQueryRewrite_ToService.class);
     }
 
