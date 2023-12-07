@@ -11,8 +11,10 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdfconnection.JenaConnectionException;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.core.TransactionalNull;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.system.Txn;
 
@@ -24,6 +26,26 @@ public interface LinkSparqlQueryBase
     extends TransactionalWrapper, LinkSparqlQuery
 {
     // ---- SparqlQueryConnection
+
+    /** Create a {@link LinkSparqlQuery} instance based on the given builder facctory. */
+    public static LinkSparqlQuery of(Supplier<QueryExecBuilder> queryExecBuilderFactory) {
+        return new LinkSparqlQueryBase() {
+            @Override
+            public QueryExecBuilder newQuery() {
+                QueryExecBuilder result = queryExecBuilderFactory.get();
+                return result;
+            }
+
+            @Override
+            public void close() {
+            }
+
+            @Override
+            public Transactional getDelegate() {
+                return new TransactionalNull();
+            }
+        };
+    }
 
     default Query parse(String query) {
         return QueryFactory.create(query);

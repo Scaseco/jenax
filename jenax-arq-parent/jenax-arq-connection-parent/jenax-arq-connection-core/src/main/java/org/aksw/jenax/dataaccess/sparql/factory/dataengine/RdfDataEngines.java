@@ -1,10 +1,11 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
+
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsa;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineDecoratorBase;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineWrapperBase;
@@ -15,11 +16,18 @@ import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.rdflink.LinkSparqlQuery;
+import org.apache.jena.rdflink.RDFConnectionAdapter;
+import org.apache.jena.rdflink.RDFLinkModular;
+import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.exec.QueryExecAdapter;
 
 public class RdfDataEngines {
     /**
@@ -111,9 +119,18 @@ public class RdfDataEngines {
 
         @Override
         public RDFConnection getConnection() {
-            SparqlQueryConnection core = new SparqlQueryConnectionJsa(qef);
-            RDFConnection result = new RDFConnectionModular(core, null, null);
-            return result;
+            LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
+                @Override
+                public QueryExec build() {
+                    // TODO Raise warnings when unsupported features are requested.
+                    String str = this.getQueryString();
+                    QueryExecution qe = str != null
+                            ? qef.createQueryExecution(str)
+                            : qef.createQueryExecution(getParsedQuery());
+                    return QueryExecAdapter.adapt(qe);
+                }
+            });
+            return RDFConnectionAdapter.adapt(new RDFLinkModular(queryLink, null, null));
         }
 
         @Override
