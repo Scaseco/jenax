@@ -138,19 +138,8 @@ public class NodeTransformLib2 {
     }
 
     public static Graph applyNodeTransform(NodeTransform nodeTransform, Graph graph) {
-        // debug
-        List<Triple> triples = null;
-        if (true) {
-            if (triples == null) {
-                triples = graph.find().toList();
-            } else {
-                // Will be entered when dropping the frame in debug mode
-                triples.forEach(graph::add);
-            }
-            // graph = g;
-        }
-
         List<Triple> inserts = new ArrayList<>();
+        List<Triple> deletions = new ArrayList<>();
 
         ExtendedIterator<Triple> it = graph.find();
         try {
@@ -158,12 +147,17 @@ public class NodeTransformLib2 {
                 Triple before = it.next();
                 Triple after = NodeTransformLib.transform(nodeTransform, before);
                 if (!after.equals(before)) {
-                    it.remove();
+                    // it.remove(); // Since jena 5 the default graph iterator does not support remove
+                    deletions.add(before);
                     inserts.add(after);
                 }
             }
         } finally {
             it.close();
+        }
+
+        for(Triple t : deletions) {
+            graph.delete(t);
         }
 
         for(Triple t : inserts) {

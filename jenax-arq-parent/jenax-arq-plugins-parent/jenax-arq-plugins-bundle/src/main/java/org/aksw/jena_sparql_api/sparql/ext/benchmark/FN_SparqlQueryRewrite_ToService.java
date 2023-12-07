@@ -38,7 +38,7 @@ public class FN_SparqlQueryRewrite_ToService
         if (dd != null && !dd.isEmpty()) {
             try {
                 URI uri = new URI(serviceUriStr);
-                List<Entry<String, String>> args = UriUtils.parseQueryStringAsList(uri.getQuery());
+                List<Entry<String, String>> args = UriUtils.parseQueryStringAsList(uri.getRawQuery());
                 dd.getDefaultGraphURIs().forEach(item -> args.add(new SimpleEntry<>("default-graph-uri", item)));
                 dd.getNamedGraphURIs().forEach(item -> args.add(new SimpleEntry<>("named-graph-uri", item)));
                 String newQueryString = UriUtils.toQueryString(args);
