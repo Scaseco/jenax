@@ -180,6 +180,47 @@ public class RDFDataMgrEx {
     }
 
     /**
+     * Given an input stream with mark support, attempt to create a decoded input stream.
+     * The returned stream will be ready for further use with all detected encodings added to outEncodings.
+     *
+     * @param is An input stream that must have mark support
+     * @param outEncodings Output argument. Detected encodings will be added to that list (if not null).
+     */
+    public static InputStream probeEncodings(InputStream is, List<String> outEncodings) throws IOException {
+        if (!is.markSupported()) {
+            throw new IllegalArgumentException("Encoding probing requires an input stream with mark support");
+        }
+
+        List<String> detectedEncodings = new ArrayList<>();
+        CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
+        InputStream nextIn = is;
+        for (;;) {
+            is.mark(1024 * 1024 * 1024);
+            String encoding;
+            try {
+                encoding = CompressorStreamFactory.detect(is);
+            } catch (CompressorException e) {
+                break;
+            } finally {
+                is.reset();
+            }
+            detectedEncodings.add(encoding);
+            if (outEncodings != null) {
+                outEncodings.add(encoding);
+            }
+
+            try {
+                // Only buffer the outermost stream; requires decoding from the base input stream
+                nextIn = new BufferedInputStream(decode(is, detectedEncodings, csf));
+            } catch (CompressorException e) {
+                // Should not fail here because we applied detect() before
+                throw new RuntimeException(e);
+            }
+        }
+        return nextIn;
+    }
+
+    /**
      * Probe an input stream for any encodings (e.g. using compression codecs) and
      * its eventual content type.
      *
@@ -198,34 +239,12 @@ public class RDFDataMgrEx {
         if (!in.markSupported()) {
             in = new BufferedInputStream(in);
         }
-        in.mark(1024 * 1024 * 1024);
-
-        CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
+        // in.mark(1024 * 1024 * 1024);
 
         RdfEntityInfo result;
         try (InputStream is = in) {
-
-            InputStream nextIn = is;
             List<String> encodings = new ArrayList<>();
-            for (;;) {
-                String encoding;
-                try {
-                    encoding = CompressorStreamFactory.detect(is);
-                } catch (CompressorException e) {
-                    break;
-                } finally {
-                    is.reset();
-                }
-                encodings.add(encoding);
-
-                try {
-                    nextIn = new BufferedInputStream(decode(is, encodings, csf));
-                } catch (CompressorException e) {
-                    // Should not fail here because we applied detect() before
-                    throw new RuntimeException(e);
-                }
-            }
-
+            InputStream nextIn = probeEncodings(is, encodings);
             try (TypedInputStream tis = RDFDataMgrEx.probeLang(nextIn, candidates)) {
                 String contentType = tis.getContentType();
                 String charset = tis.getCharset();
@@ -238,7 +257,6 @@ public class RDFDataMgrEx {
                 // result = new EntityInfoImpl(encodings, contentType, charset);
             }
         }
-
         return result;
     }
 
