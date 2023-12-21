@@ -95,6 +95,8 @@
 		<pebble.version>3.2.1</pebble.version>
 		<graphql.version>21.1</graphql.version>
 
+		<!-- h3 spatial grid -->
+		<h3.version>4.1.1</h3.version>
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
 		<!-- <jetty-plugin.version>8.1.10.v20130312</jetty-plugin.version> -->
@@ -756,6 +758,12 @@
 				<artifactId>ini4j</artifactId>
 				<version>0.5.4</version>
 			</dependency>
+			<dependency>
+				<groupId>com.uber</groupId>
+				<artifactId>h3</artifactId>
+				<version>${h3.version}</version>
+			</dependency>
+
 			<!-- <dependency> <groupId>org.apache.jena</groupId>
 			<artifactId>jena-sdb</artifactId>
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
@@ -1301,7 +1309,7 @@
 				</exclusions>
 			</dependency>
 			-->
-			
+
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-io</artifactId> -->

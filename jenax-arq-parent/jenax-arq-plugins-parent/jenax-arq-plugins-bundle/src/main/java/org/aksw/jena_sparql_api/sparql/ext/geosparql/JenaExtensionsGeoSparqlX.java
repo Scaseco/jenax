@@ -14,6 +14,7 @@ import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.locationtech.jts.geom.Geometry;
 
 public class JenaExtensionsGeoSparqlX {
+    // private static final Logger logger = LoggerFactory.getLogger(JenaExtensionsGeoSparqlX.class);
 
     public static void register() {
         loadDefs(FunctionRegistry.get());
@@ -82,5 +83,7 @@ public class JenaExtensionsGeoSparqlX {
         registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
+
+        JenaBindingH3.init(binder);
     }
 }

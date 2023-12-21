@@ -46,6 +46,11 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.uber</groupId>
+			<artifactId>h3</artifactId>
+		</dependency>
+		
 		<!-- javascript -->
 		<dependency>
 			<groupId>org.openjdk.nashorn</groupId>
@@ -53,7 +58,8 @@
 			<version>15.4</version>
 		</dependency>
 
-		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
+		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to
+		get 
 			rid of this dep -->
 		<!-- Possibly also used for result set comparison -->
 		<dependency>
@@ -93,7 +99,8 @@
 			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
 
-		<!-- Query federation to files in virtual file systems with binary search 
+		<!-- Query federation to files in virtual file systems with binary
+		search 
 			support -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
