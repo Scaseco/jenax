@@ -1051,6 +1051,12 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<!-- Apache Sedona used for some Geospatial extensions -->
+			<dependency>
+				<groupId>org.apache.sedona</groupId>
+				<artifactId>sedona-common</artifactId>
+				<version>1.5.0</version>
+			</dependency>
 			<!-- Embedded Databases (will be moved to separate package) -->
 			<dependency>
 				<groupId>com.h2database</groupId>
