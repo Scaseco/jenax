@@ -201,7 +201,8 @@ public class GraphQlToSparqlConverter {
 
             // Materialize prefixes
             PrefixMap prefixMap = PrefixMapFactory.create(context.getFinalPrefixMap());
-            result.addEntry(field, prefixMap, nodeQuery, nodeMapper);
+            boolean isSingle = Cardinality.ONE.equals(context.getThisCardinality());
+            result.addEntry(field, prefixMap, nodeQuery, nodeMapper, isSingle);
 
             // context = context.getParent();
             contextStack.pop();
@@ -521,9 +522,11 @@ public class GraphQlToSparqlConverter {
         ScopedCardinality scopedCardinality = getCardinality(field);
         if (scopedCardinality != null) {
             Cardinality cardinality = scopedCardinality.getCardinality();
-            cxt.setThisCardinality(cardinality);
+            if (scopedCardinality.isSelf()) {
+                cxt.setThisCardinality(cardinality);
+            }
 
-            if (scopedCardinality.isAll()) {
+            if (scopedCardinality.isCascade()) {
                 cxt.setInheritedCardinality(cardinality);
             }
         }
@@ -785,7 +788,8 @@ public class GraphQlToSparqlConverter {
 
         if (cardinality != null) {
             boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade)).orElse(false);
-            result = new ScopedCardinality(cardinality, cascade);
+            boolean self = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.self)).orElse(true);
+            result = new ScopedCardinality(cardinality, cascade, self);
         }
         return result;
     }

@@ -76,6 +76,7 @@ public class GraphQlExecImpl
     @Override
     public GraphQlDataProvider getDataProvider(String name) {
         GraphQlToSparqlMapping.Entry entry = mapping.getTopLevelMappings().get(name);
+        boolean isSingle = entry.isSingle();
 
         // GraphQlToSparqlConverter.setupContext(null)
         // entry.getTopLevelField();
@@ -94,6 +95,7 @@ public class GraphQlExecImpl
         if (field.hasDirective("debug")) {
             metadata = new JsonObject();
             metadata.addProperty("sparqlQuery", query.toString());
+            // metadata.addProperty("isSingle", entry.isSingle());
         }
 
         GraphQlDataProvider result;
@@ -118,7 +120,7 @@ public class GraphQlExecImpl
                 @Override
                 public Stream<JsonElement> openStream() {
                     AccJson acc = agg.newAccumulator();
-                    AccJsonDriver driver = AccJsonDriver.of(acc);
+                    AccJsonDriver driver = AccJsonDriver.of(acc, isSingle);
                     AccContext context = AccContext.materializing();
                     RdfElementVisitorRdfToJson converter = new RdfElementVisitorRdfToJson();
                     Stream<Quad> quadStream = quadStreamSupplier.get();
@@ -131,7 +133,7 @@ public class GraphQlExecImpl
                 @Override
                 public void write(JsonWriter writer, Gson gson) throws IOException {
                     AccJson acc = agg.newAccumulator();
-                    AccJsonDriver driver = AccJsonDriver.of(acc);
+                    AccJsonDriver driver = AccJsonDriver.of(acc, isSingle);
                     AccContext context = AccContext.serializing(gson, writer);
 
                     quadStreamSupplier.get().forEach(quad -> {
@@ -143,6 +145,11 @@ public class GraphQlExecImpl
                     });
 
                     driver.end(context);
+                }
+
+                @Override
+                public boolean isSingle() {
+                    return isSingle;
                 }
             };
 
@@ -183,6 +190,11 @@ public class GraphQlExecImpl
                   try (Stream<JsonElement> stream = openStream()) {
                       stream.forEach(item -> gson.toJson(item, writer));
                   }
+                }
+
+                @Override
+                public boolean isSingle() {
+                    return isSingle;
                 }
             };
         }

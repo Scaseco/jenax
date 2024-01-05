@@ -23,5 +23,6 @@ public class GraphQlSpecialKeys {
     public static final String one = "one";
     public static final String many = "many";
     public static final String cascade = "cascade";
+    public static final String self = "self";
 
 }

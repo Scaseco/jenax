@@ -1,12 +1,12 @@
 package org.aksw.jenax.graphql.sparql;
 
 public class ScopedCardinality
-    extends Scoped
+    extends Scope
 {
     protected Cardinality cardinality;
 
-    public ScopedCardinality(Cardinality cardinality, boolean all) {
-        super(all);
+    public ScopedCardinality(Cardinality cardinality, boolean cascade, boolean self) {
+        super(cascade, self);
         this.cardinality = cardinality;
     }
 
