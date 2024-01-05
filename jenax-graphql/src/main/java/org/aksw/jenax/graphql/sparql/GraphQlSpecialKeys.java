@@ -20,4 +20,8 @@ public class GraphQlSpecialKeys {
     public static final String fragment = "fragment";
     public static final String inject = "inject";
 
+    public static final String one = "one";
+    public static final String many = "many";
+    public static final String cascade = "cascade";
+
 }

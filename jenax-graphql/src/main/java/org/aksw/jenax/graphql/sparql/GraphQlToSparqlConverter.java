@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -41,9 +42,6 @@ import org.apache.jena.query.Query;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.algebra.Algebra;
-import org.apache.jena.sparql.algebra.Op;
-import org.apache.jena.sparql.algebra.optimize.TransformScopeRename;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Path0;
@@ -59,15 +57,18 @@ import com.google.common.collect.Range;
 import graphql.language.Argument;
 import graphql.language.ArrayValue;
 import graphql.language.Directive;
+import graphql.language.DirectivesContainer;
 import graphql.language.Document;
 import graphql.language.EnumValue;
 import graphql.language.Field;
+import graphql.language.InlineFragment;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
 import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
 import graphql.language.StringValue;
+import graphql.language.TypeName;
 import graphql.language.Value;
 
 /**
@@ -220,6 +221,17 @@ public class GraphQlToSparqlConverter {
                         if (propertyMapper != null) {
                             nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
                         }
+                    } else if (selection instanceof InlineFragment) {
+                        InlineFragment fragment = (InlineFragment)selection;
+
+                        // If there is a type name then resolve it
+                        TypeName typeName = fragment.getTypeCondition();
+                        String name = typeName.getName();
+                        // contextStack.peek().ge
+
+                        // nodeQuery.
+                        // fragment.getSelectionSet();
+                        throw new RuntimeException("Inline Fragement is not supported yet");
                     }
                 }
                 result = nodeMapperObject;
@@ -241,7 +253,8 @@ public class GraphQlToSparqlConverter {
             String fieldName = field.getName();
             Map<String, List<Directive>> directives = field.getDirectivesByName();
 
-            boolean isSingle = directives.containsKey("one");
+            // Cardinality is set up in setupContext
+            boolean isSingle = Cardinality.ONE.equals(context.getThisCardinality());
 
 //            String fieldIri = deriveFieldIri(context, fieldName);
 //            FacetPath keyPath = fieldIri != null
@@ -505,6 +518,17 @@ public class GraphQlToSparqlConverter {
             if (prefixMapContrib != null) { cxt.setLocalPrefixMap(prefixMapContrib); }
         }
 
+        ScopedCardinality scopedCardinality = getCardinality(field);
+        if (scopedCardinality != null) {
+            Cardinality cardinality = scopedCardinality.getCardinality();
+            cxt.setThisCardinality(cardinality);
+
+            if (scopedCardinality.isAll()) {
+                cxt.setInheritedCardinality(cardinality);
+            }
+        }
+
+
         // Invoke update to compute the effective prefix information
         cxt.update();
         return cxt;
@@ -733,6 +757,36 @@ public class GraphQlToSparqlConverter {
             }
         }
         // System.out.println(result);
+        return result;
+    }
+
+    /**
+     * Returns the last {@literal @one} or {@literal @many} directive - null if there is none.
+     */
+    public static ScopedCardinality getCardinality(DirectivesContainer<?> container) {
+        List<Directive> directives = container.getDirectives();
+        ScopedCardinality result = directives.stream()
+                .map(GraphQlToSparqlConverter::getCardinality)
+                .filter(Objects::nonNull)
+                .reduce((a, b) -> b)
+                .orElse(null);
+        return result;
+    }
+
+    /** Return a cardinality object if the directive is {@literal @one} or {@literal @many} - null if neither. */
+    public static ScopedCardinality getCardinality(Directive d) {
+        ScopedCardinality result = null;
+        String name = d.getName();
+        Cardinality cardinality = GraphQlSpecialKeys.one.equalsIgnoreCase(name)
+                ? Cardinality.ONE
+                : GraphQlSpecialKeys.many.equalsIgnoreCase(name)
+                    ? Cardinality.MANY
+                    : null;
+
+        if (cardinality != null) {
+            boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade)).orElse(false);
+            result = new ScopedCardinality(cardinality, cascade);
+        }
         return result;
     }
 }
