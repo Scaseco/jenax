@@ -145,6 +145,11 @@ public class GraphQlExecImpl
                     });
 
                     driver.end(context);
+
+                    // Write null if there were no sources
+                    if (driver.getSourcesSeen() == 0) {
+                        writer.nullValue();
+                    }
                 }
 
                 @Override

@@ -40,6 +40,10 @@ public class AccJsonDriver
         return new AccJsonDriver(rootAcc, isSingle);
     }
 
+    public long getSourcesSeen() {
+        return sourcesSeen;
+    }
+
     /**
      * We expect each root node to be announced with a dummy quad that does not carry any
      * edge information (s, s, ANY, ANY)
@@ -127,6 +131,7 @@ public class AccJsonDriver
             if (currentState.hasBegun()) {
                 currentState.end(cxt);
             }
+
             AccJson parent = currentState.getParent();
             if (parent != null) {
                 currentState = parent;
