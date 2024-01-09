@@ -3,21 +3,23 @@
 
 ### Features
 
-* Fast and streaming (for top-level fields)
+* Fast and **fully streaming** JSON serialization from SPARQL result sets
 * Vendor-independent: The generated SPARQL queries can run on any SPARQL 1.1 \* endpoint.
 * Self-contained queries: Use the `@rdf` and `@sparql` directives to unambiguously map the GraphQL fields to data in your SPARQL endpoint.
     * No need for expensive schema generation or data summarization
     * No need to manage additional mapping files
-* Auto-mapping of fields to classes and properties via VoID and SHACL is available. However, be aware that this can take a while on large data.
-
+* Optional support for auto-mapping fields to classes and properties. Auto-mapping performs data summarization which can take a while on large data. Data summarization builds VoID and SHACL models.
 
 \* The generated SPARQL query makes use of the LATERAL feature, however this can be polyfilled at the cost of multiple requests with jenax SPARQL polyfills in jenax-dataaccess
 
 
+
 ## Building SPARQL queries with GraphQL
+
 The core machinery is based on the `@rdf` and `@sparql` directives.
 
 ### Prefixes and Namespaces
+
 The essential aspect for bridging GraphQL and SPARQL is to annotate fields with IRIs. The explicit way to accomplish this is using the `@rdf(iri: )` directive.
 
 ```graphql
@@ -65,6 +67,7 @@ Setting a `base` IRI on a field implicitely sets `@rdf(iri:)` for the annotated 
 The values for `iri`, `ns` and `base` are always resolved against a field's effective prefixes.
 You should avoid defining prefixes that are also used as IRI schemas, such as `http`, `https` or `urn`.
 In the example below, the IRI for `label` is expanded to `http://www.example.org///www.w3.org/2000/01/rdf-schema#label`.
+
 ```graphql
 {
   label @rdf(iri: "http://www.w3.org/2000/01/rdf-schema#label")
@@ -135,7 +138,49 @@ If `@class` was omitted, then the `@sparql(fragment:)` alone would be used as th
 
 **If the set of initial items is otherwise unspecified, it defaults to the set of subjects in the graphs.**
 
+### Cardinality
+
+The directives `@one` and `@many` control whether fields are mapped to JSON arrays. By default, all fields are considered `@many`.
+
+Both directives have the following optional parameters:
+
+* `cascade`: If false, then the directive only affects the annotated field. If true, then the cardinality is set as the default for all descendants of the annotated field. Descendant fields can override the default with further annotations. Default: `false`.
+* `self`: If false, then the annotated field is not affected by the directive. Default: `true`
+
+
+
+The following examples show how to use the annotations to specify that the `firstName` and `lastName` fields of a person should not be arrays:
+
+```graphql
+{
+  People { /* Implicitly @many */
+    firstName @one
+    lastName @one
+    friends
+  }
+}
+```
+
+
+
+The same example could alternatively be represented as below where `@one` declared as cascading and exceptions are specified with `@many`.
+
+Note, that `self: false` prevents `@one` from affecting the `People` field, so this field will result in a JSON array of people.
+
+```graphql
+{
+  People @one(self: false, cascade: true) {
+    firstName
+    lastName
+    friends @many
+  }
+}
+```
+
+
+
 ### Pagination (Limit and Offset)
+
 Limit and offset can be provided as arguments to any field.
 
 ```graphql
