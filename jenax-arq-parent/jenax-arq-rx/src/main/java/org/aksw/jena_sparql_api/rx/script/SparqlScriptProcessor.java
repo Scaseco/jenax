@@ -217,11 +217,15 @@ public class SparqlScriptProcessor {
     }
 
     public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
+        return createParserWithEnvSubstitution(prologue, System::getenv);
+    }
+
+    public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue, Function<String, String> lookup) {
         SparqlStmtParser core = createParserPlain(prologue, prologue.getBaseURI());
         SparqlStmtParser sparqlParser =
                 SparqlStmtParser.wrapWithTransform(
                        core,
-                        stmt -> SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, System::getenv)));
+                        stmt -> SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, lookup)));
 
         return sparqlParser;
     }
@@ -235,8 +239,12 @@ public class SparqlScriptProcessor {
      * @return
      */
     public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes) {
+        return createWithEnvSubstitution(globalPrefixes, System::getenv);
+    }
+
+    public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes, Function<String, String> lookup) {
         SparqlScriptProcessor result = new SparqlScriptProcessor(
-                SparqlScriptProcessor::createParserWithEnvSubstitution,
+                prologue -> createParserWithEnvSubstitution(prologue, lookup),
                 globalPrefixes);
         return result;
     }
