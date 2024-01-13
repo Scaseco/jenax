@@ -173,6 +173,14 @@ public class ContentTypeUtils {
         codingExtensions.putPrimary("bzip2", "bz2");
     }
 
+    public static MapPair<String, String> getCtExtensions() {
+        return ctExtensions;
+    }
+
+    public static MapPair<String, String> getCodingExtensions() {
+        return codingExtensions;
+    }
+
 
     // TODO Move
 
