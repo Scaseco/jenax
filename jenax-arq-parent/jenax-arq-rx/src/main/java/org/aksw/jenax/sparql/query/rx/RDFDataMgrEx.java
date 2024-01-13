@@ -179,6 +179,15 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static OutputStream encode(OutputStream out, List<String> codecs, CompressorStreamFactory csf)
+            throws CompressorException {
+        OutputStream result = out;
+        for (String encoding : codecs) {
+            result = csf.createCompressorOutputStream(encoding, result);
+        }
+        return result;
+    }
+
     /**
      * Given an input stream with mark support, attempt to create a decoded input stream.
      * The returned stream will be ready for further use with all detected encodings added to outEncodings.
