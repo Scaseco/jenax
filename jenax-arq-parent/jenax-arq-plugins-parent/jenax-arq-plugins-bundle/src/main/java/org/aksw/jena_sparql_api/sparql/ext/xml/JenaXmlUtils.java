@@ -72,15 +72,13 @@ public class JenaXmlUtils {
 
     public static org.w3c.dom.Node extractXmlNode(Node node) {
         org.w3c.dom.Node result = null;
-
-        if (node.isLiteral()) {
+        if (node != null && node.isLiteral()) {
             Object value = node.getLiteralValue();
 
             if (value instanceof org.w3c.dom.Node) {
                 result = (org.w3c.dom.Node)value;
             }
         }
-
         return result;
     }
 
