@@ -20,6 +20,7 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
+import org.aksw.jenax.arq.util.update.UpdateTransform;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -49,6 +50,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
+import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
@@ -289,6 +291,17 @@ public class SparqlScriptProcessor {
         process(index, filename, sparqlStmts);
     }
 
+    public SparqlStmtParser createParser(String baseIri) {
+        IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
+        // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
+        Prologue prologue = new Prologue(
+                globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
+                resolver);
+                // IRIxResolver.create(baseIri).build());
+        SparqlStmtParser result = sparqlParserFactory.apply(prologue);
+        return result;
+    }
+
     public void process(int index, String filename, List<Entry<SparqlStmt, Provenance>> result) {
         logger.info("Interpreting argument" + (index >= 0 ? " #" + index : "" ) + ": '" + filename + "'");
 
@@ -342,15 +355,8 @@ public class SparqlScriptProcessor {
                 try {
 //                    Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, globalPrefixes, sparqlParser, baseIri);
                     // globalPrefixes,
-                    IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
-                    // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
-                    Prologue prologue = new Prologue(
-                            globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
-                            resolver);
-                            // IRIxResolver.create(baseIri).build());
-                    SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
 
-
+                    SparqlStmtParser sparqlParser;
                     TypedInputStream tmpIn = null;
                     Iterator<SparqlStmt> it;
 
@@ -361,6 +367,7 @@ public class SparqlScriptProcessor {
                             throw new FileSystemException(filename);
                         }
 
+                        sparqlParser = createParser(baseIri != null ? baseIri : tmpIn.getBaseURI());
                         it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
                         it.hasNext();
 
@@ -373,6 +380,7 @@ public class SparqlScriptProcessor {
                             }
 
                             tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
+                            sparqlParser = createParser(baseIri != null ? baseIri : tmpIn.getBaseURI());
                             it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
                             it.hasNext();
                         } catch (Exception f) {
@@ -425,6 +433,11 @@ public class SparqlScriptProcessor {
                                 }
                             }
 
+//                            if (sourceLocation != null && stmt.isUpdateRequest() && stmt.isParsed()) {
+//                                UpdateTransform updateTransform = resolveFilePath(sourceNamespace);
+//                                stmt = new SparqlStmtUpdate(UpdateRequestUtils.copyTransform(stmt.getUpdateRequest(), updateTransform));
+//                            }
+
                             // TODO: Move optimizePrefixes to transformers?
                             //SparqlStmtUtils.optimizePrefixes(stmt);
 
@@ -447,6 +460,24 @@ public class SparqlScriptProcessor {
             }
         }
     }
+
+/*
+    // Its safer to set a base IRI on the parser rather than trying to fix it with a post processor
+    public UpdateTransform resolveFilePath(String basePath) {
+        return update -> {
+            Update r = update;
+            if (update instanceof UpdateLoad) {
+                UpdateLoad ul = (UpdateLoad)update;
+                String src = ul.getSource();
+                String newSrc = IRIxResolver.create(basePath).allowRelative(true).build().resolve(src).str();
+                r = src.equals(newSrc)
+                        ? update
+                        : new UpdateLoad(newSrc, ul.getDest(), ul.getSilent());
+            }
+            return r;
+        };
+    }
+*/
 
     public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, Node targetGraph, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
         UpdateRequest result = null;
