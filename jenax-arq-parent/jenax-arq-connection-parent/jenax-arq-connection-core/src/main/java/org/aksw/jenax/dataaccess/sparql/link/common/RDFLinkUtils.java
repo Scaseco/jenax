@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
@@ -20,8 +21,13 @@ import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateRequest;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateWrapperBase;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtQuery;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
@@ -241,6 +247,41 @@ public class RDFLinkUtils {
 
         RDFLink result = new RDFLinkModular(
                 queryLink, new LinkSparqlUpdateUpdateTransform(updateLink, updateTransform, updateExecTransform), dgLink);
+
+        return result;
+    }
+
+    /**
+     * Apply a SparqlStmtTransform to the given link.
+     * The transform must not convert query statements to update ones or vice versa.
+     *
+     * @param conn
+     * @param transform
+     * @return
+     */
+    public static RDFLink wrapWithStmtTransform(RDFLink conn, SparqlStmtTransform transform) {
+        QueryTransform xformQuery = before -> {
+            SparqlStmt beforeStmt = new SparqlStmtQuery(before);
+            SparqlStmt afterStmt = transform.apply(beforeStmt);
+            Query r = afterStmt.getQuery();
+            return r;
+        };
+
+        UpdateRequestTransform xformUpdate = before -> {
+            SparqlStmt beforeStmt = new SparqlStmtUpdate(before);
+            SparqlStmt afterStmt = transform.apply(beforeStmt);
+            UpdateRequest r = afterStmt.getUpdateRequest();
+            return r;
+        };
+
+        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(conn);
+        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(conn);
+        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(conn);
+
+        RDFLink result = new RDFLinkModular(
+                new LinkSparqlQueryQueryTransform(queryLink, xformQuery, null),
+                new LinkSparqlUpdateUpdateTransform(updateLink, xformUpdate, null),
+                dgLink);
 
         return result;
     }

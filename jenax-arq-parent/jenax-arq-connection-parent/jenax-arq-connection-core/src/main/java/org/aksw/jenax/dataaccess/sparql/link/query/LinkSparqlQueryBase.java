@@ -27,7 +27,9 @@ public interface LinkSparqlQueryBase
 {
     // ---- SparqlQueryConnection
 
-    /** Create a {@link LinkSparqlQuery} instance based on the given builder facctory. */
+    /**
+     * Create a {@link LinkSparqlQuery} instance based on the given builder factory.
+     */
     public static LinkSparqlQuery of(Supplier<QueryExecBuilder> queryExecBuilderFactory) {
         return new LinkSparqlQueryBase() {
             @Override

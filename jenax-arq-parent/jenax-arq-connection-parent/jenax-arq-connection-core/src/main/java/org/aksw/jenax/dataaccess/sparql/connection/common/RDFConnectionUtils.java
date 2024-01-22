@@ -14,6 +14,7 @@ import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -249,6 +250,14 @@ public class RDFConnectionUtils {
             QueryTransform queryTransform
         ) {
         return wrapWithQueryTransform(conn, queryTransform, null);
+    }
+
+
+    public static RDFConnection wrapWithStmtTransform(RDFConnection conn, SparqlStmtTransform transform) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink newLink = RDFLinkUtils.wrapWithStmtTransform(oldLink, transform);
+        RDFConnection result = RDFConnectionAdapter.adapt(newLink);
+        return result;
     }
 
     public static RDFConnection wrapWithQueryTransform(
