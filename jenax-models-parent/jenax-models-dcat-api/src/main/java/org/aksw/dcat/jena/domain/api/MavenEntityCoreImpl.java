@@ -8,22 +8,24 @@ public class MavenEntityCoreImpl
     protected String version;
     protected String type;
     protected String classifier;
+    protected String remainder;
 
     public MavenEntityCoreImpl() {
         super();
     }
 
     public MavenEntityCoreImpl(MavenEntityCore base) {
-        this(base.getGroupId(), base.getArtifactId(), base.getVersion(), base.getType(), base.getClassifier());
+        this(base.getGroupId(), base.getArtifactId(), base.getVersion(), base.getType(), base.getClassifier(), base.getRemainder());
     }
 
-    public MavenEntityCoreImpl(String groupId, String artifactId, String version, String type, String classifier) {
+    public MavenEntityCoreImpl(String groupId, String artifactId, String version, String type, String classifier, String remainder) {
         super();
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
         this.type = type;
         this.classifier = classifier;
+        this.remainder = remainder;
     }
 
     @Override
@@ -78,6 +80,17 @@ public class MavenEntityCoreImpl
     @Override
     public MavenEntityCore setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    @Override
+    public String getRemainder() {
+        return remainder;
+    }
+
+    @Override
+    public MavenEntityCore setRemainder(String remainder) {
+        this.remainder = remainder;
         return this;
     }
 }

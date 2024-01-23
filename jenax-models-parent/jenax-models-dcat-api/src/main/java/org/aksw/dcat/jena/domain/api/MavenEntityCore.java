@@ -24,6 +24,11 @@ public interface MavenEntityCore {
     String getClassifier();
     MavenEntityCore setClassifier(String classifier);
 
+    /** The remainder is a string that follows the maven coordinate and should start with # or / */
+    String getRemainder();
+    MavenEntityCore setRemainder(String remainder);
+
+
     /** Return a copy where all nulls replaced by empty strings and all strings are trimmed */
     public static MavenEntityCore normalize(MavenEntityCore coord) {
         String g = Objects.toString(coord.getGroupId(), "").trim();
@@ -31,27 +36,31 @@ public interface MavenEntityCore {
         String v = Objects.toString(coord.getVersion(), "").trim();
         String c = Objects.toString(coord.getClassifier(), "").trim();
         String t = Objects.toString(coord.getType(), "").trim();
+        String r = Objects.toString(coord.getRemainder(), "").trim();
 
         // If there is a classifier without a type then type becomes "jar"
         if (!c.isEmpty() && t.isEmpty()) {
             t = "jar";
         }
 
-        return new MavenEntityCoreImpl(g, a, v, t, c);
+        return new MavenEntityCoreImpl(g, a, v, t, c, r);
     }
 
     public static String toString(MavenEntityCore coord) {
         String t = coord.getType();
         String c = coord.getClassifier();
+        String r = coord.getRemainder();
 
         String suffix =
                 (t == null || t.isEmpty() ? "" : ":" + t) +
-                (c == null || c.isEmpty() ? "" : ":" + c);
+                (c == null || c.isEmpty() ? "" : ":" + c) +
+                (r == null || r.isEmpty() ? "" : r);
 
         String result = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion() + suffix;
         return result;
     }
 
+    /** Returns a present classifier and type prefixed with '-' and '.', respectively. I.e.: [-classifier][.type] */
     public static String getFileNameSuffix(MavenEntityCore coord) {
         String t = coord.getType();
         String c = coord.getClassifier();
@@ -76,7 +85,7 @@ public interface MavenEntityCore {
     public static String toFileName(MavenEntityCore coord) {
         String suffix = getFileNameSuffix(coord);
         String v = coord.getVersion();
-        String result = coord.getArtifactId() + (v.isEmpty() ? "" : "-") + v + suffix;
+        String result = coord.getArtifactId() + (v == null || v.isEmpty() ? "" : "-" + v) + suffix;
         return result;
     }
 
@@ -89,16 +98,35 @@ public interface MavenEntityCore {
                 .filter(x -> !x.isEmpty())
                 .collect(Collectors.joining("/"));
 
-        String result = g + "/" + coord.getArtifactId() + "/" + coord.getVersion();
+        String result = Arrays.asList(g, coord.getArtifactId(), coord.getVersion()).stream()
+                .filter(x -> x != null && !x.isEmpty())
+                .collect(Collectors.joining("/"));
 
         return result;
     }
 
-    public static MavenEntityCore parseId(String mvnId) {
+    public static MavenEntityCore parseId(String mvnIdEx) {
+        int remainderOffset = -1;
+        for (int i = 0; i < mvnIdEx.length(); ++i) {
+            char c = mvnIdEx.charAt(i);
+            if (c == '/' || c == '#') {
+                remainderOffset = i;
+                break;
+            }
+        }
+
+        String mvnId = remainderOffset == -1
+                ? mvnIdEx
+                : mvnIdEx.substring(0, remainderOffset);
+
+        String remainder = remainderOffset == -1
+                ? null
+                : mvnIdEx.substring(remainderOffset);
+
         String[] tmp = mvnId.split(":", 5);
         String[] parts = new String[5];
         System.arraycopy(tmp, 0, parts, 0, tmp.length);
-        return new MavenEntityCoreImpl(parts[0], parts[1], parts[2], parts[3], parts[4]);
+        return new MavenEntityCoreImpl(parts[0], parts[1], parts[2], parts[3], parts[4], remainder);
     }
 
     public static MavenEntityCore parseUrn(String mvnUrn) {
@@ -142,9 +170,14 @@ public interface MavenEntityCore {
         String pathStr = includeDirectories ? toPath(entity) : null;
         String fileName = includeFileName ? toFileName(entity) : null;
 
+        String remainder = entity.getRemainder();
         result = Arrays.asList(prefix, pathStr, fileName).stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining(componentSeparator));
+
+        if (remainder != null) {
+            result += remainder;
+        }
 
         return result;
     }
