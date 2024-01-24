@@ -3,16 +3,20 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
 import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.system.PrefixMapStd;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.apache.jena.sys.JenaSystem;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -186,6 +190,17 @@ public class TestGeoSparqlEx {
                 "  BIND(spatial-f:dbscan(?arr, 1, 1000000, 1) AS ?clusters)",
                 "}"));
         Assert.assertEquals("1", actual);
+    }
+
+    @Test
+    public void testConcaveHull() {
+        String wkt = "GEOMETRYCOLLECTION(POINT(130.80525 33.613573), POINT(72.1058108 42.9889454), POINT(133.9479139 34.2505222), POINT(5.8576847 49.534911), POINT(121.7142624 29.9660376), POINT(79.887197 27.9224151))";
+        PrefixMapStd pm = new PrefixMapStd();
+        pm.putAll(GeoSPARQL_URI.getPrefixes());
+        Node node = NodeFactoryExtra.parseNode(String.format("\"%s\"^^geo:wktLiteral", wkt), pm);
+        GeometryWrapper geometryWrapper = GeometryWrapper.extract(node);
+        GeoSparqlExFunctions.concaveHull(geometryWrapper, 10, false);
+        // TODO
     }
 
 //	@Test

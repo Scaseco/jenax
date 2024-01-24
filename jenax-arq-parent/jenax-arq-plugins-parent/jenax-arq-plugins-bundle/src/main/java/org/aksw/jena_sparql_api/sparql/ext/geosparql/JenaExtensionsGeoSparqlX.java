@@ -79,7 +79,7 @@ public class JenaExtensionsGeoSparqlX {
         // PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
 
 
-        registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
+        registry.put(GeoSPARQL_URI.SPATIAL_FUNCTION_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
     }
