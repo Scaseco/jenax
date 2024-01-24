@@ -383,7 +383,7 @@ public class ServiceExecutorFactoryVfsUtils {
 
             if (!specialStreamProcessingApplied) {
                 Dataset dataset = DatasetFactory.create();
-                try (InputStream in = Files.newInputStream(path)) {
+                try (InputStream in = RDFDataMgrEx.probeEncodings(Files.newInputStream(path), null)) {
                     TypedInputStream tis = RDFDataMgrEx.probeLang(in, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
 
                     // String url = path.toUri().toString();
