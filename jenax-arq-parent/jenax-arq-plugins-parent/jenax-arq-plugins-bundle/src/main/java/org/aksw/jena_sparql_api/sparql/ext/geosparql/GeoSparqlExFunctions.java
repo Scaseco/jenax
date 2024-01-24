@@ -23,6 +23,8 @@ import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.FmtUtils;
+import org.locationtech.jts.algorithm.hull.ConcaveHull;
+import org.locationtech.jts.algorithm.hull.ConcaveHullOfPolygons;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.H3Utils;
@@ -295,14 +297,33 @@ public class GeoSparqlExFunctions {
     }
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static GeometryWrapper hullByAreaDelta(GeometryWrapper geomWrapper, boolean isOuter, double areaDeltaRatio) {
+    public static GeometryWrapper concaveHull(GeometryWrapper geomWrapper,
+                                              double maxLength,
+                                              @DefaultValue("false") boolean isHoleAllowed) {
+        Geometry hull = ConcaveHull.concaveHullByLength(geomWrapper.getParsingGeometry(), maxLength, isHoleAllowed);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
+        return result;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper concaveHullOfPolygons(GeometryWrapper geomWrapper,
+                                                        double maxLength,
+                                                        @DefaultValue("false") boolean isTight,
+                                                        @DefaultValue("false") boolean isHoleAllowed) {
+        Geometry hull = ConcaveHullOfPolygons.concaveHullByLength(geomWrapper.getParsingGeometry(), maxLength, isTight, isHoleAllowed);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
+        return result;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper simplifyPolygonHullByAreaDelta(GeometryWrapper geomWrapper, boolean isOuter, double areaDeltaRatio) {
         Geometry hull = PolygonHullSimplifier.hullByAreaDelta(geomWrapper.getParsingGeometry(), isOuter, areaDeltaRatio);
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
         return result;
     }
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static GeometryWrapper hullByVertexNumberFraction(GeometryWrapper geomWrapper, boolean isOuter, double vertexNumFraction) {
+    public static GeometryWrapper simplifyPolygonHullByVertexNumFraction(GeometryWrapper geomWrapper, boolean isOuter, double vertexNumFraction) {
         Geometry hull = PolygonHullSimplifier.hull(geomWrapper.getParsingGeometry(), isOuter, vertexNumFraction);
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
         return result;
