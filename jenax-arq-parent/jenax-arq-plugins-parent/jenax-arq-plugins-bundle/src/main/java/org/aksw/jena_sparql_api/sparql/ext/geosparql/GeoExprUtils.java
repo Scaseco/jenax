@@ -49,7 +49,7 @@ public class GeoExprUtils {
     }
 
     public static Expr createExprOgcIntersects(Var v, Envelope bounds, String intersectsFnName, String geomFromTextFnName) {
-        var ogc = "http://www.opengis.net/rdf#";
+        String ogc = "http://www.opengis.net/rdf#";
 
         intersectsFnName = Optional.ofNullable(intersectsFnName).orElse(ogc + "intersects");
         geomFromTextFnName = Optional.ofNullable(geomFromTextFnName).orElse(ogc + "geomFromText");

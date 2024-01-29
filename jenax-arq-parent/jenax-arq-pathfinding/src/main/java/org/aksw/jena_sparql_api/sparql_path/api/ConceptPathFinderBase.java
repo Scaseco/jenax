@@ -1,17 +1,17 @@
 package org.aksw.jena_sparql_api.sparql_path.api;
 
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.apache.jena.graph.Graph;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 public abstract class ConceptPathFinderBase
-	implements ConceptPathFinder
+    implements ConceptPathFinder
 {
-	protected Graph dataSummary;
-	protected SparqlQueryConnection dataConnection;
+    protected Graph dataSummary;
+    protected RdfDataSource dataSource;
 
-	public ConceptPathFinderBase(Graph dataSummary, SparqlQueryConnection dataConnection) {
-		super();
-		this.dataSummary = dataSummary;
-		this.dataConnection = dataConnection;
-	}
+    public ConceptPathFinderBase(Graph dataSummary, RdfDataSource dataSource) {
+        super();
+        this.dataSummary = dataSummary;
+        this.dataSource = dataSource;
+    }
 }

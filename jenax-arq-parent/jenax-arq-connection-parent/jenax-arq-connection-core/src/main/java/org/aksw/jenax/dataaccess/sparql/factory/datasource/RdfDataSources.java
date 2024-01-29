@@ -35,7 +35,8 @@ import org.apache.jena.system.Txn;
 
 public class RdfDataSources {
 
-    /** Execute a query and invoke a function on the response.
+    /**
+     * Execute a query and invoke a function on the response.
      * Upon returning the internally freshly obtained connection and query execution are closed so
      * the result must be detached from those resources.
      */

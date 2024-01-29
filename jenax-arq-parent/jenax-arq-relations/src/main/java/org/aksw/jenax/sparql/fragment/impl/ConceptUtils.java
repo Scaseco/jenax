@@ -83,11 +83,11 @@ public class ConceptUtils {
      */
     public static Fragment1 createPredicateQuery(Fragment1 concept) {
         Collection<Var> vars = PatternVars.vars(concept.getElement());
-        List<String> varNames = VarUtils.getVarNames(vars);
+        //List<String> varNames = VarUtils.getVarNames(vars);
 
         Var s = concept.getVar();
 
-        Generator<Var> gen = GeneratorBlacklist.create(VarGeneratorImpl2.create("v"), varNames);
+        Generator<Var> gen = GeneratorBlacklist.create(VarGeneratorImpl2.create("v"), vars);
         Var p = Var.alloc(gen.next());
         Var o = Var.alloc(gen.next());
 
