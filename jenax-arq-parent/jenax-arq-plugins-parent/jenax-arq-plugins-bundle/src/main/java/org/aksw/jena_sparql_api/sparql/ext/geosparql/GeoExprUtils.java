@@ -1,12 +1,11 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Function;
-import org.apache.jena.sparql.expr.E_GreaterThan;
 import org.apache.jena.sparql.expr.E_GreaterThanOrEqual;
 import org.apache.jena.sparql.expr.E_LessThan;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
@@ -48,21 +47,28 @@ public class GeoExprUtils {
         return result;
     }
 
-    public static Expr createExprOgcIntersects(Var v, Envelope bounds, String intersectsFnName, String geomFromTextFnName) {
+    public static Expr createExprOgcIntersects(Expr exprVar, Expr geom, String intersectsFnName, String geomFromTextFnName) {
         String ogc = "http://www.opengis.net/rdf#";
+
+        // Expr geomExpr = NodeValue.makeNode(geomNode);
 
         intersectsFnName = Optional.ofNullable(intersectsFnName).orElse(ogc + "intersects");
         geomFromTextFnName = Optional.ofNullable(geomFromTextFnName).orElse(ogc + "geomFromText");
 
-        ExprVar exprVar = new ExprVar(v);
-        String wktStr = boundsToWkt(bounds);
+        // ExprVar exprVar = new ExprVar(v);
 
+        Expr geomExpr = geom.isConstant() && geom.getConstant().isString()
+            ? new E_Function(geomFromTextFnName, new ExprList(geom))
+            : geom;
+
+        // String wktStr = boundsToWkt(bounds);
+//        			Expr geomExpr = NodeValue.makeNode(geomNode);
         // FIXME: Better use typeLit with xsd:string
-        NodeValue wktNodeValue = NodeValue.makeString(wktStr); //new NodeValue(rdf.NodeFactory.createPlainLiteral(wktStr));
+        // NodeValue wktNodeValue = NodeValue.makeString(wktStr); //new NodeValue(rdf.NodeFactory.createPlainLiteral(wktStr));
 
         Expr result = new E_Function(
             intersectsFnName,
-            new ExprList(Arrays.asList(exprVar, new E_Function(geomFromTextFnName, new ExprList(wktNodeValue)))));
+            new ExprList(List.of(exprVar, geomExpr)));
 
         return result;
     }

@@ -8,7 +8,6 @@ import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
-import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.Geo;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -16,20 +15,20 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.syntax.Element;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
 
 public class GeoConstraintFactoryGeoSparql
     implements GeoConstraintFactory
 {
     // The fragment is typically of the form ?s { ?s wgs:lat ?lat ; wgs:long ?long }
     protected Fragment2 fragment;
+    protected BBoxExprFactoryWkt bboxExprFactory;
 
-    protected GeoConstraintFactoryGeoSparql(Fragment2 fragment) {
+    protected GeoConstraintFactoryGeoSparql(Fragment2 fragment, BBoxExprFactoryWkt bboxExprFactory) {
         // this.fragment = fragment;
         this.fragment = Objects.requireNonNull(fragment);
+        this.bboxExprFactory = Objects.requireNonNull(bboxExprFactory);
     }
 
     public static GeoConstraintFactoryGeoSparql of(String hasGeometryPropertyIri, String asLiteralPropertyIri) {
@@ -60,7 +59,7 @@ public class GeoConstraintFactoryGeoSparql
     }
 
     public static GeoConstraintFactoryGeoSparql of(Fragment2 fragment) {
-        return new GeoConstraintFactoryGeoSparql(fragment);
+        return new GeoConstraintFactoryGeoSparql(fragment, BBoxExprFactoryWkt.ofGeoSparql());
     }
 
     @Override
@@ -75,10 +74,8 @@ public class GeoConstraintFactoryGeoSparql
 
     @Override
     public Expr createExpr(Envelope bounds) {
-        Geometry geom = CustomGeometryFactory.theInstance().toGeometry(bounds);
-        GeometryWrapper geomWrapper = new GeometryWrapper(geom, Geo.WKT);
-        Node node = geomWrapper.asNode();
-        Expr result = NodeValue.makeNode(node);
+        Var geomVar = fragment.getTargetVar();
+        Expr result = bboxExprFactory.createExpr(geomVar, bounds);
         return result;
     }
 
