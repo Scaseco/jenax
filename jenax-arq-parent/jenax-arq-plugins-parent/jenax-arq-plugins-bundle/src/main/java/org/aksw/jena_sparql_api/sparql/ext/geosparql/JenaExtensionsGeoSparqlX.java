@@ -31,6 +31,10 @@ public class JenaExtensionsGeoSparqlX {
                 GeoSPARQL_URI.GEOF_URI + "aggIntersection",
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggIntersectionGeometryWrapperCollection));
 
+        AggregateRegistry.register(
+                GeoSPARQL_URI.GEOF_URI + "h3ToGeom",
+                H3ToGeometryAgg.h3CellIdAccumulatorFactory);
+
     }
 
     public static void loadDefs(FunctionRegistry registry) {
@@ -53,10 +57,10 @@ public class JenaExtensionsGeoSparqlX {
 
         // Define two-way Geometry - GeometryWrapper coercions
         generator.getConverterRegistry()
-            .register(Geometry.class, GeometryWrapper.class,
-                    geometry -> new GeometryWrapper(geometry, WKTDatatype.URI),
-                    GeometryWrapper::getParsingGeometry)
-            ;
+                .register(Geometry.class, GeometryWrapper.class,
+                        geometry -> new GeometryWrapper(geometry, WKTDatatype.URI),
+                        GeometryWrapper::getParsingGeometry)
+        ;
 
         // Declare that the conversion of Geometry to GeometryWrapper
         // yields an RDF-compatible java object w.r.t. Jena's TypeMapper
@@ -85,5 +89,8 @@ public class JenaExtensionsGeoSparqlX {
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
 
         JenaBindingH3.init(binder);
+        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_geometryToCellIds", H3GeometryToCellIDsPF.class);
+        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_cellIdToChildren", H3CellToChildrenPF.class);
+        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_gridDisk", H3GridDiskPF.class);
     }
 }
