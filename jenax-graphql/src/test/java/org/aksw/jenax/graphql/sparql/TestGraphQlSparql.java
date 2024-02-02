@@ -39,7 +39,7 @@ public class TestGraphQlSparql {
         Assert.assertEquals(expected, actual);
     }
 
-    @Test
+    // @Test
     public void testInlineFragments02() {
 
         // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
@@ -68,6 +68,29 @@ public class TestGraphQlSparql {
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
 
         // Assert.assertEquals(expected, actual);
+    }
+
+    // @Test
+    public void testInlineFragments03() {
+        // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
+
+        String queryStr
+                = "{\n"
+                + "  user {\n"
+                + "    ... on User @test {\n"
+                + "      id\n"
+                + "      username\n"
+                + "      ... on Agent {\n"
+                + "        ... { test }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n"
+                + "";
+
+        Parser parser = new Parser();
+        Document doc = parser.parseDocument(queryStr);
+        System.out.println(doc);
     }
 
     private static JsonElement getResourceAsJson(String name, Gson gson) {
