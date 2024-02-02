@@ -1,31 +1,21 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
-import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
-import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.UnitsOfMeasure;
-import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
-import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.Unit_URI;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Node_URI;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.FmtUtils;
-import org.apache.jena.sparql.util.NodeFactoryExtra;
-import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.utils.H3Utils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -307,45 +297,4 @@ public class GeoSparqlExFunctions {
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, hull);
         return result;
     }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static NodeList h3CellIDs(GeometryWrapper geomWrapper, int level, boolean fullCover) {
-        Long[] ids = Functions.h3CellIDs(geomWrapper.getParsingGeometry(), level, fullCover);
-        NodeListImpl nodeList = new NodeListImpl(Arrays.stream(ids).map(NodeFactoryExtra::intToNode).collect(Collectors.toList()));
-        return nodeList;
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static long h3LongLatAsCellId(double lon, double lat, int resolution) {
-        long cellId = H3Utils.h3.latLngToCell(lat, lon, resolution);
-        return cellId;
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static GeometryWrapper h3CellIdToGeom(long cellId) {
-        Geometry geom = H3ToGeometryAgg.h3ToGeom(new long[]{cellId});
-        return GeometryWrapperFactory.createGeometry(geom, WKTDatatype.URI);
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static long h3CellIdToParent(long cellId, int parentRes) {
-        long parentId = H3Utils.h3.cellToParent(cellId, parentRes);
-        return parentId;
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static boolean h3IsValidCell(long cellId) {
-        return H3Utils.h3.isValidCell(cellId);
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static int h3CellResolution(long cellId) {
-        return H3Utils.h3.getResolution(cellId);
-    }
-
-    @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static long h3GridDistance(long cellId1, long cellId2) {
-        return H3Utils.h3.gridDistance(cellId1, cellId2);
-    }
-
 }
