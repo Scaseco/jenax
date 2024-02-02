@@ -31,10 +31,13 @@ import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.Rename;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
+import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.exec.QueryExec;
@@ -296,10 +299,23 @@ public class RDFConnectionUtils {
     }
 
     /**
+     * Runs an OpService on the given connection.
+     * Resulting bindings must be compatible with the given one and will be merged with it.
+     *
+     * @implNote
+     *   This method calls {@link #execService(OpService, RDFConnection)}.
+     */
+    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target) {
+        QueryIterator qIter = execService(opService, target);
+        qIter = QueryIter.makeTracked(qIter, execCxt);
+        return new QueryIterCommonParent(qIter, binding, execCxt);
+    }
+
+    /**
      * Runs an OpService on the given connection. Ignores the service IRI but considers the silent flag.
      *
      * @implNote
-     *  Adapted from {@link Service#exec(OpService, Context)}.
+     *   Adapted from {@link Service#exec(OpService, Context)}.
      */
     public static QueryIterator execService(OpService opService, RDFConnection target) {
         boolean silent = opService.getSilent();

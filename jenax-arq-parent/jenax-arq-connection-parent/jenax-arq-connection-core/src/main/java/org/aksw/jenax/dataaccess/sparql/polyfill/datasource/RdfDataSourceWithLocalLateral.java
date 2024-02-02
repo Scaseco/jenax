@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalLateral
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalLateral.class);
 
@@ -60,14 +60,18 @@ public class RdfDataSourceWithLocalLateral
         Query query = QueryFactory.create(queryStr);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
-        RdfDataSourceWithLocalLateral dataSource = new RdfDataSourceWithLocalLateral(RdfDataEngines.of(DatasetFactory.create()));
+        RdfDataSourceWithLocalLateral dataSource = RdfDataSourceWithLocalLateral.wrap(RdfDataEngines.of(DatasetFactory.create()));
         Query rewritten = OpRewriteInjectRemoteOps.rewriteQuery(query);
         System.out.println(rewritten);
     }
 
-    public RdfDataSourceWithLocalLateral(RdfDataSource delegate) {
+    protected RdfDataSourceWithLocalLateral(RdfDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
+    }
+
+    public static RdfDataSourceWithLocalLateral wrap(RdfDataSource delegate) {
+        return new RdfDataSourceWithLocalLateral(delegate);
     }
 
     public static Dataset createProxyDataset(RdfDataSource delegate) {
@@ -78,7 +82,7 @@ public class RdfDataSourceWithLocalLateral
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(opExec, base);
+                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }

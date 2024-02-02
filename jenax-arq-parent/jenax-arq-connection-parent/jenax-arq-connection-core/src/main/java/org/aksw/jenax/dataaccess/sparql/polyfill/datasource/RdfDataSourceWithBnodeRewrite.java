@@ -77,7 +77,7 @@ public class RdfDataSourceWithBnodeRewrite
                 // try {
                 // These requests materialize the result set, so the connection should be idle
                 // once execService returns
-                    r = RDFConnectionUtils.execService(opExec, conn);
+                    r = RDFConnectionUtils.execService(binding, execCxt, opExec, conn);
                     // RDFLinkAdapter.adapt(base).query(query).sel
                     // r = new QueryIteratorResultSet(base.query(query).execSelect());
 //                    } catch (Exception e) {
