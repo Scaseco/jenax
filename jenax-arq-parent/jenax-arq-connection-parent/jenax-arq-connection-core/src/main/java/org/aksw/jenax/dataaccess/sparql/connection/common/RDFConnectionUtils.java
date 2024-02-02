@@ -371,10 +371,10 @@ public class RDFConnectionUtils {
 
 
         QueryIterator result = QueryIterPlainWrapper.create(rowSet);
-        if (requiresRemapping)
+        if (requiresRemapping) {
             result = QueryIter.map(result, varMapping);
+        }
         return result;
-
     }
 
 }

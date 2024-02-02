@@ -3,11 +3,8 @@ package org.aksw.jenax.dataaccess.sparql.link.query;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperWithTransform;
-import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.LinkSparqlQuery;
-import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
-
 
 /**
  * LinkSparqlQuery wrapper that can transform both
@@ -49,6 +46,7 @@ public class LinkSparqlQueryQueryTransform
 
     @Override
     public QueryExecBuilder newQuery() {
-        return QueryExecBuilderWrapperWithTransform.create(delegate.newQuery(), queryTransform, queryExecTransform);
+        QueryExecBuilder delegateBuilder = delegate.newQuery();
+        return QueryExecBuilderWrapperWithTransform.create(delegateBuilder, queryTransform, queryExecTransform);
     }
 }

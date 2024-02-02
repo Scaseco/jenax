@@ -29,7 +29,7 @@ import com.google.common.collect.Iterables;
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
 public class RdfDataSourceWithBnodeRewrite
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithBnodeRewrite.class);
 
