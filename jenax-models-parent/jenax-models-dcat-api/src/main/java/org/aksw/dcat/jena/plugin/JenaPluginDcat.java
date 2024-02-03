@@ -6,9 +6,6 @@ import org.aksw.dcat.jena.domain.api.DcatDistribution;
 import org.aksw.dcat.jena.domain.api.DcatDownloadUrl;
 import org.aksw.dcat.jena.domain.api.MavenEntity;
 import org.aksw.dcat.mgmt.api.DataProject;
-import org.aksw.dcat.mgmt.api.FoafDepiction;
-import org.aksw.dcat.mgmt.api.RdfsComment;
-import org.aksw.dcat.mgmt.api.RdfsLabel;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
@@ -19,6 +16,7 @@ import org.apache.jena.sys.JenaSubsystemLifecycle;
 public class JenaPluginDcat
     implements JenaSubsystemLifecycle {
 
+    @Override
     public void start() {
         JenaPluginDcat.init();
     }
@@ -38,9 +36,6 @@ public class JenaPluginDcat
                 DcatDownloadUrl.class);
 
         JenaPluginUtils.registerResourceClasses(
-                RdfsLabel.class,
-                RdfsComment.class,
-                FoafDepiction.class,
                 DataProject.class,
                 DcatRepoConfig.class,
                 MavenEntity.class);

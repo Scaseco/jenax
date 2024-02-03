@@ -285,6 +285,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-rdfs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-polyfill</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-shacl</artifactId>
 				<version>${project.version}</version>
 			</dependency>

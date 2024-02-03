@@ -18,6 +18,15 @@ import org.apache.jena.sparql.engine.Rename;
  */
 public class ReverseRenameUtils {
 
+    /** Return the plain name of the given variable node. Raises an exception for non-variable nodes. */
+    public static String plainVarName(Node node) {
+        return plainVarName(node.getName());
+    }
+
+    public static String plainVarName(String rawName) {
+        return separateMarkerFromVarName(rawName)[1];
+    }
+
     public static String[] separateMarkerFromVarName(String rawName) {
         String[] result = new String[] {"", null};
         if(Var.isAllocVarName(rawName)) {

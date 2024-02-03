@@ -12,6 +12,15 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-models-rdfs</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.jenax</groupId>
+            <artifactId>jenax-models-foaf</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.aksw.jenax</groupId>
