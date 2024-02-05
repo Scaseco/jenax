@@ -1,12 +1,18 @@
 package org.aksw.jenax.dataaccess.sparql.polyfill.datasource;
 
+import java.io.Serializable;
+
 /**
  * A basic class with basic attributes that represents a suggestion to a user.
  *
  *
  * @param <T> The payload type.
  */
-public class Suggestion<T> {
+public class Suggestion<T>
+    implements Serializable
+{
+    private static final long serialVersionUID = 1L;
+
     protected String name;
     protected String comment;
 

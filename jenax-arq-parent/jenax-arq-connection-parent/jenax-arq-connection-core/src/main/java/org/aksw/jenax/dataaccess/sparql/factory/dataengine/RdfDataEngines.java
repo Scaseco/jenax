@@ -1,6 +1,8 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
 
+import java.util.Objects;
+
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
@@ -11,12 +13,14 @@ import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineDecoratorBase;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngineWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.QueryExecution;
@@ -72,6 +76,14 @@ public class RdfDataEngines {
             this.closeAction = closeAction;
         }
 
+        public RdfDataSource getDataSource() {
+            return rdfDataSource;
+        }
+
+        public AutoCloseable getCloseAction() {
+            return closeAction;
+        }
+
         @Override
         public RDFConnection getConnection() {
             return rdfDataSource.getConnection();
@@ -83,6 +95,41 @@ public class RdfDataEngines {
                 closeAction.close();
             }
         }
+    }
+
+    /** A data engine with data source wrappers applied */
+    public static class WrappedRdfDataEngine
+        extends RdfDataEngineDecoratorBase<RdfDataEngine>
+    {
+        protected RdfDataSource effectiveDataSource;
+
+        public WrappedRdfDataEngine(RdfDataEngine baseEngine, RdfDataSource effectiveDataSource) {
+            super(Objects.requireNonNull(baseEngine));
+            this.effectiveDataSource = Objects.requireNonNull(effectiveDataSource);
+        }
+
+        @Override
+        public RdfDataEngine getDecoratee() {
+            return super.getDecoratee();
+        }
+
+        public RdfDataSource getEffectiveDataSource() {
+            return effectiveDataSource;
+        }
+
+        @Override
+        public RDFConnection getConnection() {
+            return effectiveDataSource.getConnection();
+        }
+    }
+
+    /** Return the DataEngine as a DatasSource thereby remove any wrapping with RdfDataEngineOverRdfDataSource */
+    public static RdfDataSource unwrapDataSource(RdfDataEngineOverRdfDataSource dataEngine) {
+        RdfDataSource result = dataEngine;
+        while (result instanceof RdfDataEngineOverRdfDataSource) {
+            result = ((RdfDataEngineOverRdfDataSource)result).getDataSource();
+        }
+        return result;
     }
 
     public static RdfDataEngine transform(RdfDataEngine dataEngine, RdfDataSourceTransform transform) {
@@ -156,9 +203,14 @@ public class RdfDataEngines {
     }
 
 
-    /** Wrap an RdfDataSource as an RdfDataEngine */
+    /**
+     * Returns the argument if it already is a RdfDataEngine.
+     * Otherwise, wrap an RdfDataSource as an RdfDataEngine with a no-op close method.
+     */
     public static RdfDataEngine of(RdfDataSource rdfDataSource) {
-        return of(rdfDataSource, null);
+        return rdfDataSource instanceof RdfDataEngine
+                ? (RdfDataEngine)rdfDataSource
+                : of(rdfDataSource, null);
     }
 
     /**
@@ -173,6 +225,22 @@ public class RdfDataEngines {
                 ? (RdfDataEngine)rdfDataSource
                 : new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
 
+        return result;
+    }
+
+    /**
+     * If the dataSource is already a data engine then return it.
+     * Otherwise, return a WrappedRdfDataEngine - the dataSource becomes the effective one, and the
+     * baseDataEngine's underlying engine becomes the base engine.
+     *
+     * @param dataSource
+     * @param baseDataEngine
+     * @return
+     */
+    public static RdfDataEngine of(RdfDataSource dataSource, RdfDataEngine baseDataEngine) {
+        RdfDataEngine result = dataSource instanceof RdfDataEngine
+            ? (RdfDataEngine)dataSource
+            : new WrappedRdfDataEngine(asWrappedEngine(baseDataEngine).getDecoratee(), dataSource);
         return result;
     }
 
@@ -214,5 +282,36 @@ public class RdfDataEngines {
 
     public static RdfDataEngine wrapWithWorkerThread(RdfDataEngine dataEngine) {
         return wrapWithLinkTransform(dataEngine, RDFLinkWrapperWithWorkerThread::wrap);
+    }
+
+//    public static RdfDataEngine wrapWithOpTransform(RdfDataEngine dataEngine, Transform statelessTransform) {
+//        return wrapWithOpTransform(dataEngine, () -> statelessTransform);
+//    }
+//
+//    /**
+//     * Wrap a datasource such that an algebra transform is applied to each statement.
+//     */
+//    // XXX Improve method to flatten multiple stacking transforms on a dataSource into a
+//    //   list which makes debugging easier
+//    public static RdfDataSource wrapWithOpTransform(RdfDataEngine dataEngine, Supplier<Transform> transformSupplier) {
+//        return of(unwrapDataSource(dataEngine));
+//    }
+//
+    public static RdfDataEngine wrapWithStmtTransform(RdfDataEngine dataEngine, SparqlStmtTransform stmtTransform) {
+        RdfDataSourceTransform dataSourceTransform = RdfDataSourceTransforms.of(stmtTransform);
+        return wrapWithDataSourceTransform(dataEngine, dataSourceTransform);
+    }
+
+    public static RdfDataEngine wrapWithDataSourceTransform(RdfDataEngine dataEngine, RdfDataSourceTransform transform) {
+        WrappedRdfDataEngine tmp = asWrappedEngine(dataEngine);
+        RdfDataSource before = tmp.getEffectiveDataSource();
+        RdfDataSource after = transform.apply(before);
+        return new WrappedRdfDataEngine(dataEngine, after);
+    }
+
+    public static WrappedRdfDataEngine asWrappedEngine(RdfDataEngine dataEngine) {
+        return dataEngine instanceof WrappedRdfDataEngine
+            ? (WrappedRdfDataEngine)dataEngine
+            : new WrappedRdfDataEngine(dataEngine, dataEngine);
     }
 }

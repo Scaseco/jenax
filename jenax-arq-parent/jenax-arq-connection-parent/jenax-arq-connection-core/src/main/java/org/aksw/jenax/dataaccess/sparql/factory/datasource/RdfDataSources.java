@@ -24,7 +24,8 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
-import org.aksw.jenax.stmt.util.SparqlStmtUtils;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -32,7 +33,6 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.algebra.Transform;
-import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
@@ -79,7 +79,8 @@ public class RdfDataSources {
      * Wrap a datasource such that a (stateless) algebra transform is applied to each statement.
      */
     public static RdfDataSource wrapWithOpTransform(RdfDataSource dataSource, Transform statelessTransform) {
-        return wrapWithOpTransform(dataSource, () -> statelessTransform);
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(statelessTransform);
+        return wrapWithStmtTransform(dataSource, stmtTransform);
     }
 
     /**
@@ -88,14 +89,17 @@ public class RdfDataSources {
     // XXX Improve method to flatten multiple stacking transforms on a dataSource into a
     //   list which makes debugging easier
     public static RdfDataSource wrapWithOpTransform(RdfDataSource dataSource, Supplier<Transform> transformSupplier) {
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(transformSupplier);
+        return wrapWithStmtTransform(dataSource, stmtTransform);
+    }
+
+    public static RdfDataSource wrapWithStmtTransform(RdfDataSource dataSource, SparqlStmtTransform stmtTransform) {
         return wrapWithLinkTransform(dataSource,
-            link -> RDFLinkUtils.wrapWithStmtTransform(link,
-                stmt -> SparqlStmtUtils.applyOpTransform(stmt,
-                    op -> Transformer.transform(transformSupplier.get(), op))));
+            link -> RDFLinkUtils.wrapWithStmtTransform(link, stmtTransform));
     }
 
     public static RdfDataSource wrapWithLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
-        return new RdfDataSourceWrapperBase(rdfDataSource) {
+        return new RdfDataSourceWrapperBase<>(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection base = super.getConnection();

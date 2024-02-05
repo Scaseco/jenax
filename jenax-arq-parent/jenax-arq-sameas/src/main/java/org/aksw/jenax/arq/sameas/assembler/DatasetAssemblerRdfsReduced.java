@@ -10,7 +10,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfs.RDFSFactory;
-import org.apache.jena.rdfs.SetupRDFS;
 import org.apache.jena.rdfs.assembler.DatasetRDFSAssembler;
 import org.apache.jena.rdfs.assembler.VocabRDFS;
 import org.apache.jena.rdfs.setup.ConfigRDFS;
@@ -21,7 +20,9 @@ import org.apache.jena.sparql.core.assembler.DatasetAssembler;
 import org.apache.jena.sparql.util.Symbol;
 
 /**
- * Same as {@link DatasetRDFSAssembler} except that the type is jxp:DatasetRDFS
+ * A variant of jena's {@link DatasetRDFSAssembler}.
+ * The returned DatasetGraph produces fewer redundant when
+ * inferences on the {@code find} methods of {@link DatasetGraph}.
  */
 public class DatasetAssemblerRdfsReduced extends DatasetAssembler {
 

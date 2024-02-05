@@ -55,6 +55,8 @@ import org.apache.jena.riot.system.stream.StreamManager;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.Transform;
+import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -208,6 +210,10 @@ public class SparqlStmtUtils {
         }
 
         return result;
+    }
+
+    public static SparqlStmt applyOpTransform(SparqlStmt stmt, Transform transform) {
+        return applyOpTransform(stmt, op -> Transformer.transform(transform, op));
     }
 
     public static SparqlStmt applyOpTransform(SparqlStmt stmt, Function<? super Op, ? extends Op> transform) {

@@ -2,6 +2,8 @@ package org.aksw.jena_sparql_api.conjure.dataset.engine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.algebra.transform.TransformUnionQuery2;
@@ -32,6 +35,8 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpError;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpHdtHeader;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJavaRewrite;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJavaRewrite.Rewrite;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJobInstance;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpMacroCall;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpPersist;
@@ -60,12 +65,20 @@ import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapper;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.aksw.jenax.stmt.resultset.SPARQLResultSinkQuads;
 import org.aksw.jenax.stmt.resultset.SPARQLResultVisitor;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
@@ -74,9 +87,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.jena.atlas.lib.Sink;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -89,6 +99,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.lang.SinkQuadsToDataset;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -101,6 +112,10 @@ import org.apache.jena.sparql.path.PathParser;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 // TODO The visitor should delegate to the executor implementation(s) instead of
 // performing operations directly
@@ -747,10 +762,103 @@ public class OpExecutorDefault
             }
 
             @Override
-            public void close() throws Exception {
+            public synchronized void close() throws Exception {
                 subPod.close();
             }
         };
+
+        return result;
+    }
+
+    @Override
+    public RdfDataPod visit(OpJavaRewrite op) {
+        Op subOp = op.getSubOp();
+        RdfDataPod subPod = subOp.accept(this);
+
+        RdfDataEngine tmp = subPod;
+
+        for (Rewrite rewrite : op.getRewrites()) {
+            String javaClass = rewrite.getJavaClass();
+            RdfDataSourceTransform dataSourceTransform;
+            try {
+                dataSourceTransform = createTransformRdfDataSource(javaClass);
+            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+                    | IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            tmp = RdfDataEngines.transform(tmp, dataSourceTransform);
+        }
+
+        RdfDataEngine engine = tmp;
+        RdfDataPod result = new RdfDataPodBase() {
+            @Override
+            protected RDFConnection newConnection() {
+                return engine.getConnection();
+            }
+
+            @Override
+            public synchronized void close() throws Exception {
+                engine.close();
+            }
+        };
+
+        return result;
+    }
+
+    public RdfDataSourceTransform createTransformRdfDataSource(String className) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+        Class<?> cls = Class.forName(className);
+        return createTransformRdfDataSource(cls);
+    }
+
+    public RdfDataSourceTransform createTransformRdfDataSource(Class<?> cls) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        RdfDataSourceTransform result;
+
+        if (Transform.class.isAssignableFrom(cls)) {
+            Constructor<?> ctor = cls.getConstructor();
+            Supplier<Transform> opTransformSupplier = () -> {
+                Object obj;
+                try {
+                    obj = ctor.newInstance();
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+                return (Transform)obj;
+            };
+            // Create a test instance to detect issues early
+            Object testInstance = opTransformSupplier.get();
+            SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(opTransformSupplier);
+            result = RdfDataSourceTransforms.of(stmtTransform);
+            // result = tmp -> RdfDataEngines.wrapWithStmtTransform(tmp, stmtTransform);
+        } else
+        if (SparqlStmtTransform.class.isAssignableFrom(cls)) {
+            Constructor<?> ctor = cls.getConstructor();
+            Object inst = ctor.newInstance();
+            SparqlStmtTransform stmtTransform = (SparqlStmtTransform)inst;
+            // result = tmp -> RdfDataEngines.wrapWithStmtTransform(tmp, stmtTransform);
+            // result = RdfDataSources.wrapWithStmtTransform(null, stmtTransform)
+            result = RdfDataSourceTransforms.of(stmtTransform);
+        } else if (RdfDataSourceWrapper.class.isAssignableFrom(cls)) {
+            Constructor<?> ctor = cls.getConstructor(RdfDataSource.class);
+            // result = tmp -> RdfDataEngines.of(dataSource, tmp);
+            result = tmp -> {
+                Object inst;
+                try {
+                    inst = ctor.newInstance(tmp);
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+                RdfDataSource r = (RdfDataSource)inst;
+                return r;
+            };
+        } else if (RdfDataSourceTransform.class.isAssignableFrom(cls)) {
+            Constructor<?> ctor = cls.getConstructor();
+            Object inst = ctor.newInstance();
+            result = (RdfDataSourceTransform)inst;
+        } else {
+            throw new RuntimeException("Unsupported transformation type: " + cls);
+        }
 
         return result;
     }

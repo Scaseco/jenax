@@ -111,7 +111,7 @@ public class RdfDataSourceWithLocalLateral
         System.out.println(rewritten);
     }
 
-    protected RdfDataSourceWithLocalLateral(RdfDataSource delegate) {
+    public RdfDataSourceWithLocalLateral(RdfDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
     }
