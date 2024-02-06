@@ -1,14 +1,14 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import com.uber.h3core.H3Core;
-import org.apache.jena.atlas.logging.LogCtl;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
-import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprEvalException;
@@ -17,24 +17,15 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.aggregate.Accumulator;
 import org.apache.jena.sparql.expr.aggregate.AccumulatorFactory;
 import org.apache.jena.sparql.expr.aggregate.AggCustom;
-import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionEnv;
-import org.apache.jena.sparql.graph.NodeConst;
-import org.apache.jena.sparql.sse.SSE;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.H3Utils;
-import org.locationtech.jts.geom.*;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 
 public class H3ToGeometryAgg {
-
-    static { LogCtl.setLogging(); }
 
     /**
      * Execution of a custom aggregate is with accumulators. One accumulator is

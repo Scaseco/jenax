@@ -89,7 +89,8 @@
 		<!-- <jgit.version>6.7.0.202309050840-r</jgit.version> -->
 		<jgit.version>5.6.0.201912101111-r</jgit.version>
 		<jsch.version>0.0.9</jsch.version>
-
+		
+		<sis.version>1.4</sis.version>
 
 		<velocity-engine.version>2.3</velocity-engine.version>
 		<pebble.version>3.2.1</pebble.version>
@@ -1465,6 +1466,19 @@
 				<artifactId>plexus-utils</artifactId>
 				<version>3.1.0</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.sis.non-free</groupId>
+				<artifactId>sis-embedded-data</artifactId>
+				<version>${sis.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.sis.core</groupId>
+				<artifactId>sis-referencing</artifactId>
+				<version>${sis.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
