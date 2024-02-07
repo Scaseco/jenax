@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.reflect.ClassUtils;
 import org.aksw.jena_sparql_api.algebra.transform.TransformUnionQuery2;
 import org.aksw.jena_sparql_api.algebra.utils.VirtualPartitionedQuery;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
@@ -105,6 +106,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.path.Path;
@@ -814,24 +816,15 @@ public class OpExecutorDefault
         RdfDataSourceTransform result;
 
         if (Transform.class.isAssignableFrom(cls)) {
-            Constructor<?> ctor = cls.getConstructor();
-            Supplier<Transform> opTransformSupplier = () -> {
-                Object obj;
-                try {
-                    obj = ctor.newInstance();
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-                return (Transform)obj;
-            };
-            // Create a test instance to detect issues early
-            Object testInstance = opTransformSupplier.get();
+            Supplier<Transform> opTransformSupplier = ClassUtils.supplierFromCtor(cls, true);
             SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(opTransformSupplier);
             result = RdfDataSourceTransforms.of(stmtTransform);
             // result = tmp -> RdfDataEngines.wrapWithStmtTransform(tmp, stmtTransform);
-        } else
-        if (SparqlStmtTransform.class.isAssignableFrom(cls)) {
+        } else if (ExprTransform.class.isAssignableFrom(cls)) {
+            Supplier<ExprTransform> exprTransformSupplier = ClassUtils.supplierFromCtor(cls, true);
+            SparqlStmtTransform stmtTransform = SparqlStmtTransforms.ofExprTransform(exprTransformSupplier);
+            result = RdfDataSourceTransforms.of(stmtTransform);
+        } else if (SparqlStmtTransform.class.isAssignableFrom(cls)) {
             Constructor<?> ctor = cls.getConstructor();
             Object inst = ctor.newInstance();
             SparqlStmtTransform stmtTransform = (SparqlStmtTransform)inst;

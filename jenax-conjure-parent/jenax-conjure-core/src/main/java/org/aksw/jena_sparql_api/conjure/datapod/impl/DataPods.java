@@ -51,6 +51,8 @@ import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.sparql.exec.http.QuerySendMode;
+import org.apache.jena.sparql.exec.http.UpdateSendMode;
 import org.apache.jena.util.ResourceUtils;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdt.hdt.HDTManager;
@@ -287,22 +289,34 @@ public class DataPods {
                         .destination(serviceUrl);
 
                 // Apply headers
-                String header;
-                if ((header = dataRef.getAcceptHeaderAskQuery()) != null) {
-                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderAskQuery(header);
+                String value;
+                if ((value = dataRef.getAcceptHeaderAskQuery()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderAskQuery(value);
                 }
 
-                if ((header = dataRef.getAcceptHeaderSelectQuery()) != null) {
-                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderSelectQuery(header);
+                if ((value = dataRef.getAcceptHeaderSelectQuery()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderSelectQuery(value);
                 }
 
-                if ((header = dataRef.getAcceptHeaderGraph()) != null) {
-                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderGraph(header);
+                if ((value = dataRef.getAcceptHeaderGraph()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderGraph(value);
                 }
 
-                if ((header = dataRef.getAcceptHeaderDataset()) != null) {
-                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderDataset(header);
+                if ((value = dataRef.getAcceptHeaderDataset()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderDataset(value);
                 }
+
+                // Send Modes
+                if ((value = dataRef.getSendModeQuery()) != null) {
+                    QuerySendMode sendMode = QuerySendMode.valueOf(value);
+                    rdfConnectionBuilder = rdfConnectionBuilder.querySendMode(sendMode);
+                }
+
+                if ((value = dataRef.getSendModeUpdate()) != null) {
+                    UpdateSendMode sendMode = UpdateSendMode.valueOf(value);
+                    rdfConnectionBuilder = rdfConnectionBuilder.updateSendMode(sendMode);
+                }
+
 
 //                        .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
 //                        ;

@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class SparqlStmtTransforms {
     public static SparqlStmtTransform of(Transform statelessTransform) {
@@ -21,4 +22,10 @@ public class SparqlStmtTransforms {
         return result;
     }
 
+    public static SparqlStmtTransform ofExprTransform(Supplier<? extends ExprTransform> transformSupplier) {
+        SparqlStmtTransform result =
+                stmt -> SparqlStmtUtils.applyOpTransform(stmt,
+                    op -> Transformer.transform(null, transformSupplier.get(), op));
+        return result;
+    }
 }

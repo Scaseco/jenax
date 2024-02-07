@@ -67,6 +67,18 @@ public interface RdfDataRefSparqlEndpoint
     RdfDataRefSparqlEndpoint setAcceptHeaderSelectQuery(String header);
 
     @Override
+    @Iri("rpif:sendModeQuery")
+    @IriType
+    String getSendModeQuery();
+    RdfDataRefSparqlEndpoint setSendModeQuery(String sendMode);
+
+    @Override
+    @Iri("rpif:sendModeUpdate")
+    @IriType
+    String getSendModeUpdate();
+    RdfDataRefSparqlEndpoint setSendModeUpdate(String sendMode);
+
+    @Override
     default <T> T acceptRdf(RdfDataRefVisitor<T> visitor) {
         T result = visitor.visit(this);
         return result;

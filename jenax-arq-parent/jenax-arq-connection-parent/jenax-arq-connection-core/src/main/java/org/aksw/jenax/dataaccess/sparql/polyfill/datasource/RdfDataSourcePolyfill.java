@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtuosoSubstr;
 import org.aksw.jena_sparql_api.algebra.transform.TransformExpandAggCountDistinct;
 import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumnsToExtend;
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
@@ -56,6 +57,7 @@ public class RdfDataSourcePolyfill {
         result.add(Suggestion.of("Virtuoso - Rephrase COUNT(DISTINCT ?x)", "Rewrite as COUNT(*) over a sub query using DISTINCT ?x", TransformExpandAggCountDistinct.class.getName()));
         result.add(Suggestion.of("Virtuoso - Remove redundant filters", "Some versions of Virtuoso raise errors for BIND('foo' AS ?x) FILTER(?x = 'foo')", TransformRedundantFilterRemoval.class.getName()));
         result.add(Suggestion.of("Virtuoso - OpDatasetNames to OpGraph", "Rewrite Graph ?g {} to Graph ?g { ?s ?p ?o }", TransformOpDatasetNamesToOpGraph.class.getName()));
+        result.add(Suggestion.of("Virtuoso - Fix SubStr", "Transform substr expressions to handle the case where the requested length is greater than the string's remaining length", ExprTransformVirtuosoSubstr.class.getName()));
         result.add(Suggestion.of("Generic - Remove redundant projections", "", TransformRedundantProjectionRemoval.class.getName()));
         return result;
     }
