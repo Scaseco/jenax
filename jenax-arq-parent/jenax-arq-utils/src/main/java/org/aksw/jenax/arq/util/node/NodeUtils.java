@@ -340,4 +340,30 @@ public class NodeUtils {
         }
         return result;
     }
+
+    /**
+     * Returns the "lexical form" of any Node depending on its type:
+     * <ul>
+     *   <li>null &rarr; ""</li>
+     *   <li>literal &rarr; node.getLiteralLexicalForm()</li>
+     *   <li>iri &rarr; node.getURI()</li>
+     *   <li>bnode &rarr; node.getBlankNodeLabel()</li>
+     *   <li>variable &rarr; node.getName()</li>
+     *   <li>otherwise &rarr; NodeFmtLib.displayStr(node) </li>
+     * </ul>
+     */
+    public static String getLexicalForm(Node node) {
+        String result = node == null
+                ? ""
+                : node.isLiteral()
+                    ? node.getLiteralLexicalForm()
+                    : node.isURI()
+                        ? node.getURI()
+                        : node.isBlank()
+                            ? node.getBlankNodeLabel()
+                            : node.isVariable()
+                                ? node.getName()
+                                : NodeFmtLib.displayStr(node);
+        return result;
+    }
 }
