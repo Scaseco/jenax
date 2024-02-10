@@ -128,7 +128,7 @@ public class RdfDataSourceWithLocalLateral
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base);
+                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base, true);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }

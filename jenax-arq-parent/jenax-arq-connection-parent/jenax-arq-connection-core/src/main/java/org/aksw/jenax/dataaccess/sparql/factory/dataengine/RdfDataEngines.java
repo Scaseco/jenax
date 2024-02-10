@@ -230,8 +230,12 @@ public class RdfDataEngines {
 
     /**
      * If the dataSource is already a data engine then return it.
-     * Otherwise, return a WrappedRdfDataEngine - the dataSource becomes the effective one, and the
-     * baseDataEngine's underlying engine becomes the base engine.
+     *
+     * Otherwise:
+     * (a) If the baseDataEngine is non-null, then return a WrappedRdfDataEngine from both arguments.
+     *
+     * (b) If the baseDataEngine is null, then just wrap the RdfDataSource as a RdfDataEngine with a
+     * no-op close action.
      *
      * @param dataSource
      * @param baseDataEngine
@@ -240,7 +244,9 @@ public class RdfDataEngines {
     public static RdfDataEngine of(RdfDataSource dataSource, RdfDataEngine baseDataEngine) {
         RdfDataEngine result = dataSource instanceof RdfDataEngine
             ? (RdfDataEngine)dataSource
-            : new WrappedRdfDataEngine(asWrappedEngine(baseDataEngine).getDecoratee(), dataSource);
+            : baseDataEngine == null
+                ? new RdfDataEngineOverRdfDataSource(dataSource, null)
+                : new WrappedRdfDataEngine(asWrappedEngine(baseDataEngine).getDecoratee(), dataSource);
         return result;
     }
 
@@ -266,7 +272,7 @@ public class RdfDataEngines {
             QueryExecTransform queryExecTransform
             ) {
 
-        return new RdfDataEngineDecoratorBase<RdfDataEngine>(dataEngine) {
+        return new RdfDataEngineDecoratorBase<>(dataEngine) {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection raw = decoratee.getConnection();

@@ -1,7 +1,9 @@
 package org.aksw.jenax.dataaccess.sparql.connection.common;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -11,6 +13,7 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;
@@ -35,14 +38,13 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
-import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.exec.RowSetStream;
 import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
@@ -302,11 +304,19 @@ public class RDFConnectionUtils {
      * Runs an OpService on the given connection.
      * Resulting bindings must be compatible with the given one and will be merged with it.
      *
+     * @param binding The parent binding that is merged with the bindings obtained from the execution.
+     * @param execCxt The execution context
+     * @param opService The service operation to delegate to the RDFConnection. Its serviceNode is ignored, but silent is repsected.
+     * @param isStreamingAllowed If true then a live iterator over the result is returned.
+     *          Otherwise the method materializes the data before returning.
+     *          If opService.isSilent() is true then isStreaming has no effect because
+     *          all data must be materialized first in order to detect errors.
+     *
      * @implNote
      *   This method calls {@link #execService(OpService, RDFConnection)}.
      */
-    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target) {
-        QueryIterator qIter = execService(opService, target);
+    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target, boolean isStreamingAllowed) {
+        QueryIterator qIter = execService(opService, target, isStreamingAllowed);
         qIter = QueryIter.makeTracked(qIter, execCxt);
         return new QueryIterCommonParent(qIter, binding, execCxt);
     }
@@ -317,8 +327,8 @@ public class RDFConnectionUtils {
      * @implNote
      *   Adapted from {@link Service#exec(OpService, Context)}.
      */
-    public static QueryIterator execService(OpService opService, RDFConnection target) {
-        boolean silent = opService.getSilent();
+    public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed) {
+        boolean isSilent = opService.getSilent();
         Op opRemote = opService.getSubOp();
         Query query = OpAsQuery.asQuery(opRemote);
 
@@ -349,27 +359,14 @@ public class RDFConnectionUtils {
         }
 
         RDFLink link = RDFLinkAdapter.adapt(target);
-        RowSet rowSet;
         QueryExecBuilder builder = link.newQuery().query(query);
         Context cxt = builder.getContext();
         if (cxt == null) {
             cxt = ARQ.getContext().copy();
         }
 
-        try {
-            try (QueryExec qe = builder.build()) {
-                // Detach from the network stream.
-                rowSet = qe.select().materialize();
-            }
-        } catch (RuntimeException ex) {
-            if ( silent ) {
-                // logger.warn("SERVICE " + NodeFmtLib.strTTL(opService.getService()) + " : " + ex.getMessage(), ex);
-                // Return the input
-                return QueryIterSingleton.create(BindingFactory.root(), null);
-
-            }
-            throw ex;
-        }
+        RowSet rowSet = exec(builder, isSilent, isStreamingAllowed);
+        QueryIterator result = QueryIterPlainWrapper.create(rowSet);
 
 //        if (silent) {
 //        	RDFLink link = RDFLinkAdapter.adapt(target);
@@ -386,11 +383,33 @@ public class RDFConnectionUtils {
 //        }
 
 
-        QueryIterator result = QueryIterPlainWrapper.create(rowSet);
         if (requiresRemapping) {
             result = QueryIter.map(result, varMapping);
         }
         return result;
     }
 
+    public static RowSet exec(QueryExecBuilder builder, boolean isSilent, boolean isStreamingAllowed) {
+        RowSet result;
+        if (isSilent || !isStreamingAllowed) {
+            // Non-streaming case
+            try (QueryExec qe = builder.build()) {
+                // Detach from the network stream.
+                result = qe.select().materialize();
+            } catch (RuntimeException ex) {
+                if (isSilent) {
+                    // logger.warn("SERVICE " + NodeFmtLib.strTTL(opService.getService()) + " : " + ex.getMessage(), ex);
+                    // Return the input
+                    result = RowSetStream.create(List.of(), Collections.emptyIterator());
+                    // QueryIterSingleton.create(BindingFactory.root(), null);
+                } else {
+                    throw ex;
+                }
+            }
+        } else {
+            // Streaming case
+            result = new RowSetOverQueryExec(builder.build());
+        }
+        return result;
+    }
 }
