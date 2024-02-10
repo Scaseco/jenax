@@ -342,7 +342,7 @@ public class NodeUtils {
     }
 
     /**
-     * Returns the "lexical form" of any Node depending on its type:
+     * Returns the "unquoted form" of any Node depending on its type:
      * <ul>
      *   <li>null &rarr; ""</li>
      *   <li>literal &rarr; node.getLiteralLexicalForm()</li>
@@ -352,7 +352,7 @@ public class NodeUtils {
      *   <li>otherwise &rarr; NodeFmtLib.displayStr(node) </li>
      * </ul>
      */
-    public static String getLexicalForm(Node node) {
+    public static String getUnquotedForm(Node node) {
         String result = node == null
                 ? ""
                 : node.isLiteral()
