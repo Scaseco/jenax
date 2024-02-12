@@ -14,7 +14,7 @@ public class GraphQlToSparqlMapping {
     public static class Entry {
         protected Field topLevelField;
 
-        /** A cache of the prefixes computed from the field */
+        /** A copy of the prefixes computed from the field */
         protected PrefixMap prefixMap;
         protected NodeQuery nodeQuery;
         protected GraphToJsonNodeMapper mapper;

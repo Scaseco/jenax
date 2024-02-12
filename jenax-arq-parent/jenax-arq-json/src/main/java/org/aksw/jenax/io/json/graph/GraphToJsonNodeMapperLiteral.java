@@ -9,6 +9,7 @@ import org.apache.jena.graph.Node;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 public class GraphToJsonNodeMapperLiteral
     implements GraphToJsonNodeMapper
@@ -30,7 +31,9 @@ public class GraphToJsonNodeMapperLiteral
 
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
-        JsonElement result = RdfJsonUtils.toJson(graph, node, 0, 1, false);
+        JsonElement result = node != null && node.isURI()
+                ? new JsonPrimitive(node.getURI())
+                : RdfJsonUtils.toJson(graph, node, 0, 1, false);
         return result;
     }
 
