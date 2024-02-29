@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.mvn;
 
-import org.aksw.dcat.jena.domain.api.MavenEntityCore;
+import org.aksw.commons.model.maven.domain.api.MavenEntityCore;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
