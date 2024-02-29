@@ -43,6 +43,7 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
+import org.apache.jena.sparql.service.enhancer.impl.ServiceResponseCache;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementService;
@@ -105,6 +106,11 @@ public class RdfDataSourceWithLocalCache
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
         registry.addBulkLink(new ChainingServiceExecutorBulkServiceEnhancer());
+
+        // Create a cache local to the dataset - don't use the global cache, because
+        // all service requests will go to REMOTE_NODE
+        ServiceResponseCache.set(result.getContext(), new ServiceResponseCache());
+
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
