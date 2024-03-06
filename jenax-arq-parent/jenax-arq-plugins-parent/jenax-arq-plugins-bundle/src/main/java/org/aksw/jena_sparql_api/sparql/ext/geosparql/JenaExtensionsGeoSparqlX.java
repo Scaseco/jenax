@@ -24,6 +24,10 @@ public class JenaExtensionsGeoSparqlX {
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
 
         AggregateRegistry.register(
+                NorseTermsGeo.aggCollect,
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
+
+        AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "aggUnion",
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggUnionGeometryWrapperCollection));
 

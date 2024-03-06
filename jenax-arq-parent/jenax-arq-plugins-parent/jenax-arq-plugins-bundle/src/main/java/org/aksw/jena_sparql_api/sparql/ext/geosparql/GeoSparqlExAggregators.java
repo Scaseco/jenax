@@ -14,6 +14,7 @@ import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
@@ -53,7 +54,6 @@ public class GeoSparqlExAggregators {
             return new AccAdapterJena(coreAgg.createAccumulator());
         };
     }
-
 
     /**
      * Return the common item type.
@@ -139,10 +139,14 @@ public class GeoSparqlExAggregators {
 //    }
 
     public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+        return aggGeometryWrapperCollection(geomExpr, distinct, false);
+    }
+
+    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct, boolean unwrapSingle) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
-        Function<Collection<Geometry>, Geometry> finisher = geoms -> geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
-
-
+        Function<Collection<Geometry>, Geometry> finisher = geoms -> unwrapSingle && geoms.size() == 1
+                ? geoms.iterator().next()
+                : geomFactory.createGeometryCollection(geoms.toArray(new Geometry[0]));
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 

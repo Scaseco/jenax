@@ -10,12 +10,13 @@ import java.lang.annotation.Target;
  * Java methods.
  * The provided string must be either a valid lexical value for the arguments datatype
  * corresponding RDF type.
- * 
- * @author raven
  *
+ * For example, Java's primitive {@code boolean} and boxed {@code Boolean} types both map to {@code xsd:boolean}.
+ * Its lexical space is the set of strings {"false", "true" }.
+ * Hence, the annotation {@code myMethod(@DefaultValue("true") boolean arg)} is interpreted as {@code "true"^^xsd:boolean}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
 public @interface DefaultValue {
-	String value();
+    String value();
 }

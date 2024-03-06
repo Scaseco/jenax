@@ -1,20 +1,30 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
+import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
+import org.aksw.jenax.arq.util.node.NodeListImpl;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.UnitsOfMeasure;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.geosparql.implementation.vocabulary.Unit_URI;
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -47,6 +57,46 @@ public class GeoSparqlExFunctions {
 
         return result;
     }
+
+    @Iri(NorseTermsGeo.collect)
+    public static GeometryWrapper collect(Node ... nodes) { //, @DefaultValue("false") boolean distinct, @DefaultValue("false") boolean unwrapSingle) {
+        return collect(NodeListImpl.wrap(nodes));
+    }
+
+    @Iri(NorseTermsGeo.asCollection)
+    public static GeometryWrapper collect(NodeList nodeCollection) {
+        Aggregator<Binding, FunctionEnv, GeometryWrapper> agg =
+            GeoSparqlExAggregators.aggGeometryWrapperCollection(new ExprVar(Vars.x), false, false);
+
+        // XXX Performance-wise not ideal to allocate dummy binding objects here
+        Optional<GeometryWrapper> r = agg.accumulateAll(nodeCollection.stream()
+                .map(node -> BindingFactory.binding(Vars.x, node)), null);
+        return r.orElse(null);
+    }
+
+    @Iri(NorseTermsGeo.unwrapSingle)
+    public static GeometryWrapper collect(GeometryWrapper geom, @DefaultValue("false") boolean recursive) {
+        Geometry init = geom.getParsingGeometry();
+        Geometry current = init;
+        do {
+            if (!(current instanceof GeometryCollection)) {
+                break;
+            }
+
+            GeometryCollection c = (GeometryCollection)current;
+            if (c.getNumGeometries() != 1) {
+                break;
+            }
+
+            current = c.getGeometryN(0);
+        } while (recursive);
+
+        GeometryWrapper result = current == init
+                ? geom
+                : GeometryWrapperUtils.createFromPrototype(geom, current);
+        return result;
+    }
+
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper simplifyDp(

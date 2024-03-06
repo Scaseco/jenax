@@ -190,7 +190,10 @@ public class FunctionAdapter
             }
 
             if (isInVarArgs) {
-                Array.set(javaVarArgsArr, i - varArgOffset, javaArg);
+                // Handle the case where there is a vararg parameter but no argument is given
+                if (i < argCount) {
+                    Array.set(javaVarArgsArr, i - varArgOffset, javaArg);
+                }
             } else {
                 javaArgs[i] = javaArg;
             }

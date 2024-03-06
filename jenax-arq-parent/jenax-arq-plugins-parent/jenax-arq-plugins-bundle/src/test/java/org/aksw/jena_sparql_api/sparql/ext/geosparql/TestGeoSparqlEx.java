@@ -169,6 +169,30 @@ public class TestGeoSparqlEx {
     }
 
     @Test
+    public void testCollect_empty() {
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect() AS ?c) { }");
+        Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
+    }
+
+    @Test
+    public void testCollect_single() {
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect('POINT(0 0)'^^geo:wktLiteral) AS ?c) { }");
+        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+    }
+
+    @Test
+    public void testCollect_single_unwrap() {
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.unwrapSingle(norse:geo.collect('POINT(0 0)'^^geo:wktLiteral), true) AS ?c) { }");
+        Assert.assertEquals("POINT(0 0)", actual);
+    }
+
+    @Test
+    public void testCollect() {
+        String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect('POINT(0 0)'^^geo:wktLiteral, 'POINT(1 1)'^^geo:wktLiteral) AS ?c) { }");
+        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0), POINT(1 1))", actual);
+    }
+
+    @Test
     public void testCollectExprEmpty() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(geof:centroid(?geom)) AS ?c) { VALUES (?s ?geom) { (<urn:s> 'POINT(0 0)'^^geo:wktLiteral) }  } group by ?s");
         Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
@@ -187,6 +211,8 @@ public class TestGeoSparqlEx {
                 "}"));
         Assert.assertEquals("1", actual);
     }
+
+
 
 //	@Test
 //	public void testNearestPoints() {
