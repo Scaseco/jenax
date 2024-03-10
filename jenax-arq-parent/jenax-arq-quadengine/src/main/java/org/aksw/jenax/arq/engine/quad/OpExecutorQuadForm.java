@@ -10,6 +10,7 @@ import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 // TODO We need to revise OpExecutor such that quad patterns are forwarded to the dataset graph
 // The default implementation is graph (not named graph) centric and ALWAYS iterates all named graphs
 // when GRAPH ?foo is used.
+@Deprecated(forRemoval = true) // Use jena's native OpExecutorQuads
 public class OpExecutorQuadForm
     extends OpExecutor
 {
