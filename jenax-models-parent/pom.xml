@@ -18,6 +18,7 @@
 		<module>jenax-models-shacl</module>
 		<module>jenax-models-foaf</module>
 		<module>jenax-models-prov</module>
+		<module>jenax-models-geosparql</module>
 		<module>jenax-models-dcat-api</module>
 		<module>jenax-models-entityinfo</module>
 		<module>jenax-models-csvw</module>

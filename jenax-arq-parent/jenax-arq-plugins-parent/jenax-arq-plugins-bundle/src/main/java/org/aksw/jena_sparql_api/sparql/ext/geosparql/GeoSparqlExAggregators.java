@@ -14,7 +14,6 @@ import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
-import org.apache.commons.lang3.function.TriFunction;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;
@@ -108,14 +107,14 @@ public class GeoSparqlExAggregators {
         return result;
     }
 
-    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static ParallelAggregator<Binding, FunctionEnv, GeometryWrapper, ?> aggUnionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> UnaryUnionOp.union(geoms, geomFactory);
 
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static ParallelAggregator<Binding, FunctionEnv, GeometryWrapper, ?> aggIntersectionGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> {
             Iterator<Geometry> it = geoms.iterator();
@@ -138,11 +137,11 @@ public class GeoSparqlExAggregators {
 //        return aggGeometryWrapperCollection(geomExpr, distinct).finish(GeometryWrapper::asNodeValue);
 //    }
 
-    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
+    public static ParallelAggregator<Binding, FunctionEnv, GeometryWrapper, ?> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct) {
         return aggGeometryWrapperCollection(geomExpr, distinct, false);
     }
 
-    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct, boolean unwrapSingle) {
+    public static ParallelAggregator<Binding, FunctionEnv, GeometryWrapper, ?> aggGeometryWrapperCollection(Expr geomExpr, boolean distinct, boolean unwrapSingle) {
         GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
         Function<Collection<Geometry>, Geometry> finisher = geoms -> unwrapSingle && geoms.size() == 1
                 ? geoms.iterator().next()
@@ -150,7 +149,7 @@ public class GeoSparqlExAggregators {
         return aggGeometryWrapperCollection(geomExpr, distinct, finisher);
     }
 
-    public static Aggregator<Binding, FunctionEnv, GeometryWrapper> aggGeometryWrapperCollection(
+    public static ParallelAggregator<Binding, FunctionEnv, GeometryWrapper, ?> aggGeometryWrapperCollection(
             Expr geomExpr,
             boolean distinct,
             Function<Collection<Geometry>, Geometry> finisher) {

@@ -317,6 +317,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-geosparql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-table</artifactId>
 				<version>${project.version}</version>
 			</dependency>
