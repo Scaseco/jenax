@@ -9,7 +9,9 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.assembler.DatasetAssembler;
 import org.apache.jena.sparql.engine.QueryEngineRegistry;
+import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.engine.main.QueryEngineMainQuad;
+import org.apache.jena.sparql.engine.main.solver.OpExecutorQuads;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ public class DatasetAssemblerQuads
 
             Dataset dataset = (Dataset)obj;
             Context cxt = dataset.getContext();
+
+            QC.setFactory(cxt, OpExecutorQuads::new);
 
             QueryEngineRegistry reg = new QueryEngineRegistry();
             reg.add(QueryEngineMainQuad.getFactory());
