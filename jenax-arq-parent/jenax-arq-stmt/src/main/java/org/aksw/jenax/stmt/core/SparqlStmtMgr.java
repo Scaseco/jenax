@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
@@ -241,6 +242,12 @@ public class SparqlStmtMgr {
         readConnection(conn, filenameOrURI,
                 q -> result.add(ModelUtils.tripleToStatement(result, q.asTriple())));
         return result;
+    }
+
+    public static Model execConstruct(Supplier<RDFConnection> dataSource, String filenameOrURI) {
+        try (RDFConnection conn = dataSource.get()) {
+            return execConstruct(conn, filenameOrURI);
+        }
     }
 
 

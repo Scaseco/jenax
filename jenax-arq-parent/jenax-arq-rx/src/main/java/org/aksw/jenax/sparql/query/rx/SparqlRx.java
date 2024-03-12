@@ -27,7 +27,6 @@ import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
-import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.graph.Graph;
@@ -656,11 +655,11 @@ public class SparqlRx {
         return r;
     }
 
-    public static Flowable<RDFNode> execConstructGrouped(SparqlQueryConnection conn, Entry<? extends Node, Query> e) {
+    public static Flowable<RDFNode> execConstructGrouped(QueryExecutionFactoryQuery conn, Entry<? extends Node, Query> e) {
         return execConstructGrouped(conn, e, true);
     }
 
-    public static Flowable<RDFNode> execConstructGrouped(SparqlQueryConnection conn, Entry<? extends Node, Query> e, boolean sortRowsByPartitionVar) {
+    public static Flowable<RDFNode> execConstructGrouped(QueryExecutionFactoryQuery conn, Entry<? extends Node, Query> e, boolean sortRowsByPartitionVar) {
         Node s = e.getKey();
         Query q = e.getValue();
 
@@ -669,13 +668,13 @@ public class SparqlRx {
 
     /* Use grouped execution which aggregates over multiple rows */
     @Deprecated
-    public static Flowable<RDFNode> execPartitioned(SparqlQueryConnection conn, Entry<? extends Node, Query> e) {
+    public static Flowable<RDFNode> execPartitioned(QueryExecutionFactoryQuery conn, Entry<? extends Node, Query> e) {
         return execPartitioned(conn, e, true);
     }
 
     /* Use grouped execution which aggregates over multiple rows */
     @Deprecated
-    public static Flowable<RDFNode> execPartitioned(SparqlQueryConnection conn, Entry<? extends Node, Query> e, boolean sortRowsByPartitionVar) {
+    public static Flowable<RDFNode> execPartitioned(QueryExecutionFactoryQuery conn, Entry<? extends Node, Query> e, boolean sortRowsByPartitionVar) {
         Node s = e.getKey();
         Query q = e.getValue();
 
@@ -683,23 +682,22 @@ public class SparqlRx {
     }
 
 
-    public static Flowable<RDFNode> execConstructGrouped(SparqlQueryConnection conn, Query query, Node s) {
+    public static Flowable<RDFNode> execConstructGrouped(QueryExecutionFactoryQuery conn, Query query, Node s) {
         return execConstructGrouped(conn, query, s, true);
     }
 
 
-    public static Flowable<RDFNode> execConstructGrouped(SparqlQueryConnection conn, Query query, Node s, boolean sortRowsByPartitionVar) {
-        return execConstructGrouped(conn, query, Collections.singletonList((Var)s), s, sortRowsByPartitionVar)
+    public static Flowable<RDFNode> execConstructGrouped(QueryExecutionFactoryQuery conn, Query query, Node s, boolean sortRowsByPartitionVar) {
+        return execConstructGrouped(conn::createQueryExecution, query, Collections.singletonList((Var)s), s, sortRowsByPartitionVar)
                 .map(Entry::getValue);
     }
 
-
-    public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(SparqlQueryConnection conn, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
-        return execConstructGrouped(q -> conn.query(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
-    }
+//    public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(QueryExecutionFactoryQuery conn, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
+//        return execConstructGrouped(q -> conn.query(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
+//    }
 
     public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(RdfDataSource dataSource, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
-        return execConstructGrouped(q -> QueryExecutionFactories.of(dataSource).createQueryExecution(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
+        return execConstructGrouped(q -> dataSource.asQef().createQueryExecution(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
     }
 
 
@@ -813,14 +811,14 @@ public class SparqlRx {
 
     /* Use grouped execution which aggregates over multiple rows */
     @Deprecated
-    public static Flowable<RDFNode> execPartitioned(SparqlQueryConnection conn, Node s, Query q, boolean sortRowsByPartitionVar) {
+    public static Flowable<RDFNode> execPartitioned(QueryExecutionFactoryQuery conn, Node s, Query q, boolean sortRowsByPartitionVar) {
 
         Template template = q.getConstructTemplate();
         Query clone = preprocessQueryForPartition(q, Collections.singletonList((Var)s), sortRowsByPartitionVar);
 
         Flowable<RDFNode> result = SparqlRx
                 // For future reference: If we get an empty results by using the query object, we probably have wrapped a variable with NodeValue.makeNode.
-                .execSelectRaw(() -> conn.query(clone))
+                .execSelectRaw(() -> conn.createQueryExecution(clone))
                 .map(b -> {
                     Graph graph = GraphFactory.createDefaultGraph();
 
