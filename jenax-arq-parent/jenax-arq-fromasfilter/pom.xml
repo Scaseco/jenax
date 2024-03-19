@@ -23,6 +23,7 @@
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-plugins-datatypes</artifactId>
@@ -31,7 +32,7 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-tdb2</artifactId>
-<!-- 			<version>${project.version}</version> -->
+			<!-- 			<version>${project.version}</version> -->
 			<scope>test</scope>
 		</dependency>
 
@@ -49,4 +50,52 @@
 		</dependency>
 
 	</dependencies>
+
+	<!-- Profile to build a "plugin jar bundle" that can be loaded with fuseki
+	or any other jena-based app -->
+	<profiles>
+		<profile>
+			<id>bundle</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-arq</artifactId>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<filters>
+										<filter>
+											<artifact>*:*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+											</excludes>
+										</filter>
+									</filters>
+									<transformers>
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+									</transformers>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
