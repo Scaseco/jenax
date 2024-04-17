@@ -5,9 +5,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
-import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderDelegateBaseParse;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
@@ -16,26 +17,30 @@ import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTmp;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdflink.RDFLink;
-import org.apache.jena.sparql.core.Transactional;
+import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
 
 public class RdfDataSources {
 
-    /** Execute a query and invoke a function on the response.
+    /**
+     * Execute a query and invoke a function on the response.
      * Upon returning the internally freshly obtained connection and query execution are closed so
      * the result must be detached from those resources.
      */
@@ -70,8 +75,31 @@ public class RdfDataSources {
         return result;
     }
 
-    public static RdfDataSource applyLinkTransform(RdfDataSource rdfDataSource, Function<? super RDFLink, ? extends RDFLink> linkXform) {
-        return new RdfDataSourceWrapperBase(rdfDataSource) {
+    /**
+     * Wrap a datasource such that a (stateless) algebra transform is applied to each statement.
+     */
+    public static RdfDataSource wrapWithOpTransform(RdfDataSource dataSource, Transform statelessTransform) {
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(statelessTransform);
+        return wrapWithStmtTransform(dataSource, stmtTransform);
+    }
+
+    /**
+     * Wrap a datasource such that an algebra transform is applied to each statement.
+     */
+    // XXX Improve method to flatten multiple stacking transforms on a dataSource into a
+    //   list which makes debugging easier
+    public static RdfDataSource wrapWithOpTransform(RdfDataSource dataSource, Supplier<Transform> transformSupplier) {
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(transformSupplier);
+        return wrapWithStmtTransform(dataSource, stmtTransform);
+    }
+
+    public static RdfDataSource wrapWithStmtTransform(RdfDataSource dataSource, SparqlStmtTransform stmtTransform) {
+        return wrapWithLinkTransform(dataSource,
+            link -> RDFLinkUtils.wrapWithStmtTransform(link, stmtTransform));
+    }
+
+    public static RdfDataSource wrapWithLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
+        return new RdfDataSourceWrapperBase<>(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection base = super.getConnection();
@@ -86,13 +114,14 @@ public class RdfDataSources {
      */
     public static RdfDataSource decorateUpdate(RdfDataSource dataSource, UpdateExecTransform updateExecTransform) {
         LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
-        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        RdfDataSource result = wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
         return result;
     }
 
     /**
      * Wrap a LinkSparqlQuery such that a possible write action is run when txn.begin() is invoked.
      * The action is run before the transaction is started.
+     * Can be used to update e.g. the spatial index before a read transaction.
      */
     public static RdfDataSource decorateQueryBeforeTxnBegin(RdfDataSource dataSource, Runnable action) {
         LinkSparqlQueryTransform componentTransform = link -> new LinkSparqlQueryWrapperBase(link) {
@@ -106,7 +135,7 @@ public class RdfDataSources {
                 begin(TxnType.convert(readWrite));
             }
         };
-        RdfDataSource result = applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
+        RdfDataSource result = wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, componentTransform));
         return result;
     }
 
@@ -117,10 +146,10 @@ public class RdfDataSources {
      */
     public static LinkSparqlQueryTransform execQueryViaSelect(Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform result = baseLink -> {
-            return new LinkSparqlQueryTmp() {
+            return new LinkSparqlQueryWrapperBase(baseLink) {
                 @Override
                 public QueryExecBuilder newQuery() {
-                    return new QueryExecBuilderDelegateBaseParse(baseLink.newQuery()) {
+                    return new QueryExecBuilderWrapperBaseParse(baseLink.newQuery()) {
                         protected Query seenQuery = null;
                         @Override
                         public QueryExecBuilder query(Query query) {
@@ -135,24 +164,23 @@ public class RdfDataSources {
                             if (doConvert) {
                                 r = QueryExecSelect.of(seenQuery, q -> delegate.query(q).build());
                             } else {
-                                r = delegate.query(seenQuery).build();
+                                r = getDelegate().query(seenQuery).build();
                             }
                             return r;
                         }
                     };
                 }
-
-                @Override
-                public void close() {
-                    baseLink.close();
-                }
-
-                @Override
-                public Transactional getDelegate() {
-                    return baseLink;
-                }
             };
         };
+        return result;
+    }
+
+    /** Utility method that bridges an RdfDataSource to a function that operates on a RDFConnection. */
+    public static <T> T compute(RdfDataSource dataSource, Function<RDFConnection, T> computation) {
+        T result;
+        try (RDFConnection conn = dataSource.getConnection()) {
+            result = computation.apply(conn);
+        }
         return result;
     }
 
@@ -167,7 +195,24 @@ public class RdfDataSources {
      */
     public static RdfDataSource execQueryViaSelect(RdfDataSource dataSource, Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform decorizer = execQueryViaSelect(convertToSelect);
-        RdfDataSource result = RdfDataSources.applyLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
+        RdfDataSource result = RdfDataSources.wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.apply(link, decorizer));
+        return result;
+    }
+
+    public static String fetchDatasetHash(RdfDataSource dataSource) {
+        String result = QueryExecutionFactories.fetchDatasetHash(dataSource.asQef());
+        return result;
+    }
+
+    /**
+     * If the dataset supports transactions then return a wrapped datasource that starts
+     * transactions when none is active.
+     * This method checks transaction support only immediately.
+     */
+    public static RdfDataSource wrapWithAutoTxn(RdfDataSource dataSource, Dataset dataset) {
+        RdfDataSource result = dataset.supportsTransactions()
+            ? RdfDataSources.wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.wrapWithAutoTxn(link, dataset))
+            : dataSource;
         return result;
     }
 }

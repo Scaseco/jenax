@@ -2356,7 +2356,7 @@ public class MapperProxyUtils {
                 String str = (String)o;
                 result = hashFn.hashString(str, StandardCharsets.UTF_8);
             } else {
-                result = hashFn.hashString(NodeFmtLib.str(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
+                result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
             }
         } else {
             ClassDescriptor cd = getClassDescriptorCached(root.getClass());

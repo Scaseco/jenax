@@ -13,6 +13,7 @@ import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
 import org.aksw.jenax.sparql.algebra.transform2.Evaluation;
 import org.aksw.jenax.sparql.algebra.transform2.EvaluationCopy;
 import org.aksw.jenax.sparql.algebra.transform2.Evaluator;
@@ -21,7 +22,11 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecException;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpLateral;
@@ -38,8 +43,49 @@ import org.slf4j.LoggerFactory;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalLateral
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
+    /** AutoDetector */
+    public static class AutoDetector
+        implements RdfDataSourceDecorator
+    {
+        protected Query probeQuery;
+
+        public AutoDetector() {
+            probeQuery = QueryFactory.create("SELECT * { ?s <urn:foo> <urn:bar> LATERAL { ?s <urn:foo> <urn:bar> } }");
+        }
+
+        public AutoDetector(Query probeQuery) {
+            super();
+            this.probeQuery = probeQuery;
+        }
+
+        // @Override
+        public RdfDataSource decorate(RdfDataSource decoratee, Map<String, Object> options) {
+            RdfDataSource result;
+            try (QueryExecution qe =  decoratee.asQef().createQueryExecution(probeQuery)) {
+                ResultSet rs = qe.execSelect();
+                ResultSetFormatter.consume(rs);
+                result = decoratee;
+            } catch (QueryExecException e) {
+                logger.info("Probing for LATERAL failed. Adding polyfill.");
+                // TODO Improve distinguishing server error from unsupported LATERAL
+                result = new RdfDataSourceWithLocalLateral(decoratee);
+            }
+            return result;
+        }
+    }
+
+    /** Factory class */
+    public static class Factory
+        implements RdfDataSourceDecorator
+    {
+        @Override
+        public RdfDataSource decorate(RdfDataSource decoratee, Map<String, Object> options) {
+            return new RdfDataSourceWithLocalLateral(decoratee);
+        }
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalLateral.class);
 
     public static final String REMOTE_IRI = "env://REMOTE";
@@ -60,7 +106,7 @@ public class RdfDataSourceWithLocalLateral
         Query query = QueryFactory.create(queryStr);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
-        RdfDataSourceWithLocalLateral dataSource = new RdfDataSourceWithLocalLateral(RdfDataEngines.of(DatasetFactory.create()));
+        RdfDataSourceWithLocalLateral dataSource = RdfDataSourceWithLocalLateral.wrap(RdfDataEngines.of(DatasetFactory.create()));
         Query rewritten = OpRewriteInjectRemoteOps.rewriteQuery(query);
         System.out.println(rewritten);
     }
@@ -68,6 +114,10 @@ public class RdfDataSourceWithLocalLateral
     public RdfDataSourceWithLocalLateral(RdfDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
+    }
+
+    public static RdfDataSourceWithLocalLateral wrap(RdfDataSource delegate) {
+        return new RdfDataSourceWithLocalLateral(delegate);
     }
 
     public static Dataset createProxyDataset(RdfDataSource delegate) {
@@ -78,7 +128,7 @@ public class RdfDataSourceWithLocalLateral
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(opExec, base);
+                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base, true);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }

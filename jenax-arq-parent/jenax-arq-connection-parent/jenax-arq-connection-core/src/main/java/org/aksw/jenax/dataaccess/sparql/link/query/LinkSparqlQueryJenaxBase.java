@@ -15,7 +15,7 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
  * The link does not support {@link #newQuery()}.
  */
 public class LinkSparqlQueryJenaxBase<T extends QueryExecFactoryQuery>
-    implements TransactionalWrapper, LinkSparqlQueryTmp
+    implements TransactionalWrapper, LinkSparqlQueryBase
 {
     protected T queryExecFactory;
     protected Transactional transactional;

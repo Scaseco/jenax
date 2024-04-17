@@ -7,13 +7,13 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinder;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinderSystemBasic;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.path.PathParser;
@@ -79,13 +79,13 @@ public class TestConceptPathFinder {
         Fragment1 target,
         int n) {
         // Load some test data and create a sparql connection to it
-        RDFConnection dataConnection = RDFConnectionFactory.connect(ds);
+        RdfDataSource dataSource = () -> RDFConnection.connect(ds);
 
         //dataConnection.update("DELETE WHERE { ?s a ?t }");
 
         // Use the system to compute a data summary
         // Note, that the summary could be loaded from any place, such as a file used for caching
-        Model dataSummary = system.computeDataSummary(dataConnection).blockingGet();
+        Model dataSummary = system.computeDataSummary(dataSource).blockingGet();
 
         // RDFDataMgr.write(System.out, dataSummary, RDFFormat.TURTLE_PRETTY);
 
@@ -93,7 +93,7 @@ public class TestConceptPathFinder {
         // set its attributes and eventually build the path finder.
         ConceptPathFinder pathFinder = system.newPathFinderBuilder()
             .setDataSummary(dataSummary)
-            .setDataConnection(dataConnection)
+            .setDataSource(dataSource)
             .setShortestPathsOnly(false)
             .build();
 

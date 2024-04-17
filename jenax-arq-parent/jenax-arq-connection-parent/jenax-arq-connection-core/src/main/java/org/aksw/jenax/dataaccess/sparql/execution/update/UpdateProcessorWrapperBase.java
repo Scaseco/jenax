@@ -26,8 +26,8 @@ public class UpdateProcessorWrapperBase<T extends UpdateProcessor>
     }
 
     protected void onException(Exception e) {
+        // throw new RuntimeException(e);
     }
-
 
     @Override
     public void execute() {
@@ -38,11 +38,8 @@ public class UpdateProcessorWrapperBase<T extends UpdateProcessor>
             onException(e);
             throw e;
         } finally {
+            // FIXME If there was an exception and afterExec throws one as well then the first one gets swallowed!
             afterExec();
         }
     }
-
-
-
-
 }

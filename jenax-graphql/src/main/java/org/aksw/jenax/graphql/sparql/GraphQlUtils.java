@@ -91,6 +91,12 @@ public class GraphQlUtils {
         return result;
     }
 
+    public static Boolean toBoolean(Node<?> node) {
+        NodeValue nv = toNodeValue(node);
+        Boolean result = nv == null ? null : nv.getBoolean();
+        return result;
+    }
+
     public static Number toNumber(Node<?> node) {
         NodeValue nv = toNodeValue(node);
         Number result = nv == null ? null : NodeValueUtils.getNumber(nv);
@@ -152,6 +158,11 @@ public class GraphQlUtils {
 
     public static String getArgValueAsString(Directive directive, String argName) {
         String result = GraphQlUtils.toString(GraphQlUtils.getValue(directive.getArgument(argName)));
+        return result;
+    }
+
+    public static Boolean getArgValueAsBoolean(Directive directive, String argName) {
+        Boolean result = GraphQlUtils.toBoolean(GraphQlUtils.getValue(directive.getArgument(argName)));
         return result;
     }
 

@@ -9,7 +9,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>4.10.0-1-SNAPSHOT</version>
+	<version>5.0.0-1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Jena eXtension Components</name>
 	<description>Modular extensions for Apache Jena</description>
@@ -43,42 +43,62 @@
 		<module>..</module>
 	</modules>
 	<properties>
-		<jena.version>4.10.0</jena.version>
+		<slf4j.version>2.0.9</slf4j.version>
+		<log4j.version>2.21.0</log4j.version>
+
+		<ee.version>9</ee.version> <!-- ee9->servlet-api: 9->5.0.0 10->6.0.2 -->
+		<jetty.version>12.0.8</jetty.version>
+		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
+		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
+
+		<spring.version>6.1.1</spring.version>
+		<spring.batch.version>4.3.1</spring.batch.version>
+
+		<jakarta.xml.version>4.0.0</jakarta.xml.version>
+		<jaxb.version>2.3.1</jaxb.version>
+		<javax.xml.version>2.3.1</javax.xml.version> <!-- legacy; superseded by
+		jakarta.xml; used only by a plugin in jenax-facete-impl -->
+
+		<!-- <jena.version>4.10.0</jena.version> -->
+		<jena.version>5.0.0</jena.version>
+
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
 		<!-- <jetty.version>11.0.0</jetty.version> this is java 11+ only -->
 		<!-- <jetty.version>9.4.35.v20201120</jetty.version> -->
-		<jetty.version>9.4.40.v20210413</jetty.version>
 		<kryo.version>4.0.2</kryo.version>
 		<jgrapht.version>1.5.1</jgrapht.version>
 		<!-- 2.18 could be tried out next -->
 		<!-- <jersey.version>2.26-b03</jersey.version> -->
 		<!-- <jersey.version>2.30</jersey.version> -->
-		<jersey.version>2.35</jersey.version>
+		<!-- <jersey.version>2.35</jersey.version> -->
+		<jersey.version>3.1.3</jersey.version>
 		<asm.version>8.0.1</asm.version>
 		<guava.version>31.0.1-jre</guava.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-vfs2.version>2.9.0</commons-vfs2.version>
 		<ver.commons-math>3.6.1</ver.commons-math>
-		<slf4j.version>1.7.36</slf4j.version>
-		<log4j.version>2.19.0</log4j.version>
 		<hadoop.version>3.3.4</hadoop.version>
+		<commons-text.version>1.10.0</commons-text.version>
 		<junit.version>4.13.2</junit.version>
-		<tika.version>2.1.0</tika.version>
-		<spring.version>5.3.2</spring.version>
-		<spring.batch.version>4.3.1</spring.batch.version>
-		<aksw-commons.version>0.9.8-SNAPSHOT</aksw-commons.version>
-		<javax.xml.version>2.3.1</javax.xml.version>
-		<jaxb.version>2.3.1</jaxb.version>
+		<tika.version>2.9.1</tika.version>
+		<aksw-commons.version>0.9.8</aksw-commons.version>
 		<jts.version>1.19.0</jts.version>
 		<gson.version>2.9.0</gson.version>
 		<annotation-api.version>1.3.2</annotation-api.version>
 		<topbraid.shacl.version>1.4.2</topbraid.shacl.version>
+		<!-- <jgit.version>6.7.0.202309050840-r</jgit.version> -->
+		<jgit.version>5.6.0.201912101111-r</jgit.version>
+		<jsch.version>0.0.9</jsch.version>
+		
+		<sis.version>1.4</sis.version>
 
 		<velocity-engine.version>2.3</velocity-engine.version>
 		<pebble.version>3.2.1</pebble.version>
 		<graphql.version>21.1</graphql.version>
 
+		<!-- h3 spatial grid -->
+		<h3.version>4.1.1</h3.version>
 		<!-- <atmosphere.version>2.0.0.RC3</atmosphere.version> -->
 		<!-- <atmosphere-spring.version>1.1.0.RC5</atmosphere-spring.version> -->
 		<!-- <jetty-plugin.version>8.1.10.v20130312</jetty-plugin.version> -->
@@ -86,8 +106,8 @@
 		<!-- <jetty.jsp.version>9.2.22.v20170606</jetty.jsp.version> -->
 		<javaee-api.version>6.0</javaee-api.version>
 		<!-- Project Settings -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
+		<!-- <maven.compiler.target>17</maven.compiler.target> -->
 		<!--
 		<java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
 		<file.encoding>UTF-8</file.encoding>
@@ -97,6 +117,23 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${jetty.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+				<artifactId>jetty-ee${ee.version}-bom</artifactId>
+				<version>${jetty.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
 			<!-- Shacl to HTML template rending -->
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -267,6 +304,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-rdfs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-polyfill</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-shacl</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -283,6 +330,11 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-models-prov</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-models-geosparql</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -579,6 +631,34 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jgit</groupId>
+				<artifactId>org.eclipse.jgit</artifactId>
+				<version>${jgit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jgit</groupId>
+				<artifactId>org.eclipse.jgit.http.server</artifactId>
+				<version>${jgit.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch.agentproxy.jsch</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch.agentproxy.usocket-jna</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch.agentproxy.sshagent</artifactId>
+				<version>${jsch.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.google.maps</groupId>
 				<artifactId>google-maps-services</artifactId>
@@ -591,9 +671,9 @@
 			</dependency>
 			<!-- java 9+ for server-standalone -->
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${javax.xml.version}</version>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jakarta.xml.version}</version>
 			</dependency>
 			<!-- <dependency> <groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId> 
@@ -620,31 +700,6 @@
 			<!-- Never depend on the logging implementations unless in test
 			cases 
 				or test modules -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jul-to-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-ext</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
 			<!-- Modules -->
 			<!-- Make the test configuration available across all modules -
 			especially 
@@ -659,13 +714,6 @@
 				<groupId>com.nurkiewicz.asyncretry</groupId>
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>apache-jena-libs</artifactId>
-				<version>${jena.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
@@ -744,6 +792,12 @@
 				<artifactId>ini4j</artifactId>
 				<version>0.5.4</version>
 			</dependency>
+			<dependency>
+				<groupId>com.uber</groupId>
+				<artifactId>h3</artifactId>
+				<version>${h3.version}</version>
+			</dependency>
+
 			<!-- <dependency> <groupId>org.apache.jena</groupId>
 			<artifactId>jena-sdb</artifactId>
 				<version>${jena.version}</version> <type>jar</type> <exclusions> <exclusion> 
@@ -804,7 +858,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.ext</groupId>
-				<artifactId>jersey-spring5</artifactId>
+				<artifactId>jersey-spring6</artifactId>
 				<version>${jersey.version}</version>
 				<exclusions>
 					<exclusion>
@@ -861,84 +915,7 @@
 				<artifactId>byte-buddy</artifactId>
 				<version>1.12.3</version>
 			</dependency>
-			<!-- Jetty -->
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-bom</artifactId>
-				<version>${jetty.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-server</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-webapp</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlet</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-http</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-security</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-io</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-util-ajax</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-util</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlets</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-xml</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-plus</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-jndi</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-annotations</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>apache-jsp</artifactId>
-				<version>${jetty.version}</version>
-			</dependency>
+
 			<!-- <dependency> <groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jsp</artifactId> 
 				<version>${jetty.version}</version> <type>jar</type> <scope>compile</scope> 
@@ -982,6 +959,31 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>${jena.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-bom</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>${log4j.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
 			<!-- <dependency> <groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-objectstore</artifactId> 
 				<version>${aksw-commons.version}</version> </dependency> <dependency>
@@ -1061,7 +1063,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.196</version>
+				<version>1.4.200</version>
 				<!--<scope>runtime</scope> -->
 			</dependency>
 			<!-- JDBC Connection Pooling -->
@@ -1220,9 +1222,9 @@
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-reload4j</artifactId>
 					</exclusion>
-					<!-- <exclusion> <groupId>log4j</groupId>
+					<exclusion> <groupId>log4j</groupId>
 					<artifactId>log4j</artifactId> 
-						</exclusion> -->
+						</exclusion>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-log4j12</artifactId>
@@ -1238,11 +1240,19 @@
 						</exclusion> -->
 				</exclusions>
 			</dependency>
+
+			<!-- Override hadoop's commons-text version because it conflicts with Fuseki's shiro mod -->
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${commons-text.version}</version>
+			</dependency>
+			
 			<!-- Servlet APIs -->
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>4.0.1</version>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>${jakarta.servlet-api.version}</version>
 			</dependency>
 			<!-- <dependency> -->
 			<!-- <groupId>javax.ws.rs</groupId> -->
@@ -1250,9 +1260,9 @@
 			<!-- <version>1.1.1</version> -->
 			<!-- </dependency> -->
 			<dependency>
-				<groupId>javax.ws.rs</groupId>
-				<artifactId>javax.ws.rs-api</artifactId>
-				<version>2.1.1</version>
+				<groupId>jakarta.ws.rs</groupId>
+				<artifactId>jakarta.ws.rs-api</artifactId>
+				<version>${jakarta.ws.rs-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -1310,6 +1320,18 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-parsers-standard-package</artifactId>
+				<version>${tika.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!--
+			<dependency>
+				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-java7</artifactId>
 				<version>${tika.version}</version>
 				<exclusions>
@@ -1323,6 +1345,8 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			-->
+
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-io</artifactId> -->
@@ -1462,6 +1486,19 @@
 				<artifactId>plexus-utils</artifactId>
 				<version>3.1.0</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.sis.non-free</groupId>
+				<artifactId>sis-embedded-data</artifactId>
+				<version>${sis.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.sis.core</groupId>
+				<artifactId>sis-referencing</artifactId>
+				<version>${sis.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
@@ -1550,11 +1587,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.11.0</version>
 				<configuration>
 					<!-- <source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target> -->
-					<release>11</release>
+					<release>${maven.compiler.release}</release>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
@@ -1667,6 +1704,11 @@
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.2.4</version>
+				</plugin>
+				<plugin>
 					<groupId>org.bsc.maven</groupId>
 					<artifactId>maven-processor-plugin</artifactId>
 					<version>2.0.5</version>
@@ -1694,7 +1736,7 @@
 						<dependency>
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
-							<version>${javax.xml.version}</version>
+							<version>2.3.1</version>
 						</dependency>
 						<dependency>
 							<groupId>javax.annotation</groupId>

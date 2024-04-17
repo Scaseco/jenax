@@ -1,21 +1,19 @@
 package org.aksw.jenax.arq.util.exec.query;
 
 import org.apache.jena.query.ARQ;
-import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.NodeFactoryExtra;
 
 public class ExecutionContextUtils {
 
     /** Creates an execution context primarily for use as a FunctionEnv */
     public static ExecutionContext createFunctionEnv() {
         Context context = ARQ.getContext().copy();
-        context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime());
+        Context.setCurrentDateTime(context);
         ExecutionContext result = new ExecutionContext(context, null, null, null);
         return result;
     }
@@ -24,7 +22,7 @@ public class ExecutionContextUtils {
     public static ExecutionContext createExecCxt(DatasetGraph dsg) {
         Context context = ARQ.getContext().copy() ;
         OpExecutorFactory opExecutorFactory = QC.getFactory(context);
-        context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime()) ;
+        Context.setCurrentDateTime(context);
         ExecutionContext result = new ExecutionContext(context, dsg.getDefaultGraph(), dsg, opExecutorFactory) ;
         return result;
     }
@@ -32,7 +30,7 @@ public class ExecutionContextUtils {
     public static ExecutionContext createExecCxtEmptyDsg(Context context) {
         DatasetGraph dsg = DatasetGraphFactory.create();
         OpExecutorFactory opExecutorFactory = QC.getFactory(context);
-        context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime()) ;
+        Context.setCurrentDateTime(context);
         ExecutionContext result = new ExecutionContext(context, dsg.getDefaultGraph(), dsg, opExecutorFactory) ;
         return result;
     }
@@ -41,5 +39,4 @@ public class ExecutionContextUtils {
     public static ExecutionContext createExecCxtEmptyDsg() {
         return createExecCxt(DatasetGraphFactory.create());
     }
-
 }

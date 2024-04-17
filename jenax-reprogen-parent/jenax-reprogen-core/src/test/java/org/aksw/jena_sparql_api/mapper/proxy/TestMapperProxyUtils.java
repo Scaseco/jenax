@@ -315,7 +315,7 @@ public class TestMapperProxyUtils {
         sb.setDateTime(null);
         Assert.assertNull(tmp = sb.getDateTime());
 
-        sb.getModel().getGraph().add(new Triple(
+        sb.getModel().getGraph().add(Triple.create(
                 sb.asNode(),
                 NodeFactory.createURI("http://www.example.org/dateTime"),
                 RiotLib.parse("\"2020-10-07T13:03:58.471+00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>")));

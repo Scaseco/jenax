@@ -46,12 +46,16 @@ public class GraphQlResultWriterImpl
             String name = dataProvider.getName();
             writer.name(name);
 
-            // TODO Handle the case of non-array responses
-            writer.beginArray();
+            boolean isSingle = dataProvider.isSingle();
+            if (!isSingle) {
+                writer.beginArray();
+            }
 
             dataProvider.write(writer, gson);
 
-            writer.endArray();
+            if (!isSingle) {
+                writer.endArray();
+            }
         }
 
         writer.endObject(); // end data

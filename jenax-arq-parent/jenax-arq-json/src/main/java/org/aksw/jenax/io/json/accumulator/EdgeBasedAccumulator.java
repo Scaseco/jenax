@@ -97,7 +97,7 @@ public class EdgeBasedAccumulator {
         RdfArray materialized = new RdfArray();
         try {
             writer.beginArray();
-            AccJsonDriver driver = AccJsonDriver.of(movieObject.newAccumulator());
+            AccJsonDriver driver = AccJsonDriver.of(movieObject.newAccumulator(), false);
             driver.asStream(accContext, data.stream()).map(Entry::getValue).forEach(materialized::add);
             writer.endArray();
         } finally {

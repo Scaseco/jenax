@@ -18,13 +18,16 @@ import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.math.DoubleMath;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.math.DoubleMath;
 import com.google.common.net.MediaType;
 
 
@@ -170,6 +173,14 @@ public class ContentTypeUtils {
         codingExtensions.putPrimary("bzip2", "bz2");
     }
 
+    public static MapPair<String, String> getCtExtensions() {
+        return ctExtensions;
+    }
+
+    public static MapPair<String, String> getCodingExtensions() {
+        return codingExtensions;
+    }
+
 
     // TODO Move
 
@@ -182,9 +193,20 @@ public class ContentTypeUtils {
 
     public static String toFileExtensionCt(Header[] headers) {
         String ct = HttpHeaderUtils.getValue(headers, HttpHeaders.CONTENT_TYPE);
-        String result = ctExtensions.getPrimary().get(ct);
+        // String result = ctExtensions.getPrimary().get(ct);
+
+        MimeTypes allTypes = MimeTypes.getDefaultMimeTypes();
+        MimeType mimeType;
+        try {
+            mimeType = allTypes.forName(ct);
+        } catch (MimeTypeException e) {
+            throw new RuntimeException(e);
+        }
+        String result = mimeType.getExtension();
+
         Objects.requireNonNull(result, "Could not find file extension for content type: " + ct + " ; got: " + ctExtensions.getPrimary());
-        result = "." + result;
+        // tika already includes a dot
+        // result = "." + result;
         return result;
     }
 
@@ -195,10 +217,10 @@ public class ContentTypeUtils {
             String part = Objects.requireNonNull(codingExtensions.getPrimary().get(coding));
             parts.add(part);
         }
-        
+
         return parts;
     }
-    
+
     public static String toFileExtension(List<String> codings) {
         List<String> parts = toFileExtensionParts(codings);
 

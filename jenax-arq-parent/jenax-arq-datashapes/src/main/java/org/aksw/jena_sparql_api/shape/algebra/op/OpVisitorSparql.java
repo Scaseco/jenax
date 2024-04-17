@@ -80,7 +80,7 @@ public class OpVisitorSparql
     @Override
     public Fragment1 visit(OpType op) {
         Node node = op.getType();
-        Element e = ElementUtils.createElement(new Triple(Vars.s, RDF.type.asNode(), node));
+        Element e = ElementUtils.createElement(Triple.create(Vars.s, RDF.type.asNode(), node));
         Fragment1 result = new Concept(e, Vars.s);
         return result;
     }

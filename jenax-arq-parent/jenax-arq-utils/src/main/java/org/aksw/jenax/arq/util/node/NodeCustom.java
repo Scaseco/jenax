@@ -1,7 +1,6 @@
 package org.aksw.jenax.arq.util.node;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -11,7 +10,8 @@ import org.aksw.commons.util.obj.ObjectUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeVisitor;
-import org.apache.jena.graph.Node_Fluid;
+import org.apache.jena.graph.Node_Ext;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprTransformer;
@@ -27,13 +27,14 @@ import org.apache.jena.sparql.graph.NodeTransformExpr;
  * @param <T>
  */
 public class NodeCustom<T>
-    extends Node_Fluid
+    extends Node_Ext<T>
 {
-    protected T value;
+    // protected T value;
 
     protected NodeCustom(T value) {
         super(value);
-        this.value = value;
+        // super(value);
+        // this.value = value;
     }
 
     @Override
@@ -41,15 +42,17 @@ public class NodeCustom<T>
         throw new UnsupportedOperationException();
     }
 
+    /** Use {@link #get()} */
+    @Deprecated
     public T getValue() {
-        return value;
+        return get();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        boolean result = this == o || this.getClass().equals(o.getClass()) && Objects.equals(value, ((NodeCustom<?>)o).getValue());
-        return result;
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        boolean result = this == o || this.getClass().equals(o.getClass()) && Objects.equals(value, ((NodeCustom<?>)o).getValue());
+//        return result;
+//    }
 
     public Expr asExpr() {
         // return NodeValue.makeNode(this);
@@ -57,8 +60,13 @@ public class NodeCustom<T>
     }
 
     @Override
+    public String toString(PrefixMapping pmap) {
+        return toString();
+    }
+
+    @Override
     public String toString() {
-        return "NodeCustom [value=" + value + "]";
+        return "NodeCustom [value=" + get() + "]";
     }
 
     @Deprecated // Use of()

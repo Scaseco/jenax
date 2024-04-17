@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.aksw.jena_sparql_api.rx.entity.model.EntityQueryImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplate;
 import org.aksw.jena_sparql_api.rx.entity.model.EntityTemplateImpl;
 import org.aksw.jena_sparql_api.rx.entity.model.GraphPartitionJoin;
-import org.aksw.jena_sparql_api.schema.ShUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.node.PathUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
@@ -31,18 +29,16 @@ import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.model.shacl.domain.ShHasTargets;
 import org.aksw.jenax.model.shacl.domain.ShNodeShape;
-import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.model.shacl.util.ShSparqlTargets;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
-import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -70,7 +66,6 @@ import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.aggregate.AggMin;
-import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -216,7 +211,7 @@ public class EntityClassifier {
         Var classVar = r.getTargetVar();
 
         EntityTemplate et = new EntityTemplateImpl(Collections.singletonList(entityVar),
-                new Template(BasicPattern.wrap(Arrays.asList(new Triple(entityVar, classifier.asNode(), classVar)))),
+                new Template(BasicPattern.wrap(Arrays.asList(Triple.create(entityVar, classifier.asNode(), classVar)))),
                 new LinkedHashMap<>());
 
         EntityGraphFragment egf = new EntityGraphFragment(

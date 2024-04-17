@@ -183,10 +183,10 @@ public class SimplePath
 
             Triple t;
             if(step.isForward()) {
-                t = new Triple(a, step.getNode(), b);
+                t = Triple.create(a, step.getNode(), b);
             }
             else {
-                t = new Triple(b, step.getNode(), a);
+                t = Triple.create(b, step.getNode(), a);
             }
 
             result.add(t);

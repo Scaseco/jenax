@@ -29,12 +29,14 @@ public class QueryExecutionAdapter
 {
 //    protected QueryExecutionTimeoutHelper timeoutHelper = new QueryExecutionTimeoutHelper(this);
 
-    @Override
+    // @Override
+    @Deprecated
     public void setInitialBinding(Binding binding) {
         throw new UnsupportedOperationException("Not Implemented.");
     }
 
-    @Override
+    // @Override
+    @Deprecated
     public void setInitialBinding(QuerySolution binding) {
         throw new UnsupportedOperationException("Not Implemented.");
     }
@@ -101,26 +103,30 @@ public class QueryExecutionAdapter
     public void close() {
     }
 
-    @Override
+    // @Override
+    @Deprecated
     public void setTimeout(long timeout, TimeUnit timeoutUnits) {
         throw new UnsupportedOperationException("Not Implemented.");
 //        timeoutHelper.setTimeout(timeout, timeoutUnits);
     }
 
-    @Override
+    // @Override
+    @Deprecated
     public void setTimeout(long timeout) {
         throw new UnsupportedOperationException("Not Implemented.");
 //        timeoutHelper.setTimeout(timeout);
     }
 
-    @Override
+//    @Override
+    @Deprecated
     public void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
         throw new UnsupportedOperationException("Not Implemented.");
 
 //        timeoutHelper.setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
     }
 
-    @Override
+//    @Override
+    @Deprecated
     public void setTimeout(long timeout1, long timeout2) {
         throw new UnsupportedOperationException("Not Implemented.");
 //        timeoutHelper.setTimeout(timeout1, timeout2);

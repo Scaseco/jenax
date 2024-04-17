@@ -38,6 +38,46 @@ public interface RdfDataRefSparqlEndpoint
     RdfAuth getAuth();
     RdfDataRefSparqlEndpoint setAuth(RdfAuth auth);
 
+    @HashId
+    @Override
+    @Iri("rpif:acceptHeaderGraph")
+    @IriType
+    String getAcceptHeaderGraph();
+    RdfDataRefSparqlEndpoint setAcceptHeaderGraph(String header);
+
+    @HashId
+    @Override
+    @Iri("rpif:acceptHeaderDataset")
+    @IriType
+    String getAcceptHeaderDataset();
+    RdfDataRefSparqlEndpoint setAcceptHeaderDataset(String header);
+
+    @HashId
+    @Override
+    @Iri("rpif:acceptHeaderAskQuery")
+    @IriType
+    String getAcceptHeaderAskQuery();
+    RdfDataRefSparqlEndpoint setAcceptHeaderAskQuery(String header);
+
+    @HashId
+    @Override
+    @Iri("rpif:acceptHeaderSelectQuery")
+    @IriType
+    String getAcceptHeaderSelectQuery();
+    RdfDataRefSparqlEndpoint setAcceptHeaderSelectQuery(String header);
+
+    @Override
+    @Iri("rpif:sendModeQuery")
+    @IriType
+    String getSendModeQuery();
+    RdfDataRefSparqlEndpoint setSendModeQuery(String sendMode);
+
+    @Override
+    @Iri("rpif:sendModeUpdate")
+    @IriType
+    String getSendModeUpdate();
+    RdfDataRefSparqlEndpoint setSendModeUpdate(String sendMode);
+
     @Override
     default <T> T acceptRdf(RdfDataRefVisitor<T> visitor) {
         T result = visitor.visit(this);

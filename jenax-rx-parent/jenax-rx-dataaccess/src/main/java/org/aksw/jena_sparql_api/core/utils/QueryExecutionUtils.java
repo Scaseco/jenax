@@ -21,6 +21,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryType;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFormatter;
@@ -67,22 +68,22 @@ public class QueryExecutionUtils {
     public static void abortAfterFirstRow(QueryExecution qe) {
         Query query = qe.getQuery();
         assert query != null : "QueryExecution did not tell us which query it is bound to - query was null";
-        int queryType = query.getQueryType();
+        QueryType queryType = query.queryType();
 
         try {
             switch (queryType) {
-            case Query.QueryTypeAsk:
+            case ASK:
                 qe.execAsk();
                 break;
-            case Query.QueryTypeConstruct:
+            case CONSTRUCT:
                 Iterator<Triple> itC = qe.execConstructTriples();
                 itC.hasNext();
                 break;
-            case Query.QueryTypeDescribe:
+            case DESCRIBE:
                 Iterator<Triple> itD = qe.execDescribeTriples();
                 itD.hasNext();
                 break;
-            case Query.QueryTypeSelect:
+            case SELECT:
                 ResultSet rs = qe.execSelect();
                 rs.hasNext();
                 break;
@@ -103,23 +104,23 @@ public class QueryExecutionUtils {
     public static long consume(QueryExecution qe) {
         Query query = qe.getQuery();
         assert query != null : "QueryExecution did not tell us which query it is bound to - query was null";
-        int queryType = query.getQueryType();
+        QueryType queryType = query.queryType();
 
         long result;
         switch (queryType) {
-        case Query.QueryTypeAsk:
+        case ASK:
             qe.execAsk();
             result = 1;
             break;
-        case Query.QueryTypeConstruct:
+        case CONSTRUCT:
             Iterator<Triple> itC = qe.execConstructTriples();
             result = Iterators.size(itC);
             break;
-        case Query.QueryTypeDescribe:
+        case DESCRIBE:
             Iterator<Triple> itD = qe.execDescribeTriples();
             result = Iterators.size(itD);
             break;
-        case Query.QueryTypeSelect:
+        case SELECT:
             ResultSet rs = qe.execSelect();
             result = ResultSetFormatter.consume(rs);
             break;

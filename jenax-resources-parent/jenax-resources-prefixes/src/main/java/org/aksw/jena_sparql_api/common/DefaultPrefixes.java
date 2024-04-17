@@ -49,7 +49,7 @@ public class DefaultPrefixes {
 
 
     public static void load(PrefixMapping target) {
-        prefixes
+        target
             .setNsPrefixes(RDFDataMgr.loadModel("rdf-prefixes/jena-extended.jsonld"))
             .setNsPrefixes(RDFDataMgr.loadModel("rdf-prefixes/arq.jsonld"))
             .setNsPrefixes(RDFDataMgr.loadModel("rdf-prefixes/rdfa11.jsonld"))

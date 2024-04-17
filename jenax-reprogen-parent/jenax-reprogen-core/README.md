@@ -73,11 +73,10 @@ public interface ExampleResource
 
 ```xml
 <dependency>
-    <groupId>org.aksw.jena_sparql_api</groupId>
-    <artifactId>jena-sparql-api-mapper-proxy</artifactId>
-</dependency>
-```
-Check for the latest version on [Maven Central](https://search.maven.org/search?q=a:jena-sparql-api-mapper-proxy).
+  <groupId>org.aksw.jenax</groupId>
+  <artifactId>jenax-reprogen-core</artifactId>
+</dependency>```
+Check for the latest version on [Maven Central](https://search.maven.org/search?q=a:jenax-reprogen-core).
 
 
 ### Resource View

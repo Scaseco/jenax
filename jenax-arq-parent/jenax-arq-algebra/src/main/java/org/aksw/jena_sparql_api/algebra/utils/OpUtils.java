@@ -35,6 +35,7 @@ import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
+import org.apache.jena.sparql.algebra.TransformQuadGraph;
 import org.apache.jena.sparql.algebra.op.Op0;
 import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.Op2;
@@ -97,6 +98,28 @@ public class OpUtils {
         TableData table = new TableData(vars, Collections.emptyList());
         OpTable result = OpTable.create(table);
         return result;
+    }
+
+    /**
+     * Test whether the given Op is an empty BGP or a unit table.
+     * Code copied / factored out from {@link TransformQuadGraph}
+     */
+    public static boolean isNoPattern(Op op) {
+        boolean noPattern = false;
+
+        if ( OpBGP.isBGP(op) )
+        {
+            // Empty BGP
+            if ( ((OpBGP)op).getPattern().isEmpty() )
+                noPattern = true ;
+        }
+        else if ( op instanceof OpTable )
+        {
+            // Empty BGP compiled to a unit table
+            if ( ((OpTable)op).isJoinIdentity() )
+                noPattern = true ;
+        }
+        return noPattern;
     }
 
     /**

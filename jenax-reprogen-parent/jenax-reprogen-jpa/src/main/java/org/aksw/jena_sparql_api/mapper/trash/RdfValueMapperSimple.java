@@ -44,7 +44,7 @@ public class RdfValueMapperSimple
         }
 
         if(o != null) {
-            Triple triple = new Triple(subject, predicate, o);
+            Triple triple = Triple.create(subject, predicate, o);
             outputGraph.add(triple);
         }
     }

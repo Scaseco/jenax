@@ -7,10 +7,10 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint2;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -22,8 +22,8 @@ public class ConceptPathFinderSystemBidirectional
 
 
     @Override
-    public Single<Model> computeDataSummary(SparqlQueryConnection dataConnection) {
-        return ConceptPathFinderBidirectionalUtils.createDefaultDataSummary(dataConnection);
+    public Single<Model> computeDataSummary(RdfDataSource dataSource) {
+        return ConceptPathFinderBidirectionalUtils.createDefaultDataSummary(dataSource);
     }
 
     @Override
@@ -41,18 +41,18 @@ public class ConceptPathFinderSystemBidirectional
 
         @Override
         public ConceptPathFinder build() {
-            return new ConceptPathFinderBase(dataSummary.getGraph(), dataConnection) {
+            return new ConceptPathFinderBase(dataSummary.getGraph(), dataSource) {
 
                 @Override
                 public PathSearch<SimplePath> createSearch(Fragment1 sourceConcept, Fragment1 targetConcept) {
-                    return new PathSearchSparqlBase(dataConnection, sourceConcept, targetConcept) {
+                    return new PathSearchSparqlBase(dataSource, sourceConcept, targetConcept) {
                         @Override
                         public Flowable<SimplePath> execCore() {
                             Long effectiveLength = maxLength == null ? null : 2 * maxLength;
 
                             return ConceptPathFinderBidirectionalUtils
                                 .findPathsCore(
-                                        dataConnection,
+                                        dataSource,
                                         sourceConcept,
                                         targetConcept,
                                         maxResults,

@@ -22,7 +22,6 @@ import org.apache.jena.sparql.core.Quad;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class TestNamedGraphStreamOperators {
 
 //    @Test

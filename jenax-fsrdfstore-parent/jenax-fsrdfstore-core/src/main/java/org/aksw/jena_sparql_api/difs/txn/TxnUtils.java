@@ -24,15 +24,11 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.cycle.QueueBFSFundamentalCycleBasis;
 import org.jgrapht.alg.interfaces.CycleBasisAlgorithm;
 
-
-
-
 public class TxnUtils {
 
     // Custom RDF predicate to relate transactions to resources
     public static final Node accessed = NodeFactory.createURI("urn:accessed");
     public static final Node waitsFor = NodeFactory.createURI("urn:waitsFor");
-
 
     /**
      * Utility function that adds a triple to a graph by allocating nodes that represent the given
@@ -49,10 +45,9 @@ public class TxnUtils {
         if (!srcKey.equals(tgtKey)) {
             Node srcNode = nodeFactory.apply(srcKey);
             Node tgtNode = nodeFactory.apply(tgtKey);
-            graph.add(new Triple(srcNode, predicate, tgtNode));
+            graph.add(Triple.create(srcNode, predicate, tgtNode));
         }
     }
-
 
     /**
      * Analyze a set of transactions for whether dead lock conditions are met.

@@ -73,7 +73,7 @@ public class MainConjureSparkComparison {
 
         List<Resource> dcatRecords;
         try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.create(catalog))) {
-            dcatRecords = SparqlRx.execConstructGrouped(conn, dcatQuery, Vars.a)
+            dcatRecords = SparqlRx.execConstructGrouped(conn::query, dcatQuery, Vars.a)
                 .map(RDFNode::asResource)
                 .toList().blockingGet();
         }

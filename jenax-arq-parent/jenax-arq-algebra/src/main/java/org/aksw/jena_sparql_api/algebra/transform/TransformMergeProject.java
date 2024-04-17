@@ -9,7 +9,8 @@ import org.apache.jena.sparql.algebra.op.OpProject;
 /**
  * project(project(op, varsA), varsB) -> project(op, VarsB)
  *
- * Assumes that the op expression is valid, such that only the variables of the outer most projection need to be retained.
+ * Assumes that the op expression is valid, such that only the variables
+ * of the outer most projection need to be retained.
  *
  * @author raven
  *

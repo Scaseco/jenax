@@ -49,7 +49,7 @@ public class CannedQueryUtils {
         Query query = QueryFactory.create();
         query.setQuerySelectType();
 
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
         ElementGroup group = new ElementGroup();
         group.addTriplePattern(triple);
         query.setQueryPattern(group);
@@ -76,7 +76,7 @@ public class CannedQueryUtils {
         Query query = QueryFactory.create();
         query.setQuerySelectType();
 
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
         ElementGroup group = new ElementGroup();
         group.addTriplePattern(triple);
         query.setQueryPattern(group);
@@ -105,7 +105,7 @@ public class CannedQueryUtils {
         Query query = QueryFactory.create();
         query.setQueryConstructType();
         query.setDistinct(true);
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
         ElementGroup group = new ElementGroup();
         group.addTriplePattern(triple);
 
@@ -134,7 +134,7 @@ public class CannedQueryUtils {
     }
 
     public static Query constructBySubject(Node s) {
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
 
         BasicPattern basicPattern = new BasicPattern();
         basicPattern.add(triple);
@@ -192,7 +192,7 @@ public class CannedQueryUtils {
         Query query = QueryFactory.create();
         query.setQueryConstructType();
         query.setDistinct(true);
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
         ElementGroup group = new ElementGroup();
         group.addTriplePattern(triple);
 

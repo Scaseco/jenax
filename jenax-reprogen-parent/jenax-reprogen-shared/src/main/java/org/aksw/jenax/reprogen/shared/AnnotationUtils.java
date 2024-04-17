@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriNss;
+import org.aksw.jenax.annotation.reprogen.Iris;
 import org.aksw.jenax.annotation.reprogen.ToString;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
@@ -34,56 +36,57 @@ public class AnnotationUtils {
 
     public static List<String> deriveIrisFromMethod(Method method, PrefixMapping pm) {
         List<String> result = new ArrayList<>();
-        Iri iri = method.getAnnotation(Iri.class);
-        IriNs iriNs = method.getAnnotation(IriNs.class);
-        if(iri != null) {
-            String[] rdfPropertyStrs = iri.value();
-            for (String rdfPropertyStr : rdfPropertyStrs) {
-                // Always expand URIs
-                // FIXME This will break for general paths - perform prefix expansion using a path transformer!
-                String expanded = pm.expandPrefix(rdfPropertyStr);
-                // String pathStr = "<" + expanded + ">";
+        Iri[] iris = method.getAnnotationsByType(Iri.class);
+        // String[] rdfPropertyStrs = iris.value();
+        // for (String rdfPropertyStr : rdfPropertyStrs) {
+        for (Iri iri : iris) {
+            String rdfPropertyStr = iri.value();
+            // Always expand URIs
+            // FIXME This will break for general paths - perform prefix expansion using a path transformer!
+            String expanded = pm.expandPrefix(rdfPropertyStr);
+            // String pathStr = "<" + expanded + ">";
 
-                // result = (P_Path0)PathParser.parse(pathStr, pm);
-                String contrib = expanded;
+            // result = (P_Path0)PathParser.parse(pathStr, pm);
+            String contrib = expanded;
 
-                //logger.debug("Parsed bean property RDF annotation " + pathStr + " into " + result + " on " + method);
-                if(logger.isDebugEnabled()) {
-                    logger.debug("Found @Iri annotation on " + method + ":");
-                    if(Objects.equals(rdfPropertyStr, expanded)) {
-                        logger.debug("  " + rdfPropertyStr);
-                    } else {
-                        logger.debug("  " + rdfPropertyStr + " expanded to " + result);
-                    }
-                }
-
-                result.add(contrib);
-            }
-            //Node p = NodeFactory.createURI(rdfPropertyStr);
-
-            //result = new P_Link(p);
-        } else if(iriNs != null) {
-            String localName = deriveBeanPropertyName(method.getName());
-            String[] nss = iriNs.value();
-            for (String ns : nss) {
-                String uri;
-                // If there is a colon we assume a IRI prefix - otherwise we assume a namespace
-                // <schema>: part - i.e. whether there is a colon
-                if(ns.contains(":")) {
-                    uri = ns;
+            //logger.debug("Parsed bean property RDF annotation " + pathStr + " into " + result + " on " + method);
+            if(logger.isDebugEnabled()) {
+                logger.debug("Found @Iri annotation on " + method + ":");
+                if(Objects.equals(rdfPropertyStr, expanded)) {
+                    logger.debug("  " + rdfPropertyStr);
                 } else {
-                    uri = pm.getNsPrefixURI(ns);
-                    if(uri == null) {
-                        throw new RuntimeException("Undefined prefix: " + ns + " on method " + method);
-                    }
+                    logger.debug("  " + rdfPropertyStr + " expanded to " + result);
                 }
-
-                String contrib = uri + localName;
-                result.add(contrib);
             }
-            return result;
-                //result = (P_Path0)PathParser.parse(uri + localName, pm);
+
+            result.add(contrib);
         }
+        //Node p = NodeFactory.createURI(rdfPropertyStr);
+
+        //result = new P_Link(p);
+
+        IriNs[] iriNss = method.getAnnotationsByType(IriNs.class);
+        String localName = deriveBeanPropertyName(method.getName());
+        // String[] nss = iriNs.value();
+        // for (String ns : nss) {
+        for (IriNs iriNs : iriNss) {
+            String ns = iriNs.value();
+            String uri;
+            // If there is a colon we assume a IRI prefix - otherwise we assume a namespace
+            // <schema>: part - i.e. whether there is a colon
+            if(ns.contains(":")) {
+                uri = ns;
+            } else {
+                uri = pm.getNsPrefixURI(ns);
+                if(uri == null) {
+                    throw new RuntimeException("Undefined prefix: " + ns + " on method " + method);
+                }
+            }
+
+            String contrib = uri + localName;
+            result.add(contrib);
+        }
+                //result = (P_Path0)PathParser.parse(uri + localName, pm);
 
 //		System.out.println(method + " -> " + result);
 //		if(result != null && result.toString().contains("style")) {
@@ -161,5 +164,4 @@ public class AnnotationUtils {
 
         return result;
     }
-
 }

@@ -16,6 +16,14 @@ public interface GraphQlDataProvider {
     JsonObject getMetadata();
     Stream<JsonElement> openStream();
 
+    /**
+     * Whether this provider is expected to yield at most 1 result.
+     * The client can use this information to e.g. omit starting an array in the output.
+     * However, the data provider does not know whether this information is truthful.
+     * If a violation is encountered during runtime then an exception will be raised.
+     */
+    boolean isSingle();
+
     /** Write the data of this provider to the given json writer */
     void write(JsonWriter writer, Gson gson) throws IOException; // IOException?
 }

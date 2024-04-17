@@ -1,12 +1,32 @@
 package org.aksw.jena_sparql_api.rx.script;
 
-import com.google.common.base.StandardSystemProperty;
-import com.google.common.collect.Lists;
-import org.aksw.jena_sparql_api.rx.RDFIterator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystemException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
+import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
+import org.aksw.jenax.arq.util.update.UpdateTransform;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
-import org.aksw.jenax.stmt.core.*;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserWrapperSelectShortForm;
@@ -30,26 +50,17 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
+import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileSystemException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
+import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.Lists;
 
 /**
- * Super-convenient SPARQL statement loader. Probes arguments whether they are inline SPARQL statements or refer to files.
+ * Convenient SPARQL statement loader. Probes arguments whether they are inline SPARQL statements or refer to files.
  * Referred files may contain RDF or sequences of SPARQL statements.
  * RDF files are loaded fully into memory as UpdateModify statements.
  *
@@ -58,7 +69,6 @@ import java.util.function.Function;
  *
  * Prefixes from an input source carry over to the next. Hence, if an RDF file is loaded, its prefixes can be used in
  * subsequent SPARQL statements without need for declaration.
- *
  *
  * For example assuming that mydata defines a foo prefix
  * ad-hoc querying becomes possible simply using the arguments ["people.ttl", "?s { ?s a foaf:Person }"]
@@ -209,11 +219,15 @@ public class SparqlScriptProcessor {
     }
 
     public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue) {
+        return createParserWithEnvSubstitution(prologue, System::getenv);
+    }
+
+    public static SparqlStmtParser createParserWithEnvSubstitution(Prologue prologue, Function<String, String> lookup) {
         SparqlStmtParser core = createParserPlain(prologue, prologue.getBaseURI());
         SparqlStmtParser sparqlParser =
                 SparqlStmtParser.wrapWithTransform(
                        core,
-                        stmt -> SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, System::getenv)));
+                        stmt -> SparqlStmtUtils.applyNodeTransform(stmt, x -> NodeEnvsubst.subst(x, lookup)));
 
         return sparqlParser;
     }
@@ -227,8 +241,12 @@ public class SparqlScriptProcessor {
      * @return
      */
     public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes) {
+        return createWithEnvSubstitution(globalPrefixes, System::getenv);
+    }
+
+    public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes, Function<String, String> lookup) {
         SparqlScriptProcessor result = new SparqlScriptProcessor(
-                SparqlScriptProcessor::createParserWithEnvSubstitution,
+                prologue -> createParserWithEnvSubstitution(prologue, lookup),
                 globalPrefixes);
         return result;
     }
@@ -273,6 +291,17 @@ public class SparqlScriptProcessor {
         process(index, filename, sparqlStmts);
     }
 
+    public SparqlStmtParser createParser(String baseIri) {
+        IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
+        // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
+        Prologue prologue = new Prologue(
+                globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
+                resolver);
+                // IRIxResolver.create(baseIri).build());
+        SparqlStmtParser result = sparqlParserFactory.apply(prologue);
+        return result;
+    }
+
     public void process(int index, String filename, List<Entry<SparqlStmt, Provenance>> result) {
         logger.info("Interpreting argument" + (index >= 0 ? " #" + index : "" ) + ": '" + filename + "'");
 
@@ -314,7 +343,9 @@ public class SparqlScriptProcessor {
 
                 isProcessed = true;
             } catch (Exception e) {
-                logger.debug("Probing " + filename + " as RDF data file failed", e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Probing verdict is 'not an RDF file' for " + filename, e);
+                }
             }
 
             Collection<Throwable> stmtErrorCollector = new ArrayList<>();
@@ -324,15 +355,8 @@ public class SparqlScriptProcessor {
                 try {
 //                    Iterator<SparqlStmt> it = SparqlStmtMgr.loadSparqlStmts(filename, globalPrefixes, sparqlParser, baseIri);
                     // globalPrefixes,
-                    IRIxResolver resolver = IRIxResolver.create(baseIri).allowRelative(true).build();
-                    // resolver = IRIxResolverUtils.newIRIxResolverAsGiven(baseIri
-                    Prologue prologue = new Prologue(
-                            globalPrefixes == null ? new PrefixMappingImpl() : globalPrefixes,
-                            resolver);
-                            // IRIxResolver.create(baseIri).build());
-                    SparqlStmtParser sparqlParser = sparqlParserFactory.apply(prologue);
 
-
+                    SparqlStmtParser sparqlParser;
                     TypedInputStream tmpIn = null;
                     Iterator<SparqlStmt> it;
 
@@ -343,6 +367,7 @@ public class SparqlScriptProcessor {
                             throw new FileSystemException(filename);
                         }
 
+                        sparqlParser = createParser(baseIri != null ? baseIri : tmpIn.getBaseURI());
                         it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
                         it.hasNext();
 
@@ -355,6 +380,7 @@ public class SparqlScriptProcessor {
                             }
 
                             tmpIn = new TypedInputStream(new ByteArrayInputStream(filename.getBytes()), null, null);
+                            sparqlParser = createParser(baseIri != null ? baseIri : tmpIn.getBaseURI());
                             it = SparqlStmtUtils.parse(tmpIn, sparqlParser);
                             it.hasNext();
                         } catch (Exception f) {
@@ -407,6 +433,11 @@ public class SparqlScriptProcessor {
                                 }
                             }
 
+//                            if (sourceLocation != null && stmt.isUpdateRequest() && stmt.isParsed()) {
+//                                UpdateTransform updateTransform = resolveFilePath(sourceNamespace);
+//                                stmt = new SparqlStmtUpdate(UpdateRequestUtils.copyTransform(stmt.getUpdateRequest(), updateTransform));
+//                            }
+
                             // TODO: Move optimizePrefixes to transformers?
                             //SparqlStmtUtils.optimizePrefixes(stmt);
 
@@ -428,9 +459,25 @@ public class SparqlScriptProcessor {
                 }
             }
         }
-
     }
 
+/*
+    // Its safer to set a base IRI on the parser rather than trying to fix it with a post processor
+    public UpdateTransform resolveFilePath(String basePath) {
+        return update -> {
+            Update r = update;
+            if (update instanceof UpdateLoad) {
+                UpdateLoad ul = (UpdateLoad)update;
+                String src = ul.getSource();
+                String newSrc = IRIxResolver.create(basePath).allowRelative(true).build().resolve(src).str();
+                r = src.equals(newSrc)
+                        ? update
+                        : new UpdateLoad(newSrc, ul.getDest(), ul.getSilent());
+            }
+            return r;
+        };
+    }
+*/
 
     public static UpdateRequest tryLoadFileAsUpdateRequest(String filename, Node targetGraph, PrefixMapping globalPrefixes, Collection<Entry<Lang, Throwable>> errorCollector) throws IOException {
         UpdateRequest result = null;
@@ -448,50 +495,36 @@ public class SparqlScriptProcessor {
             // Unwrap the input stream for less overhead
             InputStream in = tmpIn.getInputStream();
 
-
             String contentType = tmpIn.getContentType();
             if (contentType == null) {
-                logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
+                if (logger.isInfoEnabled()) {
+                    logger.info("Argument does not appear to be (RDF) data because content type probing yeld no result");
+                }
             } else {
-                logger.info("Detected data format: " + contentType);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Detected data format: " + contentType);
+                }
             }
             Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
 
             //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
             if(rdfLang != null) {
 
-                RDFIterator<?> itTmp;
+                Lang finalLang;
                 // FIXME Validate we are really using turtle/trig here
                 if(RDFLanguages.isTriples(rdfLang)) {
-                    itTmp = RDFDataMgrEx.createIteratorTriples(globalPrefixes, in, Lang.TTL);
+                    finalLang = Lang.TTL;
                 } else if(RDFLanguages.isQuads(rdfLang)) {
-                    itTmp = RDFDataMgrEx.createIteratorQuads(globalPrefixes, in, Lang.TRIG);
+                    finalLang = Lang.TRIG;
                 } else {
                     throw new RuntimeException("Unknown lang: " + rdfLang);
                 }
 
-
-                int window = 100;
-                try (RDFIterator<?> it = itTmp) {
-                    int remaining = window;
-                    while (it.hasNext()) {
-                        --remaining;
-                        if (remaining == 0) {
-                            PrefixMap pm = it.getPrefixes();
-                            // FIXME This log message should display how many prefixes were actually gathered from the file
-                            //  The total number of prefixes includes preconfigured ones
-                            logger.info("A total of " + pm.size() + " prefixes known after processing " + filename);
-                            globalPrefixes.setNsPrefixes(pm.getMapping());
-                            break;
-                        }
-
-                        if (it.prefixesChanged()) {
-                            remaining = 100;
-                        }
-
-                        it.next();
-                    }
+                PrefixMap newPrefixes = PrefixUtils.readPrefixes(null, in, finalLang);
+                if (logger.isInfoEnabled()) {
+                    logger.info("A total of " + newPrefixes.size() + " prefixes known after processing " + filename);
                 }
+                globalPrefixes.setNsPrefixes(newPrefixes.getMapping());
 
                 // String fileUrl = "file://" + Paths.get(filename).toAbsolutePath().normalize().toString();
                 result = new UpdateRequest(new UpdateLoad(filename, targetGraph));
@@ -514,7 +547,9 @@ public class SparqlScriptProcessor {
 
 
             String contentType = tmpIn.getContentType();
-            logger.info("Detected format: " + contentType);
+            if (logger.isInfoEnabled()) {
+                logger.info("Detected format: " + contentType);
+            }
             Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
 
             //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
@@ -545,7 +580,9 @@ public class SparqlScriptProcessor {
                         globalPrefixes.setNsPrefixes(m);
                     }
 
-                    logger.info("Gathering prefixes from named graphs...");
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Gathering prefixes from named graphs...");
+                    }
                     int i = 0;
                     Iterator<String> it = tmp.listNames();
                     while(it.hasNext()) {
@@ -556,7 +593,9 @@ public class SparqlScriptProcessor {
                             globalPrefixes.setNsPrefixes(m);
                         }
                     }
-                    logger.info("Gathered prefixes from " + i + " named graphs");
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Gathered prefixes from " + i + " named graphs");
+                    }
 
                     result = UpdateRequestUtils.createUpdateRequest(tmp, null);
 

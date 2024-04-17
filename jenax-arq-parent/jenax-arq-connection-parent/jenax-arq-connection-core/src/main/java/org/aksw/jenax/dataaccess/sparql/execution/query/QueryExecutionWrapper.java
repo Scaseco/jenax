@@ -1,13 +1,10 @@
 package org.aksw.jenax.dataaccess.sparql.execution.query;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.Context;
 
 public interface QueryExecutionWrapper
@@ -20,15 +17,15 @@ public interface QueryExecutionWrapper
         return Optional.ofNullable(delegate);
     }
 
-    @Override
-    default void setInitialBinding(QuerySolution binding) {
-        getDelegate().setInitialBinding(binding);
-    }
-
-    @Override
-    default void setInitialBinding(Binding binding) {
-        getDelegate().setInitialBinding(binding);
-    }
+//    @Override
+//    default void setInitialBinding(QuerySolution binding) {
+//        getDelegate().setInitialBinding(binding);
+//    }
+//
+//    @Override
+//    default void setInitialBinding(Binding binding) {
+//        getDelegate().setInitialBinding(binding);
+//    }
 
     @Override
     default Dataset getDataset() {
@@ -60,25 +57,25 @@ public interface QueryExecutionWrapper
         tryGetDelegate().ifPresent(QueryExecution::close);
     }
 
-    @Override
-    default void setTimeout(long timeout, TimeUnit timeoutUnits) {
-        getDelegate().setTimeout(timeout, timeoutUnits);
-    }
-
-    @Override
-    default void setTimeout(long timeout) {
-        getDelegate().setTimeout(timeout);
-    }
-
-    @Override
-    default void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
-        getDelegate().setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
-    }
-
-    @Override
-    default void setTimeout(long timeout1, long timeout2) {
-        getDelegate().setTimeout(timeout1, timeout2);
-    }
+//    @Override
+//    default void setTimeout(long timeout, TimeUnit timeoutUnits) {
+//        getDelegate().setTimeout(timeout, timeoutUnits);
+//    }
+//
+//    @Override
+//    default void setTimeout(long timeout) {
+//        getDelegate().setTimeout(timeout);
+//    }
+//
+//    @Override
+//    default void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
+//        getDelegate().setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
+//    }
+//
+//    @Override
+//    default void setTimeout(long timeout1, long timeout2) {
+//        getDelegate().setTimeout(timeout1, timeout2);
+//    }
 
     @Override
     default long getTimeout1() {

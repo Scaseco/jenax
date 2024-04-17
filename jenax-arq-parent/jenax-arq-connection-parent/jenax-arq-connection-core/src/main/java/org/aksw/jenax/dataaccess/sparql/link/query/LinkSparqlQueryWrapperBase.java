@@ -2,6 +2,9 @@ package org.aksw.jenax.dataaccess.sparql.link.query;
 
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
+/**
+ * Wrapper that delegates all requests to {@link #newQuery()}
+ */
 public class LinkSparqlQueryWrapperBase
     implements LinkSparqlQueryWrapper
 {

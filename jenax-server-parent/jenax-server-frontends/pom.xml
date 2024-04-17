@@ -1,101 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jenax-server-frontends</artifactId>
-    <packaging>jar</packaging>
+	<artifactId>jenax-server-frontends</artifactId>
+	<packaging>jar</packaging>
 
-    <parent>
-        <groupId>org.aksw.jenax</groupId>
-        <artifactId>jenax-server-parent</artifactId>
-        <version>4.10.0-1-SNAPSHOT</version>
-    </parent>
-
-
-    <dependencies>
-        <dependency>
-            <groupId>org.aksw.jenax</groupId>
-            <artifactId>jenax-arq-connection-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.aksw.jenax</groupId>
-            <artifactId>jenax-arq-utils</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.aksw.jenax</groupId>
-            <artifactId>jenax-server-core</artifactId>
-        </dependency>
-
-        <!-- Jersey / spring -->
-        <!-- <dependency> -->
-        <!-- <groupId>com.sun.jersey.contribs</groupId> -->
-        <!-- <artifactId>jersey-spring</artifactId> -->
-        <!-- </dependency> -->
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-server-parent</artifactId>
+		<version>5.0.0-1-SNAPSHOT</version>
+	</parent>
 
 
-        <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet</artifactId>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-utils</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-multipart</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-server-core</artifactId>
+		</dependency>
 
-
-        <!-- <dependency> -->
-        <!-- <groupId>org.springframework</groupId> -->
-        <!-- <artifactId>spring-core</artifactId> -->
-        <!-- </dependency> -->
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-        </dependency>
+		<!-- Jersey / spring -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.sun.jersey.contribs</groupId> -->
+		<!-- <artifactId>jersey-spring</artifactId> -->
+		<!-- </dependency> -->
 
 
-        <!-- <dependency> -->
-        <!-- <groupId>org.atmosphere</groupId> -->
-        <!-- <artifactId>atmosphere-spring</artifactId> -->
-        <!-- </dependency> -->
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>eu.infomas</groupId>
-            <artifactId>annotation-detector</artifactId>
-        </dependency>
-        <dependency> <!-- Used for @Configuration annotation so we can inject an ApplicationContext
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+		</dependency>
+
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework</groupId> -->
+		<!-- <artifactId>spring-core</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.atmosphere</groupId> -->
+		<!-- <artifactId>atmosphere-spring</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>eu.infomas</groupId>
+			<artifactId>annotation-detector</artifactId>
+		</dependency>
+		<dependency> <!-- Used for @Configuration annotation so we can inject an
+			ApplicationContext
                 into servlets -->
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-        </dependency>
-        <!-- <dependency> -->
-        <!-- <groupId>com.sun.jersey</groupId> -->
-        <!-- <artifactId>jersey-json</artifactId> -->
-        <!-- <version>${jersey.version}</version> -->
-        <!-- </dependency> -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.atmosphere</groupId> -->
-        <!-- <artifactId>atmosphere-jquery</artifactId> -->
-        <!-- <version>${atmosphere.version}</version> -->
-        <!-- <type>war</type> -->
-        <!-- </dependency> -->
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.sun.jersey</groupId> -->
+		<!-- <artifactId>jersey-json</artifactId> -->
+		<!-- <version>${jersey.version}</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.atmosphere</groupId> -->
+		<!-- <artifactId>atmosphere-jquery</artifactId> -->
+		<!-- <version>${atmosphere.version}</version> -->
+		<!-- <type>war</type> -->
+		<!-- </dependency> -->
 
-        <!-- Jetty -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-        </dependency>
+		<!-- Jetty -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-webapp</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-plus</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-annotations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-apache-jsp</artifactId>
+		</dependency>
+
+		<!--
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
@@ -120,81 +150,81 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>apache-jsp</artifactId>
         </dependency>
-
-        <!-- <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-jsp</artifactId>
+-->
+		<!-- <dependency> <groupId>org.eclipse.jetty</groupId>
+		<artifactId>jetty-jsp</artifactId>
             </dependency> -->
 
-        <!-- Logging -->
-<!--
+		<!-- Logging -->
+		<!--
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-ext</artifactId>
-        </dependency>
-<!--
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-ext</artifactId>
+		</dependency>
+		<!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
 -->
 
-        <!-- AKSW Commons -->
+		<!-- AKSW Commons -->
 
 
-        <!-- Database Connectivity -->
+		<!-- Database Connectivity -->
 
 
-        <!-- JDBC Connection Pooling -->
+		<!-- JDBC Connection Pooling -->
 
-        <!-- Utils; but what for??? -->
-
-
-        <!-- Command Line Argument Parsing -->
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-        </dependency>
+		<!-- Utils; but what for??? -->
 
 
-        <!-- Collection Libraries -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
+		<!-- Command Line Argument Parsing -->
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+		</dependency>
 
 
-        <!-- Spring Framework -->
+		<!-- Collection Libraries -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 
 
-
-        <!-- URL Rewriting -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.tuckey</groupId> -->
-        <!-- <artifactId>urlrewritefilter</artifactId> -->
-        <!-- </dependency> -->
-
-        <!-- Gson: Java to Json conversion -->
-        <!-- <dependency> -->
-        <!-- <groupId>com.google.code.gson</groupId> -->
-        <!-- <artifactId>gson</artifactId> -->
-        <!-- </dependency> -->
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<!-- Spring Framework -->
 
 
-    </dependencies>
+		<!-- URL Rewriting -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.tuckey</groupId> -->
+		<!-- <artifactId>urlrewritefilter</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- Gson: Java to Json conversion -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.code.gson</groupId> -->
+		<!-- <artifactId>gson</artifactId> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+	</dependencies>
 
 </project>
 

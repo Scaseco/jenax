@@ -200,7 +200,7 @@ public class ConceptPathFinder {
 //		        continue;
 //		    }
 
-            Triple triple = new Triple(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), node);
+            Triple triple = Triple.create(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), node);
 
 
 //			System.out.println("JoinSummaryTriple: " + triple);

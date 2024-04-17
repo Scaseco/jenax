@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
-import org.aksw.jena_sparql_api.rx.RDFIterator;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.util.irixresolver.IRIxResolverUtils;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
@@ -35,10 +34,7 @@ import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.Dataset;
@@ -60,11 +56,13 @@ import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Extensions to help open an InputStream of unknown content using probing against languages registered to the Jena riot system.
@@ -181,6 +179,56 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    public static OutputStream encode(OutputStream out, List<String> codecs, CompressorStreamFactory csf)
+            throws CompressorException {
+        OutputStream result = out;
+        for (String encoding : codecs) {
+            result = csf.createCompressorOutputStream(encoding, result);
+        }
+        return result;
+    }
+
+    /**
+     * Given an input stream with mark support, attempt to create a decoded input stream.
+     * The returned stream will be ready for further use with all detected encodings added to outEncodings.
+     *
+     * @param is An input stream that must have mark support
+     * @param outEncodings Output argument. Detected encodings will be added to that list (if not null).
+     */
+    public static InputStream probeEncodings(InputStream is, List<String> outEncodings) throws IOException {
+        if (!is.markSupported()) {
+            throw new IllegalArgumentException("Encoding probing requires an input stream with mark support");
+        }
+
+        List<String> detectedEncodings = new ArrayList<>();
+        CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
+        InputStream nextIn = is;
+        for (;;) {
+            is.mark(1024 * 1024 * 1024);
+            String encoding;
+            try {
+                encoding = CompressorStreamFactory.detect(is);
+            } catch (CompressorException e) {
+                break;
+            } finally {
+                is.reset();
+            }
+            detectedEncodings.add(encoding);
+            if (outEncodings != null) {
+                outEncodings.add(encoding);
+            }
+
+            try {
+                // Only buffer the outermost stream; requires decoding from the base input stream
+                nextIn = new BufferedInputStream(decode(is, detectedEncodings, csf));
+            } catch (CompressorException e) {
+                // Should not fail here because we applied detect() before
+                throw new RuntimeException(e);
+            }
+        }
+        return nextIn;
+    }
+
     /**
      * Probe an input stream for any encodings (e.g. using compression codecs) and
      * its eventual content type.
@@ -200,34 +248,12 @@ public class RDFDataMgrEx {
         if (!in.markSupported()) {
             in = new BufferedInputStream(in);
         }
-        in.mark(1024 * 1024 * 1024);
-
-        CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
+        // in.mark(1024 * 1024 * 1024);
 
         RdfEntityInfo result;
         try (InputStream is = in) {
-
-            InputStream nextIn = is;
             List<String> encodings = new ArrayList<>();
-            for (;;) {
-                String encoding;
-                try {
-                    encoding = CompressorStreamFactory.detect(is);
-                } catch (CompressorException e) {
-                    break;
-                } finally {
-                    is.reset();
-                }
-                encodings.add(encoding);
-
-                try {
-                    nextIn = new BufferedInputStream(decode(is, encodings, csf));
-                } catch (CompressorException e) {
-                    // Should not fail here because we applied detect() before
-                    throw new RuntimeException(e);
-                }
-            }
-
+            InputStream nextIn = probeEncodings(is, encodings);
             try (TypedInputStream tis = RDFDataMgrEx.probeLang(nextIn, candidates)) {
                 String contentType = tis.getContentType();
                 String charset = tis.getCharset();
@@ -240,7 +266,6 @@ public class RDFDataMgrEx {
                 // result = new EntityInfoImpl(encodings, contentType, charset);
             }
         }
-
         return result;
     }
 
@@ -537,18 +562,18 @@ public class RDFDataMgrEx {
         return result;
     }
 
-    public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-        InputStream combined = prependWithPrefixes(in, prefixMapping);
-        RDFIterator<Triple> it = RDFDataMgrRx.createIteratorTriples(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-        return it;
-    }
-
-
-    public static RDFIterator<Quad> createIteratorQuads(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-        InputStream combined = prependWithPrefixes(in, prefixMapping);
-        RDFIterator<Quad> it = RDFDataMgrRx.createIteratorQuads(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-        return it;
-    }
+//    public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
+//        InputStream combined = prependWithPrefixes(in, prefixMapping);
+//        RDFIterator<Triple> it = RDFDataMgrRx.createIteratorTriples(combined, lang, null, (thread, throwable) -> {}, thread -> {});
+//        return it;
+//    }
+//
+//
+//    public static RDFIterator<Quad> createIteratorQuads(PrefixMapping prefixMapping, InputStream in, Lang lang) {
+//        InputStream combined = prependWithPrefixes(in, prefixMapping);
+//        RDFIterator<Quad> it = RDFDataMgrRx.createIteratorQuads(combined, lang, null, (thread, throwable) -> {}, thread -> {});
+//        return it;
+//    }
 
     public static Dataset parseTrigAgainstDataset(Dataset dataset, PrefixMapping prefixMapping, InputStream in) {
         // Add namespaces from the spec

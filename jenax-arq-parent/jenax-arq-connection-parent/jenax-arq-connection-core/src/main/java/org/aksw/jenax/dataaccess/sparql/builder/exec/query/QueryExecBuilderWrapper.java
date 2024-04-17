@@ -2,7 +2,6 @@ package org.aksw.jenax.dataaccess.sparql.builder.exec.query;
 
 import java.util.concurrent.TimeUnit;
 
-import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecModDelegate;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ARQ;
@@ -16,44 +15,44 @@ import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 
-public interface QueryExecBuilderWrapper
-    extends QueryExecBuilder, QueryExecModDelegate
+public interface QueryExecBuilderWrapper<T extends QueryExecBuilder>
+    extends QueryExecBuilder, QueryExecModWrapper<T>
 {
     @Override
     QueryExecBuilder getDelegate();
 
     @Override
-    default QueryExecBuilder query(Query query) {
+    default T query(Query query) {
         getDelegate().query(query);
-        return this;
+        return self();
     }
 
     /** Set the query. */
     @Override
-    default QueryExecBuilder query(String queryString) {
+    default T query(String queryString) {
         getDelegate().query(queryString);
-        return this;
+        return self();
     }
 
     /** Set the query. */
     @Override
-    default QueryExecBuilder query(String queryString, Syntax syntax) {
+    default T query(String queryString, Syntax syntax) {
         getDelegate().query(queryString, syntax);
-        return this;
+        return self();
     }
 
     /** Set a context entry. */
     @Override
-    default QueryExecBuilder set(Symbol symbol, Object value) {
+    default T set(Symbol symbol, Object value) {
         getDelegate().set(symbol, value);
-        return this;
+        return self();
     }
 
     /** Set a context entry. */
     @Override
-    default QueryExecBuilder set(Symbol symbol, boolean value) {
+    default T set(Symbol symbol, boolean value) {
         getDelegate().set(symbol, value);
-        return this;
+        return self();
     }
 
     /**
@@ -61,37 +60,37 @@ public interface QueryExecBuilderWrapper
      * ({@link ARQ#getContext}).
      */
     @Override
-    default QueryExecBuilder context(Context context) {
+    default T context(Context context) {
         getDelegate().context(context);
-        return this;
+        return self();
     }
 
     /** Provide a set of (Var, Node) for substitution in the query when QueryExec is built. */
     @Override
-    default QueryExecBuilder substitution(Binding binding) {
+    default T substitution(Binding binding) {
         getDelegate().substitution(binding);
-        return this;
+        return self();
     }
 
     /** Provide a (Var, Node) for substitution in the query when QueryExec is built. */
     @Override
-    default QueryExecBuilder substitution(Var var, Node value) {
+    default T substitution(Var var, Node value) {
         getDelegate().substitution(var, value);
-        return this;
+        return self();
     }
 
     /** Provide a (var name, Node) for substitution in the query when QueryExec is built. */
     @Override
-    public default QueryExecBuilder substitution(String var, Node value) {
+    public default T substitution(String var, Node value) {
         getDelegate().substitution(var, value);
-        return this;
+        return self();
     }
 
     /** Set the overall query execution timeout. */
     @Override
-    default QueryExecBuilder timeout(long value, TimeUnit timeUnit) {
+    default T timeout(long value, TimeUnit timeUnit) {
         getDelegate().timeout(value, timeUnit);
-        return this;
+        return self();
     }
 
     /**
