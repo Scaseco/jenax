@@ -343,6 +343,11 @@ public class DataPods {
                         } else {
                             res = query;
                         }
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Effective query: " + res);
+                        }
+
                         return res;
                     });
 

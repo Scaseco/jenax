@@ -47,7 +47,7 @@
 		<log4j.version>2.21.0</log4j.version>
 
 		<ee.version>9</ee.version> <!-- ee9->servlet-api: 9->5.0.0 10->6.0.2 -->
-		<jetty.version>12.0.6</jetty.version>
+		<jetty.version>12.0.8</jetty.version>
 		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 
@@ -60,7 +60,7 @@
 		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
 		<!-- <jena.version>4.10.0</jena.version> -->
-		<jena.version>5.0.0-SNAPSHOT</jena.version>
+		<jena.version>5.1.0-SNAPSHOT</jena.version>
 
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
@@ -117,6 +117,23 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Jetty -->
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-bom</artifactId>
+				<version>${jetty.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+				<artifactId>jetty-ee${ee.version}-bom</artifactId>
+				<version>${jetty.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
 			<!-- Shacl to HTML template rending -->
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -898,14 +915,6 @@
 				<artifactId>byte-buddy</artifactId>
 				<version>1.12.3</version>
 			</dependency>
-			<!-- Jetty -->
-			<dependency>
-				<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
-				<artifactId>jetty-ee${ee.version}-bom</artifactId>
-				<version>${jetty.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
 
 			<!-- <dependency> <groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-jsp</artifactId> 
@@ -960,14 +969,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-bom</artifactId>
-				<version>${jetty.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-bom</artifactId>
 				<version>${slf4j.version}</version>
@@ -982,7 +983,6 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-
 
 			<!-- <dependency> <groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-objectstore</artifactId> 
@@ -1063,7 +1063,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.196</version>
+				<version>1.4.200</version>
 				<!--<scope>runtime</scope> -->
 			</dependency>
 			<!-- JDBC Connection Pooling -->
