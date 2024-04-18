@@ -13,7 +13,6 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.reasoner.InfGraph;
-import org.apache.jena.riot.other.G;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.Prefixes;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -24,6 +23,7 @@ import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TxnDataset2Graph;
 import org.apache.jena.sparql.graph.GraphOps;
 import org.apache.jena.sparql.graph.GraphZero;
+import org.apache.jena.system.G;
 
 /** Adapted from DatasetGraphOne ~ Claus Stadler
  *
@@ -58,10 +58,10 @@ public class DatasetGraphOneNgImpl
         // Didn't find a GraphView so no backing DatasetGraph; work on the graph as given.
         return new DatasetGraphOneNgImpl(graphName, graph);
     }
-    
-    
+
+
     public static DatasetGraphOneNg create(DatasetGraph datasetGraph, Node graphName) {
-    	Graph graph = DatasetGraphUtils.getDefaultOrNamedGraph(datasetGraph, graphName);
+        Graph graph = DatasetGraphUtils.getDefaultOrNamedGraph(datasetGraph, graphName);
         return new DatasetGraphOneNgImpl(graphName, graph, datasetGraph);
     }
 
@@ -167,7 +167,7 @@ public class DatasetGraphOneNgImpl
     @Override
     public void add(Node g, Node s, Node p, Node o) {
         if ( g.equals(graphName) || (Quad.isDefaultGraph(graphName) && Quad.isDefaultGraph(g)) )
-            graph.add(new Triple(s, p, o));
+            graph.add(Triple.create(s, p, o));
         else
             unsupportedMethod(this, "add(named graph)");
     }
@@ -184,7 +184,7 @@ public class DatasetGraphOneNgImpl
     @Override
     public void delete(Node g, Node s, Node p, Node o) {
         if ( g.equals(graphName) || (Quad.isDefaultGraph(graphName) && Quad.isDefaultGraph(g)) )
-            graph.delete(new Triple(s, p, o));
+            graph.delete(Triple.create(s, p, o));
         else
             unsupportedMethod(this, "add(named graph)");
     }
@@ -198,10 +198,10 @@ public class DatasetGraphOneNgImpl
             unsupportedMethod(this, "add(named graph)");
     }
 
-    @Override
-    public void setDefaultGraph(Graph g) {
-        unsupportedMethod(this, "setDefaultGraph");
-    }
+//    @Override
+//    public void setDefaultGraph(Graph g) {
+//        unsupportedMethod(this, "setDefaultGraph");
+//    }
 
     @Override
     public void addGraph(Node graphName, Graph graph) {

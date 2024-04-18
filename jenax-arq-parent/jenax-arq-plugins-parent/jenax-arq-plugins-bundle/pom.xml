@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>4.9.0-1</version>
+		<version>5.0.0-1</version>
 	</parent>
 
 	<dependencies>
@@ -46,6 +46,12 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
+<!-- Uber's h3 library is referenced indirectly via apache sedona -->
+<!--		<dependency>-->
+<!--			<groupId>com.uber</groupId>-->
+<!--			<artifactId>h3</artifactId>-->
+<!--		</dependency>-->
+		
 		<!-- javascript -->
 		<dependency>
 			<groupId>org.openjdk.nashorn</groupId>
@@ -53,7 +59,8 @@
 			<version>15.4</version>
 		</dependency>
 
-		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to get 
+		<!-- Used only for IteratorClosable and NodeMapperRdfDatatype; try to
+		get 
 			rid of this dep -->
 		<!-- Possibly also used for result set comparison -->
 		<dependency>
@@ -69,6 +76,11 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-pathfinding</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-quadengine</artifactId>
 		</dependency>
 
 		<dependency>
@@ -93,7 +105,8 @@
 			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
 
-		<!-- Query federation to files in virtual file systems with binary search 
+		<!-- Query federation to files in virtual file systems with binary
+		search 
 			support -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
@@ -189,13 +202,21 @@
 		<dependency>
 			<groupId>org.apache.sis.non-free</groupId>
 			<artifactId>sis-embedded-data</artifactId>
-			<version>1.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.sis.core</groupId>
 			<artifactId>sis-referencing</artifactId>
-			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.sedona</groupId>
+			<artifactId>sedona-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.sedona</groupId>
+			<artifactId>sedona-common</artifactId>
 		</dependency>
 
 		<!-- <dependency> -->

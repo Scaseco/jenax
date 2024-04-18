@@ -2,8 +2,6 @@ package org.aksw.jenax.web.server.boot;
 
 import java.util.function.Function;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsaBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
@@ -18,6 +16,8 @@ import org.eclipse.jetty.server.AbstractConnector;
 import org.eclipse.jetty.server.Server;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /** Use ServerBuilder instead which is not limited to a single sparql servlet */
 @Deprecated

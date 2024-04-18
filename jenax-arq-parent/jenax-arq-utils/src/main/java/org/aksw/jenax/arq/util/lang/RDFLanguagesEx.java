@@ -235,7 +235,7 @@ public class RDFLanguagesEx {
      * @return
      */
     public static RDFFormat findRdfFormat(String label) {
-        RDFFormat outFormat = findRdfFormat(label, RDFWriterRegistry.registered());
+        RDFFormat outFormat = findRdfFormat(label, RDFWriterRegistry.registeredFormats());
         return outFormat;
     }
 
@@ -291,7 +291,7 @@ public class RDFLanguagesEx {
         RDFLanguages.getRegisteredLanguages().stream().sorted(Comparator.comparing(Lang::getName)).forEach(l -> {
             list.add(listOutFormatsAddCts(l.getName(), l));
         });
-        RDFWriterRegistry.registered().stream().sorted(Comparator.comparing(RDFFormat::toString)).forEach(f -> {
+        RDFWriterRegistry.registeredFormats().stream().sorted(Comparator.comparing(RDFFormat::toString)).forEach(f -> {
             list.add(listOutFormatsAddCts(f.toString(), f.getLang()));
         });
 

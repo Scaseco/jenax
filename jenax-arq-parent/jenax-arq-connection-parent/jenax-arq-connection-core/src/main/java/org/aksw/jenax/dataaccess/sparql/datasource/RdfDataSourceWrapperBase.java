@@ -1,17 +1,17 @@
 package org.aksw.jenax.dataaccess.sparql.datasource;
 
-public class RdfDataSourceWrapperBase
-    implements RdfDataSourceWrapper
+public class RdfDataSourceWrapperBase<T extends RdfDataSource>
+    implements RdfDataSourceWrapper<T>
 {
-    protected RdfDataSource delegate;
+    protected T delegate;
 
-    public RdfDataSourceWrapperBase(RdfDataSource delegate) {
+    public RdfDataSourceWrapperBase(T delegate) {
         super();
         this.delegate = delegate;
     }
 
     @Override
-    public RdfDataSource getDelegate() {
+    public T getDelegate() {
         return delegate;
     }
 }

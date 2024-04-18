@@ -154,8 +154,8 @@ public class ObservableSetFromGraph
             ObservableSet<Triple> effectiveTriples = ObservableSets.union(a, b);
             effectiveTriples.addPropertyChangeListener(ev -> System.out.println(ev));
 
-            Triple t1 = new Triple(RDF.Nodes.type, RDF.Nodes.type, RDF.Nodes.type);
-            Triple t2 = new Triple(RDFS.Nodes.label, RDFS.Nodes.label, RDFS.Nodes.label);
+            Triple t1 = Triple.create(RDF.Nodes.type, RDF.Nodes.type, RDF.Nodes.type);
+            Triple t2 = Triple.create(RDFS.Nodes.label, RDFS.Nodes.label, RDFS.Nodes.label);
 
             a.add(t1);
             map.put(t2, t2);

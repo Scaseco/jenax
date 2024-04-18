@@ -6,12 +6,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 /**
  * Source: https://stackoverflow.com/questions/2811769/adding-an-http-header-to-the-request-in-a-servlet-filter
@@ -21,7 +21,7 @@ import com.google.common.collect.ListMultimap;
  */
 public class HeaderMapRequestWrapper extends HttpServletRequestWrapper {
 
-	protected boolean overrideValuesMode;
+    protected boolean overrideValuesMode;
     protected ListMultimap<String, String> headerMap = ArrayListMultimap.create();
 
     /**
@@ -47,7 +47,7 @@ public class HeaderMapRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getHeader(String name) {
-    	String headerValue = super.getHeader(name);
+        String headerValue = super.getHeader(name);
 
         if ((overrideValuesMode || headerValue == null) && headerMap.containsKey(name)) {
             headerValue = Iterables.getFirst(headerMap.get(name), null);
@@ -68,10 +68,10 @@ public class HeaderMapRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public Enumeration<String> getHeaders(String name) {
-    	List<String> tmp = headerMap.get(name);
-    	List<String> values;
+        List<String> tmp = headerMap.get(name);
+        List<String> values;
         if (overrideValuesMode && headerMap.containsKey(name)) {
-        	values = tmp;
+            values = tmp;
         } else {
             values = Collections.list(super.getHeaders(name));
             values.addAll(tmp);

@@ -10,6 +10,8 @@ public interface OpVisitor<T> {
     T visit(OpCoalesce op);
     T visit(OpPersist op);
 
+    T visit(OpJavaRewrite op);
+
     T visit(OpHdtHeader op);
 
 

@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql_path.api;
 
 import java.util.function.BiPredicate;
 
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
@@ -11,7 +12,11 @@ import org.apache.jena.sparql.path.P_Path0;
 public interface ConceptPathFinderFactory<T extends ConceptPathFinderFactory<T>> {
     T setDataSummary(Graph dataSummary);
     T setDataSummary(Model dataSummary);
+
+    @Deprecated
     T setDataConnection(SparqlQueryConnection conn);
+
+    T setDataSource(RdfDataSource dataSource);
 
     // If null, use the system's default
     T setShortestPathsOnly(Boolean onOrOff);

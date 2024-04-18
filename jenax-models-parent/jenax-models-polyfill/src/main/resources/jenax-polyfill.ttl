@@ -1,0 +1,25 @@
+PREFIX norse: <https://w3id.org/aksw/norse#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX polyfill: norse:polyfill.
+
+:pluginCatalog
+  a polyfill:PluginCatalog ;
+  polyfill:entry :e1 .
+
+
+:profileVirtuoso
+  a polyfill:Profile ;
+  polyfill:profileName "virtuoso" ;
+  polyfill:pluginConfigurations (
+    [
+      a polyfill:PluginConfiguration ;
+      polyfill:plugin :pluginPolyfillLateral ;
+    ]
+  )
+
+:pluginPolyfillLateral
+  rdfs:label "Polyfill - LATERAL" ;
+  rdfs:comment "Polyfill for client side execution of LATERAL. Beware that large volumes of data may be transfered from the target SPARQL endpoint to the polyfill middleware." ;
+  polyfill:javaClass "org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalLateral.Factory" ;
+  .
+

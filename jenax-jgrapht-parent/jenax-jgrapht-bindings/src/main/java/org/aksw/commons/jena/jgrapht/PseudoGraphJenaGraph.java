@@ -217,7 +217,7 @@ public class PseudoGraphJenaGraph
 
     @Override
     public Triple removeEdge(Node sourceVertex, Node targetVertex) {
-        Triple result = new Triple(sourceVertex, confinementPredicate, targetVertex);
+        Triple result = Triple.create(sourceVertex, confinementPredicate, targetVertex);
         removeEdge(result);
 //    	graph.remove(result.get, p, o);
 //        return true;

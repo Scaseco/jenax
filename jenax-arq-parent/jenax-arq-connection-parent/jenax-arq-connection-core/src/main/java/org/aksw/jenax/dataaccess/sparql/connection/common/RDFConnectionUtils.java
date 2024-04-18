@@ -1,7 +1,9 @@
 package org.aksw.jenax.dataaccess.sparql.connection.common;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -11,12 +13,14 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;
+import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionLocal;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
@@ -30,17 +34,19 @@ import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.Rename;
-import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIter;
+import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
-import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.RowSet;
+import org.apache.jena.sparql.exec.RowSetStream;
 import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -160,6 +166,13 @@ public class RDFConnectionUtils {
     }
 
 
+    public static RDFConnection wrapWithContextMutator(RDFConnection rawConn, Consumer<Context> contextMutator) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(rawConn);
+        RDFLink newLink = RDFLinkUtils.wrapWithContextMutator(oldLink, contextMutator);
+        RDFConnection result = RDFConnectionAdapter.adapt(newLink);
+        return result;
+    }
+
 
     /**
      * Places the connection object as a symbol into to context,
@@ -175,64 +188,63 @@ public class RDFConnectionUtils {
     // Ideally replace with wrapWithPostProcessor
     // ISSUE: With the connection interface we cannot mutate the context of update requests
     // Hence the existance of this method is still justified
-    public static RDFConnection wrapWithContextMutator(RDFConnection rawConn, Consumer<Context> contextMutator) {
-        RDFConnection[] result = {null};
+//    public static RDFConnection wrapWithContextMutatorOld(RDFConnection rawConn, Consumer<Context> contextMutator) {
+//        RDFConnection[] result = {null};
+//
+//        SparqlUpdateConnection tmp = unwrapUpdateConnection(rawConn);
+//        Dataset dataset = tmp instanceof RDFConnectionLocal
+//                ? getDataset((RDFConnectionLocal)tmp)
+//                : null;
+//
+//        result[0] =
+//            new RDFConnectionModular(rawConn, rawConn, rawConn) {
+//                public QueryExecution query(Query query) {
+//                    return postProcess(rawConn.query(query));
+//                }
+//
+//                @Override
+//                public QueryExecution query(String queryString) {
+//                    return postProcess(rawConn.query(queryString));
+//                }
+//
+//
+//                @Override
+//                public void update(UpdateRequest update) {
+////			        checkOpen();
+////			        Txn.executeWrite(dataset, () -> {
+//                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
+//                        UpdateProcessor up = postProcess(tmp);
+//                        up.execute();
+////			        });
+//                }
+//
+//                public UpdateProcessor postProcess(UpdateProcessor qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//
+//                public QueryExecution postProcess(QueryExecution qe) {
+//                    Context cxt = qe.getContext();
+//                    if(cxt != null) {
+//                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
+//                        contextMutator.accept(cxt);
+//                    }
+//
+//                    return qe;
+//                }
+//            };
+//
+//        return result[0];
+//    }
 
-        SparqlUpdateConnection tmp = unwrapUpdateConnection(rawConn);
-        Dataset dataset = tmp instanceof RDFConnectionLocal
-                ? getDataset((RDFConnectionLocal)tmp)
-                : null;
-
-        result[0] =
-            new RDFConnectionModular(rawConn, rawConn, rawConn) {
-                public QueryExecution query(Query query) {
-                    return postProcess(rawConn.query(query));
-                }
-
-                @Override
-                public QueryExecution query(String queryString) {
-                    return postProcess(rawConn.query(queryString));
-                }
-
-
-                @Override
-                public void update(UpdateRequest update) {
-//			        checkOpen();
-//			        Txn.executeWrite(dataset, () -> {
-                        UpdateProcessor tmp = UpdateExecutionFactory.create(update, dataset);
-                        UpdateProcessor up = postProcess(tmp);
-                        up.execute();
-//			        });
-                }
-
-
-                public UpdateProcessor postProcess(UpdateProcessor qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-
-                public QueryExecution postProcess(QueryExecution qe) {
-                    Context cxt = qe.getContext();
-                    if(cxt != null) {
-                        cxt.set(RDFLinkUtils.CONNECTION_SYMBOL, result[0]);
-                        contextMutator.accept(cxt);
-                    }
-
-                    return qe;
-                }
-            };
-
-        return result[0];
-    }
-
-    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, Function<? super RDFLink, ? extends RDFLink> linkDecorator) {
+    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, RDFLinkTransform linkTransform) {
         RDFLink oldLink = RDFLinkAdapter.adapt(conn);
-        RDFLink newLink = linkDecorator.apply(oldLink);
+        RDFLink newLink = linkTransform.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
     }
@@ -243,6 +255,14 @@ public class RDFConnectionUtils {
             QueryTransform queryTransform
         ) {
         return wrapWithQueryTransform(conn, queryTransform, null);
+    }
+
+
+    public static RDFConnection wrapWithStmtTransform(RDFConnection conn, SparqlStmtTransform transform) {
+        RDFLink oldLink = RDFLinkAdapter.adapt(conn);
+        RDFLink newLink = RDFLinkUtils.wrapWithStmtTransform(oldLink, transform);
+        RDFConnection result = RDFConnectionAdapter.adapt(newLink);
+        return result;
     }
 
     public static RDFConnection wrapWithQueryTransform(
@@ -281,13 +301,34 @@ public class RDFConnectionUtils {
     }
 
     /**
+     * Runs an OpService on the given connection.
+     * Resulting bindings must be compatible with the given one and will be merged with it.
+     *
+     * @param binding The parent binding that is merged with the bindings obtained from the execution.
+     * @param execCxt The execution context
+     * @param opService The service operation to delegate to the RDFConnection. Its serviceNode is ignored, but silent is repsected.
+     * @param isStreamingAllowed If true then a live iterator over the result is returned.
+     *          Otherwise the method materializes the data before returning.
+     *          If opService.isSilent() is true then isStreaming has no effect because
+     *          all data must be materialized first in order to detect errors.
+     *
+     * @implNote
+     *   This method calls {@link #execService(OpService, RDFConnection)}.
+     */
+    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target, boolean isStreamingAllowed) {
+        QueryIterator qIter = execService(opService, target, isStreamingAllowed);
+        qIter = QueryIter.makeTracked(qIter, execCxt);
+        return new QueryIterCommonParent(qIter, binding, execCxt);
+    }
+
+    /**
      * Runs an OpService on the given connection. Ignores the service IRI but considers the silent flag.
      *
      * @implNote
-     *  Adapted from {@link Service#exec(OpService, Context)}.
+     *   Adapted from {@link Service#exec(OpService, Context)}.
      */
-    public static QueryIterator execService(OpService opService, RDFConnection target) {
-        boolean silent = opService.getSilent();
+    public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed) {
+        boolean isSilent = opService.getSilent();
         Op opRemote = opService.getSubOp();
         Query query = OpAsQuery.asQuery(opRemote);
 
@@ -300,7 +341,6 @@ public class RDFConnectionUtils {
             varMapping = new HashMap<>();
             Set<Var> originalVars = OpVars.visibleVars(opService);
             Set<Var> remoteVars = OpVars.visibleVars(opRestored);
-
             for (Var v : originalVars) {
                 if (v.getName().contains("/")) {
                     // A variable which was scope renamed so has a different name
@@ -319,25 +359,14 @@ public class RDFConnectionUtils {
         }
 
         RDFLink link = RDFLinkAdapter.adapt(target);
-        RowSet rowSet;
         QueryExecBuilder builder = link.newQuery().query(query);
         Context cxt = builder.getContext();
         if (cxt == null) {
             cxt = ARQ.getContext().copy();
         }
 
-        try {
-            // Detach from the network stream.
-            rowSet = link.newQuery().query(query).select().materialize();
-        } catch (RuntimeException ex) {
-            if ( silent ) {
-                // logger.warn("SERVICE " + NodeFmtLib.strTTL(opService.getService()) + " : " + ex.getMessage(), ex);
-                // Return the input
-                return QueryIterSingleton.create(BindingFactory.root(), null);
-
-            }
-            throw ex;
-        }
+        RowSet rowSet = exec(builder, isSilent, isStreamingAllowed);
+        QueryIterator result = QueryIterPlainWrapper.create(rowSet);
 
 //        if (silent) {
 //        	RDFLink link = RDFLinkAdapter.adapt(target);
@@ -354,11 +383,33 @@ public class RDFConnectionUtils {
 //        }
 
 
-        QueryIterator result = QueryIterPlainWrapper.create(rowSet);
-        if (requiresRemapping)
+        if (requiresRemapping) {
             result = QueryIter.map(result, varMapping);
+        }
         return result;
-
     }
 
+    public static RowSet exec(QueryExecBuilder builder, boolean isSilent, boolean isStreamingAllowed) {
+        RowSet result;
+        if (isSilent || !isStreamingAllowed) {
+            // Non-streaming case
+            try (QueryExec qe = builder.build()) {
+                // Detach from the network stream.
+                result = qe.select().materialize();
+            } catch (RuntimeException ex) {
+                if (isSilent) {
+                    // logger.warn("SERVICE " + NodeFmtLib.strTTL(opService.getService()) + " : " + ex.getMessage(), ex);
+                    // Return the input
+                    result = RowSetStream.create(List.of(), Collections.emptyIterator());
+                    // QueryIterSingleton.create(BindingFactory.root(), null);
+                } else {
+                    throw ex;
+                }
+            }
+        } else {
+            // Streaming case
+            result = new RowSetOverQueryExec(builder.build());
+        }
+        return result;
+    }
 }

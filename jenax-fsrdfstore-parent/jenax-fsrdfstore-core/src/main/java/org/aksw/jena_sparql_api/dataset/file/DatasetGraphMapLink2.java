@@ -157,7 +157,8 @@ public class DatasetGraphMapLink2 extends DatasetGraphCollection
             txnDsg2Graph.removeGraph(g);
     }
 
-    @Override
+    // @Override
+    // TODO setDefaultGraph was removed in jena 5 - but we need to check whether any other methods needs to be updated to accomodate for possible changes in the semantics
     public void setDefaultGraph(Graph g) {
         if ( g == null )
             // Always have a default graph of some kind.
@@ -185,8 +186,8 @@ public class DatasetGraphMapLink2 extends DatasetGraphCollection
         super.close();
     }
 
-	@Override
-	public PrefixMap prefixes() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public PrefixMap prefixes() {
+        throw new UnsupportedOperationException();
+    }
 }

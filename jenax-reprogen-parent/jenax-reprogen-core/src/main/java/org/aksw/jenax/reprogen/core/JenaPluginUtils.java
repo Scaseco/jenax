@@ -1,6 +1,7 @@
 package org.aksw.jenax.reprogen.core;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,8 +25,6 @@ import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.enhanced.Implementation;
 import org.apache.jena.enhanced.Personality;
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -37,6 +36,9 @@ import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 
 public class JenaPluginUtils {
 
@@ -328,9 +330,26 @@ public class JenaPluginUtils {
             // Check if the class is annotated by @ResourceView
             result = clazz.getAnnotation(ResourceView.class) != null;
 
-            // Check if there ary any @Iri annotations
-            result = result || Arrays.asList(clazz.getDeclaredMethods()).stream()
-                .anyMatch(m -> m.getAnnotation(Iri.class) != null || m.getAnnotation(IriNs.class) != null);
+            if (!result) {
+                // Check if there ary any @Iri annotations
+                for (Method m : clazz.getDeclaredMethods()) {
+                    try {
+                        Iri[] iris = m.getAnnotationsByType(Iri.class);
+                        result = iris.length > 0;
+                        if (!result) {
+                            IriNs[] iriNss = m.getAnnotationsByType(IriNs.class);
+                            result = iriNss.length > 0;
+                        }
+
+                        if (result) {
+                            break;
+                        }
+                    } catch (Exception e) {
+                        e.addSuppressed(new RuntimeException("Error processing method " + m));
+                        throw e;
+                    }
+                }
+            }
         //}
 
         return result;

@@ -203,7 +203,7 @@ public class MyOpAsQuery
         {
             Node s = processPropFuncArg(opPropFunc.getSubjectArgs()) ;
             Node o = processPropFuncArg(opPropFunc.getObjectArgs()) ;
-            Triple t = new Triple(s, opPropFunc.getProperty(), o) ;
+            Triple t = Triple.create(s, opPropFunc.getProperty(), o) ;
             currentGroup().addElement(process(t)) ;
         }
 

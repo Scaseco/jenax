@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-bom</artifactId>
-		<version>4.9.0-1</version>
+		<version>5.0.0-1</version>
 		<relativePath>jenax-bom</relativePath>
 	</parent>
 
@@ -37,17 +37,6 @@
 	</modules>
 
 	<properties>
-		<!-- This property is used in :jenax-facete-impl for a plugin -->
-		<javax.xml.version>2.3.1</javax.xml.version>
-
-		<!-- Project Settings -->
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<!-- <java.version.javadoc>http://java.sun.com/javase/9/docs/api/</java.version.javadoc> -->
-		<file.encoding>UTF-8</file.encoding>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
 	</properties>
 
 	<dependencyManagement>

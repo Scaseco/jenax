@@ -1,14 +1,15 @@
 package org.aksw.jena_sparql_api.sparql.ext.collection.base;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.arq.util.node.NodeSet;
 import org.aksw.jenax.arq.util.node.NodeSetImpl;
+import org.apache.jena.graph.Node;
 
 public class SparqlLibCollectionFn {
 
@@ -33,7 +34,32 @@ public class SparqlLibCollectionFn {
                 ? null
                 : nodes instanceof NodeList
                     ? (NodeList)nodes
-                    : new NodeListImpl(new ArrayList<>(nodes));
+                    : NodeListImpl.copyOf(nodes);
         return result;
     }
+
+    @IriNs(JenaExtensionCollection.NS)
+    public static Node unwrapSingle(Node node, @DefaultValue("false") boolean recursive) {
+        Node current = node;
+        do {
+            if (!node.isLiteral()) {
+                break;
+            }
+
+            Object value = node.getLiteralValue();
+            if(!(value instanceof NodeCollection)) {
+                break;
+            }
+
+            NodeCollection c = (NodeCollection)value;
+            if (c.size() != 1) {
+                break;
+            }
+
+            current = c.iterator().next();
+        } while (recursive);
+
+        return current;
+    }
+
 }

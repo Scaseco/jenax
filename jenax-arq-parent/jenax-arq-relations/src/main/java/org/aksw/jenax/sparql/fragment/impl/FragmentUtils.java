@@ -395,8 +395,8 @@ public class FragmentUtils {
         //Expr expr = new E_Equals(new ExprVar(Vars.p), ExprUtils.nodeToExpr(property));
 
         Triple t = isInverse
-                ? new Triple(Vars.o, property, Vars.s)
-                : new Triple(Vars.s, property, Vars.o);
+                ? Triple.create(Vars.o, property, Vars.s)
+                : Triple.create(Vars.s, property, Vars.o);
 
         Element element = ElementUtils.createElement(t);
         //Element element = new ElementTriplesBlock(bgp);

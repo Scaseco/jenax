@@ -14,7 +14,7 @@ import org.aksw.commons.graph.index.core.SubgraphIsomorphismIndexImpl;
 import org.aksw.commons.graph.index.core.SubgraphIsomorphismIndexTagBased;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.sparql.util.NodeUtils;
+import org.apache.jena.sparql.util.NodeCmp;
 import org.apache.jena.sparql.util.graph.GraphUtils;
 import org.jgrapht.Graph;
 
@@ -32,22 +32,22 @@ public class SubgraphIsomorphismIndexJena {
         return result;
     }
 
-	
+
     // TODO Move to util class
     public static <K> SubgraphIsomorphismIndex<K, Graph<Node, Triple>, Node> create() {
         SubgraphIsomorphismIndexImpl<K, Graph<Node, Triple>, Node, Node> result =
                 new SubgraphIsomorphismIndexImpl<>(
                         SetOpsJGraphTRdfJena.INSTANCE,
                         SubgraphIsomorphismIndexJena::extractGraphTags,
-                        NodeUtils::compareRDFTerms,
+                        NodeCmp::compareRDFTerms,
                         new IsoMatcherImpl<Node, Triple, Graph<Node, Triple>>(SubgraphIsomorphismIndexJena::createNodeComparator, SubgraphIsomorphismIndexJena::createEdgeComparator));
         return result;
     }
 
     public static <K> SubgraphIsomorphismIndexTagBased<K, Graph<Node, Triple>, Node, Node> createTagBased(TagMap<K, Node> tagMap) {
-    	SubgraphIsomorphismIndexTagBased<K, Graph<Node, Triple>, Node, Node> result =
+        SubgraphIsomorphismIndexTagBased<K, Graph<Node, Triple>, Node, Node> result =
                 new SubgraphIsomorphismIndexTagBased<K, Graph<Node, Triple>, Node, Node>(
-                		new IsoMatcherImpl<Node, Triple, Graph<Node, Triple>>(SubgraphIsomorphismIndexJena::createNodeComparator, SubgraphIsomorphismIndexJena::createEdgeComparator),
+                        new IsoMatcherImpl<Node, Triple, Graph<Node, Triple>>(SubgraphIsomorphismIndexJena::createNodeComparator, SubgraphIsomorphismIndexJena::createEdgeComparator),
                         SubgraphIsomorphismIndexJena::extractGraphTags,
                         tagMap
                         );
@@ -71,7 +71,7 @@ public class SubgraphIsomorphismIndexJena {
                         (i.isBlank() && j.isBlank() ||
                         Objects.equals(baseIso.get(i), j)))
                 ? 0
-                : NodeUtils.compareRDFTerms(i, j);
+                : NodeCmp.compareRDFTerms(i, j);
 
         return result;
     }

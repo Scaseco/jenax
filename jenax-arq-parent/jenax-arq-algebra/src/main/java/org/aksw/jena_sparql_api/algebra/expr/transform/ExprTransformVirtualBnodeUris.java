@@ -194,7 +194,7 @@ public class ExprTransformVirtualBnodeUris
 
     public static Node bnodeToIri(Node node) {
         Node result = node.isBlank()
-                ? NodeFactory.createURI("bnode://" + node.getBlankNodeId().getLabelString())
+                ? NodeFactory.createURI("bnode://" + node.getBlankNodeLabel())
                 : node;
         return result;
     }

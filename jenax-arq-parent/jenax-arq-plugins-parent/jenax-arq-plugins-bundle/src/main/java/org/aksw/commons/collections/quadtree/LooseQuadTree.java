@@ -18,6 +18,7 @@ import org.locationtech.jts.geom.Envelope;
 public class LooseQuadTree<T> {
     protected double k;
     protected QuadTreeNode<T> rootNode;
+    // protected G data;
 
     /** Map where objects have been inserted */
     protected Map<Object, QuadTreeNode<T>> idToNodes;
@@ -35,6 +36,14 @@ public class LooseQuadTree<T> {
     public QuadTreeNode<T> getRootNode() {
         return rootNode;
     }
+
+//    public G getData() {
+//        return data;
+//    }
+
+//    public void setData(G data) {
+//        this.data = data;
+//    }
 
     /**
      * Retrieve the node that completely encompasses the given bounds

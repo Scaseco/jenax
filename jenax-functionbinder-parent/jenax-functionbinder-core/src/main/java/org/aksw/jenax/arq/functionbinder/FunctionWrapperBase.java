@@ -5,6 +5,7 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionEnv;
+import org.apache.jena.sparql.util.Context;
 
 public class FunctionWrapperBase
     implements Function
@@ -21,8 +22,8 @@ public class FunctionWrapperBase
     }
 
     @Override
-    public void build(String uri, ExprList args) {
-        delegate.build(uri, args);
+    public void build(String uri, ExprList args, Context context) {
+        delegate.build(uri, args, context);
     }
 
     @Override

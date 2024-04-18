@@ -43,6 +43,6 @@ public class FromAsFilterInit
     }
 
     static void registerWith(AssemblerGroup g) {
-        AssemblerUtils.register(g, FromAsFilterVocab.DatasetFromAsFilter, new DatasetAssemblerFromAsFilter(), DatasetAssembler.getType());
+        AssemblerUtils.register(g, FromAsFilterVocab.DatasetFromAsFilter, new DatasetAssemblerFromAsFilter(), DatasetAssembler.getGeneralType());
     }
 }

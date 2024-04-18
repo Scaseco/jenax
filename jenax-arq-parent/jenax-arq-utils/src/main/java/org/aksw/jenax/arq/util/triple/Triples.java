@@ -4,5 +4,5 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Triple;
 
 public class Triples {
-    public static final Triple spo = new Triple(Vars.s, Vars.p, Vars.o);
+    public static final Triple spo = Triple.create(Vars.s, Vars.p, Vars.o);
 }

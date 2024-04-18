@@ -26,6 +26,8 @@ import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
@@ -49,7 +51,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.core.Var;
@@ -77,7 +78,7 @@ public class ConceptPathFinderBidirectionalUtils {
     private static final Logger logger = LoggerFactory.getLogger(ConceptPathFinderBidirectionalUtils.class);
 
 
-    public static Single<Model> createDefaultDataSummary(SparqlQueryConnection dataConnection) {
+    public static Single<Model> createDefaultDataSummary(RdfDataSource dataSource) {
         InputStream in = ConceptPathFinderBidirectionalUtils.class.getClassLoader().getResourceAsStream("concept-path-finder.conf.sparql");
         //Stream<SparqlStmt> stmts;
         Flowable<SparqlStmt> stmts;
@@ -95,7 +96,7 @@ public class ConceptPathFinderBidirectionalUtils {
             .map(SparqlStmt::getAsQueryStmt)
             .map(SparqlStmtQuery::getQuery)
             .filter(q -> q.isConstructType())
-            .map(dataConnection::queryConstruct)
+            .map(q -> RdfDataSources.exec(dataSource, q, QueryExecution::execConstruct))
             .toList()
             .map(list -> {
                 Model r = ModelFactory.createDefaultModel();
@@ -141,7 +142,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
 
     public static Flowable<SimplePath> findPathsCore(
-            SparqlQueryConnection conn,
+            RdfDataSource dataSource,
             Fragment1 sourceConcept,
             Fragment1 tmpTargetConcept,
             Long nPaths,
@@ -169,7 +170,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("SELECT * { ?s ?p ?o }").execSelect()));
         //System.out.println(ResultSetFormatter.asText(qef.createQueryExecution("" + propertyQuery).execSelect()));
-        List<Node> types = QueryExecutionUtils.executeList(conn::query, typeQuery);
+        List<Node> types = QueryExecutionUtils.executeList(dataSource.asQef()::createQueryExecution, typeQuery);
         logger.debug("Retrieved " + types.size() + " types"); // + " properties: " + types);
 
         org.apache.jena.graph.Graph ext = GraphFactory.createDefaultGraph();
@@ -187,11 +188,11 @@ public class ConceptPathFinderBidirectionalUtils {
 //        		.toSet();
 //
 //        	for(Node type : types) {
-//                Triple triple = new Triple(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), type);
+//                Triple triple = Triple.create(VocabPath.start.asNode(), VocabPath.joinsWith.asNode(), type);
 //                ext.add(triple);
 //        	}
 
-            Triple triple = new Triple(VocabPath.start.asNode(), VocabPath.connectsWith.asNode(), node);
+            Triple triple = Triple.create(VocabPath.start.asNode(), VocabPath.connectsWith.asNode(), node);
             ext.add(triple);
 
 //			System.out.println("JoinSummaryTriple: " + triple);
@@ -234,7 +235,7 @@ public class ConceptPathFinderBidirectionalUtils {
         logger.debug("Got " + candidates.size() + " candidate target nodes"); // + " candidates: " + candidates);
 
         for(Node candidate : candidates) {
-            Triple triple = new Triple(candidate, VocabPath.connectsWith.asNode(), VocabPath.end.asNode());
+            Triple triple = Triple.create(candidate, VocabPath.connectsWith.asNode(), VocabPath.end.asNode());
             ext.add(triple);
         }
 
@@ -401,7 +402,7 @@ public class ConceptPathFinderBidirectionalUtils {
 //    }
 
     public static Predicate<SimplePath> createSparqlPathValidator(
-        SparqlQueryConnection conn,
+        RdfDataSource dataSource,
         Fragment1 sourceConcept,
         Fragment1 tmpTargetConcept) {
 
@@ -422,7 +423,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
             Generator<Var> generator = VarGeneratorBlacklist.create("v", vars);
 
-            boolean r = validatePath(conn, sourceConcept, targetConcept, path, generator);
+            boolean r = validatePath(dataSource, sourceConcept, targetConcept, path, generator);
             return r;
         };
         return result;
@@ -519,7 +520,7 @@ public class ConceptPathFinderBidirectionalUtils {
     }
 
 
-    public static boolean validatePath(SparqlQueryConnection conn, Fragment1 sourceConcept, Fragment1 targetConcept, SimplePath path, Generator<Var> generator) {
+    public static boolean validatePath(RdfDataSource dataSource, Fragment1 sourceConcept, Fragment1 targetConcept, SimplePath path, Generator<Var> generator) {
 
         List<Element> pathElements = SimplePath.pathToElements(path, sourceConcept.getVar(), targetConcept.getVar(), generator);
 
@@ -571,13 +572,14 @@ public class ConceptPathFinderBidirectionalUtils {
 //        }
 
         // TODO Make timeouts configurable
-        boolean result;
+        boolean result = RdfDataSources.exec(dataSource, query, QueryExecution::execAsk);
         Rewrite rewrite = AlgebraUtils.createDefaultRewriter();
         query = QueryUtils.rewrite(query, rewrite::rewrite);
-        try(QueryExecution qe = conn.query(query)) {
-            //qe.setTimeout(30, TimeUnit.SECONDS, 30, TimeUnit.SECONDS);
-            result = qe.execAsk();
-        }
+
+//        try(QueryExecution qe = dataSource.query(query)) {
+//            //qe.setTimeout(30, TimeUnit.SECONDS, 30, TimeUnit.SECONDS);
+//            result = qe.execAsk();
+//        }
 
         logger.debug("Verification result is [" + result + "] for " + query);
 

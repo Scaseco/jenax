@@ -97,51 +97,52 @@ public interface ResultSetRx {
 
         return result;
     }
-
-//    default QueryExecution asQueryExecution(Template template) {
-//
-//        QueryExecution result = new QueryExecutionAdapter() {
-//            protected Disposable disposable = null;
-//
-//            @Override
-//            public Iterator<Quad> execConstructQuads() {
-//                if (template == null) {
-//                    throw new IllegalStateException("No template set");
-//                }
-//
-//                return null;
-//                //TemplateLib.subst(quad, b, bNodeMap)
-//            }
-//
-//            @Override
-//            public ResultSet execSelect() {
-//                if (disposable != null) {
-//                    throw new IllegalStateException("execSelect has already been called");
-//                }
-//
-//                List<Var> vars = getVars();
-//                Flowable<Binding> flowable = getBindings();
-//                Iterator<Binding> it = flowable.blockingIterable().iterator();
-//                disposable = (Disposable)it;
-//                ResultSet result = ResultSetUtils.createUsingVars(vars, it);
-//                return result;
-//            }
-//
-//            @Override
-//            public void abort() {
-//                super.abort();
-//                close();
-//            }
-//
-//            @Override
-//            public void close() {
-//                if (disposable != null) {
-//                    disposable.dispose();
-//                }
-//                super.close();
-//            }
-//        };
-//
-//        return result;
-//    }
 }
+
+// Old code that created a QueryExecution rather than a QueryExec
+//default QueryExecution asQueryExecution(Template template) {
+//
+//  QueryExecution result = new QueryExecutionAdapter() {
+//      protected Disposable disposable = null;
+//
+//      @Override
+//      public Iterator<Quad> execConstructQuads() {
+//          if (template == null) {
+//              throw new IllegalStateException("No template set");
+//          }
+//
+//          return null;
+//          //TemplateLib.subst(quad, b, bNodeMap)
+//      }
+//
+//      @Override
+//      public ResultSet execSelect() {
+//          if (disposable != null) {
+//              throw new IllegalStateException("execSelect has already been called");
+//          }
+//
+//          List<Var> vars = getVars();
+//          Flowable<Binding> flowable = getBindings();
+//          Iterator<Binding> it = flowable.blockingIterable().iterator();
+//          disposable = (Disposable)it;
+//          ResultSet result = ResultSetUtils.createUsingVars(vars, it);
+//          return result;
+//      }
+//
+//      @Override
+//      public void abort() {
+//          super.abort();
+//          close();
+//      }
+//
+//      @Override
+//      public void close() {
+//          if (disposable != null) {
+//              disposable.dispose();
+//          }
+//          super.close();
+//      }
+//  };
+//
+//  return result;
+//}

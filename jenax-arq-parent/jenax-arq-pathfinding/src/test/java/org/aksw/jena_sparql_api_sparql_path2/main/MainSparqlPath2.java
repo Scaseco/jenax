@@ -225,7 +225,7 @@ public class MainSparqlPath2 {
         query.getProject().add(Vars.x, new ExprAggregator(Vars.y, new AggCountVarDistinct(new ExprVar(Vars.o))));
         query.getGroupBy().add(Vars.s);
         query.getGroupBy().add(Vars.p);
-        Triple t = new Triple(Vars.s, Vars.p, Vars.o);
+        Triple t = Triple.create(Vars.s, Vars.p, Vars.o);
         if(reverse) {
             t = TripleUtils.swap(t);
         }

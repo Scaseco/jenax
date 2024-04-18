@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.util.triple;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,8 @@ import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.util.ModelUtils;
+import org.apache.jena.sparql.util.NodeCmp;
 
 public class TripleUtils {
 
@@ -38,6 +41,9 @@ public class TripleUtils {
         return streamNodes(t).iterator();
     }
 
+    public static boolean isValidAsStatement(Triple t) {
+        return ModelUtils.isValidAsStatement(t.getSubject(), t.getPredicate(), t.getObject());
+    }
 
     /** Access a triple's component by a zero-based index in order s, p, o.
      * Raises {@link IndexOutOfBoundsException} for any index outside of the range [0, 2]*/
@@ -164,7 +170,7 @@ public class TripleUtils {
         Node s = nodes[0];
         Node p = nodes[1];
         Node o = nodes[2];
-        Triple result = new Triple(s, p, o);
+        Triple result = Triple.create(s, p, o);
         return result;
     }
 
@@ -217,7 +223,7 @@ public class TripleUtils {
     }
 
     public static Triple listToTriple(List<Node> nodes) {
-        return new Triple(nodes.get(0), nodes.get(1), nodes.get(2));
+        return Triple.create(nodes.get(0), nodes.get(1), nodes.get(2));
     }
 
     public static List<Node> tripleToList(Triple triple)
@@ -243,7 +249,6 @@ public class TripleUtils {
         return result;
     }
 
-
     public static String md5sum(Triple triple) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         NTriplesWriter.write(baos, Collections.singleton(triple).iterator());
@@ -251,6 +256,33 @@ public class TripleUtils {
         String result = StringUtils.md5Hash(raw);
 
         return result;
+    }
+
+    public static int compareRDFTerms(Triple o1, Triple o2) {
+        return compare(o1, o2, NodeCmp::compareRDFTerms);
+    }
+
+//    public static int compareByValue(Triple o1, Triple o2) {
+//    	return compare(o1, o2, NodeValueCmp::compareByValue);
+//    }
+
+    /**
+     * Compare two triples by their nodes.
+     *
+     * @implNote
+     *   This is jena4's TripleComparator.
+     * */
+    public static int compare(Triple o1, Triple o2, Comparator<Node> nc) {
+        int toReturn = nc.compare(o1.getSubject(), o2.getSubject());
+        if (toReturn == 0)
+        {
+            toReturn = nc.compare(o1.getPredicate(), o2.getPredicate());
+            if (toReturn == 0)
+            {
+                toReturn = nc.compare(o1.getObject(), o2.getObject());
+            }
+        }
+        return toReturn;
     }
 
 }

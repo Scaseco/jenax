@@ -56,10 +56,12 @@ public class QueryExecutionRetry
         if(decoratee instanceof QueryExecutionRetryDecorateeProxy) {
             this.proxy = (QueryExecutionRetryDecorateeProxy) decoratee;
             decoratee = supplier.get();
-            if (proxy.getInitialBinding() != null)
-                decoratee.setInitialBinding(proxy.getInitialBinding());
-            if (proxy.getTimeout1() > -1L || proxy.getTimeout2() > -1L)
-                decoratee.setTimeout(proxy.getTimeout1(), proxy.getTimeout2());
+            if (proxy.getInitialBinding() != null) {
+                // decoratee.setInitialBinding(proxy.getInitialBinding());
+            }
+            if (proxy.getTimeout1() > -1L || proxy.getTimeout2() > -1L) {
+                // decoratee.setTimeout(proxy.getTimeout1(), proxy.getTimeout2());
+            }
         }
         try {
             return callable.call();
@@ -156,16 +158,16 @@ public class QueryExecutionRetry
         private long timeout1 = -1L;
         private long timeout2 = -1L;
 
-        @Override
-        public void setInitialBinding(QuerySolution querySolution) {
-            this.initialBinding = querySolution;
-        }
+//        @Override
+//        public void setInitialBinding(QuerySolution querySolution) {
+//            this.initialBinding = querySolution;
+//        }
 
-        @Override
-        public void setInitialBinding(Binding binding) {
-            throw new RuntimeException("not implemented");
-            //this.initialBinding = QuerySolution. binding;
-        }
+//        @Override
+//        public void setInitialBinding(Binding binding) {
+//            throw new RuntimeException("not implemented");
+//            //this.initialBinding = QuerySolution. binding;
+//        }
 
         public QuerySolution getInitialBinding() {
             return initialBinding;

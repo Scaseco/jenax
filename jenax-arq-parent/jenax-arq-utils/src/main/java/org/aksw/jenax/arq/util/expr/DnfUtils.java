@@ -25,7 +25,6 @@ import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Sets;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;

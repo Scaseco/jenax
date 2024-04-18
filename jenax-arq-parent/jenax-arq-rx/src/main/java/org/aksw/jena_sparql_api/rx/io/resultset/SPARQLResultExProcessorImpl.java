@@ -12,7 +12,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.engine.binding.Binding;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Iterators;
+import com.google.common.collect.Iterators;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 

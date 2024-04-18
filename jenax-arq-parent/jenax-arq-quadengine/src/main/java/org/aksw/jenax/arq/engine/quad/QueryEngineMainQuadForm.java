@@ -11,7 +11,8 @@ import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.engine.main.QueryEngineMain;
 import org.apache.jena.sparql.util.Context;
 
-// There is already QueryEngineMainQuad - Not sure why I created a copy of it
+// There is already QueryEngineMainQuad - Not sure why I created a copy of it (probably I overlooked it back then)
+// The DatasetInFileSystem code relies on it - so it needs to be checked whether switching to Jena's internal one works as expected
 // Probably it can be removed
 public class QueryEngineMainQuadForm
     extends QueryEngineMain

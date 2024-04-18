@@ -5,6 +5,7 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.Function;
 import org.apache.jena.sparql.function.FunctionEnv;
+import org.apache.jena.sparql.util.Context;
 
 public interface FunctionDelegate
     extends Function
@@ -12,8 +13,8 @@ public interface FunctionDelegate
     Function getDelegate();
 
     @Override
-    default void build(String uri, ExprList args) {
-        getDelegate().build(uri, args);
+    default void build(String uri, ExprList args, Context context) {
+        getDelegate().build(uri, args, context);
     }
 
     @Override

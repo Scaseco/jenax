@@ -51,7 +51,6 @@ import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
-import com.google.common.collect.ImmutableMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
@@ -69,6 +68,7 @@ import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -392,7 +392,7 @@ public class MainConjurePlayground {
         try(RdfDataPod catalog = basicWorkflow.accept(catalogExecutor)) {
             try(RDFConnection conn = catalog.getConnection()) {
 
-                List<Resource> inputRecords = SparqlRx.execConstructGrouped(conn, dcatQuery, Vars.a)
+                List<Resource> inputRecords = SparqlRx.execConstructGrouped(conn::query, dcatQuery, Vars.a)
                         .map(RDFNode::asResource)
                         .toList()
                         .blockingGet();

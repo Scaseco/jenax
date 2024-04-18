@@ -15,9 +15,9 @@ import org.apache.jena.sparql.core.Quad;
 import com.google.common.base.Preconditions;
 
 /**
- * This class implements the driver for accumulating (json) objects from a sequence of edges (triples).
+ * This class implements the driver for accumulating (json) objects from a sequence of edges (triples/quads).
  * The AccJson objects can be seen as states in a state automaton, and this class drives
- * transitioning between the states based on the input.
+ * the transition between the states based on the input.
  */
 public class AccJsonDriver
 // its like an accumulator but depending on the context the final value may be absent (null) if it was in streaming mode
@@ -26,14 +26,22 @@ public class AccJsonDriver
     protected AccJson currentState;
     protected Node currentSource;
 
-    protected AccJsonDriver(AccJson rootAcc) {
+    protected long sourcesSeen = 0;
+    protected boolean isSingle;
+
+    protected AccJsonDriver(AccJson rootAcc, boolean isSingle) {
         super();
         Preconditions.checkArgument(rootAcc.getParent() == null, "Root accumulator must not have a parent");
         this.currentState = rootAcc;
+        this.isSingle = isSingle;
     }
 
-    public static AccJsonDriver of(AccJson rootAcc) {
-        return new AccJsonDriver(rootAcc);
+    public static AccJsonDriver of(AccJson rootAcc, boolean isSingle) {
+        return new AccJsonDriver(rootAcc, isSingle);
+    }
+
+    public long getSourcesSeen() {
+        return sourcesSeen;
     }
 
     /**
@@ -65,6 +73,13 @@ public class AccJsonDriver
                 if (cxt.isSerialize()) {
                     cxt.getJsonWriter().flush();
                 }
+            }
+
+            isNewSource = true;
+            ++sourcesSeen;
+
+            if (isSingle && sourcesSeen > 1) {
+                throw new RuntimeException("Too many results. Maybe use @one(self: false)?");
             }
 
             currentSource = source;
@@ -116,6 +131,7 @@ public class AccJsonDriver
             if (currentState.hasBegun()) {
                 currentState.end(cxt);
             }
+
             AccJson parent = currentState.getParent();
             if (parent != null) {
                 currentState = parent;

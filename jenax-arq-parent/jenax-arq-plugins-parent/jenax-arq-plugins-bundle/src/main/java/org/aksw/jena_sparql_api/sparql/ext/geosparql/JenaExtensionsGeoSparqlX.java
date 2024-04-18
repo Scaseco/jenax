@@ -14,6 +14,7 @@ import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.locationtech.jts.geom.Geometry;
 
 public class JenaExtensionsGeoSparqlX {
+    // private static final Logger logger = LoggerFactory.getLogger(JenaExtensionsGeoSparqlX.class);
 
     public static void register() {
         loadDefs(FunctionRegistry.get());
@@ -23,12 +24,20 @@ public class JenaExtensionsGeoSparqlX {
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
 
         AggregateRegistry.register(
+                NorseTermsGeo.aggCollect,
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
+
+        AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "aggUnion",
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggUnionGeometryWrapperCollection));
 
         AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "aggIntersection",
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggIntersectionGeometryWrapperCollection));
+
+        AggregateRegistry.register(
+                GeoSPARQL_URI.GEOF_URI + "h3ToGeom",
+                H3ToGeometryAgg.h3CellIdAccumulatorFactory);
 
     }
 
@@ -52,10 +61,10 @@ public class JenaExtensionsGeoSparqlX {
 
         // Define two-way Geometry - GeometryWrapper coercions
         generator.getConverterRegistry()
-            .register(Geometry.class, GeometryWrapper.class,
-                    geometry -> new GeometryWrapper(geometry, WKTDatatype.URI),
-                    GeometryWrapper::getParsingGeometry)
-            ;
+                .register(Geometry.class, GeometryWrapper.class,
+                        geometry -> new GeometryWrapper(geometry, WKTDatatype.URI),
+                        GeometryWrapper::getParsingGeometry)
+        ;
 
         // Declare that the conversion of Geometry to GeometryWrapper
         // yields an RDF-compatible java object w.r.t. Jena's TypeMapper
@@ -67,6 +76,7 @@ public class JenaExtensionsGeoSparqlX {
 
         binder.registerAll(GeoSparqlExFunctions.class);
 
+        PropertyFunctionRegistry ppfRegistry = PropertyFunctionRegistry.get();
 
 
 //			binder.register(GeoFunctionsJena.class.getMethod("simplifyDp", Geometry.class, double.class, boolean.class));
@@ -74,13 +84,15 @@ public class JenaExtensionsGeoSparqlX {
 
         // FunctionRegistry.get().put(ns + "nearestPoints", uri -> new E_ST_NearestPoints());
 
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
+        ppfRegistry.put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
+        ppfRegistry.put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
         // PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
 
 
         registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
+
+        JenaExtensionsH3.init(binder, ppfRegistry);
     }
 }

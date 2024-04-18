@@ -36,7 +36,9 @@ public class ServerBuilder {
         }
 
         GenericWebApplicationContext rootContext = new GenericWebApplicationContext();
-        List<WebApplicationInitializer> initializers = servletBuilders.stream().map(builder -> builder.build(rootContext)).collect(Collectors.toList());
+        List<WebApplicationInitializer> initializers = servletBuilders.stream()
+                .map(builder -> builder.build(rootContext))
+                .collect(Collectors.toList());
 
         WebApplicationInitializer initializer = servletContext -> {
             WebAppInitUtils.defaultSetup(servletContext, rootContext);

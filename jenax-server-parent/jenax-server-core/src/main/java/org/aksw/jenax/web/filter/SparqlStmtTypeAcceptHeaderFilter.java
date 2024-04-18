@@ -12,17 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
@@ -30,9 +19,19 @@ import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.fuseki.DEF;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.WebContent;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * Adjust wildcard accept header with a specific one based on the sparql query / update type

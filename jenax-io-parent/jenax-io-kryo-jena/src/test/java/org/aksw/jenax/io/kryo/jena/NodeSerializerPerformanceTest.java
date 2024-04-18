@@ -1,21 +1,5 @@
 package org.aksw.jenax.io.kryo.jena;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-
-import org.aksw.jenax.io.kryo.jena.GenericNodeSerializerCustom;
-import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
-import org.aksw.jenax.io.kryo.jena.ThriftUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.riot.out.NodeFmtLib;
-import org.apache.jena.riot.system.RiotLib;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +10,19 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.riot.system.RiotLib;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 /* The benchmark shouldn't be a unit test but it is simple doing it that way */
 @Ignore
@@ -64,7 +61,7 @@ public class NodeSerializerPerformanceTest {
     }
 
     public static void roundTripWithRiot(Node expected) {
-        byte[] bytes = NodeFmtLib.str(expected).getBytes();
+        byte[] bytes = NodeFmtLib.strNT(expected).getBytes();
         Node actual = RiotLib.parse(new String(bytes, StandardCharsets.UTF_8));
         Assert.assertEquals(expected, actual);
     }

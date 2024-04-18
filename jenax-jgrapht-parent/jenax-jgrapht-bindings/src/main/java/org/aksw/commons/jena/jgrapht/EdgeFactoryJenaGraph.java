@@ -8,9 +8,9 @@ import org.apache.jena.graph.Triple;
 
 
 public class EdgeFactoryJenaGraph
-	implements
+    implements
 //    EdgeFactory<Node, Triple>,
-	Supplier<Triple>
+    Supplier<Triple>
 {
     protected Node predicate;
 
@@ -21,12 +21,12 @@ public class EdgeFactoryJenaGraph
 
     //@Override
     public Triple createEdge(Node sourceVertex, Node targetVertex) {
-        Triple result = new Triple(sourceVertex, predicate, targetVertex);
+        Triple result = Triple.create(sourceVertex, predicate, targetVertex);
         return result;
     }
-    
+
     @Override
     public Triple get() {
-    	return new Triple(Node.ANY, predicate, Node.ANY);
+        return Triple.create(Node.ANY, predicate, Node.ANY);
     }
 }

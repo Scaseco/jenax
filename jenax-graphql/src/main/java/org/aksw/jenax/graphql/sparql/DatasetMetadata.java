@@ -4,13 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.model.voidx.util.VoidUtils;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -24,7 +23,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 public class DatasetMetadata {
     private static final Logger logger = LoggerFactory.getLogger(DatasetMetadata.class);
 
-    protected static final Query datasetHashQuery = SparqlStmtMgr.loadQuery("probe-dataset-hash-simple.rq");
     protected static final Query classPartitionsQuery = SparqlStmtMgr.loadQuery("void/minimal/class-partitions.rq");
     protected static final Query propertyPartitionsQuery = SparqlStmtMgr.loadQuery("void/minimal/property-partitions.rq");
     protected static final List<Query> shaclQueries = SparqlStmtMgr.loadQueries("sh-scalar-properties.rq");
@@ -44,14 +42,6 @@ public class DatasetMetadata {
 
     public Model getShaclModel() {
         return shaclModel;
-    }
-
-    public static String fetchDatasetHash(QueryExecutionFactoryQuery qef) {
-        String result = QueryExecutionUtils.fetchNode(qef::createQueryExecution, datasetHashQuery)
-                .map(Node::getLiteralLexicalForm)
-                .map(String::toLowerCase)
-                .orElse(null);
-        return result;
     }
 
     public static Model combine(List<Model> models) {
@@ -78,7 +68,7 @@ public class DatasetMetadata {
     }
 
     public static ListenableFuture<String> fetchDatasetHash(RdfDataSource dataSource, ListeningExecutorService executorService) {
-        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> fetchDatasetHash(dataSource.asQef()));
+        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> RdfDataSources.fetchDatasetHash(dataSource));
         return datasetHashFuture;
     }
 

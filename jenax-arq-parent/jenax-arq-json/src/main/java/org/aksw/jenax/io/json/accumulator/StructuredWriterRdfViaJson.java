@@ -9,6 +9,7 @@ import org.apache.jena.graph.Node;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
 
 public class StructuredWriterRdfViaJson
@@ -75,7 +76,9 @@ public class StructuredWriterRdfViaJson
     public static JsonElement toJson(Node value) {
         JsonElement elt = value == null
                 ? JsonNull.INSTANCE
-                : RdfJsonUtils.toJson(Graph.emptyGraph, value, 0, 1, false);
+                : value.isURI()
+                    ? new JsonPrimitive(value.getURI())
+                    : RdfJsonUtils.toJson(Graph.emptyGraph, value, 0, 1, false);
         return elt;
     }
 

@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-server-parent</artifactId>
-		<version>4.9.0-1</version>
+		<version>5.0.0-1</version>
 	</parent>
 
 
@@ -146,7 +146,7 @@
 
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-spring5</artifactId>
+			<artifactId>jersey-spring6</artifactId>
 		</dependency>
 
 		<dependency>
@@ -159,11 +159,10 @@
 		<!-- <groupId>org.atmosphere</groupId> -->
 		<!-- <artifactId>atmosphere-jersey</artifactId> -->
 		<!-- </dependency> -->
-
-
+		
 		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
+			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
+			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
 		</dependency>
 
 		<!-- <dependency> -->
@@ -188,8 +187,8 @@
 		<!-- </dependency> -->
 
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
 		<!-- <dependency> -->
@@ -198,14 +197,16 @@
 		<!-- </dependency> -->
 
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-fuseki-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		-->
 
 		<!-- <dependency> -->
 		<!-- <groupId>javax.servlet</groupId> -->

@@ -85,8 +85,8 @@ import org.apache.jena.sparql.util.VarUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Maps;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
 
 import io.reactivex.rxjava3.core.Flowable;
