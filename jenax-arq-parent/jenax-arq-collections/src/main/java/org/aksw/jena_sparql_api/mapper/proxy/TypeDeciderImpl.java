@@ -26,8 +26,6 @@ import com.google.common.base.Strings;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
-
-
 public class TypeDeciderImpl
     implements TypeDecider
 {
@@ -118,8 +116,13 @@ public class TypeDeciderImpl
             Model model = outResource.getModel();
             RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(type, model);
 
-            outResource
-                .addProperty(typeProperty, rdfNode);
+            // Check presence of the triple before adding it -
+            // a union model will accept the triple even if it is already part of the union
+            boolean isAlreadyPresent = outResource.hasProperty(typeProperty, rdfNode);
+            if (!isAlreadyPresent) {
+                outResource
+                    .addProperty(typeProperty, rdfNode);
+            }
         }
     }
 

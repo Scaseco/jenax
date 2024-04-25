@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 
+@Deprecated /** Use TypeDeciderImpl from jenax-arq-collections! */
 public class TypeDeciderImpl
     implements TypeDecider
 {
@@ -93,8 +94,13 @@ public class TypeDeciderImpl
             Model model = outResource.getModel();
             RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(type, model);
 
-            outResource
-                .addProperty(typeProperty, rdfNode);
+            // Check presence of the triple before adding it -
+            // a union model will accept the triple even if it is already part of the union
+            boolean isAlreadyPresent = outResource.hasProperty(typeProperty, rdfNode);
+            if (!isAlreadyPresent) {
+                outResource
+                    .addProperty(typeProperty, rdfNode);
+            }
         }
     }
 

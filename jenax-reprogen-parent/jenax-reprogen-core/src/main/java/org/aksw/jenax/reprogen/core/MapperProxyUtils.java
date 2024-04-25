@@ -2340,6 +2340,10 @@ public class MapperProxyUtils {
 
 
     public static HashCode getHashIdActual(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         HashCode result;
         cxt.declareProcessing(root);
 
@@ -2359,7 +2363,8 @@ public class MapperProxyUtils {
                 result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
             }
         } else {
-            ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+            Class<?> rootClass = root.getClass();
+            ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
             if(cd != null) {
                 // NOTE Do not call root.asResource() as this may unproxy proxied resources!
@@ -2382,10 +2387,16 @@ public class MapperProxyUtils {
     }
 
     public static void collectReachableResources(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         cxt.declarePending(root);
 
+        Class<?> rootClass = root.getClass();
+
         // If there is a class descriptor, root is implicitly a resource
-        ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+        ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
         if(cd != null) {
             // NOTE Do not call root.asResource() as this may unproxy proxied resources!
