@@ -214,11 +214,6 @@
 			<artifactId>sedona-common</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.sedona</groupId>
-			<artifactId>sedona-common</artifactId>
-		</dependency>
-
 		<!-- <dependency> -->
 		<!-- <groupId>org.locationtech.jts</groupId> -->
 		<!-- <artifactId>jts-core</artifactId> -->
