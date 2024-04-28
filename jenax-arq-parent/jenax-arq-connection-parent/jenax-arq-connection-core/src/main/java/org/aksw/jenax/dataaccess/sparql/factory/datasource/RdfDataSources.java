@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
+import org.aksw.jenax.arq.util.op.RewriteList;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
@@ -25,6 +26,7 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtTransformViaRewrite;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -33,6 +35,7 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.algebra.Transform;
+import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
@@ -93,9 +96,49 @@ public class RdfDataSources {
         return wrapWithStmtTransform(dataSource, stmtTransform);
     }
 
+
+    /**
+     * Returns a new data source that applies the given rewrite.
+     *
+     * In order to reduce Algebra.compile / OpAsQuery.asQuery round trips,
+     * if the base data source is already a {@link RdfDataSourceWrapperWithRewrite} then
+     * the rewrite is unwrapped and combined with the given rewrite.
+     */
+    public static RdfDataSource wrapWithOpTransform(RdfDataSource dataSource, Rewrite rewrite) {
+        RdfDataSource result;
+        if (dataSource instanceof RdfDataSourceWrapperWithRewrite) {
+            RdfDataSourceWrapperWithRewrite<?> tmp = (RdfDataSourceWrapperWithRewrite<?>)dataSource;
+
+            Rewrite before = tmp.getRewrite();
+            RdfDataSource delegate = tmp.getDelegate();
+            Rewrite effectiveRewrite = RewriteList.flatten(true, before, rewrite);
+            result = new RdfDataSourceWrapperWithRewrite<>(delegate, effectiveRewrite);
+        } else {
+            result = new RdfDataSourceWrapperWithRewrite<>(dataSource, rewrite);
+        }
+        return result;
+    }
+
+    /**
+     * Return a new data source that applies the given statement transform.
+     *
+     * If the given transform in an instance of {@link SparqlStmtTransformViaRewrite} then the rewrite is
+     * unwrapped and passed to {@link #wrapWithOpTransform(RdfDataSource, Rewrite)}.
+     *
+     * @param dataSource
+     * @param stmtTransform
+     * @return
+     */
     public static RdfDataSource wrapWithStmtTransform(RdfDataSource dataSource, SparqlStmtTransform stmtTransform) {
-        return wrapWithLinkTransform(dataSource,
-            link -> RDFLinkUtils.wrapWithStmtTransform(link, stmtTransform));
+        RdfDataSource result;
+        if (stmtTransform instanceof SparqlStmtTransformViaRewrite) {
+            Rewrite rewrite = ((SparqlStmtTransformViaRewrite)stmtTransform).getRewrite();
+            result = wrapWithOpTransform(dataSource, rewrite);
+        } else {
+            result = wrapWithLinkTransform(dataSource,
+                link -> RDFLinkUtils.wrapWithStmtTransform(link, stmtTransform));
+        }
+        return result;
     }
 
     public static RdfDataSource wrapWithLinkTransform(RdfDataSource rdfDataSource, RDFLinkTransform linkXform) {
@@ -103,7 +146,7 @@ public class RdfDataSources {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection base = super.getConnection();
-                RDFConnection r = RDFConnectionUtils.wrapWithLinkDecorator(base, linkXform);
+                RDFConnection r = RDFConnectionUtils.wrapWithLinkTransform(base, linkXform);
                 return r;
             }
         };

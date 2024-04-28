@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalCache
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalCache.class);
 

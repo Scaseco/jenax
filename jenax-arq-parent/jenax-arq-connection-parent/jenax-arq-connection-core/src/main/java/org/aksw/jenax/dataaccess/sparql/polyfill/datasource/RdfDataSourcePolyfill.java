@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtuosoSubstr;
+import org.aksw.jena_sparql_api.algebra.transform.TransformExistsToOptional;
 import org.aksw.jena_sparql_api.algebra.transform.TransformExpandAggCountDistinct;
 import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumnsToExtend;
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
@@ -41,10 +42,11 @@ public class RdfDataSourcePolyfill {
             result = virtuosoProfile();
         }
 
-
         if (result == null) {
-            result = List.of();
+            result = new ArrayList<>(); // List.of();
         }
+
+        result.add(Suggestion.of("Generic - EXISTS as OPTIONAL", "Rewrite EXISTS conditions using OPTIONAL", TransformExistsToOptional.class.getName()));
 
         return result;
     }

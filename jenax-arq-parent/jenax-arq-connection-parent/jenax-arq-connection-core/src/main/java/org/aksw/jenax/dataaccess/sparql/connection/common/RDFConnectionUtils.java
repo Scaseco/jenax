@@ -242,13 +242,13 @@ public class RDFConnectionUtils {
 //        return result[0];
 //    }
 
-    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, RDFLinkTransform linkTransform) {
+    /** Adapt the given connection as a link. Then apply the transform to that link and return the result. */
+    public static RDFConnection wrapWithLinkTransform(RDFConnection conn, RDFLinkTransform linkTransform) {
         RDFLink oldLink = RDFLinkAdapter.adapt(conn);
         RDFLink newLink = linkTransform.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
     }
-
 
     public static RDFConnection wrapWithQueryTransform(
             RDFConnection conn,
@@ -286,11 +286,11 @@ public class RDFConnectionUtils {
     }
 
     public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
-        return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+        return wrapWithLinkTransform(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
     }
 
     public static RDFConnection wrapWithQueryOnly(RDFConnection conn) {
-        return wrapWithLinkDecorator(conn, RDFLinkUtils::wrapWithQueryOnly);
+        return wrapWithLinkTransform(conn, RDFLinkUtils::wrapWithQueryOnly);
     }
 
     public static RDFConnection wrapWithAutoDisableReorder(RDFConnection conn) {
