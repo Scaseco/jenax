@@ -11,7 +11,7 @@
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-functionbinder-parent</artifactId>
 		<!--< <artifactId>jena-sparql-api-mapper-parent</artifactId> -->
-		<version>5.0.0-2-SNAPSHOT</version>
+		<version>5.1.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
