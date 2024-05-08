@@ -1,7 +1,6 @@
 package org.aksw.jenax.model.rdfs.domain.api;
 
 import org.aksw.jenax.annotation.reprogen.IriNs;
-import org.aksw.jenax.annotation.reprogen.IriType;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDFS;
@@ -16,7 +15,6 @@ import org.apache.jena.vocabulary.RDFS;
 public interface HasRdfsComment
     extends Resource
 {
-    @IriType
     @IriNs(RDFS.uri)
     String getComment();
     HasRdfsComment setComment(String url);

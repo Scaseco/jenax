@@ -51,4 +51,10 @@ public class Suggestion<T>
     public T getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Suggestion [name=" + name + ", comment=" + comment + ", isEnabled=" + isEnabled + ", value=" + value
+                + "]";
+    }
 }

@@ -14,10 +14,13 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRe
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
+import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -34,7 +37,18 @@ import com.google.common.collect.Iterables;
  * SPARQL endpoint feature detector.
  */
 public class RdfDataSourcePolyfill {
+
     public static List<Suggestion<String>> suggestPolyfills(RdfDataSource rdfDataSource) {
+        Model model = ModelFactory.createDefaultModel();
+        MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
+
+        PolyfillDetector detector = new PolyfillDetector();
+        detector.load(model);
+        List<Suggestion<String>> result = detector.detect(rdfDataSource);
+        return result;
+    }
+
+    public static List<Suggestion<String>> suggestPolyfillsOld(RdfDataSource rdfDataSource) {
         List<Suggestion<String>> result = null;
         String profile = RdfDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
 

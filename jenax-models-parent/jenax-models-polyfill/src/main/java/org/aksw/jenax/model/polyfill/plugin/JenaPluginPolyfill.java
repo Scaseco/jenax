@@ -1,5 +1,10 @@
 package org.aksw.jenax.model.polyfill.plugin;
 
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillConditionConjunction;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillConditionQuery;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggester;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.Personality;
 import org.apache.jena.rdf.model.RDFNode;
@@ -23,6 +28,13 @@ public class JenaPluginPolyfill
     }
 
     public static void init(Personality<RDFNode> p) {
+        JenaPluginUtils.registerResourceClasses(
+            PolyfillSuggester.class,
+            PolyfillConditionQuery.class,
+            PolyfillConditionConjunction.class,
+            PolyfillRewriteJava.class
+        );
+
 //        JenaPluginUtils.registerResourceClasses(
 //            Profile.class,
 //            Plugin.class,

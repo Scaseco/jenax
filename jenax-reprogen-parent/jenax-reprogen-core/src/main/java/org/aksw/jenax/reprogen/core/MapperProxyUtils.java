@@ -2227,6 +2227,24 @@ public class MapperProxyUtils {
 
 
     public static String defaultToString(Object that, Object[] args) {
+        return toStringTree(that, args);
+    }
+
+    public static String toStringTree(Object that, Object[] args) {
+        Resource res = (Resource)that;
+        Class<?>[] interfaces = res.getClass().getInterfaces();
+
+        // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
+        Model m = ModelFactory.createDefaultModel();
+        RDFNode closure = res.inModel(ResourceUtils.bnodeClosure(res));
+        // m.add(res.listProperties());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        RDFDataMgr.write(baos, closure.getModel(), RDFFormat.TURTLE_PRETTY);
+        String r = res.asNode() + " (javaInterfaces: " + Arrays.toString(interfaces) + "): [" + baos.toString() + "]";
+        return r;
+    }
+
+    public static String toStringDirectProperties(Object that, Object[] args) {
         Resource res = (Resource)that;
         // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
         Model m = ModelFactory.createDefaultModel();
