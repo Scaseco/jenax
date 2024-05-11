@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.util.exec.query;
 
 import org.apache.jena.sparql.util.Symbol;
 
-public class JenaxSymbols {
+public class JenaXSymbols {
     /**
      * Symbol for a jenax-based ResourceManager.
      * Certain JenaX components (such as the JDBC extensions for RML) need to
