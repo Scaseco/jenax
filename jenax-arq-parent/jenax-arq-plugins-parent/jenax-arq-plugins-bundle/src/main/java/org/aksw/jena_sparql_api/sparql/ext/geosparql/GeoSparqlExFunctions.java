@@ -344,7 +344,7 @@ public class GeoSparqlExFunctions {
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper h3CellIdToGeom(long cellId) {
-        Geometry geom = H3ToGeometryAgg.h3ToGeom(new long[]{cellId});
+        Geometry geom = H3ToGeometryAgg.h3ToGeom(cellId);
         return GeometryWrapperFactory.createGeometry(geom, WKTDatatype.URI);
     }
 

@@ -1,6 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
 import com.uber.h3core.H3Core;
+import com.uber.h3core.util.LatLng;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.geosparql.implementation.GeometryWrapperFactory;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
@@ -21,6 +22,8 @@ import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.NodeConst;
 import org.apache.jena.sparql.sse.SSE;
+import org.apache.jena.sparql.util.NodeFactoryExtra;
+import org.apache.jena.sys.JenaSystem;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.H3Utils;
 import org.locationtech.jts.geom.*;
@@ -105,4 +108,24 @@ public class H3ToGeometryAgg {
         );
     }
 
+    public static Geometry h3ToGeom(long cell) {
+        GeometryFactory geomFactory = CustomGeometryFactory.theInstance();
+
+        List<LatLng> latLngs = H3Utils.h3.cellToBoundary(cell);
+        latLngs.add(latLngs.get(0));
+        LinearRing linearRing = geomFactory.createLinearRing(latLngs.stream().map(latLng -> new Coordinate(latLng.lng, latLng.lat, Double.NaN)).toArray(Coordinate[]::new));
+        Polygon polygon = geomFactory.createPolygon(linearRing, new LinearRing[]{});
+
+        return polygon;
+    }
+
+
+    public static void main(String[] args) {
+        JenaSystem.init();
+        long cell = 586013859081355263L;
+        Geometry geom = h3ToGeom(cell);
+        System.out.println(geom);
+
+
+    }
 }
