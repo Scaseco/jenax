@@ -5,6 +5,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprEvalTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.VariableNotBoundException;
 import org.apache.jena.sparql.function.FunctionBase2;
 
 /**
@@ -30,6 +31,9 @@ public class F_BindingGet
         if (key.isString()) {
             String str = key.getString();
             Node node = elt.get(str);
+            if (node == null) {
+                NodeValue.raise(new VariableNotBoundException());
+            }
             result = NodeValue.makeNode(node);
         } else {
             NodeValue.raise(new ExprEvalTypeException("Json array or object expected"));

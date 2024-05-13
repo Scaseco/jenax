@@ -87,34 +87,34 @@ public class DatasetCmp {
         }
     }
 
-    public static Report assessIsIsomorphicByGraph(Dataset ds1, Dataset ds2) {
-        return assessIsIsomorphicByGraph(ds1.asDatasetGraph(), ds2.asDatasetGraph());
+    public static Report assessIsIsomorphicByGraph(Dataset expected, Dataset actual) {
+        return assessIsIsomorphicByGraph(expected.asDatasetGraph(), actual.asDatasetGraph());
     }
 
-    public static Report assessIsIsomorphicByGraph(DatasetGraph ds1, DatasetGraph ds2) {
+    public static Report assessIsIsomorphicByGraph(DatasetGraph expected, DatasetGraph actual) {
 
         Report report = new Report();
         // compare default graphs first
-        if (!ds1.getDefaultGraph().isIsomorphicWith(ds2.getDefaultGraph())) {
+        if (!expected.getDefaultGraph().isIsomorphicWith(actual.getDefaultGraph())) {
             report.nonIsomorphicGraphs.add(Quad.defaultGraphIRI);
         }
         // then compare the named graphs
         Set<Node> allNodes = new LinkedHashSet<>();
-        ds1.listGraphNodes().forEachRemaining(allNodes::add);
-        ds2.listGraphNodes().forEachRemaining(allNodes::add);
+        expected.listGraphNodes().forEachRemaining(allNodes::add);
+        actual.listGraphNodes().forEachRemaining(allNodes::add);
 
         for (Node g : allNodes) {
 
-            if (!ds1.containsGraph(g)) {
+            if (!expected.containsGraph(g)) {
                 report.missingGraphsFirst().add(g);
             }
 
-            if (!ds2.containsGraph(g)) {
+            if (!actual.containsGraph(g)) {
                 report.missingGraphsSecond().add(g);
             }
 
-            Graph g1 = ds1.getGraph(g);
-            Graph g2 = ds2.getGraph(g);
+            Graph g1 = expected.getGraph(g);
+            Graph g2 = actual.getGraph(g);
 
             if (g1.size() != g2.size()) {
                 report.nonIsomorphicGraphs().add(g);
