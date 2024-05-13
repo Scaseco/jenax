@@ -67,7 +67,7 @@ public class DatasetCmp {
     }
 
     public static record Report(
-        Set<Node> nonIsomoprhicGraphs,
+        Set<Node> nonIsomorphicGraphs,
         Set<Node> missingGraphsFirst,
         Set<Node> missingGraphsSecond) {
         public Report() {
@@ -75,7 +75,7 @@ public class DatasetCmp {
         }
 
         public boolean isIsomorphic() {
-            return missingGraphsFirst.isEmpty() && missingGraphsSecond.isEmpty() && nonIsomoprhicGraphs.isEmpty();
+            return missingGraphsFirst.isEmpty() && missingGraphsSecond.isEmpty() && nonIsomorphicGraphs.isEmpty();
         }
 
         @Override
@@ -83,7 +83,7 @@ public class DatasetCmp {
             return
                 "Missing graphs first : " + missingGraphsFirst + "\n" +
                 "Missing graphs second: " + missingGraphsSecond + "\n" +
-                "Non-isomorphic graphs: " + nonIsomoprhicGraphs;
+                "Non-isomorphic graphs: " + nonIsomorphicGraphs;
         }
     }
 
@@ -96,7 +96,7 @@ public class DatasetCmp {
         Report report = new Report();
         // compare default graphs first
         if (!ds1.getDefaultGraph().isIsomorphicWith(ds2.getDefaultGraph())) {
-            report.nonIsomoprhicGraphs.add(Quad.defaultGraphIRI);
+            report.nonIsomorphicGraphs.add(Quad.defaultGraphIRI);
         }
         // then compare the named graphs
         Set<Node> allNodes = new LinkedHashSet<>();
@@ -117,7 +117,7 @@ public class DatasetCmp {
             Graph g2 = ds2.getGraph(g);
 
             if (g1.size() != g2.size()) {
-                report.nonIsomoprhicGraphs().add(g);
+                report.nonIsomorphicGraphs().add(g);
             }
 
             // Isomorphism check may fail with stack overflow execution if datasets
