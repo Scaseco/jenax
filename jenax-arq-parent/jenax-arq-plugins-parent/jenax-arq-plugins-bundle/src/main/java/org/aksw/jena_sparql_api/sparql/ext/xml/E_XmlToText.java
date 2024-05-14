@@ -19,6 +19,9 @@ public class E_XmlToText
         if (xmlNode != null) {
             String str = xmlNode.getTextContent();
             result = NodeValue.makeString(str);
+        } else if (nv.isString()) {
+            // could be that E_XPath was used to select an attribute, in which case we end up with a String here
+            return nv;
         } else {
             throw new ExprEvalException("Argument is not an xml node");
         }
