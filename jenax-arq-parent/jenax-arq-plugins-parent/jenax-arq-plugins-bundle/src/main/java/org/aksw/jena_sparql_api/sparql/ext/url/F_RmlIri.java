@@ -2,7 +2,9 @@ package org.aksw.jena_sparql_api.sparql.ext.url;
 
 import java.util.List;
 
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.norse.NorseTerms;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.expr.E_Function;
@@ -26,7 +28,12 @@ public class F_RmlIri extends FunctionBase1 {
     protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
         String baseIRI = null;
         NodeValue nvRel = args.get(0);
-        return resolve(nvRel, baseIRI, env);
+        NodeValue result = resolve(nvRel, baseIRI, env);
+
+        Node node = result.asNode();
+        NodeUtils.validate(node);
+
+        return result;
     }
 
     @Override
