@@ -30,7 +30,7 @@ import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.lang.RiotParsers;
+import org.apache.jena.riot.lang.IteratorParsers;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
@@ -109,7 +109,7 @@ public class GraphFromPrefixMatcher extends GraphBase {
 
         Stream<Triple> baseStream = Streams.stream(
                 //RDFDataMgrRx.createIteratorTriples(in, Lang.NTRIPLES, "http://www.example.org/"));
-                RiotParsers.createIteratorNTriples(in, null, RDFDataMgrRx.dftProfile()));
+                IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()));
 
         if(false) {
             if(prefix != null && prefix.length() > 0) {

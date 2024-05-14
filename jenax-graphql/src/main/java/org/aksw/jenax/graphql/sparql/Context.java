@@ -1,6 +1,5 @@
 package org.aksw.jenax.graphql.sparql;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathStr;
 import org.aksw.jenax.arq.util.prefix.PrefixMap2;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
-import org.aksw.jenax.path.core.FacetPath;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
@@ -64,6 +62,7 @@ class PrefixCxt {
 
 
 public class Context {
+
     // Effective local values
     protected Field field;
     protected Context parent;
@@ -74,7 +73,7 @@ public class Context {
     protected String iri;
     protected String ns;
 
-    // Computed values taking parent context into account
+    // Computed effective values taking parent context into account
     protected PrefixMap finalPrefixMap = null;
     protected String finalBase = null;
     protected String finalNs = null;
@@ -86,10 +85,21 @@ public class Context {
     // Contexts of immediate children. Used to reference information of fields by name
     protected Map<String, Context> childContexts = new LinkedHashMap<>();
 
+    protected Cardinality thisCardinality;
+    protected Cardinality inheritedCardinality;
+
     public Context(Context parent, Field field) {
         super();
         this.parent = parent;
         this.field = field;
+
+        if (parent != null) {
+            this.inheritedCardinality = parent.getInheritedCardinality();
+            this.thisCardinality = parent.getInheritedCardinality();
+        } else {
+            this.inheritedCardinality = Cardinality.MANY;
+            this.thisCardinality = Cardinality.MANY;
+        }
     }
 
     public Path<String> getPath() {
@@ -190,6 +200,10 @@ public class Context {
     }
 
     public void update() {
+        updatePrefixes();
+    }
+
+    public void updatePrefixes() {
         finalPrefixMap = buildFinalPrefixMap();
         PrefixMapping pm = new PrefixMappingAdapter(finalPrefixMap);
         finalBase = base == null ? null : Optional.ofNullable(pm.getNsPrefixURI(base)).orElseGet(() -> pm.expandPrefix(base));
@@ -266,6 +280,39 @@ public class Context {
             .collect(Collectors.toSet());
         return result;
     }
+
+    public Cardinality getThisCardinality() {
+        return thisCardinality;
+    }
+
+    public void setThisCardinality(Cardinality thisCardinality) {
+        this.thisCardinality = thisCardinality;
+    }
+
+    public Cardinality getInheritedCardinality() {
+        return inheritedCardinality;
+    }
+
+    public void setInheritedCardinality(Cardinality inheritedCardinality) {
+        this.inheritedCardinality = inheritedCardinality;
+    }
+
+
+    /** Whether the cardinality of the field is effectively single */
+//    public Cardinality getFinalCardinality() {
+//        Cardinality card = getCardinality();
+//        if (card == null && parent != null) {
+//            card = parent.getFinalCardinality();
+//            if (!card.isAll()) {
+//                card = null;
+//            }
+//        }
+//
+//        if (card == null) {
+//            card = new Cardinality(false, false);
+//        }
+//        return card;
+//    }
 
 //    public static Set<Path<String>> findField(TreeDataMap<Path<String>, Field> tree, Path<String> basePath, String name) {
 //        Set<Path<String>> result = Streams.stream(Traverser.<Path<String>>forTree(tree::getChildren).depthFirstPreOrder(basePath))

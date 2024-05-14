@@ -129,8 +129,8 @@ public class QueryFragment {
 
     public static Triple createTriple(boolean isReverse, Node s, Node p, Node o) {
         Triple result = isReverse
-                ? new Triple(o, p, s)
-                : new Triple(s, p, o)
+                ? Triple.create(o, p, s)
+                : Triple.create(s, p, o)
                 ;
 
         return result;
@@ -361,7 +361,7 @@ public class QueryFragment {
 
 
         BasicPattern bgp = new BasicPattern();
-        bgp.add(new Triple(p, facetCount.asNode(), c));
+        bgp.add(Triple.create(p, facetCount.asNode(), c));
         Template template = new Template(bgp);
         query.setConstructTemplate(template);
 

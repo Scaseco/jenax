@@ -29,6 +29,7 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.NodeUtils;
 
 public class QuadUtils {
@@ -40,6 +41,10 @@ public class QuadUtils {
 
     public static final List<String> quadVarNames = Arrays.asList(ng, ns, np, no);
 
+
+    public static boolean isValidAsStatement(Quad quad) {
+        return quad.getGraph().isURI() && ModelUtils.isValidAsStatement(quad.getSubject(), quad.getPredicate(), quad.getObject());
+    }
 
     /** Create o stream of a quad's four nodes */
     public static Stream<Node> streamNodes(Quad q) {

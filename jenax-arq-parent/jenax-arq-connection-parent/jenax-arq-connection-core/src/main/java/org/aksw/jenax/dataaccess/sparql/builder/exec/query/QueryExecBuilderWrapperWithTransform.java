@@ -1,25 +1,25 @@
 package org.aksw.jenax.dataaccess.sparql.builder.exec.query;
 
-import java.util.function.Function;
-
+import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
+import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 
-/** QueryExecBuilder base class which parses query strings and delegates them to the object based method*/
+/** QueryExecBuilder base class which parses query strings and delegates them to the object based method */
 public class QueryExecBuilderWrapperWithTransform
-    extends QueryExecBuilderDelegateBaseParse
+    extends QueryExecBuilderWrapperBaseParse
 {
-    protected Function<? super Query, ? extends Query> queryTransformer;
-    protected Function<? super QueryExec, ? extends QueryExec> queryExecTransformer;
+    protected QueryTransform queryTransform;
+    protected QueryExecTransform queryExecTransform;
 
     protected QueryExecBuilderWrapperWithTransform(
             QueryExecBuilder delegate,
-            Function<? super Query, ? extends Query> queryTransformer,
-            Function<? super QueryExec, ? extends QueryExec> queryExecTransformer) {
+            QueryTransform queryTransform,
+            QueryExecTransform queryExecTransform) {
         super(delegate);
-        this.queryTransformer = queryTransformer;
-        this.queryExecTransformer = queryExecTransformer;
+        this.queryTransform = queryTransform;
+        this.queryExecTransform = queryExecTransform;
     }
 
     /**
@@ -31,25 +31,25 @@ public class QueryExecBuilderWrapperWithTransform
      */
     public static QueryExecBuilder create(
             QueryExecBuilder delegate,
-            Function<? super Query, ? extends Query> queryTransformer,
-            Function<? super QueryExec, ? extends QueryExec> queryExecTransformer) {
-        return new QueryExecBuilderWrapperWithTransform(delegate, queryTransformer, queryExecTransformer);
+            QueryTransform queryTransform,
+            QueryExecTransform queryExecTransform) {
+        return new QueryExecBuilderWrapperWithTransform(delegate, queryTransform, queryExecTransform);
     }
 
     @Override
     public QueryExecBuilder query(Query query) {
-        Query q = queryTransformer == null
+        Query q = queryTransform == null
                 ? query
-                : queryTransformer.apply(query);
+                : queryTransform.apply(query);
         return super.query(q);
     }
 
     @Override
     public QueryExec build() {
         QueryExec raw = super.build();
-        QueryExec result = queryExecTransformer == null
+        QueryExec result = queryExecTransform == null
                 ? raw
-                : queryExecTransformer.apply(raw);
+                : queryExecTransform.apply(raw);
         return result;
     }
 

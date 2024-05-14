@@ -7,7 +7,6 @@ import org.aksw.jenax.dataaccess.sparql.factory.engine.query.QueryEngineFactoryP
 import org.aksw.jenax.dataaccess.sparql.factory.engine.update.UpdateEngineFactoryCore;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.engine.QueryEngineFactory;
 import org.apache.jena.sparql.engine.QueryEngineRegistry;
 import org.apache.jena.sparql.exec.QueryExecutionCompat;
@@ -17,7 +16,7 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.ContextAccumulator;
 
 /**
- * Similar to {@link RDFConnectionFactory#connect(Dataset)} but
+ * Similar to {@link RDFConnection#connect(Dataset)} but
  * with additional configuration options to set a {@link Context} and
  * the update / query engines.
  *
@@ -103,8 +102,6 @@ public class DatasetRDFConnectionFactoryBuilder {
         // If they are null we assume a mistake
         Objects.requireNonNull(queryEngineFactoryProvider);
         Objects.requireNonNull(updateEngineFactoryProvider);
-
         return new DatasetRDFConnectionFactoryImpl(context, queryEngineFactoryProvider, updateEngineFactoryProvider);
     }
-
 }

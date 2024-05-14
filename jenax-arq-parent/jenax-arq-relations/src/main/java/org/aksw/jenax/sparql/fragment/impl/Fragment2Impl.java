@@ -149,7 +149,7 @@ public class Fragment2Impl
     }
 
     public static Fragment2 create(Node p) {
-        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(new Triple(Vars.s, p, Vars.o)), Vars.s, Vars.o);
+        Fragment2 result = new Fragment2Impl(ElementUtils.createElement(Triple.create(Vars.s, p, Vars.o)), Vars.s, Vars.o);
         return result;
     }
 

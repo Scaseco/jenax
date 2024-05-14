@@ -21,6 +21,8 @@ import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpData;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpDataRefResource;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpError;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpHdtHeader;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJavaRewrite;
+import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJavaRewrite.Rewrite;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpJobInstance;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpMacroCall;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpN;
@@ -103,6 +105,9 @@ public class JenaPluginConjure
                 OpCoalesce.class,
                 OpConstruct.class,
                 OpUnionDefaultGraph.class,
+
+                OpJavaRewrite.class,
+                Rewrite.class,
 
                 OpData.class,
                 OpDataRefResource.class,

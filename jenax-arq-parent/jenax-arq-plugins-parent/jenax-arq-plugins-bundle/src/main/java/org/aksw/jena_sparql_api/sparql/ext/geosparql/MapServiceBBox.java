@@ -1,10 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 
-import java.util.Map;
-
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
-import org.aksw.commons.util.benchmark.BenchmarkUtils;
 import org.aksw.jena_sparql_api.lookup.MapPaginatorConcept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;

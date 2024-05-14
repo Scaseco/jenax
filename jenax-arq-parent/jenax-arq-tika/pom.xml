@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>4.10.0-1-SNAPSHOT</version>
+		<version>5.1.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -26,10 +26,16 @@
 			<artifactId>tika-core</artifactId>
 		</dependency>
 
-                <dependency>
-                        <groupId>org.apache.tika</groupId>
-                        <artifactId>tika-java7</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers-standard-package</artifactId>
+		</dependency>
+
+		<!-- TODO We only need RDFLanguagesEx; it should eventually be separated from the rx module -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
+		</dependency>
 
 		<!-- Unit Testing -->
 		<dependency>

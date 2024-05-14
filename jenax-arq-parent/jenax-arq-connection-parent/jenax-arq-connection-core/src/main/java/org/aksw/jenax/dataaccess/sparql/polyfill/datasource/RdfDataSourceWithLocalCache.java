@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.obj.ObjectUtils;
 import org.aksw.jena_sparql_api.algebra.transform.ProjectExtend;
+import org.aksw.jena_sparql_api.algebra.utils.AlgebraUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
@@ -25,24 +26,35 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
+import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExtend;
+import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.algebra.op.OpOrder;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpUnion;
+import org.apache.jena.sparql.algebra.optimize.Rewrite;
+import org.apache.jena.sparql.algebra.optimize.TransformFilterPlacement;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
+import org.apache.jena.sparql.service.enhancer.impl.ServiceResponseCache;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.ElementService;
+import org.apache.jena.sparql.syntax.ElementSubQuery;
+import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +64,12 @@ import org.slf4j.LoggerFactory;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalCache
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalCache.class);
 
     public static final String REMOTE_IRI = "env://REMOTE";
     public static final Node REMOTE_NODE = NodeFactory.createURI(REMOTE_IRI);
-
     public static final Node CACHE_NODE = NodeFactory.createURI("cache:");
 
     /** Requests go to this dataset which is configured to delegate SERVICE >env://REMOTE> requests to the delegate data source */
@@ -77,7 +88,46 @@ public class RdfDataSourceWithLocalCache
         + "    ORDER BY ASC(MIN(str(?o)))\n"
         + "  }\n"
         + "ORDER BY ASC(?sortKey_1) ?s";
+
+        queryStr = """
+            SELECT DISTINCT  ?p ?o ?c
+WHERE
+  { SELECT DISTINCT  ?p ?o (COUNT(DISTINCT ?s) AS ?c)
+    WHERE
+      { ?s  a   <http://fp7-pp.publicdata.eu/ontology/Project> ;
+            ?p  ?o
+      }
+    GROUP BY ?p ?o
+    HAVING ( ?p = <http://fp7-pp.publicdata.eu/ontology/strategicObjective> )
+  }
+ORDER BY ASC(?p) ASC(?o)
+LIMIT   127
+        """;
+
+        queryStr = """
+            SELECT *
+WHERE
+  {{ SELECT DISTINCT  ?p ?o
+    WHERE
+      { SELECT DISTINCT  ?p ?o (COUNT(DISTINCT ?s) AS ?c)
+        WHERE
+          { ?s  a   <http://fp7-pp.publicdata.eu/ontology/Project> ;
+                ?p  ?o
+          }
+        GROUP BY ?p ?o
+      } }
+      FILTER ( ?p = <http://fp7-pp.publicdata.eu/ontology/strategicObjective> )
+  }
+        """;
+
         Query query = QueryFactory.create(queryStr);
+
+        Op op = Algebra.compile(query);
+        // Rewrite rewrite = AlgebraUtils.createDefaultRewriter();
+        Rewrite rewrite = x -> Transformer.transform(new TransformFilterPlacement(), x);
+        op = rewrite.rewrite(op);
+
+        System.out.println(op);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
         RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RdfDataEngines.of(DatasetFactory.create()));
@@ -85,22 +135,32 @@ public class RdfDataSourceWithLocalCache
         System.out.println(rewritten);
     }
 
-
-
     public RdfDataSourceWithLocalCache(RdfDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
     }
 
+    /**
+     * Create an (empty) dataset with a special ServiceExecutorRegistry that handles
+     * caching and remote requests.
+     *
+     * @param delegate
+     * @return
+     */
     public static Dataset createProxyDataset(RdfDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
         registry.addBulkLink(new ChainingServiceExecutorBulkServiceEnhancer());
+
+        // Create a cache local to the dataset - don't use the global cache, because
+        // all service requests will go to REMOTE_NODE
+        ServiceResponseCache.set(result.getContext(), new ServiceResponseCache());
+
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(opExec, base);
+                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base, true);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }
@@ -114,6 +174,7 @@ public class RdfDataSourceWithLocalCache
     public RDFConnection getConnection() {
         RDFConnection base = RDFConnection.connect(proxyDataset);
         RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, OpRewriteInjectCacheOps::rewriteQuery);
+        // RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base, TransformInjectCacheOps::rewriteQuery);
         return result;
     }
 
@@ -144,7 +205,11 @@ public class RdfDataSourceWithLocalCache
         return result;
     }
 
-    /** Rewriter that injects caching operations after group by operations */
+
+    /**
+     * Rewriter that injects cache ops as the parent of group by ops.
+     * Note, that all group by results are pulled into the client.
+     */
     public static class OpRewriteInjectCacheOps
         implements OpRewriter<Entry<Op, Boolean>> {
 
@@ -170,12 +235,13 @@ public class RdfDataSourceWithLocalCache
             return rr;
         }
 
-        public Entry<Op, Boolean> handleOp1(Op op, Function<Op, Op> ctor) {
-            Entry<Op, Boolean> tmp = rewriteOp(op);
-            Op subOp = tmp.getKey();
+        public Entry<Op, Boolean> handleOp1(Op1 op, Function<Op, Op> ctor) {
+            Op subOp = op.getSubOp();
+            Entry<Op, Boolean> tmp = rewriteOp(subOp);
+            Op newSubOp = tmp.getKey();
             boolean rewritten = tmp.getValue();
             Entry<Op, Boolean> result = rewritten
-                    ? Map.entry(ctor.apply(subOp), true)
+                    ? Map.entry(ctor.apply(newSubOp), true)
                     : Map.entry(op, false);
             return result;
         }
@@ -185,7 +251,19 @@ public class RdfDataSourceWithLocalCache
             Entry<Op, Boolean> result = null;
             Op subOp = op.getSubOp();
             if (pe != null) {
-                if (pe.getSubOp() instanceof OpGroup) {
+                Op finalSubOp = pe.getSubOp();
+
+//                ExprList filterExprs = null;
+//                if (finalSubOp instanceof OpFilter) {
+//                    OpFilter f = (OpFilter)finalSubOp;
+//                    filterExprs = f.getExprs();
+//                    finalSubOp = f.getSubOp();
+//                }
+
+                if (finalSubOp instanceof OpGroup)
+                {
+//                	Op tmp = filterExprs != null ? Op
+
                     result = wrapWithCache(pe.toOp());
                 } else {
                     Entry<Op, Boolean> tmp = rewriteOp(subOp);
@@ -196,7 +274,8 @@ public class RdfDataSourceWithLocalCache
             }
 
             if (result == null) {
-                result = handleOp1(subOp, ctor);
+                // result = rewriteOp(op);
+                result = handleOp1(op, ctor);
                 // result = defaultHandler.apply(op); // OpRewriter.super.rewrite(op);
             }
 
@@ -206,6 +285,12 @@ public class RdfDataSourceWithLocalCache
         @Override
         public Entry<Op, Boolean> fallback(Op op) {
             return Map.entry(op, false);
+        }
+
+        @Override
+        public Entry<Op, Boolean> rewrite(OpFilter op) {
+            Entry<Op, Boolean> result = handleOp1(op, subOp -> OpFilter.filterBy(op.getExprs(), subOp));
+            return result;
         }
 
         @Override
@@ -221,13 +306,13 @@ public class RdfDataSourceWithLocalCache
 
         @Override
         public Entry<Op, Boolean> rewrite(OpSlice op) {
-            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> new OpSlice(subOp, op.getStart(), op.getLength()));
+            Entry<Op, Boolean> result = handleOp1(op, subOp -> new OpSlice(subOp, op.getStart(), op.getLength()));
             return result;
         }
 
         @Override
         public Entry<Op, Boolean> rewrite(OpDistinct op) {
-            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> new OpDistinct(subOp));
+            Entry<Op, Boolean> result = handleOp1(op, subOp -> new OpDistinct(subOp));
             return result;
         }
 
@@ -261,7 +346,7 @@ public class RdfDataSourceWithLocalCache
         @Override
         public Entry<Op, Boolean> rewrite(OpOrder op) {
             // Copy op.getConditions()?
-            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> {
+            Entry<Op, Boolean> result = handleOp1(op, subOp -> {
                 // Check for the pattern: service(<cache:>, service(<REMOTE:>, extend(?.x)))
                 Op unwrapped = unwrapIfCached(subOp);
                 List<SortCondition> rawConditions = op.getConditions();
@@ -353,4 +438,117 @@ public class RdfDataSourceWithLocalCache
             return result;
         }
     }
+
+
+    /**
+     * FIXME This class is not 'broken' but it serves the purpose where the underlying service supports
+     * caching with the service enhancer plugin.
+     *
+     * Broken query rewrite based on the syntax level. The problem is that we need to take care of
+     * which parts are executed remotely and which ones are executed in the client.
+     * This cannot be cleanly done without the semantics of the algebra: if we have an ElementGroup
+     * of which some elements can be cached and other not, then how can we ensure apply the correct transformation
+     * if not converting to the algebra first?
+     */
+    public static class TransformInjectCacheSyntax {
+
+        public static boolean canWrapWithCache(Query query) {
+            boolean result = query.hasGroupBy() || query.hasAggregators();
+            return result;
+        }
+
+        public static Query rewriteQuery(Query query) {
+            Query result = query;
+
+            boolean doWrapAsSubQuery = false;
+            Element queryPattern = null;
+            if (query.isSelectType()) {
+                doWrapAsSubQuery = canWrapWithCache(query);
+                if (doWrapAsSubQuery) {
+                    queryPattern = new ElementSubQuery(query);
+                } else {
+                    queryPattern = query.getQueryPattern();
+                }
+            }
+
+            if (queryPattern != null) {
+                Element newElt = rewriteInjectCache(queryPattern);
+                if (queryPattern != newElt) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Original query:\n" + query);
+                    }
+                    if (doWrapAsSubQuery) {
+                        if (newElt instanceof ElementSubQuery) {
+                            result = ((ElementSubQuery)newElt).getQuery();
+                        } else {
+                            result = new Query();
+                            result.setQuerySelectType();
+                            result.setQueryResultStar(true);
+                            result.setQueryPattern(newElt);
+                        }
+                    } else {
+                        result = QueryTransformOps.shallowCopy(query);
+                        result.setQueryPattern(newElt);
+                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Rewritten query:\n" + result);
+                    }
+                }
+            }
+            return result;
+        }
+
+        public static Element rewriteInjectCacheSubQuery(ElementSubQuery elt) {
+            Element result;
+            Query query = elt.getQuery();
+
+            if (canWrapWithCache(query)) {
+    //    		Query newQuery = new Query();
+    //    		newQuery.setQuerySelectType();
+    //    		newQuery.setQueryResultStar(true);
+                // result = new ElementService("cache:env://REMOTE", elt);
+                result = new ElementService("cache:", elt);
+            } else {
+                Query oldQuery = elt.getQuery();
+                Query newQuery = rewriteQuery(elt.getQuery());
+                result = oldQuery == newQuery
+                    ? elt
+                    : new ElementSubQuery(newQuery);
+            }
+
+            return result;
+        }
+
+        public static Element rewriteInjectCache(Element elt) {
+            Element result;
+            if (elt instanceof ElementGroup) {
+                result = rewriteInjectCacheGroup((ElementGroup)elt);
+            } else if (elt instanceof ElementSubQuery) {
+                result = rewriteInjectCacheSubQuery((ElementSubQuery)elt);
+            } else {
+                result = elt;
+            }
+            return result;
+        }
+
+        public static Element rewriteInjectCacheGroup(ElementGroup elts) {
+            ElementGroup result = new ElementGroup();
+            boolean change = false;
+            for (Element elt : elts.getElements()) {
+                Element newElt = rewriteInjectCache(elt);
+                if (newElt != elt) {
+                    change = true;
+                }
+                result.addElement(newElt);
+            }
+
+            if (!change) {
+                result = elts;
+            }
+            return result;
+        }
+    }
 }
+
+
+

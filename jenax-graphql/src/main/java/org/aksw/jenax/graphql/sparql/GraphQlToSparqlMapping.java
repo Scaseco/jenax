@@ -14,17 +14,19 @@ public class GraphQlToSparqlMapping {
     public static class Entry {
         protected Field topLevelField;
 
-        /** A cache of the prefixes computed from the field */
+        /** A copy of the prefixes computed from the field */
         protected PrefixMap prefixMap;
         protected NodeQuery nodeQuery;
         protected GraphToJsonNodeMapper mapper;
+        protected boolean isSingle;
 
-        public Entry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonNodeMapper mapper) {
+        public Entry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonNodeMapper mapper, boolean isSingle) {
             super();
             this.nodeQuery = nodeQuery;
             this.prefixMap = prefixMap;
             this.mapper = mapper;
             this.topLevelField = topLevelField;
+            this.isSingle = isSingle;
         }
 
         public Field getTopLevelField() {
@@ -41,6 +43,11 @@ public class GraphQlToSparqlMapping {
 
         public GraphToJsonNodeMapper getMapper() {
             return mapper;
+        }
+
+        /** True if the cardinality is {@literal @one} */
+        public boolean isSingle() {
+            return isSingle;
         }
     }
 
@@ -65,8 +72,8 @@ public class GraphQlToSparqlMapping {
         return topLevelMappings;
     }
 
-    public void addEntry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonNodeMapper mapper) {
+    public void addEntry(Field topLevelField, PrefixMap prefixMap, NodeQuery nodeQuery, GraphToJsonNodeMapper mapper, boolean isSingle) {
         String fieldName = topLevelField.getName();
-        topLevelMappings.put(fieldName, new Entry(topLevelField, prefixMap, nodeQuery, mapper));
+        topLevelMappings.put(fieldName, new Entry(topLevelField, prefixMap, nodeQuery, mapper, isSingle));
     }
 }

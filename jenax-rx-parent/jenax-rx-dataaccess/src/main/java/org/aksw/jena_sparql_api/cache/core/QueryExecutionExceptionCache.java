@@ -1,12 +1,12 @@
 package org.aksw.jena_sparql_api.cache.core;
 
+import java.net.http.HttpConnectTimeoutException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 
@@ -43,7 +43,7 @@ public class QueryExecutionExceptionCache
     protected void onException(Exception e) {
         List<Throwable> throwables = ExceptionUtils.getThrowableList(e);
         for(Throwable t : throwables) {
-            if(t instanceof TimeoutException || t instanceof ConnectTimeoutException) {
+            if(t instanceof TimeoutException || t instanceof HttpConnectTimeoutException) {
                 String queryStr = getQueryStr();
                 exceptionCache.put(queryStr, e);
             }

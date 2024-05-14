@@ -135,7 +135,7 @@ public class QuadContainmentUtils {
         Element elData = tableToElement(table);
 
         ElementTriplesBlock elTriples = new ElementTriplesBlock();
-        elTriples.addTriple(new Triple(Vars.s, Vars.p, Vars.o));
+        elTriples.addTriple(Triple.create(Vars.s, Vars.p, Vars.o));
 
         ElementGroup result = new ElementGroup();
         result.addElement(elData);
@@ -148,7 +148,7 @@ public class QuadContainmentUtils {
         Element elData = tableToElement(table);
 
         ElementTriplesBlock elTriples = new ElementTriplesBlock();
-        elTriples.addTriple(new Triple(Vars.s, Vars.p, Vars.o));
+        elTriples.addTriple(Triple.create(Vars.s, Vars.p, Vars.o));
 
         ElementGroup result = new ElementGroup();
         result.addElement(elData);

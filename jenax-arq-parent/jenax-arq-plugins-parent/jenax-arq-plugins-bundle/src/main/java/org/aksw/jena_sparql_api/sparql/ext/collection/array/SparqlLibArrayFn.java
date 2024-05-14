@@ -13,12 +13,14 @@ import org.apache.jena.sparql.expr.ExprEvalException;
 
 public class SparqlLibArrayFn {
 
-    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    @IriNs(JenaExtensionArray.NS)
+    @IriNs(value=JenaExtensionArray.LEGACY_NS, deprecated=true)
     public static Node get(NodeList nodes, int index) {
         return nodes.get(index);
     }
 
-    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    @IriNs(JenaExtensionArray.NS)
+    @IriNs(value=JenaExtensionArray.LEGACY_NS, deprecated=true)
     public static Node last(NodeList nodes) {
         int n = nodes.size();
         Node result;
@@ -30,17 +32,20 @@ public class SparqlLibArrayFn {
         return result;
     }
 
-    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    @IriNs(JenaExtensionArray.NS)
+    @IriNs(value=JenaExtensionArray.LEGACY_NS, deprecated=true)
     public static NodeList of(Node... nodes) {
         return new NodeListImpl(Arrays.asList(nodes));
     }
 
-    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    @IriNs(JenaExtensionArray.NS)
+    @IriNs(value=JenaExtensionArray.LEGACY_NS, deprecated=true)
     public static int size(NodeList nodes) {
         return nodes.size();
     }
 
-    @IriNs({JenaExtensionArray.NS, JenaExtensionArray.LEGACY_NS})
+    @IriNs(JenaExtensionArray.NS)
+    @IriNs(value=JenaExtensionArray.LEGACY_NS, deprecated=true)
     public static NodeSet toSet(NodeList nodes) {
         return new NodeSetImpl(new LinkedHashSet<>(nodes));
     }

@@ -16,17 +16,17 @@ public class PathConstraint3
         // TODO: Rename Vars.p if it is equal to s or p
 
         return Arrays.asList(
-                new Triple(type, Vars.x, Vars.o),
-                new Triple(Vars.x, OWL2.annotatedProperty.asNode(), p));
+                Triple.create(type, Vars.x, Vars.o),
+                Triple.create(Vars.x, OWL2.annotatedProperty.asNode(), p));
     }
 
     @Override
     public Collection<Triple> createIngoingPattern(Node type, Node p) {
         return Arrays.asList(
-                new Triple(Vars.s, Vars.x,type),
-                new Triple(Vars.x, OWL2.annotatedProperty.asNode(), p));
+                Triple.create(Vars.s, Vars.x,type),
+                Triple.create(Vars.x, OWL2.annotatedProperty.asNode(), p));
 
-//		Triple u = new Triple(p, VocabPath.isIngoingPredicateOf.asNode(), type);
+//		Triple u = Triple.create(p, VocabPath.isIngoingPredicateOf.asNode(), type);
 //    	return Collections.singleton(u);
     }
 

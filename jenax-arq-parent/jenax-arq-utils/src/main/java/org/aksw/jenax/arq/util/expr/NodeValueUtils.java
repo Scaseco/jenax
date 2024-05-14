@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.util.NodeCmp;
 
 public class NodeValueUtils {
 
@@ -21,7 +22,7 @@ public class NodeValueUtils {
                 : o2 == null ? 1 : NodeValue.compareAlways(o1, o2);
         } catch (Exception e) {
             // RDF terms with mismatch in lexical value / datatype cause an exception
-            result = org.apache.jena.sparql.util.NodeUtils.compareRDFTerms(o1.asNode(), o2.asNode());
+            result = NodeCmp.compareRDFTerms(o1.asNode(), o2.asNode());
         }
         return result;
     }

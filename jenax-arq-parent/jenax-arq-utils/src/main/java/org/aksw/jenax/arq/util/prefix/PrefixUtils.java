@@ -2,10 +2,11 @@ package org.aksw.jenax.arq.util.prefix;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -16,14 +17,12 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.system.AsyncParser;
+import org.apache.jena.riot.system.EltStreamRDF;
 import org.apache.jena.riot.system.PrefixMap;
-import org.apache.jena.riot.system.PrefixMapAdapter;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.ARQConstants;
-import org.apache.jena.sparql.core.Prologue;
-import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
 public class PrefixUtils {
@@ -142,5 +141,47 @@ public class PrefixUtils {
         PrefixMapping result = new PrefixMappingImpl();
         result.setNsPrefixes(model.getNsPrefixMap());
         return result;
+    }
+
+    /**
+     * Reads prefixes from the given input stream into the provided sink.
+     *
+     * @param sink
+     * @param in
+     * @param lang
+     * @return If the sink is null then a new prefix map is returned, otherwise the sink is returned.
+     */
+    public static PrefixMap readPrefixes(PrefixMap sink, InputStream in, Lang lang) {
+        PrefixMap dst = sink == null
+                ? PrefixMapFactory.create()
+                : sink;
+
+        try(Stream<EltStreamRDF> stream = AsyncParser.of(in, lang, null)
+                // .setPrematureDispatch(elt -> true) // Dispatch each element individually
+                .setChunkSize(100)
+                .streamElements()) {
+            Iterator<EltStreamRDF> it = stream.iterator();
+            long nonPrefixEventCount = 0;
+            long maxNonPrefixEventCount = 1000;
+            while (it.hasNext() && nonPrefixEventCount < maxNonPrefixEventCount) {
+                EltStreamRDF event = it.next();
+                if (event.isPrefix()) {
+                    String eventPrefix = event.prefix();
+                    String eventIri = event.iri();
+
+                    String priorIri = dst.get(eventPrefix);
+                    if (priorIri != null && priorIri.equals(eventIri)) {
+                        // Repeated prefixes count as non-prefix-events
+                        ++nonPrefixEventCount;
+                    } else {
+                        dst.add(eventPrefix, eventIri);
+                        nonPrefixEventCount = 0;
+                    }
+                } else {
+                    ++nonPrefixEventCount;
+                }
+            }
+        }
+        return dst;
     }
 }

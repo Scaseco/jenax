@@ -3,8 +3,6 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 import java.io.Closeable;
 import java.util.function.Function;
 
-import org.aksw.jenax.arq.util.dataset.HasDataset;
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 
@@ -16,7 +14,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
  *
  */
 public class RdfDataEngineFromDataset
-    implements RdfDataEngine, HasDataset
+    implements RdfDataEngineWithDataset
 {
     protected Dataset dataset;
     protected Function<? super Dataset, ? extends RDFConnection> connSupplier;

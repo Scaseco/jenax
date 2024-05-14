@@ -8,7 +8,6 @@ public class QueryExecWrapperTxn<T extends QueryExec>
     extends QueryExecWrapperBase<T>
 {
     protected Transactional transactional;
-
     protected boolean startedTxnHere = false;
     protected Throwable seenThrowable = null;
 

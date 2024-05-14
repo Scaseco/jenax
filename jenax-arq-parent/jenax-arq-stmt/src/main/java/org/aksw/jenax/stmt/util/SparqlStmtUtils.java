@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,11 +37,8 @@ import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.aksw.jenax.stmt.resultset.SPARQLResultEx;
 import org.aksw.jenax.stmt.resultset.SPARQLResultVisitor;
-import org.apache.http.client.HttpClient;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.web.TypedInputStream;
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.http.HttpOp;
@@ -57,6 +55,8 @@ import org.apache.jena.riot.system.stream.StreamManager;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.Transform;
+import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -73,6 +73,9 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 
 /**
  * Utility methods for processing sources of SparqlStmts
@@ -207,6 +210,10 @@ public class SparqlStmtUtils {
         }
 
         return result;
+    }
+
+    public static SparqlStmt applyOpTransform(SparqlStmt stmt, Transform transform) {
+        return applyOpTransform(stmt, op -> Transformer.transform(transform, op));
     }
 
     public static SparqlStmt applyOpTransform(SparqlStmt stmt, Function<? super Op, ? extends Op> transform) {

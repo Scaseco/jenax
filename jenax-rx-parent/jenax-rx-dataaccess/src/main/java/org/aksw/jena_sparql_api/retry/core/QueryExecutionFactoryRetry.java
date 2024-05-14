@@ -169,7 +169,7 @@ public class QueryExecutionFactoryRetry
         qef = new QueryExecutionFactoryRetry(qef).retryOn(Exception.class).withMaxRetries(3).withMinDelay(500).withMaxDelay(1000);
         String query = "SELECT ?type (COUNT(?s) AS ?cnt) WHERE {?s a <http://dbpedia.org/ontology/Person> . ?s a ?type .} GROUP BY ?type ORDER BY DESC(?cnt)";
         QueryExecution qe = qef.createQueryExecution(query);
-        qe.setTimeout(10000);
+        // qe.setTimeout(10000);
         ResultSet rs = qe.execSelect();
         System.out.println(ResultSetFormatter.asText(rs));
     }

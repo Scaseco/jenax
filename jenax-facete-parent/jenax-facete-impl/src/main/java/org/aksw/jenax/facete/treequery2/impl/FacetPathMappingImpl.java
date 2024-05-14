@@ -30,7 +30,9 @@ public class FacetPathMappingImpl
     implements FacetPathMapping
 {
     public static final BaseEncoding DEFAULT_ENCODING = BaseEncoding.base32().omitPadding();
-    public static final HashFunction DEFAULT_HASH_FUNCTION = Hashing.murmur3_32_fixed();
+
+    // murmur3_32_fixed(); // FIXME There seems to be some conflict with hadoop/spark which causes murmur hash not to be found
+    public static final HashFunction DEFAULT_HASH_FUNCTION = Hashing.md5();
 
     private static final Logger logger = LoggerFactory.getLogger(FacetPathMappingImpl.class);
 

@@ -6,6 +6,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.DatasetImpl;
 import org.apache.jena.sparql.graph.GraphFactory;
 
@@ -36,6 +37,10 @@ public class DatasetOneNgImpl
 
     public static DatasetOneNg create(String graphName, Graph graph) {
         return wrap(DatasetGraphOneNgImpl.create(NodeFactory.createURI(graphName), graph));
+    }
+
+    public static DatasetOneNg naturalDataset(RDFNode resource) {
+        return new DatasetOneNgImpl(DatasetGraphOneNgImpl.create(resource.asNode(), resource.getModel().getGraph()));
     }
 
     @Override

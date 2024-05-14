@@ -8,6 +8,7 @@ import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TransactionalNull;
 
+@Deprecated /** Use RdfDataEngineOverQueryExecutionFactory */
 public class SparqlQueryConnectionJsaBase<T extends QueryExecutionFactoryQuery>
     implements TransactionalWrapper, SparqlQueryConnectionTmp
 {

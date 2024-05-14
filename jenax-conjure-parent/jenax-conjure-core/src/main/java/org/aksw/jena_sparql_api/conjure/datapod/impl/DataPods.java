@@ -51,7 +51,8 @@ import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.riot.WebContent;
+import org.apache.jena.sparql.exec.http.QuerySendMode;
+import org.apache.jena.sparql.exec.http.UpdateSendMode;
 import org.apache.jena.util.ResourceUtils;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdt.hdt.HDTManager;
@@ -248,13 +249,6 @@ public class DataPods {
         List<String> namedGraphs = dataRef.getNamedGraphs();
 
         Object auth = dataRef.getAuth();
-
-        RdfDataPod result = fromSparqlEndpoint(serviceUrl, defaultGraphs, namedGraphs, auth);
-        return result;
-    }
-
-    public static RdfDataPod fromSparqlEndpoint(String serviceUrl, List<String> defaultGraphs, List<String> namedGraphs, Object auth) {
-
         Objects.requireNonNull(serviceUrl, "Service URL must not be null");
 
         // Make immutable copies of the arguments
@@ -288,14 +282,44 @@ public class DataPods {
 
 
         RdfDataPod result = new RdfDataPod() {
-
             @Override
             public RDFConnection getConnection() {
 
                 RDFConnectionRemoteBuilder rdfConnectionBuilder = RDFConnectionRemote.create()
-                        .destination(serviceUrl)
-                        .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
-                        ;
+                        .destination(serviceUrl);
+
+                // Apply headers
+                String value;
+                if ((value = dataRef.getAcceptHeaderAskQuery()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderAskQuery(value);
+                }
+
+                if ((value = dataRef.getAcceptHeaderSelectQuery()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderSelectQuery(value);
+                }
+
+                if ((value = dataRef.getAcceptHeaderGraph()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderGraph(value);
+                }
+
+                if ((value = dataRef.getAcceptHeaderDataset()) != null) {
+                    rdfConnectionBuilder = rdfConnectionBuilder.acceptHeaderDataset(value);
+                }
+
+                // Send Modes
+                if ((value = dataRef.getSendModeQuery()) != null) {
+                    QuerySendMode sendMode = QuerySendMode.valueOf(value);
+                    rdfConnectionBuilder = rdfConnectionBuilder.querySendMode(sendMode);
+                }
+
+                if ((value = dataRef.getSendModeUpdate()) != null) {
+                    UpdateSendMode sendMode = UpdateSendMode.valueOf(value);
+                    rdfConnectionBuilder = rdfConnectionBuilder.updateSendMode(sendMode);
+                }
+
+
+//                        .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML) // JSON breaks on virtuoso with empty result sets
+//                        ;
 
                 // FIXME We cannot set default / named graphs on the remote builder
 
@@ -319,6 +343,11 @@ public class DataPods {
                         } else {
                             res = query;
                         }
+
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Effective query: " + res);
+                        }
+
                         return res;
                     });
 

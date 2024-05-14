@@ -156,7 +156,7 @@ public class TestBinSearchBz2 {
 //                }
 
                 //String str = s.isURI() ? "<" + s.getURI() + ">" : s.getBlankNodeLabel()
-                String str = NodeFmtLib.str(s);
+                String str = NodeFmtLib.strNT(s);
                 try(InputStream in = bs.search(str)) {
                     Graph actual = GraphFactory.createDefaultGraph();
                     RDFDataMgr.read(actual, in, Lang.NTRIPLES);
@@ -258,7 +258,7 @@ public class TestBinSearchBz2 {
 //                }
 
             //String str = s.isURI() ? "<" + s.getURI() + ">" : s.getBlankNodeLabel()
-            String str = NodeFmtLib.str(s);
+            String str = NodeFmtLib.strNT(s);
             try(InputStream in = bs.search(str)) {
                 Graph actual = GraphFactory.createDefaultGraph();
                 RDFDataMgr.read(actual, in, Lang.NTRIPLES);

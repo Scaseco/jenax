@@ -45,6 +45,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -284,7 +285,7 @@ public class ResourceShape {
         if(!concretePredicates.isEmpty()) {
             ExprList exprs = new ExprList();
             for(Node node : concretePredicates) {
-                Expr expr = org.apache.jena.sparql.util.ExprUtils.nodeToExpr(node);
+                Expr expr = ExprLib.nodeToExpr(node);
                 exprs.add(expr);
             }
 
@@ -406,7 +407,7 @@ public class ResourceShape {
         // TODO We need to include the triple direction in var ?z
 
         BasicPattern bgp = new BasicPattern();
-        bgp.add(new Triple(Vars.s, Vars.p, Vars.o));
+        bgp.add(Triples.spo); // Triple.create(Vars.s, Vars.p, Vars.o));
         Template template = new Template(bgp);
 
         //Agg<Map<Node, Graph>> agg = AggMap.create(new BindingMapperExpr(new ExprVar(Vars.g)), new AggGraph(template));
@@ -491,8 +492,8 @@ public class ResourceShape {
 
 
         Triple triple = isInverse
-                ? new Triple(Vars.o, Vars.p, Vars.s)
-                : new Triple(Vars.s, Vars.p, Vars.o);
+                ? Triple.create(Vars.o, Vars.p, Vars.s)
+                : Triple.create(Vars.s, Vars.p, Vars.o);
 
         BasicPattern bp = new BasicPattern();
         bp.add(triple);

@@ -4,14 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.aksw.commons.util.Directed;
 import org.aksw.commons.util.triplet.Triplet;
 import org.aksw.commons.util.triplet.TripletImpl;
 import org.aksw.commons.util.triplet.TripletPath;
-
-import com.github.jsonldjava.shaded.com.google.common.base.Objects;
 
 public class NestedPath<V, E>
     implements Serializable
@@ -29,7 +28,7 @@ public class NestedPath<V, E>
     }
 
     public boolean containsVertex(Object vertex) {
-        boolean result = Objects.equal(current, vertex) ||
+        boolean result = Objects.equals(current, vertex) ||
                 getParentLink().map(ParentLink::getTarget).map(parent -> parent.containsVertex(vertex)).orElse(false);
         return result;
     }

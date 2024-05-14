@@ -13,6 +13,14 @@ public interface DataRefSparqlEndpoint
 
     Object getAuth();
 
+    String getAcceptHeaderAskQuery();
+    String getAcceptHeaderDataset();
+    String getAcceptHeaderGraph();
+    String getAcceptHeaderSelectQuery();
+
+    String getSendModeQuery();
+    String getSendModeUpdate();
+
     default DatasetDescription getDatsetDescription() {
         List<String> dgs = getDefaultGraphs();
         List<String> ngs = getNamedGraphs();

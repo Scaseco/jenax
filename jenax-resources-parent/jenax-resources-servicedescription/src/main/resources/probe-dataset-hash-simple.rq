@@ -2,7 +2,7 @@
 # This method is not suitable to detect changes, but it is sufficient to detect (vastly)
 # different datasets under the same service URL
 
-SELECT (MD5(GROUP_CONCAT(?tripleHash)) AS ?datasetHash) {
-  { SELECT * { SELECT * { ?s ?p ?o } LIMIT 1000000 } ORDER BY ?s ?p ?o }
+SELECT (MD5(GROUP_CONCAT(?tripleHash; separator="|")) AS ?datasetHash) {
+  { SELECT * { SELECT * { ?s ?p ?o } LIMIT 30000 } ORDER BY ?s ?p ?o }
   BIND(MD5(CONCAT(STR(?s), '-', STR(?p), '-', STR(?o))) AS ?tripleHash)
 }

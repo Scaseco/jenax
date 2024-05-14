@@ -20,7 +20,7 @@ public class RdfValueMapperStringIri
             String iri = value.toString();
 
             Node o = NodeFactory.createURI(iri);
-            Triple t = new Triple(subject, predicate, o);
+            Triple t = Triple.create(subject, predicate, o);
             outputGraph.add(t);
         }
 

@@ -166,7 +166,11 @@ public class UpdateRequestUtils {
 //        return result;
 //    }
 
-    public static UpdateRequest copyTransform(UpdateRequest request, Function<? super Update, ? extends Update> updateTransform) {
+    /**
+     * Create a new UpdateRequest object by passing all Update elements through the transform.
+     * Null elements are omitted.
+     */
+    public static UpdateRequest copyTransform(UpdateRequest request, UpdateTransform updateTransform) {
         UpdateRequest result = new UpdateRequest();
         PrologueUtils.copy(result, request);
 

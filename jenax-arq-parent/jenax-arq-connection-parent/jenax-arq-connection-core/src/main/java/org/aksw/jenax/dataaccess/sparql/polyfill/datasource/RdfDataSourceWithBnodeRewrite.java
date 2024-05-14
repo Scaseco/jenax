@@ -29,7 +29,7 @@ import com.google.common.collect.Iterables;
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
 public class RdfDataSourceWithBnodeRewrite
-    extends RdfDataSourceWrapperBase
+    extends RdfDataSourceWrapperBase<RdfDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithBnodeRewrite.class);
 
@@ -64,47 +64,6 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
-    public static String detectProfile(RDFConnection conn) {
-        String result = null;
-        // if ("auto".equalsIgnoreCase(givenProfileName) && transformer == null) {
-        // A helper dataset against which the probing query is run.
-        // The dataset's context gets special service handler
-        Dataset probeDs = DatasetFactory.create();
-        ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
-        registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
-            QueryIterator r;
-            if (opExec.getService().getURI().equals("env://REMOTE")) {
-                // try {
-                // These requests materialize the result set, so the connection should be idle
-                // once execService returns
-                    r = RDFConnectionUtils.execService(opExec, conn);
-                    // RDFLinkAdapter.adapt(base).query(query).sel
-                    // r = new QueryIteratorResultSet(base.query(query).execSelect());
-//                    } catch (Exception e) {
-//                        logger.warn("Probing failed", e);
-//                    }
-            } else {
-                r = chain.createExecution(opExec, opOrig, binding, execCxt);
-            }
-            return r;
-        });
-        ServiceExecutorRegistry.set(probeDs.getContext(), registry);
-
-        SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
-        Property dbmsShortName = ResourceFactory.createProperty("http://www.example.org/dbmsShortName");
-
-        Model report = probeDs.getDefaultModel();
-        List<String> nodes = report.listObjectsOfProperty(dbmsShortName)
-            .mapWith(n -> n.isLiteral() ? Objects.toString(n.asLiteral().getValue()) : null)
-            .toList();
-        String first = Iterables.getFirst(nodes, null);
-
-        if(first != null) {
-            result = first;
-        }
-        return result;
-    }
-
     @Override
     public RDFConnection getConnection() {
         // TODO Do probing, block further requests, allow for async shutdown
@@ -113,7 +72,7 @@ public class RdfDataSourceWithBnodeRewrite
         RDFConnection result;
         if (transformer == null) {
             if ("auto".equalsIgnoreCase(givenProfileName)) {
-                derivedProfileName = detectProfile(base);
+                derivedProfileName = RdfDataSourcePolyfill.detectProfile(base);
             } else {
                 derivedProfileName = givenProfileName;
             }

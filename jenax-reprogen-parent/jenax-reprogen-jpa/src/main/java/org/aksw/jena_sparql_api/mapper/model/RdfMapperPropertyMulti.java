@@ -195,7 +195,7 @@ public class RdfMapperPropertyMulti
                 relation = FragmentUtils.createRelation(predicate.asNode(), false);
             } else {
                 ElementGroup group = new ElementGroup();
-                group.addElement(ElementUtils.createElement(new Triple(Vars.s, predicate.asNode(), Vars.x)));
+                group.addElement(ElementUtils.createElement(Triple.create(Vars.s, predicate.asNode(), Vars.x)));
                 Expr expr = typeConverter.toJava(new ExprVar(Vars.x));
                 group.addElement(new ElementBind(Vars.o, expr));
                 relation = new Fragment2Impl(group, Vars.s, Vars.o);

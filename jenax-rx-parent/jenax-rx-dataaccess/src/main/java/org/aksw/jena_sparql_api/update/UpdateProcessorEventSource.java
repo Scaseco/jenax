@@ -8,8 +8,6 @@ import org.aksw.jena_sparql_api.core.QuadContainmentChecker;
 import org.aksw.jena_sparql_api.core.UpdateContext;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
@@ -33,17 +31,17 @@ public class UpdateProcessorEventSource
         //this.ssr = ssr;
     }
 
-    @Override
-    public Context getContext() {
-        return null;
-    }
-
-
-    @Override
-    public DatasetGraph getDatasetGraph() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    @Override
+//    public Context getContext() {
+//        return null;
+//    }
+//
+//
+//    @Override
+//    public DatasetGraph getDatasetGraph() {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
 
     @Override

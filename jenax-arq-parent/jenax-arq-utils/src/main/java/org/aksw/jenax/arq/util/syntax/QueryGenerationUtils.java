@@ -16,10 +16,6 @@ import org.aksw.commons.collections.SetUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -50,6 +46,10 @@ import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 
 public class QueryGenerationUtils {
 
@@ -108,7 +108,7 @@ public class QueryGenerationUtils {
         p = p == null || p.equals(Node.ANY) ? Vars.p : p;
         o = o == null || o.equals(Node.ANY) ? Vars.o : o;
 
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
 
         BasicPattern bgp = new BasicPattern();
         bgp.add(triple);
@@ -138,7 +138,7 @@ public class QueryGenerationUtils {
         p = p == null || p.equals(Node.ANY) ? Vars.p : p;
         o = o == null || o.equals(Node.ANY) ? Vars.o : o;
 
-        Triple triple = new Triple(s, p, o);
+        Triple triple = Triple.create(s, p, o);
 
         BasicPattern bgp = new BasicPattern();
         bgp.add(triple);

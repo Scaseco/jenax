@@ -1,11 +1,11 @@
 package org.aksw.jenax.web.server.boot;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import org.aksw.jenax.web.frontend.WebAppInitializerSparqlServiceUtils;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.WebApplicationContext;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 public class WebAppInitializerSparqlService
     implements  WebApplicationInitializer

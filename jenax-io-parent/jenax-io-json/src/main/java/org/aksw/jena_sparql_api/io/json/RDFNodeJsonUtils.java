@@ -56,7 +56,7 @@ public class RDFNodeJsonUtils {
     public static String nodeToStr(Node node) {
         String result = node.isBlank()
             ? "_:" + node.getBlankNodeLabel()
-            : NodeFmtLib.str(node);
+            : NodeFmtLib.strNT(node);
 
         return result;
     }

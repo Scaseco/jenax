@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.healthcheck.HealthcheckRunner;
-import org.aksw.jenax.dataaccess.sparql.common.TransactionalWrapper;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionTmp;
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
 import org.apache.jena.query.Query;
@@ -126,12 +125,10 @@ public class SparqlQueryConnectionWithReconnect
         return wrapped;
     }
 
-
     protected boolean isConnectionProblemException(Throwable t) {
         return ExceptionUtilsAksw.isConnectionRefusedException(t)
                 || ExceptionUtilsAksw.isUnknownHostException(t);
     }
-
 
     protected void forceCloseActiveConn() {
         try {

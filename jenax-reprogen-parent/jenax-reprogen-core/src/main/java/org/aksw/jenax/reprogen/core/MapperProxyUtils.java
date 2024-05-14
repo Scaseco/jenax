@@ -2227,6 +2227,24 @@ public class MapperProxyUtils {
 
 
     public static String defaultToString(Object that, Object[] args) {
+        return toStringTree(that, args);
+    }
+
+    public static String toStringTree(Object that, Object[] args) {
+        Resource res = (Resource)that;
+        Class<?>[] interfaces = res.getClass().getInterfaces();
+
+        // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
+        Model m = ModelFactory.createDefaultModel();
+        RDFNode closure = res.inModel(ResourceUtils.bnodeClosure(res));
+        // m.add(res.listProperties());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        RDFDataMgr.write(baos, closure.getModel(), RDFFormat.TURTLE_PRETTY);
+        String r = res.asNode() + " (javaInterfaces: " + Arrays.toString(interfaces) + "): [" + baos.toString() + "]";
+        return r;
+    }
+
+    public static String toStringDirectProperties(Object that, Object[] args) {
         Resource res = (Resource)that;
         // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
         Model m = ModelFactory.createDefaultModel();
@@ -2340,6 +2358,10 @@ public class MapperProxyUtils {
 
 
     public static HashCode getHashIdActual(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         HashCode result;
         cxt.declareProcessing(root);
 
@@ -2356,10 +2378,11 @@ public class MapperProxyUtils {
                 String str = (String)o;
                 result = hashFn.hashString(str, StandardCharsets.UTF_8);
             } else {
-                result = hashFn.hashString(NodeFmtLib.str(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
+                result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
             }
         } else {
-            ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+            Class<?> rootClass = root.getClass();
+            ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
             if(cd != null) {
                 // NOTE Do not call root.asResource() as this may unproxy proxied resources!
@@ -2382,10 +2405,16 @@ public class MapperProxyUtils {
     }
 
     public static void collectReachableResources(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         cxt.declarePending(root);
 
+        Class<?> rootClass = root.getClass();
+
         // If there is a class descriptor, root is implicitly a resource
-        ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+        ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
         if(cd != null) {
             // NOTE Do not call root.asResource() as this may unproxy proxied resources!

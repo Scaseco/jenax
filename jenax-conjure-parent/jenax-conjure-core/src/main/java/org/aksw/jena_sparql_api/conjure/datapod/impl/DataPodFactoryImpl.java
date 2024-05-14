@@ -14,13 +14,11 @@ import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefUrl;
 import org.aksw.jena_sparql_api.conjure.dataref.core.api.DataRefVisitor;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.Op;
 import org.aksw.jena_sparql_api.conjure.dataset.algebra.OpVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DataPodFactoryImpl
     implements DataRefVisitor<RdfDataPod>
 {
-    private static Logger logger = LoggerFactory.getLogger(DataPodFactoryImpl.class);
+    // private static Logger logger = LoggerFactory.getLogger(DataPodFactoryImpl.class);
 
     protected OpVisitor<? extends RdfDataPod> opExecutor;
 

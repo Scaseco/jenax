@@ -85,28 +85,28 @@ public class QueryExecutionTimeoutExogeneous
         }
     }
 
-
-    @Override
-    public void setTimeout(long timeout) {
-        duration1 = Duration.ofMillis(timeout);
-        duration2 = duration1;
-    }
-
-    @Override
-    public void setTimeout(long timeout, TimeUnit timeoutUnits) {
-        duration1 = Duration.ofMillis(timeoutUnits.toMillis(timeout));
-        duration2 = duration1;
-    }
-
-    @Override
-    public void setTimeout(long timeout1, long timeout2) {
-        duration1 = Duration.ofMillis(timeout1);
-        duration2 = Duration.ofMillis(timeout2);
-    }
-
-    @Override
-    public void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
-        duration1 = Duration.ofMillis(timeUnit1.toMillis(timeout1));
-        duration2 = Duration.ofMillis(timeUnit2.toMillis(timeout2));
-    }
+//
+//    @Override
+//    public void setTimeout(long timeout) {
+//        duration1 = Duration.ofMillis(timeout);
+//        duration2 = duration1;
+//    }
+//
+//    @Override
+//    public void setTimeout(long timeout, TimeUnit timeoutUnits) {
+//        duration1 = Duration.ofMillis(timeoutUnits.toMillis(timeout));
+//        duration2 = duration1;
+//    }
+//
+//    @Override
+//    public void setTimeout(long timeout1, long timeout2) {
+//        duration1 = Duration.ofMillis(timeout1);
+//        duration2 = Duration.ofMillis(timeout2);
+//    }
+//
+//    @Override
+//    public void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
+//        duration1 = Duration.ofMillis(timeUnit1.toMillis(timeout1));
+//        duration2 = Duration.ofMillis(timeUnit2.toMillis(timeout2));
+//    }
 }

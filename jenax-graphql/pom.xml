@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>4.10.0-1-SNAPSHOT</version>
+		<version>5.1.0-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jenax-graphql</artifactId>
@@ -47,6 +47,7 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

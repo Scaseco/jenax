@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
@@ -78,13 +79,13 @@ public class SparqlStmtMgr {
     }
 
     public static void execSparql(Dataset dataset, String filenameOrURI, Function<String, String> envLookup) {
-        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+        try(RDFConnection conn = RDFConnection.connect(dataset)) {
             execSparql(conn, filenameOrURI, envLookup);
         }
     }
 
     public static void execSparql(Model model, String filenameOrURI, Map<String, String> envMap) {
-        try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model))) {
+        try(RDFConnection conn = RDFConnection.connect(DatasetFactory.wrap(model))) {
             execSparql(conn, filenameOrURI, envMap == null ? null : envMap::get);
         }
     }
@@ -241,6 +242,12 @@ public class SparqlStmtMgr {
         readConnection(conn, filenameOrURI,
                 q -> result.add(ModelUtils.tripleToStatement(result, q.asTriple())));
         return result;
+    }
+
+    public static Model execConstruct(Supplier<RDFConnection> dataSource, String filenameOrURI) {
+        try (RDFConnection conn = dataSource.get()) {
+            return execConstruct(conn, filenameOrURI);
+        }
     }
 
 

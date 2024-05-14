@@ -8,10 +8,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.algebra.Algebra;
-import org.apache.jena.sparql.algebra.OpVars;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,12 +39,13 @@ public class TestGraphQlSparql {
         Assert.assertEquals(expected, actual);
     }
 
-    @Test
-    public void testConditionalFields02() {
+    // @Test
+    public void testInlineFragments02() {
 
-        System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
+        // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
 
-        String queryStr = "{\n"
+        String queryStr
+                = "{\n"
                 + "  user {\n"
                 + "    ... on User @test {\n"
                 + "      id\n"
@@ -61,14 +59,38 @@ public class TestGraphQlSparql {
         System.out.println(doc);
         // JsonElement expected = getResourceAsJson("graphql/test01-result.json", gson);
 
-//        Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
-//        RdfDataSource dataSource = RdfDataEngines.of(ds);
-//        GraphQlExecFactory gef = GraphQlExecFactoryOverSparql.(dataSource);
-//        JsonObject actual = GraphQlExecUtils.materialize(gef, queryStr);
+        Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
+        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        GraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
 
-        // System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
+        JsonObject actual = GraphQlExecUtils.materialize(gef, queryStr);
+
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
 
         // Assert.assertEquals(expected, actual);
+    }
+
+    // @Test
+    public void testInlineFragments03() {
+        // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
+
+        String queryStr
+                = "{\n"
+                + "  user {\n"
+                + "    ... on User @test {\n"
+                + "      id\n"
+                + "      username\n"
+                + "      ... on Agent {\n"
+                + "        ... { test }\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n"
+                + "";
+
+        Parser parser = new Parser();
+        Document doc = parser.parseDocument(queryStr);
+        System.out.println(doc);
     }
 
     private static JsonElement getResourceAsJson(String name, Gson gson) {

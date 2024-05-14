@@ -22,6 +22,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathNodes;
 
+import org.aksw.commons.lambda.throwing.ThrowingSupplier;
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaUrlUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
@@ -72,15 +73,13 @@ public class JenaXmlUtils {
 
     public static org.w3c.dom.Node extractXmlNode(Node node) {
         org.w3c.dom.Node result = null;
-
-        if (node.isLiteral()) {
+        if (node != null && node.isLiteral()) {
             Object value = node.getLiteralValue();
 
             if (value instanceof org.w3c.dom.Node) {
                 result = (org.w3c.dom.Node)value;
             }
         }
-
         return result;
     }
 
@@ -115,6 +114,15 @@ public class JenaXmlUtils {
             result = new NodeValueXml(xmlNode);
         } catch (Exception e) {
             throw new QueryExecException("Failed to parse xml from input stream");
+        }
+        return result;
+    }
+
+    public static NodeValue parse(ThrowingSupplier<InputStream> inSupp) throws Exception {
+        RDFDatatypeXml dtype = (RDFDatatypeXml)TypeMapper.getInstance().getTypeByClass(org.w3c.dom.Node.class);
+        NodeValue result;
+        try (InputStream in = inSupp.get()) {
+            result = JenaXmlUtils.parse(in, dtype);
         }
         return result;
     }

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 public class PrefixSetImpl
     extends AbstractSet<String>

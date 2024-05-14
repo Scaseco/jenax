@@ -355,7 +355,7 @@ public class SqlTranslationUtils {
 
         if(node.isBlank()) {
             type = 0;
-            val = node.getBlankNodeId().getLabelString();
+            val = node.getBlankNodeLabel();
         } else if(node.isURI()) {
             type = 1;
             val = node.getURI();

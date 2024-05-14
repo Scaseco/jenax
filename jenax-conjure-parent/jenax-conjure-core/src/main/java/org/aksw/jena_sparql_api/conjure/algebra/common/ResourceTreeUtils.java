@@ -213,7 +213,7 @@ public class ResourceTreeUtils {
 
                 if(useIriOfThisNode) {
                     Node n = r.isAnon() ? Vars.x : r.asNode();
-                    result = hashFn.hashString(NodeFmtLib.str(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
+                    result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
                     priorHash.put(rdfNode, result);
                 }
 
@@ -235,10 +235,10 @@ public class ResourceTreeUtils {
                         // Using ntriples format because then the node id matches
                         RDFDataMgr.write(System.err, r.getModel(), RDFFormat.NTRIPLES);
     //                        RDFDataMgr.write(System.err, r.getModel(), RDFFormat.TURTLE_PRETTY);
-                        throw new RuntimeException("Leaf nodes must not be blank nodes: " + NodeFmtLib.str(r.asNode()));
+                        throw new RuntimeException("Leaf nodes must not be blank nodes: " + NodeFmtLib.strNT(r.asNode()));
                     } else {
                         Node n = r.isAnon() ? Vars.x : r.asNode();
-                        result = hashFn.hashString(NodeFmtLib.str(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
+                        result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
                     }
                 } else {
 
@@ -265,7 +265,7 @@ public class ResourceTreeUtils {
                     //DcatUtils.getFirstDownloadUrl(dcatDataset)
                 }
             } else {
-                result = hashFn.hashString(NodeFmtLib.str(rdfNode.asNode()), StandardCharsets.UTF_8);
+                result = hashFn.hashString(NodeFmtLib.strNT(rdfNode.asNode()), StandardCharsets.UTF_8);
             }
 
             priorHash.put(rdfNode, result);

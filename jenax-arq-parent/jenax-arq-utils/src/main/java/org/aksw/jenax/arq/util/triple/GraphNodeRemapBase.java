@@ -54,7 +54,7 @@ public class GraphNodeRemapBase
     }
 
     public static Triple createTriple(Node s, Node p, Node o) {
-        Triple result = new Triple(
+        Triple result = Triple.create(
                 s == null ? Node.ANY : s,
                 p == null ? Node.ANY : p,
                 o == null ? Node.ANY : o);

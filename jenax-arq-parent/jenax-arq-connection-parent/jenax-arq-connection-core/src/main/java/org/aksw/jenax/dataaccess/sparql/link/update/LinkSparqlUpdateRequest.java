@@ -7,7 +7,7 @@ import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 
 public interface LinkSparqlUpdateRequest
-    extends LinkSparqlUpdateTmp
+    extends LinkSparqlUpdateBase
 {
     @Override
     LinkSparqlUpdate getDelegate();

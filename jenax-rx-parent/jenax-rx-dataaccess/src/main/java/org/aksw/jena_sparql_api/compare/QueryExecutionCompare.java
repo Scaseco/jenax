@@ -18,7 +18,6 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
@@ -121,15 +120,15 @@ public class QueryExecutionCompare
      *
      * @param binding
      */
-    @Override
-    public void setInitialBinding(QuerySolution binding) {
-        throw new RuntimeException("not implemented");
-    }
+//    @Override
+//    public void setInitialBinding(QuerySolution binding) {
+//        throw new RuntimeException("not implemented");
+//    }
 
-    @Override
-    public void setInitialBinding(Binding binding) {
-        throw new RuntimeException("not implemented");
-    }
+//    @Override
+//    public void setInitialBinding(Binding binding) {
+//        throw new RuntimeException("not implemented");
+//    }
 
     /**
      * The dataset against which the query will execute.
@@ -417,22 +416,22 @@ public class QueryExecutionCompare
      * Not all query execution systems support timeouts.
      * A timeout of less than zero means no timeout.
      */
-    @Override
-    public void setTimeout(long timeout, TimeUnit timeoutUnits) {
-        a.setTimeout(timeout, timeoutUnits);
-        b.setTimeout(timeout, timeoutUnits);
-    }
+//    @Override
+//    public void setTimeout(long timeout, TimeUnit timeoutUnits) {
+//        a.setTimeout(timeout, timeoutUnits);
+//        b.setTimeout(timeout, timeoutUnits);
+//    }
 
     /**
      * Set time, in milliseconds
      *
      * @see #setTimeout(long, java.util.concurrent.TimeUnit)
      */
-    @Override
-    public void setTimeout(long timeout) {
-        a.setTimeout(timeout);
-        b.setTimeout(timeout);
-    }
+//    @Override
+//    public void setTimeout(long timeout) {
+//        a.setTimeout(timeout);
+//        b.setTimeout(timeout);
+//    }
 
     /**
      * Set timeouts on the query execution; the first timeout refers to time to first result,
@@ -441,22 +440,22 @@ public class QueryExecutionCompare
      * Not all query execution systems support timeouts.
      * A timeout of less than zero means no timeout; this can be used for timeout1 or timeout2.
      */
-    @Override
-    public void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
-        a.setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
-        b.setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
-    }
+//    @Override
+//    public void setTimeout(long timeout1, TimeUnit timeUnit1, long timeout2, TimeUnit timeUnit2) {
+//        a.setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
+//        b.setTimeout(timeout1, timeUnit1, timeout2, timeUnit2);
+//    }
 
     /**
      * Set time, in milliseconds
      *
      * @see #setTimeout(long, java.util.concurrent.TimeUnit, long, java.util.concurrent.TimeUnit)
      */
-    @Override
-    public void setTimeout(long timeout1, long timeout2) {
-        a.setTimeout(timeout1, timeout2);
-        b.setTimeout(timeout1, timeout2);
-    }
+//    @Override
+//    public void setTimeout(long timeout1, long timeout2) {
+//        a.setTimeout(timeout1, timeout2);
+//        b.setTimeout(timeout1, timeout2);
+//    }
 
     @Override
     public Iterator<Triple> execConstructTriples() {

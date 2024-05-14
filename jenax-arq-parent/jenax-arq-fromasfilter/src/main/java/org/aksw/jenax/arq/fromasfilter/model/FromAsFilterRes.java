@@ -3,16 +3,13 @@ package org.aksw.jenax.arq.fromasfilter.model;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.arq.fromasfilter.assembler.FromAsFilterTerms;
-import org.apache.jena.rdf.model.Resource;
 
+@ResourceView
 public interface FromAsFilterRes
-    extends Resource
+    extends RdfAssemblerWrapper
 {
-    @Iri(FromAsFilterTerms.baseDataset)
-    Resource getBaseDataset();
-    void setBaseDataset(Resource baseDataset);
-
     @Iri(FromAsFilterTerms.NS + "alias")
     Set<GraphAlias> getAliases();
 

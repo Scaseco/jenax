@@ -1,9 +1,10 @@
 package org.aksw.jena_sparql_api.sparql.ext.mvn;
 
-import org.aksw.dcat.jena.domain.api.MavenEntityCore;
+import org.aksw.commons.model.maven.domain.api.MavenEntityCore;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.norse.NorseTerms;
 
 public class JenaExtensionsMvn {
     public static final String ns = "http://jsa.aksw.org/fn/mvn/";
@@ -14,7 +15,8 @@ public class JenaExtensionsMvn {
             .registerAll(JenaExtensionsMvn.class);
     }
 
-    @IriNs(ns)
+    @IriNs(NorseTerms.NS + "mvn.")
+    @IriNs(value=ns, deprecated=true)
     public static String toPath(String mvnIdOrUrn,
             @DefaultValue("snapshots") String snapshotPrefix,
             @DefaultValue("internal") String internalPrefix) {

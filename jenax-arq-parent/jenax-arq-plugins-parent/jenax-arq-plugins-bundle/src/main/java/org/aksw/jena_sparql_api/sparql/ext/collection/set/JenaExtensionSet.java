@@ -9,6 +9,7 @@ import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 
 public class JenaExtensionSet {
+    // TODO Upgrade to norse namespace
     public static final String NS = "http://jsa.aksw.org/fn/set/";
 
 

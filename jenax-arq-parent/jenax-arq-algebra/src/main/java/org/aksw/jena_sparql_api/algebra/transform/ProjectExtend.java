@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpExtend;
+import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
@@ -88,6 +89,13 @@ public class ProjectExtend {
         return result;
     }
 
+    /**
+     *
+     * @param project If true, inject a OpProject with the variables in vel.
+     * @param vel
+     * @param subOp
+     * @return
+     */
     public static Op applyIfNeeded(boolean project, VarExprList vel, Op subOp) {
         Op result = subOp;
         if (!vel.isEmpty()) {

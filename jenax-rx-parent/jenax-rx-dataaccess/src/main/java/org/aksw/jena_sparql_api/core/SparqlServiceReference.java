@@ -9,7 +9,6 @@ import org.aksw.jenax.annotation.reprogen.Base;
 import org.aksw.jenax.annotation.reprogen.DefaultIri;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.RdfType;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.jena.sparql.core.DatasetDescription;
 
 /**

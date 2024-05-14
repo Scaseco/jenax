@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.syntax.ElementTransformSubst2;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
@@ -11,6 +12,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -24,6 +26,7 @@ import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateDataDelete;
 import org.apache.jena.sparql.modify.request.UpdateDataInsert;
 import org.apache.jena.sparql.modify.request.UpdateDeleteInsert;
+import org.apache.jena.sparql.modify.request.UpdateLoad;
 import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.modify.request.UpdateWithUsing;
 import org.apache.jena.sparql.syntax.Element;
@@ -67,7 +70,6 @@ public class UpdateUtils {
         Node toNode = NodeFactory.createURI(to);
         execRename(graph, RENAME_PROPERTY_RU, fromNode, toNode);
     }
-
 
     public static void renameNamespace(Graph graph, String from, String to) {
         Node fromNode = NodeFactory.createLiteral(from);
@@ -337,6 +339,25 @@ public class UpdateUtils {
         QuadAcc acc = result.getInsertAcc();
         query.getConstructTemplate().getQuads().forEach(acc::addQuad);
 
+        return result;
+    }
+
+    /**
+     * Turn a LOAD statement into an INSERT one.
+     *
+     * @implNote Uses {@link AsyncParser} to parse the given LOAD statement's source.
+     */
+    public static UpdateDataInsert materialize(UpdateLoad update) {
+        String str = update.getSource();
+        Node dest = update.getDest();
+        Stream<Quad> stream = AsyncParser.of(str).streamQuads();
+
+        if (dest != null) {
+            stream = stream.map(q -> new Quad(dest, q.asTriple()));
+        }
+
+        List<Quad> quads = stream.collect(Collectors.toList());
+        UpdateDataInsert result = new UpdateDataInsert(new QuadDataAcc(quads));
         return result;
     }
 }

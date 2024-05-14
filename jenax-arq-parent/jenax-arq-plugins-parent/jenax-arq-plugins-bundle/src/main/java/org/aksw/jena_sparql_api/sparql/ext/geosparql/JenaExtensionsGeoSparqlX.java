@@ -14,12 +14,17 @@ import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 import org.locationtech.jts.geom.Geometry;
 
 public class JenaExtensionsGeoSparqlX {
+    // private static final Logger logger = LoggerFactory.getLogger(JenaExtensionsGeoSparqlX.class);
 
     public static void register() {
         loadDefs(FunctionRegistry.get());
 
         AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "collect",
+                GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
+
+        AggregateRegistry.register(
+                NorseTermsGeo.aggCollect,
                 GeoSparqlExAggregators.wrap1(GeoSparqlExAggregators::aggGeometryWrapperCollection));
 
         AggregateRegistry.register(
@@ -71,6 +76,7 @@ public class JenaExtensionsGeoSparqlX {
 
         binder.registerAll(GeoSparqlExFunctions.class);
 
+        PropertyFunctionRegistry ppfRegistry = PropertyFunctionRegistry.get();
 
 
 //			binder.register(GeoFunctionsJena.class.getMethod("simplifyDp", Geometry.class, double.class, boolean.class));
@@ -78,8 +84,8 @@ public class JenaExtensionsGeoSparqlX {
 
         // FunctionRegistry.get().put(ns + "nearestPoints", uri -> new E_ST_NearestPoints());
 
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
+        ppfRegistry.put(GeoSPARQL_URI.SPATIAL_URI + "withinBoxMultipolygonGeom", WithinBoxMultipolygonPF.class);
+        ppfRegistry.put(GeoSPARQL_URI.SPATIAL_URI + "st_dump", STDumpPF.class);
         // PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
 
 
@@ -87,8 +93,6 @@ public class JenaExtensionsGeoSparqlX {
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
 
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_geometryToCellIds", H3GeometryToCellIDsPF.class);
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_cellIdToChildren", H3CellToChildrenPF.class);
-        PropertyFunctionRegistry.get().put(GeoSPARQL_URI.GEO_URI + "h3_gridDisk", H3GridDiskPF.class);
+        JenaExtensionsH3.init(binder, ppfRegistry);
     }
 }
