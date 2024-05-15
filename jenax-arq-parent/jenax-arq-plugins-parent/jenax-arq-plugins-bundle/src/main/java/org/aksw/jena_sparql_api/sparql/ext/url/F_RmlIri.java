@@ -10,6 +10,7 @@ import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_IRI;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprFunction1;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransform;
@@ -28,12 +29,14 @@ public class F_RmlIri extends FunctionBase1 {
     protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
         String baseIRI = null;
         NodeValue nvRel = args.get(0);
-        NodeValue result = resolve(nvRel, baseIRI, env);
-
-        Node node = result.asNode();
-        NodeUtils.validate(node);
-
-        return result;
+        try {
+            NodeValue result = resolve(nvRel, baseIRI, env);
+            Node node = result.asNode();
+            NodeUtils.validate(node);
+            return result;
+        } catch (ExprEvalException e) {
+            throw new RuntimeException("Abort due to generation of invalid IRI: " + nvRel);
+        }
     }
 
     @Override

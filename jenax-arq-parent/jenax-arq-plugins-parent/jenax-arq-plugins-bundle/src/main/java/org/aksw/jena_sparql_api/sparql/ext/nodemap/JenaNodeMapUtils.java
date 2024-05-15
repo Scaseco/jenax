@@ -1,23 +1,23 @@
-package org.aksw.jena_sparql_api.sparql.ext.binding;
+package org.aksw.jena_sparql_api.sparql.ext.nodemap;
 
+import org.aksw.jenax.arq.util.node.NodeMap;
 import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 
-public class JenaBindingUtils {
-    public static Binding requireBinding(NodeValue nv) {
-        Binding elt = extractBindingOrNull(nv);
+public class JenaNodeMapUtils {
+    public static NodeMap requireNodeMap(NodeValue nv) {
+        NodeMap elt = extractNodeMapOrNull(nv);
         if (elt == null) {
             NodeValue.raise(new ExprTypeException("Not a Binding"));
         }
         return elt;
     }
 
-    public static Binding extractBindingOrNull(NodeValue nv) {
-        Binding result = null;
-        if (nv instanceof NodeValueBinding) {
-            result = ((NodeValueBinding)nv).getBinding();
+    public static NodeMap extractNodeMapOrNull(NodeValue nv) {
+        NodeMap result = null;
+        if (nv instanceof NodeValueNodeMap) {
+            result = ((NodeValueNodeMap)nv).getBinding();
         } else {
             // Do we need this fallback?
             Node node = nv.getNode();
@@ -28,12 +28,12 @@ public class JenaBindingUtils {
         return result;
     }
 
-    public static Binding extractOrNull(Node node) {
-        Binding result = null;
+    public static NodeMap extractOrNull(Node node) {
+        NodeMap result = null;
         if (node.isLiteral()) {
             Object value = node.getLiteralValue();
-            if (value instanceof Binding) {
-                result = (Binding)value;
+            if (value instanceof NodeMap) {
+                result = (NodeMap)value;
             }
         }
         return result;

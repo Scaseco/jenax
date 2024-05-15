@@ -95,5 +95,4 @@ public class RDFDatatypeBinding
         Binding result = o instanceof Binding ? (Binding)o : null;
         return result;
     }
-
 }
