@@ -1,8 +1,8 @@
-package org.aksw.jena_sparql_api.sparql.ext.json;
+package org.aksw.jenax.norse.term.json;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
-public class NorseJsonTerms {
+public class NorseTermsJson {
     /** The IRI for the JSON datatype */
     public static final String Datatype = NorseTerms.NS + "json";
 

@@ -1,6 +1,6 @@
-package org.aksw.jena_sparql_api.sparql.ext.nodemap;
+package org.aksw.jenax.norse.term.rdf;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
 public class NorseTermsNodeMap {
     public static final String Datatype = NorseTerms.NS + "nodeMap";

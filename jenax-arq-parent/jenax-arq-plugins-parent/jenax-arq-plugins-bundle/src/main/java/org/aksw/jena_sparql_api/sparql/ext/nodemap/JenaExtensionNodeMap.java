@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.nodemap;
 
+import org.aksw.jenax.norse.term.rdf.NorseTermsNodeMap;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 

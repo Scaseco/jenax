@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.aksw.jenax.arq.util.node.NodeMap;
 import org.aksw.jenax.arq.util.node.NodeMapImpl;
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;

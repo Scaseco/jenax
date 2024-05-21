@@ -10,13 +10,13 @@ public class JenaExtensionXml {
     public static void register() {
         TypeMapper.getInstance().registerDatatype(RDFDatatypeXml.get());
 
-        FunctionRegistry.get().put(NorseXmlTerms.parse, E_XmlParse.class);
-        PropertyFunctionRegistry.get().put(NorseXmlTerms.parse, new PropertyFunctionFactoryXmlParse());
+        FunctionRegistry.get().put(NorseTermsXml.parse, E_XmlParse.class);
+        PropertyFunctionRegistry.get().put(NorseTermsXml.parse, new PropertyFunctionFactoryXmlParse());
 
-        FunctionRegistry.get().put(NorseXmlTerms.path, E_XPath.class);
-        FunctionRegistry.get().put(NorseXmlTerms.text, E_XmlToText.class);
+        FunctionRegistry.get().put(NorseTermsXml.path, E_XPath.class);
+        FunctionRegistry.get().put(NorseTermsXml.text, E_XmlToText.class);
 
-        PropertyFunctionRegistry.get().put(NorseXmlTerms.unnest, new PropertyFunctionFactoryXmlUnnest());
+        PropertyFunctionRegistry.get().put(NorseTermsXml.unnest, new PropertyFunctionFactoryXmlUnnest());
 
         // Legacy
 

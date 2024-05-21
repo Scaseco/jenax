@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.norse.term.json.NorseTermsJson;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.ARQConstants;
@@ -25,11 +26,11 @@ public class JenaExtensionJson {
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
 
         // If there is more than one datatype for the JsonElement class then use the one with the given IRI
-        binder.getFunctionGenerator().getTypeByClassOverrides().put(JsonElement.class, NorseJsonTerms.Datatype);
+        binder.getFunctionGenerator().getTypeByClassOverrides().put(JsonElement.class, NorseTermsJson.Datatype);
 
-        typeMapper.registerDatatype(new RDFDatatypeJson(NorseJsonTerms.Datatype));
-        registerFunctions(fnReg, NorseJsonTerms.NS);
-        registerPropertyFunctions(pfnReg, NorseJsonTerms.NS);
+        typeMapper.registerDatatype(new RDFDatatypeJson(NorseTermsJson.Datatype));
+        registerFunctions(fnReg, NorseTermsJson.NS);
+        registerPropertyFunctions(pfnReg, NorseTermsJson.NS);
 
         // TODO We yet need to register the legacy functions in the new namespace
         binder.registerAll(SparqlFnLibJson.class);
