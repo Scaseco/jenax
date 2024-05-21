@@ -12,7 +12,7 @@ public class JenaExtensionNodeMap {
         // typeMapper.registerDatatype(RDFDatatypeBinding.get());
 
         FunctionRegistry fnRegistry = FunctionRegistry.get();
-        fnRegistry.put(NorseTermsNodeMap.strictGet, F_NodeMapStrictGet.class);
+        fnRegistry.put(NorseTermsNodeMap.getStrict, F_NodeMapStrictGet.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {
