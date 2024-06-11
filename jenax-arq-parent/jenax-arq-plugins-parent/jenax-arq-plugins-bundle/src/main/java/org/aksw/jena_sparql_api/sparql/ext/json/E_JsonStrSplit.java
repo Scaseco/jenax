@@ -34,7 +34,7 @@ public class E_JsonStrSplit
 		
 		NodeValue limit = args.size() > 2 ? args.get(2) : null;
 
-		int l = limit == null || limit.isInteger() ? -1 : limit.getInteger().intValue();
+		int l = limit == null || !limit.isInteger() ? -1 : limit.getInteger().intValue();
 		
 		if(haystack.isString() && needle.isString()) {
 			RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
