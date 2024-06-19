@@ -275,6 +275,7 @@ public class ElementGeneratorLateral {
 
         List<Element> unionMembers = new ArrayList<>();
 
+
         Var parentVar = current.source().var();
 
         Var targetVar = current.target().var();
@@ -285,6 +286,12 @@ public class ElementGeneratorLateral {
 
         Fragment relation = current.getRelation();
         nodeElement = relation.getElement();
+
+        boolean isFragment = FacetStep.isFragment(reachingStep);
+//        if (FacetStep.isFragment(reachingStep)) {
+//            targetVar = parentVar;
+//            nodeElement = new ElementGroup();
+//        }
 
         Long limit = current.limit();
         Long offset = current.offset();
@@ -436,16 +443,17 @@ public class ElementGeneratorLateral {
         // we become aware of its existence
         // Its like declaring a vertex exists in a graph without attaching any edges
         if (reachingStep == null) {
-            Var s = current.source().var();
+            Var s = parentVar;
             ElementBind bind = new ElementBind(Vars.x, new ExprVar(s));
             ElementGroup bindGroup = new ElementGroup();
             bindGroup.addElement(bind);
             unionMembers.add(bindGroup);
         }
 
-        if (reachingStep != null) {
+        // Don't create BINDs for fragments
+        if (reachingStep != null) { // && !isFragment) {
 
-            Var s = current.source().var();
+            Var s = parentVar;
             Node p;
             Var o = targetVar;
 
@@ -463,7 +471,7 @@ public class ElementGeneratorLateral {
                 // FacetStep facetStep = facetPath.getFileName().toSegment();
                 p = reachingStep.getNode();
             } else {
-                p = current.target().var();
+                p = targetVar;
             }
 
             // If there is limit, slice, filter or order then create an appropriate sub-query

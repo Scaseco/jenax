@@ -5,6 +5,7 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.sparql.graph.GraphFactory;
+import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.system.G;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
@@ -16,6 +17,8 @@ import com.esotericsoftware.kryo.Kryo;
 
 /** Tests for Graph, Model, DatasetGraph and Dataset */
 public class TestRdfSerializers {
+    static { JenaSystem.init(); }
+
     protected Kryo kryo;
 
     public static Graph createTestGraph() {

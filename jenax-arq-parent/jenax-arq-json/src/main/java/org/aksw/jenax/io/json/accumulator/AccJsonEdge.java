@@ -10,7 +10,7 @@ public interface AccJsonEdge
     boolean isForward();
 
 
-    void setSingle(boolean onOrOff);
-    boolean isSingle();
-    void setTargetAcc(AccJsonNode targetAcc);
+    // void setSingle(boolean onOrOff);
+    // boolean isSingle();
+    // void setTargetAcc(AccJsonNode targetAcc);
 }

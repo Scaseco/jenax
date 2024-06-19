@@ -6,9 +6,9 @@ import java.util.Map.Entry;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
+import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.aksw.jenax.io.json.accumulator.AggJsonObject;
-import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -18,10 +18,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class GraphToJsonNodeMapperObject
-    implements GraphToJsonNodeMapper
+    implements GraphToJsonNodeMapperObjectLike
 {
     protected Map<String, GraphToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
 
+    @Override
     public Map<String, GraphToJsonPropertyMapper> getPropertyMappers() {
         return propertyMappers;
     }
@@ -83,7 +84,8 @@ public class GraphToJsonNodeMapperObject
         AggJsonObject result = AggJsonObject.of();
         propertyMappers.forEach((name, mapper) -> {
             Node node = NodeFactory.createLiteral(name);
-            AggJsonProperty agg = mapper.toAggregator(node);
+            // AggJsonProperty agg = mapper.toAggregator(node);
+            AggJsonEdge agg = mapper.toAggregator(node);
             result.addPropertyAggregator(agg);
         });
         return result;

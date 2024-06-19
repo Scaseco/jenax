@@ -9,7 +9,7 @@ public interface AggJsonEdge
     Node getMatchFieldId();
 
     AggJsonEdge setTargetAgg(AggJsonNode targetAgg);
-    AggJsonEdge setSingle(boolean value);
+    // AggJsonEdge setSingle(boolean value);
 
     @Override
     AccJsonEdge newAccumulator();

@@ -21,8 +21,11 @@ import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragment;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentBody;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperLiteral;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObject;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObjectLike;
 import org.aksw.jenax.io.json.graph.GraphToJsonPropertyMapper;
 import org.aksw.jenax.model.shacl.domain.ShPropertyShape;
 import org.aksw.jenax.path.core.FacetPath;
@@ -72,11 +75,12 @@ import graphql.language.TypeName;
 import graphql.language.Value;
 
 /**
- * Compiles a graphql query to a {@link GraphQlToSparqlMapping} instance.
- * All fields can be qualified with IRIs of properties and classes.
- * Names of unqualified fields are passed to a {@link GraphQlResolver} for resolution to IRIs.
- * All resolver methods are allowed to throw {@link UnsupportedOperationException} to indicate absence
- * of resolution support.
+ * Compiles a graphql query to a {@link GraphQlToSparqlMapping} instance. All
+ * fields can be qualified with IRIs of properties and classes. Names of
+ * unqualified fields are passed to a {@link GraphQlResolver} for resolution to
+ * IRIs. All resolver methods are allowed to throw
+ * {@link UnsupportedOperationException} to indicate absence of resolution
+ * support.
  */
 public class GraphQlToSparqlConverter {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlToSparqlConverter.class);
@@ -101,7 +105,6 @@ public class GraphQlToSparqlConverter {
         return result;
     }
 
-
 //    public static TreeDataMap<Path<String>, Field> indexFields(Document document) {
 //        TreeDataMap<Path<String>, Field> result = new TreeDataMap<>();
 //        Path<String> path = PathStr.newAbsolutePath();
@@ -114,18 +117,21 @@ public class GraphQlToSparqlConverter {
 //    }
 
     public class Worker {
-        /** The context keeps track of which information (e.g. namespaces) currently applies */
+        /**
+         * The context keeps track of which information (e.g. namespaces) currently
+         * applies
+         */
         // protected Context context = new Context(null, null);
         protected Stack<Context> contextStack = new Stack<>();
         // protected TreeDataMap<Path<String>, Field> fieldIndex;
 
         public void convertTopLevelFields(SelectionSet selectionSet, GraphQlToSparqlMapping result) {
             contextStack.push(new Context(null, null));
-            // Index the field tree and create a global map of field names thereby considering
+            // Index the field tree and create a global map of field names thereby
+            // considering
             // aliases declared on fields using such as { foo (as: "bar") }
             // fieldIndex = GraphQlUtils.indexFields(selectionSet);
             // context = new Context(null, selectionSet);
-
 
             // RdfToJsonNodeMapperObject nodeConverter = null;
             for (Field field : selectionSet.getSelectionsOfType(Field.class)) {
@@ -156,7 +162,6 @@ public class GraphQlToSparqlConverter {
 
             // String fieldIri = deriveFieldIri(context, fieldName);
 
-
             // Map<String, List<Directive>> directives = field.getDirectivesByName();
 
             if (logger.isDebugEnabled()) {
@@ -169,7 +174,6 @@ public class GraphQlToSparqlConverter {
 
             SelectionSet subSelection = field.getSelectionSet();
             GraphToJsonNodeMapper nodeMapper = convertInnerSelectionSet(subSelection, nodeQuery);
-
 
             // Handle arguments of the field, such as slice, filter and orderBy
             if (fieldQuery != null) {
@@ -185,13 +189,12 @@ public class GraphQlToSparqlConverter {
 
                         Value<?> rawV = arg.getValue();
                         if (rawV instanceof StringValue) {
-                            StringValue v = (StringValue)rawV;
+                            StringValue v = (StringValue) rawV;
                             String str = v.getValue();
 
                             org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
-                            argQuery.constraints().fwd(TO_STRING).enterConstraints()
-                                .eq(NodeFactory.createLiteral(str)).activate()
-                            .leaveConstraints();
+                            argQuery.constraints().fwd(TO_STRING).enterConstraints().eq(NodeFactory.createLiteral(str))
+                                    .activate().leaveConstraints();
                         }
                     }
                 }
@@ -214,29 +217,90 @@ public class GraphQlToSparqlConverter {
                 result = GraphToJsonNodeMapperLiteral.get();
             } else {
                 GraphToJsonNodeMapperObject nodeMapperObject = new GraphToJsonNodeMapperObject();
-                for (Selection<?> selection : selectionSet.getSelections()) {
-                    if (selection instanceof Field) {
-                        Field field = (Field)selection;
-                        String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
-                        GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
-                        if (propertyMapper != null) {
-                            nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
-                        }
-                    } else if (selection instanceof InlineFragment) {
-                        InlineFragment fragment = (InlineFragment)selection;
-
-                        // If there is a type name then resolve it
-                        TypeName typeName = fragment.getTypeCondition();
-                        String name = typeName.getName();
-                        // contextStack.peek().ge
-
-                        // nodeQuery.
-                        // fragment.getSelectionSet();
-                        throw new RuntimeException("Inline Fragement is not supported yet");
-                    }
-                }
+                convertInnerSelectionSet(nodeMapperObject, selectionSet, nodeQuery);
+//                for (Selection<?> selection : selectionSet.getSelections()) {
+//                    if (selection instanceof Field) {
+//                        Field field = (Field)selection;
+//                        String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
+//                        GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
+//                        if (propertyMapper != null) {
+//                            nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
+//                        }
+//                    } else if (selection instanceof InlineFragment) {
+//                        InlineFragment fragment = (InlineFragment)selection;
+//
+//                        // If there is a type name then resolve it
+//                        TypeName typeName = fragment.getTypeCondition();
+//                        String name = typeName.getName();
+//                        // contextStack.peek().ge
+//
+//                        // nodeQuery.
+//                        // fragment.getSelectionSet();
+//                        // throw new RuntimeException("Inline Fragement is not supported yet");
+//                        NodeQuery nodeFragment = nodeQuery.addFragment();
+//                        convertInnerSelectionSet(fragment.getSelectionSet(), nodeFragment);
+//                    }
+//                }
                 result = nodeMapperObject;
             }
+            return result;
+        }
+
+        public GraphToJsonNodeMapper convertInnerSelectionSet(GraphToJsonNodeMapperObjectLike nodeMapperObject, SelectionSet selectionSet, NodeQuery nodeQuery) {
+            GraphToJsonNodeMapper result;
+            for (Selection<?> selection : selectionSet.getSelections()) {
+                if (selection instanceof Field) {
+                    Field field = (Field)selection;
+                    String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
+                    GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
+                    if (propertyMapper != null) {
+                        nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
+                    }
+                } else if (selection instanceof InlineFragment) {
+                    InlineFragment fragment = (InlineFragment)selection;
+
+                    // If there is a type name then resolve it
+                    TypeName typeName = fragment.getTypeCondition();
+                    String name = typeName.getName();
+                    // contextStack.peek().ge
+
+                    // nodeQuery.
+                    // fragment.getSelectionSet();
+                    // throw new RuntimeException("Inline Fragement is not supported yet");
+                    Field dummyField = Field.newField()
+                            .name(name)
+                            .directives(fragment.getDirectives())
+                            .build()
+                            ;
+                    Context context = contextStack.peek().newChildContext(dummyField);
+                    setupContext(context);
+                    contextStack.push(context);
+
+                    NodeQuery nodeFragment = nodeQuery.addFragment();
+                    context.setNodeQuery(nodeFragment);
+                    processSparqlDirectives(context, resolver);
+
+                    // fieldIri = deriveFieldIri(context, name);
+                    // Node node = NodeFactory.createLiteral(nodeQuery.relationQuery().getScopeBaseName());
+                    Node node = NodeFactory.createLiteral(nodeFragment.relationQuery().getScopeBaseName());
+
+
+                    GraphToJsonNodeMapperFragment fragmentMapper = GraphToJsonNodeMapperFragment.of(node, true);
+
+                    GraphToJsonNodeMapperFragmentBody bodyMapper = new GraphToJsonNodeMapperFragmentBody();
+                    fragmentMapper.setTargetNodeMapper(bodyMapper);
+
+
+                    // GraphToJsonM fragmentMapper.getTargetNodeMapper();
+
+                    convertInnerSelectionSet(fragmentMapper.getTargetNodeMapper(), fragment.getSelectionSet(), nodeFragment);
+                    // "fragment" + new Random().nextInt()
+                    nodeMapperObject.getPropertyMappers().put(node.getLiteralLexicalForm(), fragmentMapper);
+
+                    contextStack.pop();
+                }
+            }
+            result = nodeMapperObject;
             return result;
         }
 
@@ -274,13 +338,13 @@ public class GraphQlToSparqlConverter {
                 NodeQuery fieldQuery = nodeQuery.resolve(keyPath);
                 context.setNodeQuery(fieldQuery);
 
-
 //                if (filterRelation != null) {
 //                    // TODO Error message if not an unary relation
 //                    fieldQuery.setFilterRelation(filterRelation.toUnaryRelation());
 //                }
 
-                // FIXME We need to handle the xid field to get a resources IRI / blank node label
+                // FIXME We need to handle the xid field to get a resources IRI / blank node
+                // label
                 if (keyPath.getNameCount() == 1) { // xid resolves to a zero-segment path
                     // Set up an accumulator for the facet path
 
@@ -302,12 +366,10 @@ public class GraphQlToSparqlConverter {
                         propertyShapes = Collections.emptySet();
                     }
                     if (!propertyShapes.isEmpty()) {
-                        boolean allMaxCountsAreOne = propertyShapes.stream()
-                                .map(ShPropertyShape::getMaxCount)
+                        boolean allMaxCountsAreOne = propertyShapes.stream().map(ShPropertyShape::getMaxCount)
                                 .allMatch(v -> v != null && v.intValue() == 1);
 
-                        boolean isUniqueLang = propertyShapes.stream()
-                                .map(ShPropertyShape::isUniqueLang)
+                        boolean isUniqueLang = propertyShapes.stream().map(ShPropertyShape::isUniqueLang)
                                 .allMatch(v -> v != null && v == true);
 
                         if (allMaxCountsAreOne) {
@@ -346,13 +408,12 @@ public class GraphQlToSparqlConverter {
 
                         Value<?> rawV = arg.getValue();
                         if (rawV instanceof StringValue) {
-                            StringValue v = (StringValue)rawV;
+                            StringValue v = (StringValue) rawV;
                             String str = v.getValue();
 
                             org.apache.jena.graph.Node TO_STRING = NodeFactory.createURI("fn:" + XSD.xstring.getURI());
-                            argQuery.constraints().fwd(TO_STRING).enterConstraints()
-                                .eq(NodeFactory.createLiteral(str)).activate()
-                            .leaveConstraints();
+                            argQuery.constraints().fwd(TO_STRING).enterConstraints().eq(NodeFactory.createLiteral(str))
+                                    .activate().leaveConstraints();
                         }
                     }
                 }
@@ -366,12 +427,11 @@ public class GraphQlToSparqlConverter {
             return propertyMapper;
         }
 
-
         public Object tryApplyOrderBy(NodeQuery nodeQuery, Multimap<String, Value<?>> args) {
             Value<?> val = GraphQlUtils.getArgumentValue(args, GraphQlSpecialKeys.orderBy);
 
             if (val instanceof ArrayValue) {
-                ArrayValue array = (ArrayValue)val;
+                ArrayValue array = (ArrayValue) val;
                 for (Value<?> item : array.getValues()) {
                     tryApplySortCondition(nodeQuery, item);
                 }
@@ -385,7 +445,7 @@ public class GraphQlToSparqlConverter {
 
         public Object tryApplyOrderBy(NodeQuery nodeQuery, Value<?> v) {
             if (v instanceof ObjectValue) {
-                ObjectValue ov = (ObjectValue)v;
+                ObjectValue ov = (ObjectValue) v;
                 tryApplyOrderBy(nodeQuery, ov);
             }
             return null;
@@ -394,7 +454,7 @@ public class GraphQlToSparqlConverter {
         public FacetPath toFacetPath(Value<?> value) {
             FacetPath result = null;
             if (value instanceof ArrayValue) {
-                ArrayValue av = (ArrayValue)value;
+                ArrayValue av = (ArrayValue) value;
                 result = FacetPath.newRelativePath();
                 for (Value<?> v : av.getValues()) {
                     FacetPath contrib = toFacetPathSingle(v);
@@ -415,9 +475,9 @@ public class GraphQlToSparqlConverter {
             FacetPath result = null;
             String key = null;
             if (value instanceof StringValue) {
-                key = ((StringValue)value).getValue();
+                key = ((StringValue) value).getValue();
             } else if (value instanceof EnumValue) {
-                key = ((EnumValue)value).getName();
+                key = ((EnumValue) value).getName();
             }
 
             if (key != null) {
@@ -425,8 +485,6 @@ public class GraphQlToSparqlConverter {
             }
             return result;
         }
-
-
 
         public Object tryApplyOrderBy(NodeQuery nodeQuery, ObjectValue ov) {
             // System.out.println("ORDER: " + ov);
@@ -439,11 +497,8 @@ public class GraphQlToSparqlConverter {
                 Value<?> val = Iterables.getOnlyElement(e.getValue());
                 String orderStr = GraphQlUtils.toString(val);
 
-                int order = "ASC".equalsIgnoreCase(orderStr)
-                        ? Query.ORDER_ASCENDING
-                        : "DESC".equalsIgnoreCase(orderStr)
-                            ? Query.ORDER_DESCENDING
-                            : Query.ORDER_DEFAULT;
+                int order = "ASC".equalsIgnoreCase(orderStr) ? Query.ORDER_ASCENDING
+                        : "DESC".equalsIgnoreCase(orderStr) ? Query.ORDER_DESCENDING : Query.ORDER_DEFAULT;
 
                 Context match = contextStack.peek().findOnlyField(fieldName);
 //                Set<Context> matches = context.findField(fieldName);
@@ -464,7 +519,7 @@ public class GraphQlToSparqlConverter {
                 FacetPath base = nodeQuery.getFacetPath();
                 FacetPath rel = base.relativize(facetPath);
 
-                //FacetPath facetPath = match.getFacetPath();
+                // FacetPath facetPath = match.getFacetPath();
                 // NodeQuery nodeQuery = match.getNodeQuery();
                 ConstraintNode<NodeQuery> sortNode = nodeQuery.constraints().resolve(rel);
                 sortNode.sort(order);
@@ -492,10 +547,9 @@ public class GraphQlToSparqlConverter {
             return null;
         }
 
-
         public Object tryApplySortCondition(NodeQuery nodeQuery, Value<?> value) {
             if (value instanceof ObjectValue) {
-                ObjectValue ov = (ObjectValue)value;
+                ObjectValue ov = (ObjectValue) value;
                 tryApplyOrderBy(nodeQuery, ov);
             }
             return null;
@@ -509,14 +563,23 @@ public class GraphQlToSparqlConverter {
             String baseContrib = GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("base")));
             String iriContrib = GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("iri")));
             String nsContrib = GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("ns")));
-            // String prefixContrib = GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("prefix")));
+            // String prefixContrib =
+            // GraphQlUtils.toString(GraphQlUtils.getValue(rdf.getArgument("prefix")));
             PrefixMap prefixMapContrib = tryGetPrefixMap(GraphQlUtils.getValue(rdf.getArgument("prefixes")));
 
-            if (baseContrib != null) { cxt.setBase(baseContrib); }
-            if (iriContrib != null) { cxt.setIri(iriContrib); }
-            if (nsContrib != null) { cxt.setNs(nsContrib); }
+            if (baseContrib != null) {
+                cxt.setBase(baseContrib);
+            }
+            if (iriContrib != null) {
+                cxt.setIri(iriContrib);
+            }
+            if (nsContrib != null) {
+                cxt.setNs(nsContrib);
+            }
             // if (prefixContrib != null) { cxt.setPrefix(prefixContrib); }
-            if (prefixMapContrib != null) { cxt.setLocalPrefixMap(prefixMapContrib); }
+            if (prefixMapContrib != null) {
+                cxt.setLocalPrefixMap(prefixMapContrib);
+            }
         }
 
         ScopedCardinality scopedCardinality = getCardinality(field);
@@ -530,7 +593,6 @@ public class GraphQlToSparqlConverter {
                 cxt.setInheritedCardinality(cardinality);
             }
         }
-
 
         // Invoke update to compute the effective prefix information
         cxt.update();
@@ -573,7 +635,6 @@ public class GraphQlToSparqlConverter {
 //
 //        return tryParseSparqlQuery(cxt, dir);
 //    }
-
 
     public static void processSparqlDirectives(Context cxt, GraphQlResolver resolver) {
         Field field = cxt.getField();
@@ -636,7 +697,8 @@ public class GraphQlToSparqlConverter {
 
                     // FIXME Only substitute in-scope variables - so apply scope rename first
                     // Rename.reverseVarRename(null)
-                    // Relation resolvedContrib = contrib.applyNodeTransform(new NodeTransformSubst(varMap));
+                    // Relation resolvedContrib = contrib.applyNodeTransform(new
+                    // NodeTransformSubst(varMap));
                     MappedFragment<Node> mr = MappedFragment.of(contrib, varMap);
                     // System.err.println("Resolved contrib: " + resolvedContrib);
                     nodeQuery.addInjectFragment(mr);
@@ -654,17 +716,15 @@ public class GraphQlToSparqlConverter {
     }
 
     public static Fragment tryParseSparqlQuery(Context cxt, Directive dir, String argName) {
-        String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument(argName))
-            .map(Argument::getValue)
-            .map(GraphQlUtils::toString)
-            .orElse(null);
+        String queryStr = Optional.ofNullable(dir).map(d -> d.getArgument(argName)).map(Argument::getValue)
+                .map(GraphQlUtils::toString).orElse(null);
 
         Fragment result = null;
         if (queryStr != null) {
             String base = cxt.getFinalBase();
             PrefixMapping pm = new PrefixMappingAdapter(cxt.getFinalPrefixMap());
-            SparqlQueryParser parser = SparqlQueryParserImpl.create(
-                    SparqlParserConfig.newInstance().setBaseURI(base).setPrefixMapping(pm));
+            SparqlQueryParser parser = SparqlQueryParserImpl
+                    .create(SparqlParserConfig.newInstance().setBaseURI(base).setPrefixMapping(pm));
             Query query = parser.apply(queryStr);
             result = FragmentUtils.fromQuery(query);
         }
@@ -682,22 +742,21 @@ public class GraphQlToSparqlConverter {
 
     public FacetPath resolveProperty(Context cxt, String fieldName) {
         FacetPath result;
-        // For now it seems easier to handle the xid field here rather then in the property resolver
+        // For now it seems easier to handle the xid field here rather then in the
+        // property resolver
         if ("xid".equals(fieldName)) {
             result = FacetPath.newRelativePath();
         } else {
             String fieldIri = deriveFieldIri(cxt, fieldName);
-            result = fieldIri != null
-                ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
-                : resolver.resolveKeyToProperty(fieldName);
+            result = fieldIri != null ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
+                    : resolver.resolveKeyToProperty(fieldName);
         }
         return result;
     }
 
     public static org.apache.jena.graph.Node resolveClass(GraphQlResolver resolver, Context cxt, String fieldName) {
         String fieldIri = deriveFieldIri(cxt, fieldName);
-        Set<org.apache.jena.graph.Node> classes = fieldIri != null
-                ? Set.of(NodeFactory.createURI(fieldIri))
+        Set<org.apache.jena.graph.Node> classes = fieldIri != null ? Set.of(NodeFactory.createURI(fieldIri))
                 : resolver.resolveKeyToClasses(fieldName);
         org.apache.jena.graph.Node result = IterableUtils.expectZeroOrOneItems(classes);
         return result;
@@ -706,9 +765,9 @@ public class GraphQlToSparqlConverter {
     public NodeQuery resolveKeyToClasses(NodeQuery nq, org.apache.jena.graph.Node cls) {
         NodeQuery result = null;
         if (cls != null) {
-            // FacetStep step = FacetStep.of(RDF.type.asNode(), Direction.FORWARD, "", FacetStep.TARGET);
-            result = nq.constraints().fwd(RDF.type.asNode())
-                    .enterConstraints().eq(cls).activate().leaveConstraints()
+            // FacetStep step = FacetStep.of(RDF.type.asNode(), Direction.FORWARD, "",
+            // FacetStep.TARGET);
+            result = nq.constraints().fwd(RDF.type.asNode()).enterConstraints().eq(cls).activate().leaveConstraints()
                     .getRoot();
         }
         return result;
@@ -751,7 +810,7 @@ public class GraphQlToSparqlConverter {
     public static PrefixMap tryGetPrefixMap(Value<?> value) {
         PrefixMap result = null;
         if (value instanceof ObjectValue) {
-            ObjectValue obj = (ObjectValue)value;
+            ObjectValue obj = (ObjectValue) value;
             result = PrefixMapFactory.create();
             for (ObjectField field : obj.getObjectFields()) {
                 String prefix = field.getName();
@@ -764,31 +823,31 @@ public class GraphQlToSparqlConverter {
     }
 
     /**
-     * Returns the last {@literal @one} or {@literal @many} directive - null if there is none.
+     * Returns the last {@literal @one} or {@literal @many} directive - null if
+     * there is none.
      */
     public static ScopedCardinality getCardinality(DirectivesContainer<?> container) {
         List<Directive> directives = container.getDirectives();
-        ScopedCardinality result = directives.stream()
-                .map(GraphQlToSparqlConverter::getCardinality)
-                .filter(Objects::nonNull)
-                .reduce((a, b) -> b)
-                .orElse(null);
+        ScopedCardinality result = directives.stream().map(GraphQlToSparqlConverter::getCardinality)
+                .filter(Objects::nonNull).reduce((a, b) -> b).orElse(null);
         return result;
     }
 
-    /** Return a cardinality object if the directive is {@literal @one} or {@literal @many} - null if neither. */
+    /**
+     * Return a cardinality object if the directive is {@literal @one} or
+     * {@literal @many} - null if neither.
+     */
     public static ScopedCardinality getCardinality(Directive d) {
         ScopedCardinality result = null;
         String name = d.getName();
-        Cardinality cardinality = GraphQlSpecialKeys.one.equalsIgnoreCase(name)
-                ? Cardinality.ONE
-                : GraphQlSpecialKeys.many.equalsIgnoreCase(name)
-                    ? Cardinality.MANY
-                    : null;
+        Cardinality cardinality = GraphQlSpecialKeys.one.equalsIgnoreCase(name) ? Cardinality.ONE
+                : GraphQlSpecialKeys.many.equalsIgnoreCase(name) ? Cardinality.MANY : null;
 
         if (cardinality != null) {
-            boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade)).orElse(false);
-            boolean self = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.self)).orElse(true);
+            boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade))
+                    .orElse(false);
+            boolean self = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.self))
+                    .orElse(true);
             result = new ScopedCardinality(cardinality, cascade, self);
         }
         return result;

@@ -8,7 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 public interface GraphToJsonMapper {
-    // TODO errors should be a callback that receives the events
+    // TODO errors should be a callback that receives the events; this API appends errors to the array
     JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node);
 }
 

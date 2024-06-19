@@ -98,6 +98,8 @@ public class GraphQlExecImpl
             // metadata.addProperty("isSingle", entry.isSingle());
         }
 
+        System.err.println(query.toString());
+
         GraphQlDataProvider result;
 
         // true = new fully streaming approach

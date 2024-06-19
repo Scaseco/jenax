@@ -8,6 +8,7 @@ import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.atlas.iterator.Iter;
@@ -172,7 +173,8 @@ public class GraphToJsonPropertyMapper
                 + isUniqueLang + ", maxCount=" + maxCount + ", isHidden=" + isHidden + "]";
     }
 
-    public AggJsonProperty toAggregator(Node jsonKey) {
+    // public AggJsonProperty toAggregator(Node jsonKey) {
+    public AggJsonEdge toAggregator(Node jsonKey) {
         AggJsonNode targetAgg = targetNodeMapper.toAggregator();
 
         // It should be fairly easy to extend AggJsonProperty such that the TripleFilter can be passed to it
