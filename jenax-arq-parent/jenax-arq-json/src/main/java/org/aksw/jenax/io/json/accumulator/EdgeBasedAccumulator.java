@@ -85,7 +85,7 @@ public class EdgeBasedAccumulator {
         JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(System.out));
 
         // gson.fromJson(/null, null)
-        AccContext accContext = new AccContext(new StructuredWriterRdfViaJson(gson, writer), true, true);
+        AccContext accContext = new AccContext(new RdfObjectNotationWriterViaJson(gson, writer), true, true);
         accContext.setErrorHandler(ev -> {
             System.err.println("Error: " + ev);
         });

@@ -4,7 +4,7 @@ import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.util.direction.Direction;
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.io.json.accumulator.AggJsonFragment;
+import org.aksw.jenax.io.json.accumulator.AggJsonFragmentHead;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -14,32 +14,19 @@ import org.apache.jena.sparql.path.P_Path0;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-public class GraphToJsonNodeMapperFragment
-    // implements GraphToJsonMapper
-    extends GraphToJsonPropertyMapper
+public class GraphToJsonNodeMapperFragmentHead
+    extends GraphToJsonEdgeMapper
 {
-    // protected TripleFilter baseFilter;
-    // protected GraphToJsonNodeMapper targetNodeMapper; // = GraphToJsonNodeMapperObject.get();
-    // protected GraphToJsonNodeMapperObject targetNodeMapper = new GraphToJsonNodeMapperObject();
-
-    /**
-     * Only applicable if the value produced by this PropertyMapper is a json object.
-     * If hidden is true, then the owning NodeMapper should merge the produced json object into
-     * its own json object.
-     */
-    protected boolean isHidden = false;
-
-    public GraphToJsonNodeMapperFragment(TripleFilter baseFilter) {
+    public GraphToJsonNodeMapperFragmentHead(TripleFilter baseFilter) {
         super(baseFilter);
         this.targetNodeMapper = new GraphToJsonNodeMapperFragmentBody();
-        // this.baseFilter = baseFilter;
     }
 
-    public static GraphToJsonNodeMapperFragment of(P_Path0 basicPath) {
+    public static GraphToJsonNodeMapperFragmentHead of(P_Path0 basicPath) {
         return of(basicPath.getNode(), Direction.ofFwd(basicPath.isForward()));
     }
 
-    public static GraphToJsonNodeMapperFragment of(Node node, boolean isForward) {
+    public static GraphToJsonNodeMapperFragmentHead of(Node node, boolean isForward) {
         return of(node, Direction.ofFwd(isForward));
     }
 
@@ -50,16 +37,16 @@ public class GraphToJsonNodeMapperFragment
 //        return result;
 //    }
 
-    public static GraphToJsonNodeMapperFragment of(Node predicate, Direction direction) {
+    public static GraphToJsonNodeMapperFragmentHead of(Node predicate, Direction direction) {
         TripleFilter baseFilter = TripleFilter.create(Vars.s, predicate, direction.isForward());
-        return new GraphToJsonNodeMapperFragment(baseFilter);
+        return new GraphToJsonNodeMapperFragmentHead(baseFilter);
     }
 
     public TripleFilter getBaseFilter() {
         return baseFilter;
     }
 
-    public GraphToJsonNodeMapperFragment setBaseFilter(TripleFilter baseFilter) {
+    public GraphToJsonNodeMapperFragmentHead setBaseFilter(TripleFilter baseFilter) {
         this.baseFilter = baseFilter;
         return this;
     }
@@ -69,7 +56,7 @@ public class GraphToJsonNodeMapperFragment
         return (GraphToJsonNodeMapperObjectLike)targetNodeMapper;
     }
 
-    public GraphToJsonNodeMapperFragment setTargetNodeMapper(GraphToJsonNodeMapperObject targetNodeMapper) {
+    public GraphToJsonNodeMapperFragmentHead setTargetNodeMapper(GraphToJsonNodeMapperObjectLike targetNodeMapper) {
         this.targetNodeMapper = targetNodeMapper;
         return this;
     }
@@ -138,7 +125,7 @@ public class GraphToJsonNodeMapperFragment
         return "PropertyMapper [baseFilter=" + baseFilter + ", targetNodeMapper=" + targetNodeMapper + "]";
     }
 
-    public AggJsonFragment toAggregator(Node jsonKey) {
+    public AggJsonFragmentHead toAggregator(Node jsonKey) {
         AggJsonNode targetAgg = targetNodeMapper.toAggregator();
 
         // It should be fairly easy to extend AggJsonProperty such that the TripleFilter can be passed to it
@@ -159,7 +146,7 @@ public class GraphToJsonNodeMapperFragment
 
         boolean isForward = baseFilter.isForward();
 
-        AggJsonFragment result = AggJsonFragment.of(jsonKey, p, isForward, targetAgg);
+        AggJsonFragmentHead result = AggJsonFragmentHead.of(jsonKey, p, isForward, targetAgg);
         // TODO uniqueLang and maxCount act as filters for the matcher
         // they don't directly translate to the accumulator - so what to do with them?
         // We could have the accumulator materialize the values and then pick the best one

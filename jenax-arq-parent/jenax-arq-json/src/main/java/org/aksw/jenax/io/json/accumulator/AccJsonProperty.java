@@ -11,6 +11,9 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
+/**
+ * Accumulator for the values of an (objectId, propertyId) pair.
+ */
 public class AccJsonProperty
     extends AccJsonBase
     implements AccJsonEdge
@@ -94,7 +97,7 @@ public class AccJsonProperty
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf writer = context.getJsonWriter();
+                RdfObjectNotationWriter writer = context.getJsonWriter();
                 writer.name(jsonKey);
                 if (!isSingle) {
                     writer.beginArray();
@@ -154,13 +157,13 @@ public class AccJsonProperty
                 if (parent != null) {
                     // Turns null into JsonNull
                     RdfElement elt = value == null ? RdfElement.nullValue() : value;
-                    AccJsonObject acc = (AccJsonObject)parent;
+                    AccJsonObjectLikeBase acc = (AccJsonObjectLikeBase)parent;
                     acc.value.getAsObject().add(jsonKey, elt);
                 }
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf jsonWriter = context.getJsonWriter();
+                RdfObjectNotationWriter jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
                     jsonWriter.endArray();
                 } else if (seenTargetCount == 0) {

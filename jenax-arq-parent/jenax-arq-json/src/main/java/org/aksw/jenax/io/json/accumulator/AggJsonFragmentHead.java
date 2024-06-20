@@ -2,7 +2,7 @@ package org.aksw.jenax.io.json.accumulator;
 
 import org.apache.jena.graph.Node;
 
-public class AggJsonFragment
+public class AggJsonFragmentHead
     implements AggJsonEdge
 {
     /** The property (json key) being aggregated */
@@ -15,7 +15,7 @@ public class AggJsonFragment
     protected AggJsonNode targetAggregator;
 
 
-    protected AggJsonFragment(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    protected AggJsonFragmentHead(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         super();
         this.jsonKey = jsonKey;
         this.matchFieldId = matchFieldId;
@@ -23,18 +23,18 @@ public class AggJsonFragment
         this.targetAggregator = targetAggregator;
     }
 
-    public static AggJsonFragment of(Node jsonKey, Node matchFieldId, boolean isForward) {
+    public static AggJsonFragmentHead of(Node jsonKey, Node matchFieldId, boolean isForward) {
         return of(jsonKey, matchFieldId, isForward, null);
     }
 
-    public static AggJsonFragment of(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
-        return new AggJsonFragment(jsonKey, matchFieldId, isForward, targetAggregator);
+    public static AggJsonFragmentHead of(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+        return new AggJsonFragmentHead(jsonKey, matchFieldId, isForward, targetAggregator);
     }
 
     @Override
     public AccJsonEdge newAccumulator() {
         AccJsonNode valueAcc = targetAggregator.newAccumulator();
-        AccJsonFragment result = new AccJsonFragment(jsonKey, matchFieldId, isForward, valueAcc);
+        AccJsonFragmentHead result = new AccJsonFragmentHead(jsonKey, matchFieldId, isForward, valueAcc);
         valueAcc.setParent(result);
         // result.setSingle(isSingle);
         return result;
@@ -58,7 +58,7 @@ public class AggJsonFragment
     }
 
     @Override
-    public AggJsonFragment setTargetAgg(AggJsonNode targetAggregator) {
+    public AggJsonFragmentHead setTargetAgg(AggJsonNode targetAggregator) {
         this.targetAggregator = targetAggregator;
         return this;
     }

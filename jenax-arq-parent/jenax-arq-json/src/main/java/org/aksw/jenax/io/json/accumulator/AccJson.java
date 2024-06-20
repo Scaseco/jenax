@@ -70,6 +70,14 @@ public interface AccJson {
      */
     RdfElement getValue();
 
+
+    /**
+     * Internal method, mainly for processing fragments.
+     * Unchecked access to the value.
+     * Should hardly be used.
+     */
+    RdfElement getInternalValue();
+
     /**
      * For materialization: Whenever end() is called on a state with materialization enabled, then
      * it passes its accumulated value to the parent using this method.

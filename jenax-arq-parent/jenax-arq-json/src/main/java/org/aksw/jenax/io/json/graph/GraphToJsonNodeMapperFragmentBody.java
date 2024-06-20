@@ -1,8 +1,5 @@
 package org.aksw.jenax.io.json.graph;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonFragmentBody;
@@ -15,18 +12,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 public class GraphToJsonNodeMapperFragmentBody
-    implements GraphToJsonNodeMapperObjectLike
+    extends GraphToJsonNodeMapperObjectLike
 {
-    protected Map<String, GraphToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
-
-    @Override
-    public Map<String, GraphToJsonPropertyMapper> getPropertyMappers() {
-        return propertyMappers;
-    }
-
     @Override
     public GraphToJsonNodeMapperType getType() {
-        return GraphToJsonNodeMapperType.OBJECT;
+        return GraphToJsonNodeMapperType.FRAGMENT;
     }
 
     @Override

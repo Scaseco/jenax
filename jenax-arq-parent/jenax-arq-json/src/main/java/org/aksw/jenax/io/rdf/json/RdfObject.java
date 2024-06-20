@@ -1,5 +1,6 @@
 package org.aksw.jenax.io.rdf.json;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import org.apache.jena.graph.Node;
 public class RdfObject
     extends RdfElementNodeBase
 {
-    protected LinkedHashMap<Node, RdfElement> members;
+    protected HashMap<Node, RdfElement> members;
 
     public RdfObject(Node node) {
         this(node, new LinkedHashMap<>());

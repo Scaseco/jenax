@@ -7,17 +7,21 @@ import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.io.rdf.json.RdfObject;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
-public class AccJsonFragment
+/**
+ * An accumulator for a conditional transition to the fragment body.
+ */
+public class AccJsonFragmentHead
     extends AccJsonBase
     implements AccJsonEdge
 {
     protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
-    protected Node jsonKey;
+    protected Node dummyJsonKey;
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
@@ -29,11 +33,11 @@ public class AccJsonFragment
     /** If true then no array is created. Any item after the first raises an error event. */
     // protected boolean isSingle = false;
 
-    public AccJsonFragment(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
+    public AccJsonFragmentHead(Node dummyJsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
         super();
         this.matchFieldId = matchFieldId;
         this.isForward = isForward;
-        this.jsonKey = jsonKey;
+        this.dummyJsonKey = dummyJsonKey;
         this.targetAcc = targetAcc;
     }
 
@@ -60,7 +64,7 @@ public class AccJsonFragment
 
     @Override
     public Node getJsonKey() {
-        return jsonKey;
+        return dummyJsonKey;
     }
 
     @Override
@@ -81,19 +85,20 @@ public class AccJsonFragment
 
         if (!skipOutput) {
             if (context.isMaterialize()) {
-                value = parent.getValue();
+                // Create a temporary object
+                value = new RdfObject(dummyJsonKey);// parent.getValue();
 //                value = isSingle
 //                        ? null
 //                        : RdfElement.newArray(); // new JsonArray();
             }
 
-            if (context.isSerialize()) {
-                StructuredWriterRdf writer = context.getJsonWriter();
+//            if (context.isSerialize()) {
+//                RdfObjectNotationWriter writer = context.getJsonWriter();
                 // writer.name(jsonKey);
 //                if (!isSingle) {
 //                    writer.beginArray();
 //                }
-            }
+//            }
         }
     }
 
@@ -154,13 +159,19 @@ public class AccJsonFragment
                     while (true) {
                         if (tmp instanceof AccJsonObject o) {
                             break;
-                        } else if (parent instanceof AccJsonFragment f) {
+                        } else if (parent instanceof AccJsonFragmentHead f) {
                             tmp = f.parent;
                         }
                     }
 
-                    AccJsonObject acc = (AccJsonObject)tmp;
-                    acc.value.getAsObject().add(jsonKey, elt);
+                    AccJsonObject parentAcc = (AccJsonObject)tmp;
+                    boolean showFragments = false;
+                    if (showFragments) {
+                        // Debug: Expose the fragment in the parent object under the dummyJsonKey
+                        parentAcc.value.getAsObject().add(dummyJsonKey, elt);
+                    } else {
+                        parentAcc.value.getAsObject().getMembers().putAll(elt.getAsObject().getMembers());
+                    }
                 }
             }
 
@@ -184,19 +195,14 @@ public class AccJsonFragment
     @Override
     public void acceptContribution(RdfElement item, AccContext context) {
         ensureBegun();
-//        if (!skipOutput) {
-//            if (context.isMaterialize()) {
-//                if (isSingle) {
-//                    if (value == null) {
-//                        value = item;
-//                    } else {
-//                        // TODO Report an error, ignore or overwrite?
-//                    }
-//                } else {
-//                    value.getAsArray().add(item);
-//                }
-//            }
-//        }
+        if (!skipOutput) {
+            if (context.isMaterialize()) {
+                // value.getAsArray().add(item);
+                RdfObject src = item.getAsObject();
+                RdfObject tgt = value.getAsObject();
+                tgt.getMembers().putAll(src.getMembers());
+            }
+        }
     }
 
     @Override

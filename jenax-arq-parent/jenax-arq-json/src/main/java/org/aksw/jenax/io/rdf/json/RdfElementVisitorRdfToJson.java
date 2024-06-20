@@ -2,7 +2,7 @@ package org.aksw.jenax.io.rdf.json;
 
 import java.util.Map.Entry;
 
-import org.aksw.jenax.io.json.accumulator.StructuredWriterRdfViaJson;
+import org.aksw.jenax.io.json.accumulator.RdfObjectNotationWriterViaJson;
 import org.apache.jena.graph.Node;
 
 import com.google.gson.Gson;
@@ -31,7 +31,7 @@ public class RdfElementVisitorRdfToJson
         JsonObject result = new JsonObject();
         for (Entry<Node, RdfElement> e : obj.getMembers().entrySet()) {
             Node key = e.getKey();
-            String name = StructuredWriterRdfViaJson.nodeToJsonKey(key);
+            String name = RdfObjectNotationWriterViaJson.nodeToJsonKey(key);
             JsonElement elt = e.getValue().accept(this);
             result.add(name, elt);
         }
@@ -41,7 +41,7 @@ public class RdfElementVisitorRdfToJson
     @Override
     public JsonElement visit(RdfLiteral element) {
         Node node = element.getNode();
-        JsonElement result = StructuredWriterRdfViaJson.toJson(node);
+        JsonElement result = RdfObjectNotationWriterViaJson.toJson(node);
         return result;
     }
 

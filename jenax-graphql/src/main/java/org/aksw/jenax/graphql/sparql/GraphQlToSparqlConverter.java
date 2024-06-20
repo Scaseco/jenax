@@ -21,7 +21,7 @@ import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
-import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragment;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentHead;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentBody;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperLiteral;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObject;
@@ -285,7 +285,7 @@ public class GraphQlToSparqlConverter {
                     Node node = NodeFactory.createLiteral(nodeFragment.relationQuery().getScopeBaseName());
 
 
-                    GraphToJsonNodeMapperFragment fragmentMapper = GraphToJsonNodeMapperFragment.of(node, true);
+                    GraphToJsonNodeMapperFragmentHead fragmentMapper = GraphToJsonNodeMapperFragmentHead.of(node, true);
 
                     GraphToJsonNodeMapperFragmentBody bodyMapper = new GraphToJsonNodeMapperFragmentBody();
                     fragmentMapper.setTargetNodeMapper(bodyMapper);

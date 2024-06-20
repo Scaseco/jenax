@@ -12,13 +12,13 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
 
-public class StructuredWriterRdfViaJson
-    implements StructuredWriterRdf
+public class RdfObjectNotationWriterViaJson
+    implements RdfObjectNotationWriter
 {
     protected Gson gson;
     protected JsonWriter jsonWriter;
 
-    public StructuredWriterRdfViaJson(Gson gson, JsonWriter jsonWriter) {
+    public RdfObjectNotationWriterViaJson(Gson gson, JsonWriter jsonWriter) {
         super();
         this.gson = gson;
         this.jsonWriter = jsonWriter;
@@ -30,45 +30,45 @@ public class StructuredWriterRdfViaJson
     }
 
     @Override
-    public StructuredWriterRdf beginArray() throws IOException {
+    public RdfObjectNotationWriter beginArray() throws IOException {
         jsonWriter.beginArray();
         return this;
     }
 
     @Override
-    public StructuredWriterRdf endArray() throws IOException {
+    public RdfObjectNotationWriter endArray() throws IOException {
         jsonWriter.endArray();
         return this;
     }
 
     @Override
-    public StructuredWriterRdf beginObject() throws IOException {
+    public RdfObjectNotationWriter beginObject() throws IOException {
         jsonWriter.beginObject();
         return this;
     }
 
     @Override
-    public StructuredWriterRdf endObject() throws IOException {
+    public RdfObjectNotationWriter endObject() throws IOException {
         jsonWriter.endObject();
         return this;
     }
 
     @Override
-    public StructuredWriterRdf name(Node name) throws IOException {
+    public RdfObjectNotationWriter name(Node name) throws IOException {
         String str = nodeToJsonKey(name);
         jsonWriter.name(str);
         return this;
     }
 
     @Override
-    public StructuredWriterRdf value(Node value) throws IOException {
+    public RdfObjectNotationWriter value(Node value) throws IOException {
         JsonElement elt = toJson(value);
         gson.toJson(elt, jsonWriter);
         return this;
     }
 
     @Override
-    public StructuredWriterRdf nullValue() throws IOException {
+    public RdfObjectNotationWriter nullValue() throws IOException {
         jsonWriter.nullValue();
         return this;
     }

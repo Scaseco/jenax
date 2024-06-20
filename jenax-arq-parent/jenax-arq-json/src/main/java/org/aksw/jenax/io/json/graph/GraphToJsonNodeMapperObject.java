@@ -1,7 +1,5 @@
 package org.aksw.jenax.io.json.graph;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.aksw.commons.path.json.PathJson;
@@ -18,15 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class GraphToJsonNodeMapperObject
-    implements GraphToJsonNodeMapperObjectLike
+    extends GraphToJsonNodeMapperObjectLike
 {
-    protected Map<String, GraphToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
-
-    @Override
-    public Map<String, GraphToJsonPropertyMapper> getPropertyMappers() {
-        return propertyMappers;
-    }
-
     @Override
     public GraphToJsonNodeMapperType getType() {
         return GraphToJsonNodeMapperType.OBJECT;
@@ -35,9 +26,9 @@ public class GraphToJsonNodeMapperObject
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         JsonObject result = new JsonObject();
-        for (Entry<String, GraphToJsonPropertyMapper> e : getPropertyMappers().entrySet()) {
+        for (Entry<String, GraphToJsonEdgeMapper> e : getPropertyMappers().entrySet()) {
             String name = e.getKey();
-            GraphToJsonPropertyMapper mapper = e.getValue();
+            GraphToJsonEdgeMapper mapper = e.getValue();
 
             PathJson subPath = path.resolve(Step.of(name));
             JsonElement contrib = mapper.map(subPath, errors, graph, node);

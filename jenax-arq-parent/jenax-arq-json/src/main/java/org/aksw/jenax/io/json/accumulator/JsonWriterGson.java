@@ -9,7 +9,7 @@ import com.google.gson.JsonElement;
  * It turns out that guava has the JsonTreeWriter (an internal but public class) which does the job.
  */
 public interface JsonWriterGson
-    extends StructuredWriter
+    extends ObjectNotationWriter
 {
     @Override
     JsonWriterGson beginArray() throws IOException;

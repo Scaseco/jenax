@@ -22,26 +22,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 
 public class GraphToJsonPropertyMapper
-    implements GraphToJsonMapper
+    // implements GraphToJsonMapper
+    extends GraphToJsonEdgeMapper
 {
-    protected TripleFilter baseFilter;
-    protected GraphToJsonNodeMapper targetNodeMapper = GraphToJsonNodeMapperLiteral.get();
+//    protected TripleFilter baseFilter;
+//    protected GraphToJsonNodeMapper targetNodeMapper = GraphToJsonNodeMapperLiteral.get();
 
     protected boolean isUniqueLang = false;
     protected int maxCount = -1;
 
     protected boolean single = false; // Only accept a single value (the first one encountered)
 
-    /**
-     * Only applicable if the value produced by this PropertyMapper is a json object.
-     * If hidden is true, then the owning NodeMapper should merge the produced json object into
-     * its own json object.
-     */
-    protected boolean isHidden = false;
-
     public GraphToJsonPropertyMapper(TripleFilter baseFilter) {
-        super();
-        this.baseFilter = baseFilter;
+        super(baseFilter);
     }
 
     public static GraphToJsonPropertyMapper of(P_Path0 basicPath) {
@@ -93,13 +86,13 @@ public class GraphToJsonPropertyMapper
         return this;
     }
 
-    public boolean isHidden() {
-        return isHidden;
-    }
-
-    public void setHidden(boolean isHidden) {
-        this.isHidden = isHidden;
-    }
+//    public boolean isHidden() {
+//        return isHidden;
+//    }
+//
+//    public void setHidden(boolean isHidden) {
+//        this.isHidden = isHidden;
+//    }
 
     public boolean isSingle() {
         return single;
