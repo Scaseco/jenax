@@ -330,10 +330,10 @@ public class RDFConnectionUtils {
     public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed) {
         boolean isSilent = opService.getSilent();
         Op opRemote = opService.getSubOp();
-        Query query = OpAsQuery.asQuery(opRemote);
+        // Query query = OpAsQuery.asQuery(opRemote);
 
         Op opRestored = Rename.reverseVarRename(opRemote, true);
-        query = OpAsQuery.asQuery(opRestored);
+        Query query = OpAsQuery.asQuery(opRestored);
         // Transforming: Same object means "no change"
         boolean requiresRemapping = false;
         Map<Var, Var> varMapping = null;
