@@ -1,11 +1,10 @@
 package org.aksw.jenax.graphql.api;
 
-import graphql.language.Document;
-
-public interface GraphQlExecFactory {
-    /**
-     * A typical graphql JSON request has the attributes {@code { "query": "...", "variables": { ... } "operationName": "..." } }
-     * This method accounts for the parsed value of the 'query' field.
-     */
-    GraphQlExec create(Document document);
+/**
+ * Public high-level interface.
+ * Typically implemented as a wrapper over {@link GraphQlExecFactoryDocument}.
+ */
+public interface GraphQlExecFactory
+    extends GraphQlExecFactoryDocument, GraphQlExecFactoryString
+{
 }

@@ -14,4 +14,9 @@ public interface GraphQlExecFactoryWrapper
     default GraphQlExec create(Document document) {
         return getDelegate().create(document);
     }
+
+    @Override
+    default GraphQlExec create(String documentString) {
+        return getDelegate().create(documentString);
+    }
 }

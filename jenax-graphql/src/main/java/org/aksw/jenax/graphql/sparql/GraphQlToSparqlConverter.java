@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.util.range.RangeUtils;
@@ -21,8 +23,8 @@ import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
-import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentHead;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentBody;
+import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperFragmentHead;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperLiteral;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObject;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapperObjectLike;
@@ -64,6 +66,8 @@ import graphql.language.DirectivesContainer;
 import graphql.language.Document;
 import graphql.language.EnumValue;
 import graphql.language.Field;
+import graphql.language.FragmentDefinition;
+import graphql.language.FragmentSpread;
 import graphql.language.InlineFragment;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
@@ -73,6 +77,7 @@ import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.TypeName;
 import graphql.language.Value;
+import graphql.parser.antlr.GraphqlVisitor;
 
 /**
  * Compiles a graphql query to a {@link GraphQlToSparqlMapping} instance. All
@@ -94,16 +99,33 @@ public class GraphQlToSparqlConverter {
 
     public GraphQlToSparqlMapping convertDocument(Document document) {
         GraphQlToSparqlMapping result = new GraphQlToSparqlMapping(document);
-        OperationDefinition op = document.getFirstDefinitionOfType(OperationDefinition.class).orElse(null);
-        if (op != null) {
-            SelectionSet selectionSet = op.getSelectionSet();
-
-            // System.err.println("Field index: " + fieldIndex);
-
-            new Worker().convertTopLevelFields(selectionSet, result);
-        }
+        new GraphQlQueryWorker(document).convertDocument(result);
         return result;
     }
+
+//    public GraphQlToSparqlMapping convertDocument(Document document) {
+//        Map<String, FragmentDefinition> fragmentsByName = new LinkedHashMap<>();
+//
+//        for (graphql.language.Node child : document.getChildren()) {
+//            if (child instanceof FragmentDefinition fragmentDefinition) {
+//
+//            } else if (child instanceof OperationDefinition operationDefinition) {
+//
+//            }
+//        }
+//
+//        GraphQlToSparqlMapping result = new GraphQlToSparqlMapping(document);
+//        OperationDefinition op = document.getFirstDefinitionOfType(OperationDefinition.class).orElse(null);
+//        if (op != null) {
+//            SelectionSet selectionSet = op.getSelectionSet();
+//
+//            // System.err.println("Field index: " + fieldIndex);
+//
+//            new GraphQlQueryWorker(document).convertTopLevelFields(selectionSet, result);
+//        }
+//
+//        return result;
+//    }
 
 //    public static TreeDataMap<Path<String>, Field> indexFields(Document document) {
 //        TreeDataMap<Path<String>, Field> result = new TreeDataMap<>();
@@ -116,7 +138,32 @@ public class GraphQlToSparqlConverter {
 //        return result;
 //    }
 
-    public class Worker {
+    public class GraphQlQueryWorker {
+
+        protected Document document;
+
+        /** The currently encountered fragments (definitions are processed in order) */
+        protected Map<String, FragmentDefinition> fragmentsByName;
+
+        public GraphQlQueryWorker(Document document) {
+            this.document = Objects.requireNonNull(document);
+            this.fragmentsByName = new LinkedHashMap<>();
+        }
+
+        public void convertDocument(GraphQlToSparqlMapping result) {
+            for (graphql.language.Node child : document.getChildren()) {
+                if (child instanceof FragmentDefinition fragmentDefinition) {
+                    fragmentsByName.put(fragmentDefinition.getName(), fragmentDefinition);
+                } else if (child instanceof OperationDefinition operationDefinition) {
+                    SelectionSet selectionSet = operationDefinition.getSelectionSet();
+                    convertTopLevelFields(selectionSet, result);
+                } else {
+                    // logger.warn("Unknown element: );
+                    throw new RuntimeException("Unknown element: " + child);
+                }
+            }
+        }
+
         /**
          * The context keeps track of which information (e.g. namespaces) currently
          * applies
@@ -249,58 +296,80 @@ public class GraphQlToSparqlConverter {
         public GraphToJsonNodeMapper convertInnerSelectionSet(GraphToJsonNodeMapperObjectLike nodeMapperObject, SelectionSet selectionSet, NodeQuery nodeQuery) {
             GraphToJsonNodeMapper result;
             for (Selection<?> selection : selectionSet.getSelections()) {
-                if (selection instanceof Field) {
-                    Field field = (Field)selection;
+                if (selection instanceof Field field) {
                     String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
                     GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
                     if (propertyMapper != null) {
                         nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
                     }
-                } else if (selection instanceof InlineFragment) {
-                    InlineFragment fragment = (InlineFragment)selection;
+                } else {
 
-                    // If there is a type name then resolve it
-                    TypeName typeName = fragment.getTypeCondition();
-                    String name = typeName.getName();
-                    // contextStack.peek().ge
+                    // Resolved fragment attributes
+                    SelectionSet resolvedSelectionSet = null;
+                    List<Directive> resolvedbDirectives = null;
+                    TypeName resolvedTypeName = null;
 
-                    // nodeQuery.
-                    // fragment.getSelectionSet();
-                    // throw new RuntimeException("Inline Fragement is not supported yet");
-                    Field dummyField = Field.newField()
-                            .name(name)
-                            .directives(fragment.getDirectives())
-                            .build()
-                            ;
-                    Context context = contextStack.peek().newChildContext(dummyField);
-                    setupContext(context);
-                    contextStack.push(context);
+                    if (selection instanceof FragmentSpread fragmentSpread) {
+                        String name = fragmentSpread.getName();
+                        FragmentDefinition def = fragmentsByName.get(name);
 
-                    NodeQuery nodeFragment = nodeQuery.addFragment();
-                    context.setNodeQuery(nodeFragment);
-                    processSparqlDirectives(context, resolver);
+                        if (def == null) {
+                            throw new RuntimeException("Fragment with name " + name + " not found");
+                        }
 
-                    // fieldIri = deriveFieldIri(context, name);
-                    // Node node = NodeFactory.createLiteral(nodeQuery.relationQuery().getScopeBaseName());
-                    Node node = NodeFactory.createLiteral(nodeFragment.relationQuery().getScopeBaseName());
+                        resolvedSelectionSet = def.getSelectionSet();
+                        resolvedbDirectives = def.getDirectives();
+                        resolvedTypeName = def.getTypeCondition();
+                    } else if (selection instanceof InlineFragment inlineFragment) {
+                        resolvedSelectionSet = inlineFragment.getSelectionSet();
+                        resolvedbDirectives = inlineFragment.getDirectives();
+                        resolvedTypeName = inlineFragment.getTypeCondition();
+                    }
+
+                    if (resolvedSelectionSet != null) {
+                        // If there is a type name then resolve it
+                        String name = resolvedTypeName.getName();
+                        // contextStack.peek().ge
+
+                        // nodeQuery.
+                        // fragment.getSelectionSet();
+                        // throw new RuntimeException("Inline Fragement is not supported yet");
+                        Field dummyField = Field.newField()
+                                .name(name)
+                                .directives(resolvedbDirectives)
+                                .build()
+                                ;
+                        Context context = contextStack.peek().newChildContext(dummyField);
+                        setupContext(context);
+                        contextStack.push(context);
+
+                        NodeQuery nodeFragment = nodeQuery.addFragment();
+                        context.setNodeQuery(nodeFragment);
+                        processSparqlDirectives(context, resolver);
+
+                        // fieldIri = deriveFieldIri(context, name);
+                        // Node node = NodeFactory.createLiteral(nodeQuery.relationQuery().getScopeBaseName());
+                        Node node = NodeFactory.createLiteral(nodeFragment.relationQuery().getScopeBaseName());
 
 
-                    GraphToJsonNodeMapperFragmentHead fragmentMapper = GraphToJsonNodeMapperFragmentHead.of(node, true);
+                        GraphToJsonNodeMapperFragmentHead fragmentMapper = GraphToJsonNodeMapperFragmentHead.of(node, true);
 
-                    GraphToJsonNodeMapperFragmentBody bodyMapper = new GraphToJsonNodeMapperFragmentBody();
-                    fragmentMapper.setTargetNodeMapper(bodyMapper);
+                        GraphToJsonNodeMapperFragmentBody bodyMapper = new GraphToJsonNodeMapperFragmentBody();
+                        fragmentMapper.setTargetNodeMapper(bodyMapper);
 
 
-                    // GraphToJsonM fragmentMapper.getTargetNodeMapper();
+                        // GraphToJsonM fragmentMapper.getTargetNodeMapper();
 
-                    convertInnerSelectionSet(fragmentMapper.getTargetNodeMapper(), fragment.getSelectionSet(), nodeFragment);
-                    // "fragment" + new Random().nextInt()
-                    nodeMapperObject.getPropertyMappers().put(node.getLiteralLexicalForm(), fragmentMapper);
+                        convertInnerSelectionSet(fragmentMapper.getTargetNodeMapper(), resolvedSelectionSet, nodeFragment);
+                        // "fragment" + new Random().nextInt()
+                        nodeMapperObject.getPropertyMappers().put(node.getLiteralLexicalForm(), fragmentMapper);
 
-                    contextStack.pop();
+                        contextStack.pop();
+                    }
                 }
             }
             result = nodeMapperObject;
+
             return result;
         }
 
@@ -556,6 +625,7 @@ public class GraphQlToSparqlConverter {
         }
     }
 
+    /** Parses a GraphQL node's rdf annotations. */
     public static Context setupContext(Context cxt) {
         Field field = cxt.getField();
         List<Directive> rdfDirectives = field.getDirectives("rdf");
