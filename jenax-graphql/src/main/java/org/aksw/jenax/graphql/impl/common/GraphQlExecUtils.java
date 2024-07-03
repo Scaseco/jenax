@@ -65,7 +65,7 @@ public class GraphQlExecUtils {
     public static GraphQlExec exec(GraphQlExecFactory gef, String queryStr) {
         Parser parser = new Parser();
         Document document = parser.parseDocument(queryStr);
-        GraphQlExec result = gef.create(document);
+        GraphQlExec result = gef.create(document, null);
         return result;
     }
 

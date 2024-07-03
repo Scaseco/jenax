@@ -1,5 +1,6 @@
 package org.aksw.jenax.graphql.impl.common;
 
+import java.util.Map;
 import java.util.Objects;
 
 import org.aksw.jenax.graphql.api.GraphQlExec;
@@ -7,6 +8,7 @@ import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
 
 import graphql.language.Document;
+import graphql.language.Value;
 import graphql.parser.Parser;
 
 /** Front end implementation. Bundles the core logic (based on
@@ -23,9 +25,9 @@ public class GraphQlExecFactoryFront
     }
 
     @Override
-    public GraphQlExec create(String documentStr) {
+    public GraphQlExec create(String documentStr, Map<String, Value<?>> assignments) {
         Document document = parser.parseDocument(documentStr);
-        return create(document);
+        return create(document, assignments);
     }
 
     public static GraphQlExecFactoryFront of(GraphQlExecFactoryDocument delegate) {

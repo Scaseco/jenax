@@ -1,5 +1,7 @@
 package org.aksw.jenax.graphql.legacy;
 
+import java.util.Map;
+
 import org.aksw.jenax.graphql.api.GraphQlExec;
 import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
@@ -11,6 +13,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import graphql.language.Document;
+import graphql.language.Value;
 
 @Deprecated // Lazy init was moved to the resolver so that fully qualified queries do not need it
 public class GraphQlExecFactoryLazy
@@ -26,7 +29,7 @@ public class GraphQlExecFactoryLazy
     }
 
     @Override
-    public GraphQlExec create(Document document) {
+    public GraphQlExec create(Document document, Map<String, Value<?>> assignments) {
         ListenableFuture<GraphQlExecFactory> future = delegateCreation.get();
 
         Thread thread = Thread.currentThread();
@@ -47,7 +50,7 @@ public class GraphQlExecFactoryLazy
                 }
             }
         }
-        GraphQlExec result = delegate.create(document);
+        GraphQlExec result = delegate.create(document, assignments);
         return result;
     }
 }

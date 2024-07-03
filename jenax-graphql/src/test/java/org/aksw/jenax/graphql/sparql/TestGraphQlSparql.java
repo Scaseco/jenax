@@ -2,6 +2,8 @@ package org.aksw.jenax.graphql.sparql;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
@@ -10,6 +12,7 @@ import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -22,6 +25,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import graphql.language.Document;
+import graphql.language.IntValue;
+import graphql.language.Value;
 import graphql.parser.Parser;
 
 public class TestGraphQlSparql {
@@ -110,9 +115,42 @@ public class TestGraphQlSparql {
         System.out.println(doc);
     }
 
+
+    @Test
+    public void testVariables_01() {
+
+        String queryStr = """
+            query($limit: Int!) {
+              Pokemon(limit: $limit, orderBy: { label: ASC }) @class
+                 @debug
+                 @rdf (
+                   prefixes: {
+                     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                     pokedex: "http://pokedex.dataincubator.org/pkm/"
+                   },
+                   base: pokedex
+                 )
+              {
+                xid,
+                label @rdf(ns: rdfs) @one
+              }
+            }
+            """;
+
+        String expected = """
+            { "Pokemon": [
+              {
+                "label": "Electrode"
+              }
+            ] }
+        """;
+
+        evaluate(expected, queryStr, Map.of("limit", IntValue.of(1)));
+    }
+    // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
+
     @Test
     public void testFragments04() {
-        // System.out.println(OpVars.fixedVars(Algebra.compile(QueryFactory.create("SELECT * { ?s a ?t . OPTIONAL { ?s a ?x } FILTER(?x = ?s) }"))));
 
         String queryStr = """
             {
@@ -165,15 +203,68 @@ public class TestGraphQlSparql {
             ] }
         """;
 
-        evaluate(queryStr, expected);
+        evaluate(expected, queryStr, null);
     }
 
-    public void evaluate(String documentString, String expectedJson) {
+
+    // @Test
+    public void testFragments04b() {
+
+        // Issue: Order by with a field defined in a fragment does not work - { orderBy: { fragmentField: ASC } }
+        String queryStr = """
+            fragment pokemonFields on Thing {
+              label @rdf(ns: rdfs) @one,
+              colour @one,
+              speciesOf @inverse @one {
+                label @rdf(ns: rdfs) @one
+              }
+            }
+
+            query {
+              Pokemon(limit: 1, orderBy: { colour2: ASC }) @class
+               @debug
+                @rdf (
+                  prefixes: {
+                    rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                    pokedex: "http://pokedex.dataincubator.org/pkm/"
+                  },
+                  base: pokedex
+                )
+              {
+                ... pokemonFields
+                colour2:colour @one
+              }
+            }
+            """;
+        // Issue: why does colour2 fail to resolve?
+
+        String expected = """
+            { "Pokemon": [
+              {
+                "label": "Umbreon",
+                "colour": "black",
+                "speciesOf": {
+                  "label": "Moonlight Pokémon"
+                },
+                "colour2": "black"
+              }
+            ] }
+        """;
+
+        evaluate(expected, queryStr, null);
+    }
+
+    public void evaluate(String expectedJson, String documentString, Map<String, Value<?>> assignments) {
         JsonElement expectedData = gson.fromJson(expectedJson, JsonElement.class);
 
-        GraphQlExec qe = gef.create(documentString);
+        GraphQlExec qe = gef.create(documentString, assignments);
         JsonObject actualResponse = GraphQlExecUtils.materialize(qe);
         JsonElement actualData = actualResponse.get("data");
+
+        boolean isEquals = Objects.equals(expectedData, actualData);
+        if (!isEquals) {
+            System.err.println(gson.toJson(actualResponse));
+        }
 
         Assert.assertEquals(expectedData, actualData);
     }

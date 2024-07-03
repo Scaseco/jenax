@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.util.range.RangeUtils;
@@ -77,7 +76,6 @@ import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.TypeName;
 import graphql.language.Value;
-import graphql.parser.antlr.GraphqlVisitor;
 
 /**
  * Compiles a graphql query to a {@link GraphQlToSparqlMapping} instance. All
@@ -97,9 +95,9 @@ public class GraphQlToSparqlConverter {
         this.resolver = resolver;
     }
 
-    public GraphQlToSparqlMapping convertDocument(Document document) {
+    public GraphQlToSparqlMapping convertDocument(Document document, Map<String, Value<?>> assignments) {
         GraphQlToSparqlMapping result = new GraphQlToSparqlMapping(document);
-        new GraphQlQueryWorker(document).convertDocument(result);
+        new GraphQlQueryWorker(document, assignments).convertDocument(result);
         return result;
     }
 
@@ -141,13 +139,15 @@ public class GraphQlToSparqlConverter {
     public class GraphQlQueryWorker {
 
         protected Document document;
+        protected Map<String, Value<?>> assignments;
 
         /** The currently encountered fragments (definitions are processed in order) */
         protected Map<String, FragmentDefinition> fragmentsByName;
 
-        public GraphQlQueryWorker(Document document) {
+        public GraphQlQueryWorker(Document document, Map<String, Value<?>> assignments) {
             this.document = Objects.requireNonNull(document);
             this.fragmentsByName = new LinkedHashMap<>();
+            this.assignments = assignments != null ? assignments : Collections.emptyMap();
         }
 
         public void convertDocument(GraphQlToSparqlMapping result) {
@@ -224,7 +224,7 @@ public class GraphQlToSparqlConverter {
 
             // Handle arguments of the field, such as slice, filter and orderBy
             if (fieldQuery != null) {
-                tryApplySlice(nodeQuery, args);
+                tryApplySlice(nodeQuery, args, assignments);
                 tryApplyOrderBy(nodeQuery, args);
 
                 if (false) { // The idea was to allow to filter fields - but this codeblock is broken
@@ -463,7 +463,7 @@ public class GraphQlToSparqlConverter {
                 }
 
                 // Handle arguments of the field, such as slice, filter and orderBy
-                tryApplySlice(fieldQuery, args);
+                tryApplySlice(fieldQuery, args, assignments);
                 tryApplyOrderBy(fieldQuery, args);
                 // tryUpdateContext(args);
                 // GraphQlUtils.tryU
@@ -802,10 +802,10 @@ public class GraphQlToSparqlConverter {
     }
 
     /** Returns null if neither offset nor limit is found */
-    public static Range<Long> tryParseSlice(Multimap<String, Value<?>> args) {
+    public static Range<Long> tryParseSlice(Multimap<String, Value<?>> args, Map<String, Value<?>> assignments) {
         // System.out.println("Children: " + field.getNamedChildren().getChildren());
-        Long offset = GraphQlUtils.toLong(GraphQlUtils.getArgumentValue(args, "offset"));
-        Long limit = GraphQlUtils.toLong(GraphQlUtils.getArgumentValue(args, "limit"));
+        Long offset = GraphQlUtils.toLong(GraphQlUtils.getArgumentValue(args, "offset", assignments));
+        Long limit = GraphQlUtils.toLong(GraphQlUtils.getArgumentValue(args, "limit", assignments));
         Range<Long> result = offset == null && limit == null ? null : RangeUtils.createRange(limit, offset);
         return result;
     }
@@ -855,8 +855,8 @@ public class GraphQlToSparqlConverter {
 //        return result;
 //    }
 
-    public static void tryApplySlice(NodeQuery nodeQuery, Multimap<String, Value<?>> args) {
-        Range<Long> slice = tryParseSlice(args);
+    public static void tryApplySlice(NodeQuery nodeQuery, Multimap<String, Value<?>> args, Map<String, Value<?>> assignments) {
+        Range<Long> slice = tryParseSlice(args, assignments);
         if (slice != null) {
             long offset = QueryUtils.rangeToOffset(slice);
             if (offset != 0) {
@@ -914,9 +914,9 @@ public class GraphQlToSparqlConverter {
                 : GraphQlSpecialKeys.many.equalsIgnoreCase(name) ? Cardinality.MANY : null;
 
         if (cardinality != null) {
-            boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade))
+            boolean cascade = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.cascade, null))
                     .orElse(false);
-            boolean self = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.self))
+            boolean self = Optional.ofNullable(GraphQlUtils.getArgValueAsBoolean(d, GraphQlSpecialKeys.self, null))
                     .orElse(true);
             result = new ScopedCardinality(cardinality, cascade, self);
         }

@@ -1,5 +1,6 @@
 package org.aksw.jenax.graphql.sparql;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,6 +21,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import graphql.language.Document;
+import graphql.language.Value;
 
 public class GraphQlExecFactoryOverSparql
     implements GraphQlExecFactoryDocument
@@ -40,8 +42,8 @@ public class GraphQlExecFactoryOverSparql
     }
 
     @Override
-    public GraphQlExec create(Document document) {
-        GraphQlToSparqlMapping mapping = converter.convertDocument(document);
+    public GraphQlExec create(Document document, Map<String, Value<?>> assignments) {
+        GraphQlToSparqlMapping mapping = converter.convertDocument(document, assignments);
         GraphQlExec result = new GraphQlExecImpl(dataSource, mapping);
         return result;
     }
