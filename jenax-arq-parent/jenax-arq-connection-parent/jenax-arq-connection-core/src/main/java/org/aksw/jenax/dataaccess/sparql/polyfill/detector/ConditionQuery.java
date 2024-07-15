@@ -41,7 +41,7 @@ public class ConditionQuery
             boolean isConnectionProblem = isConnectionProblemException(e);
             if (isConnectionProblem) {
                 // Forward the exception
-                e.addSuppressed(new RuntimeException("Connection problem detected"));
+                e.addSuppressed(new RuntimeException("Connection problem detected", e));
                 throw e;
             } else {
                 result = matchOnNonEmptyResult ? false : true;

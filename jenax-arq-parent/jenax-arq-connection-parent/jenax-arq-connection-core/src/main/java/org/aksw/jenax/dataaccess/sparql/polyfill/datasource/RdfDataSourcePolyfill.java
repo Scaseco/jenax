@@ -46,6 +46,7 @@ public class RdfDataSourcePolyfill {
         // Wrap the datasource with a cache for polyfill detection
         // The cache stores all query results in-memory
         RdfDataSource cachedDataSource = rdfDataSource.decorate(RdfDataSourceTransforms.simpleCache());
+        // RdfDataSource cachedDataSource = rdfDataSource;
 
         PolyfillDetector detector = new PolyfillDetector();
         detector.load(model);

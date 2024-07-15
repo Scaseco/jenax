@@ -42,7 +42,7 @@ public class RdfDataSourceWithSimpleCache
 
     public RdfDataSourceWithSimpleCache(RdfDataSource delegate, Cache<Object, Object> cache) {
         super(delegate);
-        this.cache = cache;
+        this.cache = Objects.requireNonNull(cache);
     }
 
     public Cache<Object, Object> getCache() {
@@ -77,11 +77,11 @@ public class RdfDataSourceWithSimpleCache
             Object queryOrQueryString = query != null ? query : queryString;
             Objects.requireNonNull(queryOrQueryString, "No query or query string was set");
 
-            if (query != null) {
-                delegate.query(query);
-            } else if (queryString != null) {
-                delegate.query(queryString);
-            }
+//            if (query != null) {
+//                delegate.query(query);
+//            } else if (queryString != null) {
+//                delegate.query(queryString);
+//            }
 
             return new QueryExecWithSimpleCache(delegate::build, cache, queryOrQueryString);
         }
@@ -156,11 +156,14 @@ public class RdfDataSourceWithSimpleCache
                     } catch (Exception e) {
                         r = e;
                     }
+                } catch (Exception e) {
+                    r = e;
                 }
                 return r;
             });
 
             if (tmp instanceof RuntimeException re) {
+                re.printStackTrace();
                 throw re;
             } else if (tmp instanceof Exception e) {
                 throw new RuntimeException(e);
