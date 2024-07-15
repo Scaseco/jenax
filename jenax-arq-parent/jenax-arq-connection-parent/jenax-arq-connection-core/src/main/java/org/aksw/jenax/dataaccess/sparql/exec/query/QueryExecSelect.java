@@ -2,7 +2,6 @@ package org.aksw.jenax.dataaccess.sparql.exec.query;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.RowSet;
 
 
 /**
@@ -12,11 +11,10 @@ import org.apache.jena.sparql.exec.RowSet;
  */
 public class QueryExecSelect
     extends QueryExecBaseSelect
-    implements QueryExecWrapper
 {
-    protected QueryExec delegate;
+    protected QueryExecFactoryQuery delegate;
 
-    protected QueryExecSelect(Query query, QueryExec delegate, boolean rawTuples) {
+    protected QueryExecSelect(Query query, QueryExecFactoryQuery delegate, boolean rawTuples) {
         super(query, rawTuples);
         this.delegate = delegate;
     }
@@ -42,17 +40,48 @@ public class QueryExecSelect
      */
     public static QueryExec of(Query query, QueryExecFactoryQuery qef, boolean rawTuples) {
         Query selectQuery = QueryExecBaseSelect.adjust(query);
-        QueryExec actualExec = qef.create(selectQuery);
-        return new QueryExecSelect(query, actualExec, rawTuples);
+        // QueryExec actualExec = qef.create(selectQuery);
+        return new QueryExecSelect(query, qef, rawTuples);
     }
 
     @Override
-    protected RowSet doSelect(Query selectQuery) {
-        return getDelegate().select();
+    protected QueryExec doSelect(Query selectQuery) {
+        QueryExec result = delegate.create(query);
+        return result;
     }
-
-    @Override
-    public QueryExec getDelegate() {
-        return delegate;
-    }
+//
+//    @Override
+//    public DatasetGraph constructDataset(DatasetGraph dataset) {
+//        return super.constructDataset(dataset);
+//    }
+//
+//    @Override
+//    public DatasetGraph constructDataset() {
+//        return super.constructDataset();
+//    }
+//
+//    @Override
+//    public Graph describe(Graph graph) {
+//        return super.describe(graph);
+//    }
+//
+//    @Override
+//    public Graph describe() {
+//        return super.describe();
+//    }
+//
+//    @Override
+//    public JsonArray execJson() {
+//        return super.execJson();
+//    }
+//
+//    @Override
+//    public Graph construct(Graph result) {
+//        return super.construct(result);
+//    }
+//
+//    @Override
+//    public Graph construct() {
+//        return super.construct();
+//    }
 }

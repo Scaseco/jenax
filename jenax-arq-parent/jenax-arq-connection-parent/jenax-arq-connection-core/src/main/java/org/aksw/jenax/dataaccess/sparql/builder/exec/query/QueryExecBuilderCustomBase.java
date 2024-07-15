@@ -27,6 +27,7 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
     protected Query query;
     protected String queryString;
     protected Syntax querySyntax;
+    protected Boolean parseCheck = null;
     protected BindingBuilder substitution = BindingFactory.builder();
 
     public QueryExecBuilderCustomBase() {
@@ -72,7 +73,7 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
 
     @Override
     public QueryExecBuilder query(String queryString) {
-        this.query = null;
+        this.query = null; // parseCheck ? QueryFactory.create(queryString) : null;;
         this.querySyntax = null;
         this.queryString = queryString;
         return self();
@@ -83,6 +84,12 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         this.query = null;
         this.queryString = queryString;
         this.querySyntax = syntax;
+        return self();
+    }
+
+    @Override
+    public QueryExecBuilder parseCheck(boolean parseCheck) {
+        this.parseCheck = parseCheck;
         return self();
     }
 
@@ -128,6 +135,10 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
 
     public void applySettings(QueryExecBuilder dst) {
         super.applySettings(dst);
+
+        if (parseCheck != null) {
+            dst.parseCheck(parseCheck);
+        }
 
         if (querySyntax != null) {
             dst.query(queryString, querySyntax);

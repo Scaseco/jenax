@@ -34,6 +34,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.exec.QueryExec;
@@ -41,6 +42,23 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
 
 public class RdfDataSources {
+
+    /**
+     * Create a datasource where any attempt to <b>execute</b> a query or an update will fail.
+     * @implNote The implementation internally decorates an RdfDataSource over a read-only empty dataset.
+     */
+    public static RdfDataSource alwaysFail() {
+        // Using the remote builder defers parsing query strings until the execution
+        // The builder for local dataset connections parses query eagerly.
+        RdfDataSource dummy = () -> RDFConnectionRemote.newBuilder().destination("urn:dummy").parseCheckSPARQL(false).build();
+        // RdfDataSource dummy = of(DatasetFactory.empty());
+        RdfDataSource result = dummy.decorate(RdfDataSourceTransforms.alwaysFail());
+        return result;
+    }
+
+    public static RdfDataSource of(Dataset dataset) {
+        return () -> RDFConnection.connect(dataset);
+    }
 
     /**
      * Execute a query and invoke a function on the response.

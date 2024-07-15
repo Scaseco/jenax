@@ -9,7 +9,6 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
-import org.junit.Test;
 
 public class TestRdfDataSourceWithLocalCache {
 

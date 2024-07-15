@@ -13,6 +13,7 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemova
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
@@ -42,9 +43,13 @@ public class RdfDataSourcePolyfill {
         Model model = ModelFactory.createDefaultModel();
         MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
 
+        // Wrap the datasource with a cache for polyfill detection
+        // The cache stores all query results in-memory
+        RdfDataSource cachedDataSource = rdfDataSource.decorate(RdfDataSourceTransforms.simpleCache());
+
         PolyfillDetector detector = new PolyfillDetector();
         detector.load(model);
-        List<Suggestion<String>> result = detector.detect(rdfDataSource);
+        List<Suggestion<String>> result = detector.detect(cachedDataSource);
         return result;
     }
 

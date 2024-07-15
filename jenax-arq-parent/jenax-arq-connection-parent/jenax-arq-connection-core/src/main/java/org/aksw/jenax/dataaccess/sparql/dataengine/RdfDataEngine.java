@@ -3,6 +3,8 @@ package org.aksw.jenax.dataaccess.sparql.dataengine;
 import java.util.function.Function;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 /** The main difference between an RdfDataEngine and an RdfDataSource is that
@@ -15,6 +17,10 @@ import org.apache.jena.rdfconnection.RDFConnection;
 public interface RdfDataEngine
     extends RdfDataSource, AutoCloseable
 {
+    @Override
+    default RdfDataEngine decorate(RdfDataSourceTransform rdfDataSourceTransform) {
+        return RdfDataEngines.transform(this, rdfDataSourceTransform);
+    }
 
     /** Return a new RdfDataEngine whose {@link #getConnection()} method has the given
      *  wrapping applied */

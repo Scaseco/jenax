@@ -34,6 +34,12 @@ public interface UpdateExecBuilderWrapper
     }
 
     @Override
+    default UpdateExecBuilder parseCheck(boolean parseCheck) {
+        getDelegate().parseCheck(parseCheck);
+        return this;
+    }
+
+    @Override
     default UpdateExecBuilder set(Symbol symbol, Object value) {
         getDelegate().set(symbol, value);
         return this;
