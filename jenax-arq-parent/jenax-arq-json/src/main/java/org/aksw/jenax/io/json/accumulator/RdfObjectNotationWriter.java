@@ -3,6 +3,7 @@ package org.aksw.jenax.io.json.accumulator;
 import java.io.IOException;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.path.P_Path0;
 
 public interface RdfObjectNotationWriter
     extends ObjectNotationWriter
@@ -19,7 +20,9 @@ public interface RdfObjectNotationWriter
     @Override
     RdfObjectNotationWriter endObject() throws IOException;
 
-    RdfObjectNotationWriter name(Node name) throws IOException;
+    // RdfObjectNotationWriter name(Node name, boolean isForward) throws IOException;
+    RdfObjectNotationWriter name(P_Path0 name) throws IOException;
+
     RdfObjectNotationWriter value(Node value) throws IOException;
 
     RdfObjectNotationWriter nullValue() throws IOException;

@@ -5,8 +5,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
-import org.aksw.jenax.graphql.api.GraphQlDataProvider;
-import org.aksw.jenax.graphql.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlDataProvider;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

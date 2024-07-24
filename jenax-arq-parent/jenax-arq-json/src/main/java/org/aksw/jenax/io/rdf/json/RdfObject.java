@@ -1,47 +1,26 @@
 package org.aksw.jenax.io.rdf.json;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.sparql.path.P_Path0;
 
-public class RdfObject
-    extends RdfElementNodeBase
+public interface RdfObject
+    extends RdfElementResource
 {
-    protected HashMap<Node, RdfElement> members;
+    /** Get the members of this object. */
+    // XXX We may want to add support for dedicated forward / backward views
+    Map<P_Path0, RdfElement> getMembers();
 
-    public RdfObject(Node node) {
-        this(node, new LinkedHashMap<>());
-    }
+    // RdfObject add(P_Path0, RdfElement value);
 
-    protected RdfObject(Node node, LinkedHashMap<Node, RdfElement> members) {
-        super(node);
-        this.members = members;
-    }
+    RdfObject addForward(Node property, RdfElement value);
+    RdfObject addForward(RDFNode property, RdfElement value);
 
-    /** Return an RdfObject for the given node. The argument must not be null. */
-//    public static RdfObject of(Node node) {
-//        return new RdfObject(node);
-//    }
+    RdfObject addBackward(Node property, RdfElement value);
+    RdfObject addBackward(RDFNode property, RdfElement value);
 
-    public RdfObject add(Node property, RdfElement value) {
-        members.put(property, value);
-        return this;
-    }
-
-    public Map<Node, RdfElement> getMembers() {
-        return members;
-    }
-
-//    public RdfObject add(Node property, Node node) {
-//        add(property, RdfElement.(node));
-//        return this;
-//    }
-
-    @Override
-    public <T> T accept(RdfElementVisitor<T> visitor) {
-        return visitor.visit(this);
-    }
+    /** Return a mutable sub view of all forward keys that are strings and that can thus be viewed as json objects. */
+    // getJsonSubView()
 }
-

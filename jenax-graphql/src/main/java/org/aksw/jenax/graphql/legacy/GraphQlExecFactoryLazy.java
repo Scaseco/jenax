@@ -2,10 +2,10 @@ package org.aksw.jenax.graphql.legacy;
 
 import java.util.Map;
 
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
-import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
 import org.aksw.jenax.graphql.impl.common.ComputeOnce;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactoryDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,9 +2,9 @@ package org.aksw.jenax.web.servlet;
 
 import java.util.Objects;
 
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
 import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

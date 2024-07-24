@@ -2,8 +2,8 @@ package org.aksw.jenax.graphql.impl.common;
 
 import java.util.Map;
 
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
 
 import graphql.language.Document;
 import graphql.language.Value;

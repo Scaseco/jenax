@@ -6,6 +6,7 @@ import org.apache.jena.graph.Node;
  * A data model for RDF tree structures akin to gson's JsonElement.
  */
 public interface RdfElement {
+
     default boolean isArray() {
         return this instanceof RdfArray;
     }
@@ -48,15 +49,15 @@ public interface RdfElement {
 //    }
 
     public static RdfElement newObject(Node node) {
-        return new RdfObject(node);
+        return new RdfObjectImpl(node);
     }
 
     public static RdfArray newArray() {
-        return new RdfArray();
+        return new RdfArrayImpl();
     }
 
     public static RdfElement newLiteral(Node node) {
-        return new RdfLiteral(node);
+        return new RdfLiteralImpl(node);
     }
 
     public static RdfElement nullValue() {

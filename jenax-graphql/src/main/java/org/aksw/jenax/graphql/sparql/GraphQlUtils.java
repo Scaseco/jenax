@@ -3,9 +3,10 @@ package org.aksw.jenax.graphql.sparql;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.path.core.Path;
 import org.aksw.commons.path.core.PathStr;
 import org.aksw.facete.v3.api.TreeDataMap;
@@ -27,6 +28,7 @@ import graphql.language.IntValue;
 import graphql.language.Node;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
+import graphql.language.ScalarValue;
 import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.Value;
@@ -84,6 +86,22 @@ public class GraphQlUtils {
             result = NodeValue.makeString(((StringValue)node).getValue());
         } else if (node instanceof EnumValue) {
             result = NodeValue.makeString(((EnumValue)node).getName());
+        }
+        return result;
+    }
+
+    public static ScalarValue<?> toScalarValue(NodeValue nv) {
+        ScalarValue<?> result;
+        if (nv.isString()) {
+            result = StringValue.newStringValue(nv.getString()).build();
+        } else  if (nv.isInteger()) {
+            result = IntValue.newIntValue(nv.getInteger()).build();
+        } else if (nv.isBoolean()) {
+            result = BooleanValue.newBooleanValue(nv.getBoolean()).build();
+        } else if (nv.isDecimal()) {
+            result = FloatValue.newFloatValue(nv.getDecimal()).build();
+        } else {
+            throw new UnsupportedOperationException("Cannot convert: " + nv);
         }
         return result;
     }
@@ -193,4 +211,21 @@ public class GraphQlUtils {
         }
         return result;
     }
+
+    public static Map<String, Value<?>> mapToGraphQl(Map<String, org.apache.jena.graph.Node> assignments) {
+        Map<String, Value<?>> result = assignments == null
+                ? null
+                : assignments.entrySet().stream().collect(Collectors.toMap(
+                        Entry::getKey, v -> (Value<?>)GraphQlUtils.toScalarValue(NodeValue.makeNode(v.getValue()))));
+        return result;
+    }
+
+    public static Map<String, org.apache.jena.graph.Node> mapToJena(Map<String, Value<?>> assignments) {
+        Map<String, org.apache.jena.graph.Node> result = assignments == null
+                ? null
+                : assignments.entrySet().stream().collect(Collectors.toMap(
+                        Entry::getKey, v -> GraphQlUtils.toNodeValue(v.getValue()).asNode()));
+        return result;
+    }
+
 }

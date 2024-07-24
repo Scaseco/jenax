@@ -1,12 +1,13 @@
 package org.aksw.jenax.io.json.accumulator;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.path.P_Path0;
 
 public interface AccJsonEdge
     extends AccJson
 {
     Node getMatchFieldId();
-    Node getJsonKey();
+    P_Path0 getJsonKey();
     boolean isForward();
 
 

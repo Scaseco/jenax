@@ -1,16 +1,13 @@
 package org.aksw.jenax.graphql.sparql;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
-import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
-import org.aksw.jenax.graphql.impl.common.GraphQlExecFactoryFront;
 import org.aksw.jenax.graphql.impl.common.GraphQlResolverAlwaysFail;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecBuilder;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecFactory;
 import org.apache.jena.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,32 +17,27 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import graphql.language.Document;
-import graphql.language.Value;
-
 public class GraphQlExecFactoryOverSparql
-    implements GraphQlExecFactoryDocument
+    implements RdfGraphQlExecFactory
 {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlExecFactoryOverSparql.class);
 
     protected RdfDataSource dataSource;
-    protected GraphQlToSparqlConverter converter;
+    protected GraphQlToSparqlMappingFactory mappingFactory;
 
-    public GraphQlExecFactoryOverSparql(RdfDataSource dataSource, GraphQlToSparqlConverter converter) {
+    public GraphQlExecFactoryOverSparql(RdfDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
         super();
         this.dataSource = dataSource;
-        this.converter = converter;
-    }
-
-    public static GraphQlExecFactory of(RdfDataSource dataSource, GraphQlToSparqlConverter converter) {
-        return GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
+        this.mappingFactory = mappingFactory;
     }
 
     @Override
-    public GraphQlExec create(Document document, Map<String, Value<?>> assignments) {
-        GraphQlToSparqlMapping mapping = converter.convertDocument(document, assignments);
-        GraphQlExec result = new GraphQlExecImpl(dataSource, mapping);
-        return result;
+    public RdfGraphQlExecBuilder newBuilder() {
+        return new GraphQlExecBuilderOverSparql(dataSource, mappingFactory);
+    }
+
+    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
+        return new GraphQlExecFactoryOverSparql(dataSource, mappingFactory); // GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
     }
 
     /**
@@ -53,13 +45,13 @@ public class GraphQlExecFactoryOverSparql
      * This means that any request to resolve a field to a class or property IRI will
      * cause the query to fail.
      */
-    public static GraphQlExecFactory of(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory of(RdfDataSource dataSource) {
         return of(dataSource, new GraphQlResolverAlwaysFail());
     }
 
-    public static GraphQlExecFactory of(RdfDataSource dataSource, GraphQlResolver resolver) {
-        GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        return of(dataSource, converter);
+    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, GraphQlResolver resolver) {
+        GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
+        return of(dataSource, mappingFactory);
     }
 
     /** Create a GraphQlResolver from a DatasetMetadata instance. */
@@ -67,19 +59,19 @@ public class GraphQlExecFactoryOverSparql
         return new GraphQlResolverImpl(metadata.getVoidDataset(), metadata.getShaclModel());
     }
 
-    public static GraphQlExecFactory of(RdfDataSource dataSource, DatasetMetadata metadata) {
+    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, DatasetMetadata metadata) {
         GraphQlResolver resolver = resolverOf(metadata);
-        GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        GraphQlExecFactory result = GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
+        GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
+        RdfGraphQlExecFactory result = of(dataSource, mappingFactory);
         return result;
     }
 
     /** Summarize the data in the data source and configure a resolver with it */
-    public static GraphQlExecFactory autoConfEager(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory autoConfEager(RdfDataSource dataSource) {
         DatasetMetadata metadata = Futures.getUnchecked(DatasetMetadata.fetch(dataSource, MoreExecutors.listeningDecorator(MoreExecutors.newDirectExecutorService())));
         GraphQlResolver resolver = resolverOf(metadata);
-        GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        return GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
+        GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
+        return of(dataSource, mappingFactory);
     }
 
     /**
@@ -88,7 +80,7 @@ public class GraphQlExecFactoryOverSparql
      * Any further request made to the resolver while auto configuration is in progress will
      * block until completion.
      */
-    public static GraphQlExecFactory autoConfLazy(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory autoConfLazy(RdfDataSource dataSource) {
         GraphQlResolver resolver = GraphQlResolverImplLazy.of(() -> {
             ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
                     MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool()));
@@ -103,7 +95,7 @@ public class GraphQlExecFactoryOverSparql
                     Set<Node> properties = metadata.getVoidDataset().getPropertyPartitionMap().keySet();
                     logger.info("Autodetected properties: " + properties);
                 }
-                GraphQlResolver s = resolverOf(metadata);
+                GraphQlResolver s = GraphQlExecFactoryOverSparql.resolverOf(metadata);
                 return s;
             }, executorService);
 
@@ -111,8 +103,9 @@ public class GraphQlExecFactoryOverSparql
             return r;
         });
 
-        GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        GraphQlExecFactory result = GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
+        // GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
+        GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
+        RdfGraphQlExecFactory result = GraphQlExecFactoryOverSparql.of(dataSource, mappingFactory);
         return result;
     }
 }

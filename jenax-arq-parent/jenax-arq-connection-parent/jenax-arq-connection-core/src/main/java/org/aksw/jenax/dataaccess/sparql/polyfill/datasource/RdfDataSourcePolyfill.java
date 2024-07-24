@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumns
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
+import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
@@ -110,7 +111,11 @@ public class RdfDataSourcePolyfill {
         });
         ServiceExecutorRegistry.set(probeDs.getContext(), registry);
 
-        SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        // Disable warnings about unknown functions while probing
+        FunctionUtils.runWithDisabledWarnOnUnknownFunction(() -> {
+            SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        });
+
         Property dbmsShortName = ResourceFactory.createProperty("http://www.example.org/dbmsShortName");
 
         Model report = probeDs.getDefaultModel();

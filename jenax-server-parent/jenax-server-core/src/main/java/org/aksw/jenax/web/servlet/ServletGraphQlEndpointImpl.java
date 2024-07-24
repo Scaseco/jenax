@@ -2,7 +2,7 @@ package org.aksw.jenax.web.servlet;
 
 import java.io.InputStream;
 
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 

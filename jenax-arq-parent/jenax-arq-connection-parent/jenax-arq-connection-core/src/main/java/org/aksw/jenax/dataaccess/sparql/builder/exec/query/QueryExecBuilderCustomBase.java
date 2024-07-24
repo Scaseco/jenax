@@ -63,6 +63,16 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         return result;
     }
 
+    /** Parse the query string or return a copy of the query object. */
+    public Query getParsedQueryCopy() {
+        Query result = query != null
+                ? query.cloneQuery()
+                : queryString != null
+                    ? QueryFactory.create(queryString, querySyntax)
+                    : null;
+        return result;
+    }
+
     @Override
     public QueryExecBuilder query(Query query) {
         this.querySyntax = null;

@@ -3,9 +3,9 @@ package org.aksw.jenax.graphql.impl.common;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
-import org.aksw.jenax.graphql.api.GraphQlDataProvider;
+import org.aksw.jenax.graphql.json.api.GraphQlDataProvider;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;

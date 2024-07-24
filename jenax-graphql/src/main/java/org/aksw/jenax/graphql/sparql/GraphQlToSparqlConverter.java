@@ -48,6 +48,7 @@ import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
+import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
@@ -90,9 +91,18 @@ public class GraphQlToSparqlConverter {
 
     protected GraphQlResolver resolver;
 
-    public GraphQlToSparqlConverter(GraphQlResolver resolver) {
+    /** false -&gt; rdf mode, true -&gt; json mode*/
+    protected boolean jsonMode;
+
+
+//    public GraphQlToSparqlConverter(GraphQlResolver resolver) {
+//        this(resolver, false);
+//    }
+
+    public GraphQlToSparqlConverter(GraphQlResolver resolver, boolean jsonMode) {
         super();
         this.resolver = resolver;
+        this.jsonMode = jsonMode;
     }
 
     public GraphQlToSparqlMapping convertDocument(Document document, Map<String, Value<?>> assignments) {
@@ -297,14 +307,15 @@ public class GraphQlToSparqlConverter {
             GraphToJsonNodeMapper result;
             for (Selection<?> selection : selectionSet.getSelections()) {
                 if (selection instanceof Field field) {
-                    String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
-                    GraphToJsonPropertyMapper propertyMapper = convertInnerField(field, nodeQuery);
-                    if (propertyMapper != null) {
-                        nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
-                    }
+                    // String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
+                    // GraphToJsonPropertyMapper propertyMapper =
+                    convertInnerField(field, nodeQuery, nodeMapperObject);
+//                    if (propertyMapper != null) {
+//                        nodeMapperObject.getPropertyMappers().put(jsonKeyName, propertyMapper);
+//                    }
                 } else {
+                    // Resolve fragments and inline fragements
 
-                    // Resolved fragment attributes
                     SelectionSet resolvedSelectionSet = null;
                     List<Directive> resolvedbDirectives = null;
                     TypeName resolvedTypeName = null;
@@ -362,7 +373,12 @@ public class GraphQlToSparqlConverter {
 
                         convertInnerSelectionSet(fragmentMapper.getTargetNodeMapper(), resolvedSelectionSet, nodeFragment);
                         // "fragment" + new Random().nextInt()
-                        nodeMapperObject.getPropertyMappers().put(node.getLiteralLexicalForm(), fragmentMapper);
+
+                        P_Path0 key = jsonMode
+                                ? new P_Link(NodeFactory.createLiteralString(node.getLiteralLexicalForm()))
+                                : new P_Link(node);
+
+                        nodeMapperObject.getPropertyMappers().put(key, fragmentMapper);
 
                         contextStack.pop();
                     }
@@ -373,7 +389,17 @@ public class GraphQlToSparqlConverter {
             return result;
         }
 
-        public GraphToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery) {
+        /**
+         *
+         * @param field
+         * @param nodeQuery
+         * @param nodeMapperObject This method will register the mapper for the field to this object
+         * @return
+         */
+        public GraphToJsonPropertyMapper convertInnerField(Field field, NodeQuery nodeQuery, GraphToJsonNodeMapperObjectLike nodeMapperObject) {
+
+            String jsonKeyName = ObjectUtils.firstNonNull(field.getAlias(), field.getName());
+
             // context = setupContext(new Context(context, field), field);
             Context context = contextStack.peek().newChildContext(field);
             setupContext(context);
@@ -390,10 +416,6 @@ public class GraphQlToSparqlConverter {
             // Cardinality is set up in setupContext
             boolean isSingle = Cardinality.ONE.equals(context.getThisCardinality());
 
-//            String fieldIri = deriveFieldIri(context, fieldName);
-//            FacetPath keyPath = fieldIri != null
-//                    ? FacetPath.newRelativePath(FacetStep.fwd(NodeFactory.createURI(fieldIri)))
-//                    : resolver.resolveKeyToProperty(fieldName);
             FacetPath keyPath = resolveProperty(context, fieldName);
 
             if (keyPath != null) {
@@ -492,6 +514,18 @@ public class GraphQlToSparqlConverter {
 
             // context = context.getParent();
             contextStack.pop();
+
+            if (nodeMapperObject != null) {
+                P_Path0 key = jsonMode
+                        ? new P_Link(NodeFactory.createLiteralString(jsonKeyName))
+                        : keyPath.getFileName().toSegment().getStep();
+
+                // Objects.requireNonNull(propertyMapper);
+                // TODO Deal with xid
+                if (propertyMapper != null) {
+                    nodeMapperObject.getPropertyMappers().put(key, propertyMapper);
+                }
+            }
 
             return propertyMapper;
         }
@@ -810,6 +844,7 @@ public class GraphQlToSparqlConverter {
         return result;
     }
 
+    /** This method uses the context to resolve a field name to a relative facet path */
     public FacetPath resolveProperty(Context cxt, String fieldName) {
         FacetPath result;
         // For now it seems easier to handle the xid field here rather then in the

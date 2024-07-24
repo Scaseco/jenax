@@ -3,7 +3,7 @@ package org.aksw.jenax.graphql.impl.common;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.graphql.api.GraphQlDataProvider;
+import org.aksw.jenax.graphql.json.api.GraphQlDataProvider;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

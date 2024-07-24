@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.aksw.commons.collections.maps.MapFromValueConverter;
 import org.aksw.commons.collections.trees.TreeUtils;
 import org.aksw.facete.v3.api.Direction;
 import org.aksw.facete.v3.bgp.api.BgpDirNode;
@@ -13,7 +14,6 @@ import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromKeyConverter;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromResourceUnmanaged;
-import org.aksw.jena_sparql_api.utils.views.map.MapFromValueConverter;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Property;

@@ -4,7 +4,8 @@ import org.apache.jena.graph.Node;
 
 public interface RdfElementFactory {
     // Allow of(null) ? Probably not because error prone
-    RdfElement nullValue();
-    RdfElement of(Node node);
+    RdfNull nullValue();
+    RdfLiteral newLiteral(Node node);
     RdfArray newArray();
+    RdfObject newObject();
 }

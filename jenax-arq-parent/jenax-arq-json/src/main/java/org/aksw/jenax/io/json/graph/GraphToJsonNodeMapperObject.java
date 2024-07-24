@@ -7,9 +7,10 @@ import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.aksw.jenax.io.json.accumulator.AggJsonObject;
+import org.aksw.jenax.io.json.accumulator.RdfObjectNotationWriterViaJson;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.path.P_Path0;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -26,9 +27,13 @@ public class GraphToJsonNodeMapperObject
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         JsonObject result = new JsonObject();
-        for (Entry<String, GraphToJsonEdgeMapper> e : getPropertyMappers().entrySet()) {
-            String name = e.getKey();
+        for (Entry<P_Path0, GraphToJsonEdgeMapper> e : getPropertyMappers().entrySet()) {
+            // String name = e.getKey();
+            P_Path0 keyNode = e.getKey();
             GraphToJsonEdgeMapper mapper = e.getValue();
+
+            // TODO Get rid of this implicit mapping of keyNode to a JSON key
+            String name = RdfObjectNotationWriterViaJson.nodeToJsonKey(keyNode);
 
             PathJson subPath = path.resolve(Step.of(name));
             JsonElement contrib = mapper.map(subPath, errors, graph, node);
@@ -74,7 +79,9 @@ public class GraphToJsonNodeMapperObject
     public AggJsonNode toAggregator() {
         AggJsonObject result = AggJsonObject.of();
         propertyMappers.forEach((name, mapper) -> {
-            Node node = NodeFactory.createLiteral(name);
+            // Node node = NodeFactory.createLiteral(name);
+            P_Path0 node = name;
+
             // AggJsonProperty agg = mapper.toAggregator(node);
             AggJsonEdge agg = mapper.toAggregator(node);
             result.addPropertyAggregator(agg);

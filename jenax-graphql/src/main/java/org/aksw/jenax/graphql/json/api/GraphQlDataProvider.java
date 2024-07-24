@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.api;
+package org.aksw.jenax.graphql.json.api;
 
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -14,6 +14,8 @@ public interface GraphQlDataProvider {
 
     /** Metadata for this stream. */
     JsonObject getMetadata();
+
+    /** A stream over the resulting items. */
     Stream<JsonElement> openStream();
 
     /**

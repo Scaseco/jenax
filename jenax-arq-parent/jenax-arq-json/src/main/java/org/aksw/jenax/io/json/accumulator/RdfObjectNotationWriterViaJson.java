@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.sparql.path.P_Path0;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -17,12 +19,19 @@ public class RdfObjectNotationWriterViaJson
 {
     protected Gson gson;
     protected JsonWriter jsonWriter;
+    // protected boolean rdfTermMode;
 
     public RdfObjectNotationWriterViaJson(Gson gson, JsonWriter jsonWriter) {
+        this(gson, jsonWriter, false);
+    }
+
+    public RdfObjectNotationWriterViaJson(Gson gson, JsonWriter jsonWriter, boolean rdfTermMode) {
         super();
         this.gson = gson;
         this.jsonWriter = jsonWriter;
+        // this.rdfTermMode = rdfTermMode;
     }
+
 
     @Override
     public void flush() throws IOException {
@@ -54,7 +63,7 @@ public class RdfObjectNotationWriterViaJson
     }
 
     @Override
-    public RdfObjectNotationWriter name(Node name) throws IOException {
+    public RdfObjectNotationWriter name(P_Path0 name) throws IOException {
         String str = nodeToJsonKey(name);
         jsonWriter.name(str);
         return this;
@@ -82,11 +91,23 @@ public class RdfObjectNotationWriterViaJson
         return elt;
     }
 
+    public static String nodeToJsonKey(P_Path0 name) {
+        return nodeToJsonKey(name.getNode());
+    }
+
+    // FIXME Move this method to a common place
     public static String nodeToJsonKey(Node name) {
-        String result = name.getLiteralLexicalForm();
-//        String result = name.isURI()
-//                ? name.getURI()
-//                : NodeFmtLib.strNT(name);
+        String result;
+        boolean strict = false;
+        if (strict) {
+            result = name.getLiteralLexicalForm();
+        } else {
+            result = name.isLiteral()
+                    ? name.getLiteralLexicalForm() // Check for string literal
+                    : name.isURI()
+                        ? name.getURI()
+                        : NodeFmtLib.strNT(name);
+        }
         return result;
     }
 }

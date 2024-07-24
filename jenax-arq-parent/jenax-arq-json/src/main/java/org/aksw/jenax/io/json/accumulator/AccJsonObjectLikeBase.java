@@ -10,6 +10,7 @@ import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 
+/** Common base class for accumulators of Objects and Fragments. */
 public abstract class AccJsonObjectLikeBase
     extends AccJsonBase
     implements AccJsonObjectLike
@@ -41,7 +42,7 @@ public abstract class AccJsonObjectLikeBase
     /** Internal method, use only for debugging/testing */
     public void addEdge(AccJsonEdge subAcc) {
         // TODO Lots of array copying!
-        // We should add a builder for efficiet adds and derive the more efficient array version from it.
+        // We should add a builder for efficient additions and derive the more efficient array version from it.
         Node fieldId = subAcc.getMatchFieldId();
         int fieldIndex = edgeAccs.length;
         fieldIdToIndex.put(fieldId, fieldIndex);

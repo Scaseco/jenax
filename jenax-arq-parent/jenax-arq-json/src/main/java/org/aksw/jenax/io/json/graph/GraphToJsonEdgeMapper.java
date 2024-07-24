@@ -2,7 +2,7 @@ package org.aksw.jenax.io.json.graph;
 
 import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
-import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.path.P_Path0;
 
 public abstract class GraphToJsonEdgeMapper
     implements GraphToJsonMapper
@@ -31,6 +31,6 @@ public abstract class GraphToJsonEdgeMapper
         this.isHidden = isHidden;
     }
 
-    public abstract AggJsonEdge toAggregator(Node jsonKey);
+    public abstract AggJsonEdge toAggregator(P_Path0 jsonKey);
 
 }

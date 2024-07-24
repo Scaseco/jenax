@@ -6,7 +6,7 @@ import org.aksw.jenax.io.json.accumulator.AggJsonFragmentBody;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.sparql.path.P_Path0;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -71,7 +71,9 @@ public class GraphToJsonNodeMapperFragmentBody
     public AggJsonNode toAggregator() {
         AggJsonFragmentBody result = AggJsonFragmentBody.of();
         propertyMappers.forEach((name, mapper) -> {
-            Node node = NodeFactory.createLiteral(name);
+            // Node node = NodeFactory.createLiteral(name);
+            P_Path0 node = name;
+
             // AggJsonProperty agg = mapper.toAggregator(node);
             AggJsonEdge agg = mapper.toAggregator(node);
             result.addPropertyAggregator(agg);

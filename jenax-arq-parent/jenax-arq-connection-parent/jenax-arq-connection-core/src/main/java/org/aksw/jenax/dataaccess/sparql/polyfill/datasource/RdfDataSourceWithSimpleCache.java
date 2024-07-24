@@ -33,7 +33,12 @@ import org.apache.jena.sparql.util.Context;
 import com.github.benmanes.caffeine.cache.Cache;
 
 /**
- * RdfDataSource wrapper that caches failed executions.
+ * RdfDataSource wrapper that uses a simple (= non-streaming) cache both successful and failed executions.
+ *
+ * The cache keys are of type Entry('queryForm', 'queryObjectOrString').
+ * The cache values are either Exception, Table, List<Triple> or List<Quad>.
+ *
+ * Cancelling a query execution while it is being cached caches the encountered cancellation exception.
  */
 public class RdfDataSourceWithSimpleCache
     extends RdfDataSourceWrapperBase<RdfDataSource>
@@ -154,16 +159,23 @@ public class RdfDataSourceWithSimpleCache
                     try {
                         r = queryExecAccessor.apply(qe);
                     } catch (Exception e) {
+                        // Track as a suppressed exception that control of flow passed through here
+                        if (e instanceof RuntimeException) {
+                            e.addSuppressed(new RuntimeException("Query execution error"));
+                        }
                         r = e;
                     }
                 } catch (Exception e) {
+                    // Track as a suppressed exception that control of flow passed through here
+                    if (e instanceof RuntimeException) {
+                        e.addSuppressed(new RuntimeException("Query execution error"));
+                    }
                     r = e;
                 }
                 return r;
             });
 
             if (tmp instanceof RuntimeException re) {
-                re.printStackTrace();
                 throw re;
             } else if (tmp instanceof Exception e) {
                 throw new RuntimeException(e);

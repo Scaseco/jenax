@@ -5,16 +5,17 @@ import java.util.Objects;
 import org.apache.jena.graph.Node;
 
 public abstract class RdfElementNodeBase
-    implements RdfElement
+    implements RdfElementNode
 {
-    protected Node node;
+    protected Node internalId;
 
-    public RdfElementNodeBase(Node node) {
+    public RdfElementNodeBase(Node internalId) {
         super();
-        this.node = Objects.requireNonNull(node);
+        this.internalId = Objects.requireNonNull(internalId);
     }
 
-    public Node getNode() {
-        return node;
+    @Override
+    public Node getInternalId() {
+        return internalId;
     }
 }

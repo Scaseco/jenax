@@ -27,6 +27,7 @@
 		<module>jenax-models-void</module>
 		<module>jenax-models-udf</module>
 		<module>jenax-models-polyfill</module>
+		<module>jenax-models-ron</module>
 	</modules>
 </project>
 

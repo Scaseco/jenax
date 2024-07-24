@@ -24,6 +24,10 @@ public class AccContext {
 
     public static AccContext serializing(Gson gson, JsonWriter jsonWriter) {
         RdfObjectNotationWriter writer = new RdfObjectNotationWriterViaJson(gson, jsonWriter);
+        return serializing(writer);
+    }
+
+    public static AccContext serializing(RdfObjectNotationWriter writer) {
         return new AccContext(writer, false, true);
     }
 

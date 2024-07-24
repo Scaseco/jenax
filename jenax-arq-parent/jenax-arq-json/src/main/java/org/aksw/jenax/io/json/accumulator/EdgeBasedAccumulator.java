@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.aksw.jenax.io.rdf.json.RdfArray;
+import org.aksw.jenax.io.rdf.json.RdfArrayImpl;
 import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -94,7 +95,7 @@ public class EdgeBasedAccumulator {
         accContext.materialize = true;
 
         // JsonArray materialized = new JsonArray();
-        RdfArray materialized = new RdfArray();
+        RdfArray materialized = new RdfArrayImpl();
         try {
             writer.beginArray();
             AccJsonDriver driver = AccJsonDriver.of(movieObject.newAccumulator(), false);

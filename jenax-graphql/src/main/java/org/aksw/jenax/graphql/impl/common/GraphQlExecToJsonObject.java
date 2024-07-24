@@ -2,8 +2,8 @@ package org.aksw.jenax.graphql.impl.common;
 
 import java.util.stream.Stream;
 
-import org.aksw.jenax.graphql.api.GraphQlDataProvider;
-import org.aksw.jenax.graphql.api.GraphQlExec;
+import org.aksw.jenax.graphql.json.api.GraphQlDataProvider;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

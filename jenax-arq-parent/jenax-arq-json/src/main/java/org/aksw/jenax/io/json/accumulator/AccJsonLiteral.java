@@ -44,7 +44,7 @@ public class AccJsonLiteral
                 if (value == null) {
                     writer.nullValue();
                 } else {
-                    writer.value(value.getAsLiteral().getNode());
+                    writer.value(value.getAsLiteral().getInternalId());
                 }
             }
 

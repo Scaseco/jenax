@@ -1,6 +1,6 @@
 package org.aksw.jenax.graphql.impl.common;
 
-import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
+import org.aksw.jenax.graphql.json.api.GraphQlExecFactoryDocument;
 
 public class GraphQlExecFactoryDocumentWrapperBase
     implements GraphQlExecFactoryDocumentWrapper

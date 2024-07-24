@@ -9,6 +9,7 @@ import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.path.P_Path0;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
 /**
@@ -21,7 +22,7 @@ public class AccJsonProperty
     protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
-    protected Node jsonKey;
+    protected P_Path0 jsonKey;
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
@@ -33,7 +34,7 @@ public class AccJsonProperty
     /** If true then no array is created. Any item after the first raises an error event. */
     protected boolean isSingle = false;
 
-    public AccJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
+    public AccJsonProperty(P_Path0 jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
         super();
         this.matchFieldId = matchFieldId;
         this.jsonKey = jsonKey;
@@ -64,7 +65,7 @@ public class AccJsonProperty
 //    }
 
     @Override
-    public Node getJsonKey() {
+    public P_Path0 getJsonKey() {
         return jsonKey;
     }
 
@@ -158,7 +159,7 @@ public class AccJsonProperty
                     // Turns null into JsonNull
                     RdfElement elt = value == null ? RdfElement.nullValue() : value;
                     AccJsonObjectLikeBase acc = (AccJsonObjectLikeBase)parent;
-                    acc.value.getAsObject().add(jsonKey, elt);
+                    acc.value.getAsObject().getMembers().put(jsonKey, elt);
                 }
             }
 

@@ -394,6 +394,11 @@ public class RDFConnectionUtils {
         return result;
     }
 
+    /**
+     * Obtain a RowSet from the given queryExecBuilder.
+     * The RowSet is materialized when the silent flag is set or streaming is disallowed.
+     * Otherwise it is streamed.
+     */
     public static RowSet exec(QueryExecBuilder builder, boolean isSilent, boolean isStreamingAllowed) {
         RowSet result;
         if (isSilent || !isStreamingAllowed) {
@@ -408,6 +413,7 @@ public class RDFConnectionUtils {
                     result = RowSetStream.create(List.of(), Collections.emptyIterator());
                     // QueryIterSingleton.create(BindingFactory.root(), null);
                 } else {
+                    ex.addSuppressed(new RuntimeException("QueryExecution error"));
                     throw ex;
                 }
             }

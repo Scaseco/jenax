@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.api;
+package org.aksw.jenax.graphql.json.api;
 
 import java.util.Map;
 

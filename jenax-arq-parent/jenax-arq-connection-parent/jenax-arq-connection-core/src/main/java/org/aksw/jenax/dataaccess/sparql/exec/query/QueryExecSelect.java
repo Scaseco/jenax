@@ -46,7 +46,7 @@ public class QueryExecSelect
 
     @Override
     protected QueryExec doSelect(Query selectQuery) {
-        QueryExec result = delegate.create(query);
+        QueryExec result = delegate.create(selectQuery);
         return result;
     }
 //

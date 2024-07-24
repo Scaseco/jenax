@@ -4,17 +4,34 @@ import java.util.Map.Entry;
 
 import org.aksw.jenax.io.json.accumulator.RdfObjectNotationWriterViaJson;
 import org.apache.jena.graph.Node;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.sparql.path.P_Path0;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
+/**
+ *
+ * If rdfTermMode is true, then all json literals will be strings that
+ * contain RDF terms in n-triples syntax.
+ *
+ */
 public class RdfElementVisitorRdfToJson
     implements RdfElementVisitor<JsonElement>
 {
-    protected Gson gson;
+    // protected boolean rdfTermMode;
+
+//    public RdfElementVisitorRdfToJson() {
+//        this(false);
+//    }
+//
+//    public RdfElementVisitorRdfToJson(boolean rdfTermMode) {
+//        super();
+//        this.rdfTermMode = rdfTermMode;
+//    }
 
     @Override
     public JsonElement visit(RdfArray elements) {
@@ -29,8 +46,20 @@ public class RdfElementVisitorRdfToJson
     @Override
     public JsonElement visit(RdfObject obj) {
         JsonObject result = new JsonObject();
-        for (Entry<Node, RdfElement> e : obj.getMembers().entrySet()) {
-            Node key = e.getKey();
+        for (Entry<P_Path0, RdfElement> e : obj.getMembers().entrySet()) {
+            P_Path0 path = e.getKey();
+            Node key = path.getNode();
+
+            // TODO Add the object's node
+            Node id = obj.getExternalId();
+//            if (id != null && rdfTermMode) {
+//                result.addProperty("@id", NodeFmtLib.strNT(id));
+//            }
+//
+//            String name = rdfTermMode
+//                    ? NodeFmtLib.strNT(key)
+//                    : RdfObjectNotationWriterViaJson.nodeToJsonKey(key);
+
             String name = RdfObjectNotationWriterViaJson.nodeToJsonKey(key);
             JsonElement elt = e.getValue().accept(this);
             result.add(name, elt);
@@ -40,7 +69,10 @@ public class RdfElementVisitorRdfToJson
 
     @Override
     public JsonElement visit(RdfLiteral element) {
-        Node node = element.getNode();
+        Node node = element.getInternalId();
+//        JsonElement result = rdfTermMode
+//                ? new JsonPrimitive(NodeFmtLib.strNT(node))
+//                : RdfObjectNotationWriterViaJson.toJson(node);
         JsonElement result = RdfObjectNotationWriterViaJson.toJson(node);
         return result;
     }

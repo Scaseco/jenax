@@ -7,54 +7,42 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.aksw.commons.path.json.PathJson;
-import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
-import org.aksw.commons.util.stream.CollapseRunsSpec;
-import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
-import org.aksw.jenax.graphql.api.GraphQlDataProvider;
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.impl.common.GraphQlDataProviderBase;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlDataProvider;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlDataProviderBase;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExec;
 import org.aksw.jenax.io.json.accumulator.AccContext;
 import org.aksw.jenax.io.json.accumulator.AccJson;
 import org.aksw.jenax.io.json.accumulator.AccJsonDriver;
 import org.aksw.jenax.io.json.accumulator.AggJson;
+import org.aksw.jenax.io.json.accumulator.RdfObjectNotationWriter;
 import org.aksw.jenax.io.json.graph.GraphToJsonNodeMapper;
+import org.aksw.jenax.io.rdf.json.RdfElement;
 import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.exec.QueryExecAdapter;
 import org.apache.jena.sparql.exec.QueryExecutionAdapter;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
-import org.apache.jena.sparql.util.ModelUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
 
 import graphql.language.Field;
-import io.reactivex.rxjava3.core.Flowable;
 
-public class GraphQlExecImpl
-    implements GraphQlExec
+public class RdfGraphQlExecImpl
+    implements RdfGraphQlExec
 {
     protected RdfDataSource dataSource;
     protected GraphQlToSparqlMapping mapping;
-    protected List<GraphQlDataProvider> dataProviders;
+    protected List<RdfGraphQlDataProvider> dataProviders;
 
-    public GraphQlExecImpl(RdfDataSource dataSource, GraphQlToSparqlMapping mapping) {
+    public RdfGraphQlExecImpl(RdfDataSource dataSource, GraphQlToSparqlMapping mapping) {
         super();
         this.dataSource = dataSource;
         this.mapping = mapping;
@@ -74,7 +62,7 @@ public class GraphQlExecImpl
     }
 
     @Override
-    public GraphQlDataProvider getDataProvider(String name) {
+    public RdfGraphQlDataProvider getDataProvider(String name) {
         GraphQlToSparqlMapping.Entry entry = mapping.getTopLevelMappings().get(name);
         boolean isSingle = entry.isSingle();
 
@@ -100,7 +88,7 @@ public class GraphQlExecImpl
 
         // System.err.println(query.toString());
 
-        GraphQlDataProvider result;
+        RdfGraphQlDataProvider result;
 
         // true = fully streaming approach ; false = legacy
         boolean useAccumulators = true;
@@ -118,25 +106,29 @@ public class GraphQlExecImpl
                                 )))
                     .blockingStream();
 
-            result = new GraphQlDataProviderBase(name, metadata) {
+            result = new RdfGraphQlDataProviderBase(name, metadata) {
                 @Override
-                public Stream<JsonElement> openStream() {
+                public Stream<RdfElement> openStream() {
                     AccJson acc = agg.newAccumulator();
                     AccJsonDriver driver = AccJsonDriver.of(acc, isSingle);
                     AccContext context = AccContext.materializing();
-                    RdfElementVisitorRdfToJson converter = new RdfElementVisitorRdfToJson();
+                    // RdfElementVisitorRdfToJson converter = new RdfElementVisitorRdfToJson();
                     Stream<Quad> quadStream = quadStreamSupplier.get();
-                    Stream<JsonElement> r = driver.asStream(context, quadStream)
-                            .map(Entry::getValue)
-                            .map(elt -> elt.accept(converter));
+                    Stream<RdfElement> r = driver.asStream(context, quadStream)
+                        .map(Entry::getValue);
                     return r;
+
+//                    Stream<JsonElement> r = driver.asStream(context, quadStream)
+//                            .map(Entry::getValue)
+//                            .map(elt -> elt.accept(converter));
+//                    return r;
                 }
 
                 @Override
-                public void write(JsonWriter writer, Gson gson) throws IOException {
+                public void write(RdfObjectNotationWriter writer) throws IOException {
                     AccJson acc = agg.newAccumulator();
                     AccJsonDriver driver = AccJsonDriver.of(acc, isSingle);
-                    AccContext context = AccContext.serializing(gson, writer);
+                    AccContext context = AccContext.serializing(writer);
 
                     quadStreamSupplier.get().forEach(quad -> {
                         try {
@@ -162,48 +154,49 @@ public class GraphQlExecImpl
 
         } else {
 
-            result = new GraphQlDataProviderBase(name, metadata) {
-                @Override
-                public Stream<JsonElement> openStream() {
-                    FlowableOperatorCollapseRuns<Quad, Node, Graph> grouper = FlowableOperatorCollapseRuns.create(
-                        CollapseRunsSpec.create(
-                            Quad::getGraph,
-                            graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
-                            (graph, quad) -> graph.add(quad.asTriple())));
-
-                    Flowable<RDFNode> graphFlow = SparqlRx
-                        .execConstructQuads(() ->
-                            // Produce quads by executing the construct query as a select one
-                            QueryExecutionAdapter.adapt(
-                                QueryExecSelect.of(
-                                    query, q ->
-                                    QueryExecAdapter.adapt(dataSource.asQef().createQueryExecution(q)))))
-                        .lift(grouper)
-                        .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
-
-                    Flowable<JsonElement> r = graphFlow.map(rdfNode -> {
-                        org.apache.jena.graph.Node node = rdfNode.asNode();
-                        Graph graph = rdfNode.getModel().getGraph();
-                        JsonArray errors = new JsonArray();
-                        JsonElement json = jsonMapper.map(PathJson.newAbsolutePath(), errors, graph, node);
-                        // TODO Handle errors
-                        return json;
-                    });
-                    return r.blockingStream();
-                }
-
-                @Override
-                public void write(JsonWriter writer, Gson gson) {
-                  try (Stream<JsonElement> stream = openStream()) {
-                      stream.forEach(item -> gson.toJson(item, writer));
-                  }
-                }
-
-                @Override
-                public boolean isSingle() {
-                    return isSingle;
-                }
-            };
+            throw new UnsupportedOperationException("legacy implementation no longer supported");
+//            result = new GraphQlDataProviderBase(name, metadata) {
+//                @Override
+//                public Stream<JsonElement> openStream() {
+//                    FlowableOperatorCollapseRuns<Quad, Node, Graph> grouper = FlowableOperatorCollapseRuns.create(
+//                        CollapseRunsSpec.create(
+//                            Quad::getGraph,
+//                            graphNode -> GraphFactoryEx.createInsertOrderPreservingGraph(), // GraphFactory.createDefaultGraph(),
+//                            (graph, quad) -> graph.add(quad.asTriple())));
+//
+//                    Flowable<RDFNode> graphFlow = SparqlRx
+//                        .execConstructQuads(() ->
+//                            // Produce quads by executing the construct query as a select one
+//                            QueryExecutionAdapter.adapt(
+//                                QueryExecSelect.of(
+//                                    query, q ->
+//                                    QueryExecAdapter.adapt(dataSource.asQef().createQueryExecution(q)))))
+//                        .lift(grouper)
+//                        .map(e -> ModelUtils.convertGraphNodeToRDFNode(e.getKey(), ModelFactory.createModelForGraph(e.getValue())));
+//
+//                    Flowable<JsonElement> r = graphFlow.map(rdfNode -> {
+//                        org.apache.jena.graph.Node node = rdfNode.asNode();
+//                        Graph graph = rdfNode.getModel().getGraph();
+//                        JsonArray errors = new JsonArray();
+//                        JsonElement json = jsonMapper.map(PathJson.newAbsolutePath(), errors, graph, node);
+//                        // TODO Handle errors
+//                        return json;
+//                    });
+//                    return r.blockingStream();
+//                }
+//
+//                @Override
+//                public void write(JsonWriter writer, Gson gson) {
+//                  try (Stream<JsonElement> stream = openStream()) {
+//                      stream.forEach(item -> gson.toJson(item, writer));
+//                  }
+//                }
+//
+//                @Override
+//                public boolean isSingle() {
+//                    return isSingle;
+//                }
+//            };
         }
 
         return result;

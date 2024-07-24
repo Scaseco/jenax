@@ -7,12 +7,14 @@ import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
-import org.aksw.jenax.graphql.api.GraphQlExec;
-import org.aksw.jenax.graphql.api.GraphQlExecFactory;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
+import org.aksw.jenax.graphql.impl.common.RdfGraphQlExecUtils;
+import org.aksw.jenax.graphql.json.api.GraphQlExec;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecFactory;
+import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJsonNt;
+import org.aksw.jenax.io.rdf.json.RdfObject;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -30,9 +32,12 @@ import graphql.language.Value;
 import graphql.parser.Parser;
 
 public class TestGraphQlSparql {
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson gson = new GsonBuilder()
+            .disableHtmlEscaping() // If enabled then e.g. the angular brackets in <my:iri> get escaped.
+            .setPrettyPrinting()
+            .create();
 
-    protected static GraphQlExecFactory gef;
+    protected static RdfGraphQlExecFactory gef;
 
     @BeforeClass
     public static void beforeClass() {
@@ -53,8 +58,8 @@ public class TestGraphQlSparql {
 
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
         RdfDataSource dataSource = RdfDataEngines.of(ds);
-        GraphQlExecFactory gef = GraphQlExecFactoryOverSparql.autoConfEager(dataSource);
-        JsonObject actual = GraphQlExecUtils.materialize(gef, queryStr);
+        RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.autoConfEager(dataSource);
+        JsonObject actual = GraphQlExecUtils.materialize(gef.toJson(), queryStr);
 
         // System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
 
@@ -83,9 +88,9 @@ public class TestGraphQlSparql {
 
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
         RdfDataSource dataSource = RdfDataEngines.of(ds);
-        GraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
+        RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
 
-        JsonObject actual = GraphQlExecUtils.materialize(gef, queryStr);
+        JsonObject actual = GraphQlExecUtils.materialize(gef.toJson(), queryStr);
 
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
 
@@ -254,10 +259,72 @@ public class TestGraphQlSparql {
         evaluate(expected, queryStr, null);
     }
 
+    @Test
+    public void testPokemon02() throws IOException {
+
+        String queryStr = """
+            query($limit: Int!) {
+              Pokemon(limit: $limit, orderBy: { l1: ASC }) @class
+                 @debug
+                 @rdf (
+                   prefixes: {
+                     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+                     pokedex: "http://pokedex.dataincubator.org/pkm/"
+                   },
+                   base: pokedex
+                 )
+              {
+                # xid,
+                label @as(name: l1) @rdf(ns: rdfs) @one
+                speciesOf @inverse @many {
+                  label @rdf(ns: rdfs) @one
+                }
+              }
+            }
+            """;
+
+        // Actually, we want to write GraphQL over SPARQL leveraging the usual SPARQL notations:
+        // The problem is, that the colon syntax is already reserved for field aliases...
+        String queryStr2 = """
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX pokedex: <http://pokedex.dataincubator.org/pkm/>
+                PREFX : <http://pokedex.dataincubator.org/pkm/>
+
+                query($limit: xsd:numeric!) {
+                  :Pokemon(limit: $limit, orderBy: { l1: ASC }) @class @debug
+                  {
+                    rdfs:label @as(name: l1) @one
+                    :speciesOf @inverse @many {
+                      rdfs:label @rdf(ns: rdfs) @one
+                    }
+                  }
+                }
+                """;
+
+        // JsonElement expected = getResourceAsJson("graphql/test01-result.json", gson);
+
+        Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
+        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
+        RdfObject actual = RdfGraphQlExecUtils.write(gef.newBuilder().setDocument(queryStr).setJsonMode(false).build());
+
+        // JsonWriter jsonWriter = gson.newJsonWriter(new PrintWriter(System.out));
+        // ObjectNotationWriter visitor = new RdfObjectNotationWriterViaJson(gson, jsonWriter);
+
+
+        JsonElement json = actual.accept(new RdfElementVisitorRdfToJsonNt());
+        System.out.println(gson.toJson(json));
+
+        // System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(actual));
+
+        // Assert.assertEquals(expected, actual);
+    }
+
+
     public void evaluate(String expectedJson, String documentString, Map<String, Value<?>> assignments) {
         JsonElement expectedData = gson.fromJson(expectedJson, JsonElement.class);
 
-        GraphQlExec qe = gef.create(documentString, assignments);
+        GraphQlExec qe = gef.toJson().create(documentString, assignments);
         JsonObject actualResponse = GraphQlExecUtils.materialize(qe);
         JsonElement actualData = actualResponse.get("data");
 
