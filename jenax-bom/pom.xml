@@ -104,7 +104,7 @@
 
 		<velocity-engine.version>2.3</velocity-engine.version>
 		<pebble.version>3.2.1</pebble.version>
-		<graphql.version>21.1</graphql.version>
+		<graphql.version>22.1</graphql.version>
 
 		<!-- h3 spatial grid -->
 		<h3.version>4.1.1</h3.version>
@@ -200,7 +200,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-graphql</artifactId>
+				<artifactId>jenax-graphql-v1</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

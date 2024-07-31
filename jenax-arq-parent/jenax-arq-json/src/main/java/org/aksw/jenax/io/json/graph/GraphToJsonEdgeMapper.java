@@ -8,7 +8,7 @@ public abstract class GraphToJsonEdgeMapper
     implements GraphToJsonMapper
 {
     protected TripleFilter baseFilter;
-    protected GraphToJsonNodeMapper targetNodeMapper = GraphToJsonNodeMapperLiteral.get();
+    protected GraphToJsonMapperNode targetNodeMapper = GraphToJsonNodeMapperLiteral.get();
 
     /**
      * Only applicable if the value produced by this PropertyMapper is a json object.
@@ -21,7 +21,7 @@ public abstract class GraphToJsonEdgeMapper
         this.baseFilter = baseFilter;
     }
 
-    public abstract GraphToJsonNodeMapper getTargetNodeMapper();
+    public abstract GraphToJsonMapperNode getTargetNodeMapper();
 
     public boolean isHidden() {
         return isHidden;

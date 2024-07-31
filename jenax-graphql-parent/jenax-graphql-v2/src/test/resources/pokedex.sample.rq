@@ -1,0 +1,16 @@
+# Extract 2 pokemon for each of a given color
+PREFIX : <http://pokedex.dataincubator.org/pkm/>
+CONSTRUCT { ?x ?y ?z }
+{
+  SELECT DISTINCT ?x ?y ?z {
+    VALUES ?c { "red" "black" }
+    LATERAL {
+      { SELECT DISTINCT ?s ?c { ?s a :Pokemon ; :colour ?c } LIMIT 2 }
+    }
+    LATERAL {
+        { BIND(?s AS ?x) ?x ?y ?z }
+      UNION
+        { ?x :speciesOf ?s . ?x ?y ?z }
+    }
+  } ORDER BY ?x ?y ?z
+}

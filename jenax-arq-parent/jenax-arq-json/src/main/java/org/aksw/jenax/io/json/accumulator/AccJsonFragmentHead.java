@@ -6,9 +6,10 @@ import java.util.Objects;
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.io.rdf.json.RdfElement;
-import org.aksw.jenax.io.rdf.json.RdfObject;
-import org.aksw.jenax.io.rdf.json.RdfObjectImpl;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfNull;
+import org.aksw.jenax.ron.RdfObject;
+import org.aksw.jenax.ron.RdfObjectImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.path.P_Path0;
@@ -79,7 +80,7 @@ public class AccJsonFragmentHead
      * @throws IOException
      */
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node node, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
         seenTargetCount = 0;
         skipOutputStartedHere = false;
@@ -105,7 +106,7 @@ public class AccJsonFragmentHead
 
     /** Accepts a triple if source and field id match that of the current state */
     @Override
-    public AccJson transition(Triple input, AccContext context) throws IOException {
+    public AccJson transition(Triple input, AccContextRdf context) throws IOException {
         ensureBegun();
 
         // End the current target (array item) if there is one
@@ -143,7 +144,7 @@ public class AccJsonFragmentHead
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
 
         if (!skipOutput) {
@@ -153,7 +154,7 @@ public class AccJsonFragmentHead
                 // So we access the field directly
                 if (parent != null) {
                     // Turns null into JsonNull
-                    RdfElement elt = value == null ? RdfElement.nullValue() : value;
+                    RdfElement elt = value == null ? new RdfNull() : value;
 
                     // parent can be either Object or Fragment.
                     AccJson tmp = parent;
@@ -194,7 +195,7 @@ public class AccJsonFragmentHead
     }
 
     @Override
-    public void acceptContribution(RdfElement item, AccContext context) {
+    public void acceptContribution(RdfElement item, AccContextRdf context) {
         ensureBegun();
         if (!skipOutput) {
             if (context.isMaterialize()) {

@@ -59,11 +59,11 @@ public class GraphToJsonPropertyMapper
         return this;
     }
 
-    public GraphToJsonNodeMapper getTargetNodeMapper() {
+    public GraphToJsonMapperNode getTargetNodeMapper() {
         return targetNodeMapper;
     }
 
-    public GraphToJsonPropertyMapper setTargetNodeMapper(GraphToJsonNodeMapper targetNodeMapper) {
+    public GraphToJsonPropertyMapper setTargetNodeMapper(GraphToJsonMapperNode targetNodeMapper) {
         this.targetNodeMapper = targetNodeMapper;
         return this;
     }

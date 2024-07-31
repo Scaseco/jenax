@@ -33,7 +33,7 @@
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
 
-		<module>jenax-graphql</module>
+		<module>jenax-graphql-parent</module>
 		<!-- <module>jenax-cli-core</module> -->
 	</modules>
 

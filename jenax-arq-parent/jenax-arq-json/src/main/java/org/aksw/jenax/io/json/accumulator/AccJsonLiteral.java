@@ -4,7 +4,10 @@ import java.io.IOException;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriter;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfLiteralImpl;
+import org.aksw.jenax.ron.RdfNull;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
@@ -18,26 +21,26 @@ public class AccJsonLiteral
     }
 
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node node, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
 
         // Always materialize literals
         // Only emit them when calling end()
-        value = RdfElement.newLiteral(node);
+        value = new RdfLiteralImpl(node);
     }
 
     @Override
-    public AccJson transition(Triple edge, AccContext context) {
+    public AccJson transition(Triple edge, AccContextRdf context) {
         ensureBegun();
         // Literals reject all edges (indicated by null)
         return null;
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
         if (!skipOutput) {
-            RdfElement effectiveValue = value == null ? RdfElement.nullValue() : value;
+            RdfElement effectiveValue = value == null ? new RdfNull() : value;
 
             if (context.isSerialize()) {
                 RdfObjectNotationWriter writer = context.getJsonWriter();
@@ -61,7 +64,7 @@ public class AccJsonLiteral
     }
 
     @Override
-    public void acceptContribution(RdfElement value, AccContext context) {
+    public void acceptContribution(RdfElement value, AccContextRdf context) {
         throw new UnsupportedOperationException("Literals cannot expect json elemnts as contributions");
     }
 }

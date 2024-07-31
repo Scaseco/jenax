@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.jena.sparql.path.P_Path0;
 
 public abstract class GraphToJsonNodeMapperObjectLike
-    implements GraphToJsonNodeMapper
+    implements GraphToJsonMapperNode
 {
     protected Map<P_Path0, GraphToJsonEdgeMapper> propertyMappers = new LinkedHashMap<>();
 

@@ -1,10 +1,10 @@
 package org.aksw.jenax.web.server.boot;
 
-import org.aksw.jenax.graphql.json.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecFactory;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
 import org.aksw.jenax.web.provider.UnwrapRuntimeExceptionProvider;
-import org.aksw.jenax.web.servlet.ServletGraphQlEndpointImpl;
+import org.aksw.jenax.web.servlet.graphql.v1.ServletGraphQlEndpointImpl;
 import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -16,17 +16,17 @@ import jakarta.servlet.ServletRegistration;
 public class ServletBuilderGraphQl
     implements ServletBuilder
 {
-    protected GraphQlExecFactory graphQlExecFactory;
+    protected RdfGraphQlExecFactory graphQlExecFactory;
 
     public static ServletBuilderGraphQl newBuilder() {
         return new ServletBuilderGraphQl();
     }
 
-    public GraphQlExecFactory getGraphQlExecFactory() {
+    public RdfGraphQlExecFactory getGraphQlExecFactory() {
         return graphQlExecFactory;
     }
 
-    public ServletBuilderGraphQl setGraphQlExecFactory(GraphQlExecFactory graphQlExecFactory) {
+    public ServletBuilderGraphQl setGraphQlExecFactory(RdfGraphQlExecFactory graphQlExecFactory) {
         this.graphQlExecFactory = graphQlExecFactory;
         return this;
     }
@@ -49,7 +49,7 @@ public class ServletBuilderGraphQl
                 ));
         //        servlet.setInitParameter(ServletProperties.FILTER_FORWARD_ON_404, "true");
         //        servlet.setInitParameter(ServletProperties.FILTER_STATIC_CONTENT_REGEX, ".*(html|css|js)");
-                servlet.addMapping("/graphql/*");
+                servlet.addMapping("/graphql/v1/*");
                 servlet.setAsyncSupported(true);
                 servlet.setLoadOnStartup(1);
             }

@@ -5,9 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.aksw.jenax.io.rdf.json.RdfArray;
-import org.aksw.jenax.io.rdf.json.RdfArrayImpl;
-import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriterViaJson;
+import org.aksw.jenax.ron.RdfArray;
+import org.aksw.jenax.ron.RdfArrayImpl;
+import org.aksw.jenax.ron.RdfElementVisitorRdfToJson;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Quad;
@@ -86,7 +87,7 @@ public class EdgeBasedAccumulator {
         JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(System.out));
 
         // gson.fromJson(/null, null)
-        AccContext accContext = new AccContext(new RdfObjectNotationWriterViaJson(gson, writer), true, true);
+        AccContextRdf accContext = new AccContextRdf(new RdfObjectNotationWriterViaJson(gson, writer), true, true);
         accContext.setErrorHandler(ev -> {
             System.err.println("Error: " + ev);
         });

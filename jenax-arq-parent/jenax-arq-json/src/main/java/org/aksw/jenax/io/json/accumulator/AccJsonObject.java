@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.ron.RdfObjectImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
@@ -32,7 +32,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void begin(Node source, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node source, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(source, context, skipOutput);
 
         // Reset fields
@@ -41,7 +41,7 @@ public class AccJsonObject
 
         if (!skipOutput) {
             if (context.isMaterialize()) {
-                value = RdfElement.newObject(source); // new JsonObject();
+                value = new RdfObjectImpl(source); // new JsonObject();
             }
 
             if (context.isSerialize()) {
@@ -51,7 +51,7 @@ public class AccJsonObject
     }
 
     @Override
-    public AccJson transition(Triple input, AccContext context) throws IOException {
+    public AccJson transition(Triple input, AccContextRdf context) throws IOException {
         ensureBegun();
 
         Node inputFieldId = input.getPredicate();
@@ -98,7 +98,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
 
         // Visit all remaining fields

@@ -33,7 +33,7 @@ public class FacetStep
     public static final Var PREDICATE = Var.alloc("predicate");
     public static final Var SOURCE = Var.alloc("source");
     public static final Var GRAPH = Var.alloc("graph");
-    public static final Var TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
+    public static final Var TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or a general tuple expression)
 
     public static Node PATH_NODE = NodeFactory.createURI("urn:fragment");
     public static P_Path0 FRAGMENT_PATH = (P_Path0)PathFactory.pathLink(PATH_NODE);

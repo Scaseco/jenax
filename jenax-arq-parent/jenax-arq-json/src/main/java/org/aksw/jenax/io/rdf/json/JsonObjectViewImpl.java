@@ -4,6 +4,8 @@ import java.util.Map;
 
 import org.aksw.commons.collections.maps.MapFromKeyConverter;
 import org.aksw.commons.collections.maps.MapFromValueConverter;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfObject;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;

@@ -184,14 +184,16 @@ public class NodeQueryImpl
                 }
 
                 Var sourceVar = FacetRelationUtils.resolveComponent(FacetStep.SOURCE, baseRelation);
-                Var targetVar = relationQuery.target().var();
+                Var targetVar = var; // relationQuery.target().var();
 
                 QueryContext cxt = relationQuery.getContext();
 
 
-                String scopeName = cxt.getFieldIdGenerator().next();
+                String scopeName = cxt.getScopeNameGenerator().next();
                 Set<Var> usedVars = cxt.getUsedVars();
-                Fragment relation = FacetRelationUtils.renameVariables(baseRelation, sourceVar, targetVar, scopeName, usedVars);
+
+                Map<Var, Var> toScoped = FacetRelationUtils.createVarMap(baseRelation, sourceVar, targetVar, scopeName, usedVars);
+                Fragment relation = FacetRelationUtils.applyNodeTransform(baseRelation, toScoped);
                 usedVars.addAll(relation.getVarsMentioned());
 
                 if (FacetStep.isFragment(fs)) {

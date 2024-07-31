@@ -7,7 +7,7 @@ import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.aksw.jenax.io.json.accumulator.AggJsonObject;
-import org.aksw.jenax.io.json.accumulator.RdfObjectNotationWriterViaJson;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriterViaJson;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.path.P_Path0;

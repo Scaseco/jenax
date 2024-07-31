@@ -1,12 +1,13 @@
 package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,7 +18,6 @@ import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -85,6 +85,8 @@ record MultiRequestElt(
     RdfDataSource dataSource,
 
     /** A binding to merge into all bindings obtained from the data source */
+    @Deprecated /** It is better to substitute special rdf terms with values from an environment (e.g. env://SOURCE),
+    rather than injecting variables that were not asked for in the original query. */
     Binding binding
 ) {}
 
@@ -139,6 +141,15 @@ class MultiRequestBuilder {
 //        protected List<Element> elements;
 //    }
 
+
+    /**
+     * Create a query execution.
+     * Internally creates a query that federates via SERVICE.
+     *
+     *
+     * @param eltToQuery
+     * @return
+     */
     public QueryExec build(Function<Element, Query> eltToQuery) {
         // Assign each data source a service Node
         Set<Node> seenDataSourceNodes = new HashSet<>();
@@ -171,8 +182,18 @@ class MultiRequestBuilder {
                 ElementUtils.addBinding(group, b);
                 elt = group;
             }
-            Node serviceNode = sourceToNode.getOrDefault(member.dataSource(), member.serviceNode());
-            elts.add(new ElementService(serviceNode, elt, false));
+
+            Node dataSourceServiceNode = sourceToNode.getOrDefault(member.dataSource(), member.serviceNode());
+            Node memberServiceNode = Optional.ofNullable(member.serviceNode()).orElse(dataSourceServiceNode);
+
+            // Replace env:SOURCE iris (if any) with the respective service
+            Node SOURCE = NodeFactory.createURI("env://SOURCE");
+//            elt = ElementUtils.applyNodeTransform(elt, node -> NodeEnvsubst.subst(node, k -> {
+//                return "SOURCE".equals(k) ? serviceNode : k;
+//            }));
+            elt = ElementUtils.applyNodeTransform(elt, node -> SOURCE.equals(node) ? memberServiceNode : node);
+
+            elts.add(new ElementService(dataSourceServiceNode, elt, false));
         }
 
         Element union = ElementUtils.unionIfNeeded(elts);
@@ -195,6 +216,12 @@ class MultiRequestBuilder {
             return r;
         });
 
+
+        // XXX Push DISTINCT and GROUP BY to the source if the SOURCE variable is involved
+        // Evaluator<CBinding> evaluator = new EvaluationOfConstraints();
+        // CBinding cbinding = evaluator.evalOp(op, CBindingMap.create());
+        // System.out.println(cbinding);
+
         DatasetGraph proxyDataset = DatasetGraphFactory.create();
         ServiceExecutorRegistry.set(proxyDataset.getContext(), reg);
         return QueryExec.newBuilder().dataset(proxyDataset).query(query).build();
@@ -204,11 +231,47 @@ class MultiRequestBuilder {
 public class RdfDataSourceMulti
     implements RdfDataSource
 {
-    protected List<RdfDataSource> dataSources;
+    public static Builder newBuilder() {
+        return new Builder();
+    }
 
-    public RdfDataSourceMulti(List<RdfDataSource> dataSources) {
+    public static class Builder {
+        protected Map<Node, RdfDataSource> dataSources = new LinkedHashMap<>();
+
+        public Builder add(RdfDataSource dataSource) {
+            add(NodeFactory.createURI("urn:service:" + System.identityHashCode(dataSource)), dataSource);
+            return this;
+        }
+
+        public Builder add(String dataSourceIri, RdfDataSource dataSource) {
+            add(NodeFactory.createURI(dataSourceIri), dataSource);
+            return this;
+        }
+
+        public Builder add(Node dataSourceNode, RdfDataSource dataSource) {
+            dataSources.put(dataSourceNode, dataSource);
+            return this;
+        }
+
+        public RdfDataSourceMulti build() {
+            Map<Node, RdfDataSource> map = new LinkedHashMap<>(dataSources);
+            return new RdfDataSourceMulti(map);
+        }
+    }
+
+    protected Map<Node, RdfDataSource> dataSources = new LinkedHashMap<>();
+
+    public RdfDataSourceMulti() {
         super();
-        this.dataSources = new ArrayList<>(dataSources);
+    }
+
+    protected RdfDataSourceMulti(Map<Node, RdfDataSource> dataSources) {
+        super();
+        this.dataSources = dataSources;
+    }
+
+    public Map<Node, RdfDataSource> getDataSources() {
+        return dataSources;
     }
 
     @Override
@@ -224,9 +287,10 @@ public class RdfDataSourceMulti
                         // Element elt = new ElementSubQuery(q);
                         MultiRequestBuilder builder = new MultiRequestBuilder();
 
-                        for (RdfDataSource dataSource : dataSources) {
-                            builder.add(null, elt, dataSource, null);
-                        }
+                        // for (RdfDataSource dataSource : dataSources) {
+                        dataSources.forEach((node, dataSource) ->
+                            builder.add(node, elt, dataSource, null)
+                        );
 
                         QueryExec r = builder.build(e -> {
                             q.setQueryPattern(e);
@@ -253,12 +317,56 @@ public class RdfDataSourceMulti
     public static void main(String[] args) {
         RdfDataSource ds1 = () -> RDFConnectionRemote.newBuilder().destination("http://maven.aksw.org/sparql").build();
         RdfDataSource ds2 = () -> RDFConnectionRemote.newBuilder().destination("http://linkedgeodata.org/sparql").build();
+        RdfDataSource ds3 = () -> RDFConnectionRemote.newBuilder().destination("https://staging.databus.dbpedia.org/repo/sparql").build();
 
-        String queryStr = "SELECT (COUNT(*) AS ?c) { GRAPH ?g { ?s a ?t . FILTER(?t IN (<http://www.w3.org/2000/01/rdf-schema#Class>, <http://www.w3.org/2002/07/owl#Class>)) ?s ?p ?o } } LIMIT 10";
+        // RdfDataSource dsRaw = new RdfDataSourceMulti(Arrays.asList(ds1, ds2));
+        RdfDataSource dsRaw = RdfDataSourceMulti.newBuilder()
+                .add("http://maven.aksw.org/sparql", ds1)
+                .add("http://linkedgeodata.org/sparql", ds2)
+                .add("urn://p.p.p.org/sparql", ds3)
+                .build()
+                ;
+
+        RdfDataSource ds = dsRaw; //dsRaw.decorate(RdfDataSourceTransforms.)
+
+        // XX Future optimization could detect grouping by source, so that aggregation is pushed
+        // to each source individually
+        String queryStrX = """
+                SELECT * {
+                  { SELECT ?t (COUNT(*) AS ?c) {
+                    GRAPH ?g {
+                      ?s a ?t .
+                      FILTER(?t IN (
+                        <http://www.w3.org/2000/01/rdf-schema#Class>,
+                        <http://www.w3.org/2002/07/owl#Class>,
+                        <http://www.w3.org/ns/dcat#Dataset>))
+                      ?s ?p ?o
+                     }
+                   } GROUP BY ?t }
+                   BIND(<env://SOURCE> AS ?source)
+                 }
+                 ORDER BY ?source ?t
+            """;
+
+        String queryStr = """
+            SELECT ?source ?t (COUNT(*) AS ?c) {
+              GRAPH ?g {
+                ?s a ?t .
+                FILTER(?t IN (
+                  <http://www.w3.org/2000/01/rdf-schema#Class>,
+                  <http://www.w3.org/2002/07/owl#Class>,
+                  <http://www.w3.org/ns/dcat#Dataset>))
+                ?s ?p ?o
+               }
+               BIND(<env://SOURCE> AS ?source)
+              } GROUP BY ?source ?t
+             ORDER BY ?source ?t
+            """;
         // String queryStr = "SELECT (COUNT(*) AS ?c) { GRAPH ?g { ?s a <http://www.w3.org/2000/01/rdf-schema#Class> ; ?p ?o } } LIMIT 10";
 
-        RdfDataSource dsRaw = new RdfDataSourceMulti(Arrays.asList(ds1, ds2));
-        RdfDataSource ds = dsRaw; //dsRaw.decorate(RdfDataSourceTransforms.)
+
+        // Op op = Algebra.compile(QueryFactory.create(queryStr));
+
         try (QueryExecution qe = ds.asQef().createQueryExecution(queryStr)) {
             System.out.println(ResultSetFormatter.asText(qe.execSelect()));
         }

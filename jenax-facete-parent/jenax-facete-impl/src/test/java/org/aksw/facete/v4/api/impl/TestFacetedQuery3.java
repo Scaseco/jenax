@@ -2,6 +2,7 @@ package org.aksw.facete.v4.api.impl;
 
 import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.jena_sparql_api.data_query.api.QuerySpec;
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
@@ -73,6 +74,24 @@ public class TestFacetedQuery3 {
 
         nq.addFragment()
             .setFilterFragment(Concept.createForType(RDFS.Resource.asNode()));
+        Query query = ElementGeneratorLateral.toQuery(nq);
+        System.out.println(query);
+
+    }
+
+
+    @Test
+    public void test_spo_relation() {
+        NodeQuery nq = NodeQueryImpl.newRoot().fwd(RDF.type);
+        NodeQuery tgt = nq.fwd(NodeUtils.ANY_IRI);
+        tgt.relationQuery().roots().get(1).fwd(RDFS.label);
+
+        // TODO Somehow add an API that we can inject relations + custom aggregators (= MappedEntityFragments)
+
+        // Note: so far, relationQuery is never null
+        // nq.addEntityFragment()
+        // System.out.println(nq.relationQuery());
+
         Query query = ElementGeneratorLateral.toQuery(nq);
         System.out.println(query);
 

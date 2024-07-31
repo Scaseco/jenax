@@ -3,7 +3,7 @@ package org.aksw.jenax.io.json.accumulator;
 import java.io.IOException;
 
 import org.aksw.commons.path.json.PathJson;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.ron.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
@@ -44,21 +44,21 @@ public interface AccJson {
      * @param context The context which holds the JSON serializers
      * @param skipOutput When output should be disabled (used e.g. to skip over lists of items where just one was expected)
      */
-    void begin(Node node, AccContext context, boolean skipOutput) throws IOException;
+    void begin(Node node, AccContextRdf context, boolean skipOutput) throws IOException;
 
     /**
      * Process an edge.
      * Based on the given edge, this accumulator attempts to transition to another AccJson instance and return it.
      * If there is no valid transition then this method returns null.
      */
-    AccJson transition(Triple edge, AccContext cxt) throws IOException;
+    AccJson transition(Triple edge, AccContextRdf cxt) throws IOException;
 
     /**
      * End the accumulator's current node
      *
      * @throws IllegalStateException if there was no prior call to begin()
      */
-    void end(AccContext cxt) throws IOException;
+    void end(AccContextRdf cxt) throws IOException;
 
     /** True after begin() and before end()*/
     boolean hasBegun();
@@ -73,7 +73,7 @@ public interface AccJson {
 
     /**
      * Internal method, mainly for processing fragments.
-     * Unchecked access to the value.
+     * Unchecked access to the current value under construction.
      * Should hardly be used.
      */
     RdfElement getInternalValue();
@@ -82,5 +82,5 @@ public interface AccJson {
      * For materialization: Whenever end() is called on a state with materialization enabled, then
      * it passes its accumulated value to the parent using this method.
      */
-    void acceptContribution(RdfElement value, AccContext context);
+    void acceptContribution(RdfElement value, AccContextRdf context);
 }

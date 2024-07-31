@@ -12,7 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 public class GraphToJsonNodeMapperLiteral
-    implements GraphToJsonNodeMapper
+    implements GraphToJsonMapperNode
 {
     private static final GraphToJsonNodeMapperLiteral INSTANCE = new GraphToJsonNodeMapperLiteral();
 
