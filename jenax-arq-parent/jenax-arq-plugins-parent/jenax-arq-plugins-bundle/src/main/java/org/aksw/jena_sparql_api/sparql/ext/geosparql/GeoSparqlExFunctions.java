@@ -296,10 +296,10 @@ public class GeoSparqlExFunctions {
 
     // GeoSPARQL 1.1
     @IriNs(GeoSPARQL_URI.GEOF_URI)
-    public static double area(GeometryWrapper geom, NodeValue areaUnitsURI) {
+    public static double area(GeometryWrapper geom, Node areaUnitsURI) {
 
-        if (!areaUnitsURI.isIRI()) {
-            throw new ExprEvalException("Not a IRI for area unit: " + FmtUtils.stringForNode(areaUnitsURI.asNode()));
+        if (!areaUnitsURI.isURI()) {
+            throw new ExprEvalException("Not a IRI for area unit: " + FmtUtils.stringForNode(areaUnitsURI));
         }
 
         Geometry g = geom.getXYGeometry();
@@ -313,14 +313,14 @@ public class GeoSparqlExFunctions {
 
         String unitsURI = geom.getUnitsOfMeasure().getUnitURI();
 
-        double areaConverted = UnitsOfMeasure.conversion(area, unitsURI, areaUnitsURI.asNode().getURI());
+        double areaConverted = UnitsOfMeasure.conversion(area, unitsURI, areaUnitsURI.getURI());
 
         return areaConverted;
     }
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static double metricArea(GeometryWrapper geom) {
-        return area(geom, NodeValue.makeNode(NodeFactory.createURI(Unit_URI.METRE_URL)));
+        return area(geom, NodeFactory.createURI(Unit_URI.METRE_URL));
     }
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
