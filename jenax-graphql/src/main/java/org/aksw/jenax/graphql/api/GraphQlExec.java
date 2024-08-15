@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 /** A GraphQl execution */
 public interface GraphQlExec {
-    public Set<String> getDataProviderNames();
-    public GraphQlDataProvider getDataProvider(String name);
+    Set<String> getDataProviderNames();
+    GraphQlDataProvider getDataProvider(String name);
 
     /**
      * Return the list of data providers.

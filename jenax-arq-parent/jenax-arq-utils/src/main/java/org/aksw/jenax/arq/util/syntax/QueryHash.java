@@ -55,29 +55,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
-class LehmerHash {
-    protected HashCode hash;
-    protected BigInteger lehmer;
-
-    protected LehmerHash(HashCode hash, BigInteger lehmer) {
-        super();
-        this.hash = hash;
-        this.lehmer = lehmer;
-    }
-
-    public static LehmerHash of(HashCode hash, BigInteger lehmer) {
-        return new LehmerHash(hash, lehmer);
-    }
-
-    public HashCode getHash() {
-        return hash;
-    }
-    public BigInteger getLehmer() {
-        return lehmer;
-    }
-}
-
-
 /**
  * A hasher for SPARQL queries that keeps track of separate hash codes for the
  * body, the subset of the projection (w.r.t. visible variables), the permutation of the projection and

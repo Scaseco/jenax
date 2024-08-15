@@ -54,6 +54,11 @@ public abstract class AccJsonBase
     }
 
     @Override
+    public RdfElement getInternalValue() {
+        return value;
+    }
+
+    @Override
     public void begin(Node sourceNode, AccContext cxt, boolean skipOutput) throws IOException {
         if (hasBegun) {
             throw new IllegalStateException("begin() has already been called() with " + currentSourceNode);

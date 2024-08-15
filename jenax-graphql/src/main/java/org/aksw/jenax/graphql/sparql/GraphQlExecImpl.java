@@ -98,9 +98,11 @@ public class GraphQlExecImpl
             // metadata.addProperty("isSingle", entry.isSingle());
         }
 
+        // System.err.println(query.toString());
+
         GraphQlDataProvider result;
 
-        // true = new fully streaming approach
+        // true = fully streaming approach ; false = legacy
         boolean useAccumulators = true;
 
         if (useAccumulators) {
@@ -146,8 +148,8 @@ public class GraphQlExecImpl
 
                     driver.end(context);
 
-                    // Write null if there were no sources
-                    if (driver.getSourcesSeen() == 0) {
+                    // Write null if in single mode and there were no sources
+                    if (isSingle && driver.getSourcesSeen() == 0) {
                         writer.nullValue();
                     }
                 }

@@ -276,7 +276,7 @@ public class Context {
         // String alias = field.getAlias();
 //        Set<String> result = alias == null ? Set.of() : Set.of(alias);
         Set<String> result = field.getDirectives("as").stream()
-            .map(d -> GraphQlUtils.getArgValueAsString(d, "name"))
+            .map(d -> GraphQlUtils.getArgValueAsString(d, "name", null)) // TODO Raise exception when field aliases are variables!
             .collect(Collectors.toSet());
         return result;
     }

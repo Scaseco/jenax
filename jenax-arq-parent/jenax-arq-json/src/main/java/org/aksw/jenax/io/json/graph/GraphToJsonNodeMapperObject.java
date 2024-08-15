@@ -1,14 +1,12 @@
 package org.aksw.jenax.io.json.graph;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
+import org.aksw.jenax.io.json.accumulator.AggJsonEdge;
 import org.aksw.jenax.io.json.accumulator.AggJsonNode;
 import org.aksw.jenax.io.json.accumulator.AggJsonObject;
-import org.aksw.jenax.io.json.accumulator.AggJsonProperty;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -18,14 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class GraphToJsonNodeMapperObject
-    implements GraphToJsonNodeMapper
+    extends GraphToJsonNodeMapperObjectLike
 {
-    protected Map<String, GraphToJsonPropertyMapper> propertyMappers = new LinkedHashMap<>();
-
-    public Map<String, GraphToJsonPropertyMapper> getPropertyMappers() {
-        return propertyMappers;
-    }
-
     @Override
     public GraphToJsonNodeMapperType getType() {
         return GraphToJsonNodeMapperType.OBJECT;
@@ -34,9 +26,9 @@ public class GraphToJsonNodeMapperObject
     @Override
     public JsonElement map(PathJson path, JsonArray errors, Graph graph, Node node) {
         JsonObject result = new JsonObject();
-        for (Entry<String, GraphToJsonPropertyMapper> e : getPropertyMappers().entrySet()) {
+        for (Entry<String, GraphToJsonEdgeMapper> e : getPropertyMappers().entrySet()) {
             String name = e.getKey();
-            GraphToJsonPropertyMapper mapper = e.getValue();
+            GraphToJsonEdgeMapper mapper = e.getValue();
 
             PathJson subPath = path.resolve(Step.of(name));
             JsonElement contrib = mapper.map(subPath, errors, graph, node);
@@ -83,7 +75,8 @@ public class GraphToJsonNodeMapperObject
         AggJsonObject result = AggJsonObject.of();
         propertyMappers.forEach((name, mapper) -> {
             Node node = NodeFactory.createLiteral(name);
-            AggJsonProperty agg = mapper.toAggregator(node);
+            // AggJsonProperty agg = mapper.toAggregator(node);
+            AggJsonEdge agg = mapper.toAggregator(node);
             result.addPropertyAggregator(agg);
         });
         return result;

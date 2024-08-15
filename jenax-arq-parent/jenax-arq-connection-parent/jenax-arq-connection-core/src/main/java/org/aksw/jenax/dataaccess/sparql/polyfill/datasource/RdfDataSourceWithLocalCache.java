@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.obj.ObjectUtils;
 import org.aksw.jena_sparql_api.algebra.transform.ProjectExtend;
-import org.aksw.jena_sparql_api.algebra.utils.AlgebraUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
@@ -26,23 +25,18 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
-import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExtend;
-import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.algebra.op.OpOrder;
 import org.apache.jena.sparql.algebra.op.OpProject;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpUnion;
-import org.apache.jena.sparql.algebra.optimize.Rewrite;
-import org.apache.jena.sparql.algebra.optimize.TransformFilterPlacement;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.expr.Expr;
@@ -88,46 +82,7 @@ public class RdfDataSourceWithLocalCache
         + "    ORDER BY ASC(MIN(str(?o)))\n"
         + "  }\n"
         + "ORDER BY ASC(?sortKey_1) ?s";
-
-        queryStr = """
-            SELECT DISTINCT  ?p ?o ?c
-WHERE
-  { SELECT DISTINCT  ?p ?o (COUNT(DISTINCT ?s) AS ?c)
-    WHERE
-      { ?s  a   <http://fp7-pp.publicdata.eu/ontology/Project> ;
-            ?p  ?o
-      }
-    GROUP BY ?p ?o
-    HAVING ( ?p = <http://fp7-pp.publicdata.eu/ontology/strategicObjective> )
-  }
-ORDER BY ASC(?p) ASC(?o)
-LIMIT   127
-        """;
-
-        queryStr = """
-            SELECT *
-WHERE
-  {{ SELECT DISTINCT  ?p ?o
-    WHERE
-      { SELECT DISTINCT  ?p ?o (COUNT(DISTINCT ?s) AS ?c)
-        WHERE
-          { ?s  a   <http://fp7-pp.publicdata.eu/ontology/Project> ;
-                ?p  ?o
-          }
-        GROUP BY ?p ?o
-      } }
-      FILTER ( ?p = <http://fp7-pp.publicdata.eu/ontology/strategicObjective> )
-  }
-        """;
-
         Query query = QueryFactory.create(queryStr);
-
-        Op op = Algebra.compile(query);
-        // Rewrite rewrite = AlgebraUtils.createDefaultRewriter();
-        Rewrite rewrite = x -> Transformer.transform(new TransformFilterPlacement(), x);
-        op = rewrite.rewrite(op);
-
-        System.out.println(op);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
         RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RdfDataEngines.of(DatasetFactory.create()));
@@ -235,13 +190,12 @@ WHERE
             return rr;
         }
 
-        public Entry<Op, Boolean> handleOp1(Op1 op, Function<Op, Op> ctor) {
-            Op subOp = op.getSubOp();
-            Entry<Op, Boolean> tmp = rewriteOp(subOp);
-            Op newSubOp = tmp.getKey();
+        public Entry<Op, Boolean> handleOp1(Op op, Function<Op, Op> ctor) {
+            Entry<Op, Boolean> tmp = rewriteOp(op);
+            Op subOp = tmp.getKey();
             boolean rewritten = tmp.getValue();
             Entry<Op, Boolean> result = rewritten
-                    ? Map.entry(ctor.apply(newSubOp), true)
+                    ? Map.entry(ctor.apply(subOp), true)
                     : Map.entry(op, false);
             return result;
         }
@@ -251,19 +205,7 @@ WHERE
             Entry<Op, Boolean> result = null;
             Op subOp = op.getSubOp();
             if (pe != null) {
-                Op finalSubOp = pe.getSubOp();
-
-//                ExprList filterExprs = null;
-//                if (finalSubOp instanceof OpFilter) {
-//                    OpFilter f = (OpFilter)finalSubOp;
-//                    filterExprs = f.getExprs();
-//                    finalSubOp = f.getSubOp();
-//                }
-
-                if (finalSubOp instanceof OpGroup)
-                {
-//                	Op tmp = filterExprs != null ? Op
-
+                if (pe.getSubOp() instanceof OpGroup) {
                     result = wrapWithCache(pe.toOp());
                 } else {
                     Entry<Op, Boolean> tmp = rewriteOp(subOp);
@@ -274,8 +216,7 @@ WHERE
             }
 
             if (result == null) {
-                // result = rewriteOp(op);
-                result = handleOp1(op, ctor);
+                result = handleOp1(subOp, ctor);
                 // result = defaultHandler.apply(op); // OpRewriter.super.rewrite(op);
             }
 
@@ -285,12 +226,6 @@ WHERE
         @Override
         public Entry<Op, Boolean> fallback(Op op) {
             return Map.entry(op, false);
-        }
-
-        @Override
-        public Entry<Op, Boolean> rewrite(OpFilter op) {
-            Entry<Op, Boolean> result = handleOp1(op, subOp -> OpFilter.filterBy(op.getExprs(), subOp));
-            return result;
         }
 
         @Override
@@ -306,13 +241,13 @@ WHERE
 
         @Override
         public Entry<Op, Boolean> rewrite(OpSlice op) {
-            Entry<Op, Boolean> result = handleOp1(op, subOp -> new OpSlice(subOp, op.getStart(), op.getLength()));
+            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> new OpSlice(subOp, op.getStart(), op.getLength()));
             return result;
         }
 
         @Override
         public Entry<Op, Boolean> rewrite(OpDistinct op) {
-            Entry<Op, Boolean> result = handleOp1(op, subOp -> new OpDistinct(subOp));
+            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> new OpDistinct(subOp));
             return result;
         }
 
@@ -346,7 +281,7 @@ WHERE
         @Override
         public Entry<Op, Boolean> rewrite(OpOrder op) {
             // Copy op.getConditions()?
-            Entry<Op, Boolean> result = handleOp1(op, subOp -> {
+            Entry<Op, Boolean> result = handleOp1(op.getSubOp(), subOp -> {
                 // Check for the pattern: service(<cache:>, service(<REMOTE:>, extend(?.x)))
                 Op unwrapped = unwrapIfCached(subOp);
                 List<SortCondition> rawConditions = op.getConditions();

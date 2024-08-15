@@ -1,5 +1,6 @@
 package org.aksw.jenax.graphql.sparql;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -7,6 +8,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.graphql.api.GraphQlExec;
 import org.aksw.jenax.graphql.api.GraphQlExecFactory;
+import org.aksw.jenax.graphql.api.GraphQlExecFactoryDocument;
+import org.aksw.jenax.graphql.impl.common.GraphQlExecFactoryFront;
 import org.aksw.jenax.graphql.impl.common.GraphQlResolverAlwaysFail;
 import org.apache.jena.graph.Node;
 import org.slf4j.Logger;
@@ -18,9 +21,10 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import graphql.language.Document;
+import graphql.language.Value;
 
 public class GraphQlExecFactoryOverSparql
-    implements GraphQlExecFactory
+    implements GraphQlExecFactoryDocument
 {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlExecFactoryOverSparql.class);
 
@@ -34,12 +38,12 @@ public class GraphQlExecFactoryOverSparql
     }
 
     public static GraphQlExecFactory of(RdfDataSource dataSource, GraphQlToSparqlConverter converter) {
-        return new GraphQlExecFactoryOverSparql(dataSource, converter);
+        return GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
     }
 
     @Override
-    public GraphQlExec create(Document document) {
-        GraphQlToSparqlMapping mapping = converter.convertDocument(document);
+    public GraphQlExec create(Document document, Map<String, Value<?>> assignments) {
+        GraphQlToSparqlMapping mapping = converter.convertDocument(document, assignments);
         GraphQlExec result = new GraphQlExecImpl(dataSource, mapping);
         return result;
     }
@@ -66,16 +70,16 @@ public class GraphQlExecFactoryOverSparql
     public static GraphQlExecFactory of(RdfDataSource dataSource, DatasetMetadata metadata) {
         GraphQlResolver resolver = resolverOf(metadata);
         GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        GraphQlExecFactory result = new GraphQlExecFactoryOverSparql(dataSource, converter);
+        GraphQlExecFactory result = GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
         return result;
     }
 
     /** Summarize the data in the data source and configure a resolver with it */
-    public static GraphQlExecFactoryOverSparql autoConfEager(RdfDataSource dataSource) {
+    public static GraphQlExecFactory autoConfEager(RdfDataSource dataSource) {
         DatasetMetadata metadata = Futures.getUnchecked(DatasetMetadata.fetch(dataSource, MoreExecutors.listeningDecorator(MoreExecutors.newDirectExecutorService())));
         GraphQlResolver resolver = resolverOf(metadata);
         GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        return new GraphQlExecFactoryOverSparql(dataSource, converter);
+        return GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
     }
 
     /**
@@ -108,7 +112,7 @@ public class GraphQlExecFactoryOverSparql
         });
 
         GraphQlToSparqlConverter converter = new GraphQlToSparqlConverter(resolver);
-        GraphQlExecFactory result = new GraphQlExecFactoryOverSparql(dataSource, converter);
+        GraphQlExecFactory result = GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
         return result;
     }
 }

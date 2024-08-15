@@ -17,10 +17,13 @@ import org.aksw.jenax.path.core.FacetPath;
 import org.aksw.jenax.path.core.FacetStep;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.sparql.fragment.api.MappedFragment;
+import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.syntax.ElementBind;
 
 /**
  * A root node corresponds to a variable of a graph pattern.
@@ -33,8 +36,13 @@ public class NodeQueryImpl
     protected Var var;
     protected FacetStep reachingStep;
 
+    /** Facet steps with type TUPLE point to relations */
     protected Map<FacetStep, RelationQuery> children = new LinkedHashMap<>();
+
+    /** Facet steps with a specific target node */
     protected Map<FacetStep, NodeQuery> subPaths = new LinkedHashMap<>();
+
+    // protected Map<FacetStep, Selection> selections = new LinkedHashMap<>();
 
     protected ConstraintNode<NodeQuery> constraintRoot;
 
@@ -47,6 +55,15 @@ public class NodeQueryImpl
      * FIXME Each relation must carry a mapping for how its variables map to facet paths
      */
     protected List<MappedFragment<Node>> injectRelations = new ArrayList<>();
+
+    @Override
+    public NodeQuery addFragment() {
+        long nextStepId = children.keySet().stream()
+                .filter(step -> step.getStep().equals(FacetStep.FRAGMENT_PATH))
+                .count();
+        FacetStep step = FacetStep.fwd(FacetStep.PATH_NODE, Long.toString(nextStepId));
+        return getOrCreateChild(step);
+    }
 
     @Override
     public NodeQuery addInjectFragment(MappedFragment<Node> relation) {
@@ -155,7 +172,9 @@ public class NodeQueryImpl
             FacetStep relationStep = FacetStep.of(step.getNode(), step.getDirection(), step.getAlias(), FacetStep.TUPLE);
             RelationQueryImpl tmp = (RelationQueryImpl)children.computeIfAbsent(relationStep, fs -> {
                 Node property = fs.getNode();
-                Fragment baseRelation = relationQuery().getContext().getPropertyResolver().resolve(property);
+                Fragment baseRelation;
+
+                baseRelation = relationQuery().getContext().getPropertyResolver().resolve(property);
 
                 if (step.getDirection().equals(Direction.BACKWARD)) {
                     if (baseRelation.getVars().size() != 2) {
@@ -175,8 +194,15 @@ public class NodeQueryImpl
                 Fragment relation = FacetRelationUtils.renameVariables(baseRelation, sourceVar, targetVar, scopeName, usedVars);
                 usedVars.addAll(relation.getVarsMentioned());
 
+                if (FacetStep.isFragment(fs)) {
+                    Fragment2 r = relation.toFragment2();
+                    relation = new Fragment2Impl(new ElementBind(r.getTargetVar(), new ExprVar(r.getSourceVar())), r.getSourceVar(), r.getTargetVar());
+                    // System.err.println("test");
+                }
+
+                Fragment finalRelation = relation;
                 Map<Var, Node> varToComponent = FacetRelationUtils.createVarToComponentMap(relation);
-                return new RelationQueryImpl(scopeName, this, () -> relation, relationStep, relationQuery.getContext(), varToComponent);
+                return new RelationQueryImpl(scopeName, this, () -> finalRelation, relationStep, relationQuery.getContext(), varToComponent);
             });
 
             // We need to get the target node
@@ -187,6 +213,15 @@ public class NodeQueryImpl
 
         return result;
     }
+
+//  RelationQuery rq = relationQuery();
+//  QueryContext qc = rq.getContext();
+//  String scope = relationQuery().getScopeBaseName();
+//  Var targetVar = rq.target().var();
+//  Fragment2 f = new Fragment2Impl(new ElementGroup(), targetVar, targetVar);
+//
+//  // Map<Var, Var> varToComponent = Map.of(sourceVar, FacetStep.SOURCE, sourceVar, FacetStep.TARGET);
+//  return new RelationQueryImpl(scope, this, () -> f, step, qc, null);
 
     @Override
     public RelationQuery relationQuery() {

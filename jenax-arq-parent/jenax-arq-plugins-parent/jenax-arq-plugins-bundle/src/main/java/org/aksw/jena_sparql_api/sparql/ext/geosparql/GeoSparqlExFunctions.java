@@ -12,6 +12,7 @@ import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.norse.term.geo.NorseTermsGeo;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.UnitsOfMeasure;
 import org.apache.jena.geosparql.implementation.jts.CustomGeometryFactory;

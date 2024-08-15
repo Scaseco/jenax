@@ -1,6 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.binding;
 
-import org.aksw.jena_sparql_api.sparql.ext.xml.RDFDatatypeXml;
 import org.aksw.jenax.arq.datatype.RDFDatatypeBinding;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -40,7 +39,7 @@ public class NodeValueBinding extends NodeValue {
         // Preserve lexical form
         String result = getNode() != null
                 ? super.asString()
-                : RDFDatatypeXml.get().unparse(binding);
+                : RDFDatatypeBinding.get().unparse(binding);
         return result;
     }
 

@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.xml;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
-public class NorseXmlTerms {
+public class NorseTermsXml {
     public static final String NS = NorseTerms.NS + "xml.";
 
     public static final String parse = NS + "parse";

@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.path;
 
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionFactoryKShortestPaths;
 import org.aksw.jena_sparql_api.sparql_path2.PropertyFunctionPathFinder;
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 

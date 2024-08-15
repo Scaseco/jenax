@@ -9,6 +9,7 @@ import org.aksw.jenax.facete.treequery2.api.RelationQuery;
 import org.aksw.jenax.facete.treequery2.impl.ElementGeneratorLateral;
 import org.aksw.jenax.facete.treequery2.impl.NodeQueryImpl;
 import org.aksw.jenax.path.core.FacetStep;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.RDFNode;
@@ -61,4 +62,20 @@ public class TestFacetedQuery3 {
         System.out.println(query);
 
     }
+
+    @Test
+    public void test_03() {
+        NodeQuery nq = NodeQueryImpl.newRoot();
+        nq.addFragment()
+            .setFilterFragment(Concept.createForType(RDF.Property.asNode()))
+            .fwd(RDFS.label)
+            ;
+
+        nq.addFragment()
+            .setFilterFragment(Concept.createForType(RDFS.Resource.asNode()));
+        Query query = ElementGeneratorLateral.toQuery(nq);
+        System.out.println(query);
+
+    }
+
 }

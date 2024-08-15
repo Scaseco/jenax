@@ -83,6 +83,13 @@ public class DatasetMetadata {
                 Futures.whenAllSucceed(voidModelFuture, shaclModelFuture).call(() -> {
                     List<VoidDataset> voidDatasets = VoidUtils.listVoidDatasets(voidModelFuture.get());
                     VoidDataset voidDataset = IterableUtils.expectZeroOrOneItems(voidDatasets);
+
+                    // If no void dataset was obtained (e.g. because the data graph was empty) then
+                    // create an empty resource
+                    if (voidDataset == null) {
+                        voidDataset = ModelFactory.createDefaultModel().createResource().as(VoidDataset.class);
+                    }
+
                     return new DatasetMetadata(voidDataset, shaclModelFuture.get());
                 }
                 , executorService);

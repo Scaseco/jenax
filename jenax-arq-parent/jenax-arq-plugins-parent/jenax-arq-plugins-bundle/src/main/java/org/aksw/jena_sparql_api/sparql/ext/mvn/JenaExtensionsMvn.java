@@ -4,7 +4,7 @@ import org.aksw.commons.model.maven.domain.api.MavenEntityCore;
 import org.aksw.jenax.annotation.reprogen.DefaultValue;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
 public class JenaExtensionsMvn {
     public static final String ns = "http://jsa.aksw.org/fn/mvn/";

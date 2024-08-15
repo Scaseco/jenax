@@ -2,6 +2,7 @@ package org.aksw.jenax.graphql.sparql;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.aksw.commons.collections.IterableUtils;
@@ -12,6 +13,7 @@ import org.aksw.jenax.arq.util.expr.NodeValueUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.sparql.expr.NodeValue;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
@@ -28,6 +30,7 @@ import graphql.language.ObjectValue;
 import graphql.language.SelectionSet;
 import graphql.language.StringValue;
 import graphql.language.Value;
+import graphql.language.VariableReference;
 
 public class GraphQlUtils {
     /** FIXME Update to the graphqls pec*/
@@ -124,9 +127,13 @@ public class GraphQlUtils {
 
     public static Value<?> getArgumentValue(Multimap<String, Value<?>> args, String argName) {
         Collection<Value<?>> a = args.get(argName);
-        Value<?> result = IterableUtils.expectZeroOrOneItems(a);
+        Value<?> result = Iterables.getOnlyElement(a, null);
         //Value<?> result = arg == null ? null : arg.getValue();
         return result;
+    }
+
+    public static Value<?> getArgumentValue(Multimap<String, Value<?>> args, String argName, Map<String, Value<?>> assignments) {
+        return resolveValue(getArgumentValue(args, argName), assignments);
     }
 
     public static Optional<Value<?>> tryGetArgumentValue(Multimap<String, Value<?>> args, String argName) {
@@ -156,13 +163,13 @@ public class GraphQlUtils {
         }
     }
 
-    public static String getArgValueAsString(Directive directive, String argName) {
-        String result = GraphQlUtils.toString(GraphQlUtils.getValue(directive.getArgument(argName)));
+    public static String getArgValueAsString(Directive directive, String argName, Map<String, Value<?>> assignments) {
+        String result = toString(resolveValue(getValue(directive.getArgument(argName)), assignments));
         return result;
     }
 
-    public static Boolean getArgValueAsBoolean(Directive directive, String argName) {
-        Boolean result = GraphQlUtils.toBoolean(GraphQlUtils.getValue(directive.getArgument(argName)));
+    public static Boolean getArgValueAsBoolean(Directive directive, String argName, Map<String, Value<?>> assignments) {
+        Boolean result = toBoolean(resolveValue(getValue(directive.getArgument(argName)), assignments));
         return result;
     }
 
@@ -173,5 +180,17 @@ public class GraphQlUtils {
         tree.put(fieldPath, field);
         SelectionSet selectionSet = field.getSelectionSet();
         indexFields(tree, fieldPath, selectionSet);
+    }
+
+    /** Resolves variable references once against the given map of assignments. Null if there is no assignment. */
+    public static Value<?> resolveValue(Value<?> value, Map<String, Value<?>> assignments) {
+        Value<?> result;
+        if (value instanceof VariableReference ref) {
+            String varName = ref.getName();
+            result = assignments.get(varName);
+        } else {
+            result = value;
+        }
+        return result;
     }
 }

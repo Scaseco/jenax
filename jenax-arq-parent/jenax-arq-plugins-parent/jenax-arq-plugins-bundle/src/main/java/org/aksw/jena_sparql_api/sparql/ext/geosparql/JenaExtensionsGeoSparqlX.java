@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
+import org.aksw.jenax.norse.term.geo.NorseTermsGeo;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;

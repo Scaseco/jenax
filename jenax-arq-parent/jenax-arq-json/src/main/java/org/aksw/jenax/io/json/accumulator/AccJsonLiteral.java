@@ -40,7 +40,7 @@ public class AccJsonLiteral
             RdfElement effectiveValue = value == null ? RdfElement.nullValue() : value;
 
             if (context.isSerialize()) {
-                StructuredWriterRdf writer = context.getJsonWriter();
+                RdfObjectNotationWriter writer = context.getJsonWriter();
                 if (value == null) {
                     writer.nullValue();
                 } else {

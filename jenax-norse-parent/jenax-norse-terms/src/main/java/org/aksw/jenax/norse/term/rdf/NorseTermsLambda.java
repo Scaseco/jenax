@@ -1,8 +1,8 @@
-package org.aksw.jena_sparql_api.sparql.ext.sys;
+package org.aksw.jenax.norse.term.rdf;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
-public class NorseLambdaTerms {
+public class NorseTermsLambda {
     public static final String fnOf = NorseTerms.NS + "fn.of";
     public static final String fnCall = NorseTerms.NS + "fn.call";
 

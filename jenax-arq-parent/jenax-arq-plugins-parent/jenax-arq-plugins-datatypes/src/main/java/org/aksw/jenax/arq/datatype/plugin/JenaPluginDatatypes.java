@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.datatype.plugin;
 import org.aksw.jenax.arq.datatype.RDFDatatypeBinding;
 import org.aksw.jenax.arq.datatype.RDFDatatypeExpr;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
+import org.aksw.jenax.arq.datatype.RDFDatatypeNodeMap;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeSet;
 import org.aksw.jenax.arq.datatype.RDFDatatypeQuery;
 import org.aksw.jenax.arq.datatype.lambda.RDFDatatypeLambda;
@@ -27,6 +28,7 @@ public class JenaPluginDatatypes
         // typeMapper.registerDatatype(RDFDatatypeExprList.INSTANCE);
         typeMapper.registerDatatype(RDFDatatypeQuery.get());
         typeMapper.registerDatatype(RDFDatatypeBinding.get());
+        typeMapper.registerDatatype(RDFDatatypeNodeMap.get());
 
         typeMapper.registerDatatype(RDFDatatypeNodeList.get());
         typeMapper.registerDatatype(RDFDatatypeNodeSet.get());

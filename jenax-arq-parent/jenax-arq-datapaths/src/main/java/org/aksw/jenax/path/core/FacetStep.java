@@ -10,7 +10,12 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.path.PathFactory;
 
+/**
+ * A traversal from a set of source nodes to a set of target nodes.
+ * Based on a predicate, direction, an alias and the name of the target node.
+ */
 public class FacetStep
     implements Serializable
 {
@@ -30,12 +35,17 @@ public class FacetStep
     public static final Var GRAPH = Var.alloc("graph");
     public static final Var TUPLE = Var.alloc("tuple"); // A placeholder to refer to the tuple rather than one of its components - which corresponds to the the triple/quad (or or general tuple expression)
 
+    public static Node PATH_NODE = NodeFactory.createURI("urn:fragment");
+    public static P_Path0 FRAGMENT_PATH = (P_Path0)PathFactory.pathLink(PATH_NODE);
+    public static FacetStep FRAGMENT_STEP = FacetStep.fwd(PATH_NODE);
+
     public static boolean isTarget(Node component) { return Objects.equals(TARGET, component); }
     public static boolean isPredicate(Node component) { return Objects.equals(PREDICATE, component); }
     public static boolean isSource(Node component) { return Objects.equals(SOURCE, component); }
     public static boolean isGraph(Node component) { return Objects.equals(GRAPH, component); }
     public static boolean isTuple(Node component) { return Objects.equals(TUPLE, component); }
 
+    public static boolean isFragment(FacetStep facetStep) { return facetStep != null && FRAGMENT_PATH.equals(facetStep.getStep()); }
     /** TODO Include a constant for the graph? */
 
     public static FacetStep of(Node node, Direction direction, String alias, Node component) {

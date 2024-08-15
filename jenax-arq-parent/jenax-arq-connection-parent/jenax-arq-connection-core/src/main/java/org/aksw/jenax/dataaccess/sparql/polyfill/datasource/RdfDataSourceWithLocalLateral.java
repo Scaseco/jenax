@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.algebra.transform.TransformAssignToExtend;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
@@ -29,6 +30,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpLateral;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -127,8 +129,13 @@ public class RdfDataSourceWithLocalLateral
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
             QueryIterator r;
             if (opExec.getService().equals(REMOTE_NODE)) {
+                // Transform assigns to extend - assign ops may be injected by Jena v5.0.0 QueryIterLateral
+                OpService finalOp = (OpService)Transformer.transform(TransformAssignToExtend.get(), opExec);
+
+                // TODO Evaluate table-based algebra locally.
+
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(binding, execCxt, opExec, base, true);
+                r = RDFConnectionUtils.execService(binding, execCxt, finalOp, base, true);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }

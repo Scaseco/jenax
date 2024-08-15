@@ -7,10 +7,10 @@ public class AccContext {
 //    protected Gson gson;
 //    protected JsonWriter jsonWriter;
 
-    protected StructuredWriterRdf writer;
+    protected RdfObjectNotationWriter writer;
     protected AccJsonErrorHandler errorHandler = null;
 
-    public AccContext(StructuredWriterRdf writer, boolean materialize, boolean serialize) {
+    public AccContext(RdfObjectNotationWriter writer, boolean materialize, boolean serialize) {
         super();
         this.writer = writer;
         this.materialize = materialize;
@@ -23,7 +23,7 @@ public class AccContext {
     }
 
     public static AccContext serializing(Gson gson, JsonWriter jsonWriter) {
-        StructuredWriterRdf writer = new StructuredWriterRdfViaJson(gson, jsonWriter);
+        RdfObjectNotationWriter writer = new RdfObjectNotationWriterViaJson(gson, jsonWriter);
         return new AccContext(writer, false, true);
     }
 
@@ -49,7 +49,7 @@ public class AccContext {
         return serialize;
     }
 
-    public StructuredWriterRdf getJsonWriter() {
+    public RdfObjectNotationWriter getJsonWriter() {
         return writer;
     }
 

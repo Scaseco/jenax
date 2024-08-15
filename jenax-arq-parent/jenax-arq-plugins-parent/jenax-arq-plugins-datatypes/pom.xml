@@ -15,6 +15,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-norse-terms</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
 		</dependency>

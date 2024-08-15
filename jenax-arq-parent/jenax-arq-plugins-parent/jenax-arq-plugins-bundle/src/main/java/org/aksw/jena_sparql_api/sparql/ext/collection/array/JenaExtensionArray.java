@@ -4,7 +4,7 @@ import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionExplode;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;

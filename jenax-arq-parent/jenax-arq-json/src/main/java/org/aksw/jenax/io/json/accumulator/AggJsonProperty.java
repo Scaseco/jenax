@@ -34,9 +34,9 @@ public class AggJsonProperty
     @Override
     public AccJsonEdge newAccumulator() {
         AccJsonNode valueAcc = targetAggregator.newAccumulator();
-        AccJsonProperty result = new AccJsonProperty(jsonKey, matchFieldId, isForward, valueAcc);
+        AccJsonProperty result = new AccJsonProperty(jsonKey, matchFieldId, isForward, valueAcc, isSingle);
         valueAcc.setParent(result);
-        result.setSingle(isSingle);
+        // result.setSingle(isSingle);
         return result;
     }
 
@@ -63,7 +63,8 @@ public class AggJsonProperty
         return this;
     }
 
-    @Override
+    // @Override
+    /** Only for testing; should not be used in production code */
     public AggJsonProperty setSingle(boolean value) {
         this.isSingle = value;
         return this;

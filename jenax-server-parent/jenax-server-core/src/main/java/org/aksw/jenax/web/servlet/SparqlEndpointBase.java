@@ -252,10 +252,16 @@ public abstract class SparqlEndpointBase {
                     try (QueryExecution qe = exec(qef, stmt)) {
                         qeCallback.accept(qe);
                         // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
-                        if (parsedQuery.isConstructQuad()) {
-                            StreamRDFOps.sendQuadsToStream(qe.execConstructQuads(), writer);
-                        } else { // if (parsedQuery.isConstructType()) {
-                            StreamRDFOps.sendTriplesToStream(qe.execConstructTriples(), writer);
+                        if (parsedQuery.isConstructType()) {
+                            if (parsedQuery.isConstructQuad()) {
+                                StreamRDFOps.sendQuadsToStream(qe.execConstructQuads(), writer);
+                            } else {
+                                StreamRDFOps.sendTriplesToStream(qe.execConstructTriples(), writer);
+                            }
+                        } else if (parsedQuery.isDescribeType()) {
+                            StreamRDFOps.sendTriplesToStream(qe.execDescribeTriples(), writer);
+                        } else {
+                            throw new RuntimeException("Unknown query type: " + parsedQuery);
                         }
 
                         writer.finish();
@@ -270,17 +276,27 @@ public abstract class SparqlEndpointBase {
                         qeCallback.accept(qe);
                         // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
                         RDFWriterBuilder writerBuilder = RDFWriter.create();
-                        if (parsedQuery.isConstructQuad()) {
-                            DatasetGraph dsg = DatasetGraphFactory.createGeneral();
-                            // sr.getQuads().forEachRemaining(dsg::add);
-                            qe.execConstructQuads().forEachRemaining(dsg::add);
-                            writerBuilder.source(dsg);
-                        } else { // if (sr.isTriples()) {
+                        if (parsedQuery.isConstructType()) {
+                            if (parsedQuery.isConstructQuad()) {
+                                DatasetGraph dsg = DatasetGraphFactory.createGeneral();
+                                // sr.getQuads().forEachRemaining(dsg::add);
+                                qe.execConstructQuads().forEachRemaining(dsg::add);
+                                writerBuilder.source(dsg);
+                            } else { // if (sr.isTriples()) {
+                                Graph graph = GraphFactory.createPlainGraph();
+                                // sr.getTriples().forEachRemaining(graph::add);
+                                qe.execConstructTriples().forEachRemaining(graph::add);
+                                writerBuilder.source(graph);
+                            }
+                        } else if (parsedQuery.isDescribeType()) {
                             Graph graph = GraphFactory.createPlainGraph();
                             // sr.getTriples().forEachRemaining(graph::add);
-                            qe.execConstructTriples().forEachRemaining(graph::add);
+                            qe.execDescribeTriples().forEachRemaining(graph::add);
                             writerBuilder.source(graph);
+                        } else {
+                            throw new RuntimeException("Unknown query type: " + parsedQuery);
                         }
+
                         writerBuilder.format(fmt).context(cxt).output(out);
                     }
                 };

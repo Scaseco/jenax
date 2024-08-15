@@ -1,6 +1,6 @@
-package org.aksw.jena_sparql_api.sparql.ext.geosparql;
+package org.aksw.jenax.norse.term.geo;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
 public class NorseTermsGeo {
     public static final String NS = NorseTerms.NS + "geo.";

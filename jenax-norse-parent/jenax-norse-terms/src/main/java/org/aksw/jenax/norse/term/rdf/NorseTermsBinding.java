@@ -1,8 +1,8 @@
-package org.aksw.jena_sparql_api.sparql.ext.binding;
+package org.aksw.jenax.norse.term.rdf;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 
-public class NorseBindingTerms {
+public class NorseTermsBinding {
     public static final String Datatype = NorseTerms.NS + "binding";
 
     /** Base namespace for all types of JSON-related functions (conventional functions, property functions, aggregators, etc) */

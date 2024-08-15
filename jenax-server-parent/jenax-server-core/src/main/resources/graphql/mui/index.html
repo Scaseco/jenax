@@ -110,7 +110,7 @@ button {
   }
 
   function toBashString(str) {
-    return str.replace("'", "'\\''")
+    return str.replaceAll("'", "'\\''")
   }
 
   function showCurl() {

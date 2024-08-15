@@ -11,6 +11,9 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
 // TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
+/**
+ * Accumulator for the values of an (objectId, propertyId) pair.
+ */
 public class AccJsonProperty
     extends AccJsonBase
     implements AccJsonEdge
@@ -30,12 +33,13 @@ public class AccJsonProperty
     /** If true then no array is created. Any item after the first raises an error event. */
     protected boolean isSingle = false;
 
-    public AccJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
+    public AccJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
         super();
         this.matchFieldId = matchFieldId;
         this.jsonKey = jsonKey;
         this.isForward = isForward;
         this.targetAcc = targetAcc;
+        this.isSingle = isSingle;
     }
 
     @Override
@@ -43,21 +47,21 @@ public class AccJsonProperty
         return (parent != null ? parent.getPath() : PathJson.newRelativePath()).resolve(Step.of((int)seenTargetCount));
     }
 
-    @Override
-    public void setSingle(boolean value) {
-        this.isSingle = value;
-    }
+//    @Override
+//    public void setSingle(boolean value) {
+//        this.isSingle = value;
+//    }
 
-    @Override
+    // @Override
     public boolean isSingle() {
         return this.isSingle;
     }
 
-    @Override
-    public void setTargetAcc(AccJsonNode targetAcc) {
-        targetAcc.setParent(this);
-        this.targetAcc = targetAcc;
-    }
+//    @Override
+//    public void setTargetAcc(AccJsonNode targetAcc) {
+//        targetAcc.setParent(this);
+//        this.targetAcc = targetAcc;
+//    }
 
     @Override
     public Node getJsonKey() {
@@ -93,7 +97,7 @@ public class AccJsonProperty
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf writer = context.getJsonWriter();
+                RdfObjectNotationWriter writer = context.getJsonWriter();
                 writer.name(jsonKey);
                 if (!isSingle) {
                     writer.beginArray();
@@ -153,13 +157,13 @@ public class AccJsonProperty
                 if (parent != null) {
                     // Turns null into JsonNull
                     RdfElement elt = value == null ? RdfElement.nullValue() : value;
-                    AccJsonObject acc = (AccJsonObject)parent;
+                    AccJsonObjectLikeBase acc = (AccJsonObjectLikeBase)parent;
                     acc.value.getAsObject().add(jsonKey, elt);
                 }
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf jsonWriter = context.getJsonWriter();
+                RdfObjectNotationWriter jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
                     jsonWriter.endArray();
                 } else if (seenTargetCount == 0) {
@@ -184,7 +188,7 @@ public class AccJsonProperty
                     if (value == null) {
                         value = item;
                     } else {
-                        // TODO Report an error
+                        // TODO Report an error, ignore or overwrite?
                     }
                 } else {
                     value.getAsArray().add(item);
