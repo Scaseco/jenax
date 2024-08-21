@@ -162,7 +162,6 @@ public interface SparqlQueryConnectionTmp
         return query(parse(queryString));
     }
 
-
     @Override
     default QueryExecutionBuilder newQuery() {
         throw new UnsupportedOperationException();

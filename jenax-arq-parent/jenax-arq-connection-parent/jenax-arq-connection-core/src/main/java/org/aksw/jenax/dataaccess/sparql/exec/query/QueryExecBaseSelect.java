@@ -8,22 +8,20 @@ import org.aksw.commons.util.closeable.AutoCloseableBase;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryCancelledException;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Substitute;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.modify.TemplateLib;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
+import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +31,20 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class QueryExecBaseSelect
     extends AutoCloseableBase
-    implements QueryExec
+    implements QueryExecBaseIterator
 {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecBaseSelect.class);
     protected Query query;
 
     /**
      * If true, then triples and quads are produced by raw substitution with the bindings.
-     * This means literals and variables (that are not substituted due) may appear in any component.
+     * This means literals and variables (that are not substituted) may appear in any component.
      */
     protected boolean rawTuples;
+
+    // protected final Object lock = new Object();
+    protected volatile QueryExec activeQueryExec;
+    protected volatile boolean isCancelled;
 
     public QueryExecBaseSelect(Query query) {
         this(query, false);
@@ -59,7 +61,49 @@ public abstract class QueryExecBaseSelect
      * query of select type.
      * The RowSet may need to implement close() in order to close an underlying query execution.
      */
-    protected abstract RowSet doSelect(Query selectQuery);
+    protected abstract QueryExec doSelect(Query selectQuery);
+
+    // XXX Not ideal - dataset and context should be available directly
+    @Override
+    public DatasetGraph getDataset() {
+        return activeQueryExec == null ? null : activeQueryExec.getDataset();
+    }
+
+    @Override
+    public Context getContext() {
+        return activeQueryExec == null ? null : activeQueryExec.getContext();
+    }
+
+    @Override
+    public void abort() {
+        if (!isCancelled) {
+            synchronized (this) {
+                if (!isCancelled) {
+                    isCancelled = true;
+                    if (activeQueryExec != null) {
+                        activeQueryExec.abort();
+                    }
+                }
+            }
+        }
+    }
+
+    protected RowSet internalSelect(Query selectQuery) {
+        synchronized (this) {
+            ensureOpen();
+
+            if (activeQueryExec != null) {
+                throw new RuntimeException("Query execution has already been started");
+            }
+
+            if (isCancelled) {
+                throw new QueryCancelledException();
+            }
+
+            activeQueryExec = doSelect(selectQuery);
+        }
+        return activeQueryExec.select();
+    }
 
     public static Query adjust(Query query) {
         Template template = query.getConstructTemplate();
@@ -100,7 +144,7 @@ public abstract class QueryExecBaseSelect
         Query selectQuery = QueryUtils.elementToQuery(query.getQueryPattern());
         selectQuery.setLimit(1);
 
-        RowSet rs = doSelect(selectQuery);
+        RowSet rs = internalSelect(selectQuery);
 
         long rowCount = 0;
         while(rs.hasNext()) {
@@ -125,7 +169,7 @@ public abstract class QueryExecBaseSelect
 
         Template template = query.getConstructTemplate();
         Query clone = adjust(query);
-        RowSet rs = doSelect(clone);
+        RowSet rs = internalSelect(clone);
         Iterator<Quad> result;
         if (rawTuples) {
             result = Iter.flatMap(rs, b -> Iter.map(
@@ -133,19 +177,6 @@ public abstract class QueryExecBaseSelect
         } else {
             result = TemplateLib.calcQuads(template.getQuads(), rs);
         }
-        return result;
-    }
-
-    @Override
-    public Graph construct(Graph result) {
-        GraphUtil.add(result, constructTriples());
-        return result;
-    }
-
-    @Override
-    public Graph construct() {
-        Graph result = GraphFactory.createDefaultGraph();
-        construct(result);
         return result;
     }
 
@@ -158,7 +189,7 @@ public abstract class QueryExecBaseSelect
 
         Template template = query.getConstructTemplate();
         Query clone = adjust(query);
-        RowSet rs = doSelect(clone);
+        RowSet rs = internalSelect(clone);
         Iterator<Triple> result;
         if (rawTuples) {
             result = Iter.flatMap(rs, b -> Iter.map(
@@ -175,7 +206,7 @@ public abstract class QueryExecBaseSelect
             throw new RuntimeException("SELECT query expected. Got: ["
                     + query.toString() + "]");
         }
-        return doSelect(query);
+        return internalSelect(query);
     }
 
     @Override
@@ -189,25 +220,8 @@ public abstract class QueryExecBaseSelect
     }
 
     @Override
-    public JsonArray execJson() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Iterator<JsonObject> execJsonItems() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public DatasetGraph constructDataset(DatasetGraph dataset) {
-        constructQuads().forEachRemaining(dataset::add);
-        return dataset;
-    }
-
-    @Override
-    public Graph describe(Graph graph) {
-        describeTriples().forEachRemaining(graph::add);
-        return graph;
     }
 
     @Override

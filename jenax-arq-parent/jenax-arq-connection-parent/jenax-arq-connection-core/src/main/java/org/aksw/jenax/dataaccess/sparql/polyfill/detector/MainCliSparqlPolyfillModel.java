@@ -16,7 +16,7 @@ import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillCondition;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillConditionQuery;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
-import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggester;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggestionRule;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.riot.RDFDataMgr;
@@ -45,7 +45,7 @@ public class MainCliSparqlPolyfillModel {
         model.setNsPrefix("norse", "https://w3id.org/aksw/norse#");
         model.setNsPrefix("rdfs", RDFS.uri);
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Generic - LATERAL")
             .setComment("Client-side execution of LATERAL")
             .setCondition(model.createResource().as(PolyfillConditionQuery.class)
@@ -53,7 +53,7 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(RdfDataSourceWithLocalLateral.class.getName()));
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Generic - EXISTS as OPTIONAL")
             .setComment("Rewrite EXISTS conditions using OPTIONAL")
             .setCondition(model.createResource().as(PolyfillConditionQuery.class)
@@ -62,7 +62,7 @@ public class MainCliSparqlPolyfillModel {
                 .setJavaClass(TransformExistsToOptional.class.getName()));
 
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Generic - Remove redundant projections")
             //.setComment()
             .setLevel(10100)
@@ -81,7 +81,7 @@ public class MainCliSparqlPolyfillModel {
                 }
                 """);
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Rewrite empty table")
             .setComment("Rewrite VALUES blocks with empty bindings")
             .setCondition(virtuoso)
@@ -89,7 +89,7 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(TransformFactorizeTableColumnsToExtend.class.getName()));
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Rephrase COUNT(DISTINCT ?x)")
             .setComment("Rewrite as COUNT(*) over a sub query using DISTINCT ?x")
             .setCondition(virtuoso)
@@ -97,7 +97,7 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(TransformExpandAggCountDistinct.class.getName()));
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Remove redundant filters")
             .setComment("Some versions of Virtuoso raise errors for BIND('foo' AS ?x) FILTER(?x = 'foo')")
             .setCondition(virtuoso)
@@ -105,7 +105,7 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(TransformRedundantFilterRemoval.class.getName()));
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - OpDatasetNames to OpGraph")
             .setComment("Rewrite Graph ?g {} to Graph ?g { ?s ?p ?o }")
             .setCondition(virtuoso)
@@ -113,7 +113,7 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(TransformOpDatasetNamesToOpGraph.class.getName()));
 
-        model.createResource().as(PolyfillSuggester.class)
+        model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Fix SubStr")
             .setComment("Transform substr expressions to handle the case where the requested length is greater than the string's remaining length")
             .setCondition(model.createResource().as(PolyfillConditionQuery.class)
@@ -122,6 +122,6 @@ public class MainCliSparqlPolyfillModel {
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)
                 .setJavaClass(ExprTransformVirtuosoSubstr.class.getName()));
 
-        RDFDataMgr.write(System.out, model, RDFFormat.TRIG_PRETTY);
+        // RDFDataMgr.write(System.err, model, RDFFormat.TRIG_PRETTY);
     }
 }

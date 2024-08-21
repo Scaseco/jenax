@@ -34,6 +34,12 @@ public interface QueryExecBuilderWrapper<T extends QueryExecBuilder>
         return self();
     }
 
+    @Override
+    default QueryExecBuilder parseCheck(boolean parseCheck) {
+        getDelegate().parseCheck(parseCheck);
+        return self();
+    }
+
     /** Set the query. */
     @Override
     default T query(String queryString, Syntax syntax) {

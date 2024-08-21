@@ -13,6 +13,8 @@ import java.util.function.Function;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
@@ -159,6 +161,9 @@ public class RDFConnectionUtils {
         return result;
     }
 
+    public static RDFConnection wrapWithBuilderTransform(RDFConnection rawConn, QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
+        return wrapWithLinkTransform(rawConn, link -> RDFLinkUtils.wrapWithBuilderTransform(link, queryBuilderTransform, updateBuilderTransform));
+    }
 
 
     public static RDFConnection wrapWithContextMutator(RDFConnection rawConn) {
@@ -389,6 +394,11 @@ public class RDFConnectionUtils {
         return result;
     }
 
+    /**
+     * Obtain a RowSet from the given queryExecBuilder.
+     * The RowSet is materialized when the silent flag is set or streaming is disallowed.
+     * Otherwise it is streamed.
+     */
     public static RowSet exec(QueryExecBuilder builder, boolean isSilent, boolean isStreamingAllowed) {
         RowSet result;
         if (isSilent || !isStreamingAllowed) {
@@ -403,6 +413,7 @@ public class RDFConnectionUtils {
                     result = RowSetStream.create(List.of(), Collections.emptyIterator());
                     // QueryIterSingleton.create(BindingFactory.root(), null);
                 } else {
+                    ex.addSuppressed(new RuntimeException("QueryExecution error"));
                     throw ex;
                 }
             }

@@ -1,15 +1,19 @@
 package org.aksw.jenax.arq.util.triple;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 
 /**
@@ -48,6 +52,14 @@ public class ModelUtils {
     }
 
     public static String toString(Model model, RDFFormat rdfFormat) {
-        return DatasetUtils.toString(DatasetFactory.wrap(model), rdfFormat);
+        String result;
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            RDFDataMgr.write(out, model, rdfFormat);
+            out.flush();
+            result = out.toString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

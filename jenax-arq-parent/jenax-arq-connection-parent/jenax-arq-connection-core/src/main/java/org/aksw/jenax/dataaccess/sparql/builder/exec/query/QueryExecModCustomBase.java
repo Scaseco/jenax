@@ -1,6 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.builder.exec.query;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecMod;
@@ -20,7 +21,11 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
     protected TimeUnit overallTimeoutUnit;
 
     public QueryExecModCustomBase() {
-        this(ContextAccumulator.newBuilder());
+        this(Context::emptyContext);
+    }
+
+    public QueryExecModCustomBase(Supplier<Context> baseContextSupplier) {
+        this(ContextAccumulator.newBuilder(baseContextSupplier));
     }
 
     public QueryExecModCustomBase(ContextAccumulator contextAccumulator) {
@@ -81,7 +86,9 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
             dst.initialTimeout(overallTimeoutValue, overallTimeoutUnit);
         }
 
-        // XXX Only apply added settings
+        // Be careful to Only apply added settings!
+        // E.g. using a non-empty base context in this builder's contextAccumulator will override
+        // those settings in the context of the delegate query exec.
         Context context = getContext();
         if (context != null) {
             Context dstCxt = dst.getContext();

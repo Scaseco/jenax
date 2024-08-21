@@ -10,10 +10,16 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>5.1.0-1-SNAPSHOT</version>
+		<version>5.2.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
+		<!-- Temporary dependency for json provider -->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-datapaths</artifactId>
@@ -39,6 +45,12 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 

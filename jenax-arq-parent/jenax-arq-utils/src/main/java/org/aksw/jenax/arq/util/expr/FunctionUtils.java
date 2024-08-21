@@ -10,6 +10,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
@@ -73,5 +74,15 @@ public class FunctionUtils {
         }
         Node result = nv == null ? null : nv.asNode();
         return result;
+    }
+
+    public static void runWithDisabledWarnOnUnknownFunction(Runnable action) {
+        boolean storedValue = E_Function.WarnOnUnknownFunction;
+        try {
+            E_Function.WarnOnUnknownFunction = false;
+            action.run();
+        } finally {
+            E_Function.WarnOnUnknownFunction = storedValue;
+        }
     }
 }

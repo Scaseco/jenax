@@ -97,8 +97,6 @@ public class NodeUtils {
         return result;
     }
 
-
-
     public static boolean isNullOrAny(Node node) {
         return node == null || Node.ANY.equals(node);
     }

@@ -15,6 +15,8 @@ import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpFilter;
+import org.apache.jena.sparql.algebra.op.OpGraph;
+import org.apache.jena.sparql.algebra.op.OpGroup;
 import org.apache.jena.sparql.algebra.op.OpJoin;
 import org.apache.jena.sparql.algebra.op.OpOrder;
 import org.apache.jena.sparql.algebra.op.OpProject;
@@ -126,6 +128,18 @@ public class EvaluationOfConstraints
     @Override
     public CBinding eval(OpService opService, CBinding input) {
         return CBindingMap.create();
+    }
+
+    @Override
+    public CBinding eval(OpGroup op, CBinding input) {
+        CBinding result = eval(op.getSubOp(), input);
+        return result;
+    }
+
+    @Override
+    public CBinding eval(OpGraph op, CBinding input) {
+        CBinding result = eval(op.getSubOp(), input);
+        return result;
     }
 
     @Override

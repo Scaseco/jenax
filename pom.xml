@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-bom</artifactId>
-		<version>5.1.0-1-SNAPSHOT</version>
+		<version>5.2.0-1-SNAPSHOT</version>
 		<relativePath>jenax-bom</relativePath>
 	</parent>
 
@@ -33,7 +33,7 @@
 		<module>jenax-conjure-parent</module>
 		<module>jenax-server-parent</module>
 
-		<module>jenax-graphql</module>
+		<module>jenax-graphql-parent</module>
 		<!-- <module>jenax-cli-core</module> -->
 	</modules>
 

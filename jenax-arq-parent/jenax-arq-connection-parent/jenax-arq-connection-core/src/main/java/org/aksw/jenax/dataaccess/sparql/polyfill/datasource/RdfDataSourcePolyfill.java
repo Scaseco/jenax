@@ -11,8 +11,10 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumns
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
+import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
@@ -42,9 +44,14 @@ public class RdfDataSourcePolyfill {
         Model model = ModelFactory.createDefaultModel();
         MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
 
+        // Wrap the datasource with a cache for polyfill detection
+        // The cache stores all query results in-memory
+        RdfDataSource cachedDataSource = rdfDataSource.decorate(RdfDataSourceTransforms.simpleCache());
+        // RdfDataSource cachedDataSource = rdfDataSource;
+
         PolyfillDetector detector = new PolyfillDetector();
         detector.load(model);
-        List<Suggestion<String>> result = detector.detect(rdfDataSource);
+        List<Suggestion<String>> result = detector.detect(cachedDataSource);
         return result;
     }
 
@@ -104,7 +111,11 @@ public class RdfDataSourcePolyfill {
         });
         ServiceExecutorRegistry.set(probeDs.getContext(), registry);
 
-        SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        // Disable warnings about unknown functions while probing
+        FunctionUtils.runWithDisabledWarnOnUnknownFunction(() -> {
+            SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        });
+
         Property dbmsShortName = ResourceFactory.createProperty("http://www.example.org/dbmsShortName");
 
         Model report = probeDs.getDefaultModel();

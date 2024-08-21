@@ -1,12 +1,13 @@
 package org.aksw.jenax.io.json.accumulator;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.path.P_Path0;
 
 public class AggJsonFragmentHead
     implements AggJsonEdge
 {
     /** The property (json key) being aggregated */
-    protected Node jsonKey;
+    protected P_Path0 jsonKey;
 
     protected Node matchFieldId; // AccJsonObject indexes AccJsonEdge instances by this attribute
     protected boolean isForward;
@@ -15,7 +16,7 @@ public class AggJsonFragmentHead
     protected AggJsonNode targetAggregator;
 
 
-    protected AggJsonFragmentHead(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    protected AggJsonFragmentHead(P_Path0 jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         super();
         this.jsonKey = jsonKey;
         this.matchFieldId = matchFieldId;
@@ -23,11 +24,11 @@ public class AggJsonFragmentHead
         this.targetAggregator = targetAggregator;
     }
 
-    public static AggJsonFragmentHead of(Node jsonKey, Node matchFieldId, boolean isForward) {
+    public static AggJsonFragmentHead of(P_Path0 jsonKey, Node matchFieldId, boolean isForward) {
         return of(jsonKey, matchFieldId, isForward, null);
     }
 
-    public static AggJsonFragmentHead of(Node jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
+    public static AggJsonFragmentHead of(P_Path0 jsonKey, Node matchFieldId, boolean isForward, AggJsonNode targetAggregator) {
         return new AggJsonFragmentHead(jsonKey, matchFieldId, isForward, targetAggregator);
     }
 
@@ -45,7 +46,7 @@ public class AggJsonFragmentHead
         return matchFieldId;
     }
 
-    public Node getJsonKey() {
+    public P_Path0 getJsonKey() {
         return jsonKey;
     }
 

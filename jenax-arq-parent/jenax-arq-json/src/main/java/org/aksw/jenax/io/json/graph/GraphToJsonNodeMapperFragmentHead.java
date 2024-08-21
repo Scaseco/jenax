@@ -125,7 +125,8 @@ public class GraphToJsonNodeMapperFragmentHead
         return "PropertyMapper [baseFilter=" + baseFilter + ", targetNodeMapper=" + targetNodeMapper + "]";
     }
 
-    public AggJsonFragmentHead toAggregator(Node jsonKey) {
+    @Override
+    public AggJsonFragmentHead toAggregator(P_Path0 jsonKey) {
         AggJsonNode targetAgg = targetNodeMapper.toAggregator();
 
         // It should be fairly easy to extend AggJsonProperty such that the TripleFilter can be passed to it

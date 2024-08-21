@@ -116,6 +116,11 @@ public class RDFLinkWrapperWithWorkerThread
         return submit(() -> new QueryExecWrapper(getDelegate().query(query)));
     }
 
+    @Override
+    public QueryExec query(String queryString) {
+        return submit(() -> new QueryExecWrapper(getDelegate().query(queryString)));
+    }
+
     // TODO The builder needs to be wrapped!
     @Override
     public QueryExecBuilder newQuery() {
@@ -294,6 +299,12 @@ public class RDFLinkWrapperWithWorkerThread
         @Override
         public QueryExecBuilder query(String queryString, Syntax syntax) {
             submit(() -> delegate.query(queryString, syntax));
+            return this;
+        }
+
+        @Override
+        public QueryExecBuilder parseCheck(boolean parseCheck) {
+            submit(() -> delegate.parseCheck(parseCheck));
             return this;
         }
 

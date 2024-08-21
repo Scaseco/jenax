@@ -10,7 +10,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillCondition;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
-import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggester;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggestionRule;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillVocab;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
@@ -18,11 +18,11 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 
 public class PolyfillDetector {
     private static class Record {
-        protected PolyfillSuggester suggester;
+        protected PolyfillSuggestionRule suggester;
         protected Condition condition;
         protected String javaClass;
 
-        public Record(PolyfillSuggester suggester, Condition condition, String javaClass) {
+        public Record(PolyfillSuggestionRule suggester, Condition condition, String javaClass) {
             super();
             this.suggester = suggester;
             this.condition = condition;
@@ -38,7 +38,7 @@ public class PolyfillDetector {
         for (Entry<Integer, List<Record>> entry : suggesters.entrySet()) {
             for (Record e : entry.getValue()) {
                 Condition condition = e.condition;
-                PolyfillSuggester suggester = e.suggester;
+                PolyfillSuggestionRule suggester = e.suggester;
                 boolean value = condition == null ? true : condition.test(dataSource);
                 if (value) {
                     Suggestion<String> contrib = Suggestion.of(suggester.getLabel(), suggester.getComment(), e.javaClass);
@@ -52,11 +52,11 @@ public class PolyfillDetector {
     public void load(Model model) {
         ConditionProcessor conditionProcessor = ConditionProcessor.get();
 
-        ExtendedIterator<PolyfillSuggester> it = model.listResourcesWithProperty(PolyfillVocab.suggestion)
-                .mapWith(x -> x.as(PolyfillSuggester.class));
+        ExtendedIterator<PolyfillSuggestionRule> it = model.listResourcesWithProperty(PolyfillVocab.suggestion)
+                .mapWith(x -> x.as(PolyfillSuggestionRule.class));
         try {
             while (it.hasNext()) {
-                PolyfillSuggester suggester = it.next();
+                PolyfillSuggestionRule suggester = it.next();
 
                 PolyfillCondition conditionData = suggester.getCondition();
 

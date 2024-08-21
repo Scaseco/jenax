@@ -6,14 +6,16 @@ import java.util.Objects;
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.io.rdf.json.RdfElement;
-import org.aksw.jenax.io.rdf.json.RdfObject;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfNull;
+import org.aksw.jenax.ron.RdfObject;
+import org.aksw.jenax.ron.RdfObjectImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.path.P_Path0;
 
-/**
- * An accumulator for a conditional transition to the fragment body.
- */
+/** An accumulator for a conditional transition to the fragment body.
+ *  The fields of the body will only be instantiated if the head condition matches. */
 public class AccJsonFragmentHead
     extends AccJsonBase
     implements AccJsonEdge
@@ -21,7 +23,7 @@ public class AccJsonFragmentHead
     protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
-    protected Node dummyJsonKey;
+    protected P_Path0 dummyJsonKey;
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
@@ -33,7 +35,7 @@ public class AccJsonFragmentHead
     /** If true then no array is created. Any item after the first raises an error event. */
     // protected boolean isSingle = false;
 
-    public AccJsonFragmentHead(Node dummyJsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
+    public AccJsonFragmentHead(P_Path0 dummyJsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
         super();
         this.matchFieldId = matchFieldId;
         this.isForward = isForward;
@@ -63,7 +65,7 @@ public class AccJsonFragmentHead
 //    }
 
     @Override
-    public Node getJsonKey() {
+    public P_Path0 getJsonKey() {
         return dummyJsonKey;
     }
 
@@ -78,7 +80,7 @@ public class AccJsonFragmentHead
      * @throws IOException
      */
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node node, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
         seenTargetCount = 0;
         skipOutputStartedHere = false;
@@ -86,7 +88,7 @@ public class AccJsonFragmentHead
         if (!skipOutput) {
             if (context.isMaterialize()) {
                 // Create a temporary object
-                value = new RdfObject(dummyJsonKey);// parent.getValue();
+                value = new RdfObjectImpl(dummyJsonKey.getNode());// parent.getValue();
 //                value = isSingle
 //                        ? null
 //                        : RdfElement.newArray(); // new JsonArray();
@@ -104,7 +106,7 @@ public class AccJsonFragmentHead
 
     /** Accepts a triple if source and field id match that of the current state */
     @Override
-    public AccJson transition(Triple input, AccContext context) throws IOException {
+    public AccJson transition(Triple input, AccContextRdf context) throws IOException {
         ensureBegun();
 
         // End the current target (array item) if there is one
@@ -142,7 +144,7 @@ public class AccJsonFragmentHead
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
 
         if (!skipOutput) {
@@ -152,7 +154,7 @@ public class AccJsonFragmentHead
                 // So we access the field directly
                 if (parent != null) {
                     // Turns null into JsonNull
-                    RdfElement elt = value == null ? RdfElement.nullValue() : value;
+                    RdfElement elt = value == null ? new RdfNull() : value;
 
                     // parent can be either Object or Fragment.
                     AccJson tmp = parent;
@@ -168,7 +170,7 @@ public class AccJsonFragmentHead
                     boolean showFragments = false;
                     if (showFragments) {
                         // Debug: Expose the fragment in the parent object under the dummyJsonKey
-                        parentAcc.value.getAsObject().add(dummyJsonKey, elt);
+                        parentAcc.value.getAsObject().addForward(dummyJsonKey.getNode(), elt);
                     } else {
                         parentAcc.value.getAsObject().getMembers().putAll(elt.getAsObject().getMembers());
                     }
@@ -193,7 +195,7 @@ public class AccJsonFragmentHead
     }
 
     @Override
-    public void acceptContribution(RdfElement item, AccContext context) {
+    public void acceptContribution(RdfElement item, AccContextRdf context) {
         ensureBegun();
         if (!skipOutput) {
             if (context.isMaterialize()) {

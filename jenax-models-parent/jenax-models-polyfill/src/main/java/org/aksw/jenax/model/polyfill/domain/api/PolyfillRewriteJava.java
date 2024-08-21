@@ -11,7 +11,7 @@ import org.aksw.jenax.model.rdfs.domain.api.HasRdfsLabel;
 @RdfType
 @ResourceView
 public interface PolyfillRewriteJava
-    extends HasRdfsLabel, HasRdfsComment
+    extends PolyfillSuggestion, HasRdfsLabel, HasRdfsComment
 {
     @IriNs
     String getJavaClass();

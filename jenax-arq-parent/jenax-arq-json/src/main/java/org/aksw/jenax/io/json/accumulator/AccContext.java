@@ -1,16 +1,29 @@
 package org.aksw.jenax.io.json.accumulator;
 
+import org.aksw.jenax.io.json.gon.GonProvider;
+import org.aksw.jenax.io.json.writer.ObjectNotationWriter;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriter;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriterViaJson;
+
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 
-public class AccContext {
-//    protected Gson gson;
-//    protected JsonWriter jsonWriter;
+public class AccContext<K, V> {
+    /** Whether to accumulate a JsonElement */
+    protected boolean materialize;
 
-    protected RdfObjectNotationWriter writer;
+    /** Whether to stream to the jsonWriter */
+    protected boolean serialize;
+
+    /** The writer for generalized object notation. May support streaming. */
+    protected ObjectNotationWriter<K, V> writer;
+
+    /** The provider for building in memory objects. */
+    protected GonProvider<K, V> gonProvider;
+
     protected AccJsonErrorHandler errorHandler = null;
 
-    public AccContext(RdfObjectNotationWriter writer, boolean materialize, boolean serialize) {
+    public AccContext(ObjectNotationWriter<K, V> writer, boolean materialize, boolean serialize) {
         super();
         this.writer = writer;
         this.materialize = materialize;
@@ -18,13 +31,25 @@ public class AccContext {
     }
 
     /** Create a context that only materializes */
-    public static AccContext materializing() {
-        return new AccContext(null,  true, false);
+    public static AccContextRdf materializing() {
+        return new AccContextRdf(null, true, false);
     }
 
-    public static AccContext serializing(Gson gson, JsonWriter jsonWriter) {
+    public static AccContextRdf serializing(Gson gson, JsonWriter jsonWriter) {
         RdfObjectNotationWriter writer = new RdfObjectNotationWriterViaJson(gson, jsonWriter);
-        return new AccContext(writer, false, true);
+        return serializing(writer);
+    }
+
+    public static AccContextRdf serializing(RdfObjectNotationWriter writer) {
+        return new AccContextRdf(writer, false, true);
+    }
+
+    public static <K, V> AccContext<K, V> serializing(ObjectNotationWriter<K, V> writer) {
+        return new AccContext<>(writer, false, true);
+    }
+
+    public void setWriter(ObjectNotationWriter<K, V> writer) {
+        this.writer = writer;
     }
 
     public void setErrorHandler(AccJsonErrorHandler errorHandler) {
@@ -35,12 +60,6 @@ public class AccContext {
         return errorHandler;
     }
 
-    /** Whether to accumulate a JsonElement */
-    protected boolean materialize;
-
-    /** Whether to stream to the jsonWriter */
-    protected boolean serialize;
-
     public boolean isMaterialize() {
         return materialize;
     }
@@ -49,16 +68,23 @@ public class AccContext {
         return serialize;
     }
 
-    public RdfObjectNotationWriter getJsonWriter() {
+    public ObjectNotationWriter<K, V> getJsonWriter() {
         return writer;
     }
 
-//  public Gson getGson() {
-//  return gson;
+    public GonProvider<K, V> getGonProvider() {
+        return gonProvider;
+    }
+
+    public void setGonProvider(GonProvider<K, V> gonProvider) {
+        this.gonProvider = gonProvider;
+    }
+
+//public Gson getGson() {
+//return gson;
 //}
 
 //public JsonWriter getJsonWriter() {
-//  return jsonWriter;
+//return jsonWriter;
 //}
-
 }

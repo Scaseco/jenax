@@ -3,13 +3,15 @@ package org.aksw.jenax.io.json.graph;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.jena.sparql.path.P_Path0;
+
 public abstract class GraphToJsonNodeMapperObjectLike
-    implements GraphToJsonNodeMapper
+    implements GraphToJsonMapperNode
 {
-    protected Map<String, GraphToJsonEdgeMapper> propertyMappers = new LinkedHashMap<>();
+    protected Map<P_Path0, GraphToJsonEdgeMapper> propertyMappers = new LinkedHashMap<>();
 
     // @Override
-    public Map<String, GraphToJsonEdgeMapper> getPropertyMappers() {
+    public Map<P_Path0, GraphToJsonEdgeMapper> getPropertyMappers() {
         return propertyMappers;
     }
 

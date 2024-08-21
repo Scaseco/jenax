@@ -129,8 +129,12 @@ public interface NodeQuery
     // FIXME Use a proper interface for the constraints
     ConstraintNode<NodeQuery> constraints();
 
+    /** Return the RelationQuery of which this NodeQuery is a view of. */
     RelationQuery relationQuery();
+
+    /** Get the variable of the underlying RelationQuery of which this NodeQuery is a view of. */
     Var var();
+
     FacetStep reachingStep();
 
     @Override

@@ -1,0 +1,227 @@
+@prefix : <http://pokedex.dataincubator.org/pkm/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+<http://pokedex.dataincubator.org/pokemon/101>
+        :baseAttack            50 ;
+        :baseDefense           70 ;
+        :baseExp               150 ;
+        :baseHP                60 ;
+        :baseSpAtk             80 ;
+        :baseSpDef             80 ;
+        :baseSpeed             140 ;
+        :colour                "red" ;
+        :cryMP3                <http://www.upokecenter.com/images/cries/101Cry.mp3> ;
+        :description           "Es lässt sich vom Wind treiben, wenn es so voller Elektrizität ist, dass es fast explodiert."@de ;
+        :description           "It is known to drift on winds if it is bloated to bursting with stored electricity."@en ;
+        :description           "Se lo lleva el viento si se hincha con la electricidad que almacena."@es ;
+        :description           "Il se laisse porter par les vents lorsque son corps est gonflé d’électricité à en éclater."@fr ;
+        :description           "Quando ha accumulato elettricità fino quasi a scoppiare, si fa trasportare dal vento."@it ;
+        :description           "でんきエネルギーを　ためすぎて ぱんぱんに　ふくらんだ　マルマインが かぜに　ながされてくることが　ある。"@ja ;
+        :effortAttack          0 ;
+        :effortDefense         85 ;
+        :effortHP              0 ;
+        :effortSpAtk           101 ;
+        :effortSpDef           0 ;
+        :effortSpeed           0 ;
+        :femaleRatio           -1 ;
+        :genderThreshold       255 ;
+        :happiness             70 ;
+        :hoennNumber           "85" ;
+        :length                12 ;
+        :maleRatio             -1 ;
+        :name                  "LEKTROBAL"@de ;
+        :name                  "ELECTRODE"@en ;
+        :name                  "ELECTRODE"@es ;
+        :name                  "ELECTRODE"@fr ;
+        :name                  "ELECTRODE"@it ;
+        :name                  "マルマイン"@ja ;
+        :nationalNumber        101 ;
+        :rareness              60 ;
+        :species               <http://pokedex.dataincubator.org/species/ball> ;
+        :stepsToHatch          5120 ;
+        :type                  <http://pokedex.dataincubator.org/types/electric> ;
+        :weight                666 ;
+        rdf:type               :Pokemon ;
+        rdfs:label             "Electrode" ;
+        owl:sameAs             <http://dbpedia.org/resource/Electrode> ;
+        owl:sameAs             <http://pokedex.dataincubator.org/pokemon/electrode> ;
+        owl:sameAs             <http://rdf.freebase.com/ns/guid.9202a8c04000641f8000000000015a29> ;
+        foaf:depiction         <http://veekun.com/dex/media/icons/101.png> ;
+        foaf:depiction         <http://www.legendarypokemon.net/images/dp_artwork/101.png> ;
+        foaf:isPrimaryTopicOf  <http://www.upokecenter.com/dexws/?version=diamond&number=101> .
+
+<http://pokedex.dataincubator.org/pokemon/197>
+        :baseAttack            65 ;
+        :baseDefense           110 ;
+        :baseExp               197 ;
+        :baseHP                95 ;
+        :baseSpAtk             60 ;
+        :baseSpDef             130 ;
+        :baseSpeed             65 ;
+        :colour                "black" ;
+        :cryMP3                <http://www.upokecenter.com/images/cries/197Cry.mp3> ;
+        :description           "Mondlicht hat die genetische Struktur von EVOLI verändert. Im Dunkeln wartet es auf Beute."@de ;
+        :description           "The light of the moon changed EEVEE’s genetic structure. It lurks in darkness for prey."@en ;
+        :description           "Creado cuando la luz lunar alteró la estructura genética de EEVEE. Busca presas en la oscuridad."@es ;
+        :description           "La lumière de la lune a modifié le code génétique d’EVOLI. Il hante les ombres en quête d’une proie."@fr ;
+        :description           "La luce lunare ha mutato la struttura genetica di EEVEE. Si cela nel buio in attesa della preda."@it ;
+        :description           "つきの　ひかりが　イーブイの いでんしを　へんかさせた。 やみに　ひそみ　えものを　まつ。"@ja ;
+        :effortAttack          0 ;
+        :effortDefense         86 ;
+        :effortHP              0 ;
+        :effortSpAtk           197 ;
+        :effortSpDef           0 ;
+        :effortSpeed           1 ;
+        :femaleRatio           12 ;
+        :genderThreshold       31 ;
+        :happiness             35 ;
+        :hoennNumber           "342" ;
+        :length                10 ;
+        :maleRatio             88 ;
+        :name                  "NACHTARA"@de ;
+        :name                  "UMBREON"@en ;
+        :name                  "UMBREON"@es ;
+        :name                  "NOCTALI"@fr ;
+        :name                  "UMBREON"@it ;
+        :name                  "ブラッキー"@ja ;
+        :nationalNumber        197 ;
+        :rareness              45 ;
+        :species               <http://pokedex.dataincubator.org/species/moonlight> ;
+        :stepsToHatch          8960 ;
+        :type                  <http://pokedex.dataincubator.org/types/dark> ;
+        :weight                270 ;
+        rdf:type               :Pokemon ;
+        rdfs:label             "Umbreon" ;
+        owl:sameAs             <http://dbpedia.org/resource/Umbreon> ;
+        owl:sameAs             <http://pokedex.dataincubator.org/pokemon/umbreon> ;
+        owl:sameAs             <http://rdf.freebase.com/ns/guid.9202a8c04000641f8000000000260f5f> ;
+        foaf:depiction         <http://veekun.com/dex/media/icons/197.png> ;
+        foaf:depiction         <http://www.legendarypokemon.net/images/dp_artwork/197.png> ;
+        foaf:isPrimaryTopicOf  <http://www.upokecenter.com/dexws/?version=diamond&number=197> .
+
+<http://pokedex.dataincubator.org/pokemon/229>
+        :baseAttack            90 ;
+        :baseDefense           50 ;
+        :baseExp               204 ;
+        :baseHP                75 ;
+        :baseSpAtk             110 ;
+        :baseSpDef             80 ;
+        :baseSpeed             95 ;
+        :colour                "black" ;
+        :cryMP3                <http://www.upokecenter.com/images/cries/229Cry.mp3> ;
+        :description           "In alten Zeiten glaubte man, das Heulen dieses PKMN sei der Ruf des Todes."@de ;
+        :description           "Long ago, people imagined its eerie howls to be the call of the grim reaper."@en ;
+        :description           "Hace mucho, la gente creía que sus horripilantes aullidos eran de la muerte personificada."@es ;
+        :description           "Jadis, les gens prenaient son étrange hurlement pour l’appel de la Faucheuse."@fr ;
+        :description           "Molto tempo fa, si riteneva che le sue urla sinistre coincidessero con la chiamata della morte."@it ;
+        :description           "ヘルガーの　ぶきみな　とおぼえは じごくから　しにがみが　よぶ　こえと むかしの　ひとは　そうぞうしていた。"@ja ;
+        :effortAttack          0 ;
+        :effortDefense         111 ;
+        :effortHP              0 ;
+        :effortSpAtk           229 ;
+        :effortSpDef           0 ;
+        :effortSpeed           1 ;
+        :femaleRatio           50 ;
+        :genderThreshold       127 ;
+        :happiness             35 ;
+        :hoennNumber           "367" ;
+        :length                14 ;
+        :maleRatio             50 ;
+        :name                  "HUNDEMON"@de ;
+        :name                  "HOUNDOOM"@en ;
+        :name                  "HOUNDOOM"@es ;
+        :name                  "DEMOLOSSE"@fr ;
+        :name                  "HOUNDOOM"@it ;
+        :name                  "ヘルガー"@ja ;
+        :nationalNumber        229 ;
+        :rareness              45 ;
+        :species               <http://pokedex.dataincubator.org/species/dark> ;
+        :stepsToHatch          5120 ;
+        :type                  <http://pokedex.dataincubator.org/types/dark> ;
+        :type                  <http://pokedex.dataincubator.org/types/fire> ;
+        :weight                350 ;
+        rdf:type               :Pokemon ;
+        rdfs:label             "Houndoom" ;
+        owl:sameAs             <http://dbpedia.org/resource/Houndoom> ;
+        owl:sameAs             <http://pokedex.dataincubator.org/pokemon/houndoom> ;
+        owl:sameAs             <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000005b9e84> ;
+        foaf:depiction         <http://veekun.com/dex/media/icons/229.png> ;
+        foaf:depiction         <http://www.legendarypokemon.net/images/dp_artwork/229.png> ;
+        foaf:isPrimaryTopicOf  <http://www.upokecenter.com/dexws/?version=diamond&number=229> .
+
+<http://pokedex.dataincubator.org/pokemon/380>
+        :baseAttack            80 ;
+        :baseDefense           90 ;
+        :baseExp               211 ;
+        :baseHP                80 ;
+        :baseSpAtk             110 ;
+        :baseSpDef             130 ;
+        :baseSpeed             110 ;
+        :colour                "red" ;
+        :cryMP3                <http://www.upokecenter.com/images/cries/380Cry.mp3> ;
+        :description           "Sein Körper ist mit Daunen bedeckt, die das Licht so brechen, dass das PKMN unsichtbar wird."@de ;
+        :description           "Its body is covered with a down that can refract light in such a way that it becomes invisible."@en ;
+        :description           "Su cuerpo está cubierto de un plumón que refleja la luz de forma que se vuelve invisible."@es ;
+        :description           "Son corps est recouvert d’un  duvet qui reflète la lumière et le rend invisible."@fr ;
+        :description           "Questo Pokémon ha il corpo ricoperto di piume che riflettono la luce e lo rendono invisibile."@it ;
+        :description           "ひかりを　くっせつさせる　うもうで ぜんしんを　つつみこみ　すがたを みえなくする　のうりょくを　もつ。"@ja ;
+        :effortAttack          0 ;
+        :effortDefense         196 ;
+        :effortHP              0 ;
+        :effortSpAtk           151 ;
+        :effortSpDef           1 ;
+        :effortSpeed           0 ;
+        :femaleRatio           100 ;
+        :genderThreshold       254 ;
+        :happiness             90 ;
+        :hoennNumber           "196" ;
+        :length                14 ;
+        :maleRatio             0 ;
+        :name                  "LATIAS"@de ;
+        :name                  "LATIAS"@en ;
+        :name                  "LATIAS"@es ;
+        :name                  "LATIAS"@fr ;
+        :name                  "LATIAS"@it ;
+        :name                  "ラティアス"@ja ;
+        :nationalNumber        380 ;
+        :rareness              3 ;
+        :species               <http://pokedex.dataincubator.org/species/eon> ;
+        :stepsToHatch          30720 ;
+        :type                  <http://pokedex.dataincubator.org/types/dragon> ;
+        :type                  <http://pokedex.dataincubator.org/types/psychic> ;
+        :weight                400 ;
+        rdf:type               :Pokemon ;
+        rdfs:label             "Latias" ;
+        owl:sameAs             <http://dbpedia.org/resource/Latias> ;
+        owl:sameAs             <http://pokedex.dataincubator.org/pokemon/latias> ;
+        owl:sameAs             <http://rdf.freebase.com/ns/guid.9202a8c04000641f80000000002de307> ;
+        foaf:depiction         <http://veekun.com/dex/media/icons/380.png> ;
+        foaf:depiction         <http://www.legendarypokemon.net/images/dp_artwork/380.png> ;
+        foaf:isPrimaryTopicOf  <http://www.upokecenter.com/dexws/?version=diamond&number=380> .
+
+<http://pokedex.dataincubator.org/species/ball>
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/100> ;
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/101> ;
+        rdf:type    :Species ;
+        rdfs:label  "Ball Pokémon" .
+
+<http://pokedex.dataincubator.org/species/dark>
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/228> ;
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/229> ;
+        rdf:type    :Species ;
+        rdfs:label  "Dark Pokémon" .
+
+<http://pokedex.dataincubator.org/species/eon>
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/380> ;
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/381> ;
+        rdf:type    :Species ;
+        rdfs:label  "Eon Pokémon" .
+
+<http://pokedex.dataincubator.org/species/moonlight>
+        :speciesOf  <http://pokedex.dataincubator.org/pokemon/197> ;
+        rdf:type    :Species ;
+        rdfs:label  "Moonlight Pokémon" .

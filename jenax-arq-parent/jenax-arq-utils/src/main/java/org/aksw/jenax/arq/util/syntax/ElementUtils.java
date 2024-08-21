@@ -36,10 +36,12 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
+import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
@@ -530,5 +532,12 @@ public class ElementUtils {
         vars.forEach(result::add);
         rows.forEach(result::add);
         return result;
+    }
+
+    public static ElementGroup addBinding(ElementGroup group, Binding binding) {
+        if (binding != null) {
+            binding.forEach((v, n) -> group.addElement(new ElementBind(v, NodeValue.makeNode(n))));
+        }
+        return group;
     }
 }

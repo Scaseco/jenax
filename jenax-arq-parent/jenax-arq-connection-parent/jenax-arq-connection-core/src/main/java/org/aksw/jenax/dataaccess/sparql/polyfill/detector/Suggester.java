@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.polyfill.detector;
 
 import java.util.Optional;
 
-import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggester;
+import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggestionRule;
 
 //public class Suggester {
 //    // protected PolyfillSuggester suggester;

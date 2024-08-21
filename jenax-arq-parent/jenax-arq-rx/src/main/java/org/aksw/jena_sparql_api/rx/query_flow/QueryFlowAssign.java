@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.rx.query_flow;
 
 import java.util.function.Function;
 
-import org.aksw.jenax.arq.util.syntax.BindingOverMapMutable;
+import org.aksw.jenax.arq.util.binding.BindingOverMapMutable;
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;

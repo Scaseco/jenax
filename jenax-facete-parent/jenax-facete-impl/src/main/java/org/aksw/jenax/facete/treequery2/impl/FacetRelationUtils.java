@@ -57,7 +57,7 @@ public class FacetRelationUtils {
     }
 
 
-    public static Fragment renameVariables(Fragment relation, Var originalSubjectVar, Var renamedSubjectVar, String scopePrefix, Set<Var> forbiddenVars) {
+    public static Map<Var, Var> createVarMap(Fragment relation, Var originalSubjectVar, Var renamedSubjectVar, String scopePrefix, Set<Var> forbiddenVars) {
         Set<Var> vars = relation.getVarsMentioned();
         vars.remove(originalSubjectVar);
 
@@ -71,8 +71,18 @@ public class FacetRelationUtils {
             map.put(v, vv);
         }
 
+        return map;
+    }
+
+    public static Fragment applyNodeTransform(Fragment relation, Map<Var, Var> map) {
         Fragment result = relation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(map::get));
         return result;
     }
 
+    public static Fragment renameVariables(Fragment relation, Var originalSubjectVar, Var renamedSubjectVar, String scopePrefix, Set<Var> forbiddenVars) {
+        Map<Var, Var> map = createVarMap(relation, originalSubjectVar, renamedSubjectVar, scopePrefix, forbiddenVars);
+        Fragment result = applyNodeTransform(relation, map);
+        // Fragment result = relation.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(map::get));
+        return result;
+    }
 }

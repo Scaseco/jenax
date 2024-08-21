@@ -19,6 +19,7 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
     protected UpdateRequest updateRequest;
     protected Update update;
     protected String updateString;
+    protected boolean parseCheck = true;
 
     protected BindingBuilder substitution = BindingFactory.builder();
     protected ContextAccumulator contextAccumulator;
@@ -91,9 +92,15 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
 
     @Override
     public T update(String updateString) {
-        this.updateRequest = null;
+        this.updateRequest = parseCheck ? UpdateFactory.create(updateString) : null;
         this.update = null;
         this.updateString = updateString;
+        return self();
+    }
+
+    @Override
+    public UpdateExecBuilder parseCheck(boolean parseCheck) {
+        this.parseCheck = parseCheck;
         return self();
     }
 

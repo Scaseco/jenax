@@ -2,28 +2,33 @@ package org.aksw.jenax.io.json.accumulator;
 
 import java.io.IOException;
 
+import org.aksw.jenax.io.json.writer.ObjectNotationWriterExt;
+
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 
 /**
  * The motivation for this abstraction was to have a JsonWriter which can assemble JsonObjects.
  * It turns out that guava has the JsonTreeWriter (an internal but public class) which does the job.
  */
 public interface JsonWriterGson
-    extends ObjectNotationWriter
+    extends ObjectNotationWriterExt<String, JsonPrimitive, JsonWriterGson>
 {
     @Override
-    JsonWriterGson beginArray() throws IOException;
-
-    @Override
-    JsonWriterGson endArray() throws IOException;
-
-    @Override
-    JsonWriterGson beginObject() throws IOException;
-
-    @Override
-    JsonWriterGson endObject() throws IOException;
-
-    JsonWriterGson name(String name) throws IOException;
+    default JsonWriterGson value(JsonPrimitive value) throws IOException {
+        if (value.isString()) {
+            value(value.getAsString());
+        } else if (value.isNumber()) {
+            value(value.getAsNumber());
+        } else if (value.isBoolean()) {
+            value(value.getAsBoolean());
+        } else if (value.isJsonNull()) {
+            nullValue();
+        } else {
+            throw new IllegalArgumentException("Unknown JSON primitive: " + value);
+        }
+        return this;
+    }
 
     JsonWriterGson value(Boolean value) throws IOException;
 
@@ -34,8 +39,6 @@ public interface JsonWriterGson
     JsonWriterGson value(double value) throws IOException;
 
     JsonWriterGson value(long value) throws IOException;
-
-    JsonWriterGson nullValue() throws IOException;
 
     JsonWriterGson value(String value) throws IOException;
 

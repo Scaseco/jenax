@@ -1,7 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.datasource;
 
-import java.util.function.Function;
-
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
@@ -25,9 +23,9 @@ public interface RdfDataSource
 {
     RDFConnection getConnection();
 
-    /** Convenience method for applying decorators */
-    default <O extends RdfDataSource> O decorate(Function<? super RdfDataSource, O> decorator) {
-        return decorator.apply(this);
+    /** Convenience method for applying decorators. Returns a new RdfDatasource that wraps this one. */
+    default RdfDataSource decorate(RdfDataSourceTransform rdfDataSourceTransform) {
+        return rdfDataSourceTransform.apply(this);
     }
 
     /**

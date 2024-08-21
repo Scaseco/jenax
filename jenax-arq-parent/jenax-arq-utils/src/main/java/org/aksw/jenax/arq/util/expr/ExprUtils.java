@@ -28,6 +28,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarAlloc;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalAnd;
@@ -49,6 +50,7 @@ import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.FunctionLabel;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformExpr;
 import org.apache.jena.sparql.graph.NodeTransformLib;
@@ -766,6 +768,15 @@ public class ExprUtils {
     public static Expr factorize(Expr expr, BiMap<Var, Expr> cxt, VarAlloc varAlloc, ExprFilter<Expr> isBlocker) {
         GenericFactorizer<Expr, Var> factorizer = new GenericFactorizer<>(getExprOps(), isBlocker);
         Expr result = factorizer.factorize(expr, cxt, varAlloc::allocVar);
+        return result;
+    }
+
+    public static NodeValue[] evalToArray(List<Expr> exprs, Binding input, FunctionEnv env) {
+        NodeValue[] result = new NodeValue[exprs.size()];
+        for (int i = 0; i < exprs.size(); ++i) {
+            Expr expr = exprs.get(i);
+            result[i] = expr.eval(input, env);
+        }
         return result;
     }
 
