@@ -13,7 +13,7 @@ import org.junit.Assert;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
-public class TestGraphQlUtils {
+public class GraphQlTestUtils {
     private static Gson gson = new Gson();
 
     public static void doAssert(DatasetGraph dataset, String documentStr, String expectedResult) {

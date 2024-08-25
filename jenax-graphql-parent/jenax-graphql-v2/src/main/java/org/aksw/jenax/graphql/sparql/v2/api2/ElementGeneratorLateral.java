@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -14,13 +15,17 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode.JoinLink;
+import org.aksw.jenax.graphql.sparql.v2.model.ElementNode.ParentLink;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.graph.NodeTransformExpr;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementGroup;
@@ -33,7 +38,8 @@ public class ElementGeneratorLateral {
 
     public static ElementMapping toLateral(ElementNode rootField, Var stateVar) {
         Map<Node, Map<Var, Var>> stateVarMap = new LinkedHashMap<>();
-        Element element = toLateral(rootField, List.of(), Map.of(), stateVar, stateVarMap);
+        Map<Node, Map<Var, Var>> outStateOriginalToGlobalMap = new LinkedHashMap<>();
+        Element element = toLateral(rootField, List.of(), Map.of(), stateVar, stateVarMap, outStateOriginalToGlobalMap);
         return new ElementMapping(element, stateVarMap);
     }
 
@@ -132,6 +138,40 @@ public class ElementGeneratorLateral {
         return resultNode;
     }
 
+    public static Var resolveAncestorVar(ElementNode elementNode, Map<Node, Map<Var, Var>> outStateVarMap, Var var) {
+        String id = elementNode.getIdentifier();
+        Node idNode = NodeFactory.createLiteralString(id);
+        Map<Var, Var> localToGlobal = outStateVarMap.get(idNode);
+        Objects.requireNonNull(localToGlobal, "Unexpectedly found no local-to-global variable mapping for state: " + idNode);
+
+        Var result = localToGlobal.get(var);
+        if (result == null) {
+            ParentLink parentLink = elementNode.getParentLink();
+            result = parentLink == null ? null : resolveAncestorVar(parentLink.parent(), outStateVarMap, var);
+        }
+        return result;
+    }
+
+
+    public static Map<Var, Var> resolveVarMap(ElementNode elementNode, Map<Node, Map<Var, Var>> outStateVarMap, Expr expr) {
+        Set<Var> vars = expr.getVarsMentioned();
+        Map<Var, Var> localToGlobal = new HashMap<>();
+        for (Var var : vars) {
+            Var resolvedVar = resolveAncestorVar(elementNode, outStateVarMap, var);
+            if (resolvedVar == null) {
+                throw new RuntimeException("Could not resolve variable: " + var + " in expression: " + expr);
+            }
+            localToGlobal.put(var, resolvedVar);
+        }
+        return localToGlobal;
+    }
+
+    public static Expr resolveLocalVarsInExpr(ElementNode elementNode, Map<Node, Map<Var, Var>> outStateVarMap, Expr expr) {
+        Map<Var, Var> localToGlobal = resolveVarMap(elementNode, outStateVarMap, expr);
+        Expr result = ExprTransformer.transform(new NodeTransformExpr(new NodeTransformSubst(localToGlobal)), expr);
+        return result;
+    }
+
     /**
      *
      * @param node
@@ -141,7 +181,8 @@ public class ElementGeneratorLateral {
      * @param outStateVarMap For each state the mapping of the original var to the renamed var. The rationale is: Access to the original variable needs to be remapped to the renamed one.
      * @return
      */
-    public static Element toLateral(ElementNode node, List<String> parentPath, Map<Var, Var> parentRenames, Var discriminatorVar, Map<Node, Map<Var, Var>> outStateVarMap) {
+    public static Element toLateral(ElementNode node, List<String> parentPath, Map<Var, Var> parentRenames, Var discriminatorVar,
+            Map<Node, Map<Var, Var>> outStateVarMap, Map<Node, Map<Var, Var>> outStateOriginalToGlobalMap) {
 
         // Construction of the lateral blocks is slightly different for inner nodes and leafs:
         // For inner nodes, the first element in the lateral union harmonizes the variables of the parent
@@ -182,7 +223,8 @@ public class ElementGeneratorLateral {
         Set<Var> projVars = new LinkedHashSet<>();
         projVars.add(discriminatorVar);
 
-        Map<Var, Var> originalToGlobal = new LinkedHashMap<>();
+        Map<Var, Var> originalToGlobal = outStateOriginalToGlobalMap.computeIfAbsent(stateIdNode, k -> new LinkedHashMap<>());
+        // Map<Var, Var> originalToGlobal = new LinkedHashMap<>();
 
         // Map the connectVars to the parentVars
         if (joinLink != null) {
@@ -200,33 +242,22 @@ public class ElementGeneratorLateral {
             originalToGlobal.computeIfAbsent(var, v -> Var.alloc(scopeName + "_" + v.getName()));
         }
 
-        // Map all unique variables to enumerated ones
-        int i = 0;
-        Map<Var, Var> globalToEnum = new LinkedHashMap<>();
-
         // The mapping which original variable accesses which enumerated one
         // Map<Var, Var> originalToEnum = new LinkedHashMap<>();
 
-        Map<Var, Var> originalToEnum = outStateVarMap.computeIfAbsent(stateIdNode, k -> new LinkedHashMap<>());
 
-        // Expose the state variable
-        originalToEnum.put(discriminatorVar, discriminatorVar);
+//        for (Entry<Var, Var> e : originalToGlobal.entrySet()) {
+//            Var originalVar = e.getKey();
+//            Var globalVar = e.getValue();
+//            Var enumVar = Var.alloc("v_" + i);
+//            globalToEnum.put(globalVar, enumVar);
+//            originalToEnum.put(originalVar, enumVar);
+//
+//            // enumToOriginal.put(enumVar, originalVar);
+//
+//            ++i;
+//        }
 
-        for (Entry<Var, Var> e : originalToGlobal.entrySet()) {
-            Var originalVar = e.getKey();
-            Var globalVar = e.getValue();
-            Var enumVar = Var.alloc("v_" + i);
-            globalToEnum.put(globalVar, enumVar);
-            originalToEnum.put(originalVar, enumVar);
-
-            // enumToOriginal.put(enumVar, originalVar);
-
-            ++i;
-        }
-
-        // ISSUE: We can't optimize projections here (yet) because we don't know which variables are referenced.
-        projVars.addAll(originalToEnum.values());
-        // System.out.println(projVars);
 
         ElementGroup group = new ElementGroup();
 
@@ -236,6 +267,40 @@ public class ElementGeneratorLateral {
 
         Connective globalConnective = connective.applyNodeTransform(new NodeTransformSubst(originalToGlobal));
         ElementUtils.copyElements(group, globalConnective.getElement());
+
+
+        // Add BIND expressions
+        // TODO The defined variables (expr AS ?definedVar) also need to become part of the orginitalToGlobal map.
+        node.getBinds().forEachExpr((v, e) -> {
+            Var resolvedVar = originalToGlobal.computeIfAbsent(v, vv -> Var.alloc(scopeName + "_" + vv.getName()));
+            Expr resolvedExpr = resolveLocalVarsInExpr(node, outStateOriginalToGlobalMap, e);
+            group.addElement(new ElementBind(resolvedVar, resolvedExpr));
+        });
+
+
+        // Map all unique variables to enumerated ones
+        int i = 0;
+        Map<Var, Var> globalToEnum = new LinkedHashMap<>();
+
+        // Expose the state variable
+        Map<Var, Var> originalToEnum = outStateVarMap.computeIfAbsent(stateIdNode, k -> new LinkedHashMap<>());
+        originalToEnum.put(discriminatorVar, discriminatorVar);
+
+        // Create the enum vars
+        for (Entry<Var, Var> e : originalToGlobal.entrySet()) {
+            Var originalVar = e.getKey();
+            Var globalVar = e.getValue();
+            Var enumVar = Var.alloc("v_" + i);
+            globalToEnum.put(globalVar, enumVar);
+            originalToEnum.put(originalVar, enumVar);
+            // enumToOriginal.put(enumVar, originalVar);
+            ++i;
+        }
+
+        // ISSUE: We can't optimize projections here (yet) because we don't know which variables are referenced.
+        projVars.addAll(originalToEnum.values());
+        // System.out.println(projVars);
+
 
         if (isLeaf) {
             // Generate BIND blocks for enums
@@ -278,7 +343,7 @@ public class ElementGeneratorLateral {
 
             for (Selection selection : node.getSelections()) {
                 if (selection instanceof ElementNode f) {
-                    Element contrib = toLateral(f, fieldPath, originalToGlobal, discriminatorVar, outStateVarMap);
+                    Element contrib = toLateral(f, fieldPath, originalToGlobal, discriminatorVar, outStateVarMap, outStateOriginalToGlobalMap);
                     members.add(contrib);
                 }
             }

@@ -9,6 +9,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementGroup;
 
 public class Connective
     extends BasicConnectInfo
@@ -65,11 +66,25 @@ public class Connective
         return result;
     }
 
+    public boolean isEmpty() {
+        return element instanceof ElementGroup g
+            ? g.isEmpty() && connectVars != null && connectVars.isEmpty() && defaultTargetVars != null && defaultTargetVars.isEmpty()
+            : false;
+    }
+
     public static ConnectiveBuilder<?> newBuilder() {
         return new ConnectiveBuilder<>();
     }
 
     public static Connective of(Path path) {
         return Connective.newBuilder().step(path).build();
+    }
+
+    public static Connective empty() {
+        return Connective.newBuilder()
+                .connectVarNames()
+                .targetVarNames()
+                .element(new ElementGroup())
+                .build();
     }
 }

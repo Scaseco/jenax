@@ -20,6 +20,7 @@ import org.aksw.jenax.graphql.sparql.v2.api2.SparqlPathTraversable;
 import org.aksw.jenax.graphql.sparql.v2.util.StringUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.path.Path;
 
@@ -70,11 +71,12 @@ public class ElementNode
     /** A label that serves as a basis for allocating names when a node becomes a child of another. May be null. */
     protected String label;
 
-    /** Connective: graph pattern with default source and target vars. */
+    /** Connective: graph pattern with default source and target vars.
+     *  The defaults can be overridden. */
     protected Connective connective;
 
     // Declared variable references
-    // TODOObject
+    // TODO Object
 
     /* Extra information */
 
@@ -93,11 +95,51 @@ public class ElementNode
      */
     protected List<ElementTransform> treeTransforms = new ArrayList<>();
 
+    /** Bind expressions, can reference variables in any ancestor. */
+    protected VarExprList binds = new VarExprList();
+
+    // The target vars, may originate from the connective and/or the bind expressions
+    // (and the ancestores)
+    protected List<Var> localTargetVars;
+
     protected ElementNode(String label, Connective connective) {
         super();
         this.label = label;
         this.connective = Objects.requireNonNull(connective);
         this.nameToChildLink = new LinkedHashMap<>();
+    }
+
+    public List<Var> getLocalTargetVars() {
+        return localTargetVars;
+    }
+
+    public ElementNode setLocalTargetVars(List<Var> localTargetVars) {
+        if (nameToChildLink.size() > 0) {
+            throw new IllegalStateException("Cannot set/update target variables once children have been added.");
+        }
+
+        this.localTargetVars = localTargetVars;
+        return this;
+    }
+
+    public List<Var> getEffectiveTargetVars() {
+        List<Var> result = localTargetVars != null ? localTargetVars : connective.getDefaultTargetVars();
+        return result;
+    }
+
+    public ParentLink getParentLink() {
+        return parentLink;
+    }
+
+    /** Starting from this node and moving up its ancestors, find the first node which declares var.
+     *  Returns null if there is no match. */
+    public ElementNode findVarInAncestors(Var var) {
+        ElementNode result = connective.getVisibleVars().contains(var)
+            ? this
+            : parentLink == null
+                ? null
+                : parentLink.parent.findVarInAncestors(var);
+        return result;
     }
 
     @Deprecated // Hack for compatibility
@@ -165,6 +207,10 @@ public class ElementNode
         // return setIdentifier(NodeFactory.createLiteral(identifier));
         this.identifier = identifier;
         return this;
+    }
+
+    public VarExprList getBinds() {
+        return binds;
     }
 
 //    public ElementNode setIdentifier(Node identifier) {
@@ -258,9 +304,8 @@ public class ElementNode
             throw new IllegalArgumentException("Attempt to add a node to itself");
         }
 
-
         if (thisVars == null) {
-            thisVars = connective.getDefaultTargetVars();
+            thisVars = getEffectiveTargetVars(); // connective.getDefaultTargetVars();
         }
 
         if (childVars == null) {

@@ -15,6 +15,7 @@ import graphql.language.ArrayValue;
 import graphql.language.AstTransformer;
 import graphql.language.BooleanValue;
 import graphql.language.Directive;
+import graphql.language.Directive.Builder;
 import graphql.language.DirectivesContainer;
 import graphql.language.Document;
 import graphql.language.EnumValue;
@@ -319,4 +320,35 @@ public class GraphQlUtils {
         return ArrayValue.newArrayValue().values(strs.stream().map(x -> (Value)StringValue.of(x)).toList()).build();
     }
 
+    public static Argument newArgumentString(String name, String value) {
+        return value == null ? null : Argument.newArgument()
+                .name(name)
+                .value(StringValue.of(value))
+                .build();
+    }
+
+    public static Argument newArgumentBoolean(String name, Boolean value) {
+        return value == null ? null : Argument.newArgument()
+                .name(name)
+                .value(BooleanValue.of(value))
+                .build();
+    }
+
+    public static Argument newArgumentString(String name, List<String> values) {
+        return values == null ? null : Argument.newArgument()
+                .name(name)
+                .value(toArrayValue(values))
+                .build();
+    }
+
+    public static Directive newDirective(String name, Argument... arguments) {
+        Builder builder = Directive.newDirective()
+                .name(name);
+        for (Argument arg : arguments) {
+            if (arg != null) {
+                builder = builder.argument(arg);
+            }
+        }
+        return builder.build();
+    }
 }

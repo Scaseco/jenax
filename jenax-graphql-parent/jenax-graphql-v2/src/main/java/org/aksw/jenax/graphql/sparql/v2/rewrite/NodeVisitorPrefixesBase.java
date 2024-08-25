@@ -13,6 +13,8 @@ import graphql.language.FragmentSpread;
 import graphql.language.InlineFragment;
 import graphql.language.Node;
 import graphql.language.NodeVisitorStub;
+import graphql.language.OperationDefinition;
+import graphql.language.OperationDefinition.Operation;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
 
@@ -57,6 +59,14 @@ public abstract class NodeVisitorPrefixesBase
                 context.setVar(PrefixMap2.class, new PrefixMap2(parentPrefixMap, prefixMap));
             }
         }
+    }
+
+    @Override
+    public TraversalControl visitOperationDefinition(OperationDefinition node, TraverserContext<Node> context) {
+        if (Operation.QUERY.equals(node.getOperation())) {
+            processPrefixes(node, context);
+        }
+        return super.visitOperationDefinition(node, context);
     }
 
     @Override

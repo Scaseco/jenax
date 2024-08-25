@@ -38,7 +38,7 @@ public class TestGraphQlToSparqlMultiVars {
 
     @Test
     public void test01() {
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             {
               Locations @pattern(of: "SELECT ?city ?country { ?s a :Location ; :city ?city ; :country ?country } ORDER BY ?city ?country", from: ["country", "city"], to: ["country", "city"])
@@ -55,7 +55,7 @@ public class TestGraphQlToSparqlMultiVars {
 
     @Test
     public void test02() {
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             {
               Locations @pattern(of: "SELECT ?city ?country { ?s a :Location ; :city ?city ; :country ?country } ORDER BY ?city ?country", from: ["country", "city"], to: ["country", "city"])

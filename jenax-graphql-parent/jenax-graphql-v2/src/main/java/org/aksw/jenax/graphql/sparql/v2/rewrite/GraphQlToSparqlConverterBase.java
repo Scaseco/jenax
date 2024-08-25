@@ -24,6 +24,7 @@ import org.aksw.jenax.graphql.sparql.v2.acc.state.api.builder.AggStateBuilderTra
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
 import org.aksw.jenax.graphql.sparql.v2.api2.ElementTransform;
 import org.aksw.jenax.graphql.sparql.v2.api2.QueryUtils;
+import org.aksw.jenax.graphql.sparql.v2.context.BindDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.CardinalityDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.ConditionDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.FragmentCxt;
@@ -220,14 +221,24 @@ public abstract class GraphQlToSparqlConverterBase<K>
         Long offset = GraphQlUtils.getArgAsLong(arguments, "offset", null);
         Long limit = GraphQlUtils.getArgAsLong(arguments, "limit", null);
 
+        List<Var> parentVars = null;
+
         if (connective == null) {
-            throw new RuntimeException("No pattern for field " + directives);
+            connective = Connective.newBuilder()
+                    .connectVarNames()
+                    .targetVarNames()
+                    .element(new ElementGroup())
+                    .build();
+
+            parentVars = List.of();
+//        	connective = Connective.newBuilder()
+//        			.tar$
+            // throw new RuntimeException("No pattern for field " + directives);
         }
 
         List<Var> connectVars = connective.getConnectVars();
 
         // Read the parentVars directive (connect(to: ['foo'])
-        List<Var> parentVars = null;
         // List<Var> childVars = null;
 
 
@@ -242,7 +253,6 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 connectVars = Var.varList(joinDirective.thisVars());
             }
         }
-
 
         /* Process @index */
 
@@ -337,6 +347,38 @@ public abstract class GraphQlToSparqlConverterBase<K>
             }
         }
 
+        /* Process @bind */
+        boolean isBindValue = false;
+        for (Directive directive : directives.getDirectives("bind")) {
+            BindDirective bind = BindDirective.PARSER.parser(directive);
+            Expr expr = bind.parseExpr();
+            // Check whether the referenced variables exist
+            Set<Var> vars = expr.getVarsMentioned();
+            for (Var var : vars) {
+                ElementNode varSource = elementNode.findVarInAncestors(var);
+                if (varSource == null) {
+                    throw new RuntimeException("Could not resolve variable " + var + " at " + node);
+                }
+            }
+
+            String bindVarName = bind.varName();
+            if (bindVarName == null) {
+                // TODO Properly allocate name to avoid clash
+                bindVarName = "bindvar_" + (elementNode.getBinds().size() + 1);
+            }
+            Var bindVar = Var.alloc(bindVarName);
+            elementNode.getBinds().add(bindVar, expr);
+
+            // If there is no pattern then use a single bind expression as the target
+            if (connective.isEmpty() || Boolean.TRUE.equals(bind.isTarget())) {
+                targetVars = List.of(bindVar);
+                elementNode.setLocalTargetVars(targetVars);
+                // elementNode.setLocalTargetVars(List.of(bindVar));
+                isBindValue = true;
+            }
+        }
+
+
         if (isRoot) {
             RewriteResult<K> rewriteResult = context.getVarFromParents(RewriteResult.class);
             rewriteResult.root.rootElementNode().addChild(List.of(), elementNode, List.of());
@@ -365,6 +407,13 @@ public abstract class GraphQlToSparqlConverterBase<K>
         // AggStateBuilder<Binding, FunctionEnv, K, org.apache.jena.graph.Node> parentAggBuilder = context.getVarFromParents(AggStateBuilder.class);
 
         boolean isSingle = cardinality.isOne();
+
+        CardinalityDirective thisCardinality = context.getVar(CardinalityDirective.class);
+        if (isBindValue && thisCardinality == null) {
+            isSingle = true;
+        }
+
+
         boolean skipIfNull = directives.hasDirective("skipIfNull");
 
         // Parse the key

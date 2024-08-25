@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
+
 import graphql.language.Argument;
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;
@@ -21,6 +23,10 @@ import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
 import graphql.util.TreeTransformerUtil;
 
+/**
+ * Transforms a GraphQL document such that all query operations, fields are assigned a {@code @globalId(id: "abc")} directive.
+ * This allows for fairly easy matching between the nodes of a GraphQL document and the nodes of an {@link ElementNode} tree.
+ */
 public class TransformAssignGlobalIds
     extends NodeVisitorStub
 {

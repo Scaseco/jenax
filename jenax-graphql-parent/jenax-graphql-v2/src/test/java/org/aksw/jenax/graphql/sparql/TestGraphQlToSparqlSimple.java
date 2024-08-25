@@ -2,7 +2,11 @@ package org.aksw.jenax.graphql.sparql;
 
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.lang.ParserARQ;
+import org.apache.jena.sparql.lang.sparql_12.SPARQLParser12;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,9 +31,19 @@ public class TestGraphQlToSparqlSimple {
         testDsg = null;
     }
 
+//    @Test
+//    public void vars() {
+//        // dummy test, move elsewhere
+//        // System.out.println(OpVars.mentionedVars(Algebra.compile(ParserARQ.parseElement("{FILTER(?x)}"))));
+//
+//        // ?x ?a ?z - no ?y
+//        System.out.println(OpVars.mentionedVars(Algebra.compile(ParserARQ.parseElement("{BIND(?x AS ?y) { SELECT ?z { FILTER(?a)}}}"))));
+//
+//    }
+
     @Test
     public void test01() {
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             { Subjects @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") }
             """,
@@ -40,7 +54,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test02() {
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             { Triples @pattern(of: "?s ?p ?o", from: "s", to: "o") @index(by: "?p") }
             """,
@@ -51,7 +65,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test03() {
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             { Subjects @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")}
             """,
@@ -66,7 +80,7 @@ public class TestGraphQlToSparqlSimple {
         // however, it revealed a bug in AccStateMap:
         // When ifOne: "true" was true but multiple values for a key were encountered, the excessive values were not ignored.
         // Instead, it resulted in exceptions about illegally nested JSON.
-        TestGraphQlUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssert(testDsg,
             """
             {
               matches(limit: 2)

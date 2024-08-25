@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.graphql.sparql.v2.context.BindDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.VocabDirective;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.riot.system.PrefixMap;
@@ -256,6 +257,18 @@ public class TransformExpandShorthands
             remainingDirectives.addFirst(newDirectivePattern("BIND(?from AS ?to)", "from", "to"));
             changed = true;
 
+        }
+
+        List<Directive> binds = field.getDirectives("bind");
+        if (!binds.isEmpty()) {
+            remainingDirectives.removeIf(x -> "bind".equals(x.getName()));
+            for (Directive bind : binds) {
+                BindDirective parsed = BindDirective.PARSER.parser(bind);
+                parsed = parsed.expand(pm);
+                Directive processed = parsed.toDirective();
+                remainingDirectives.addLast(processed);
+            }
+            changed = true;
         }
 
         changed = processFilter(field, pming, remainingDirectives) || changed;

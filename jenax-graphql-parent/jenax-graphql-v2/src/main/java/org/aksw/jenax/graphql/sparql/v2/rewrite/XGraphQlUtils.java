@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
 import org.aksw.jenax.graphql.sparql.v2.api2.VarHelper;
+import org.aksw.jenax.graphql.sparql.v2.context.BindDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.CardinalityDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.Cascadable;
 import org.aksw.jenax.graphql.sparql.v2.context.ConditionDirective;
