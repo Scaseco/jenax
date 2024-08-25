@@ -317,7 +317,9 @@ public class ElementNode
             throw new RuntimeException("Join var lists differ in size");
         }
 
-        Set<Var> absentParentVars = thisVars.stream().filter(x -> !connective.getVisibleVars().contains(x)).collect(Collectors.toSet());
+        // Parent vars can be in any ancestor
+        // Set<Var> absentParentVars = thisVars.stream().filter(x -> !connective.getVisibleVars().contains(x)).collect(Collectors.toSet());
+        Set<Var> absentParentVars = thisVars.stream().filter(x -> findVarInAncestors(x) == null).collect(Collectors.toSet());
         if (!absentParentVars.isEmpty()) {
             throw new RuntimeException("Join variables do not exist on parent:" + thisVars);
         }

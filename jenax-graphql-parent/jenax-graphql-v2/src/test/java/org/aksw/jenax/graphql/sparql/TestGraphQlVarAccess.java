@@ -39,17 +39,46 @@ public class TestGraphQlVarAccess {
                 style {
                   color @bind(of: "'red'")
                   fillColor @bind(of: "CONCAT('#', SUBSTR(MD5(STR(?s)), 1, 6))")
-                  colors @pattern(of: "VALUES ?x { 'red' 'blue' }", from: [], to: "x")
+                  colors @pattern(of: "VALUES ?x { 'red' 'blue' }", from: "x", to: "x")
                 }
               }
             }
             """,
             """
             {
-              "http://www.example.org/s1":[{"style":[{"color":"red","fillColor":"#363947","colors":["red","blue"]}]}],
-              "http://www.example.org/s2":[{"style":[{"color":"red","fillColor":"#b0e502","colors":["red","blue"]}]}]
+              "http://www.example.org/s1":[{"style":{"color":"red","fillColor":"#363947","colors":["red","blue"]}}],
+              "http://www.example.org/s2":[{"style":{"color":"red","fillColor":"#b0e502","colors":["red","blue"]}}]
             }
             """);
     }
 
+    @Test
+    public void test04() {
+        GraphQlTestUtils.doAssert(testDsg,
+            """
+            {
+              Subjects
+                @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")
+              {
+                properties {
+                  objects @one @pattern(of: "?s <http://www.example.org/p1> ?o", from: "s", to: "o")
+                }
+              }
+            }
+            """,
+            """
+            {
+              "http://www.example.org/s1": [{
+                "properties": {
+                  "objects": "http://www.example.org/o1"
+                }
+              }],
+              "http://www.example.org/s2":[{
+                "properties": {
+                  "objects":"http://www.example.org/o1"
+                }
+              }]
+            }
+            """);
+    }
 }

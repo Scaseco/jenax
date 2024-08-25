@@ -335,7 +335,13 @@ public abstract class GraphQlToSparqlConverterBase<K>
         // Wire up the pattern of this node to the parent
         context.setVar(ElementNode.class, elementNode);
 
+        boolean isPatternFree = connective.isEmpty();
 
+        if (isPatternFree) {
+            // System.err.println("Pattern free");
+            List<Var> parentTargetVars = parentNode == null ? null : parentNode.getEffectiveTargetVars();
+            elementNode.setLocalTargetVars(parentTargetVars);
+        }
 
         if (isFragmentStart) {
             // FIXME Set up the join properly
@@ -348,6 +354,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
         }
 
         /* Process @bind */
+
         boolean isBindValue = false;
         for (Directive directive : directives.getDirectives("bind")) {
             BindDirective bind = BindDirective.PARSER.parser(directive);
@@ -409,8 +416,8 @@ public abstract class GraphQlToSparqlConverterBase<K>
         boolean isSingle = cardinality.isOne();
 
         CardinalityDirective thisCardinality = context.getVar(CardinalityDirective.class);
-        if (isBindValue && thisCardinality == null) {
-            isSingle = true;
+        if (isPatternFree || isBindValue) {
+            isSingle = thisCardinality == null ? true : thisCardinality.isOne();
         }
 
 
@@ -488,7 +495,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
                     AggStateBuilderProperty<Binding, FunctionEnv, K, org.apache.jena.graph.Node> propertyBuilder;
                     propertyBuilder = AggStateBuilderProperty.of(globalIdNode, key);
                     propertyBuilder.setTargetBuilder(targetAggBuilder);
-                    propertyBuilder.setSingle(cardinality.isOne());
+                    propertyBuilder.setSingle(isSingle);
                     transitionBuilder = propertyBuilder;
                     edgeBuilder = propertyBuilder;
                 }
