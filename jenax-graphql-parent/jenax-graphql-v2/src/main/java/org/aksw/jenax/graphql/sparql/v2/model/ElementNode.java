@@ -304,12 +304,16 @@ public class ElementNode
             throw new IllegalArgumentException("Attempt to add a node to itself");
         }
 
-        if (thisVars == null) {
-            thisVars = getEffectiveTargetVars(); // connective.getDefaultTargetVars();
-        }
-
         if (childVars == null) {
             childVars = child.getConnective().getConnectVars();
+        }
+
+        if (thisVars == null) {
+            // If childVars is empty and thisVars is unspecified (null) then
+            // "join" with an empty list of variables
+        	thisVars = childVars != null && childVars.isEmpty()
+        		? List.of()
+        		: getEffectiveTargetVars(); // connective.getDefaultTargetVars();
         }
 
         // Sanity checks

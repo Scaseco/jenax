@@ -39,7 +39,7 @@ public class ElementGeneratorLateral {
     public static ElementMapping toLateral(ElementNode rootField, Var stateVar) {
         Map<Node, Map<Var, Var>> stateVarMap = new LinkedHashMap<>();
         Map<Node, Map<Var, Var>> outStateOriginalToGlobalMap = new LinkedHashMap<>();
-        Element element = toLateral(rootField, List.of(), Map.of(), stateVar, stateVarMap, outStateOriginalToGlobalMap);
+        Element element = toLateral(rootField, List.of(), stateVar, stateVarMap, outStateOriginalToGlobalMap);
         return new ElementMapping(element, stateVarMap);
     }
 
@@ -181,7 +181,7 @@ public class ElementGeneratorLateral {
      * @param outStateVarMap For each state the mapping of the original var to the renamed var. The rationale is: Access to the original variable needs to be remapped to the renamed one.
      * @return
      */
-    public static Element toLateral(ElementNode node, List<String> parentPath, Map<Var, Var> parentRenames, Var discriminatorVar,
+    public static Element toLateral(ElementNode node, List<String> parentPath, Var discriminatorVar,
             Map<Node, Map<Var, Var>> outStateVarMap, Map<Node, Map<Var, Var>> outStateOriginalToGlobalMap) {
 
         // Construction of the lateral blocks is slightly different for inner nodes and leafs:
@@ -232,7 +232,11 @@ public class ElementGeneratorLateral {
             for (int i = 0; i < joinLink.size(); ++i) {
                 Var connectVar = joinLink.childVars().get(i);
                 Var parentVar = joinLink.parentVars().get(i);
-                Var globalVar = originalToGlobal.computeIfAbsent(connectVar, v -> parentRenames.getOrDefault(parentVar, parentVar));
+                
+                Var globalVar = resolveAncestorVar(node, outStateOriginalToGlobalMap, parentVar);
+                originalToGlobal.computeIfAbsent(connectVar, v -> globalVar);
+                
+                // Var globalVar = originalToGlobal.computeIfAbsent(connectVar, v -> parentRenames.getOrDefault(parentVar, parentVar));
                 projVars.add(globalVar);
             }
         }
@@ -343,7 +347,7 @@ public class ElementGeneratorLateral {
 
             for (Selection selection : node.getSelections()) {
                 if (selection instanceof ElementNode f) {
-                    Element contrib = toLateral(f, fieldPath, originalToGlobal, discriminatorVar, outStateVarMap, outStateOriginalToGlobalMap);
+                    Element contrib = toLateral(f, fieldPath, discriminatorVar, outStateVarMap, outStateOriginalToGlobalMap);
                     members.add(contrib);
                 }
             }

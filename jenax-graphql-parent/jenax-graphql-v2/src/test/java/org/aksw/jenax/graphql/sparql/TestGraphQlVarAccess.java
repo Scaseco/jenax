@@ -18,7 +18,7 @@ public class TestGraphQlVarAccess {
                 PREFIX : <http://www.example.org/>
                 :s1 :p1 :o1 .
                 :s1 :p2 :o2 .
-                :s2 :p1 :o1 .
+                :s2 :p1 :o3 .
                 """, Lang.TRIG)
             .toDatasetGraph();
     }
@@ -39,7 +39,7 @@ public class TestGraphQlVarAccess {
                 style {
                   color @bind(of: "'red'")
                   fillColor @bind(of: "CONCAT('#', SUBSTR(MD5(STR(?s)), 1, 6))")
-                  colors @pattern(of: "VALUES ?x { 'red' 'blue' }", from: "x", to: "x")
+                  colors @pattern(of: "VALUES ?x { 'red' 'blue' }", from: [], to: "x")
                 }
               }
             }
@@ -75,7 +75,7 @@ public class TestGraphQlVarAccess {
               }],
               "http://www.example.org/s2":[{
                 "properties": {
-                  "objects":"http://www.example.org/o1"
+                  "objects":"http://www.example.org/o3"
                 }
               }]
             }
