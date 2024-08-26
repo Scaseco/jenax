@@ -30,6 +30,7 @@ import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.path.P_ReverseLink;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementGroup;
 
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;
@@ -80,26 +81,29 @@ public class XGraphQlUtils {
         return result;
     }
 
-    public static String tidyElementStr(String str) {
-        String result = str.trim();
-        // Strip the string from an outermost curly braces pair
-        if (result.startsWith("{") && result.endsWith("}")) {
-            result = result.substring(1, result.length() - 1).trim();
-        }
-        return result;
-    }
+//    public static String tidyElementStr(String str) {
+//        String result = str.trim();
+//        // Strip the string from an outermost curly braces pair
+//        if (result.startsWith("{") && result.endsWith("}")) {
+//            result = result.substring(1, result.length() - 1).trim();
+//        }
+//        return result;
+//    }
 
     public static Element parseElement(String str, PrefixMap prefixMap, String base) {
-        String tidyStr = tidyElementStr(str);
+        // String tidyStr = tidyElementStr(str);
 
         PrefixMapping pm = new PrefixMappingAdapter(prefixMap);
         Query query = new Query();
         query.setPrefixMapping(pm);
 
         // Beware: Closing brace must be added after newline to cope with comment on last line
-        String finalStr = "SELECT * {\n" + tidyStr  + "\n}";
+        String finalStr = "SELECT * {\n" + str  + "\n}";
         QueryFactory.parse(query, finalStr, base, Syntax.syntaxARQ);
         Element result = query.getQueryPattern();
+        if (result instanceof ElementGroup g && g.size() == 1) {
+            result = g.get(0);
+        }
         return result;
     }
 
@@ -109,16 +113,16 @@ public class XGraphQlUtils {
         List<String> toVarNames = GraphQlUtils.getArgAsStrings(directive, "to");
 
         Element elt = parseElement(elementStr, prefixMap, null);
-        if (fromVarNames == null || toVarNames == null) {
-            Set<Var> vars = VarHelper.vars(elt);
-            List<String> varNames = Var.varNames(vars);
-            if (fromVarNames == null) {
-                fromVarNames = varNames;
-            }
-            if (toVarNames == null) {
-                toVarNames = varNames;
-            }
-        }
+//        if (fromVarNames == null || toVarNames == null) {
+//            Set<Var> vars = VarHelper.vars(elt);
+//            List<String> varNames = Var.varNames(vars);
+//            if (fromVarNames == null) {
+//                fromVarNames = varNames;
+//            }
+//            if (toVarNames == null) {
+//                toVarNames = varNames;
+//            }
+//        }
 
         Connective result = Connective.newBuilder()
             // .prefixMap(prefixMap) // TODO Implement

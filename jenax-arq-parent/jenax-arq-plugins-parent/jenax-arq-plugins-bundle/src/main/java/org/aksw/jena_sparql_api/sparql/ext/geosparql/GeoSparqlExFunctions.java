@@ -24,7 +24,6 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprVar;
-import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -97,7 +96,6 @@ public class GeoSparqlExFunctions {
                 : GeometryWrapperUtils.createFromPrototype(geom, current);
         return result;
     }
-
 
     @IriNs(GeoSPARQL_URI.GEOF_URI)
     public static GeometryWrapper simplifyDp(
@@ -243,7 +241,6 @@ public class GeoSparqlExFunctions {
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geomWrapper, outGeom);
         return result;
     }
-
 
 //    public static void main(String[] args) {
 //        GeometryWrapper start = GeometryWrapper.fromPoint(0, 0, SRS_URI.DEFAULT_WKT_CRS84);

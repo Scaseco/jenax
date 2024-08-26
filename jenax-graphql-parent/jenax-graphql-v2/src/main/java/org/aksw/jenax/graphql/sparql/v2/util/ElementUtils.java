@@ -1,20 +1,31 @@
 package org.aksw.jenax.graphql.sparql.v2.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.aksw.jenax.graphql.sparql.v2.util.backport.syntaxtransform.ElementTransformer;
+import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
+import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
@@ -23,6 +34,12 @@ import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
 import graphql.com.google.common.collect.Iterables;
 
 public class ElementUtils {
+
+    public static Element recursivelyUnnestGroupsOfOne(Element elt) {
+        return elt instanceof ElementGroup g && g.size() == 1
+            ? recursivelyUnnestGroupsOfOne(g.get(0))
+            : elt;
+    }
 
     public static ElementTriplesBlock createElementTriple(Node s, Node p, Node o) {
         return createElement(Triple.create(s, p, o));
@@ -165,6 +182,46 @@ public class ElementUtils {
 //      Element result = org.aksw.jena_sparql_api.backports.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
         Element result = org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer.transform(element, elementTransform, exprTransform);
 
+        return result;
+    }
+
+    public static List<Var> inferConnecVars(Element element) {
+        List<Var> result = null;
+        Element elt = recursivelyUnnestGroupsOfOne(element);
+        if (elt instanceof ElementSubQuery e) {
+            Query q = e.getQuery();
+            List<Var> projVars = q.getProjectVars();
+            int n = projVars.size();
+            // Treat three variables as "?s ?p ?o": from 's' to 'o'.
+            if (n > 0 && n <= 3) {
+                result = List.of(projVars.get(0), projVars.get(n - 1));
+            }
+        } else {
+            Op op = Algebra.compile(element);
+
+//            Set<Var> allVars = new LinkedHashSet<>();
+//            OpVars.mentionedVars(op, allVars);
+//            OpVars.visibleVars(op, allVars);
+
+            // If there is just a single variable in subject and object that use that
+            Tuple<Set<Var>> mentions = OpVars.mentionedVarsByPosition(op);
+
+            // 0=g, 1=s, 2=p, 3=o, 4=unknown
+            Set<Var> ss = mentions.get(1);
+            Set<Var> oo = mentions.get(3);
+            Set<Var> unknowns = mentions.get(4);
+
+            if (unknowns.isEmpty() &&
+                ss.size() <= 1 && oo.size() <= 1 && !(ss.isEmpty() && oo.isEmpty())) {
+                result = new ArrayList<>(2);
+                if (ss.size() == 1) {
+                    result.add(ss.iterator().next());
+                }
+                if (oo.size() == 1) {
+                    result.add(oo.iterator().next());
+                }
+            }
+        }
         return result;
     }
 }

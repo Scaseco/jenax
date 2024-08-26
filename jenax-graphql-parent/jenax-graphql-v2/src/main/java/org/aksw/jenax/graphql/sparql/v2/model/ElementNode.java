@@ -300,41 +300,44 @@ public class ElementNode
     public ElementNode addChild(List<Var> thisVars, ElementNode child, List<Var> childVars) {
         Objects.requireNonNull(child);
 
+        List<Var> finalThisVars = thisVars;
+        List<Var> finalChildVars = childVars;
+
         if (child == this) {
             throw new IllegalArgumentException("Attempt to add a node to itself");
         }
 
-        if (childVars == null) {
-            childVars = child.getConnective().getConnectVars();
+        if (finalChildVars == null) {
+            finalChildVars = child.getConnective().getConnectVars();
         }
 
-        if (thisVars == null) {
+        if (finalThisVars == null) {
             // If childVars is empty and thisVars is unspecified (null) then
             // "join" with an empty list of variables
-        	thisVars = childVars != null && childVars.isEmpty()
-        		? List.of()
-        		: getEffectiveTargetVars(); // connective.getDefaultTargetVars();
+            finalThisVars = finalChildVars != null && finalChildVars.isEmpty()
+                ? List.of()
+                : getEffectiveTargetVars(); // connective.getDefaultTargetVars();
         }
 
         // Sanity checks
-        if (thisVars.size() != childVars.size()) {
+        if (finalThisVars.size() != finalChildVars.size()) {
             throw new RuntimeException("Join var lists differ in size");
         }
 
         // Parent vars can be in any ancestor
         // Set<Var> absentParentVars = thisVars.stream().filter(x -> !connective.getVisibleVars().contains(x)).collect(Collectors.toSet());
-        Set<Var> absentParentVars = thisVars.stream().filter(x -> findVarInAncestors(x) == null).collect(Collectors.toSet());
+        Set<Var> absentParentVars = finalThisVars.stream().filter(x -> findVarInAncestors(x) == null).collect(Collectors.toSet());
         if (!absentParentVars.isEmpty()) {
-            throw new RuntimeException("Join variables do not exist on parent:" + thisVars);
+            throw new RuntimeException("Join variables do not exist on parent:" + finalThisVars);
         }
 
-        Set<Var> absentChildVars = childVars.stream().filter(x -> !child.getConnective().getVisibleVars().contains(x)).collect(Collectors.toSet());
+        Set<Var> absentChildVars = finalChildVars.stream().filter(x -> !child.getConnective().getVisibleVars().contains(x)).collect(Collectors.toSet());
         if (!absentChildVars.isEmpty()) {
-            throw new RuntimeException("Join variables do not exist on child:" + thisVars);
+            throw new RuntimeException("Join variables do not exist on child:" + finalThisVars);
         }
 
         String finalName = adaptName(this, child.getLabel());
-        addChildInternal(finalName, thisVars, child, childVars);
+        addChildInternal(finalName, finalThisVars, child, finalChildVars);
 
         return this;
     }

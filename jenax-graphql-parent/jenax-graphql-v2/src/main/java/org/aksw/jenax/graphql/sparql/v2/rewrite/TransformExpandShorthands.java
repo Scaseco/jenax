@@ -200,7 +200,8 @@ public class TransformExpandShorthands
             Directive newPattern = pattern.transform(builder -> {
                 builder.arguments(pattern.getArguments().stream().map(arg -> {
                     return "of".equals(arg.getName())
-                            ? Argument.newArgument("of", StringValue.of(XGraphQlUtils.tidyElementStr(elt.toString()))).build()
+                            // ? Argument.newArgument("of", StringValue.of(XGraphQlUtils.tidyElementStr(elt.toString()))).build()
+                            ? GraphQlUtils.newArgumentString("of", elt.toString())
                             : arg;
                 }).toList());
             });

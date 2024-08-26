@@ -69,12 +69,29 @@ public class ConnectiveBuilder<T extends ConnectiveBuilder<T>>
 
     public Connective build() {
         Objects.requireNonNull(element);
-        Objects.requireNonNull(connectVars);
 
         // Connect vars can be empty - an independent field that does not join on any variable with the binding.
 //        if (connectVars.isEmpty()) {
 //            throw new RuntimeException("Connect vars was empty. Cannot connect an element without any connect vars.");
 //        }
+
+        List<Var> finalConnectVars = connectVars;
+        List<Var> finalTargetVars = defaultTargetVars;
+
+        if (finalConnectVars == null || finalTargetVars == null) {
+            List<Var> vars = ElementUtils.inferConnecVars(element);
+            if (vars != null) {
+                if (finalConnectVars == null) {
+                    finalConnectVars = List.of(vars.get(0));
+                }
+
+                if (finalTargetVars == null) {
+                    finalTargetVars = List.of(vars.get(vars.size() - 1));
+                }
+            }
+        }
+
+        Objects.requireNonNull(finalConnectVars);
 
         // Check for correct variable usage
         Op op = Algebra.compile(element);
@@ -82,16 +99,16 @@ public class ConnectiveBuilder<T extends ConnectiveBuilder<T>>
 
         // TODO Check specifically whether non-visible mentioned variables are referenced in order to
         //   make the error message for specific.
-        Set<Var> absentConnectVars = SetUtils.difference(new HashSet<>(connectVars), visibleVars);
+        Set<Var> absentConnectVars = SetUtils.difference(new HashSet<>(finalConnectVars), visibleVars);
         if (!absentConnectVars.isEmpty()) {
             throw new RuntimeException("The connectVars " + absentConnectVars + " are not present or visible in the pattern: " + element);
         }
 
-        Set<Var> absentTargetVars = SetUtils.difference(new HashSet<>(defaultTargetVars), visibleVars);
+        Set<Var> absentTargetVars = SetUtils.difference(new HashSet<>(finalTargetVars), visibleVars);
         if (!absentTargetVars.isEmpty()) {
             throw new RuntimeException("The targetVars " + absentTargetVars + " are not present or visible in the pattern: " + element);
         }
 
-        return new Connective(element, connectVars, defaultTargetVars, op, visibleVars);
+        return new Connective(element, finalConnectVars, finalTargetVars, op, visibleVars);
     }
 }

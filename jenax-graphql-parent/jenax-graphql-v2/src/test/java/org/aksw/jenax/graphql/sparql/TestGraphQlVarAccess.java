@@ -81,4 +81,47 @@ public class TestGraphQlVarAccess {
             }
             """);
     }
+
+    @Test
+    public void test05() {
+        GraphQlTestUtils.doAssert(testDsg,
+            """
+            {
+              Subjects
+                @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")
+              {
+                p1 @one @pattern(of: "?s <http://www.example.org/p1> ?o . FILTER(BOUND(?o))", from: "s", to: "o")
+              }
+            }
+            """,
+            """
+            {
+              "http://www.example.org/s1":[{"p1":"http://www.example.org/o1"}],
+              "http://www.example.org/s2":[{"p1":"http://www.example.org/o3"}]
+            }
+            """);
+    }
+
+    @Test
+    public void test06() {
+        GraphQlTestUtils.doAssert(testDsg,
+            """
+            {
+              Subjects
+                @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")
+              {
+                properties {
+                  p1 @one @pattern(of: "?s <http://www.example.org/p1> ?o . FILTER(BOUND(?o))")
+                }
+              }
+            }
+            """,
+            """
+            {
+              "http://www.example.org/s1":[{"properties":{"p1":"http://www.example.org/o1"}}],
+              "http://www.example.org/s2":[{"properties":{"p1":"http://www.example.org/o3"}}]
+            }
+            """);
+    }
+
 }
