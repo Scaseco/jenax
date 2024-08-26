@@ -124,4 +124,37 @@ public class TestGraphQlVarAccess {
             """);
     }
 
+    @Test
+    public void test07() {
+        GraphQlTestUtils.doAssert(testDsg,
+            """
+            query DirectExposure {
+              triples(limit: 1) @pattern(of: "SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o LIMIT 1", to: ["s", "p", "o"]) {
+                subject {
+                  kind     @bind(of: "IF(isIRI(?s), 'IRI', 'BNODE')")
+                  value    @bind(of: "STR(?s)")
+                }
+                property {
+                  kind     @bind(of: "'IRI'")
+                  value    @bind(of: "STR(?p)")
+                }
+                object {
+                  kind     @bind(of: "IF(isIRI(?o), 'IRI', IF(isBlank(?o), 'BNODE', 'LITERAL'))")
+                  datatype @bind(of: "DATATYPE(?o)") @skipIfNull
+                  value    @bind(of: "STR(?o)") }
+              }
+            }
+            """,
+            """
+            {
+              "triples":[{
+                "subject":{"kind":"IRI","value":"http://www.example.org/s1"},
+                "property":{"kind":"IRI","value":"http://www.example.org/p1"},
+                "object":{"kind":"IRI","value":"http://www.example.org/o1"}
+              }]
+            }
+            """);
+    }
+
+
 }
