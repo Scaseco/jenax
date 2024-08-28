@@ -95,4 +95,26 @@ public class TestGraphQlToSparqlSimple {
             {"matches":[{"p1":"<http://www.example.org/o1> 1"},{"p1":"<http://www.example.org/o1> 1","p2":"<http://www.example.org/o2> 1"}]}
             """);
     }
+
+    @Test
+    public void test05() {
+        GraphQlTestUtils.doAssert(testDsg,
+            """
+            {
+              matches @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s") {
+                p2 @one @pattern(of: "SELECT ?x ?z { ?x <http://www.example.org/p2> ?z } ORDER BY ?z LIMIT 1")
+              }
+            }
+            """,
+            """
+            {
+              "matches": [{
+                "p2": "http://www.example.org/o2"
+              }, {
+                "p2": null
+              }]
+            }
+            """);
+    }
+
 }

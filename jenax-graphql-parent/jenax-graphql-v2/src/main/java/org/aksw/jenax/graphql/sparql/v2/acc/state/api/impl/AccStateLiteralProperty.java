@@ -143,6 +143,8 @@ public class AccStateLiteralProperty<I, E, K, V>
                 }
             }
         }
+
+        seenTargetCount = 0;
     }
 
     @Override
