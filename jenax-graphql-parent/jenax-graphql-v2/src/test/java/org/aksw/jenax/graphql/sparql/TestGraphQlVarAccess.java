@@ -141,7 +141,8 @@ public class TestGraphQlVarAccess {
                 object {
                   kind     @bind(of: "IF(isIRI(?o), 'IRI', IF(isBlank(?o), 'BNODE', 'LITERAL'))")
                   datatype @bind(of: "DATATYPE(?o)") @skipIfNull
-                  value    @bind(of: "STR(?o)") }
+                  value    @bind(of: "STR(?o)")
+                }
               }
             }
             """,
