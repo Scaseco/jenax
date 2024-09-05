@@ -14,7 +14,7 @@ import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.block.impl.BlockIterState;
+import org.aksw.commons.io.block.impl.BlockEnumerator;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
 import org.aksw.commons.io.hadoop.binseach.bz2.BlockSourceBzip2;
 import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
@@ -45,7 +45,7 @@ public class TestBinSearch {
             if(true)
             {
                 Ref<? extends Block> block = blockSource.contentAtOrAfter(21133549, true);
-                BlockIterState state = new BlockIterState(true, block, null, true, true);
+                BlockEnumerator state = BlockEnumerator.fwd(true, block, null);
                 while(state.hasNext()) {
                     state.advance();
                     System.out.println(state.block.getOffset());
@@ -65,7 +65,7 @@ public class TestBinSearch {
             if(true)
             {
                 Ref<? extends Block> block = blockSource.contentAtOrBefore(162881, true);
-                BlockIterState state = new BlockIterState(true, block, null, false, true);
+                BlockEnumerator state = BlockEnumerator.bwd(true, block, null);
                 while(state.hasNext()) {
                     state.advance();
                     System.out.println(state.block.getOffset());

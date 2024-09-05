@@ -10,12 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aksw.commons.io.binseach.BinarySearchOnSortedFile;
 import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
+import org.aksw.jenax.arq.util.graph.GraphFindRaw;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
@@ -38,98 +37,61 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Streams;
 
 /**
- *
- * TODO Check whether Graph is the appropriate abstraction
- *
- * @author raven
- *
+ * Graph implementation against a binary searcher for subjects.
  */
-public class GraphFromPrefixMatcher extends GraphBase {
+public class GraphFromPrefixMatcher
+    extends GraphBase
+    implements GraphFindRaw
+{
     private static final Logger logger = LoggerFactory.getLogger(GraphFromPrefixMatcher.class);
 
-//    protected Path path;
-//    protected FileChannel channel = null;
-//    protected BinarySearchOnSortedFile searcher = null;
-
     protected BinarySearcher binarySearcher;
-    // protected AutoCloseable closeAction;
 
     public GraphFromPrefixMatcher(BinarySearcher binarySearcher) {
         super();
-        //this.path = path;
         this.binarySearcher = binarySearcher;
-        // this.closeAction = closeAction;
     }
 
-
-//    public static BinarySearcher createBinarySearcher(Path path) throws IOException {
-//        FileChannel channel = FileChannel.open(path, StandardOpenOption.READ);
-//        PageManager pageManager = PageManagerForFileChannel.create(channel);
-//        Seekable seekable = new PageNavigator(pageManager);
-//        long channelSize = channel.size();
-//        BinarySearcher result = new BinarySearchOnSortedFile(seekable, channelSize, (byte)'\n');
-//        return result;
-//    	if(channel == null) {
-//      synchronized(this) {
-//          if(channel == null) {
-//        if(channel != null) {
-//            synchronized(this) {
-//                if(channel != null) {
-//                    try {
-//                        channel.close();
-//                        channel = null;
-//                        super.close();
-//                    } catch (IOException e) {
-//                        logger.warn("Exception on close", e);
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    protected ExtendedIterator<Triple> graphBaseFindCore(Triple triplePattern) throws Exception {
-        // Init channel on first request
-
-        // System.err.println(triplePattern);
-
-        // TODO Improve resource management ; we should close the seekable and the pageManager
-
-        ExtendedIterator<Triple> result;
-
+    public static Iterator<Triple> createBaseIterator(BinarySearcher binarySearcher, Triple triplePattern) {
         String prefix = derivePrefix(triplePattern.getSubject());
 
-//        System.out.println("PREFIX: " + prefix);
+        InputStream in;
+        try {
+            in = prefix == null
+                    ? new ByteArrayInputStream(new byte[0])
+                    : binarySearcher.search(prefix);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        InputStream in = prefix == null
-                ? new ByteArrayInputStream(new byte[0])
-                : binarySearcher.search(prefix);
-
-        Stream<Triple> baseStream = Streams.stream(
-                //RDFDataMgrRx.createIteratorTriples(in, Lang.NTRIPLES, "http://www.example.org/"));
-                IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()));
+        Iterator<Triple> result = Iter.onCloseIO(IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()), in::close);
 
         if(false) {
             if(prefix != null && prefix.length() > 0) {
-                List<Triple> t = baseStream.collect(Collectors.toList());
+                List<Triple> t = Iter.toList(result);
                 System.out.println("For prefix " + prefix + " got " + t.size() + " triples");
-                baseStream = t.stream();
+                result = t.iterator();
             } else {
                 System.out.println("Got pattern: " + triplePattern);
             }
         }
 
-        Iterator<Triple> itTriples = baseStream
-            .filter(triplePattern::matches)
-            .iterator();
-
-        result = WrappedIterator.create(Iter.onCloseIO(itTriples, in));
-
         return result;
     }
 
+    @Override
+    public ExtendedIterator<Triple> findRaw(Triple triplePattern) {
+        return WrappedIterator.create(createBaseIterator(binarySearcher, triplePattern));
+    }
+
+    protected ExtendedIterator<Triple> graphBaseFindCore(Triple triplePattern) throws IOException {
+        Iterator<Triple> it = Iter.filter(createBaseIterator(binarySearcher, triplePattern),
+                triplePattern::matches);
+        ExtendedIterator<Triple> result = WrappedIterator.create(it);
+        return result;
+    }
 
     public static String derivePrefix(Node s) {
         // Construct the prefix from the subject
@@ -159,13 +121,6 @@ public class GraphFromPrefixMatcher extends GraphBase {
         }
         return result;
     }
-
-
-//	public static Graph createGraphFromSortedNtriples(Path path, int maxCacheSize, int bufferSize) {
-//		// TODO Properly pass these parameters to the search component
-//		Graph result = new GraphFromFileSystem(path);
-//		return result;
-//	}
 
     @Override
     public void close() {
@@ -250,29 +205,4 @@ public class GraphFromPrefixMatcher extends GraphBase {
 //		}
 
     }
-
-    /*
-     * String prefix;
-     *
-     * // Everything // prefix = "";
-     *
-     * // First line prefix =
-     * "<http://lsq.aksw.org/res/re-swdf-q-6ffab076-8ab0c230a859bbe3-02014-52-27_03:52:43>";
-     *
-     * // In the middle // prefix = "<http://lsq.aksw.org/res/q-4a68281e>"; //
-     * prefix = "<http://lsq.aksw.org/res/q-4a6838ea>"; // prefix =
-     * "<http://lsq.aksw.org/res/re-swdf-q-ffcf2ff2-8ab0c230a859bbe3-02014-06-26_07:06:31>";
-     *
-     * // Last line // prefix = "<http://lsq.aksw.org/res/swdf>";
-     *
-     * // Random stuff // prefix = "<http://lsq.ak>"; // prefix = "<zzzzzz>";
-     *
-     * // Files.lines(Paths.get("/home/raven/Projects/Data/LSQ/sorted.nt")) //
-     * .map(str -> str.substring(0, 3)) // .forEach(str ->
-     * searcher.search(str).forEach(System.err::println));
-     *
-     *
-     * searcher.search(prefix) .forEach(System.err::println);
-     *
-     */
 }

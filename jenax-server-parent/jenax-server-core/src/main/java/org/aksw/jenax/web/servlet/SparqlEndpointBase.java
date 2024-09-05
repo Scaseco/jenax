@@ -216,7 +216,7 @@ public abstract class SparqlEndpointBase {
      * Return a lambda that executes the query and writes the result to the output stream.
      *
      */
-    public static Consumer<OutputStream> createQueryProcessor(QueryExecutionFactory qef, SparqlStmtQuery stmt, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context cxt,
+    public static Consumer<OutputStream> createQueryProcessor(QueryExecutionFactory qef, SparqlStmtQuery stmt, Lang lang, RDFFormat fmt, org.apache.jena.sparql.util.Context riotCxt,
             Consumer<QueryExecution> qeCallback) {
         Consumer<OutputStream> result = null;
         ResultSetWriterFactory rswf = lang != null ? ResultSetWriterRegistry.getFactory(lang) : null;
@@ -233,12 +233,12 @@ public abstract class SparqlEndpointBase {
                     // SPARQLResultEx sr = SparqlStmtUtils.execAny(qe, parsedQuery);
                     if (parsedQuery.isAskType()) {
                         boolean v = qe.execAsk();
-                        rsWriter.write(out, v, cxt);
+                        rsWriter.write(out, v, riotCxt);
                     } else if (parsedQuery.isJsonType()) {
                         // TODO: set proper json Content-type
                         ResultSetFormatter.output(out, qe.execJsonItems());
                     } else {
-                        rsWriter.write(out, qe.execSelect(), cxt);
+                        rsWriter.write(out, qe.execSelect(), riotCxt);
                     }
                 }
             };
@@ -246,7 +246,7 @@ public abstract class SparqlEndpointBase {
             // Try to process the query with a triple / quad language
             if (StreamRDFWriter.registered(fmt)) {
                 result = out -> {
-                    StreamRDF writer = StreamRDFWriter.getWriterStream(out, fmt, cxt);
+                    StreamRDF writer = StreamRDFWriter.getWriterStream(out, fmt, riotCxt);
                     Objects.requireNonNull(writer);
                     writer.start();
                     try (QueryExecution qe = exec(qef, stmt)) {
@@ -297,7 +297,7 @@ public abstract class SparqlEndpointBase {
                             throw new RuntimeException("Unknown query type: " + parsedQuery);
                         }
 
-                        writerBuilder.format(fmt).context(cxt).output(out);
+                        writerBuilder.format(fmt).context(riotCxt).output(out);
                     }
                 };
             } else {

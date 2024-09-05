@@ -118,6 +118,14 @@ public class NodeUtils {
         return n == null || !n.isConcrete() ? Node.ANY : n;
     }
 
+    /** Similar to {@link #nullOrFluentToAny(Node)} but specifically for variables. */
+    public static Node nullOrVarToAny(Node node) {
+        if ( node == null || node.isVariable() )
+            return Node.ANY;
+        return node;
+    }
+
+
     /**
      * Create a logical conjunction of two nodes:
      * - Node.ANY, null or a variable matches everything

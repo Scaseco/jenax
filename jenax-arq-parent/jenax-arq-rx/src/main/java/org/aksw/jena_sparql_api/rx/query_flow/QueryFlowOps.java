@@ -171,12 +171,16 @@ public class QueryFlowOps
         return Flowable.generate(
                 () -> itSupp.get(),
                 (it, emitter) -> {
-                    if(it.hasNext()) {
-                        T item = it.next();
-                        emitter.onNext(item);
-                    } else {
-//                        System.out.println("Emitting completing event");
-                        emitter.onComplete();
+                    try {
+                        if(it.hasNext()) {
+                            T item = it.next();
+                            emitter.onNext(item);
+                        } else {
+    //                        System.out.println("Emitting completing event");
+                            emitter.onComplete();
+                        }
+                    } catch (Exception e) {
+                        emitter.onError(e);
                     }
                 },
                 ClosableIterator::close);

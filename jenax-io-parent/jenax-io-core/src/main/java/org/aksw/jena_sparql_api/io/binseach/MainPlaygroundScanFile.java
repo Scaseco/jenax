@@ -23,7 +23,7 @@ import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.block.impl.BlockIterState;
+import org.aksw.commons.io.block.impl.BlockEnumerator;
 import org.aksw.commons.io.block.impl.PageManagerForByteBuffer;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
 import org.aksw.commons.io.block.impl.PageNavigator;
@@ -197,7 +197,7 @@ public class MainPlaygroundScanFile {
 
 
             int extraBytes = 0;
-            BlockIterState it = BlockIterState.fwd(true, blockRef, true);
+            BlockEnumerator it = BlockEnumerator.fwd(true, blockRef, true);
             while(it.hasNext()) {
                 it.advance();
                 SeekableFromBlock seekable = new SeekableFromBlock(it.blockRef, 0, 0);

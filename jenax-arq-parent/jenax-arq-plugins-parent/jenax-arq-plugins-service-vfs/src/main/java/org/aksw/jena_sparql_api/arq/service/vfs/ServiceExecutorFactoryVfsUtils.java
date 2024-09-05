@@ -26,14 +26,17 @@ import java.util.stream.Stream;
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
+import org.aksw.commons.io.hadoop.binseach.v2.BinarySearchBuilder;
 import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
+import org.aksw.jenax.arq.util.graph.StageGeneratorGraphFindRaw;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
+import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.atlas.data.BagFactory;
@@ -41,12 +44,10 @@ import org.apache.jena.atlas.data.DataBag;
 import org.apache.jena.atlas.data.ThresholdPolicy;
 import org.apache.jena.atlas.data.ThresholdPolicyFactory;
 import org.apache.jena.atlas.web.TypedInputStream;
-import com.google.common.base.Stopwatch;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -74,6 +75,9 @@ import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -274,6 +278,7 @@ public class ServiceExecutorFactoryVfsUtils {
 
 
     public static QueryIterator nextStage(OpService opService, Binding outerBinding, ExecutionContext execCxt, Path path, Map<String, String> params) {
+        Context context = execCxt.getContext();
         OpService op = (OpService)QC.substitute(opService, outerBinding);
         boolean silent = opService.getSilent() ;
         QueryIterator qIter ;
@@ -318,24 +323,52 @@ public class ServiceExecutorFactoryVfsUtils {
 
                 // Model generation wrapped as a flowable for resource management
                 bindingFlow = Flowable.generate(() -> {
-                    BinarySearcher binarySearcher = isBzip2
-                        ? BlockSources.createBinarySearcherBz2(path, bufferSize)
-                        : BlockSources.createBinarySearcherText(path, bufferSize);
+                    boolean useV1 = false;
+                    BinarySearcher binarySearcher;
+                    if (useV1) {
+                        binarySearcher = isBzip2
+                            ? BlockSources.createBinarySearcherBz2(path, bufferSize)
+                            : BlockSources.createBinarySearcherText(path, bufferSize);
+                    } else {
+                        binarySearcher = isBzip2
+                            ? BinarySearchBuilder.newBuilder().setSource(path).setCodec(new BZip2Codec()).build()
+                            : BinarySearchBuilder.newBuilder().setSource(path).build();
+                    }
 
                     Graph graph = new GraphFromPrefixMatcher(binarySearcher);
-                    GraphFromSubjectCache subjectCacheGraph = new GraphFromSubjectCache(graph);
-                    Model model = ModelFactory.createModelForGraph(subjectCacheGraph);
-                    QueryExecution qe = QueryExecutionFactory.create(query, model);
+                    // GraphFromSubjectCache subjectCacheGraph = new GraphFromSubjectCache(graph);
+                    GraphFromSubjectCache subjectCacheGraph = null;
+                    Graph effectiveGraph = graph;
+                    Model model = ModelFactory.createModelForGraph(effectiveGraph);
+                    // QueryExecution qe = QueryExecutionFactory.create(query, model);
+
+                    Context cxt = context.copy();
+                    cxt.set(ARQ.stageGenerator, new StageGeneratorGraphFindRaw());
+                    // XXX Even better would be to pass on the cancel symbol set up
+                    // by QueryExecDataset
+                    QueryExecution qe = QueryExecution.model(model)
+                        .query(query)
+                        .context(cxt)
+                        .build();
+
+//                    QueryExecution qe = QueryExecutionAdapter.adapt(QueryExecModCustomBase.overwriteTimeouts(
+//                                QueryExec.graph(graph), context.get(ARQ.queryTimeout))
+//                            .context(execCxt.getContext())
+//                            .query(query)
+//                            .build());
                     ResultSet rs = qe.execSelect();
 
                     Stopwatch sw = Stopwatch.createStarted();
 
                     return new SimpleEntry<AutoCloseable, ResultSet>(() -> {
                         logger.info("SERVICE <" + path + "> " +  query);
-                        logger.info(sw.elapsed(TimeUnit.MILLISECONDS) * 0.001 + " seconds - " + subjectCacheGraph.getSubjectCache().stats());
+                        if (subjectCacheGraph != null) {
+                            logger.info(sw.elapsed(TimeUnit.MILLISECONDS) * 0.001 + " seconds - " + subjectCacheGraph.getSubjectCache().stats());
+                        }
 
                         qe.close();
                         model.close();
+                        //graph.close();
                     }, rs);
                 },
                 (e, emitter) -> {

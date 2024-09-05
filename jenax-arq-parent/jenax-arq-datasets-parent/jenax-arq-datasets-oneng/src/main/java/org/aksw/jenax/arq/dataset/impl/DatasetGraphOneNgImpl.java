@@ -6,7 +6,6 @@ import java.util.Iterator;
 import org.aksw.jenax.arq.dataset.api.DatasetGraphOneNg;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.atlas.iterator.NullIterator;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -252,7 +251,7 @@ public class DatasetGraphOneNgImpl
         if ( isWildcard(g) || g.equals(graphName) || ( Quad.isDefaultGraph(g) && Quad.isDefaultGraph(graphName)) )
             return G.triples2quads(graphName, graph.find(s, p, o));
         else
-            return new NullIterator<>();
+            return Iter.nullIterator();
     }
 
     @Override
