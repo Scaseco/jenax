@@ -1,10 +1,15 @@
-package org.aksw.jenax.arq.util.graph;
+package org.aksw.jena_sparql_api.io.binseach;
 
 import static org.apache.jena.sparql.engine.main.solver.SolverLib.nodeTopLevel;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.aksw.jenax.arq.util.graph.GraphFindRaw;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -16,6 +21,7 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.engine.iterator.QueryIterConvert;
 import org.apache.jena.sparql.engine.iterator.QueryIterFilterExpr;
 import org.apache.jena.sparql.engine.iterator.QueryIterPeek;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
@@ -25,7 +31,11 @@ import org.apache.jena.sparql.engine.main.solver.SolverRX3;
 import org.apache.jena.sparql.engine.optimizer.reorder.ReorderProc;
 import org.apache.jena.sparql.engine.optimizer.reorder.ReorderTransformation;
 import org.apache.jena.sparql.expr.E_Bound;
+import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_LogicalNot;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
+import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.mgt.Explain;
@@ -104,22 +114,48 @@ public class StageGeneratorGraphFindRaw
         Node p = nodeTopLevel(tPattern.getPredicate());
         Node o = nodeTopLevel(tPattern.getObject());
 
+        ExprList spoFilter = new ExprList();
+        for (int i = 0; i < 3; ++i) {
+            Node n = TripleUtils.getNode(tPattern, i);
+            if (n.isConcrete()) {
+                Var v = Vars.spo.get(i);
+                spoFilter.add(new E_Equals(new ExprVar(v), ExprLib.nodeToExpr(n)));
+            }
+        }
+
         Triple lookup = Triple.create(s, p, o);
+
+        Function<Triple, QueryIterator> itFactory = lup -> {
+            Iterator<Binding> it = gfr.findRaw(lup)
+                    .mapWith(TripleUtils::tripleToBinding);
+            QueryIterator qIter = QueryIterPlainWrapper.create(it);
+            for (Expr condition : spoFilter) {
+                qIter = new QueryIterFilterExpr(qIter, condition, execCxt);
+            }
+            return qIter;
+        };
+
+        GraphFindCache cache = execCxt.getContext().get(GraphFindCache.graphCache);
+
+        // spoIt represents triples of graph.findRaw as bindings with vars ?s ?p ?o.
+        QueryIterator spoIt = cache == null
+                ? itFactory.apply(lookup)
+                : GraphCacheStreaming.cache(cache, lookup, itFactory);
 
         Var dummyVar = Var.alloc(ARQConstants.allocVarMarker + "binSearch_noMatchVar");
         Binding NO_MATCH = BindingFactory.binding(dummyVar, NodeValue.TRUE.asNode());
 
-        QueryIterator it = QueryIterPlainWrapper.create(gfr.findRaw(lookup)
-            .mapWith(t -> {
-                Binding r = SolverRX3.matchTriple(input, t, tPattern);
-                if (r == null) {
-                    // Create a dummy binding which we filter away
-                    r = NO_MATCH;
-                }
-                return r;
-            }));
+        QueryIterator solvedIt = new QueryIterConvert(spoIt, b -> {
+            Triple t = TripleUtils.bindingToTriple(b);
+            Binding r = SolverRX3.matchTriple(input, t, tPattern);
+            if (r == null) {
+                // Create a dummy binding which we filter away
+                r = NO_MATCH;
+            }
+            return r;
+        }, execCxt);
 
-        it = new QueryIterFilterExpr(it, new E_LogicalNot(new E_Bound(new ExprVar(dummyVar))), execCxt);
-        return it;
+        solvedIt = new QueryIterFilterExpr(solvedIt, new E_LogicalNot(new E_Bound(new ExprVar(dummyVar))), execCxt);
+        return solvedIt;
     }
 }

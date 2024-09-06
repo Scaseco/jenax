@@ -20,6 +20,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.riot.writer.NTriplesWriter;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
@@ -175,10 +176,7 @@ public class TripleUtils {
     }
 
     public static Binding tripleToBinding(Triple triple) {
-        Binding result = BindingBuilder.create().build();
-
-        tripleToBinding(triple, result);
-
+        Binding result = tripleToBinding(triple, Binding.noParent);
         return result;
     }
 
@@ -187,10 +185,27 @@ public class TripleUtils {
         result.add(Vars.s, triple.getSubject());
         result.add(Vars.p, triple.getPredicate());
         result.add(Vars.o, triple.getObject());
-
         return result.build();
     }
 
+    public static Triple bindingToTriple(Binding b) {
+        return bindingToTriple(b, Vars.s, Vars.p, Vars.o);
+    }
+
+    public static Triple bindingToTriple(Binding b, Var vs, Var vp, Var vo) {
+        Triple result = null;
+        Node s = b.get(vs);
+        if (s != null) {
+            Node p = b.get(vp);
+            if (p != null) {
+                Node o = b.get(vo);
+                if (o != null) {
+                    result = Triple.create(s, p, o);
+                }
+            }
+        }
+        return result;
+    }
 
     public static Binding tripleToBinding(Triple pattern, Triple assignment) {
         return TupleUtils.tupleToBinding(TupleBridgeTriple.INSTANCE, pattern, assignment);
