@@ -64,6 +64,7 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -73,7 +74,6 @@ import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
-import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.system.SerializationFactoryFinder;
 import org.apache.jena.sparql.util.Context;
@@ -280,6 +280,55 @@ public class ServiceExecutorFactoryVfsUtils {
 //
 //        return result;
 //    }
+
+    /** Context can provide a BinSearchResourceCache */
+    public static Graph createGraphBinSearch(Path path, Context context) throws IOException {
+        EntityInfo info;
+        try (InputStream in = Files.newInputStream(path)) {
+            info = RDFDataMgrEx.probeEntityInfo(in, Collections.singleton(Lang.NTRIPLES));
+        } catch (IOException e1) {
+            throw new RuntimeException(e1);
+        }
+
+        boolean isNtriples = Objects.equals(RDFLanguagesEx.findLang(info.getContentType()), Lang.NTRIPLES);
+
+        if (!isNtriples) {
+            throw new RuntimeException("No ntriples content in " + path);
+        }
+
+        boolean isBzip2 = Collections.singletonList("bzip2").equals(info.getContentEncodings());
+
+        // On dnb-all_lds_20200213.sorted.nt.bz2:
+//      int bufferSize = 4 * 1024; // 363 requests
+//      int bufferSize = 8 * 1024; // 187 requests
+//      int bufferSize = 16 * 1024; // 98 requests
+//      int bufferSize = 32 * 1024; // 54 requests
+//      int bufferSize = 64 * 1024; // 33 requests
+        int bufferSize = 128 * 1024; // 22 requests
+//      int bufferSize = 256 * 1024; // 16 requests
+//      int bufferSize = 512 * 1024; // 14 requests
+
+        Context cxt = context.copy();
+        BinSearchResourceCache resourceCache = ServiceExecutorBinSearch.getOrCreate(cxt);
+
+        BinarySearchBuilder binSearchBuilder =  BinarySearchBuilder.newBuilder()
+                .setSource(path)
+                .setResourceCache(resourceCache);
+
+        boolean useV1 = false;
+        BinarySearcher binarySearcher;
+        binarySearcher = isBzip2
+            ? binSearchBuilder.setCodec(new BZip2Codec()).build()
+            : binSearchBuilder.build();
+
+        Graph graph = new GraphFromPrefixMatcher(binarySearcher);
+//        // GraphFromSubjectCache subjectCacheGraph = new GraphFromSubjectCache(graph);
+//        GraphFromSubjectCache subjectCacheGraph = null;
+//        Graph effectiveGraph = graph;
+//        Model model = ModelFactory.createModelForGraph(effectiveGraph);
+//        // QueryExecution qe = QueryExecutionFactory.create(query, model);
+        return graph;
+    }
 
 
     public static QueryIterator nextStage(OpService opService, Binding outerBinding, ExecutionContext execCxt, Path path, Map<String, String> params) {

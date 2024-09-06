@@ -34,15 +34,16 @@ WHERE {
         FILTER(BOUND(?dbmsRawName))
         BIND("virtuoso" AS ?dbmsShortName)
       }
-    UNION
-      {
-        # Jena ~ https://jena.apache.org/documentation/query/library-propfunc.html (apf:versionARQ was removed in jena-4.9.0)
-        SERVICE SILENT <env://REMOTE> {
-          ?dbmsRawName apf:versionARQ ?dbmsVersion
-        }
-        FILTER(BOUND(?dbmsVersion))
-        BIND("jena" AS ?dbmsShortName)
-      }
+# Legacy jena pattern - in general patterns should be avoided because it may trigger full scans with special purpose engines (e.g. binary search)
+#    UNION
+#      {
+#        # Jena ~ https://jena.apache.org/documentation/query/library-propfunc.html (apf:versionARQ was removed in jena-4.9.0)
+#        SERVICE SILENT <env://REMOTE> {
+#          ?dbmsRawName apf:versionARQ ?dbmsVersion
+#        }
+#        FILTER(BOUND(?dbmsVersion))
+#        BIND("jena" AS ?dbmsShortName)
+#      }
     UNION
       {
         # Jena 4.9.0+
