@@ -26,10 +26,12 @@ import java.util.stream.Stream;
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
+import org.aksw.commons.io.hadoop.binseach.v2.BinSearchResourceCache;
 import org.aksw.commons.io.hadoop.binseach.v2.BinarySearchBuilder;
 import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
+import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.graph.StageGeneratorGraphFindRaw;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
@@ -62,9 +64,12 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
@@ -279,12 +284,14 @@ public class ServiceExecutorFactoryVfsUtils {
 
     public static QueryIterator nextStage(OpService opService, Binding outerBinding, ExecutionContext execCxt, Path path, Map<String, String> params) {
         Context context = execCxt.getContext();
-        OpService op = (OpService)QC.substitute(opService, outerBinding);
+        // OpService op = (OpService)QC.substitute(opService, outerBinding);
         boolean silent = opService.getSilent() ;
         QueryIterator qIter ;
         try {
-            Op subOp = op.getSubOp();
-            Query query = OpAsQuery.asQuery(subOp);
+            Op opRemote = opService.getSubOp();
+            Op opRestored = Rename.reverseVarRename(opRemote, true);
+            Query query = OpAsQuery.asQuery(opRestored);
+            Map<Var, Var> varMapping = QueryExecUtils.computeVarMapping(opRemote, opRestored);
 
             Flowable<Binding> bindingFlow = null;
             // Iterator<Binding> itBindings = null;
@@ -311,6 +318,8 @@ public class ServiceExecutorFactoryVfsUtils {
 
                 boolean isBzip2 = Collections.singletonList("bzip2").equals(info.getContentEncodings());
 
+
+
                 // On dnb-all_lds_20200213.sorted.nt.bz2:
 //              int bufferSize = 4 * 1024; // 363 requests
 //              int bufferSize = 8 * 1024; // 187 requests
@@ -320,6 +329,13 @@ public class ServiceExecutorFactoryVfsUtils {
                 int bufferSize = 128 * 1024; // 22 requests
 //              int bufferSize = 256 * 1024; // 16 requests
 //              int bufferSize = 512 * 1024; // 14 requests
+
+                Context cxt = context.copy();
+                BinSearchResourceCache resourceCache = ServiceExecutorBinSearch.getOrCreate(cxt);
+
+                BinarySearchBuilder binSearchBuilder =  BinarySearchBuilder.newBuilder()
+                        .setSource(path)
+                        .setResourceCache(resourceCache);
 
                 // Model generation wrapped as a flowable for resource management
                 bindingFlow = Flowable.generate(() -> {
@@ -331,8 +347,8 @@ public class ServiceExecutorFactoryVfsUtils {
                             : BlockSources.createBinarySearcherText(path, bufferSize);
                     } else {
                         binarySearcher = isBzip2
-                            ? BinarySearchBuilder.newBuilder().setSource(path).setCodec(new BZip2Codec()).build()
-                            : BinarySearchBuilder.newBuilder().setSource(path).build();
+                            ? binSearchBuilder.setCodec(new BZip2Codec()).build()
+                            : binSearchBuilder.build();
                     }
 
                     Graph graph = new GraphFromPrefixMatcher(binarySearcher);
@@ -342,7 +358,6 @@ public class ServiceExecutorFactoryVfsUtils {
                     Model model = ModelFactory.createModelForGraph(effectiveGraph);
                     // QueryExecution qe = QueryExecutionFactory.create(query, model);
 
-                    Context cxt = context.copy();
                     cxt.set(ARQ.stageGenerator, new StageGeneratorGraphFindRaw());
                     // XXX Even better would be to pass on the cancel symbol set up
                     // by QueryExecDataset
@@ -470,6 +485,11 @@ public class ServiceExecutorFactoryVfsUtils {
             // Add tracking.
             //qIter = QueryIter.makeTracked(right, getExecContext()) ;
             qIter = right;
+
+            if (varMapping != null) {
+                qIter = QueryIter.map(qIter, varMapping);
+            }
+
         } catch (RuntimeException ex)
         {
             if ( silent )

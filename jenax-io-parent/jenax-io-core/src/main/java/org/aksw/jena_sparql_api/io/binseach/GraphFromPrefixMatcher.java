@@ -1,11 +1,11 @@
 package org.aksw.jena_sparql_api.io.binseach;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -57,16 +57,26 @@ public class GraphFromPrefixMatcher
     public static Iterator<Triple> createBaseIterator(BinarySearcher binarySearcher, Triple triplePattern) {
         String prefix = derivePrefix(triplePattern.getSubject());
 
-        InputStream in;
-        try {
-            in = prefix == null
-                    ? new ByteArrayInputStream(new byte[0])
-                    : binarySearcher.search(prefix);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Iterator<Triple> result;
+        if (prefix == null) {
+            result = Collections.emptyIterator();
+        } else {
+            InputStream in;
+            try {
+                in = binarySearcher.search(prefix);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            result = Iter.onCloseIO(IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()), in::close);
         }
 
-        Iterator<Triple> result = Iter.onCloseIO(IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()), in::close);
+        if (false) {
+            if ("".equals(prefix)) {
+                System.err.println("WARN: Ungrounded subject: " + triplePattern);
+            } else {
+                System.err.println("Lookup with: " + triplePattern);
+            }
+        }
 
         if(false) {
             if(prefix != null && prefix.length() > 0) {

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
+import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
@@ -339,29 +340,7 @@ public class RDFConnectionUtils {
 
         Op opRestored = Rename.reverseVarRename(opRemote, true);
         Query query = OpAsQuery.asQuery(opRestored);
-        // Transforming: Same object means "no change"
-        boolean requiresRemapping = false;
-        Map<Var, Var> varMapping = null;
-        if ( ! opRestored.equals(opRemote) ) {
-            varMapping = new HashMap<>();
-            Set<Var> originalVars = OpVars.visibleVars(opService);
-            Set<Var> remoteVars = OpVars.visibleVars(opRestored);
-            for (Var v : originalVars) {
-                if (v.getName().contains("/")) {
-                    // A variable which was scope renamed so has a different name
-                    String origName = v.getName().substring(v.getName().lastIndexOf('/') + 1);
-                    Var remoteVar = Var.alloc(origName);
-                    if (remoteVars.contains(remoteVar)) {
-                        varMapping.put(remoteVar, v);
-                        requiresRemapping = true;
-                    }
-                } else {
-                    // A variable which does not have a different name
-                    if (remoteVars.contains(v))
-                        varMapping.put(v, v);
-                }
-            }
-        }
+        Map<Var, Var> varMapping = QueryExecUtils.computeVarMapping(opRemote, opRestored);
 
         RDFLink link = RDFLinkAdapter.adapt(target);
         QueryExecBuilder builder = link.newQuery().query(query);
@@ -388,7 +367,7 @@ public class RDFConnectionUtils {
 //        }
 
 
-        if (requiresRemapping) {
+        if (varMapping != null) {
             result = QueryIter.map(result, varMapping);
         }
         return result;
