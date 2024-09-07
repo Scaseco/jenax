@@ -21,12 +21,12 @@
     return ldvFetchTypeQuery('text/plain', query)
       .then((response) => {
 	if (response.status == 401) {
-	  if (ldvConfig.fileOnly)
+	  if (ldvConfig.fileOnly === 'yes')
 	    throw response
 	  else
 	    window.location.replace('/_/unauthorized')
 	} else if (!response.ok) {
-	  if (ldvConfig.fileOnly)
+	  if (ldvConfig.fileOnly === 'yes')
 	    throw response
 	  else
 	    window.location.replace('/_/' + response.statusText.toLowerCase().replaceAll(/\s+/g, '_'))
@@ -286,7 +286,7 @@
 
     if ((pathname === '/' || pathname === '/*') && search)
       resourceIri = search.substring(1) + window.location.hash
-    else if (ldvConfig.fileOnly) {
+    else if (ldvConfig.fileOnly === 'yes') {
       resourceIri = ldvConfig.datasetBase
       ldvConfig.localMode = true
     } else
