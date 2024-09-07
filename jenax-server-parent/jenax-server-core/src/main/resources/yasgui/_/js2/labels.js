@@ -6,7 +6,11 @@
 
   const fetchLabelsJson = (query) => {
     return ldvFetchTypeQuery('application/json', query)
-      .then((response) => response.json())
+      .then((response) => {
+	if (!response.ok)
+	  throw response
+	return response.json()
+      })
   }
 
   const ldvAddLabelsForUris = (uris, links) => {
@@ -50,6 +54,9 @@
 	  e.title = label + (llang ? ' @' + llang : '')
       })
     })
+      .catch((err) => {
+	err.text().then(msg => console.log(`Error fetching labels:`, {status: err.status, statusText: err.statusText, body: msg})).catch(err => console.log(`Error fetching labels:`, {status: err.status, statusText: err.statusText, err: err}))
+      })
   }
 
   const getLdvLabelsForUris = (uris, lang) => {

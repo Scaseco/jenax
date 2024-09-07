@@ -374,6 +374,8 @@
   const renderTitleAgain = () => {
     const json = JSON.parse(document.getElementById('data').innerHTML)
     embeddedGraph(json).then(graph => {
+      if (!graph.length)
+	return
       const iri = graph[0]['@id']
       renderTitleWithLang(iri, graph)
     })

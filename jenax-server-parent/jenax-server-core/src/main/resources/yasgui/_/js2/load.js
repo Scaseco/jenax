@@ -19,16 +19,30 @@
 
   const fetchPlain = (query) => {
     return ldvFetchTypeQuery('text/plain', query)
-      .then((response) => response.status == 401 ?
+      .then((response) => {
+	if (response.status == 401) {
+	  if (ldvConfig.fileOnly)
+	    throw response
+	  else
 	    window.location.replace('/_/unauthorized')
-	    : !response.ok ?
+	} else if (!response.ok) {
+	  if (ldvConfig.fileOnly)
+	    throw response
+	  else
 	    window.location.replace('/_/' + response.statusText.toLowerCase().replaceAll(/\s+/g, '_'))
-	    : response.text())
+	} else {
+	  return response.text()
+	}
+      })
   }
 
   const fetchJsonLd = (query) => {
     return ldvFetchTypeQuery('application/ld+json', query)
-      .then((response) => response.json())
+      .then((response) => {
+	if (!response.ok)
+	  throw response
+	return response.json()
+      })
   }
 
   const fetchJson = (query) => {
@@ -67,6 +81,26 @@
       })
   }
 
+  const errorPage = (iri, title, message) => {
+    document.getElementById('title').innerHTML = `<h1 style="color:firebrick">${title}</h1>`
+    document.getElementById('subtitle').innerHTML = `
+<span>
+  <h4>
+    <a href="${iri}">${iri}</a>
+  </h4>
+</span>
+`
+    let el = document.getElementById('graph')
+    let putmsg = (msg) => {
+      el.innerText = msg
+      el.style.whiteSpaceCollapse = 'preserve'
+    }
+    if (message instanceof Promise)
+      message.then(putmsg)
+    else
+      putmsg(message)
+  }
+
   const loadResource = (iri) => {
     const infer = ldvConfig.infer
     const askQuery = ldvQueries.askQuery(iri, ldvConfig.reverseEnabled)
@@ -84,9 +118,20 @@
 	      findMap(bIri, json)
 	      renderLdvLabelConfig()
 	    })
+	    .catch((err) => {
+	      errorPage(iri, err.statusText, err.text())
+	      renderLdvLabelConfig()
+	    })
+	} else if (ldvConfig.fileOnly === 'yes') {
+	  errorPage(iri, 'Resource not found', '')
+	  renderLdvLabelConfig()
 	} else {
 	  window.location.replace('/_/not_found')
 	}
+      })
+      .catch((err) => {
+	errorPage(iri, err.statusText, err.text())
+	renderLdvLabelConfig()
       })
   }
 
@@ -107,6 +152,9 @@
 	  } else {
 	    reject('not_found')
 	  }
+	})
+	.catch((err) => {
+	  reject('error', err)
 	})
     })
   }
