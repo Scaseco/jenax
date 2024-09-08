@@ -18,14 +18,18 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIter1;
 import org.apache.jena.sparql.engine.iterator.QueryIterConcat;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
+import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
 
 class PrefetchTask<T, I extends Iterator<T>>
     implements Runnable
 {
-    protected I iterator;
-    protected List<T> bufferedItems;
+    protected volatile I iterator;
+    protected volatile List<T> bufferedItems;
 
-    protected volatile boolean isAbortRequested;
+    protected volatile boolean isStopRequested;
+
+    // states: created, starting, running (= first item seen), terminated
+    protected volatile String state = "created";
 
     public PrefetchTask(I iterator) {
         super();
@@ -41,18 +45,29 @@ class PrefetchTask<T, I extends Iterator<T>>
         return iterator;
     }
 
-    // TODO Warn when read too much
-    // TODO Consider stop when read too much
+    // XXX Warn when read too much
+    // XXX Consider stop when read too much
     @Override
     public void run() {
-        while (!isAbortRequested && iterator.hasNext()) {
-            T item = iterator.next();
-            bufferedItems.add(item);
+//        System.out.println(Thread.currentThread().getName() + " Task started " + this);
+        state = "starting";
+        while (!isStopRequested) {
+            if (iterator.hasNext()) {
+                state = "running";
+                T item = iterator.next();
+//                System.out.println(Thread.currentThread().getName() + "Buffering " + item + " in task " + this);
+                bufferedItems.add(item);
+            } else {
+                break;
+            }
         }
+//        System.out.println(Thread.currentThread().getName() + "Task finished " + this);
+        state = "terminated";
     }
 
-    public void abort() {
-        isAbortRequested = true;
+    public void stop() {
+//        System.out.println(Thread.currentThread().getName() + "Requested stop of task " + this);
+        isStopRequested = true;
     }
 
     public static <T, I extends Iterator<T>> PrefetchTask<T, I> of(I iterator) {
@@ -63,18 +78,32 @@ class PrefetchTask<T, I extends Iterator<T>>
 class Prefetch
     extends PrefetchTask<Binding, QueryIterator> {
 
-    public Prefetch(QueryIterator iterator) {
+    protected Binding id;
+
+    public Prefetch(Binding id, QueryIterator iterator) {
         super(iterator);
+        this.id = id;
     }
 
-    public static PrefetchTask<Binding, QueryIterator> of(QueryIterator iterator) {
-        return new PrefetchTask<>(iterator);
+    @Override
+    public String toString() {
+        return "TaskId: " + id + " [" + state + (isStopRequested ? "aborted" : "") + "]: " + bufferedItems.size() + " items buffered.";
     }
 }
 
 record TaskEntry<T>(T task, Future<?> future) {}
 
-public abstract class QueryIterConcurrentSimple
+/** This is a variant of {@link QueryIterRepeatApply} which consumes up to N elements from the input and
+ *  schedules concurrent tasks that start buffering the related items for each input.
+ *
+ *  Whenever _this_ iterator advances to data of the next task, that task is stopped and a
+ *  {@link QueryIterConcat} is formed between the buffered items and the remaining items.
+ *  This means that at this point the remaining items of the current task are no longer loaded concurrently.
+ *  However, all further tasks still run concurrently.
+ *
+ *  Buffers currently have unlimited size.
+ */
+public abstract class QueryIterRepeatApplyConcurrent
     extends QueryIter1
 {
     private int count = 0;
@@ -89,8 +118,9 @@ public abstract class QueryIterConcurrentSimple
     private List<TaskEntry<Prefetch>> drainedTasks;
 
     private static final TaskEntry<Prefetch> POISON = new TaskEntry<>(null, null);
+    private boolean isPoisonScheduled = false;
 
-    public QueryIterConcurrentSimple(QueryIterator input, ExecutionContext execCxt, ExecutorService executorService, int maxConcurrentTasks) {
+    public QueryIterRepeatApplyConcurrent(QueryIterator input, ExecutionContext execCxt, ExecutorService executorService, int maxConcurrentTasks) {
         super(input, execCxt);
         this.currentStage = null;
         this.executorService = executorService;
@@ -106,7 +136,15 @@ public abstract class QueryIterConcurrentSimple
         return currentStage;
     }
 
-    protected abstract QueryIterator nextStage(Binding binding);
+    /**
+     *
+     * @param binding
+     * @param isolatedExecCxt A fresh execution context local to the executing thread.
+     *           ExecutionContexts are not thread-safe (as of Jena 5.2.0) and
+     *           concurrent access causes exceptions with at least the iterator tracking mechanism.
+     * @return
+     */
+    protected abstract QueryIterator nextStage(Binding binding, ExecutionContext isolatedExecCxt);
 
     @Override
     protected boolean hasNextBinding() {
@@ -144,43 +182,69 @@ public abstract class QueryIterConcurrentSimple
     }
 
     private synchronized void scheduleNextTasks() {
-        while (taskQueue.remainingCapacity() > 0) {
+        while (!isPoisonScheduled && taskQueue.remainingCapacity() > 0) {
+            // A possible async cancel request is handled in scheduleNextTask
             scheduleNextTask();
         }
     }
 
-    private void drainTasks() {
-        if (drainedTasks != null) {
+    private synchronized void drainAndStopAllTasks() {
+        if (drainedTasks == null) {
             drainedTasks = new ArrayList<>();
             taskQueue.drainTo(drainedTasks);
+            drainedTasks = drainedTasks.stream().filter(item -> item != POISON).toList();
+
+            drainedTasks.forEach(entry -> {
+                Prefetch prefetch = entry.task();
+                prefetch.stop();
+                try {
+                    entry.future().get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            schedulePoison();
         }
     }
 
+    /**
+     * Attempt to take the next item from the input and schedule a task from it.
+     * If cancel was requested then POISON is scheduled instead.
+     * POISON is also scheduled if the input is empty.
+     */
     private void scheduleNextTask() {
         if (cancelRequested) {
-            drainTasks();
-            taskQueue.add(POISON);
+            schedulePoison();
         } else {
             QueryIterator input = getInput();
-//
-//            if (!getInput().hasNext()) {
-//                getInput().close();
-//                return null;
-//            }
 
             if (input.hasNext()) {
                 count++;
 
                 Binding binding = input.next();
-                System.err.println(String.format("Thread %s: Starting task for: %s", Thread.currentThread().getName(), binding));
-                Prefetch  task = new Prefetch(nextStage(binding));
+//                System.err.println(String.format("Thread %s: Starting task for: %s", Thread.currentThread().getName(), binding));
+                ExecutionContext execCxt = getExecContext();
+                ExecutionContext isolatedExecCxt = new ExecutionContext(execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
+                Prefetch  task = new Prefetch(binding, nextStage(binding, isolatedExecCxt));
 
                 Future<?> future = executorService.submit(task::run);
-                taskQueue.offer(new TaskEntry<>(task, future));
+                try {
+                    taskQueue.put(new TaskEntry<>(task, future));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
-                taskQueue.add(POISON);
+                schedulePoison();
                 input.close(); // Probably not needed but was in the original code
             }
+        }
+    }
+
+    private void schedulePoison() {
+        if (!isPoisonScheduled) {
+            isPoisonScheduled = true;
+            taskQueue.add(POISON);
         }
     }
 
@@ -193,9 +257,11 @@ public abstract class QueryIterConcurrentSimple
             } else {
                 Prefetch prefetch = entry.task();
                 // Send the abort signal
-                prefetch.abort();
+                prefetch.stop();
                 // Wait for the task to complete
+//                System.out.println(Thread.currentThread().getName() + " Waiting for future");
                 entry.future().get();
+//                System.out.println(Thread.currentThread().getName() + " Got future");
 
                 ExecutionContext execCxt = getExecContext();
                 result = new QueryIterConcat(execCxt);
@@ -219,17 +285,10 @@ public abstract class QueryIterConcurrentSimple
         if ( currentStage != null )
             currentStage.close();
 
-        drainTasks();
+        drainAndStopAllTasks();
 
         drainedTasks.forEach(entry -> {
-            Prefetch prefetch = entry.task();
-            prefetch.abort();
-            try {
-                entry.future().get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-            prefetch.getIterator().close();
+            entry.task().getIterator().close();
         });
     }
 
@@ -240,94 +299,10 @@ public abstract class QueryIterConcurrentSimple
         if ( currentStage != null )
             currentStage.cancel();
 
-        drainTasks();
+        drainAndStopAllTasks();
 
         drainedTasks.forEach(entry -> {
-            Prefetch prefetch = entry.task();
-            prefetch.abort();
-            try {
-                entry.future().get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-            prefetch.getIterator().cancel();
+            entry.task().getIterator().cancel();
         });
-
-//        while (true) {
-//            try {
-//                taskQueue.put(POISON);
-//                break;
-//            } catch (InterruptedException e) {
-//                // Force the poison onto the queue
-//            }
-//        }
     }
 }
-
-/*
-private QueryIterator makeNextStage() {
-    count++;
-
-    if ( getInput() == null )
-        return null;
-
-    if ( !getInput().hasNext() ) {
-        getInput().close();
-        return null;
-    }
-
-    Binding binding = getInput().next();
-    QueryIterator iter = nextStage(binding);
-    return iter;
-}
-*/
-
-//@Override
-//public boolean hasNext() {
-//  while (!currentStage.hasNext() && !taskQueue.isEmpty()) {
-//      try {
-//          // Retrieve the result of the first task that completes
-//          Future<List<R>> completedTask = taskQueue.poll();
-//          List<R> relatedItems = completedTask.get(); // blocking until the task completes
-//          currentRelatedIterator = relatedItems.iterator();
-//
-//          // Schedule the next task
-//          scheduleNextTask();
-//      } catch (InterruptedException | ExecutionException e) {
-//          e.printStackTrace();
-//          Thread.currentThread().interrupt();
-//      }
-//  }
-//  return currentRelatedIterator.hasNext();
-//}
-
-//@Override
-//public R next() {
-//  if (!hasNext()) {
-//      throw new NoSuchElementException();
-//  }
-//  return currentRelatedIterator.next();
-//}
-//
-//public void shutdown() {
-//  executor.shutdown();
-//}
-//
-//public static void main(String[] args) {
-//  // Example usage
-//  List<String> items = Arrays.asList("item1", "item2", "item3");
-//
-//  // FlatMap function to simulate related items
-//  Function<String, List<String>> flatMapFunction = item -> {
-//      // Simulate related item retrieval, e.g., adding suffix
-//      return Arrays.asList(item + "-related1", item + "-related2");
-//  };
-//
-//  TaskScheduler<String, String> scheduler = new TaskScheduler<>(items.iterator(), flatMapFunction, 2);
-//
-//  while (scheduler.hasNext()) {
-//      System.out.println(scheduler.next());
-//  }
-//
-//  scheduler.shutdown();
-//}

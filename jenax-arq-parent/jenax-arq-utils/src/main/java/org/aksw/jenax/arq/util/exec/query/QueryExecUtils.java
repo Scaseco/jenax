@@ -11,10 +11,13 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.algebra.optimize.Optimize;
+import org.apache.jena.sparql.algebra.optimize.RewriteFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DynamicDatasets.DynamicDatasetGraph;
 import org.apache.jena.sparql.core.Var;
@@ -128,6 +131,19 @@ public class QueryExecUtils {
         }
 
         Map<Var, Var> result = requiresRemapping ? varMapping : null;
+        return result;
+    }
+
+    /** The method is private in {@link Optimize}. A request to make it public should be filed. */
+    public static RewriteFactory decideOptimizer(Context context) {
+        RewriteFactory result = context.get(ARQConstants.sysOptimizerFactory);
+        if (result == null) {
+            result = Optimize.getFactory();
+
+            if (result == null) {
+                result = Optimize.stdOptimizationFactory;
+            }
+        }
         return result;
     }
 }
