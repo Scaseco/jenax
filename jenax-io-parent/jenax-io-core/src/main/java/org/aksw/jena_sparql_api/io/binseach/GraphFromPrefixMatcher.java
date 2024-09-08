@@ -70,7 +70,7 @@ public class GraphFromPrefixMatcher
             result = Iter.onCloseIO(IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()), in::close);
         }
 
-        if (true) {
+        if (false) {
             if ("".equals(prefix)) {
                 System.err.println("WARN: Ungrounded subject: " + triplePattern);
             } else {
