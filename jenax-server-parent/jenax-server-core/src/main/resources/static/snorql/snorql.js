@@ -10,11 +10,13 @@ String.prototype.startsWith = function(str) {
 
 function Snorql() {
     // modify this._endpoint to point to your SPARQL endpoint
-    //this._endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
-    this._endpoint = document.location.href;
+    // must serve under snorql (with trailing slash) - otherwise generate links break
+    // this._endpoint = document.location.href.match(/^([^?]*)snorql/)[1] + 'sparql';
+    this._endpoint = document.location.href.match(/^([^?]*)snorql\//)[1] + 'sparql';
+    // this._endpoint = document.location.href;
     // modify these to your likeing
-    this._poweredByLink = 'https://github.com/AKSW/jena-sparql-api';
-    this._poweredByLabel = 'Jena SPARQL API Servlet';
+    this._poweredByLink = 'https://github.com/Scaseco/jenax';
+    this._poweredByLabel = 'JenaX SPARQL API Servlet';
     this._enableNamedGraphs = false;
 
     this._browserBase = null;

@@ -31,7 +31,7 @@ public class ServletGraphQlEndpointImpl
             throws Exception {
 
         // InputStream r = new ClassPathResource("snorql/index.html").getInputStream();
-        InputStream r = new ClassPathResource("graphql/mui/index.html").getInputStream();
+        InputStream r = new ClassPathResource("static/graphql/mui/index.html").getInputStream();
         // System.out.println(IOUtils.toString(r, StandardCharsets.UTF_8));
         Response result;
         if(r == null) {

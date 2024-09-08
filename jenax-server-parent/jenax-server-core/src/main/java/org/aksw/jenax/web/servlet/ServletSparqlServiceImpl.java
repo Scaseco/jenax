@@ -60,7 +60,7 @@ public class ServletSparqlServiceImpl
             throws Exception {
 
         // InputStream r = new ClassPathResource("snorql/index.html").getInputStream();
-        InputStream r = new ClassPathResource("yasgui/index.html").getInputStream();
+        InputStream r = new ClassPathResource("static/yasgui/index.html").getInputStream();
         // System.out.println(IOUtils.toString(r, StandardCharsets.UTF_8));
         Response result;
         if(r == null) {

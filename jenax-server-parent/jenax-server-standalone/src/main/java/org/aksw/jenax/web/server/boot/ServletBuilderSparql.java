@@ -10,7 +10,8 @@ import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.web.filter.FilterPost;
 import org.aksw.jenax.web.filter.SparqlStmtTypeAcceptHeaderFilter;
-import org.aksw.jenax.web.frontend.WebMvcConfigYasgui;
+import org.aksw.jenax.web.frontend.WebMvcConfigSnorql;
+import org.aksw.jenax.web.frontend.WebMvcConfigSparql;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
 import org.aksw.jenax.web.provider.UnwrapRuntimeExceptionProvider;
@@ -121,11 +122,10 @@ public class ServletBuilderSparql
         // This is hacky as it registers the mapping under "/*" which is not local to the sparql endpoint
         {
             AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-            // dispatcherContext.register(WebMvcConfigSnorql.class);
-            dispatcherContext.register(WebMvcConfigYasgui.class);
+            dispatcherContext.register(WebMvcConfigSparql.class);
 
             ServletRegistration.Dynamic servlet = servletContext.addServlet("dispatcherServlet", new DispatcherServlet(dispatcherContext));
-            servlet.addMapping("/*");
+            servlet.addMapping("/");
             servlet.setAsyncSupported(true);
             servlet.setLoadOnStartup(1);
         }

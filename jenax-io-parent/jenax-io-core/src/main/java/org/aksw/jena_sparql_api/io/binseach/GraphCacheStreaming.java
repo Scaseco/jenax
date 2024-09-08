@@ -2,6 +2,9 @@ package org.aksw.jena_sparql_api.io.binseach;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -19,8 +22,14 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 
 import com.google.common.collect.Streams;
+import com.google.common.util.concurrent.MoreExecutors;
 
 public class GraphCacheStreaming {
+
+    // XXX Pass executor service via context
+    // ForkJoinPool.commonPool();
+    protected static ExecutorService globalExecutorService = MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool());
+
     public static QueryIterator cache(GraphFindCache cache, Triple lookupPattern, Function<Triple, QueryIterator> itSupp) {
         ReadableChannelSource<Binding[]> cachedSource = cache.getCache().get(lookupPattern, lp -> {
 
@@ -39,6 +48,7 @@ public class GraphCacheStreaming {
                     .setSlice(SliceInMemoryCache.create(source.getArrayOps(), 1024, 1000))
                     .setRequestLimit(Long.MAX_VALUE) // One worker can serve as much as it wants
                     .setTerminationDelay(Duration.ofSeconds(180)) // TODO BUG - the worker seems to shut down after the delay even while processing
+                    .setExecutorService(globalExecutorService)
                     .build();
 
             return r;
