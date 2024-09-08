@@ -10,7 +10,6 @@ import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.web.filter.FilterPost;
 import org.aksw.jenax.web.filter.SparqlStmtTypeAcceptHeaderFilter;
-import org.aksw.jenax.web.frontend.WebMvcConfigSnorql;
 import org.aksw.jenax.web.frontend.WebMvcConfigSparql;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
