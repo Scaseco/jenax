@@ -155,21 +155,33 @@ JSON {
   } WHERE {
     VALUES ?uri_ { ${uris} }
     bind(if(isblank(?uri_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?uri_))),?uri_) as ?uri)
-    LATERAL { OPTIONAL {
+    LATERAL {
       ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
       SELECT ?uri ?uri_ ?label ?lang {
+        VALUES ?langCand { "${lang}" ""}
         {
           ?uri_ rdfs:label|skos:prefLabel ?label .
-          FILTER(lang(?label) = "${lang}") .
           BIND(lang(?label) AS ?lang) .
         } UNION {
-          ?uri_ rdfs:label|skos:prefLabel ?label .
-          FILTER(lang(?label) = "") .
+          # Wikidata normalized labels
+          BIND(STRAFTER(STR(?uri_), "http://www.wikidata.org/prop/direct/") AS ?wdPid)
+          FILTER(?wdPid != "")
+          BIND(IRI(CONCAT(STR("http://www.wikidata.org/entity/"), ?wdPid)) AS ?claimForP)
+          ?claimForP rdfs:label ?label .
           BIND(lang(?label) AS ?lang) .
+        } UNION {
+          # Wikidata non-normalized labels
+          BIND(STRAFTER(STR(?uri_), "http://www.wikidata.org/prop/direct-normalized/") AS ?wdPid)
+          FILTER(?wdPid != "")
+          BIND(IRI(CONCAT(STR("http://www.wikidata.org/entity/"), ?wdPid)) AS ?claimForP)
+          ?claimForP rdfs:label ?tmp .
+          BIND(lang(?tmp) AS ?lang) .
+          BIND(CONCAT(STR(?tmp), " (normalized)") AS ?label)
         }
+        FILTER(?lang = ?langCand) .
       } LIMIT 1
       ${ infer ? '}' : '' }
-    } }
+    }
   }
 `,
     geoQuery: (iri, infer) => `CONSTRUCT {
