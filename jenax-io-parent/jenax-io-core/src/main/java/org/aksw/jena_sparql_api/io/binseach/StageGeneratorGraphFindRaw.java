@@ -136,6 +136,7 @@ public class StageGeneratorGraphFindRaw
         };
 
         GraphFindCache cache = execCxt.getContext().get(GraphFindCache.graphCache);
+        // cache = null;
 
         // spoIt represents triples of graph.findRaw as bindings with vars ?s ?p ?o.
         QueryIterator spoIt = cache == null

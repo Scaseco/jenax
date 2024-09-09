@@ -57,6 +57,14 @@ public class GraphFromPrefixMatcher
     public static Iterator<Triple> createBaseIterator(BinarySearcher binarySearcher, Triple triplePattern) {
         String prefix = derivePrefix(triplePattern);
 
+        if (false) {
+            if ("".equals(prefix)) {
+                System.err.println("WARN: Ungrounded subject: " + triplePattern);
+            } else {
+                System.err.println(Thread.currentThread().getName() + ": Lookup with: " + triplePattern);
+            }
+        }
+
         Iterator<Triple> result;
         if (prefix == null) {
             result = Collections.emptyIterator();
@@ -68,14 +76,6 @@ public class GraphFromPrefixMatcher
                 throw new RuntimeException(e);
             }
             result = Iter.onCloseIO(IteratorParsers.createIteratorNTriples(in, RDFDataMgrRx.dftProfile()), in::close);
-        }
-
-        if (false) {
-            if ("".equals(prefix)) {
-                System.err.println("WARN: Ungrounded subject: " + triplePattern);
-            } else {
-                System.err.println(Thread.currentThread().getName() + ": Lookup with: " + triplePattern);
-            }
         }
 
         if(false) {
