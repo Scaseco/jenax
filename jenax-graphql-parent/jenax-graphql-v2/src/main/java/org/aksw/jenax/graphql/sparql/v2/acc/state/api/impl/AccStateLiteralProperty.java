@@ -41,7 +41,7 @@ public class AccStateLiteralProperty<I, E, K, V>
      */
     @Override
     public void beginActual() throws IOException {
-        // seenTargetCount = 0;
+        seenTargetCount = 0;
         skipOutputStartedHere = false;
 
         if (!skipOutput) {
@@ -85,19 +85,19 @@ public class AccStateLiteralProperty<I, E, K, V>
                         // PathJson path = getPath();
                         // errorHandler.accept(new AccJsonErrorEvent(path, "Multiple values encountered for a field that was declared to have at most a single one."));
                     }
-                }
+                } else {
+                    V currentValue = inputToValue.apply(input, env);
+                    if (!(currentValue == null && skipIfNull)) {
+                        if (!skipOutput) {
+                            if (context.isSerialize()) {
+                                ObjectNotationWriter<K, V> writer = context.getJsonWriter();
 
-                V currentValue = inputToValue.apply(input, env);
-                if (!(currentValue == null && skipIfNull)) {
-                    if (!skipOutput) {
-                        if (context.isSerialize()) {
-                            ObjectNotationWriter<K, V> writer = context.getJsonWriter();
-
-                            // In array mode the member key is written on begin.
-                            if (isSingle) {
-                                writer.name(memberKey);
+                                // In array mode the member key is written on begin.
+                                if (isSingle) {
+                                    writer.name(memberKey);
+                                }
+                                writer.value(currentValue);
                             }
-                            writer.value(currentValue);
                         }
                     }
                 }
@@ -144,7 +144,7 @@ public class AccStateLiteralProperty<I, E, K, V>
             }
         }
 
-        seenTargetCount = 0;
+        // seenTargetCount = 0;
     }
 
     @Override
