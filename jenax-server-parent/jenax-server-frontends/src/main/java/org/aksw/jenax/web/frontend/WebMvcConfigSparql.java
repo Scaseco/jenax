@@ -26,12 +26,15 @@ public class WebMvcConfigSparql
 
         registry.addViewController("/snorql").setViewName("redirect:/snorql/");
         registry.addViewController("/snorql/").setViewName("forward:/snorql/index.html");
+
+        registry.addViewController("/").setViewName("forward:/index.html");
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/yasgui/**").addResourceLocations("classpath:/static/yasgui/");
-        registry.addResourceHandler("/view/**").addResourceLocations("classpath:/static/yasgui/");
-        registry.addResourceHandler("/snorql/**").addResourceLocations("classpath:/static/snorql/");
+//        registry.addResourceHandler("/yasgui/**").addResourceLocations("classpath:/static/yasgui/");
+//        registry.addResourceHandler("/view/**").addResourceLocations("classpath:/static/yasgui/");
+//        registry.addResourceHandler("/snorql/**").addResourceLocations("classpath:/static/snorql/");
+        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
     }
 }
