@@ -126,11 +126,15 @@ public class StageGeneratorGraphFindRaw
         Triple lookup = Triple.create(s, p, o);
 
         Function<Triple, QueryIterator> itFactory = lup -> {
+            // The lookup runs in a separate thread so we need to isolate the exec cxt to avoid
+            // concurrent modification exceptions
+            ExecutionContext isolatedExecCxt = new ExecutionContext(execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
+
             Iterator<Binding> it = gfr.findRaw(lup)
                     .mapWith(TripleUtils::tripleToBinding);
             QueryIterator qIter = QueryIterPlainWrapper.create(it);
             for (Expr condition : spoFilter) {
-                qIter = new QueryIterFilterExpr(qIter, condition, execCxt);
+                qIter = new QueryIterFilterExpr(qIter, condition, isolatedExecCxt);
             }
             return qIter;
         };
