@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.arq.service.vfs;
+package org.aksw.jenax.arq.service.vfs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +12,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.aksw.commons.collections.IterableUtils;
@@ -32,6 +30,7 @@ import org.aksw.commons.util.entity.EntityInfo;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
 import org.aksw.jena_sparql_api.io.binseach.StageGeneratorGraphFindRaw;
+import org.aksw.jenax.arq.util.binding.QueryIterOverQueryExec;
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
@@ -53,10 +52,7 @@ import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -64,7 +60,6 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpService;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -74,13 +69,13 @@ import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.system.SerializationFactoryFinder;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
@@ -387,66 +382,34 @@ public class ServiceExecutorFactoryVfsUtils {
                         .setResourceCache(resourceCache);
 
                 // Model generation wrapped as a flowable for resource management
-                bindingFlow = Flowable.generate(() -> {
-                    boolean useV1 = false;
-                    BinarySearcher binarySearcher;
-                    if (useV1) {
-                        binarySearcher = isBzip2
-                            ? BlockSources.createBinarySearcherBz2(path, bufferSize)
-                            : BlockSources.createBinarySearcherText(path, bufferSize);
-                    } else {
-                        binarySearcher = isBzip2
-                            ? binSearchBuilder.setCodec(new BZip2Codec()).build()
-                            : binSearchBuilder.build();
-                    }
+                // bindingFlow = Flowable.generate(() -> {
+                boolean useV1 = false;
+                BinarySearcher binarySearcher;
+                if (useV1) {
+                    binarySearcher = isBzip2
+                        ? BlockSources.createBinarySearcherBz2(path, bufferSize)
+                        : BlockSources.createBinarySearcherText(path, bufferSize);
+                } else {
+                    binarySearcher = isBzip2
+                        ? binSearchBuilder.setCodec(new BZip2Codec()).build()
+                        : binSearchBuilder.build();
+                }
 
-                    Graph graph = new GraphFromPrefixMatcher(binarySearcher);
-                    // GraphFromSubjectCache subjectCacheGraph = new GraphFromSubjectCache(graph);
-                    GraphFromSubjectCache subjectCacheGraph = null;
-                    Graph effectiveGraph = graph;
-                    Model model = ModelFactory.createModelForGraph(effectiveGraph);
-                    // QueryExecution qe = QueryExecutionFactory.create(query, model);
+                Graph graph = new GraphFromPrefixMatcher(binarySearcher);
+                // GraphFromSubjectCache subjectCacheGraph = new GraphFromSubjectCache(graph);
+                GraphFromSubjectCache subjectCacheGraph = null;
+                Graph finalGraph = graph;
+                // QueryExecution qe = QueryExecutionFactory.create(query, model);
 
-                    cxt.set(ARQ.stageGenerator, new StageGeneratorGraphFindRaw());
-                    // XXX Even better would be to pass on the cancel symbol set up
-                    // by QueryExecDataset
-                    QueryExecution qe = QueryExecution.model(model)
-                        .query(query)
-                        .context(cxt)
-                        .build();
+                cxt.set(ARQ.stageGenerator, new StageGeneratorGraphFindRaw());
+                // XXX Even better would be to pass on the cancel symbol set up
+                // by QueryExecDataset
+                QueryExec qe = QueryExec.graph(finalGraph)
+                    .query(query)
+                    .context(cxt)
+                    .build();
 
-//                    QueryExecution qe = QueryExecutionAdapter.adapt(QueryExecModCustomBase.overwriteTimeouts(
-//                                QueryExec.graph(graph), context.get(ARQ.queryTimeout))
-//                            .context(execCxt.getContext())
-//                            .query(query)
-//                            .build());
-                    ResultSet rs = qe.execSelect();
-
-                    Stopwatch sw = Stopwatch.createStarted();
-
-                    return new SimpleEntry<AutoCloseable, ResultSet>(() -> {
-                        logger.info("SERVICE <" + path + "> " +  query);
-                        if (subjectCacheGraph != null) {
-                            logger.info(sw.elapsed(TimeUnit.MILLISECONDS) * 0.001 + " seconds - " + subjectCacheGraph.getSubjectCache().stats());
-                        }
-
-                        qe.close();
-                        model.close();
-                        //graph.close();
-                    }, rs);
-                },
-                (e, emitter) -> {
-                    ResultSet rs = e.getValue();
-                    if(rs.hasNext()) {
-                        Binding binding = rs.nextBinding();
-                        emitter.onNext(binding);
-                    } else {
-                        emitter.onComplete();
-                    }
-                },
-                e -> e.getKey().close());
-
-                // itBindings = bindingFlow.blockingIterable().iterator();
+                qIter = new QueryIterOverQueryExec(execCxt, qe);
             }
 
             // TODO Allow subject-streams to take advantage of binsearch:
@@ -475,8 +438,6 @@ public class ServiceExecutorFactoryVfsUtils {
                     throw new RuntimeException("For streaming in SERVICE, only 's' for subjects is presently supported.");
                 }
             }
-
-
 
             if (!specialStreamProcessingApplied) {
                 Dataset dataset = DatasetFactory.create();
@@ -539,15 +500,14 @@ public class ServiceExecutorFactoryVfsUtils {
                 qIter = QueryIter.map(qIter, varMapping);
             }
 
-        } catch (RuntimeException ex)
-        {
+        } catch (Exception ex) {
             if ( silent )
             {
                 logger.warn("SERVICE <" + opService.getService().toString() + ">: " + ex.getMessage()) ;
                 // Return the input
                 return QueryIterSingleton.create(outerBinding, execCxt) ;
             }
-            throw ex ;
+            throw new RuntimeException(ex);
         }
 
         // Need to put the outerBinding as parent to every binding of the service call.

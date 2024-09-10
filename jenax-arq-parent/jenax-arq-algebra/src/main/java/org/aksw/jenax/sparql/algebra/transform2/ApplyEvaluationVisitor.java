@@ -44,6 +44,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.algebra.walker.ApplyTransformVisitor;
 import org.apache.jena.sparql.algebra.walker.WalkerVisitor;
@@ -350,6 +351,13 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
 
     @Override
     public void visit(OpGroup op) {
+        T sub = pop(opStack, op.getSubOp());
+        T value = evaluator.eval(op, sub);
+        push(opStack, value) ;
+    }
+
+    @Override
+    public void visit(OpUnfold op) {
         T sub = pop(opStack, op.getSubOp());
         T value = evaluator.eval(op, sub);
         push(opStack, value) ;

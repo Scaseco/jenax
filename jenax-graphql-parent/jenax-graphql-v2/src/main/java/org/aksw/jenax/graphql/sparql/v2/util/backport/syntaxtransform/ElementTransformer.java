@@ -48,6 +48,7 @@ import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.ElementUnfold;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitor;
 import org.apache.jena.sparql.syntax.ElementVisitorBase;
@@ -55,6 +56,7 @@ import org.apache.jena.sparql.syntax.ElementWalker;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.apache.jena.sparql.syntax.syntaxtransform.TransformElementLib;
+import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 
 // TODO Part of this class is by now part of ApplyElementTransformVisitor ~ Claus 2019-06-06
 
@@ -330,6 +332,15 @@ public class ElementTransformer {
             if ( expr == null || exprTransform == null )
                 return expr ;
             return ExprTransformer.transform(exprTransform, expr) ;
+        }
+
+        @Override
+        public void visit(ElementUnfold el) {
+            throw new UnsupportedOperationException();
+//            Expr expr = el.getExpr() ;
+//            Expr expr2 = transformExpr(expr, exprTransform) ;
+//            Element el2 = transform.transform(el, expr2) ;
+//            push(el2) ;
         }
 
 //        @Override

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.arq.service.vfs;
+package org.aksw.jenax.arq.service.vfs;
 
 import java.util.ArrayList;
 import java.util.Iterator;

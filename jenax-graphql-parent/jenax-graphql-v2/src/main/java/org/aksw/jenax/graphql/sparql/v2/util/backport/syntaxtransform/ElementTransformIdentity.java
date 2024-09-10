@@ -43,6 +43,7 @@ import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.ElementUnfold;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
@@ -93,6 +94,8 @@ public final class ElementTransformIdentity implements ElementTransform
     public Element transform(ElementSubQuery el, Query query) { return el ; }
     @Override
     public Element transform(ElementLateral el, Element subElt) { return el ; }
+    @Override
+    public Element transform(ElementUnfold el, Expr expr, Var v1, Var v2) { return el ; }
 
 //    @Override
 //    public Element transform(ElementFind el, Var v, Triple triple2) {

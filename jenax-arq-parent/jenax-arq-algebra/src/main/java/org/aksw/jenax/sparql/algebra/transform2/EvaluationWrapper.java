@@ -36,6 +36,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 /** Wrap another transform and pass on the transform operation */
@@ -92,4 +93,6 @@ public class EvaluationWrapper<T>
     @Override public T eval(OpReduced opReduced, T subOp)       { return evaluator.eval(opReduced, subOp) ; }
     @Override public T eval(OpSlice opSlice, T subOp)           { return evaluator.eval(opSlice, subOp) ; }
     @Override public T eval(OpGroup opGroup, T subOp)           { return evaluator.eval(opGroup, subOp) ; }
+
+    @Override public T eval(OpUnfold opUnfold, T subOp)         { return evaluator.eval(opUnfold, subOp) ; }
 }

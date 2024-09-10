@@ -37,6 +37,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 /**
@@ -78,4 +79,5 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      T eval(OpReduced op, T subOp);
      T eval(OpSlice op, T subOp);
      T eval(OpGroup op, T subOp);
+     T eval(OpUnfold op, T subOp);
 }

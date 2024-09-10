@@ -25,6 +25,7 @@ import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.ElementUnfold;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitor;
 
@@ -295,6 +296,11 @@ public class ElementTreeAnalyser implements ElementVisitor {
 
     @Override
     public void visit(ElementLateral el) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public void visit(ElementUnfold el) {
         throw new RuntimeException("Not implemented");
     }
 

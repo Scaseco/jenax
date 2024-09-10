@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.arq.service.vfs.ServiceExecutorFactoryVfsUtils;
+import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;

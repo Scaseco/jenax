@@ -36,6 +36,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 /** Base class that evals everything to <tt>null</tt>. */
@@ -77,4 +78,5 @@ public class EvaluationBase<T>
     @Override public T eval(OpReduced opReduced, T subOp) { return null; }
     @Override public T eval(OpSlice opSlice, T subOp) { return null; }
     @Override public T eval(OpGroup opGroup, T subOp) { return null; }
+    @Override public T eval(OpUnfold opUnfold, T subOp) { return null; }
 }

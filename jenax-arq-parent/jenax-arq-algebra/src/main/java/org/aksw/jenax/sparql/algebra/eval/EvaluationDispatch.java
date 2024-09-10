@@ -39,6 +39,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 public class EvaluationDispatch<T>
@@ -315,5 +316,12 @@ public class EvaluationDispatch<T>
         if ( stack.size() == 0 )
             Log.warn(this, "Warning: pop: empty stack");
         return stack.pop();
+    }
+
+    @Override
+    public void visit(OpUnfold opUnfold) {
+        T input = pop();
+        T value = evaluator.eval(opUnfold, input);
+        push(value);
     }
 }

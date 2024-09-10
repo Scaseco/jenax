@@ -36,6 +36,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 public interface OpRewriter<T> {
@@ -82,6 +83,7 @@ public interface OpRewriter<T> {
     default T rewrite(OpReduced op)            { return fallback(op); }
     default T rewrite(OpSlice op)              { return fallback(op); }
     default T rewrite(OpGroup op)              { return fallback(op); }
+    default T rewrite(OpUnfold op)             { return fallback(op); }
 
 
     public static class OpVisitorBridge<T>
@@ -137,6 +139,7 @@ public interface OpRewriter<T> {
         @Override public void visit(OpReduced op)                { result = rewriter.rewrite(op); }
         @Override public void visit(OpSlice op)                  { result = rewriter.rewrite(op); }
         @Override public void visit(OpGroup op)                  { result = rewriter.rewrite(op); }
+        @Override public void visit(OpUnfold op)                 { result = rewriter.rewrite(op); }
     }
 
 }

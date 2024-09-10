@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.arq.service.vfs;
+package org.aksw.jenax.arq.service.vfs;
 
 import org.aksw.commons.io.hadoop.binseach.v2.BinSearchResourceCache;
 import org.apache.jena.query.ARQ;
