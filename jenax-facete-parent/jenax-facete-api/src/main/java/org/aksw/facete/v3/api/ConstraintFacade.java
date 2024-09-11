@@ -60,6 +60,8 @@ public interface ConstraintFacade<B> {
 
 
     HLFacetConstraint<? extends ConstraintFacade<B>> gt(Node node);
+    HLFacetConstraint<? extends ConstraintFacade<B>> lt(Node node);
+
     HLFacetConstraint<? extends ConstraintFacade<B>> neq(Node node);
 
 

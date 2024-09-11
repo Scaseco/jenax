@@ -47,7 +47,7 @@ public class ServiceExecutorFactoryRegistratorVfs {
 
             return result;
         }
-    };
+    }
 
     /** Read ahead a certain amount of items from the lhs and
      *  concurrently start fetching the corresponding data for the rhs.
@@ -113,7 +113,8 @@ public class ServiceExecutorFactoryRegistratorVfs {
 
         ExecutorService executorService = MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool());
 
-        // Make sure to add after the service enhancer
+        // Make sure to add the 'concurrent' handler after the service enhancer
+        // because we require 'loop:' to be processed first - i.e. the order is SERVICE <loop:concurrent:>
         List<ChainingServiceExecutorBulk> bulkChain = reg.getBulkChain();
         int idx = IntStream.range(0, bulkChain.size())
                 .filter(i -> bulkChain.get(i).getClass().equals(ChainingServiceExecutorBulkServiceEnhancer.class))

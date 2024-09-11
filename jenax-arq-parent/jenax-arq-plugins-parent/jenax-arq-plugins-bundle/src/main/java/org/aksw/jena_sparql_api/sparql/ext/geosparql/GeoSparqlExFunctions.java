@@ -26,6 +26,7 @@ import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.FmtUtils;
+import org.locationtech.jts.coverage.CoverageSimplifier;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -141,6 +142,22 @@ public class GeoSparqlExFunctions {
     public static GeometryWrapper difference(GeometryWrapper geom1, GeometryWrapper geom2) {
         Geometry difference = geom1.getParsingGeometry().difference(geom2.getParsingGeometry());
         GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom1, difference);
+        return result;
+    }
+
+    public static Geometry toCollectionIfNeeded(Geometry[] geoms) {
+        Geometry result = geoms.length == 1
+                ? geoms[0]
+                : CustomGeometryFactory.theInstance().createGeometryCollection(geoms);
+        return result;
+    }
+
+    @IriNs(GeoSPARQL_URI.GEOF_URI)
+    public static GeometryWrapper simplifyCoverage(GeometryWrapper geom, @DefaultValue("0.1") double tolerance) {
+        Geometry[] coverage = expandCollection(geom.getParsingGeometry()).toArray(Geometry[]::new);
+        Geometry[] simplified = CoverageSimplifier.simplify(coverage, tolerance);
+        Geometry tmp = toCollectionIfNeeded(simplified);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geom, tmp);
         return result;
     }
 
