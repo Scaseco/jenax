@@ -6,6 +6,8 @@ evaluations
 .settings
 target
 node_modules
+build
+node
 bin
 
 # Package Files #

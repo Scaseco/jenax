@@ -24,42 +24,73 @@
 				</configuration>
 			</plugin>
 
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.tomcat.maven</groupId> -->
-			<!-- <artifactId>tomcat6-maven-plugin</artifactId> -->
-			<!-- <version>2.1</version> -->
-			<!-- <configuration> -->
-			<!-- <server>${tomcat6.server-id}</server> -->
-			<!-- <url>${tomcat6.deploy-url}</url> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.0</version>
+				<executions>
+					<execution>
+						<id>install-node-and-yarn</id>
+						<goals>
+							<goal>install-node-and-yarn</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v18.17.1</nodeVersion>
+							<yarnVersion>v1.22.19</yarnVersion>
+							<workingDirectory>frontend</workingDirectory>
+						</configuration>
+					</execution>
 
+					<execution>
+						<id>yarn-install</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<configuration>
+							<arguments>install</arguments>
+							<workingDirectory>frontend</workingDirectory>
+						</configuration>
+					</execution>
 
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.tomcat.maven</groupId> -->
-			<!-- <artifactId>tomcat7-maven-plugin</artifactId> -->
-			<!-- <version>2.1</version> -->
-			<!-- <configuration> -->
-			<!-- <server>${tomcat7.server-id}</server> -->
-			<!-- <url>${tomcat7.deploy-url}</url> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
+					<execution>
+						<id>yarn-run-build</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>run build</arguments>
+							<workingDirectory>frontend</workingDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-
-			<!-- <plugin> -->
-			<!-- <groupId>org.mortbay.jetty</groupId> -->
-			<!-- <artifactId>jetty-maven-plugin</artifactId> -->
-			<!-- <version>8.1.9.v20130131</version> -->
-			<!-- <configuration> -->
-			<!-- <systemProperties> -->
-			<!-- <systemProperty> -->
-			<!-- <name>jetty.port</name> -->
-			<!-- <value>5510</value> -->
-			<!-- </systemProperty> -->
-			<!-- </systemProperties> -->
-			<!-- <reload>manual</reload> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
+			<!-- Maven Resources Plugin -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/frontend/build</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -120,13 +151,6 @@
 			<artifactId>jenax-graphql-v2</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-path-finding</artifactId> 
-			</dependency> -->
-		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId>
-		<artifactId>jena-sparql-api-update</artifactId> 
-			</dependency> -->
-
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -136,7 +160,6 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -148,7 +171,6 @@
 			<artifactId>spring-context</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-spring6</artifactId>
@@ -159,21 +181,10 @@
 			<artifactId>spring-web</artifactId>
 		</dependency>
 
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.atmosphere</groupId> -->
-		<!-- <artifactId>atmosphere-jersey</artifactId> -->
-		<!-- </dependency> -->
-		
 		<dependency>
 			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
 			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
 		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.slf4j</groupId> -->
-		<!-- <artifactId>slf4j-api</artifactId> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -186,48 +197,14 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>org.tuckey</groupId> -->
-		<!-- <artifactId>urlrewritefilter</artifactId> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>javax.ws.rs</groupId> -->
-		<!-- <artifactId>jsr311-api</artifactId> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<groupId>jakarta.ws.rs</groupId>
 			<artifactId>jakarta.ws.rs-api</artifactId>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-fuseki-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		-->
-
-		<!-- <dependency> -->
-		<!-- <groupId>javax.servlet</groupId> -->
-		<!-- <artifactId>javax.servlet-api</artifactId> -->
-		<!-- </dependency> -->
-
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.springframework</groupId> -->
-		<!-- <artifactId>spring-beans</artifactId> -->
-		<!-- </dependency> -->
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.springframework</groupId> -->
-		<!-- <artifactId>spring-context</artifactId> -->
-		<!-- </dependency> -->
 	</dependencies>
-
 </project>
