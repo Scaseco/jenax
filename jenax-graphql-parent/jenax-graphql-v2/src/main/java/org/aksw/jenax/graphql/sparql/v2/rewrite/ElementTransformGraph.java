@@ -14,7 +14,6 @@ public class ElementTransformGraph
 {
     protected Node node;
 
-
     public ElementTransformGraph(Node node) {
         super();
         this.node = Objects.requireNonNull(node);

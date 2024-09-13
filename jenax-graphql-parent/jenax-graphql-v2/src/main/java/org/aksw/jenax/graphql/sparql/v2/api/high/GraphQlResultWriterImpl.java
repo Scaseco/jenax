@@ -1,8 +1,13 @@
 package org.aksw.jenax.graphql.sparql.v2.api.high;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
+import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderJava;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
+import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterUtils;
+import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterViaGon;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.path.P_Link;
@@ -26,14 +31,7 @@ public class GraphQlResultWriterImpl
         return gson;
     }
 
-    /** Wraps the output stream with a json writer. Always flushes the writer on completion. */
-//    public void write(OutputStream out, GraphQlExec exec) throws IOException {
-//        JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-//        write(writer, exec);
-//        writer.flush();
-//    }
-//
-    public static P_Path0 hack(String name) {
+    public static P_Path0 stringToKey(String name) {
         return new P_Link(NodeFactory.createLiteralString(name));
     }
 
@@ -48,42 +46,44 @@ public class GraphQlResultWriterImpl
         }
 
         while (exec.sendNextItemToWriter(writer)) {
-
+            // Loop until done
         }
 
         if (!exec.isSingle()) {
             writer.endArray();
         }
 
-//        for (GraphQlDataProvider dataProvider : exec.getDataProviders()) {
-//            String name = dataProvider.getName();
-//            writer.name(name);
-//
-//            boolean isSingle = dataProvider.isSingle();
-//            if (!isSingle) {
-//                writer.beginArray();
-//            }
-//
-//            exec.
-//            // dataProvider.write(writer, gson);
-//
-//            if (!isSingle) {
-//                writer.endArray();
-//            }
-//        }
-
-        // writer.endObject(); // end data
-
         writer.name("errors");
         writer.beginArray();
         // TODO Write out encountered errors
         writer.endArray(); // end errors
 
-//        JsonObject metadata = GraphQlExecUtils.collectExtensions(exec);
-//        if (!metadata.keySet().isEmpty()) {
-//            writer.name("extensions");
-//            gson.toJson(metadata, writer);
-//        }
+        // The code below collects extensions in-memory and writes out an { "extension": {} } section
+        // if exec.writeExtensions returns a non-empty object.
+        // XXX Too much boilerplate
+
+        GonProviderJava<String, Node> gonProvider = GonProviderJava.newInstance();
+        ObjectNotationWriterViaGon<Object, String, Node> memoryWriter = ObjectNotationWriterViaGon.of(gonProvider);
+        memoryWriter.beginObject();
+        exec.writeExtensions(memoryWriter, x -> x);
+        memoryWriter.endObject();
+        Object product = memoryWriter.getProduct();
+
+        Iterator<Entry<String, Object>> it = gonProvider.listProperties(product);
+        if (it.hasNext()) {
+            writer.name("extensions");
+            writer.beginObject();
+
+            while (it.hasNext()) {
+                Entry<String, Object> e = it.next();
+                String k = e.getKey();
+                Object v = e.getValue();
+                writer.name(k);
+                ObjectNotationWriterUtils.sendToWriter(writer, gonProvider, v);
+            }
+
+            writer.endObject();
+        }
 
         writer.endObject(); // end response
         writer.flush();

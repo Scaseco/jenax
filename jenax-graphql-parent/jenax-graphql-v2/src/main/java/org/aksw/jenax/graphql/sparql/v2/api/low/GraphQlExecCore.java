@@ -1,5 +1,9 @@
 package org.aksw.jenax.graphql.sparql.v2.api.low;
 
+/**
+ * Common interface for graphql-based execution - whether its for individual fields
+ * or whole documents.
+ */
 public interface GraphQlExecCore
     extends AutoCloseable
 {

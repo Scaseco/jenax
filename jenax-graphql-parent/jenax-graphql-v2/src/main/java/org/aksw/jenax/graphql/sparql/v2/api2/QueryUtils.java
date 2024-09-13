@@ -12,7 +12,6 @@ public class QueryUtils {
     }
 
     public static Query elementToQuery(Element pattern, String resultVar) {
-
         if (pattern == null)
             return null;
         Query query = new Query();
@@ -35,6 +34,5 @@ public class QueryUtils {
         }
 
         return query;
-
     }
 }

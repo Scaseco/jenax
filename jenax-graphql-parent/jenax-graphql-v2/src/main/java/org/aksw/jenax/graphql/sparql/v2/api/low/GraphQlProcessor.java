@@ -9,16 +9,16 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.impl.AggStateGon;
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExecBuilderImpl.QueryMapping;
 import org.aksw.jenax.graphql.sparql.v2.api2.ElementGeneratorLateral;
 import org.aksw.jenax.graphql.sparql.v2.api2.ElementGeneratorLateral.ElementMapping;
-import org.aksw.jenax.graphql.sparql.v2.api2.QueryUtils;
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.GraphQlFieldRewrite;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.GraphQlToSparqlConverterBase;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult;
-import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult.SingleResult;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformAssignGlobalIds;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformDebugToQuery;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformExpandShorthands;
+import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
@@ -28,6 +28,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementLateral;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,8 @@ public class GraphQlProcessor<K> {
 
     public static <K> GraphQlProcessor<K> of(Document document, Map<String, Node> assignments, Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory) {
         Document b = GraphQlUtils.applyTransform(document, new TransformExpandShorthands());
-        Document preprocessedDoc = GraphQlUtils.applyTransform(b, TransformAssignGlobalIds.of("state_", 0));
+        Document c = GraphQlUtils.applyTransform(b, new TransformDebugToQuery());
+        Document preprocessedDoc = GraphQlUtils.applyTransform(c, TransformAssignGlobalIds.of("state_", 0));
 
         if (logger.isDebugEnabled()) {
             logger.debug("Preprocessing GraphQl document: " + AstPrinter.printAst(preprocessedDoc));
@@ -101,7 +103,7 @@ public class GraphQlProcessor<K> {
         List<GraphQlFieldProcessor<K>> fieldProcessors = new ArrayList<>(rewriteResult.map().size());
         Map<String, Integer> nameToIndex = new LinkedHashMap<>();
         int i = 0;
-        for (Entry<String, SingleResult<K>> entry : rewriteResult.map().entrySet()) {
+        for (Entry<String, GraphQlFieldRewrite<K>> entry : rewriteResult.map().entrySet()) {
 
             String name = entry.getKey();
             GraphQlFieldProcessor<K> fieldProcessor = makeProcessor(name, entry.getValue());
@@ -116,24 +118,43 @@ public class GraphQlProcessor<K> {
         return result;
     }
 
-    private static <K> GraphQlFieldProcessor<K> makeProcessor(String name,
-            SingleResult<K> single) {
-        ElementNode elementNode = single.rootElementNode();
-        boolean isSingle = single.isSingle();
+    private static <K> GraphQlFieldProcessor<K> makeProcessor(String name, GraphQlFieldRewrite<K> fieldRewrite) {
+        ElementNode elementNode = fieldRewrite.rootElementNode();
+        boolean isSingle = fieldRewrite.isSingle();
 
         Var stateVar = Var.alloc("state");
         Node rootStateId = NodeFactory.createLiteralString(elementNode.getIdentifier());
 
-        // Important: stateIds are handled as jena Nodes!
+        // Important: stateIds are jena Nodes (not java objects)!
 
         ElementMapping eltMap = ElementGeneratorLateral.toLateral(elementNode, stateVar);
         Element elt = eltMap.element();
         Map<?, Map<Var, Var>> stateVarMap = eltMap.stateVarMap();
 
-        Query query = QueryUtils.elementToQuery(elt);
-        AggStateGon<Binding, FunctionEnv, K, Node> agg = single.rootAggBuilder().newAggregator();
+        // Root var map: original var -> renamed var (so that access by original var is possibleg)
+        Map<Var, Var> rootVarMap = stateVarMap.get(rootStateId);
 
-        QueryMapping<K> queryMapping = new QueryMapping<>(name, stateVar, rootStateId, query, stateVarMap, agg, isSingle);
+        // Remove needless top-level groups-of-one and lateral
+        // XXX Should toLateral() already handle this?
+        elt = ElementUtils.recursivelyUnnestGroupsOfOne(elt);
+        if (elt instanceof ElementLateral l) {
+            elt = l.getLateralElement();
+        }
+
+        List<Var> projectVars = stateVarMap.values().stream()
+                .flatMap(varMap -> varMap.values().stream())
+                .distinct()
+                .toList();
+
+        Query query = new Query();
+        query.setQuerySelectType();
+        query.setQueryResultStar(false);
+        query.addProjectVars(projectVars);
+        query.setQueryPattern(elt);
+
+        AggStateGon<Binding, FunctionEnv, K, Node> agg = fieldRewrite.rootAggBuilder().newAggregator();
+
+        QueryMapping<K> queryMapping = new QueryMapping<>(name, stateVar, rootStateId, query, stateVarMap, agg, isSingle, fieldRewrite);
         GraphQlFieldProcessor<K> fieldProcessor = new GraphQlFieldProcessorImpl<>(name, queryMapping);
         return fieldProcessor;
     }

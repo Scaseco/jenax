@@ -3,21 +3,27 @@ package org.aksw.jenax.graphql.sparql.v2.api.low;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.impl.AccStateDriver;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 import org.aksw.jenax.graphql.sparql.v2.util.BindingRemapped;
 import org.aksw.jenax.graphql.sparql.v2.util.ExecutionContextUtils;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.function.FunctionEnv;
 
+import graphql.language.DirectivesContainer;
+
 public class GraphQlFieldExecImpl<K>
     implements GraphQlFieldExec<K>
 {
+    protected final Query query;
     protected final QueryExec queryExec;
     protected final RowSet rs;
     protected FunctionEnv functionEnv;
@@ -25,16 +31,29 @@ public class GraphQlFieldExecImpl<K>
     protected Map<?, Map<Var, Var>> stateVarMap;
     protected AccStateDriver<Binding, FunctionEnv, K, Node> driver;
 
+    protected QueryMapping<K> queryMapping;
+
     protected boolean isFinished = false;
 
-    public GraphQlFieldExecImpl(boolean isSingle, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver) {
+    /**
+     *
+     * @param isSingle
+     * @param query The query. We don't rely on QueryExec to support accessing the query.
+     * @param queryExec
+     * @param stateVarMap
+     * @param driver
+     */
+    public GraphQlFieldExecImpl(boolean isSingle, Query query, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver,
+            QueryMapping<K> queryMapping) {
         super();
         this.isSingle = isSingle;
+        this.query = query;
         this.queryExec = Objects.requireNonNull(queryExec);
         this.rs = Objects.requireNonNull(queryExec.select());
         this.functionEnv = ExecutionContextUtils.createFunctionEnv(); // XXX Ideally use the queryExec's query execution context.
         this.stateVarMap = Objects.requireNonNull(stateVarMap);
         this.driver = Objects.requireNonNull(driver);
+        this.queryMapping = queryMapping;
     }
 
     @Override
@@ -66,9 +85,9 @@ public class GraphQlFieldExecImpl<K>
                 if (originalToEnum == null) {
                     throw new IllegalStateException("No variable mapping obtained for state: " + state);
                 }
+                // XXX We could avoid creating a binding wrapper if we had Adapter.getNode(originalBinding, originalToEnum, var);
                 Binding mappedBinding = BindingRemapped.of(binding, originalToEnum);
 
-                // System.out.println(rs.next());
                 completedObject = driver.accumulate(mappedBinding, functionEnv);
                 if (completedObject) {
                     break;
@@ -86,6 +105,20 @@ public class GraphQlFieldExecImpl<K>
     }
 
     @Override
+    public void writeExtensions(ObjectNotationWriter<K, Node> writer, Function<String, K> stringToKey) throws IOException {
+        graphql.language.Node<?> graphQlNode = queryMapping.fieldRewrite().graphQlNode();
+        if (graphQlNode instanceof DirectivesContainer<?> container) {
+            if (container.hasDirective("debug")) {
+                writer.name(stringToKey.apply("metadata"));
+                writer.beginObject();
+                writer.name(stringToKey.apply("sparqlQuery"));
+                writer.value(NodeFactory.createLiteralString(Objects.toString(query)));
+                writer.endObject();
+            }
+        }
+    }
+
+    @Override
     public void close() {
         queryExec.close();
     }
@@ -95,19 +128,3 @@ public class GraphQlFieldExecImpl<K>
         queryExec.abort();
     }
 }
-
-//// @Override
-//public Object nextItem(GonProvider<K, V> gonProvider) {
-//  // Create an in-memory writer over the driver's gonProvider
-//  // GonProvider<K, V> gonProvider = driver.getContext().getGonProvider();
-//  ObjectNotationWriterViaGon<K, V> tmp = ObjectNotationWriterViaGon.of(gonProvider);
-//
-//  try {
-//      sendNextItemToWriter(tmp);
-//  } catch (IOException e) {
-//      throw new RuntimeException(e);
-//  }
-//
-//  Object result = tmp.getProduct();
-//  return result;
-//}

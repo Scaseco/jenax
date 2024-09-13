@@ -1,6 +1,7 @@
 import { basicSetup, EditorView } from 'codemirror';
 import { EditorState } from '@codemirror/state';
 import { graphql } from 'cm6-graphql';
+import { json } from '@codemirror/lang-json';
 
 const input = document.getElementById('input');
 
@@ -9,6 +10,7 @@ const debug = document.getElementById('debug');
 
 const sendBtn = document.getElementById('sendBtn');
 const abortBtn = document.getElementById('abortBtn');
+const sparqlBtn = document.getElementById('sparqlBtn');
 
 const endpoint = document.location.href
 const saveKey = "savedRequest";
@@ -33,6 +35,22 @@ function getInitialEditorContent() {
     r = "";
   }
   return r;
+}
+
+function setDebugContent(content, isSparql) {
+  if (isSparql) {
+    sparqlBtn.disabled = false;
+    sparqlBtn.onclick = function() {
+      const params = new URLSearchParams();
+      params.set('query', content);
+      window.open('sparql#' + params.toString(), '_blank');
+      return !1;
+    };
+    debug.value = content;    
+  } else {
+    sparqlBtn.disabled = true
+    debug.value = '';
+  }
 }
 
 /*
@@ -61,6 +79,19 @@ const editorView = new EditorView({
   parent: input
 });
 
+const outputView = new EditorView({
+  extensions: [basicSetup, json(), EditorView.editable.of(false)],
+  parent: output
+});
+
+function setOutputContent(newContent, lang) {
+  outputView.setState(EditorState.create({
+    doc: newContent,
+    extensions: [basicSetup, lang, EditorView.editable.of(false)].filter(item => item !== null)
+  }));
+}
+
+
 function getEditorContent() {
   const result = editorView.state.doc.toString();
   return result;
@@ -88,8 +119,8 @@ function toBashString(str) {
 
 function showCurl() {
   const payloadStr = buildRequest();
-  output.value = `curl -X POST '${toBashString(endpoint)}' -d '${toBashString(payloadStr)}'`;
-  debug.value = "";
+  setOutputContent(`curl -X POST '${toBashString(endpoint)}' -d '${toBashString(payloadStr)}'`, null);
+  setDebugContent('', false);
 }
 
 /** Create a link if it hasn't happened yet. Pushes a history state on change. */
@@ -150,12 +181,13 @@ function sendRequest() {
 
         if (xhr.status == 200) {
           const data = xhr.response;
-          output.value = data;
+          setOutputContent(data, json());
 
-          const json = JSON.parse(data);
+          const jsonData = JSON.parse(data);
           // Check for extensions.metadata keys
-          var debugStr = "";
-          const meta = json?.extensions?.metadata;
+          // var debugStr = "";
+          const sparqlQuery = jsonData?.extensions?.metadata?.sparqlQuery;
+          /*
           if (meta) {
             for (const [key, value] of Object.entries(meta)) {
               const sparqlQuery = value?.sparqlQuery;
@@ -164,14 +196,15 @@ function sendRequest() {
               }
             }
           }
-          debug.value = debugStr
+          */
+          setDebugContent(sparqlQuery, sparqlQuery != null);
         } else {
           if (xhr.status == 0) {
             // Retain the current output
             // output.value = "Request aborted";
           } else {
-            output.value = `Error: ${xhr.status}\n\n${xhr.responseText}`;
-            debug.value = "";
+            setOutputContent(`Error: ${xhr.status}\n\n${xhr.responseText}`, null);
+            setDebugContent('', false);
           }
         }
         pendingXhr = null;

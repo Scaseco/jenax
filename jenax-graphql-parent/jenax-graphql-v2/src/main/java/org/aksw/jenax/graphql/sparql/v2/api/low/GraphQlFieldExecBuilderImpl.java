@@ -28,8 +28,6 @@ public class GraphQlFieldExecBuilderImpl<K>
 {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlFieldExecBuilderImpl.class);
 
-    public static record QueryMapping<K>(String name, Var stateVar, Node rootStateId, Query query, Map<?, Map<Var, Var>> stateVarMap, AggStateGon<Binding, FunctionEnv, K, Node> agg, boolean isSingle) {}
-
     private QueryMapping<K> mapping;
     private Creator<QueryExecBuilder> queryExecBuilderCreator;
 
@@ -44,27 +42,9 @@ public class GraphQlFieldExecBuilderImpl<K>
         this.queryExecBuilderCreator = queryExecBuilderCreator;
         return this;
     }
-//
-//    // @Override
-//    public GraphQlDataProviderExecBuilder initialTimeout(long timeout, TimeUnit timeUnit) {
-//        queryExecBuilder.initialTimeout(timeout, timeUnit);
-//        return this;
-//    }
-//
-//    // @Override
-//    public GraphQlDataProviderExecBuilder overallTimeout(long timeout, TimeUnit timeUnit) {
-//        queryExecBuilder.overallTimeout(timeout, timeUnit);
-//        return this;
-//    }
-//
-//    // @Override
-//    public Context getContext() {
-//        return queryExecBuilder.getContext();
-//    }
 
     @Override
     public GraphQlFieldExec<K> build() {
-
         // this.queryExecBuilderCreator = Objects.requireNonNull(queryExecBuilderCreator);
         QueryExecBuilder queryExecBuilder = queryExecBuilderCreator.create();
         Objects.requireNonNull(queryExecBuilder);
@@ -101,12 +81,30 @@ public class GraphQlFieldExecBuilderImpl<K>
             logger.debug("GraphQl Accumulator: " + accInit);
             logger.debug("GraphQl SPARQL Query: " + query);
         }
-        System.err.println("GraphQl Accumulator: " + accInit);
-        System.err.println("GraphQl SPARQL Query: " + query);
+//        System.err.println("GraphQl Accumulator: " + accInit);
+//        System.err.println("GraphQl SPARQL Query: " + query);
 
         QueryExec queryExec = queryExecBuilder.query(query).build();
 
-        GraphQlFieldExec<K> result = new GraphQlFieldExecImpl<>(isSingle, queryExec, stateVarMap, driver);
+        GraphQlFieldExec<K> result = new GraphQlFieldExecImpl<>(isSingle, query, queryExec, stateVarMap, driver, mapping);
         return result;
     }
+
+    //
+    //  // @Override
+    //  public GraphQlDataProviderExecBuilder initialTimeout(long timeout, TimeUnit timeUnit) {
+    //      queryExecBuilder.initialTimeout(timeout, timeUnit);
+    //      return this;
+    //  }
+    //
+    //  // @Override
+    //  public GraphQlDataProviderExecBuilder overallTimeout(long timeout, TimeUnit timeUnit) {
+    //      queryExecBuilder.overallTimeout(timeout, timeUnit);
+    //      return this;
+    //  }
+    //
+    //  // @Override
+    //  public Context getContext() {
+    //      return queryExecBuilder.getContext();
+    //  }
 }

@@ -65,6 +65,7 @@ public class ElementGeneratorLateral {
      * @param outStateVarMap
      * @return
      */
+    // TODO This method should be a separate phase in the toLateral() conversion.
     public static ElementNode harmonizeVariables(ElementNode elementNode, List<String> parentPath, Map<Var, Var> parentRenames, Map<Object, Map<Var, Var>> outStateVarMap) {
 //        ElementNodeBuilder resultBuilder = ElementNode.newBuilder()
 //                .name(elementNode.getName());
@@ -232,10 +233,10 @@ public class ElementGeneratorLateral {
             for (int i = 0; i < joinLink.size(); ++i) {
                 Var connectVar = joinLink.childVars().get(i);
                 Var parentVar = joinLink.parentVars().get(i);
-                
+
                 Var globalVar = resolveAncestorVar(node, outStateOriginalToGlobalMap, parentVar);
                 originalToGlobal.computeIfAbsent(connectVar, v -> globalVar);
-                
+
                 // Var globalVar = originalToGlobal.computeIfAbsent(connectVar, v -> parentRenames.getOrDefault(parentVar, parentVar));
                 projVars.add(globalVar);
             }

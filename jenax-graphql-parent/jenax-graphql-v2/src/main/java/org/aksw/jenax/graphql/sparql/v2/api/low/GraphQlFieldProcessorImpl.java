@@ -2,8 +2,6 @@ package org.aksw.jenax.graphql.sparql.v2.api.low;
 
 import java.util.Objects;
 
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExecBuilderImpl.QueryMapping;
-
 public class GraphQlFieldProcessorImpl<K>
     implements GraphQlFieldProcessor<K>
 {

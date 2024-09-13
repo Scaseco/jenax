@@ -3,6 +3,7 @@
     "build": "webpack"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
     "cm6-graphql": "^0.1.1",
     "codemirror": "^6.0.1",
     "graphql": "^16.9.0"

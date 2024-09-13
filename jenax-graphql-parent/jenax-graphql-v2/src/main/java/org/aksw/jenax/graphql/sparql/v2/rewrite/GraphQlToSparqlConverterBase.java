@@ -34,7 +34,6 @@ import org.aksw.jenax.graphql.sparql.v2.context.IndexDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.JoinDirective;
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.Bind.BindingMapper;
-import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult.SingleResult;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.Vars;
 import org.apache.jena.graph.NodeFactory;
@@ -127,7 +126,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
             rootElementNode.setIdentifier(stateId);
 
             AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> aggStateBuilderRoot = new AggStateBuilderObject<>();
-            rr.root = new SingleResult<>(rootElementNode, aggStateBuilderRoot, true);
+            rr.root = new GraphQlFieldRewrite<>(rootElementNode, aggStateBuilderRoot, true, node);
         }
 
         return TraversalControl.CONTINUE;
@@ -553,7 +552,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
                     : (AggStateBuilderTransitionMatch<Binding, FunctionEnv, K, org.apache.jena.graph.Node>)getAggResult(context);
 
             if (targetMapper != null) {
-                SingleResult<K> singleResult = new SingleResult<>(elementNode, targetMapper, isSingle);
+                GraphQlFieldRewrite<K> singleResult = new GraphQlFieldRewrite<>(elementNode, targetMapper, isSingle, field);
                 rewriteResult.map.put(field.getName(), singleResult);
             }
 

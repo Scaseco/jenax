@@ -2,11 +2,8 @@ package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
-import org.aksw.jenax.graphql.sparql.v2.api2.VarHelper;
-import org.aksw.jenax.graphql.sparql.v2.context.BindDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.CardinalityDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.Cascadable;
 import org.aksw.jenax.graphql.sparql.v2.context.ConditionDirective;
@@ -24,7 +21,6 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
@@ -39,6 +35,10 @@ import graphql.util.TraverserContext;
 
 public class XGraphQlUtils {
 
+    /**
+     * Return true if there is no parent context with a root field marker.
+     * In that case, the root field marker is added to the given context.
+     */
     public static boolean isRootNode(graphql.language.Node<?> node, TraverserContext<?> context) {
         boolean result = context.getVarFromParents(RootFieldMarker.class) == null;
         if (!context.isVisited()) {
