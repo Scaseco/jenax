@@ -105,9 +105,9 @@ public class GraphFromPrefixMatcher
 
     public static String derivePrefix(Triple t) {
         String result = derivePrefix(t.getSubject());
-        if (result != null) {
+        if (result != null && !"".equals(result)) {
             String tmp = derivePrefix(t.getPredicate());
-            if (tmp != null) {
+            if (tmp != null && !"".equals(tmp)) {
                 result += " " + tmp;
             }
         }
