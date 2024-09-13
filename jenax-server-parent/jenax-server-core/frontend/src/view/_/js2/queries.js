@@ -8,7 +8,7 @@
  }`, `{
     bind(<${iri}> as ?s) .
     ?s ?p ?o
- }`, ... reverseEnabled ? [`{
+ }`, ... reverseEnabled === 'yes' ? [`{
     bind(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?o) .
     ?s ?p ?o
  }`, `{
