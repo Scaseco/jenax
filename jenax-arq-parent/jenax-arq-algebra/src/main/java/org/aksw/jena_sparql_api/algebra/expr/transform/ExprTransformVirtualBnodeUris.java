@@ -15,10 +15,10 @@ import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jena_sparql_api.algebra.transform.TransformExprToBasicPattern;
 import org.aksw.jena_sparql_api.algebra.transform.TransformPullFiltersIfCanMergeBGPs;
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
-import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctions;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.model.udf.util.UserDefinedFunctions;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
@@ -326,7 +326,7 @@ public class ExprTransformVirtualBnodeUris
 //		Expr input = ExprUtils.parse("<bnode://foo> = <bnode://bar>");
 
         Model model = RDFDataMgr.loadModel("bnode-rewrites.ttl");
-        SparqlStmtMgr.execSparql(model, "udf-inferences.sparql");
+        SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
 
 //        Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/jena"));
       Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/graphdb"));

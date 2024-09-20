@@ -44,8 +44,9 @@ public class GraphCacheStreaming {
 
             ReadableChannelSource<Binding[]> r = AdvancedRangeCacheImpl.<Binding[]>newBuilder()
                     .setDataSource(source)
-                    .setWorkerBulkSize(32)
+                    .setWorkerBulkSize(2) // BUG Needs to be at least 2 because one item is fetched in advance to answer an internal 'hasMoreData' query.
                     .setSlice(SliceInMemoryCache.create(source.getArrayOps(), 1024, 1000))
+                    .setMaxReadAheadItemCount(0)
                     .setRequestLimit(Long.MAX_VALUE) // One worker can serve as much as it wants
                     .setTerminationDelay(Duration.ofSeconds(180)) // TODO BUG - the worker seems to shut down after the delay even while processing
                     .setExecutorService(globalExecutorService)
@@ -56,7 +57,7 @@ public class GraphCacheStreaming {
         });
         CloseableIterator<Binding> cit;
         try {
-            cit = ReadableChannels.newIterator(cachedSource.newReadableChannel(), 16);
+            cit = ReadableChannels.newIterator(cachedSource.newReadableChannel(), 1);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

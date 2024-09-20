@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.user_defined_function;
+package org.aksw.jenax.model.udf.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +11,16 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.function.FixpointIteration;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.model.shacl.util.ShPrefixUtils;
+import org.aksw.jenax.model.udf.api.UdfDefinition;
+import org.aksw.jenax.model.udf.api.UdfVocab;
+import org.aksw.jenax.model.udf.api.UserDefinedFunctionResource;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.system.Prefixes;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
@@ -100,7 +107,9 @@ public class UserDefinedFunctions {
             }
 
             if(activeUdfs.isEmpty()) {
-                logger.warn("User defined function " + fnIri + " has no candidate for profiles " + activeProfiles);
+                if (logger.isWarnEnabled()) {
+                    logger.warn("User defined function " + fnIri + " has no candidate for profiles " + activeProfiles);
+                }
             } else if(activeUdfs.size() > 1) {
                 throw new RuntimeException("Expected exactly 1 definition for " + fnIri + "; got: " + activeUdfs);
             } else {
@@ -111,7 +120,9 @@ public class UserDefinedFunctions {
                 Resource ra = activeUdf.getAliasFor();
 
                 if (Boolean.TRUE.equals(activeUdf.mapsToPropertyFunction())) {
-                    logger.debug("Mapped property function: " + activeUdf + ", aliasFor: " + ra);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Mapped property function: " + activeUdf + ", aliasFor: " + ra);
+                    }
                     UserDefinedFunctionDefinition ud = new UserDefinedFunctionDefinition(fnIri,
                             ExprUtils.parse("<" + fnIri + ">(?s)"),
                             Arrays.asList(Vars.s));
@@ -127,7 +138,9 @@ public class UserDefinedFunctions {
                         // TODO Possibly try to resolve against Jena's function registry
                         UserDefinedFunctionDefinition udfd = result.get(iri);
                         if(udfd == null) {
-                            logger.warn("Could not resolve " + iri);
+                            if (logger.isWarnEnabled()) {
+                                logger.warn("Could not resolve " + iri);
+                            }
                             //throw new RuntimeException("Could not resolve " + iri);
                         } else {
 
@@ -139,9 +152,11 @@ public class UserDefinedFunctions {
                         }
                     }
                 } else {
-                    UserDefinedFunctionDefinition udfd = UdfDefinition.toJena(fnIri, activeUdf);
+                    UserDefinedFunctionDefinition udfd = toJena(fnIri, activeUdf);
 
-                    logger.debug("Registering " + udfd);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Registering " + udfd);
+                    }
 
                     result.put(udfd.getUri(), udfd);
                 }
@@ -167,6 +182,28 @@ public class UserDefinedFunctions {
     public static NodeValue eval(Map<String, UserDefinedFunctionDefinition> macros, String udfUri, Expr ... args) {
         Expr expr = expandMacro(macros, udfUri, args);
         NodeValue result = ExprUtils.eval(expr);
+        return result;
+    }
+
+    public static UserDefinedFunctionDefinition toJena(String iri, UdfDefinition r) {
+        PrefixMapping pm = Prefixes.adapt(ShPrefixUtils.collect(r));
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Processing user defined function definition: " + iri + ": " + pm);
+        }
+
+        List<String> paramsStr = r.getParams();
+        List<Var> params = paramsStr.stream()
+                .map(Var::alloc)
+                .collect(Collectors.toList());
+        String exprStr = r.getExpr();
+        if (exprStr == null) {
+            throw new NullPointerException("No expression present on resource: " + iri);
+        }
+
+        Expr e = ExprUtils.parse(exprStr, pm);
+
+        UserDefinedFunctionDefinition result = new UserDefinedFunctionDefinition(iri, e, params);
         return result;
     }
 }

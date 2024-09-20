@@ -1,0 +1,60 @@
+# Derive class o:UserDefinedFunction from o:simpleDefinition
+PREFIX o: <https://w3id.org/aksw/norse#udf.>
+INSERT {
+  ?s a o:UserDefinedFunction
+}
+WHERE {
+  ?s o:simpleDefinition []
+}
+
+
+# Expand convenience list-based prefix mappings
+# Note, this also works without a local name, as in ("ns2" foo:)
+#PREFIX o: <https://w3id.org/aksw/norse#udf.>
+#INSERT {
+#  ?s
+#    o:mapping [
+#      o:prefix ?ns ;
+#      o:iri ?iri
+#    ]
+#}
+#WHERE {
+#  ?s o:ns (?ns ?iri)
+#}
+
+
+# Expand convenience list-based function definitions
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX o: <https://w3id.org/aksw/norse#udf.>
+INSERT {
+  ?s
+    o:definition [
+      o:expr ?e ;
+      o:params ?pl
+    ]
+}
+WHERE {
+  ?s
+    a o:UserDefinedFunction ;
+    o:simpleDefinition [
+      rdf:first ?e ;
+      rdf:rest ?pl
+    ]
+}
+
+
+# Attach a prefixSet on the function level to all definitions without prefixes
+PREFIX o: <https://w3id.org/aksw/norse#udf.>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+INSERT {
+  ?d sh:prefixes ?ps
+}
+WHERE {
+  ?s
+    a o:UserDefinedFunction ;
+    sh:prefixes ?ps ;
+    o:definition ?d
+    FILTER(!EXISTS { ?d o:prefixSet [] })
+}
+
+

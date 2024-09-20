@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.user_defined_function;
+package org.aksw.jenax.model.udf.api;
 
 import java.io.ByteArrayInputStream;
 
@@ -13,7 +13,7 @@ public class UdfTest {
         JenaPluginUtils.scan(UdfTest.class);
 
         String tmp = "<http://www.example.org/myfn>\n" +
-                "  <http://ns.aksw.org/jena/udf/simpleDefinition> (\"<http://jena.apache.org/ARQ/function#bnode>(?x)\" \"x\") ;\n" +
+                "  <https://w3id.org/aksw/norse#udf.simpleDefinition> (\"<http://jena.apache.org/ARQ/function#bnode>(?x)\" \"x\") ;\n" +
                 "  .";
 
         Model m = ModelFactory.createDefaultModel();

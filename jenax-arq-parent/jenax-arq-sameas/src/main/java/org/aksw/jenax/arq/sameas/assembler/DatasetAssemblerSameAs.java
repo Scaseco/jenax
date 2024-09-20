@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.aksw.jenax.arq.dataset.cache.CachePatterns;
 import org.aksw.jenax.arq.dataset.cache.DatasetGraphCache;
-import org.aksw.jenax.arq.sameas.dataset.DatasetGraphSameAsOld;
 import org.aksw.jenax.arq.sameas.model.SameAsConfig;
 import org.aksw.jenax.arq.util.dataset.DatasetGraphSameAs;
 import org.apache.jena.assembler.Assembler;
@@ -17,7 +16,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.assembler.DatasetAssembler;
-import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.OWL2;
 
 public class DatasetAssemblerSameAs
     extends DatasetAssembler
@@ -36,7 +35,7 @@ public class DatasetAssemblerSameAs
 
         Set<Node> predicates = new LinkedHashSet<>(res.getPredicates());
         if (predicates.isEmpty()) {
-            predicates.add(OWL.sameAs.asNode());
+            predicates.add(OWL2.sameAs.asNode());
         }
 
         DatasetGraph result;

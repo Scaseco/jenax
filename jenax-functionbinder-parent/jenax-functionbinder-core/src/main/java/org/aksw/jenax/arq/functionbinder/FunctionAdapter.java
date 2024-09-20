@@ -124,6 +124,8 @@ public class FunctionAdapter
         return result;
     }
 
+    /** Given a list of argument expressions and a binding, derive the list of corresponding Java objects to be
+     *  used as the actual function arguments. */
     public Object[] buildJavaArgs(Binding binding, ExprList args, FunctionEnv env) {
         int argCount = args.size();
         int paramCount = params.length;

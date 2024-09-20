@@ -1,10 +1,11 @@
-package org.aksw.jena_sparql_api.user_defined_function;
+package org.aksw.jenax.model.udf.api;
 
 import java.util.List;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.norse.term.udf.NorseTermsUdf;
 import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
@@ -18,15 +19,9 @@ public interface UserDefinedFunctionResource
      *
      * @return
      */
-    @Iri("http://ns.aksw.org/jena/udf/simpleDefinition")
+    @Iri(NorseTermsUdf.simpleDefinition)
     List<String> getSimpleDefinition();
 
-
-    @Iri("http://ns.aksw.org/jena/udf/definition")
+    @Iri(NorseTermsUdf.definition)
     Set<UdfDefinition> getDefinitions();
-
-//	public default UserDefinedFunctionDefinition toJena() {
-//		UserDefinedFunctionDefinition result = toJena(this);
-//		return result;
-//	}
 }

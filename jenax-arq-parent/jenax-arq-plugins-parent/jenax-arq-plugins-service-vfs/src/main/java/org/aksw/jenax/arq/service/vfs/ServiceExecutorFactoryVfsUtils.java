@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.aksw.commons.collections.IterableUtils;
@@ -38,6 +39,7 @@ import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
 import org.apache.hadoop.io.compress.BZip2Codec;
+import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.atlas.data.BagFactory;
@@ -95,6 +97,9 @@ public class ServiceExecutorFactoryVfsUtils {
     public static final String XFSRDFSTORE = "x-fsrdfstore:";
     public static final String FILE = "file:";
     public static final String VFS = "vfs:";
+
+    // public static Supplier<SplittableCompressionCodec> CODEC_FACTORY_BZIP2 = () -> new BZip2CodecAdapted(128);
+    public static Supplier<SplittableCompressionCodec> CODEC_FACTORY_BZIP2 = () -> new BZip2Codec();
 
 
     protected static Logger logger = LoggerFactory.getLogger(ServiceExecutorFactoryVfsUtils.class);
@@ -313,7 +318,7 @@ public class ServiceExecutorFactoryVfsUtils {
         boolean useV1 = false;
         BinarySearcher binarySearcher;
         binarySearcher = isBzip2
-            ? binSearchBuilder.setCodec(new BZip2Codec()).build()
+            ? binSearchBuilder.setCodec(CODEC_FACTORY_BZIP2.get()).build()
             : binSearchBuilder.build();
 
         Graph graph = new GraphFromPrefixMatcher(binarySearcher);
@@ -391,7 +396,7 @@ public class ServiceExecutorFactoryVfsUtils {
                         : BlockSources.createBinarySearcherText(path, bufferSize);
                 } else {
                     binarySearcher = isBzip2
-                        ? binSearchBuilder.setCodec(new BZip2Codec()).build()
+                        ? binSearchBuilder.setCodec(CODEC_FACTORY_BZIP2.get()).build()
                         : binSearchBuilder.build();
                 }
 

@@ -1,9 +1,9 @@
-package org.aksw.jena_sparql_api.user_defined_function.plugin;
+package org.aksw.jenax.model.udf.plugin;
 
 
-import org.aksw.jena_sparql_api.user_defined_function.InverseDefinition;
-import org.aksw.jena_sparql_api.user_defined_function.UdfDefinition;
-import org.aksw.jena_sparql_api.user_defined_function.UserDefinedFunctionResource;
+import org.aksw.jenax.model.udf.api.InverseDefinition;
+import org.aksw.jenax.model.udf.api.UdfDefinition;
+import org.aksw.jenax.model.udf.api.UserDefinedFunctionResource;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.Personality;
 import org.apache.jena.rdf.model.RDFNode;

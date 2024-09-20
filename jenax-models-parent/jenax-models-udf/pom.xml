@@ -37,6 +37,12 @@
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-norse-terms</artifactId>
+		</dependency>
+
 
 		<!-- udf relies on reprogen; and reprogen relies on arq utils; structure
 		is not ideal -->

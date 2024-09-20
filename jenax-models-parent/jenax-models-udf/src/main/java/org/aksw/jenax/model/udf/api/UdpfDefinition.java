@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.user_defined_function;
+package org.aksw.jenax.model.udf.api;
 
 /**
  * NOT USED; it turned out we only needed user defined functions so far
