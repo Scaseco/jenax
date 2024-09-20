@@ -27,7 +27,7 @@ The most prominent application of this module is the blank node rewriting middle
 This works by rewriting SPARQL queries and exploiting vendor-specific functions that yield a blank node's internal label.
 
 
-The macro definitions are in the algebra module's resource [bnode-rewrites.ttl](../jenax-arq-algebra/src/main/resources/bnode-rewrites.ttl).
+The macro definitions are in the algebra module's resource [bnode-rewrites.ttl](../../jenax-arq-parent/jenax-arq-algebra/src/main/resources/bnode-rewrites.ttl).
 
 
 
