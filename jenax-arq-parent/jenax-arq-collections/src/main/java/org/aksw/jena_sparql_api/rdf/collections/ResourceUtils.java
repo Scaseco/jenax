@@ -189,14 +189,12 @@ public class ResourceUtils {
     public static <T> Optional<T> findFirst(ExtendedIterator<T> stream) {
         Optional<T> result = stream.nextOptional();
         stream.close();
-
         return result;
     }
 
     public static <T extends RDFNode> boolean canAsProperty(Statement stmt, boolean isFwd, Class<T> clazz) {
         RDFNode rdfNode = getTarget(stmt, isFwd);
         boolean result = rdfNode.canAs(clazz);
-
         return result;
     }
 

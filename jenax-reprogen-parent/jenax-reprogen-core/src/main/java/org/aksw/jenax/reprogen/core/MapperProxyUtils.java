@@ -665,6 +665,15 @@ public class MapperProxyUtils {
 
         Set<RDFNode> rawView = MutableCollectionViews.filteringSet(set, converter);
 
+        boolean debug = false;
+        if (debug) {
+            Iterator<RDFNode> it = rawView.iterator();
+            while (it.hasNext()) {
+                RDFNode rdfNode = it.next();
+                System.err.println(rdfNode);
+            }
+        }
+
         Set<?> javaView;
         if(isInjectiveConversion) {
             javaView = new ConvertingSet<>(
