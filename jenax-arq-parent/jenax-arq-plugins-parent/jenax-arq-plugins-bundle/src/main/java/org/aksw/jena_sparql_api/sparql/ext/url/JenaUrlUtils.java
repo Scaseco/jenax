@@ -100,12 +100,16 @@ public class JenaUrlUtils {
     // public static final Pattern URI_SCHEME_PATTERN = Pattern.compile("^\\p{Alpha}(\\p{Alnum}|+|-|\\.)*");
 
     public static InputStream openInputStream(NodeValue nv, FunctionEnv env) throws Exception {
-        URLConnection conn = openUrlConnection(nv, env);
+        return openInputStream(nv, env, null);
+    }
+
+    public static InputStream openInputStream(NodeValue nv, FunctionEnv env, Path baseDir) throws Exception {
+        URLConnection conn = openUrlConnection(nv, env, baseDir);
         InputStream result = conn == null ? null : conn.getInputStream();
         return result;
     }
 
-    public static URLConnection openUrlConnection(NodeValue nv, FunctionEnv env) throws Exception {
+    public static URLConnection openUrlConnection(NodeValue nv, FunctionEnv env, Path baseDir) throws Exception {
         URLConnection result = null;
         IRIx irix = createIriX(nv, env);
         if (irix != null) {
@@ -119,7 +123,7 @@ public class JenaUrlUtils {
                 // If the urlStr after resolution against the function env is still a
                 // relative IRI then resolve it against the current working directory
                 if (!urlStr.startsWith("/")) {
-                    Path cwd = Path.of("");
+                    Path cwd = baseDir != null ? baseDir : Path.of("");
                     uri = cwd.resolve(urlStr).toUri();
                 } else {
                     String fileUrl = "file://" + urlStr;
@@ -150,8 +154,12 @@ public class JenaUrlUtils {
     }
 
     public static NodeValue resolve(NodeValue nv, FunctionEnv env) throws Exception {
+        return resolve(nv, env, null);
+    }
+
+    public static NodeValue resolve(NodeValue nv, FunctionEnv env, Path baseDir) throws Exception {
         NodeValue result;
-        try (InputStream in = JenaUrlUtils.openInputStream(nv, env)) {
+        try (InputStream in = JenaUrlUtils.openInputStream(nv, env, baseDir)) {
             if (in != null) {
                 String str = CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8));
 
@@ -165,8 +173,12 @@ public class JenaUrlUtils {
     }
 
     public static Iterator<NodeValue> resolveAsLines(NodeValue nv, FunctionEnv env) throws Exception {
+        return resolveAsLines(nv, env, null);
+    }
 
-        LineIterator lineIterator = IOUtils.lineIterator(JenaUrlUtils.openInputStream(nv, env), StandardCharsets.UTF_8);
+    public static Iterator<NodeValue> resolveAsLines(NodeValue nv, FunctionEnv env, Path baseDir) throws Exception {
+
+        LineIterator lineIterator = IOUtils.lineIterator(JenaUrlUtils.openInputStream(nv, env, baseDir), StandardCharsets.UTF_8);
         return Iter.map(lineIterator, NodeValue::makeString);
 //        List<NodeValue> result = new ArrayList<>();
 //        try (BufferedReader reader = new BufferedReader(

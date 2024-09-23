@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.aksw.commons.collections.diff.Diff;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -16,10 +17,34 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.system.Txn;
 
 import com.google.common.collect.Streams;
 
 public class DatasetGraphUtils {
+    public static long tupleCount(DatasetGraph dsg) {
+        long result = Txn.calculateRead(dsg, () -> {
+            long r = 0;
+            Graph g = dsg.getDefaultGraph();
+            if (g != null) {
+                long contrib = g.sizeLong();
+                r += contrib;
+            }
+            Iterator<Node> it = dsg.listGraphNodes();
+            try {
+                while (it.hasNext()) {
+                    Node n = it.next();
+                    Graph gg = dsg.getGraph(n);
+                    long contrib = gg.sizeLong();
+                    r += contrib;
+                }
+            } finally {
+                Iter.close(it);
+            }
+            return r;
+        });
+        return result;
+    }
 
     public static Stream<Node> streamNodes(DatasetGraph dg) {
         return Streams.stream(dg.find()).flatMap(QuadUtils::streamNodes);
