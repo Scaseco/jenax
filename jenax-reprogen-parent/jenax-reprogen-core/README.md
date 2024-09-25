@@ -70,7 +70,7 @@ public class MyExample {
         Person setFirstName(String firstName);
 
         // Jena natively supports XSDCalendar
-        @IriNs("foaf")
+        @Iri("foaf:birthDate")
         XSDDateTime getJenaBirthDate();
         Person setJenaBirthDate(XSDDateTime date);
 
@@ -101,7 +101,7 @@ public class MyExample {
          *
          * [ <http://xmlns.com/foaf/0.1/firstName>
          *      "John";
-         *    <http://xmlns.com/foaf/0.1/jenaBirthDate>
+         *    <http://xmlns.com/foaf/0.1/birthDate>
          *      "2000-01-15T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>
          * ] .
          */
