@@ -78,11 +78,13 @@ public class MyExample {
         // without the need to register new types or conversions
 
         default Instant getBirthDate() {
-            return Optional.of(getJenaBirthDate()).map(XSDDateTime::asCalendar).map(Calendar::toInstant).orElse(null);
+            return Optional.of(getJenaBirthDate()).map(XSDDateTime::asCalendar)
+                .map(Calendar::toInstant).orElse(null);
         }
 
         default Person setBirthDate(Instant instant) {
-            return setJenaBirthDate(new XSDDateTime(GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()))));
+            return setJenaBirthDate(new XSDDateTime(
+                GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()))));
         }
     }
 
