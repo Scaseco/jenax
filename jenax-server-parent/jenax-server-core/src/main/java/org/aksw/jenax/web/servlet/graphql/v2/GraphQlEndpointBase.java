@@ -46,7 +46,7 @@ public abstract class GraphQlEndpointBase {
             GraphQlExecBuilder builder = factory.newBuilder();
             // builder = GraphQlJsonUtils.configureFromJson(builder, query);
             GraphQlJsonUtils.configureFromJson(builder, query);
-            exec = builder.build();
+            exec = builder.buildForJson();
         } catch (Exception e) {
             asyncResponse.resume(e);
             throw new RuntimeException(e);

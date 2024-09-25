@@ -2,21 +2,16 @@ package org.aksw.jenax.graphql.sparql;
 
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
-import org.apache.jena.sparql.algebra.Algebra;
-import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.lang.ParserARQ;
-import org.apache.jena.sparql.lang.sparql_12.SPARQLParser12;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TestGraphQlToSparqlSimple {
+public class TestGraphQlToJsonSimple {
     public static DatasetGraph testDsg;
 
-    @BeforeClass
-    public static void tearUp() {
-        testDsg = RDFParser.fromString(
+    public static DatasetGraph createTestDsg() {
+        return RDFParser.fromString(
                 """
                 PREFIX : <http://www.example.org/>
                 :s1 :p1 :o1 .
@@ -24,6 +19,11 @@ public class TestGraphQlToSparqlSimple {
                 :s2 :p1 :o1 .
                 """, Lang.TRIG)
             .toDatasetGraph();
+    }
+
+    @BeforeClass
+    public static void tearUp() {
+        testDsg = createTestDsg();
     }
 
     @AfterClass
@@ -43,7 +43,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test01() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             { Subjects @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") }
             """,
@@ -54,7 +54,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test02() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             { Triples @pattern(of: "?s ?p ?o", from: "s", to: "o") @index(by: "?p") }
             """,
@@ -65,7 +65,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test03() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             { Subjects @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")}
             """,
@@ -80,7 +80,7 @@ public class TestGraphQlToSparqlSimple {
         // however, it revealed a bug in AccStateMap:
         // When ifOne: "true" was true but multiple values for a key were encountered, the excessive values were not ignored.
         // Instead, it resulted in exceptions about illegally nested JSON.
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               matches(limit: 2)
@@ -98,7 +98,7 @@ public class TestGraphQlToSparqlSimple {
 
     @Test
     public void test05() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               matches @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s") {

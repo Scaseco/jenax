@@ -55,7 +55,12 @@ public class XGraphQlUtils {
     }
 
     public static P_Path0 fieldToRonKey(Field field) {
-        P_Path0 result = new P_Link(NodeFactory.createLiteralString(field.getName()));
+        P_Path0 result = fieldToRdfKey(field);
+        // If no Path could be obtained then fall back on the field name
+        if (result == null) {
+            result = new P_Link(NodeFactory.createLiteralString(field.getName()));
+            // result = new P_Link(NodeFactoryExtra.createLiteralNode(field.getName(), null, GraphQlIoBridge.DATATYPE_IRI_JSON));
+        }
         return result;
     }
 

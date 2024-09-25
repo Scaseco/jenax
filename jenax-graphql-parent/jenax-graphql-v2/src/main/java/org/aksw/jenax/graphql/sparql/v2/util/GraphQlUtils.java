@@ -278,10 +278,10 @@ public class GraphQlUtils {
     public static Directive expectAtMostOneDirective(DirectivesContainer<?> container, String name) {
         List<Directive> directives = container.getDirectives(name);
         if (directives.size() > 1) {
-            // TODO log error and return last
+            // TODO log error to graphql processor and return last
             System.err.println("Only one directive expected: " + name);
         }
-        return directives.isEmpty() ? null : directives.get(0);
+        return directives.isEmpty() ? null : directives.get(directives.size() - 1);
     }
 
 //

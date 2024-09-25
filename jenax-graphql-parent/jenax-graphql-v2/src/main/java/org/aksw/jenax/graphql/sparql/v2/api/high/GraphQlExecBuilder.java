@@ -11,6 +11,7 @@ import org.aksw.jenax.graphql.sparql.v2.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.path.P_Path0;
 
 import graphql.language.Document;
 
@@ -39,9 +40,15 @@ public class GraphQlExecBuilder
         return this;
     }
 
-    public GraphQlExec<String> build() {
+    public GraphQlExec<String> buildForJson() {
         GraphQlProcessor<String> processor = RdfGraphQlProcessorFactoryImpl.forJson().newBuilder().document(document).setVars(assignments).build();
         GraphQlFieldExec<String> exec = processor.newExecBuilder().service(queryExecBuilderFactory).build();
+        return new GraphQlExec<>(exec);
+    }
+
+    public GraphQlExec<P_Path0> buildForRon() {
+        GraphQlProcessor<P_Path0> processor = RdfGraphQlProcessorFactoryImpl.forRon().newBuilder().document(document).setVars(assignments).build();
+        GraphQlFieldExec<P_Path0> exec = processor.newExecBuilder().service(queryExecBuilderFactory).build();
         return new GraphQlExec<>(exec);
     }
 }

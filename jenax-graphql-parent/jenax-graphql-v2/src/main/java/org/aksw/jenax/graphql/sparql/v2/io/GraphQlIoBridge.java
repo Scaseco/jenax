@@ -5,8 +5,10 @@ import java.util.function.Function;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProvider;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderApi;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.path.P_Path0;
+import org.apache.jena.sparql.util.NodeUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -14,6 +16,8 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
 public class GraphQlIoBridge {
+    /** RDF literals with this JSON datatype will be embedded in the JSON output. */
+    public static String DATATYPE_IRI_JSON = "https://w3id.org/aksw/norse#json";
 
     // ronSinkBuilder.mapKey().mapValue()
 
@@ -22,8 +26,8 @@ public class GraphQlIoBridge {
         ObjectNotationWriterInMemory<T, String, V> destination = ObjectNotationWriterViaGon.of(jsonProvider);
 
         GonProvider<String, V> gonProvider = jsonProvider;
-        Function<P_Path0, String> keyMapper = GraphQlIoBridge::path0ToName;;
-        Function<Node, V> valueMapper = node -> (V)GraphQlIoBridge.nodeToGon(node, jsonProvider);
+        Function<P_Path0, String> keyMapper = GraphQlIoBridge::path0ToStrOrNt;
+        Function<Node, V> valueMapper = node -> (V)GraphQlIoBridge.nodeToGon(NodeFactory.createLiteralString(NodeFmtLib.strNT(node)), jsonProvider);
 
         ObjectNotationWriterMapper<P_Path0, String, Node, V> writer = new ObjectNotationWriterMapperImpl<>(destination, gonProvider, keyMapper, valueMapper);
         ObjectNotationWriter<P_Path0, Node> front = writer;
@@ -79,7 +83,7 @@ public class GraphQlIoBridge {
             // if (obj instanceof JsonElement) {
                 // Case for any datatype with native Json representation - including out datatype.
                 // result = gonProvider.upcast(obj);
-            if ("https://w3id.org/aksw/norse#json".equals(node.getLiteralDatatypeURI())) {
+            if (DATATYPE_IRI_JSON.equals(node.getLiteralDatatypeURI())) {
                 // Fallback if our JSON datatype is not registered
                 // The datatype would store JSON as JsonElement
                 String lex = node.getLiteralLexicalForm();
@@ -167,6 +171,20 @@ public class GraphQlIoBridge {
         return result;
     }
 
+    public static String path0ToStrNt(P_Path0 path) {
+        boolean isFwd = path.isForward();
+        Node node = path.getNode();
+        String name = (!isFwd ? "^" : "") + NodeFmtLib.strNT(node);
+        return name;
+    }
+
+    public static String path0ToStrOrNt(P_Path0 path) {
+        boolean isFwd = path.isForward();
+        Node node = path.getNode();
+        boolean isString = NodeUtils.isSimpleString(node) || NodeUtils.isLangString(node);
+        String name = (!isFwd ? "^" : "") + (isString ? node.getLiteralLexicalForm() : NodeFmtLib.strNT(node));
+        return name;
+    }
 
     public static String path0ToName(P_Path0 path) {
         boolean isFwd = path.isForward();
@@ -174,7 +192,6 @@ public class GraphQlIoBridge {
         String name = (!isFwd ? "^" : "") + getPlainString(node);
         return name;
     }
-
 
     public static String getPlainString(Node node) {
         return node == null
@@ -186,13 +203,5 @@ public class GraphQlIoBridge {
                     : node.isLiteral()
                         ? node.getLiteralLexicalForm()
                         : node.toString();
-    }
-
-
-    public static String path0ToNt(P_Path0 path) {
-        boolean isFwd = path.isForward();
-        Node node = path.getNode();
-        String name = (!isFwd ? "^" : "") + NodeFmtLib.strNT(node);
-        return name;
     }
 }

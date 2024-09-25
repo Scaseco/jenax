@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+/** Tests where fields access variables of ancestors (not just immediate parents). */
 public class TestGraphQlVarAccess {
 
     public static DatasetGraph testDsg;
@@ -30,7 +31,7 @@ public class TestGraphQlVarAccess {
 
     @Test
     public void test03() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               Subjects
@@ -54,7 +55,7 @@ public class TestGraphQlVarAccess {
 
     @Test
     public void test04() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               Subjects
@@ -84,7 +85,7 @@ public class TestGraphQlVarAccess {
 
     @Test
     public void test05() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               Subjects
@@ -104,7 +105,7 @@ public class TestGraphQlVarAccess {
 
     @Test
     public void test06() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
               Subjects
@@ -126,7 +127,7 @@ public class TestGraphQlVarAccess {
 
     @Test
     public void test07() {
-        GraphQlTestUtils.doAssert(testDsg,
+        GraphQlTestUtils.doAssertJson(testDsg,
             """
             query DirectExposure {
               triples(limit: 1) @pattern(of: "SELECT * { ?s ?p ?o } ORDER BY ?s ?p ?o LIMIT 1", to: ["s", "p", "o"]) {
