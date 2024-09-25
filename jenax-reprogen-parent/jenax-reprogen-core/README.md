@@ -89,7 +89,10 @@ public class MyExample {
     }
 
     public static void main(String[] args) {
+        // Register the view using Reprogen's utility function
         JenaPluginUtils.registerResourceClasses(Person.class);
+
+        // Use it!
         Person person = ModelFactory.createDefaultModel().createResource().as(Person.class);
         person.setFirstName("John").setBirthDate(LocalDateTime.of(2000, 1, 15, 18, 0).toInstant(ZoneOffset.UTC));
         RDFDataMgr.write(System.out, person.getModel(), RDFFormat.TURTLE_PRETTY);
