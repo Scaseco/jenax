@@ -51,6 +51,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Optional;
 
+import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.annotation.reprogen.Namespace;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
