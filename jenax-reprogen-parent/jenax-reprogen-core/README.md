@@ -7,6 +7,7 @@ nav_order: 10
 ## Annotation-based Resource Proxy Generation System
 
 ### Introduction
+
 Jena `Resource`s are stateless views over an RDF Graph (EnhGraph to be precise).
 Our system simplifies the process of creating custom views by creating a dynamic proxies that implement missing methods based on
 the provided annotations. Furthermore, collection *views* backed by Jena Model's are supported.
@@ -15,18 +16,14 @@ From our experience, the paradigm shift is instead of trying to map RDF into Jav
 to have Java views over RDF - as this way one retains access to all the flexibility of RDF while at the
 same time gaining the convenience of a Java domain model. With Java view backed by an RDF resource, one can idiomatically add any triples to that resource (either directly as triples or using the methods of the view). Conversely, adding arbitrary triples to a Java POJO is much more difficult to accomplish - essentially it requires interfacing against some sort of EntityManger.
 
-The ingenious Apache Jena framework already provided most of the conceptual foundations and building blocks - our contribution is to make this sub-system more easily accessible.
-
+The Apache Jena framework already provided most of the conceptual foundations and building blocks - our contribution is to make this sub-system more easily accessible.
 
 ### Features
 
 * Method implementation generation works with interfaces, default methods, abstract classes, and classes.
-* Support for dynamic RDF collection views using [jena-sparql-api-collections](../jena-sparql-api-collections) module. Modifications of these views propagate to the resource's backing model.
+* Support for dynamic RDF collection views using [jenax-arq-collections](../../jenax-arq-parent/jenax-arq-collections) module. Modifications of these views propagate to the resource's backing model.
 * Polymorphism based on `@RdfType` annotations. Collection views will only expose resources of the requested type or its sub-types.
 * All namespaces of the [RDFa initial context](https://www.w3.org/2011/rdfa-context/rdfa-1.1) plus other well known vocabularies, such as GeoSPARQL and Jena's namespaces, pre-registered in the class `DefaultPrefixes` which is loaded by default.
-
-
-Note: `Map` view generation is not yet supported, although the `MapFromResource` implementations already exists.
 
 
 The snippet below summarizes the mapping capabilities by the proxy system.
@@ -39,33 +36,33 @@ The snippet below summarizes the mapping capabilities by the proxy system.
 public interface ExampleResource
 	extends Resource
 {
-	@Iri("rdfs:label")
-	String getString();
+    @Iri("rdfs:label")
+    String getString();
 
-	@IriType /** Declare that Strings should be treated as IRIs */
-	@Iri("rdfs:seeAlso")
-	TestResource setIri(String str);
+    @IriType /** Declare that Strings should be treated as IRIs */
+    @Iri("rdfs:seeAlso")
+    TestResource setIri(String str);
 
-	@Iri("owl:maxCardinality")
-	Integer getInteger();
+    @Iri("owl:maxCardinality")
+    Integer getInteger();
 
     // The returned list is a *view* over the RDF model
-	@Iri("eg:stringList")
-	List<String> getList();
+    @Iri("eg:stringList")
+    List<String> getList();
 
     /** The generated setter invokes getList().addAll(strs) **/
-	TestResource setList(List<String> strs);
+    TestResource setList(List<String> strs);
 
-	@Iri("eg:set")
-	Set<String> getItems();
+    @Iri("eg:set")
+    Set<String> getItems();
 
-	@Iri("eg:set")
-	String getRandomItem();
+    @Iri("eg:set")
+    String getRandomItem();
 
     /** Return a collection view for the given type */
     /** By default, Set view implementations are returned for collections */
-	@Iri("eg:dynamicSet")
-	<T> Collection<T> getDynamicSet(Class<T> clazz);
+    @Iri("eg:dynamicSet")
+    <T> Collection<T> getDynamicSet(Class<T> clazz);
 }
 ```
 
@@ -75,7 +72,8 @@ public interface ExampleResource
 <dependency>
   <groupId>org.aksw.jenax</groupId>
   <artifactId>jenax-reprogen-core</artifactId>
-</dependency>```
+</dependency>
+```
 Check for the latest version on [Maven Central](https://search.maven.org/search?q=a:jenax-reprogen-core).
 
 
@@ -86,14 +84,14 @@ Providing no argument is is treated as if the annotated type itself was provided
 
 ```java
 interface MyPlainResource extends Resource {
-  String getName();
+    String getName();
 }
 
 @ResourceView(MyPlainResource.class)
 // Also valid (but in this case discouraged as registrations should be frugal):
 // @ResourceView(MyPlainResource.class, MyAnnotatedResource.class)
 interface MyAnnotatedResource extends MyPlainResource {
-  @Override @IriNs("eg") String getName();
+    @Override @IriNs("eg") String getName();
 }
 ```
 
@@ -120,25 +118,25 @@ requested set.
 One key advantage of dynamic collections is extensibility:
 Assume a simple model for [DCAT](https://www.w3.org/TR/vocab-dcat/) dataset descriptions:
 
-```
+```java
 interface DcatDistribution {
-  @IriType
-  @IriNs("dcat")
-  String getDownloadURL();
+    @IriType
+    @IriNs("dcat")
+    String getDownloadURL();
 }
 
 interface DcatDataset {
-  @Iri("dcat:distribution")
-  Collection<DcatDistribution> getDistributions();
+    @Iri("dcat:distribution")
+    Collection<DcatDistribution> getDistributions();
 }
 ```
 
 Now assume you want to reuse this model, however, you would also like to have some additional properties on `DcatDistribution`,
 such as whether the distribution has been downloaded to a local file:
-```
+```java
 interface MyCustomDcatDistribution {
-  @IriNs("eg")
-   String getLocalCacheLocation();
+    @IriNs("eg")
+    String getLocalCacheLocation();
 }
 ```
 
@@ -158,6 +156,7 @@ interface DcatDataset {
 }
 This indeed allows subclasses to override the method, however, you can no longer add items to the collection:
 
+```java
 DcatDataset dcatDataset = ...
 dcatDataset.getDistributions().add(/* no argument is valid here */);
 
@@ -165,7 +164,7 @@ dcatDataset.getDistributions().add(/* no argument is valid here */);
 
 With the dynamic collection view, it is possible to set up the view as
 
-```
+```java
 class DcatDataset {
     @Iri("dcat:distribution")
     <T> Collection<T extends DcatDistribution> getDistributions(Class<T> viewClass);
@@ -193,7 +192,7 @@ public interface Person extends Resource {
 
 public class PersonImpl extends ResourceImpl implements Person
 {
-  	public PersonImpl(Node node, EnhGraph graph) { super(node, graph); }
+    public PersonImpl(Node node, EnhGraph graph) { super(node, graph); }
 
     public String getFirstName() { return Optional.ofNullable(getProperty(FOAF.firstName)).map(Statement::getString).orElse(null); }
     public Person setFirstName(String fn) { setProperty(FOAF.firstName, fn); return this; }
@@ -305,7 +304,6 @@ RDFDataMgr.write(System.out, q.getModel, RDFFormat.NTRIPLES);
 // Prints _:b0 <http://xmlns.com/foaf/0.1/firstName> "John" .
 
 ```
-
 
 ### Technical Stuff / Under the Hood / Behind the Scenesn
 The proxy system relies heavily on the following Jena's fundamental classes
