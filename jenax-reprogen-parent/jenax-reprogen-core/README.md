@@ -304,7 +304,7 @@ public interface ExampleResource
 ### Step-by-step setup guide
 
 
-* **Step 1a: Create your annotated interfaces/classes extending Resource, such as **
+* **Step 1a: Create your annotated interfaces/classes extending Resource.**
 
 ```java
 @RdfType("foaf:Person")
@@ -317,7 +317,7 @@ public interface Person
 }
 ```
 
-* **Step 2a: Use the package scanning utility to automatically register annotated interfaces (or classes) with Jena**.
+* **Step 2a: Use the package scanning utility to automatically register annotated interfaces (or classes) with Jena.**
 
 ```java
 JenaPluginUtils.scan(LsqQuery.class.getPackage().getName(), BuiltinPersonalities.model);
@@ -331,7 +331,7 @@ BuiltinPersonalities.model
 ```
 
 
-* **Step 2b: Register Proxy Implementations as part of Jena's Life Cycle Management**
+* **Step 2b: Register Proxy Implementations as part of Jena's Life Cycle Management.**
 
 ```java
 package org.myproject.plugin;
