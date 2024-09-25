@@ -25,47 +25,6 @@ The Apache Jena framework already provided most of the conceptual foundations an
 * Polymorphism based on `@RdfType` annotations. Collection views will only expose resources of the requested type or its sub-types.
 * All namespaces of the [RDFa initial context](https://www.w3.org/2011/rdfa-context/rdfa-1.1) plus other well known vocabularies, such as GeoSPARQL and Jena's namespaces, pre-registered in the class `DefaultPrefixes` which is loaded by default.
 
-
-The snippet below summarizes the mapping capabilities by the proxy system.
-
-```java
-// RdfType: Upon request to view a Resource using this class, append this type to it
-// If the argument to @RdfType is omitted, it defaults to "java://" + class.getCanonicalName()
-@RdfType("http://my.rdf/Resource")
-@ResourceView // Mark as subject to classpath scanning by JenaPluginUtils
-public interface ExampleResource
-	extends Resource
-{
-    @Iri("rdfs:label")
-    String getString();
-
-    @IriType /** Declare that Strings should be treated as IRIs */
-    @Iri("rdfs:seeAlso")
-    TestResource setIri(String str);
-
-    @Iri("owl:maxCardinality")
-    Integer getInteger();
-
-    // The returned list is a *view* over the RDF model
-    @Iri("eg:stringList")
-    List<String> getList();
-
-    /** The generated setter invokes getList().addAll(strs) **/
-    TestResource setList(List<String> strs);
-
-    @Iri("eg:set")
-    Set<String> getItems();
-
-    @Iri("eg:set")
-    String getRandomItem();
-
-    /** Return a collection view for the given type */
-    /** By default, Set view implementations are returned for collections */
-    @Iri("eg:dynamicSet")
-    <T> Collection<T> getDynamicSet(Class<T> clazz);
-}
-```
-
 ### Maven
 
 ```xml
@@ -76,6 +35,74 @@ public interface ExampleResource
 ```
 Check for the latest version on [Maven Central](https://search.maven.org/search?q=a:jenax-reprogen-core).
 
+### Quick Start Guide
+
+The following example shows a complete example for how to set up a proxy view:
+
+```java
+package org.my.pkg;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Optional;
+
+import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.annotation.reprogen.Namespace;
+import org.aksw.jenax.reprogen.core.JenaPluginUtils;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+
+public class MyExample {
+    @Namespace(prefix="foaf", value="http://xmlns.com/foaf/0.1/")
+    public interface Person // Interface must be public
+        extends Resource // Required for Jena
+    {
+        @IriNs("foaf")
+        String getFirstName();
+        Person setFirstName(String firstName);
+
+        // Jena natively supports XSDCalendar
+        @IriNs("foaf")
+        XSDDateTime getJenaBirthDate();
+        Person setJenaBirthDate(XSDDateTime date);
+
+        // Default methods are a quick way work around Jena limitations
+        // without to need to register new types or conversions
+
+        default Instant getBirthDate() {
+            return Optional.of(getJenaBirthDate()).map(XSDDateTime::asCalendar).map(Calendar::toInstant).orElse(null);
+        }
+
+        default Person setBirthDate(Instant instant) {
+            return setJenaBirthDate(new XSDDateTime(GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()))));
+        }
+    }
+
+    public static void main(String[] args) {
+        JenaPluginUtils.registerResourceClasses(Person.class);
+        Person person = ModelFactory.createDefaultModel().createResource().as(Person.class);
+        person.setFirstName("John").setBirthDate(LocalDateTime.of(2000, 1, 15, 18, 0).toInstant(ZoneOffset.UTC));
+        RDFDataMgr.write(System.out, person.getModel(), RDFFormat.TURTLE_PRETTY);
+
+        /* Expected output:
+         *
+         * [ <http://xmlns.com/foaf/0.1/firstName>
+         *      "John";
+         *    <http://xmlns.com/foaf/0.1/jenaBirthDate>
+         *      "2000-01-15T18:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+         * ] .
+         */
+    }
+}
+```
 
 ### Resource View
 The `@ResourceView` annotation accepts a list of classes (`Class<?>`) as arguments which must be equivalent-or-super types of the annotated type.
@@ -231,6 +258,48 @@ We provide a util method for generating the proxy implementation from the provid
 JenaPluginUtils.registerResourceClasses(Person.class);
 ```
 
+### Summary
+
+
+The snippet below summarizes the mapping capabilities by the proxy system.
+
+```java
+// RdfType: Upon request to view a Resource using this class, append this type to it
+// If the argument to @RdfType is omitted, it defaults to "java://" + class.getCanonicalName()
+@RdfType("http://my.rdf/Resource")
+@ResourceView // Mark as subject to classpath scanning by JenaPluginUtils
+public interface ExampleResource
+	extends Resource
+{
+    @Iri("rdfs:label")
+    String getString();
+
+    @IriType /** Declare that Strings should be treated as IRIs */
+    @Iri("rdfs:seeAlso")
+    TestResource setIri(String str);
+
+    @Iri("owl:maxCardinality")
+    Integer getInteger();
+
+    // The returned list is a *view* over the RDF model
+    @Iri("eg:stringList")
+    List<String> getList();
+
+    /** The generated setter invokes getList().addAll(strs) **/
+    TestResource setList(List<String> strs);
+
+    @Iri("eg:set")
+    Set<String> getItems();
+
+    @Iri("eg:set")
+    String getRandomItem();
+
+    /** Return a collection view for the given type */
+    /** By default, Set view implementations are returned for collections */
+    @Iri("eg:dynamicSet")
+    <T> Collection<T> getDynamicSet(Class<T> clazz);
+}
+```
 
 ### Step-by-step setup guide
 
@@ -293,8 +362,8 @@ Note: prior to Jena 3.8.0 it used to be `.system.` instead of `.sys.`.
 
 Jena will out of the box support viewing resources as instances of the given class, and the proxy will take care of the bidirectional mapping between the bean methods and the RDF model.
 
-```
-LsqQuery q = Model.createResource().as(Person.class);
+```java
+Person q = Model.createResource().as(Person.class);
 q.setFirstName("John");
 
 System.out.println(q.getFirstName());
