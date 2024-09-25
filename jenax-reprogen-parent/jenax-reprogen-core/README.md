@@ -75,7 +75,7 @@ public class MyExample {
         Person setJenaBirthDate(XSDDateTime date);
 
         // Default methods are a quick way work around Jena limitations
-        // without to need to register new types or conversions
+        // without the need to register new types or conversions
 
         default Instant getBirthDate() {
             return Optional.of(getJenaBirthDate()).map(XSDDateTime::asCalendar).map(Calendar::toInstant).orElse(null);
