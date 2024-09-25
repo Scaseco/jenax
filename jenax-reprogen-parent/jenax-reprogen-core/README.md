@@ -181,12 +181,12 @@ interface DcatDataset {
     Collection<? extends DcatDistribution> getDistributions();
     ...
 }
+```
 This indeed allows subclasses to override the method, however, you can no longer add items to the collection:
 
 ```java
 DcatDataset dcatDataset = ...
 dcatDataset.getDistributions().add(/* no argument is valid here */);
-
 ```
 
 With the dynamic collection view, it is possible to set up the view as
