@@ -1,5 +1,8 @@
 ## GraphQL to SPARQL Rewriter
 
+# OUT OF DATE
+
+**This document is out of date. The current version is available at:** https://smartdataanalytics.github.io/RdfProcessingToolkit/graphql/
 
 ### Features
 
