@@ -87,7 +87,6 @@ public abstract class GraphQlToSparqlConverterBase<K>
     protected abstract K toKey(Field field);
     protected abstract K toKey(org.apache.jena.graph.Node node);
 
-
     protected org.apache.jena.graph.Node globalIdToSparql(String globalId) {
         return NodeFactory.createLiteralString(globalId);
     }

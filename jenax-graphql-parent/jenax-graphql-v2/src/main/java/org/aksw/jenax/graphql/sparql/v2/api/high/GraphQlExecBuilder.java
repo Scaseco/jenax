@@ -15,6 +15,10 @@ import org.apache.jena.sparql.path.P_Path0;
 
 import graphql.language.Document;
 
+/**
+ * Builds GraphQl execution objects from a document and variables.
+ * The document can be interpreted as JSON or RON.
+ */
 public class GraphQlExecBuilder
     implements GraphQlProcessorSettings<GraphQlExecBuilder>
 {
@@ -41,13 +45,15 @@ public class GraphQlExecBuilder
     }
 
     public GraphQlExec<String> buildForJson() {
-        GraphQlProcessor<String> processor = RdfGraphQlProcessorFactoryImpl.forJson().newBuilder().document(document).setVars(assignments).build();
+        GraphQlProcessor<String> processor = RdfGraphQlProcessorFactoryImpl.forJson()
+            .newBuilder().document(document).setVars(assignments).build();
         GraphQlFieldExec<String> exec = processor.newExecBuilder().service(queryExecBuilderFactory).build();
         return new GraphQlExec<>(exec);
     }
 
     public GraphQlExec<P_Path0> buildForRon() {
-        GraphQlProcessor<P_Path0> processor = RdfGraphQlProcessorFactoryImpl.forRon().newBuilder().document(document).setVars(assignments).build();
+        GraphQlProcessor<P_Path0> processor = RdfGraphQlProcessorFactoryImpl.forRon()
+            .newBuilder().document(document).setVars(assignments).build();
         GraphQlFieldExec<P_Path0> exec = processor.newExecBuilder().service(queryExecBuilderFactory).build();
         return new GraphQlExec<>(exec);
     }

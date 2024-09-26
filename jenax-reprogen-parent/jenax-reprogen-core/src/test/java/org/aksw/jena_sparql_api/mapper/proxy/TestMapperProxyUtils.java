@@ -16,11 +16,11 @@ import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jenax.annotation.reprogen.Inverse;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.KeyIri;
 import org.aksw.jenax.annotation.reprogen.RdfType;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import com.google.common.collect.Sets;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
@@ -34,6 +34,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.common.collect.Sets;
 
 
 public class TestMapperProxyUtils {
@@ -64,6 +66,8 @@ public class TestMapperProxyUtils {
 
 
         Map<String, Object> getSimpleMap();
+        Map<String, Object> getCustomMap();
+        Map<String, Resource> getCustomMap2();
 
         XSDDateTime getDateTime();
         TestResource setDateTime(XSDDateTime xsdDateTime);
@@ -86,32 +90,83 @@ public class TestMapperProxyUtils {
         extends TestResource
     {
         @Iri("rdfs:label")
+        @Override
         String getString();
 
         @IriType
         @Iri("rdfs:seeAlso")
+        @Override
         TestResource setIri(String str);
 
         @Iri("owl:maxCardinality")
+        @Override
         Integer getInteger();
 
         @Iri("eg:stringList")
+        @Override
         TestResource setList(List<String> strs);
 
         @Iri("eg:set")
+        @Override
         Set<String> getItems();
 
         @Iri("eg:set")
+        @Override
         String getRandomItem();
 
         @Iri("eg:dynamicSet")
+        @Override
         <T> Collection<T> getDynamicSet(Class<T> clazz);
         //TestResource setDynamicSet(Iterable<T> items);
 
+        /**
+         * {@code <pre>
+         * <http://www.example.org/simpleMap> [
+         *   <http://www.example.org/key>    "hello";
+         *   <http://www.example.org/value>  "world"
+         * ]
+         * </pre>}
+         */
         @Iri("eg:simpleMap")
+        @Override
         Map<String, Object> getSimpleMap();
 
+
+        /**
+         * {@code <pre>
+         * <http://www.example.org/simpleMap> [
+         *   <http://www.example.org/myKey>    "hello";
+         *   <http://www.example.org/myValue>  "world"
+         * ]
+         * </pre>}
+         */
+        @Iri("eg:simpleMap")
+        @KeyIri("eg:myKey")
+        //@ValueIri("eg:myValue")
+        @Override
+        Map<String, Object> getCustomMap();
+
+
+        /**
+         * If the value is a (sub class of) Resource and no {@code @ValueIri} is given then
+         * the keys become properties of the value resource.
+         *
+         * {@code <pre>
+         * [
+         *   <http://www.example.org/simpleMap>
+         *     [ <eg:myKey>  "id2" ];
+         *   <http://www.example.org/simpleMap>
+         *     [ <eg:myKey>  "id1" ]
+         * ] .
+         * </pre>}
+         */
+        @Iri("eg:simpleMap")
+        @KeyIri("eg:myKey")
+        @Override
+        Map<String, Resource> getCustomMap2();
+
         @Iri("eg:dateTime")
+        @Override
         XSDDateTime getDateTime();
         TestResourceDefault setDateTime();
 
@@ -278,15 +333,11 @@ public class TestMapperProxyUtils {
     }
 
 
-    @Test
-    public void testSimpleMap() {
-        JenaSystem.init();
-        JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
-        TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
+    private static void testMap(Map<String, Object> map) {
 
-        Assert.assertEquals(Collections.emptyMap(), sb.getSimpleMap());
-        sb.getSimpleMap().put("hello", "world");
-        sb.getSimpleMap().put("value", 123);
+        Assert.assertEquals(Collections.emptyMap(), map);
+        map.put("hello", "world");
+        map.put("value", 123);
 
         // RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE);
 
@@ -294,8 +345,43 @@ public class TestMapperProxyUtils {
 //		sb.getDynamicSet(Integer.class).addAll(set);
         //Assert.assertEquals(sb, sb.setList(list));
         //Assert.assertEquals(set, sb.getDynamicSet(Integer.class));
-        Assert.assertEquals(sb.getSimpleMap().get("hello"), "world");
-        Assert.assertEquals(sb.getSimpleMap().get("value"), 123);
+        Assert.assertEquals(map.get("hello"), "world");
+        Assert.assertEquals(map.get("value"), 123);
+    }
+
+    @Test
+    public void testSimpleMap() {
+        JenaSystem.init();
+        JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
+        TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
+        Map<String, Object> map = sb.getSimpleMap();
+        testMap(map);
+    }
+
+    @Test
+    public void testCustomMap() {
+        JenaSystem.init();
+        JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
+        TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
+        Map<String, Object> map = sb.getCustomMap();
+        testMap(map);
+    }
+
+    @Test
+    public void testCustomMap2() {
+        JenaSystem.init();
+        JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
+        TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
+        Map<String, Resource> map = sb.getCustomMap2();
+        Resource v1 = sb.getModel().createResource();
+        map.put("id1", v1);
+
+        Resource v2 = sb.getModel().createResource();
+        map.put("id2", v2);
+        // RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_PRETTY);
+
+        Assert.assertEquals(map.get("id1"), v1);
+        Assert.assertEquals(map.get("id2"), v2);
     }
 
     @Test
