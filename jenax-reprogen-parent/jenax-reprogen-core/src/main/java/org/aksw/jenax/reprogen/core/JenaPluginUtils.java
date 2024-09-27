@@ -1,7 +1,10 @@
 package org.aksw.jenax.reprogen.core;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,9 +23,11 @@ import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.arq.util.implementation.ImplementationLazy;
+import org.aksw.jenax.arq.util.implementation.SimpleImplementation;
 import org.aksw.jenax.reprogen.util.ImplementationProxy;
 import org.apache.jena.enhanced.BuiltinPersonalities;
 import org.apache.jena.enhanced.EnhGraph;
+import org.apache.jena.enhanced.EnhNode;
 import org.apache.jena.enhanced.Implementation;
 import org.apache.jena.enhanced.Personality;
 import org.apache.jena.graph.Node;
@@ -240,7 +245,30 @@ public class JenaPluginUtils {
         }
     }
 
-    public static Implementation createImplementation(boolean lazy, Class<?> clazz, Supplier<PrefixMapping> pm) {
+    public static Implementation createDirectImplementation(Class<?> clazz) {
+        Implementation result;
+        if (!Modifier.isAbstract(clazz.getModifiers())) {
+            try {
+                Constructor<?> ctor = clazz.getConstructor(Node.class, EnhGraph.class);
+                result = new SimpleImplementation((n, g) -> {
+                    try {
+                        return (EnhNode)ctor.newInstance(n, g);
+                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Resource implementation must provide the constructor (Node, EnhGraph)", e);
+            } catch (SecurityException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new RuntimeException("Cannot register an abstract non-proxy class: " + clazz);
+        }
+        return result;
+    }
+
+    public static Implementation createProxyImplementation(boolean lazy, Class<?> clazz, Supplier<PrefixMapping> pm) {
         Implementation result;
 
         TypeDecider typeDecider = getTypeDecider();
@@ -267,7 +295,10 @@ public class JenaPluginUtils {
 
         TypeDecider typeDecider = getTypeDecider();
 
-        logger.debug("Creating implementation for " + clazz);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Creating implementation for " + clazz);
+        }
+
         BiFunction<Node, EnhGraph, ? extends Resource> proxyFactory =
                 MapperProxyUtils.createProxyFactory(cls, pm, typeDecider);
 
@@ -289,40 +320,49 @@ public class JenaPluginUtils {
 //    }
 
     public static void registerResourceClass(boolean lazy, Class<?> clazz, Personality<RDFNode> p, Supplier<PrefixMapping> pm) {
-
         if (Resource.class.isAssignableFrom(clazz)) {
-            boolean supportsProxying = supportsProxying(clazz);
-            if (supportsProxying) {
-                ResourceView resourceView = clazz.getAnnotation(ResourceView.class);
-                Class<?>[] rawSuperTypes = resourceView == null
-                        ? null
-                        : resourceView.value();
+            ResourceView resourceView = clazz.getAnnotation(ResourceView.class);
+            Class<?>[] rawSuperTypes = resourceView == null
+                    ? null
+                    : resourceView.value();
 
-                // If ResourceView is used without arguments, use the annotated type itself
-                Class<?>[] superTypes = rawSuperTypes == null || rawSuperTypes.length == 0
-                        ? new Class<?>[] {clazz}
-                        : rawSuperTypes;
+            // If ResourceView is used without arguments then use the annotated type itself
+            Class<?>[] superTypes = rawSuperTypes == null || rawSuperTypes.length == 0
+                    ? new Class<?>[] {clazz}
+                    : rawSuperTypes;
 
-                List<Class<?>> effectiveTypes = new ArrayList<>(Arrays.asList(superTypes));
-                //effectiveTypes.add(clazz);
+            List<Class<?>> effectiveTypes = new ArrayList<>(Arrays.asList(superTypes));
+            //effectiveTypes.add(clazz);
 
-                Implementation impl = createImplementation(lazy, clazz, pm);
+            boolean needsProxying = Modifier.isAbstract(clazz.getModifiers()) || supportsProxying(clazz);
+            Implementation impl = needsProxying
+                    ? createProxyImplementation(lazy, clazz, pm)
+                    : createDirectImplementation(clazz);
 
-                for(Class<?> type : effectiveTypes) {
-                    if(!type.isAssignableFrom(clazz)) {
+            for(Class<?> type : effectiveTypes) {
+                if(!type.isAssignableFrom(clazz)) {
+                    if (logger.isWarnEnabled()) {
                         logger.warn("Not a super type: Cannot register implementation for " + clazz + " with specified type " + type);
-                    } else {
-                        @SuppressWarnings("unchecked")
-                        Class<? extends Resource> cls = (Class<? extends Resource>)type;
-
-                        logger.debug("Registering ResourceView from " + clazz);
-                        p.add(cls, impl);
                     }
+                } else {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends Resource> cls = (Class<? extends Resource>)type;
+
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Registering ResourceView from " + clazz);
+                    }
+                    p.add(cls, impl);
                 }
             }
         }
     }
 
+    /**
+     * Returns true if any method is annotated with {@link Iri} or {@link IriNs}.
+     *
+     * @param clazz
+     * @return
+     */
     public static boolean supportsProxying(Class<?> clazz) {
         boolean result = false;
         //int mods = clazz.getModifiers();
