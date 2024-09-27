@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.sparql.v2.api.high;
+package org.aksw.jenax.graphql.sparql.v2.exec.api.high;
 
 import java.util.Objects;
 

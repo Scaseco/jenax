@@ -1,6 +1,6 @@
 package org.aksw.jenax.web.server.boot;
 
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecFactory;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecFactory;
 import org.aksw.jenax.web.provider.QueryExceptionProvider;
 import org.aksw.jenax.web.provider.UncaughtExceptionProvider;
 import org.aksw.jenax.web.provider.UnwrapRuntimeExceptionProvider;

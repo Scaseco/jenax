@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.sparql.v2.api.low;
+package org.aksw.jenax.graphql.sparql.v2.exec.api.low;
 
 // Adapting the writer from within the API feels bad, its better to have a high level API as a facade with the default adapters
 //public class GraphQlFieldExecWrapper<K, KO, VO>

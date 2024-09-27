@@ -2,10 +2,10 @@ package org.aksw.jenax.web.servlet.graphql.v2;
 
 import java.util.Objects;
 
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExec;
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecBuilder;
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecFactory;
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecUtils;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecBuilder;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecFactory;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecUtils;
 import org.aksw.jenax.graphql.sparql.v2.io.GraphQlJsonUtils;
 import org.apache.jena.riot.WebContent;
 import org.slf4j.Logger;

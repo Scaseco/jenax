@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.sparql.v2.api.low;
+package org.aksw.jenax.graphql.sparql.v2.exec.api.low;
 
 /**
  * Common interface for graphql-based execution - whether its for individual fields

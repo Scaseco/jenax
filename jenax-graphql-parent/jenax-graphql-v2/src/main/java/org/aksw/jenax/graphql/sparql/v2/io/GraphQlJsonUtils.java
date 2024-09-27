@@ -1,6 +1,6 @@
 package org.aksw.jenax.graphql.sparql.v2.io;
 
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlProcessorSettings;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessorSettings;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

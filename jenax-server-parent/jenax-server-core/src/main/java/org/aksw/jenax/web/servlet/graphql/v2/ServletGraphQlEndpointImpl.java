@@ -2,7 +2,7 @@ package org.aksw.jenax.web.servlet.graphql.v2;
 
 import java.io.InputStream;
 
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecFactory;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 

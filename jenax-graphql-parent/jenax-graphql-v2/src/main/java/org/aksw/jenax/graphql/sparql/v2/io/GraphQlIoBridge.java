@@ -2,7 +2,7 @@ package org.aksw.jenax.graphql.sparql.v2.io;
 
 import java.util.function.Function;
 
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExec;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProvider;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderApi;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderRon;

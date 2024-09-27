@@ -3,8 +3,8 @@ package org.aksw.jenax.graphql.sparql;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExec;
-import org.aksw.jenax.graphql.sparql.v2.api.low.RdfGraphQlProcessorFactoryImpl;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderApi;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderGson;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderJava;

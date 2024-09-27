@@ -1,13 +1,13 @@
-package org.aksw.jenax.graphql.sparql.v2.api.high;
+package org.aksw.jenax.graphql.sparql.v2.exec.api.high;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExec;
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlProcessor;
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlProcessorSettings;
-import org.aksw.jenax.graphql.sparql.v2.api.low.RdfGraphQlProcessorFactoryImpl;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessor;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessorSettings;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.exec.QueryExecBuilder;

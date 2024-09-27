@@ -23,5 +23,5 @@ public class FoafTerms {
     public static final String accountName = NS + "accountName";
     public static final String accountServiceHomepage = NS + "accountServiceHomepage";
 
-
+    public static final String knows = NS + "knows";
 }

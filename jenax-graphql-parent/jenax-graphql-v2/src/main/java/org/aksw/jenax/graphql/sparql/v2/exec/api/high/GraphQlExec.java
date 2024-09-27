@@ -1,11 +1,11 @@
-package org.aksw.jenax.graphql.sparql.v2.api.high;
+package org.aksw.jenax.graphql.sparql.v2.exec.api.high;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlExecCore;
-import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlExecCore;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 import org.apache.jena.graph.Node;
 
