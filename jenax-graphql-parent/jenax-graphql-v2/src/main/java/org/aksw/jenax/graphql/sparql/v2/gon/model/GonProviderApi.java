@@ -1,5 +1,9 @@
 package org.aksw.jenax.graphql.sparql.v2.gon.model;
 
+/**
+ * This class adds the generic type parameter T for the objects being constructed by the writer.
+ * For example, for Gson this is JsonElement.
+ */
 public interface GonProviderApi<T, K, V> // V extends T>
         extends GonProvider<K, V>
 {

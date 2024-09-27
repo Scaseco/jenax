@@ -20,7 +20,7 @@ public class TestGraphQlToRonSimple {
 
     @Test
     public void test05() {
-        GraphQlTestUtils.doAssertRon(testDsg,
+        GraphQlTestUtils.doAssertJsonWithRon(testDsg,
             """
             {
               matches @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s") {

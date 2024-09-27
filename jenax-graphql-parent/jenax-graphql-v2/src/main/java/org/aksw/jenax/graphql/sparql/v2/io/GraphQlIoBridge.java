@@ -2,8 +2,13 @@ package org.aksw.jenax.graphql.sparql.v2.io;
 
 import java.util.function.Function;
 
+import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExec;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProvider;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderApi;
+import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderRon;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfLiteral;
+import org.aksw.jenax.ron.RdfLiteralImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.out.NodeFmtLib;
@@ -15,6 +20,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
+/**
+ * Methods to create sinks for use with {@link GraphQlExec#sendNextItemToWriter(ObjectNotationWriter)}.
+ */
 public class GraphQlIoBridge {
     /** RDF literals with this JSON datatype will be embedded in the JSON output. */
     public static String DATATYPE_IRI_JSON = "https://w3id.org/aksw/norse#json";
@@ -37,6 +45,20 @@ public class GraphQlIoBridge {
         return result;
     }
 
+    public static ObjectNotationWriterInMemory<RdfElement, P_Path0, Node> bridgeRonToRdfElement() {
+        GonProviderApi<RdfElement, P_Path0, RdfLiteral> gonProvider = GonProviderRon.getInstance();
+        ObjectNotationWriterInMemory<RdfElement, P_Path0, RdfLiteral> destination = ObjectNotationWriterViaGon.of(gonProvider);
+
+        Function<P_Path0, P_Path0> keyMapper = x -> x;
+        Function<Node, RdfLiteral> valueMapper = RdfLiteralImpl::new;
+
+        ObjectNotationWriterMapper<P_Path0, P_Path0, Node, RdfLiteral> writer = new ObjectNotationWriterMapperImpl<>(destination, gonProvider, keyMapper, valueMapper);
+        ObjectNotationWriter<P_Path0, Node> front = writer;
+
+        ObjectNotationWriterInMemory<RdfElement, P_Path0, Node> result = new ObjectNotationWriterInMemoryWrapper<RdfElement, P_Path0, Node>(front, destination);
+        return result;
+    }
+
     public static <T, V> ObjectNotationWriterInMemory<T, String, Node> bridgeToJsonInMemory(GonProviderApi<T, String, V> jsonProvider) {
         ObjectNotationWriterInMemory<T, String, V> destination = ObjectNotationWriterViaGon.of(jsonProvider);
 
@@ -51,7 +73,6 @@ public class GraphQlIoBridge {
 
         return result;
     }
-
 
     // exec.sendNextItemToWriter(ObjectNotationWriter<P_Path0, Node> writer)
     // exec.adapt(bridge).sendNextItemToWriter(ObjectNotationWriter<String, V> writer)

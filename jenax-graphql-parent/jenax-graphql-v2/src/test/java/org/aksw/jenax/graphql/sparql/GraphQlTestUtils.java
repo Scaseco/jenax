@@ -1,13 +1,12 @@
 package org.aksw.jenax.graphql.sparql;
 
 import java.util.Iterator;
-import java.util.Objects;
 
-import org.aksw.jenax.graphql.sparql.v2.api.high.GraphQlExecFactory;
 import org.aksw.jenax.graphql.sparql.v2.api.low.GraphQlFieldExec;
 import org.aksw.jenax.graphql.sparql.v2.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderGson;
 import org.aksw.jenax.graphql.sparql.v2.io.GraphQlIoBridge;
+import org.aksw.jenax.ron.RdfElement;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.path.P_Path0;
@@ -47,6 +46,32 @@ public class GraphQlTestUtils {
     public static void doAssertRon(DatasetGraph dataset, String documentStr, String expectedResult) {
         JsonElement expected = gson.fromJson(expectedResult, JsonElement.class);
 
+        RdfElement actual = null;
+        try (GraphQlFieldExec<P_Path0> qe = RdfGraphQlProcessorFactoryImpl.forRon().newBuilder()
+                .document(documentStr)
+                // set mode?
+            .build() // or have buildForJson and buildForRdf here?
+            // .getFieldProcessor(1).newExecBuilder()
+            .newExecBuilder()
+            .service(() -> QueryExec.dataset(dataset))
+            .build()) {
+
+        // GraphQlExecUtils.write(System.out, qe);
+            // qe.sendNextItemToWriter(GraphQlIoBridge.
+
+            Iterator<RdfElement> it = qe.asIterator(GraphQlIoBridge.bridgeRonToRdfElement());
+            while (it.hasNext()) {
+                actual = it.next();
+            }
+        }
+
+        Assert.assertEquals(expected, actual);
+    }
+
+
+    public static void doAssertJsonWithRon(DatasetGraph dataset, String documentStr, String expectedResult) {
+        JsonElement expected = gson.fromJson(expectedResult, JsonElement.class);
+
         JsonElement actual = null;
         try (GraphQlFieldExec<P_Path0> qe = RdfGraphQlProcessorFactoryImpl.forRon().newBuilder()
                 .document(documentStr)
@@ -68,5 +93,4 @@ public class GraphQlTestUtils {
 
         Assert.assertEquals(expected, actual);
     }
-
 }
