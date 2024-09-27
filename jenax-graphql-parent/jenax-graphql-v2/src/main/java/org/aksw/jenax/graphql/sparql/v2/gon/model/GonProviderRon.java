@@ -18,8 +18,6 @@ import org.apache.jena.sparql.path.P_Path0;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 public class GonProviderRon
     implements GonProviderApi<RdfElement, P_Path0, RdfLiteral>
@@ -67,7 +65,7 @@ public class GonProviderRon
 
     @Override
     public boolean isObject(Object obj) {
-        return obj instanceof JsonObject;
+        return obj instanceof RdfObject;
     }
 
     protected static RdfElement asElement(Object obj) {
@@ -117,7 +115,7 @@ public class GonProviderRon
 
     @Override
     public boolean isArray(Object obj) {
-        return obj instanceof JsonArray;
+        return obj instanceof RdfArray;
     }
 
     @Override

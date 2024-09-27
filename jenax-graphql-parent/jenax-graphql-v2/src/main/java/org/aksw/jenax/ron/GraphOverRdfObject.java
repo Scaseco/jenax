@@ -185,20 +185,25 @@ public class GraphOverRdfObject
                 : values.filter(v -> matches(v, o));
 
             return filteredValues
+                    .filter(x -> !x.isNull())
                     .map(x -> TripleUtils.create(src, pp.getNode(), wrap(x), isForward));
         });
     }
 
     public static Node wrap(RdfElement elt) {
+        Node result;
         if (elt.isArray()) {
             throw new RuntimeException("should not happen");
         } else if (elt.isLiteral()) {
-            return elt.getAsLiteral().getInternalId();
+            result = elt.getAsLiteral().getInternalId();
         } else if (elt.isObject()) {
-            return Node_RdfObject.of(elt.getAsObject());
+            result = Node_RdfObject.of(elt.getAsObject());
+        } else if (elt.isNull()) {
+            result = null;
         } else {
             throw new RuntimeException("should not happed");
         }
+        return result;
     }
 
     public static boolean matches(RdfElement elt, Node node) {
