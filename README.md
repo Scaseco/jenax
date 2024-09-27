@@ -3,12 +3,7 @@ title: Features
 nav_order: 20
 ---
 
-
 Unofficial extensions for jena - refactoring of https://github.com/SmartDataAnalytics/jena-sparql-api
-
-** Status of this project: Currently in transition ~ 2021-10-16 **
-
-That project has grown over a decade and its time to separate the good parts from the outdated ones :)
 
 ## Maven Dependencies
 
