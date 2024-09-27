@@ -220,15 +220,32 @@ public class JenaPluginUtils {
         registerResourceClasses(true, classes);
     }
 
+    @SafeVarargs
+    public static void registerResourceClasses(Personality<RDFNode> personality, Class<? extends Resource> ... classes) {
+        registerResourceClasses(personality, true, Arrays.asList(classes));
+    }
+
+    public static void registerResourceClasses(Personality<RDFNode> personality, Iterable<Class<?>> classes) {
+        registerResourceClasses(personality, true, classes);
+    }
 
     @SafeVarargs
     public static void registerResourceClasses(boolean lazy, Class<? extends Resource> ... classes) {
-        registerResourceClasses(lazy, Arrays.asList(classes));
+        registerResourceClasses(BuiltinPersonalities.model, lazy, Arrays.asList(classes));
     }
 
     public static void registerResourceClasses(boolean lazy, Iterable<Class<?>> classes) {
+        registerResourceClasses(BuiltinPersonalities.model, lazy, classes);
+    }
+
+    @SafeVarargs
+    public static void registerResourceClasses(Personality<RDFNode> personality, boolean lazy, Class<? extends Resource> ... classes) {
+        registerResourceClasses(personality, lazy, Arrays.asList(classes));
+    }
+
+    public static void registerResourceClasses(Personality<RDFNode> personality, boolean lazy, Iterable<Class<?>> classes) {
         for(Class<?> clazz : classes) {
-            registerResourceClass(lazy, clazz, BuiltinPersonalities.model, () -> DefaultPrefixes.get());
+            registerResourceClass(lazy, clazz, personality, () -> DefaultPrefixes.get());
         }
     }
 
