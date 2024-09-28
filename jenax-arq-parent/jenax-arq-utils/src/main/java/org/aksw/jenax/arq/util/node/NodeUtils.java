@@ -27,6 +27,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.NodeCmp;
 
@@ -353,6 +354,23 @@ public class NodeUtils {
         }
         return result;
     }
+
+    public static String getIriOrString(Node node) {
+        String result = node == null
+                ? null
+                : node.isURI()
+                    ? node.getURI()
+                    : node.isLiteral() && (
+                            org.apache.jena.sparql.util.NodeUtils.isSimpleString(node) ||
+                            org.apache.jena.sparql.util.NodeUtils.isLangString(node))
+                        ? node.getLiteralLexicalForm()
+                        : null;
+        if (result == null) {
+            NodeValue.raise(new ExprTypeException("datatype: Neither IRI nor string: " + node));
+        }
+        return result;
+    }
+
 
     /**
      * Returns the "unquoted form" of any Node depending on its type:
