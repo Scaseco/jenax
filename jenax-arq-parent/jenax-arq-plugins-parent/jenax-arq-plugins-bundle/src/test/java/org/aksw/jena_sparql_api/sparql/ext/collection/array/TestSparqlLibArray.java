@@ -33,14 +33,14 @@ public class TestSparqlLibArray {
     @Test
     public void testArrayAggCollectNonNull() {
         Node actual = MoreQueryExecUtils.INSTANCE.evalQueryToNode("SELECT (array:collect(?s) AS ?c) { VALUES (?s ?o) { (<urn:s1> UNDEF) (<urn:s2> <urn:o1>) }  }");
-        Node expected = NodeFactory.createLiteral("<urn:s1> <urn:s2>", RDFDatatypeNodeList.INSTANCE);
+        Node expected = NodeFactory.createLiteralDT("<urn:s1> <urn:s2>", RDFDatatypeNodeList.INSTANCE);
         Assert.assertEquals(expected, actual);
     }
 
     @Test
     public void testArrayAggCollectWithNull() {
         Node actual = MoreQueryExecUtils.INSTANCE.evalQueryToNode("SELECT (array:collect(?o) AS ?c) { VALUES (?s ?o) { (<urn:s1> UNDEF) (<urn:s2> <urn:o1>) }  }");
-        Node expected = NodeFactory.createLiteral("UNDEF <urn:o1>", RDFDatatypeNodeList.INSTANCE);
+        Node expected = NodeFactory.createLiteralDT("UNDEF <urn:o1>", RDFDatatypeNodeList.INSTANCE);
         Assert.assertEquals(expected, actual);
     }
 
@@ -62,9 +62,7 @@ public class TestSparqlLibArray {
     public void testArrayPfUnnest() {
         List<Node> actual = MoreQueryExecUtils.INSTANCE.evalQueryToNodes("SELECT ?x { 'UNDEF <urn:s>'^^norse:array array:unnest (?x ?i) }");
         @SuppressWarnings("unchecked")
-        List<Node> expected = (List<Node>)NodeFactory.createLiteral("UNDEF <urn:s>", RDFDatatypeNodeList.INSTANCE).getLiteralValue();
+        List<Node> expected = (List<Node>)NodeFactory.createLiteralDT("UNDEF <urn:s>", RDFDatatypeNodeList.INSTANCE).getLiteralValue();
         Assert.assertEquals(expected, actual);
     }
-
-
 }

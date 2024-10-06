@@ -29,5 +29,4 @@ public class TestSparqlLibMaven {
         Binding expected = BindingFactory.binding(Vars.x, NodeFactory.createLiteralString("internal/org/aksw/jenax/jenax-arq-plugin-bundle/1.0.0/jenax-arq-plugin-bundle-1.0.0"));
         Assert.assertEquals(expected, actual);
     }
-
 }

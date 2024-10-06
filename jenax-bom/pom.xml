@@ -87,7 +87,7 @@
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-vfs2.version>2.9.0</commons-vfs2.version>
 		<ver.commons-math>3.6.1</ver.commons-math>
-		<hadoop.version>3.3.4</hadoop.version>
+		<hadoop.version>3.4.0</hadoop.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.9.1</tika.version>
