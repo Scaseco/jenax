@@ -1,4 +1,4 @@
-package org.aksw.jenax.ron;
+package org.aksw.jenax.graphql.sparql.v2.ron;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;

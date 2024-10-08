@@ -1,4 +1,4 @@
-package org.aksw.jenax.ron;
+package org.aksw.jenax.graphql.sparql.v2.ron;
 
 public class ParentLinkArrayImpl
     implements ParentLinkArray

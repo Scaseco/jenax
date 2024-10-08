@@ -6,7 +6,7 @@ import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderGson;
 import org.aksw.jenax.graphql.sparql.v2.io.GraphQlIoBridge;
-import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.graphql.sparql.v2.ron.RdfElement;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.path.P_Path0;

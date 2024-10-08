@@ -1,6 +1,6 @@
 package org.aksw.jenax.graphql.sparql.v2.gon.model;
 
-import org.aksw.jenax.ron.RdfObject;
+import org.aksw.jenax.graphql.sparql.v2.ron.RdfObject;
 
 /**
  * A data model for RDF tree structures akin to gson's JsonElement.
