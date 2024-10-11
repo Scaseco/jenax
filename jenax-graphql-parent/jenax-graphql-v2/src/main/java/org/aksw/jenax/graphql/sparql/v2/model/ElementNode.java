@@ -321,7 +321,7 @@ public class ElementNode
 
         // Sanity checks
         if (finalThisVars.size() != finalChildVars.size()) {
-            throw new RuntimeException("Join var lists differ in size");
+            throw new RuntimeException(String.format("Join var lists differ in size: thisVars=%s, childVars=%s", finalThisVars, finalChildVars));
         }
 
         // Parent vars can be in any ancestor
