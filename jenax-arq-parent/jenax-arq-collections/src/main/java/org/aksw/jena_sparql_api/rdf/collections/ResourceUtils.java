@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -18,8 +20,6 @@ import org.aksw.commons.util.reflect.ClassUtils;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDecider;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -53,9 +53,12 @@ import org.apache.jena.sparql.path.PathLib;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
+import org.apache.jena.util.CollectionFactory;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 
 /**
@@ -65,6 +68,46 @@ import com.google.common.collect.Streams;
  *
  */
 public class ResourceUtils {
+
+    /**
+     * Similar to a concise bounded description / CBD BUT: only in forward direction!
+     *
+     * @implNote This is an adaption of {@link org.apache.jena.util.ResourceUtils#reachableClosure(Resource)}
+     */
+    public static Model bnodeClosure( Resource root ) {
+        Model m = ModelFactory.createDefaultModel();
+
+        // set of resources we have passed through already (i.e. the occurs check)
+        Set<Resource> seen = CollectionFactory.createHashedSet();
+
+        // queue of resources we have not yet visited
+        List<RDFNode> queue = new LinkedList<>();
+        queue.add( root );
+
+        while (!queue.isEmpty()) {
+            Resource r = (Resource) queue.remove( 0 );
+
+            // check for multiple paths arriving at this queue node
+            if (!seen.contains( r )) {
+                seen.add( r );
+
+                // add the statements to the output model, and queue any new resources
+                for (StmtIterator i = r.listProperties(); i.hasNext(); ) {
+                    Statement s = i.nextStatement();
+
+                    // don't do the occurs check now in case of reflexive statements
+                    m.add( s );
+
+                    RDFNode obj = s.getObject();
+                    if (obj.isAnon()) {
+                        queue.add( s.getObject() );
+                    }
+                }
+            }
+        }
+
+        return m;
+    }
 
     /**
      * Return the basic jena RDFNode implementation for a given RDFNode, namely
@@ -146,14 +189,12 @@ public class ResourceUtils {
     public static <T> Optional<T> findFirst(ExtendedIterator<T> stream) {
         Optional<T> result = stream.nextOptional();
         stream.close();
-
         return result;
     }
 
     public static <T extends RDFNode> boolean canAsProperty(Statement stmt, boolean isFwd, Class<T> clazz) {
         RDFNode rdfNode = getTarget(stmt, isFwd);
         boolean result = rdfNode.canAs(clazz);
-
         return result;
     }
 

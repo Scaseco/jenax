@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.aksw.jenax.io.rdf.json.RdfArray;
-import org.aksw.jenax.io.rdf.json.RdfElementVisitorRdfToJson;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriterViaJson;
+import org.aksw.jenax.ron.RdfArray;
+import org.aksw.jenax.ron.RdfArrayImpl;
+import org.aksw.jenax.ron.RdfElementVisitorRdfToJson;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Quad;
@@ -31,19 +33,19 @@ public class EdgeBasedAccumulator {
          * }
          */
 
-        AggJsonEdge actorEdge = AggJsonProperty.of(NodeFactory.createLiteral("actor"), NodeFactory.createURI("urn:actor"), true);
+        AggJsonProperty actorEdge = AggJsonProperty.of(NodeFactory.createLiteral("actor"), NodeFactory.createURI("urn:actor"), true);
         movieObject.addPropertyAggregator(actorEdge);
 
         AggJsonObject actorObject = new AggJsonObject();
         actorEdge.setTargetAgg(actorObject);
 
-        AggJsonEdge actorLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:actorLabel"), true);
+        AggJsonProperty actorLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:actorLabel"), true);
         actorLabelEdge.setSingle(true);
         AggJsonLiteral actorLabelValue = new AggJsonLiteral();
         actorLabelEdge.setTargetAgg(actorLabelValue);
         actorObject.addPropertyAggregator(actorLabelEdge);
 
-        AggJsonEdge moveLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:movieLabel"), true);
+        AggJsonProperty moveLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:movieLabel"), true);
         movieObject.addPropertyAggregator(moveLabelEdge);
 
         AggJsonLiteral movieLabelValue = new AggJsonLiteral();
@@ -85,7 +87,7 @@ public class EdgeBasedAccumulator {
         JsonWriter writer = gson.newJsonWriter(new OutputStreamWriter(System.out));
 
         // gson.fromJson(/null, null)
-        AccContext accContext = new AccContext(new StructuredWriterRdfViaJson(gson, writer), true, true);
+        AccContextRdf accContext = new AccContextRdf(new RdfObjectNotationWriterViaJson(gson, writer), true, true);
         accContext.setErrorHandler(ev -> {
             System.err.println("Error: " + ev);
         });
@@ -94,7 +96,7 @@ public class EdgeBasedAccumulator {
         accContext.materialize = true;
 
         // JsonArray materialized = new JsonArray();
-        RdfArray materialized = new RdfArray();
+        RdfArray materialized = new RdfArrayImpl();
         try {
             writer.beginArray();
             AccJsonDriver driver = AccJsonDriver.of(movieObject.newAccumulator(), false);

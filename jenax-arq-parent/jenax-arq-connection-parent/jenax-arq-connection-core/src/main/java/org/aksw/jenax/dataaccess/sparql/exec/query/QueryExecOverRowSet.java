@@ -1,9 +1,12 @@
 package org.aksw.jenax.dataaccess.sparql.exec.query;
 
+import java.util.Objects;
+
+import org.aksw.commons.util.closeable.AutoCloseableWithLeakDetectionBase;
+import org.aksw.jenax.arq.util.exec.query.QueryExecAdapter;
 import org.apache.jena.query.Query;
-import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.util.Context;
 
 /**
  * Map all non-select sparql query types to select queries.
@@ -13,6 +16,29 @@ import org.apache.jena.sparql.util.Context;
 public abstract class QueryExecOverRowSet
     extends QueryExecBaseSelect
 {
+
+    /** QueryExec wrapper for just the row set. */
+    public class QueryExecOverRowSetInternal
+        extends AutoCloseableWithLeakDetectionBase
+        implements QueryExecAdapter {
+        protected RowSet rowSet;
+
+        public QueryExecOverRowSetInternal(RowSet rowSet) {
+            super();
+            this.rowSet = Objects.requireNonNull(rowSet);
+        }
+
+        @Override
+        public RowSet select() {
+            return rowSet;
+        }
+
+        @Override
+        protected void closeActual() throws Exception {
+            rowSet.close();
+        }
+    }
+
     protected RowSet activeRowSet = null;
 
     public QueryExecOverRowSet(Query query) {
@@ -38,32 +64,21 @@ public abstract class QueryExecOverRowSet
      */
     protected abstract RowSet createRowSet(Query selectQuery);
 
-    protected synchronized final RowSet doSelect(Query query) {
-        ensureOpen();
-
-        if(this.getActiveRowSet() != null) {
-            throw new RuntimeException("A query is already running");
-        }
-
+    @Override
+    protected QueryExec doSelect(Query query) {
         RowSet rowSet = createRowSet(query);
-
-        if(rowSet == null) {
-            throw new RuntimeException("Failed to obtain a QueryExecution for query: " + query);
-        }
-
-        setActiveRowSet(activeRowSet);
-        return rowSet;
+        return new QueryExecOverRowSetInternal(rowSet);
     }
 
-    @Override
-    public DatasetGraph getDataset() {
-        return null;
-    }
-
-    @Override
-    public Context getContext() {
-        return null;
-    }
+//    @Override
+//    public DatasetGraph getDataset() {
+//        return null;
+//    }
+//
+//    @Override
+//    public Context getContext() {
+//        return null;
+//    }
 
     @Override
     public boolean isClosed() {

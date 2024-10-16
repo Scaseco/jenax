@@ -20,6 +20,7 @@ import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.ElementUnfold;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitor;
 
@@ -66,6 +67,7 @@ public class ElementVisitorGetSubElements
     @Override public void visit(ElementMinus el) { result = Collections.singletonList(el.getMinusElement()); }
     @Override public void visit(ElementService el) { result = Collections.singletonList(el.getElement()); }
     @Override public void visit(ElementLateral el) { result = Collections.singletonList(el.getLateralElement()); }
+    @Override public void visit(ElementUnfold el) { result = Collections.emptyList(); }
 
     @Override
     public void visit(ElementSubQuery el) {

@@ -18,7 +18,7 @@ The central class is [UserDefinedFunctionResource](src/main/java/org/aksw/jena_s
 The [service description module](../jena-sparql-api-service-description) contains resources to probe features of SPARQL endpoints - including the vendor - such that profiles can be activated automatically for many conventional triple stores.
 
 
-The application of this module happens in the [algebra](../jena-sparql-api-algebra) module.
+The application of this module happens in the [algebra](../../jenax-arq-parent/jenax-arq-algebra) module.
 
 
 ### Blank Node to IRI Rewriting
@@ -27,7 +27,7 @@ The most prominent application of this module is the blank node rewriting middle
 This works by rewriting SPARQL queries and exploiting vendor-specific functions that yield a blank node's internal label.
 
 
-The macro definitions are in the algebra module's resource [bnode-rewrites.ttl](../jenax-arq-algebra/src/main/resources/bnode-rewrites.ttl).
+The macro definitions are in the algebra module's resource [bnode-rewrites.ttl](../../jenax-arq-parent/jenax-arq-algebra/src/main/resources/bnode-rewrites.ttl).
 
 
 

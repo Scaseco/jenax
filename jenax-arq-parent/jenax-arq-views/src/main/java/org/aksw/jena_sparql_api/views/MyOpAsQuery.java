@@ -73,6 +73,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
@@ -100,6 +101,8 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.util.graph.GraphList;
 import org.apache.jena.vocabulary.RDF;
+
+// FIXME Can we remove this class? IIRC this class was copied because of some issue with LSQ.
 
 /** Convert an Op expression in SPARQL syntax, that is, the reverse of algebra generation */
 public class MyOpAsQuery
@@ -650,6 +653,16 @@ public class MyOpAsQuery
                 return null ;
             int len = g.getElements().size() ;
             return g.getElements().get(len-1) ;
+        }
+
+        @Override
+        public void visit(OpUnfold opUnfold) {
+            throw new UnsupportedOperationException();
+//            Element e = asElement(opUnfold.getSubOp()) ;
+//            // If (unfold ... (table unit)), and first in group, don't add the empty group.
+//            insertIntoGroup(currentGroup(), e) ;
+//            Element elmtUnfold = new ElementUnfold( opUnfold.getExpr(), opUnfold.getVar1(), opUnfold.getVar2() ) ;
+//            currentGroup().addElement(elmtUnfold) ;
         }
 
         private void startSubGroup()

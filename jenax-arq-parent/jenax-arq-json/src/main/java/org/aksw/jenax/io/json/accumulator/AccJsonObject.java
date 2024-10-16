@@ -1,38 +1,25 @@
 package org.aksw.jenax.io.json.accumulator;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.aksw.commons.path.json.PathJson;
-import org.aksw.commons.path.json.PathJson.Step;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.ron.RdfObjectImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
 public class AccJsonObject
-    extends AccJsonBase
-    implements AccJsonNode
+    extends AccJsonObjectLikeBase
 {
-    protected Map<Node, Integer> fieldIdToIndex = new HashMap<>();
-    protected AccJsonEdge[] edgeAccs = new AccJsonEdge[0];
-
-    protected int currentFieldIndex = -1;
-    protected AccJsonEdge currentFieldAcc = null;
-
-
     /** Should not be used directly; use {@link AggJsonEdge} as the builder */
     public AccJsonObject() {
         this(new HashMap<>(), new AccJsonEdge[0]);
     }
 
     protected AccJsonObject(Map<Node, Integer> fieldIdToIndex, AccJsonEdge[] edgeAccs) {
-        super();
-        this.fieldIdToIndex = fieldIdToIndex;
-        this.edgeAccs = edgeAccs;
+        super(fieldIdToIndex, edgeAccs);
     }
 
     /** Create a new instance and set it as the parent on all the property accumulators */
@@ -45,7 +32,7 @@ public class AccJsonObject
     }
 
     @Override
-    public void begin(Node source, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node source, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(source, context, skipOutput);
 
         // Reset fields
@@ -54,7 +41,7 @@ public class AccJsonObject
 
         if (!skipOutput) {
             if (context.isMaterialize()) {
-                value = RdfElement.newObject(source); // new JsonObject();
+                value = new RdfObjectImpl(source); // new JsonObject();
             }
 
             if (context.isSerialize()) {
@@ -64,7 +51,7 @@ public class AccJsonObject
     }
 
     @Override
-    public AccJson transition(Triple input, AccContext context) throws IOException {
+    public AccJson transition(Triple input, AccContextRdf context) throws IOException {
         ensureBegun();
 
         Node inputFieldId = input.getPredicate();
@@ -111,14 +98,16 @@ public class AccJsonObject
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
 
         // Visit all remaining fields
         for (int i = currentFieldIndex + 1; i < edgeAccs.length; ++i) {
             AccJsonEdge edgeAcc = edgeAccs[i];
             // Edge.begin receives the target of an edge - but there is none so we pass null
-            edgeAcc.begin(null, context, skipOutput); // TODO We need to tell fields that there is no value
+
+            // With these calls we tell the fields that there is no value
+            edgeAcc.begin(null, context, skipOutput); // TODO Passing 'null' as the start node to indicate absent values is perhaps not the best API contract
             edgeAcc.end(context);
         }
 
@@ -137,31 +126,8 @@ public class AccJsonObject
         super.end(context);
     }
 
-    /** Internal method, use only for debugging/testing */
-    public void addEdge(AccJsonEdge subAcc) {
-        // TODO Lots of array copying!
-        // We should add a builder for efficiet adds and derive the more efficient array version from it.
-        Node fieldId = subAcc.getMatchFieldId();
-        int fieldIndex = edgeAccs.length;
-        fieldIdToIndex.put(fieldId, fieldIndex);
-        edgeAccs = Arrays.copyOf(edgeAccs, fieldIndex + 1);
-        edgeAccs[fieldIndex] = subAcc;
-        subAcc.setParent(this);
-    }
-
-    @Override
-    public PathJson getPath() {
-        String stepName = currentFieldAcc == null ? "(no active field)" : Objects.toString(currentFieldAcc.getJsonKey());
-        return (parent != null ? parent.getPath() : PathJson.newRelativePath()).resolve(Step.of(stepName));
-    }
-
     @Override
     public String toString() {
         return "AccJsonNodeObject (source: " + currentSourceNode + ", field: " + currentFieldAcc + ")";
-    }
-
-    @Override
-    public void acceptContribution(RdfElement value, AccContext context) {
-        throw new UnsupportedOperationException("This method should not be called on AccJsonNodeObject. It is AccJsonEdgeImpl that adds the contributions to an object.");
     }
 }

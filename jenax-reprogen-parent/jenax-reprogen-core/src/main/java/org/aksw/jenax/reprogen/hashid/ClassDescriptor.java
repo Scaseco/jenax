@@ -49,7 +49,7 @@ public class ClassDescriptor {
     protected Set<BiFunction<? super Resource, ? super HashIdCxt, ? extends HashCode>> directHashIdProcessors = new LinkedHashSet<>();
 
     /**
-     * A sequence of functions (mananged in a LinkedHashSet) that can compute a string id for a
+     * A sequence of functions (managed in a LinkedHashSet) that can compute a string id for a
      * given resource and a HashIdCxt.
      * The functions are called in order can read and/or update the mapping in the context.
      *

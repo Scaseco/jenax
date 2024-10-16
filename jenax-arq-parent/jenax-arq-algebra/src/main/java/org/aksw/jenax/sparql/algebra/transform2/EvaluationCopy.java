@@ -42,6 +42,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
  public interface EvaluationCopy<T>
@@ -82,6 +83,7 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      @Override default T eval(OpReduced op, T subOp){ return evalOp1(op, subOp); }
      @Override default T eval(OpSlice op, T subOp) { return evalOp1(op, subOp); }
      @Override default T eval(OpGroup op, T subOp) { return evalOp1(op, subOp); }
+     @Override default T eval(OpUnfold op, T subOp) { return evalOp1(op, subOp); }
 
      default T evalOp0(Op0 op) {
          T result = evalAny(op, Arrays.asList());

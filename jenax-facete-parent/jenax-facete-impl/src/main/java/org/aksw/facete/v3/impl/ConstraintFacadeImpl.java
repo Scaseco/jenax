@@ -142,9 +142,13 @@ public class ConstraintFacadeImpl<B extends FacetNodeResource>
     }
 
     @Override
-    public HLFacetConstraint<ConstraintFacade<B>> gt(Node node) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("not implemented");
+    public HLFacetConstraint<? extends ConstraintFacade<B>> gt(Node node) {
+        return nodeRange(Range.greaterThan(ComparableNodeValue.wrap(node)));
+    }
+
+    @Override
+    public HLFacetConstraint<? extends ConstraintFacade<B>> lt(Node node) {
+        return nodeRange(Range.lessThan(ComparableNodeValue.wrap(node)));
     }
 
     @Override

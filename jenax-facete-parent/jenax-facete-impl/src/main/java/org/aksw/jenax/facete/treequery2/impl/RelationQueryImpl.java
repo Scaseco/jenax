@@ -33,6 +33,9 @@ public class RelationQueryImpl
      * May by a constant supplier or a dynamic one which e.g. resolves an IRI
      * against a {@link PropertyResolverImpl}.
      */
+    // XXX Perhaps the relation should be fixed here? The question is, at which point the properly resolver is invoked.
+    //     Probably its best if resolution happens immediately when the client code attempts to traverse a property: then immediately resolve the property to the relation
+    //     and add it to this tree structure.
     protected Supplier<Fragment> relationSupplier;
 
     // XXX We can store a materialized version of the relation here that can be rebuild on demand
@@ -47,7 +50,8 @@ public class RelationQueryImpl
     /** A mapping of which variable corresponds to which component of a facet step */
     protected FacetStep reachingStep;
 
-    /** Variables can be declared as SOURCE, TARGET, PREDICATE and GRAPH */
+    /** Variables can be declared as having special meaning: SOURCE, TARGET, PREDICATE and GRAPH */
+    // XXX With this model we can't declare multiple variables (composite ids) as SOURCE.
     protected Map<Var, Node> varToComponent;
 
     // protected FacetConstraints constraints;
@@ -67,6 +71,33 @@ public class RelationQueryImpl
 
     protected Map<Var, NodeQuery> roots = new LinkedHashMap<>();
 
+    /** Fields: for each row of this relation, a field may join in additional information.
+     *  <pre>
+     *  {
+     *    thisRelation(v1, ..., vX)
+     *    LATERAL {
+     *        {
+     *          field0 exposes the tuple of the relation itself. further fields connect custom relations.
+     *        }
+     *      UNION
+     *        {
+     *          field1(r1, ..., rX) with subList of size X (ri) that joins on this relation.
+     *        }
+     *      UNION
+     *        ...
+     *      UNION
+     *        {
+     *          fieldN
+     *        }
+     *    }
+     *  }
+     *  </pre>
+     *
+     *  A connective is (element, joinVars, visibleVarsForFurtherJoining) - the set of variables of the fragment that join).
+     *  This is different from Fragment, which only declares the visible vars. Perhaps, connective could be defined as (fragment, joinVars).
+     *
+     */
+    // protected List<> subRelations;
 //    public RelationQueryImpl(Supplier<Relation> relationSupplier, QueryContext queryContext) {
 //        this(null, relationSupplier, queryContext);
 //    }
@@ -145,8 +176,7 @@ public class RelationQueryImpl
      */
     @Override
     public NodeQueryOld asNode() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

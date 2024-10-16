@@ -8,7 +8,9 @@ import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperTxn;
@@ -95,6 +97,42 @@ public class RDFLinkUtils {
         return result;
     }
 
+    public static RDFLink wrapWithBuilderTransform(RDFLink link, QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
+        RDFLinkModular modular = asModular(link);
+
+        LinkSparqlQuery queryLink;
+        LinkSparqlUpdate updateLink;
+
+        if (queryBuilderTransform == null) {
+            queryLink = modular.queryLink();
+        } else {
+            queryLink = new LinkSparqlQueryWrapperBase(modular.queryLink()) {
+                @Override
+                public QueryExecBuilder newQuery() {
+                    QueryExecBuilder base = super.newQuery();
+                    QueryExecBuilder result = queryBuilderTransform.apply(base);
+                    return result;
+                }
+            };
+        }
+
+        if (updateBuilderTransform == null) {
+            updateLink = modular.updateLink();
+        } else {
+            updateLink = new LinkSparqlUpdateWrapperBase(modular.updateLink()) {
+                @Override
+                public UpdateExecBuilder newUpdate() {
+                    // XXX super.newUpdate() is not implemented on LinkSparqlUpdateWrapperBase which is inconsistent with LinkSparqlQueryWrapperBase
+                    UpdateExecBuilder base = getDelegate().newUpdate();
+                    UpdateExecBuilder result = updateBuilderTransform.apply(base);
+                    return result;
+                }
+            };
+        }
+
+        return toLink(queryLink, updateLink, modular.datasetLink());
+    }
+
     public static RDFLink wrapWithContextMutator(RDFLink rawConn) {
         return wrapWithContextMutator(rawConn, cxt -> {});
     }
@@ -141,6 +179,13 @@ public class RDFLinkUtils {
         RDFLinkModular result = link instanceof RDFLinkModular
             ? (RDFLinkModular)link
             : new RDFLinkModular(link, link, link);
+        return result;
+    }
+
+    public static RDFLink toLink(LinkSparqlQuery queryLink, LinkSparqlUpdate updateLink, LinkDatasetGraph datasetLink) {
+        RDFLink result = queryLink == updateLink && updateLink == datasetLink && queryLink instanceof RDFLink
+                ? (RDFLink)queryLink
+                : new RDFLinkModular(queryLink, updateLink, datasetLink);
         return result;
     }
 

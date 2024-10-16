@@ -18,11 +18,23 @@ import org.apache.jena.sparql.core.Var;
 
 /**
  * A view over a single column of a RelationQuery.
+ * Can have multiple "fragments" i.e. conditional joins.
+ *
  * Can be seen as a special form of a relation query where there is just a single variable.
  */
 public interface NodeQuery
-    extends FacetTraversable<NodeQuery>, HasSlice, Sortable<NodeQuery>
+    extends FacetTraversable<NodeQuery>, HasSlice, Sortable<NodeQuery>, Selection
 {
+    @Override
+    default boolean isNodeQuery() {
+        return true;
+    }
+
+    @Override
+    default NodeQuery asNodeQuery() {
+        return this;
+    }
+
     /**
      * Wrap this node as a Jena node so that it can be used as a 'pseudo-variable' in expressions.
      * To substitute NodeQuery references in expressions, apply a node transform using NodeCustom.createNodeTransform(pathTransform).
@@ -30,6 +42,8 @@ public interface NodeQuery
     default Node asJenaNode() {
         return NodeCustom.of(this);
     }
+
+    NodeQuery addFragment();
 
     /** */
 //    getConstraintGroups() {
@@ -115,8 +129,12 @@ public interface NodeQuery
     // FIXME Use a proper interface for the constraints
     ConstraintNode<NodeQuery> constraints();
 
+    /** Return the RelationQuery of which this NodeQuery is a view of. */
     RelationQuery relationQuery();
+
+    /** Get the variable of the underlying RelationQuery of which this NodeQuery is a view of. */
     Var var();
+
     FacetStep reachingStep();
 
     @Override

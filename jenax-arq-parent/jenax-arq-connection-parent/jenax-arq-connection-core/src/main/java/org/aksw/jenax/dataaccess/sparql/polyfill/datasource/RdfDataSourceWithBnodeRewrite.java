@@ -2,8 +2,6 @@ package org.aksw.jenax.dataaccess.sparql.polyfill.datasource;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,19 +10,11 @@ import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.sparql.engine.QueryIterator;
-import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterables;
 
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
@@ -57,7 +47,7 @@ public class RdfDataSourceWithBnodeRewrite
 
     public static ExprTransformVirtualBnodeUris getTransform(String profile) {
         Model model = RDFDataMgr.loadModel("bnode-rewrites.ttl");
-        SparqlStmtMgr.execSparql(model, "udf-inferences.sparql");
+        SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
 
         Set<String> activeProfiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/" + profile));
         ExprTransformVirtualBnodeUris result = ExprTransformVirtualBnodeUris.createTransformFromUdfModel(model, activeProfiles);

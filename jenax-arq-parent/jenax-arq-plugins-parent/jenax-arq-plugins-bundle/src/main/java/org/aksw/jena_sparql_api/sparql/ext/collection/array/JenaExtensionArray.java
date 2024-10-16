@@ -4,7 +4,7 @@ import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionExplode;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
@@ -14,16 +14,22 @@ public class JenaExtensionArray {
     public static final String NS = NorseTerms.NS + "array.";
     public static final String LEGACY_NS = "http://jsa.aksw.org/fn/array/";
 
-
     public static void register() {
-        loadDefs(FunctionRegistry.get());
+        loadDefs(FunctionRegistry.get(), LEGACY_NS);
+        loadDefs(FunctionRegistry.get(), NS);
 
-        AggregateRegistry.register(
-                LEGACY_NS + "collect",
-                SparqlLibArrayAgg.wrap1(SparqlLibArrayAgg::aggNodeList));
+        loadAggs(LEGACY_NS);
+        loadAggs(NS);
     }
 
-    public static void loadDefs(FunctionRegistry registry) {
+    public static void loadAggs(String prefix) {
+        AggregateRegistry.register(
+                prefix + "collect",
+                SparqlLibArrayAgg.wrap1(SparqlLibArrayAgg::aggNodeList));
+
+    }
+
+    public static void loadDefs(FunctionRegistry registry, String prefix) {
         // Datatype is registered in the jenax-arq-datatype module!
         // TypeMapper.getInstance().registerDatatype(RDFDatatypeNodeList.get());
 
@@ -40,12 +46,13 @@ public class JenaExtensionArray {
 
         binder.registerAll(SparqlLibArrayFn.class);
 
-        PropertyFunctionRegistry.get().put(LEGACY_NS + "unnest", PF_CollectionUnnest.class);
-        PropertyFunctionRegistry.get().put(LEGACY_NS + "explode", PF_CollectionExplode.class);
+        PropertyFunctionRegistry.get().put(prefix + "unnest", PF_CollectionUnnest.class);
+        PropertyFunctionRegistry.get().put(prefix + "explode", PF_CollectionExplode.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {
         pm.setNsPrefix("array", LEGACY_NS);
+        pm.setNsPrefix("array", NS);
     }
 
 }

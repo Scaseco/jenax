@@ -1,0 +1,9 @@
+{
+  Pokemon(orderBy: {label: ASC}) @class {
+    label @one
+    colour @one
+    speciesOf @inverse {
+      label @as(name: "sl") @one
+    }
+  }
+}

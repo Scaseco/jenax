@@ -1,0 +1,43 @@
+{
+  "data": {
+    "Pokemon": [
+      {
+        "label": "Electrode",
+        "colour": "red",
+        "speciesOf": [
+          {
+            "label": "Ball Pokémon"
+          }
+        ]
+      },
+      {
+        "label": "Houndoom",
+        "colour": "black",
+        "speciesOf": [
+          {
+            "label": "Dark Pokémon"
+          }
+        ]
+      },
+      {
+        "label": "Latias",
+        "colour": "red",
+        "speciesOf": [
+          {
+            "label": "Eon Pokémon"
+          }
+        ]
+      },
+      {
+        "label": "Umbreon",
+        "colour": "black",
+        "speciesOf": [
+          {
+            "label": "Moonlight Pokémon"
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

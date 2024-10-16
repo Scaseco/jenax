@@ -59,6 +59,9 @@ public class QueryExecDatasetBuilderEx<T extends QueryExecDatasetBuilderEx<T>>
 
         //dataset.begin(ReadWrite.WRITE);
         Binding initialBinding = substitution.build();
+
+        defaultTimeoutsFromContext(this, finalCxt);
+
         QueryExec qExec = new QueryExecDataset(query, query.toString(), dataset, finalCxt, f, initialTimeoutValue, initialTimeoutUnit, overallTimeoutValue, overallTimeoutUnit, initialBinding) {};
         return qExec;
     }

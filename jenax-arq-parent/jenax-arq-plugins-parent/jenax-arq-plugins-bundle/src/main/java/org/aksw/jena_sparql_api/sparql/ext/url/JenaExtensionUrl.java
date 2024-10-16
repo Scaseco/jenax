@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.url;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -23,6 +23,8 @@ public class JenaExtensionUrl {
 
         FunctionRegistry.get().put(ns2 + "asGiven", E_IriAsGiven.class);
         FunctionRegistry.get().put(NorseTerms.NS + "bnode.asGiven", F_BNodeAsGiven.class);
+
+        FunctionRegistry.get().put(NorseTerms.NS + "rml.iri", F_RmlIri.class);
 
         // JenaExtensionUtil.getDefaultFunctionBinder()
          //   .register(ns2 + "asGiven", NodeFactory.class, "createURI", String.class);

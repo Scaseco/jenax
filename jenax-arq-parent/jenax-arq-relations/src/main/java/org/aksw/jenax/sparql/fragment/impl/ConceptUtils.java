@@ -348,6 +348,17 @@ public class ConceptUtils {
         return result;
     }
 
+    public static Fragment1 createForSubjectsOfPredicate(String iriStr) {
+        return createForSubjectsOfPredicate(NodeFactory.createURI(iriStr));
+    }
+
+    public static Fragment1 createForSubjectsOfPredicate(Node predicate) {
+        Fragment1 result = new Concept(
+                ElementUtils.createElementTriple(Vars.s, predicate, Vars.o),
+                Vars.s);
+        return result;
+    }
+
 
     public static Map<Var, Var> createDistinctVarMap(Set<Var> workload, Set<Var> blacklist, Generator<Var> generator) {
         //Set<Var> varNames = new HashSet<String>(VarUtils.getVarNames(blacklist));

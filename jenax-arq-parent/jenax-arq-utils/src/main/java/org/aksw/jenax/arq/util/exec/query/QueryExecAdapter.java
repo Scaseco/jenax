@@ -14,93 +14,93 @@ import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
 
 /**
- * Adapter class in the sense thet most methods raise an UnsupportedOperationException
+ * Adapter mixin where most methods raise an UnsupportedOperationException
  * Can be used as a base class to provide limited behavior, such as only query(), select() and close().
  */
-public class QueryExecAdapter
-	implements QueryExec
+public interface QueryExecAdapter
+    extends QueryExec
 {
-	@Override
-	public DatasetGraph getDataset() {
-		return null;
-	}
+    @Override
+    default DatasetGraph getDataset() {
+        return null;
+    }
 
-	@Override
-	public Context getContext() {
-		return null;
-	}
+    @Override
+    default Context getContext() {
+        return null;
+    }
 
-	@Override
-	public Query getQuery() {
-		return null;
-	}
+    @Override
+    default Query getQuery() {
+        return null;
+    }
 
-	@Override
-	public String getQueryString() {
-		return null;
-	}
+    @Override
+    default String getQueryString() {
+        return null;
+    }
 
-	@Override
-	public void abort() {
-	}
+    @Override
+    default void abort() {
+    }
 
-	@Override
-	public void close() {
-	}
+    @Override
+    default void close() {
+    }
 
-	@Override
-	public RowSet select() {
+    @Override
+    default RowSet select() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Graph construct(Graph graph) {
+    @Override
+    default Graph construct(Graph graph) {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Iterator<Triple> constructTriples() {
+    @Override
+    default Iterator<Triple> constructTriples() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Iterator<Quad> constructQuads() {
+    @Override
+    default Iterator<Quad> constructQuads() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public DatasetGraph constructDataset(DatasetGraph dataset) {
+    @Override
+    default DatasetGraph constructDataset(DatasetGraph dataset) {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Graph describe(Graph graph) {
+    @Override
+    default Graph describe(Graph graph) {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Iterator<Triple> describeTriples() {
+    @Override
+    default Iterator<Triple> describeTriples() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public boolean ask() {
+    @Override
+    default boolean ask() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public JsonArray execJson() {
+    @Override
+    default JsonArray execJson() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public Iterator<JsonObject> execJsonItems() {
+    @Override
+    default Iterator<JsonObject> execJsonItems() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
-	@Override
-	public boolean isClosed() {
+    @Override
+    default boolean isClosed() {
         throw new UnsupportedOperationException("Not Implemented.");
-	}
+    }
 
 }

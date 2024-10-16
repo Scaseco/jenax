@@ -192,7 +192,7 @@ public class RdfDataEngines {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection base = getDelegate().getConnection();
-                RDFConnection result = RDFConnectionUtils.wrapWithLinkDecorator(base, xform);
+                RDFConnection result = RDFConnectionUtils.wrapWithLinkTransform(base, xform);
                 return result;
             }
         };

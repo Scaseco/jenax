@@ -56,8 +56,8 @@ public class ServerBuilder {
 
     public static void postProcess(Server server) {
         for (org.eclipse.jetty.server.Connector connector : server.getConnectors()) {
-            if (connector instanceof AbstractConnector) {
-                ((AbstractConnector) connector).setIdleTimeout(90 * 24 * 60 * 60);
+            if (connector instanceof AbstractConnector c) {
+                c.setIdleTimeout(90 * 24 * 60 * 60);
             }
         }
     }

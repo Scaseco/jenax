@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.link.common;
 import org.apache.jena.rdflink.RDFLink;
 
 public class RDFLinkWrapperWithCloseShield
-    extends RDFLinkWrapper
+    extends RDFLinkWrapperBase
 {
     public RDFLinkWrapperWithCloseShield(RDFLink delegate) {
         super(delegate);

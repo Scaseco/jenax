@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
@@ -186,6 +187,26 @@ public class RDFDataMgrEx {
             result = csf.createCompressorOutputStream(encoding, result);
         }
         return result;
+    }
+
+    public static Function<OutputStream, OutputStream> encoder(String ... codecs) {
+        List<String> list = Arrays.asList(codecs);
+        return encoder(list);
+    }
+
+    public static Function<OutputStream, OutputStream> encoder(List<String> codecs) {
+        CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
+        return encoder(csf, codecs);
+    }
+
+    public static Function<OutputStream, OutputStream> encoder(CompressorStreamFactory csf, List<String> codecs) {
+        return out -> {
+            try {
+                return encode(out, codecs, csf);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     /**

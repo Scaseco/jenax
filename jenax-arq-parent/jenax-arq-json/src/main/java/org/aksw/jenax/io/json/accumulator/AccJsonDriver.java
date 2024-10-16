@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.ron.RdfElement;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
@@ -52,7 +52,7 @@ public class AccJsonDriver
      * @param cxt
      * @throws IOException
      */
-    public void accumulate(Quad input, AccContext cxt) throws IOException {
+    public void accumulate(Quad input, AccContextRdf cxt) throws IOException {
         Node source = input.getGraph();
         Triple triple = input.asTriple();
 
@@ -110,11 +110,11 @@ public class AccJsonDriver
         }
     }
 
-    public void begin(AccContext cxt) throws IOException {
+    public void begin(AccContextRdf cxt) throws IOException {
 
     }
 
-    public void end(AccContext cxt) throws IOException {
+    public void end(AccContextRdf cxt) throws IOException {
         endCurrentItem(cxt);
         this.currentSource = null;
     }
@@ -124,7 +124,7 @@ public class AccJsonDriver
     }
 
     /** Recursively calls end() on the current accumulator and all its ancestors */
-    protected void endCurrentItem(AccContext cxt) throws IOException {
+    protected void endCurrentItem(AccContextRdf cxt) throws IOException {
         while (true) {
             // If no item was seen then begin was not called on the currentState
             // XXX Can we design the process in a way such that we don't have to check for hasBegun here?
@@ -143,7 +143,7 @@ public class AccJsonDriver
 
     // This method needs to go to the aggregator because it needs to create an accumulator specifically
     // for the stream
-    public Stream<Entry<Node, RdfElement>> asStream(AccContext cxt, Stream<Quad> quadStream) {
+    public Stream<Entry<Node, RdfElement>> asStream(AccContextRdf cxt, Stream<Quad> quadStream) {
         Preconditions.checkArgument(!quadStream.isParallel(), "Json aggregation requires sequential stream");
 
         AccJsonDriver driver = this;

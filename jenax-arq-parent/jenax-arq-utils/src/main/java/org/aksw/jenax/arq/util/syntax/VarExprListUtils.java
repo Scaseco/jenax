@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.binding.BindingOverMapMutable;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.ARQInternalErrorException;

@@ -5,20 +5,29 @@ import java.util.Objects;
 
 import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.path.json.PathJson.Step;
-import org.aksw.jenax.arq.util.triple.TripleUtils;
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.io.json.writer.RdfObjectNotationWriter;
+import org.aksw.jenax.ron.RdfArrayImpl;
+import org.aksw.jenax.ron.RdfElement;
+import org.aksw.jenax.ron.RdfNull;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.path.P_Path0;
 
-// TODO Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
+// TODO Clarify the following question, the current model should be fairly stable by now: Should we model edges as a top-level state? or is the active edge a state within the parent JsonObject node?
+/**
+ * Accumulator for the values of an (objectId, propertyId) pair.
+ */
 public class AccJsonProperty
     extends AccJsonBase
     implements AccJsonEdge
 {
+    // protected TupleBridge3<Binding, Node> tripleAccessor;
+
     protected Node matchFieldId; // AccJsonObject should index AccJsonEdge by this attribute
     protected boolean isForward;
 
-    protected Node jsonKey;
+    /** The property that is emitted by this edge accumulator if values are encountered. */
+    protected P_Path0 jsonKey;
 
     protected Node currentTarget = null;
     protected AccJsonNode targetAcc;
@@ -30,12 +39,14 @@ public class AccJsonProperty
     /** If true then no array is created. Any item after the first raises an error event. */
     protected boolean isSingle = false;
 
-    public AccJsonProperty(Node jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc) {
+    // public AccJsonProperty(TupleBridge3<Binding, Node> tripleAccessor, P_Path0 jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
+    public AccJsonProperty(P_Path0 jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
         super();
         this.matchFieldId = matchFieldId;
         this.jsonKey = jsonKey;
         this.isForward = isForward;
         this.targetAcc = targetAcc;
+        this.isSingle = isSingle;
     }
 
     @Override
@@ -43,24 +54,24 @@ public class AccJsonProperty
         return (parent != null ? parent.getPath() : PathJson.newRelativePath()).resolve(Step.of((int)seenTargetCount));
     }
 
-    @Override
-    public void setSingle(boolean value) {
-        this.isSingle = value;
-    }
+//    @Override
+//    public void setSingle(boolean value) {
+//        this.isSingle = value;
+//    }
 
-    @Override
+    // @Override
     public boolean isSingle() {
         return this.isSingle;
     }
 
-    @Override
-    public void setTargetAcc(AccJsonNode targetAcc) {
-        targetAcc.setParent(this);
-        this.targetAcc = targetAcc;
-    }
+//    @Override
+//    public void setTargetAcc(AccJsonNode targetAcc) {
+//        targetAcc.setParent(this);
+//        this.targetAcc = targetAcc;
+//    }
 
     @Override
-    public Node getJsonKey() {
+    public P_Path0 getJsonKey() {
         return jsonKey;
     }
 
@@ -80,7 +91,7 @@ public class AccJsonProperty
      * @throws IOException
      */
     @Override
-    public void begin(Node node, AccContext context, boolean skipOutput) throws IOException {
+    public void begin(Node node, AccContextRdf context, boolean skipOutput) throws IOException {
         super.begin(node, context, skipOutput);
         seenTargetCount = 0;
         skipOutputStartedHere = false;
@@ -89,11 +100,11 @@ public class AccJsonProperty
             if (context.isMaterialize()) {
                 value = isSingle
                         ? null
-                        : RdfElement.newArray(); // new JsonArray();
+                        : new RdfArrayImpl(); // new JsonArray();
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf writer = context.getJsonWriter();
+                RdfObjectNotationWriter writer = context.getJsonWriter();
                 writer.name(jsonKey);
                 if (!isSingle) {
                     writer.beginArray();
@@ -104,16 +115,24 @@ public class AccJsonProperty
 
     /** Accepts a triple if source and field id match that of the current state */
     @Override
-    public AccJson transition(Triple input, AccContext context) throws IOException {
+    public AccJson transition(Triple input, AccContextRdf context) throws IOException {
         ensureBegun();
+
+//        Node s = tripleAccessor.getArg0(input);
+//        Node p = tripleAccessor.getArg1(input);
+//        Node o = tripleAccessor.getArg2(input);
+
+        Node s = input.getSubject();
+        Node p = input.getPredicate();
+        Node o = input.getObject();
 
         // End the current target (array item) if there is one
         // endCurrentTarget(context);
 
         AccJson result = null;
-        Node inputFieldId = input.getPredicate(); //.getURI();
+        Node inputFieldId = p; //.getURI();
         if (matchFieldId.equals(inputFieldId)) {
-            Node edgeInputSource = TripleUtils.getSource(input, isForward);
+            Node edgeInputSource = isForward ? s : o; // TripleUtils.getSource(input, isForward);
 
             // endCurrentTarget(context);
 
@@ -133,7 +152,7 @@ public class AccJsonProperty
                     }
                 }
 
-                currentTarget = TripleUtils.getTarget(input, isForward);
+                currentTarget = isForward ? o : s; // TripleUtils.getTarget(input, isForward);
                 targetAcc.begin(currentTarget, context, skipOutput || skipOutputStartedHere);
                 result = targetAcc;
             }
@@ -142,7 +161,7 @@ public class AccJsonProperty
     }
 
     @Override
-    public void end(AccContext context) throws IOException {
+    public void end(AccContextRdf context) throws IOException {
         ensureBegun();
 
         if (!skipOutput) {
@@ -152,14 +171,14 @@ public class AccJsonProperty
                 // So we access the field directly
                 if (parent != null) {
                     // Turns null into JsonNull
-                    RdfElement elt = value == null ? RdfElement.nullValue() : value;
-                    AccJsonObject acc = (AccJsonObject)parent;
-                    acc.value.getAsObject().add(jsonKey, elt);
+                    RdfElement elt = value == null ? new RdfNull() : value;
+                    AccJsonObjectLikeBase acc = (AccJsonObjectLikeBase)parent;
+                    acc.value.getAsObject().getMembers().put(jsonKey, elt);
                 }
             }
 
             if (context.isSerialize()) {
-                StructuredWriterRdf jsonWriter = context.getJsonWriter();
+                RdfObjectNotationWriter jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
                     jsonWriter.endArray();
                 } else if (seenTargetCount == 0) {
@@ -176,7 +195,7 @@ public class AccJsonProperty
     }
 
     @Override
-    public void acceptContribution(RdfElement item, AccContext context) {
+    public void acceptContribution(RdfElement item, AccContextRdf context) {
         ensureBegun();
         if (!skipOutput) {
             if (context.isMaterialize()) {
@@ -184,7 +203,7 @@ public class AccJsonProperty
                     if (value == null) {
                         value = item;
                     } else {
-                        // TODO Report an error
+                        // TODO Report an error, ignore or overwrite?
                     }
                 } else {
                     value.getAsArray().add(item);

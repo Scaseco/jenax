@@ -26,6 +26,8 @@ import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.NodeCmp;
 
@@ -96,8 +98,6 @@ public class NodeUtils {
         return result;
     }
 
-
-
     public static boolean isNullOrAny(Node node) {
         return node == null || Node.ANY.equals(node);
     }
@@ -118,6 +118,14 @@ public class NodeUtils {
     public static Node nullOrFluentToAny(Node n) {
         return n == null || !n.isConcrete() ? Node.ANY : n;
     }
+
+    /** Similar to {@link #nullOrFluentToAny(Node)} but specifically for variables. */
+    public static Node nullOrVarToAny(Node node) {
+        if ( node == null || node.isVariable() )
+            return Node.ANY;
+        return node;
+    }
+
 
     /**
      * Create a logical conjunction of two nodes:
@@ -306,14 +314,8 @@ public class NodeUtils {
     public static boolean isValid(Node node) {
         boolean result = false;
         try {
-            if (node != null) {
-                String str = NodeFmtLib.strNT(node);
-                List<Node> nodes = parseNodes(str, new ArrayList<>());
-                if (nodes.size() == 1) {
-                    Node actual = nodes.get(0);
-                    result = node.equals(actual); // NodeCmp.compareRDFTerms(node, actual) == 0;
-                }
-            }
+            validate(node);
+            result = true;
         } catch (Exception e) {
             // Ignore
         }
@@ -322,8 +324,20 @@ public class NodeUtils {
 
     /** Throws an {@link IllegalArgumentException} if {@link #isValid(Node)} returns false. */
     public static void validate(Node node) {
-        if (!isValid(node)) {
-            throw new IllegalArgumentException("Node does not print/parse: " + node);
+        List<Node> nodes;
+        try {
+            String str = NodeFmtLib.strNT(node);
+            nodes = parseNodes(str, new ArrayList<>());
+        } catch (Exception e) {
+            throw new ExprEvalException("Node " + node + " did not print-parse");
+        }
+        if (nodes.size() == 1) {
+            Node actual = nodes.get(0);
+            if (!node.equals(actual)) { // NodeCmp.compareRDFTerms(node, actual) == 0;
+                throw new ExprEvalException("Node " + node + " print-parsed into " + actual);
+            }
+        } else {
+            throw new ExprEvalException("Node " + node + " did not print-parse");
         }
     }
 
@@ -340,6 +354,23 @@ public class NodeUtils {
         }
         return result;
     }
+
+    public static String getIriOrString(Node node) {
+        String result = node == null
+                ? null
+                : node.isURI()
+                    ? node.getURI()
+                    : node.isLiteral() && (
+                            org.apache.jena.sparql.util.NodeUtils.isSimpleString(node) ||
+                            org.apache.jena.sparql.util.NodeUtils.isLangString(node))
+                        ? node.getLiteralLexicalForm()
+                        : null;
+        if (result == null) {
+            NodeValue.raise(new ExprTypeException("datatype: Neither IRI nor string: " + node));
+        }
+        return result;
+    }
+
 
     /**
      * Returns the "unquoted form" of any Node depending on its type:

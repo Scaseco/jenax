@@ -73,9 +73,6 @@ public class FunctionBinder {
         registerAll(true, clz, invocationTarget);
     }
 
-
-
-
     /** Convenience method to register a function at Jena's default registry */
     public void register(boolean lazy, String functionIri, Method method) {
         register(functionIri, method, null);
@@ -105,7 +102,6 @@ public class FunctionBinder {
         register(lazy, method, null);
     }
 
-
     /** Convenience method to register a function at Jena's default registry */
     public void register(boolean lazy, Method method, Object invocationTarget) {
         List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
@@ -116,7 +112,6 @@ public class FunctionBinder {
 
         register(lazy, iris, method, invocationTarget);
     }
-
 
     /** Convenience method that hides checked exceptions from Class.getMethod */
     public void register(String iri, Class<?> clazz, String methodName, Class<?> ... paramTypes) {
@@ -159,8 +154,6 @@ public class FunctionBinder {
             }
         }
     }
-
-
 
     public FunctionFactory factory(boolean lazy, Method method) {
         return factory(lazy, method, null);

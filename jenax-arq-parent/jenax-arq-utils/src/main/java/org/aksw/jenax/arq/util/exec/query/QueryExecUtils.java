@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.util.exec.query;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -10,9 +11,13 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
+import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.algebra.optimize.Optimize;
+import org.apache.jena.sparql.algebra.optimize.RewriteFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DynamicDatasets.DynamicDatasetGraph;
 import org.apache.jena.sparql.core.Var;
@@ -28,6 +33,7 @@ import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorMapped;
+import org.apache.jena.sparql.exec.http.Service;
 import org.apache.jena.sparql.util.Context;
 
 public class QueryExecUtils {
@@ -89,6 +95,55 @@ public class QueryExecUtils {
 
         execCxt = innerIter instanceof QueryIter ? ((QueryIter)innerIter).getExecContext() : null;
         QueryIterator result = new QueryIterCommonParent(outerIter, binding, execCxt);
+        return result;
+    }
+
+    /**
+     * Computes the variable mapping between the original and restored form of an OpService.
+     * The arguments are the subOf of OpService whereas opRestored is the result of
+     * {@link Rename#reverseVarRename(Op, boolean)} with argument true.
+     * This method is factored out from {@link Service#exec(OpService, Context)}.
+     */
+    public static Map<Var, Var> computeVarMapping(Op opRemote, Op opRestored) {
+        // Op opRemote = opService.getSubOp();
+        boolean requiresRemapping = false;
+        Map<Var, Var> varMapping = null;
+        if ( ! opRestored.equals(opRemote) ) {
+            varMapping = new HashMap<>();
+            Set<Var> originalVars = OpVars.visibleVars(opRemote); // OpVars.visibleVars(opService);
+            Set<Var> remoteVars = OpVars.visibleVars(opRestored);
+
+            for (Var v : originalVars) {
+                if (v.getName().contains("/")) {
+                    // A variable which was scope renamed so has a different name
+                    String origName = v.getName().substring(v.getName().lastIndexOf('/') + 1);
+                    Var remoteVar = Var.alloc(origName);
+                    if (remoteVars.contains(remoteVar)) {
+                        varMapping.put(remoteVar, v);
+                        requiresRemapping = true;
+                    }
+                } else {
+                    // A variable which does not have a different name
+                    if (remoteVars.contains(v))
+                        varMapping.put(v, v);
+                }
+            }
+        }
+
+        Map<Var, Var> result = requiresRemapping ? varMapping : null;
+        return result;
+    }
+
+    /** The method is private in {@link Optimize}. A request to make it public should be filed. */
+    public static RewriteFactory decideOptimizer(Context context) {
+        RewriteFactory result = context.get(ARQConstants.sysOptimizerFactory);
+        if (result == null) {
+            result = Optimize.getFactory();
+
+            if (result == null) {
+                result = Optimize.stdOptimizationFactory;
+            }
+        }
         return result;
     }
 }

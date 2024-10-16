@@ -31,6 +31,8 @@ public interface RelationQuery
      * Returns the parent relation and a variable of it to which this relation connects.
      * Returns null if there is no parent
      */
+    // XXX Perhaps we need a "ParentLink" object that allows us to distinguish between different types of parents.
+    //     E.g. whether we are joining with the parent on one or multiple columns.
     NodeQuery getParentNode();
 
     /** The step by which this relation was reached from the parent node (null if there is no parent) */
@@ -125,7 +127,7 @@ public interface RelationQuery
 //    }
 
     public static RelationQuery of(Supplier<Fragment> relation, QueryContext queryContext) {
-        String scopeBaseName = queryContext.getFieldIdGenerator().next();
+        String scopeBaseName = queryContext.getScopeNameGenerator().next();
         return new RelationQueryImpl(scopeBaseName, null, relation, null, queryContext, new HashMap<>());
     }
 

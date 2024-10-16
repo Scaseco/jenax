@@ -94,7 +94,8 @@ public class SparqlRx {
                 }
             },
             QueryExecution::close)
-            .singleOrError();
+                .singleOrError()
+                .onErrorResumeNext(Single::error);
     }
 
     /**
@@ -535,7 +536,8 @@ public class SparqlRx {
     public static Single<Number> fetchNumber(Callable<? extends QueryExec> queryConnSupp, Var var) {
         Single<Number> result = SparqlRx.select(queryConnSupp)
                 .map(b -> BindingUtils.getNumber(b, var))
-                .singleOrError();
+                .singleOrError()
+                .onErrorResumeNext(Single::error);
                 // .map(Optional::ofNullable)
                 // .single(Optional.empty())
                 // .map(Optional::get); // Should never be null here

@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.arq.functionbinder.FunctionGenerator;
+import org.aksw.jenax.norse.term.geo.NorseTermsGeo;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
@@ -89,7 +90,7 @@ public class JenaExtensionsGeoSparqlX {
         // PropertyFunctionRegistry.get().put(GeoSPARQL_URI.SPATIAL_URI + "dbscan", DbscanPf.class);
 
 
-        registry.put(GeoSPARQL_URI.SPATIAL_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
+        registry.put(GeoSPARQL_URI.SPATIAL_FUNCTION_URI + "st_voronoi_polygons", F_ST_VoronoiPolygons.class);
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "distance", DistanceFF.class);
 

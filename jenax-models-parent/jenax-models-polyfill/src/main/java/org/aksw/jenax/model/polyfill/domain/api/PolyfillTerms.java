@@ -14,4 +14,5 @@ public class PolyfillTerms {
 
     public static final String property = NS + "property";
 
+    public static final String suggestion = NS + "suggestion";
 }

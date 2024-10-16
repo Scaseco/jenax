@@ -1,4 +1,4 @@
-@prefix o: <http://ns.aksw.org/jena/udf/> .
+@prefix o: <https://w3id.org/aksw/norse#udf.> .
 @prefix r: <http://ns.aksw.org/bnode/resource/> .
 
 @prefix fn: <http://ns.aksw.org/function/> .
@@ -147,7 +147,7 @@ fn:prependBnodePrefix
     o:params ("x") ;
     o:inverse [
       o:ofParam "x" ;
-      o:fn [
+      o:ofFunction [
         a o:UserDefinedFunction ;
         o:definition [
           o:expr "STRAFTER(?x, '_:')" ;

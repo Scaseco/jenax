@@ -11,7 +11,6 @@ import org.apache.jena.enhanced.Personality;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sys.JenaSubsystemLifecycle;
 
-
 public class JenaPluginFoaf
     implements JenaSubsystemLifecycle {
 

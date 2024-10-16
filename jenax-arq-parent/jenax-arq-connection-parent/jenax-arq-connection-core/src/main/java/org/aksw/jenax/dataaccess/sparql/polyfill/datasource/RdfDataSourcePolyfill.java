@@ -5,18 +5,24 @@ import java.util.List;
 import java.util.Objects;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtuosoSubstr;
+import org.aksw.jena_sparql_api.algebra.transform.TransformExistsToOptional;
 import org.aksw.jena_sparql_api.algebra.transform.TransformExpandAggCountDistinct;
 import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumnsToExtend;
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
+import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
+import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -33,7 +39,23 @@ import com.google.common.collect.Iterables;
  * SPARQL endpoint feature detector.
  */
 public class RdfDataSourcePolyfill {
+
     public static List<Suggestion<String>> suggestPolyfills(RdfDataSource rdfDataSource) {
+        Model model = ModelFactory.createDefaultModel();
+        MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
+
+        // Wrap the datasource with a cache for polyfill detection
+        // The cache stores all query results in-memory
+        RdfDataSource cachedDataSource = rdfDataSource.decorate(RdfDataSourceTransforms.simpleCache());
+        // RdfDataSource cachedDataSource = rdfDataSource;
+
+        PolyfillDetector detector = new PolyfillDetector();
+        detector.load(model);
+        List<Suggestion<String>> result = detector.detect(cachedDataSource);
+        return result;
+    }
+
+    public static List<Suggestion<String>> suggestPolyfillsOld(RdfDataSource rdfDataSource) {
         List<Suggestion<String>> result = null;
         String profile = RdfDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
 
@@ -41,10 +63,11 @@ public class RdfDataSourcePolyfill {
             result = virtuosoProfile();
         }
 
-
         if (result == null) {
-            result = List.of();
+            result = new ArrayList<>(); // List.of();
         }
+
+        result.add(Suggestion.of("Generic - EXISTS as OPTIONAL", "Rewrite EXISTS conditions using OPTIONAL", TransformExistsToOptional.class.getName()));
 
         return result;
     }
@@ -88,7 +111,11 @@ public class RdfDataSourcePolyfill {
         });
         ServiceExecutorRegistry.set(probeDs.getContext(), registry);
 
-        SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        // Disable warnings about unknown functions while probing
+        FunctionUtils.runWithDisabledWarnOnUnknownFunction(() -> {
+            SparqlStmtMgr.execSparql(probeDs, "probe-endpoint-dbms.sparql");
+        });
+
         Property dbmsShortName = ResourceFactory.createProperty("http://www.example.org/dbmsShortName");
 
         Model report = probeDs.getDefaultModel();

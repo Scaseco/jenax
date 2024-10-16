@@ -2,7 +2,7 @@ package org.aksw.jenax.io.json.accumulator;
 
 import java.io.IOException;
 
-import org.aksw.jenax.io.rdf.json.RdfElement;
+import org.aksw.jenax.ron.RdfElement;
 import org.apache.jena.graph.Node;
 
 import com.google.common.base.Preconditions;
@@ -54,7 +54,12 @@ public abstract class AccJsonBase
     }
 
     @Override
-    public void begin(Node sourceNode, AccContext cxt, boolean skipOutput) throws IOException {
+    public RdfElement getInternalValue() {
+        return value;
+    }
+
+    @Override
+    public void begin(Node sourceNode, AccContextRdf cxt, boolean skipOutput) throws IOException {
         if (hasBegun) {
             throw new IllegalStateException("begin() has already been called() with " + currentSourceNode);
         }
@@ -64,7 +69,7 @@ public abstract class AccJsonBase
     }
 
     @Override
-    public void end(AccContext cxt) throws IOException {
+    public void end(AccContextRdf cxt) throws IOException {
         this.oldSourceNode = currentSourceNode;
         this.currentSourceNode = null;
         this.hasBegun = false;

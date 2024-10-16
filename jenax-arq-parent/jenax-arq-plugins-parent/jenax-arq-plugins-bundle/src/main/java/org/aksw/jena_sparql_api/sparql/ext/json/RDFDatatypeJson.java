@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.json;
 import java.util.function.Supplier;
 
 import org.aksw.commons.util.memoize.MemoizedSupplierImpl;
+import org.aksw.jenax.norse.term.json.NorseTermsJson;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.vocabulary.XSD;
@@ -30,7 +31,7 @@ public class RDFDatatypeJson
     private Supplier<Gson> gsonSupplier;
 
     public RDFDatatypeJson() {
-        this(NorseJsonTerms.Datatype);
+        this(NorseTermsJson.Datatype);
     }
 
     public RDFDatatypeJson(String uri) {

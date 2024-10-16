@@ -36,6 +36,7 @@ import org.aksw.commons.collections.ConvertingCollection;
 import org.aksw.commons.collections.ConvertingList;
 import org.aksw.commons.collections.ConvertingSet;
 import org.aksw.commons.collections.MutableCollectionViews;
+import org.aksw.commons.collections.maps.MapFromValueConverter;
 import org.aksw.commons.collections.sets.SetFromCollection;
 import org.aksw.commons.util.convert.ConvertFunction;
 import org.aksw.commons.util.convert.ConvertFunctionImpl;
@@ -52,7 +53,6 @@ import org.aksw.jena_sparql_api.rdf.collections.SetFromPropertyValues;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromKeyConverter;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromResource;
 import org.aksw.jena_sparql_api.utils.views.map.MapFromResourceUnmanaged;
-import org.aksw.jena_sparql_api.utils.views.map.MapFromValueConverter;
 import org.aksw.jena_sparql_api.utils.views.map.MapVocab;
 import org.aksw.jena_sparql_api.utils.views.map.RdfEntry;
 import org.aksw.jena_sparql_api.utils.views.map.RdfEntryWithCast;
@@ -664,6 +664,15 @@ public class MapperProxyUtils {
         boolean isRdfItems = RDFNode.class.isAssignableFrom(itemType);
 
         Set<RDFNode> rawView = MutableCollectionViews.filteringSet(set, converter);
+
+        boolean debug = false;
+        if (debug) {
+            Iterator<RDFNode> it = rawView.iterator();
+            while (it.hasNext()) {
+                RDFNode rdfNode = it.next();
+                System.err.println(rdfNode);
+            }
+        }
 
         Set<?> javaView;
         if(isInjectiveConversion) {
@@ -2227,6 +2236,24 @@ public class MapperProxyUtils {
 
 
     public static String defaultToString(Object that, Object[] args) {
+        return toStringTree(that, args);
+    }
+
+    public static String toStringTree(Object that, Object[] args) {
+        Resource res = (Resource)that;
+        Class<?>[] interfaces = res.getClass().getInterfaces();
+
+        // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
+        Model m = ModelFactory.createDefaultModel();
+        RDFNode closure = res.inModel(ResourceUtils.bnodeClosure(res));
+        // m.add(res.listProperties());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        RDFDataMgr.write(baos, closure.getModel(), RDFFormat.TURTLE_PRETTY);
+        String r = res.asNode() + " (javaInterfaces: " + Arrays.toString(interfaces) + "): [" + baos.toString() + "]";
+        return r;
+    }
+
+    public static String toStringDirectProperties(Object that, Object[] args) {
         Resource res = (Resource)that;
         // Model m = org.apache.jena.util.ResourceUtils.reachableClosure(res);
         Model m = ModelFactory.createDefaultModel();
@@ -2340,6 +2367,10 @@ public class MapperProxyUtils {
 
 
     public static HashCode getHashIdActual(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         HashCode result;
         cxt.declareProcessing(root);
 
@@ -2359,7 +2390,8 @@ public class MapperProxyUtils {
                 result = hashFn.hashString(NodeFmtLib.strNT(n), StandardCharsets.UTF_8);//Objects.toString(rdfNode);
             }
         } else {
-            ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+            Class<?> rootClass = root.getClass();
+            ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
             if(cd != null) {
                 // NOTE Do not call root.asResource() as this may unproxy proxied resources!
@@ -2382,10 +2414,16 @@ public class MapperProxyUtils {
     }
 
     public static void collectReachableResources(RDFNode root, HashIdCxt cxt) {
+        if (root == null) {
+            throw new NullPointerException();
+        }
+
         cxt.declarePending(root);
 
+        Class<?> rootClass = root.getClass();
+
         // If there is a class descriptor, root is implicitly a resource
-        ClassDescriptor cd = getClassDescriptorCached(root.getClass());
+        ClassDescriptor cd = getClassDescriptorCached(rootClass);
 
         if(cd != null) {
             // NOTE Do not call root.asResource() as this may unproxy proxied resources!

@@ -72,6 +72,11 @@ public class ConstraintFacade2Impl<T>
     }
 
     @Override
+    public HLFacetConstraint<? extends ConstraintFacade<T>> lt(Node node) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public HLFacetConstraint<? extends ConstraintFacade<T>> neq(Node node) {
         throw new UnsupportedOperationException();
     }

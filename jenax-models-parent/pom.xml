@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>5.0.0-1</version>
+		<version>5.2.0-1</version>
 	</parent>
 
 	<modules>
@@ -27,6 +27,7 @@
 		<module>jenax-models-void</module>
 		<module>jenax-models-udf</module>
 		<module>jenax-models-polyfill</module>
+		<module>jenax-models-ron</module>
 	</modules>
 </project>
 

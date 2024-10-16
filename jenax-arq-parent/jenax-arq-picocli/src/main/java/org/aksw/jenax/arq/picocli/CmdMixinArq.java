@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.jenax.arq.util.exec.query.ContextUtils;
-import org.apache.jena.JenaRuntime;
 import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
 import org.apache.jena.query.ARQ;

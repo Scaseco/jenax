@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>5.0.0-1</version>
+		<version>5.2.0-1</version>
 	</parent>
 
 	<dependencies>
@@ -46,12 +46,12 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
-<!-- Uber's h3 library is referenced indirectly via apache sedona -->
-<!--		<dependency>-->
-<!--			<groupId>com.uber</groupId>-->
-<!--			<artifactId>h3</artifactId>-->
-<!--		</dependency>-->
-		
+		<!-- Uber's h3 library is referenced indirectly via apache sedona -->
+		<!--		<dependency>-->
+		<!--			<groupId>com.uber</groupId>-->
+		<!--			<artifactId>h3</artifactId>-->
+		<!--		</dependency>-->
+
 		<!-- javascript -->
 		<dependency>
 			<groupId>org.openjdk.nashorn</groupId>
@@ -214,16 +214,11 @@
 			<artifactId>sedona-common</artifactId>
 		</dependency>
 
+		<!-- We should rely on jena-geosparql here but the new CoverageSimplifier is not yet in jena ~ 2024-09-11 -->
 		<dependency>
-			<groupId>org.apache.sedona</groupId>
-			<artifactId>sedona-common</artifactId>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
 		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.locationtech.jts</groupId> -->
-		<!-- <artifactId>jts-core</artifactId> -->
-		<!-- <version>${jts.version}</version> -->
-		<!-- </dependency> -->
 
 		<!-- <dependency> -->
 		<!-- <groupId>com.vividsolutions</groupId> -->

@@ -23,7 +23,7 @@ import org.aksw.commons.io.binseach.BinarySearcher;
 import org.aksw.commons.io.block.api.Block;
 import org.aksw.commons.io.block.api.BlockSource;
 import org.aksw.commons.io.block.api.PageManager;
-import org.aksw.commons.io.block.impl.BlockIterState;
+import org.aksw.commons.io.block.impl.BlockEnumerator;
 import org.aksw.commons.io.block.impl.PageManagerForByteBuffer;
 import org.aksw.commons.io.block.impl.PageManagerForFileChannel;
 import org.aksw.commons.io.block.impl.PageNavigator;
@@ -35,6 +35,9 @@ import org.aksw.commons.io.seekable.api.SeekableSource;
 import org.aksw.commons.io.seekable.impl.SeekableFromBlock;
 import org.aksw.commons.io.seekable.impl.SeekableSourceFromPageManager;
 import org.aksw.commons.util.ref.Ref;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.engine.Rename;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
@@ -115,7 +118,70 @@ public class MainPlaygroundScanFile {
     }
 
     public static void main(String[] args) throws Exception {
-        mainBz2DecodeNice(args);
+        System.out.println(Rename.renameVars(Algebra.compile(QueryFactory.create("""
+            SELECT * {
+                { SELECT ?x { ?x ?p ?o } }
+                LATERAL {
+                    { ?x ?ap ?ao }
+                    LATERAL { BIND(?x AS ?s) BIND(?ap AS ?p) BIND(?ao AS ?o) }
+                }
+            }
+            """)), List.of()));
+        System.out.println(Rename.renameVars(Algebra.compile(QueryFactory.create("""
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX schema: <http://schema.org/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX eg: <http://www.example.org/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+
+SELECT ?s ?p ?o {
+   SERVICE <x-binsearch:vfs:file:///media/raven/T9/raven/datasets/wikidata/2024-08-30.wikidata.all.itypes.sorted.nt.bz2> {
+    {
+      SELECT ?x {
+        wd:Q11424 eg:hasInstances ?i .
+        ?i eg:hasInstance ?x .
+      } LIMIT 10
+    }
+    LATERAL {
+      {
+        {
+          ?x ?ap ?ao # Literals
+          # FILTER(?ap NOT IN(schema:name, skos:prefLabel))
+          # wdt:P1874 netflix
+    FILTER(?ap IN(rdfs:label, wdt:P577, schema:description, wdt:P1874))
+          FILTER(isLiteral(?ao) && (DATATYPE(?ao) != rdf:langString || lang(?ao) = 'en'))
+        } LATERAL{ BIND(?x AS ?s) BIND(?ap AS ?p) BIND(?ao AS ?o) }
+      }
+      UNION {
+        {
+          ?x ?bp ?bo
+        # P2047 -> duration
+        # P10 -> relevant video
+        # P136 -> genre
+        # P18 -> depiction
+          FILTER(?bp IN (wdt:P10, wdt:P2047, wdt:P136, wdt:P18))
+        }
+        LATERAL { {
+            BIND(?x AS ?s)
+            BIND(?bp AS ?p)
+            BIND(?bo AS ?o)
+          } UNION {
+            {
+              ?bo ?cp ?co
+              FILTER(?cp = rdfs:label)
+              FILTER(lang(?co) = 'en')
+            } LATERAL { BIND(?bo AS ?s) BIND(?cp AS ?p) BIND(?co AS ?o) }
+          }
+      }
+      }
+      }
+      }
+  }
+LIMIT 10000
+                """)), List.of()));
+//        mainBz2DecodeNice(args);
 //		mainBoyerMooreTest(args);
     }
 
@@ -197,7 +263,7 @@ public class MainPlaygroundScanFile {
 
 
             int extraBytes = 0;
-            BlockIterState it = BlockIterState.fwd(true, blockRef, true);
+            BlockEnumerator it = BlockEnumerator.fwd(true, blockRef, true);
             while(it.hasNext()) {
                 it.advance();
                 SeekableFromBlock seekable = new SeekableFromBlock(it.blockRef, 0, 0);

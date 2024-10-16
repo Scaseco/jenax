@@ -38,6 +38,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 public class OpCostEvaluation
@@ -302,6 +303,13 @@ public class OpCostEvaluation
         Op newOp = op.getSubOp() == subCost.getOp() ? op : new OpGroup(subCost.getOp(), op.getGroupVars(), op.getAggregators());
         // Double the cost because we need to touch every binding
         OpCost result = new OpCost(newOp, 2 * subCost.getCost());
+        return result;
+    }
+
+    @Override
+    public OpCost eval(OpUnfold op, OpCost subCost) {
+        Op newOp = op.getSubOp() == subCost.getOp() ? op : new OpUnfold(subCost.getOp(), op.getExpr(), op.getVar1(), op.getVar2());
+        OpCost result = new OpCost(newOp, subCost.getCost());
         return result;
     }
 }

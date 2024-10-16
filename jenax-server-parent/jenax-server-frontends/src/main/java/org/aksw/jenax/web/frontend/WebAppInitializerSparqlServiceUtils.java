@@ -49,8 +49,11 @@ public class WebAppInitializerSparqlServiceUtils {
         // Dispatcher servlet is used to serve the html/js/css resources
         {
             AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-//            dispatcherContext.register(WebMvcConfigSnorql.class);
-            dispatcherContext.register(WebMvcConfigYasgui.class);
+            dispatcherContext.register(WebMvcConfigSparql.class);
+
+            // Beware! Spring ignores subsequent WebMvcConfigurers
+            // So one cannot modularize simply by adding multiple WebMvcConfigurers!
+            // dispatcherContext.register(WebMvcConfigSnorql.class);
 
             ServletRegistration.Dynamic servlet = servletContext.addServlet("dispatcherServlet", new DispatcherServlet(dispatcherContext));
             servlet.addMapping("/*");

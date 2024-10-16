@@ -11,8 +11,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
+import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
@@ -159,6 +162,9 @@ public class RDFConnectionUtils {
         return result;
     }
 
+    public static RDFConnection wrapWithBuilderTransform(RDFConnection rawConn, QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
+        return wrapWithLinkTransform(rawConn, link -> RDFLinkUtils.wrapWithBuilderTransform(link, queryBuilderTransform, updateBuilderTransform));
+    }
 
 
     public static RDFConnection wrapWithContextMutator(RDFConnection rawConn) {
@@ -242,13 +248,13 @@ public class RDFConnectionUtils {
 //        return result[0];
 //    }
 
-    public static RDFConnection wrapWithLinkDecorator(RDFConnection conn, RDFLinkTransform linkTransform) {
+    /** Adapt the given connection as a link. Then apply the transform to that link and return the result. */
+    public static RDFConnection wrapWithLinkTransform(RDFConnection conn, RDFLinkTransform linkTransform) {
         RDFLink oldLink = RDFLinkAdapter.adapt(conn);
         RDFLink newLink = linkTransform.apply(oldLink);
         RDFConnection result = RDFConnectionAdapter.adapt(newLink);
         return result;
     }
-
 
     public static RDFConnection wrapWithQueryTransform(
             RDFConnection conn,
@@ -286,11 +292,11 @@ public class RDFConnectionUtils {
     }
 
     public static RDFConnection enableRelativeIrisInQueryResults(RDFConnection delegate) {
-        return wrapWithLinkDecorator(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
+        return wrapWithLinkTransform(delegate, RDFLinkUtils::enableRelativeIrisInQueryResults);
     }
 
     public static RDFConnection wrapWithQueryOnly(RDFConnection conn) {
-        return wrapWithLinkDecorator(conn, RDFLinkUtils::wrapWithQueryOnly);
+        return wrapWithLinkTransform(conn, RDFLinkUtils::wrapWithQueryOnly);
     }
 
     public static RDFConnection wrapWithAutoDisableReorder(RDFConnection conn) {
@@ -330,33 +336,11 @@ public class RDFConnectionUtils {
     public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed) {
         boolean isSilent = opService.getSilent();
         Op opRemote = opService.getSubOp();
-        Query query = OpAsQuery.asQuery(opRemote);
+        // Query query = OpAsQuery.asQuery(opRemote);
 
         Op opRestored = Rename.reverseVarRename(opRemote, true);
-        query = OpAsQuery.asQuery(opRestored);
-        // Transforming: Same object means "no change"
-        boolean requiresRemapping = false;
-        Map<Var, Var> varMapping = null;
-        if ( ! opRestored.equals(opRemote) ) {
-            varMapping = new HashMap<>();
-            Set<Var> originalVars = OpVars.visibleVars(opService);
-            Set<Var> remoteVars = OpVars.visibleVars(opRestored);
-            for (Var v : originalVars) {
-                if (v.getName().contains("/")) {
-                    // A variable which was scope renamed so has a different name
-                    String origName = v.getName().substring(v.getName().lastIndexOf('/') + 1);
-                    Var remoteVar = Var.alloc(origName);
-                    if (remoteVars.contains(remoteVar)) {
-                        varMapping.put(remoteVar, v);
-                        requiresRemapping = true;
-                    }
-                } else {
-                    // A variable which does not have a different name
-                    if (remoteVars.contains(v))
-                        varMapping.put(v, v);
-                }
-            }
-        }
+        Query query = OpAsQuery.asQuery(opRestored);
+        Map<Var, Var> varMapping = QueryExecUtils.computeVarMapping(opRemote, opRestored);
 
         RDFLink link = RDFLinkAdapter.adapt(target);
         QueryExecBuilder builder = link.newQuery().query(query);
@@ -383,12 +367,17 @@ public class RDFConnectionUtils {
 //        }
 
 
-        if (requiresRemapping) {
+        if (varMapping != null) {
             result = QueryIter.map(result, varMapping);
         }
         return result;
     }
 
+    /**
+     * Obtain a RowSet from the given queryExecBuilder.
+     * The RowSet is materialized when the silent flag is set or streaming is disallowed.
+     * Otherwise it is streamed.
+     */
     public static RowSet exec(QueryExecBuilder builder, boolean isSilent, boolean isStreamingAllowed) {
         RowSet result;
         if (isSilent || !isStreamingAllowed) {
@@ -403,6 +392,7 @@ public class RDFConnectionUtils {
                     result = RowSetStream.create(List.of(), Collections.emptyIterator());
                     // QueryIterSingleton.create(BindingFactory.root(), null);
                 } else {
+                    ex.addSuppressed(new RuntimeException("QueryExecution error"));
                     throw ex;
                 }
             }

@@ -35,6 +35,7 @@ import org.apache.jena.sparql.algebra.op.OpSlice;
 import org.apache.jena.sparql.algebra.op.OpTable;
 import org.apache.jena.sparql.algebra.op.OpTopN;
 import org.apache.jena.sparql.algebra.op.OpTriple;
+import org.apache.jena.sparql.algebra.op.OpUnfold;
 import org.apache.jena.sparql.algebra.op.OpUnion;
 
 /** Base class that evals everything to <tt>null</tt>. */
@@ -101,4 +102,5 @@ public class EvaluatorBase<T>
     @Override public T eval(OpReduced opReduced, T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpSlice opSlice, T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpGroup opGroup, T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpUnfold opUnfold, T input) { throw new UnsupportedOperationException(); }
 }

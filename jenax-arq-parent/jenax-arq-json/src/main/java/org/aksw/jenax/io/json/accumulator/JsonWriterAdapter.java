@@ -82,6 +82,7 @@ public class JsonWriterAdapter
         delegate.value(value);
         return this;
     }
+
     @Override
     public JsonWriterGson nullValue() throws IOException {
         delegate.nullValue();

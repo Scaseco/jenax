@@ -1,5 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.binding;
 
+import org.aksw.jenax.norse.term.rdf.NorseTermsBinding;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 
@@ -11,10 +12,10 @@ public class JenaExtensionBinding {
         // typeMapper.registerDatatype(RDFDatatypeBinding.get());
 
         FunctionRegistry fnRegistry = FunctionRegistry.get();
-        fnRegistry.put(NorseBindingTerms.get, F_BindingGet.class);
+        fnRegistry.put(NorseTermsBinding.get, F_BindingGet.class);
     }
 
     public static void addPrefixes(PrefixMapping pm) {
-        pm.setNsPrefix("binding", NorseBindingTerms.NS);
+        pm.setNsPrefix("binding", NorseTermsBinding.NS);
     }
 }

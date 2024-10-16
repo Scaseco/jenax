@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.number;
 
-import org.aksw.jenax.norse.NorseTerms;
+import org.aksw.jenax.norse.term.core.NorseTerms;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
 
