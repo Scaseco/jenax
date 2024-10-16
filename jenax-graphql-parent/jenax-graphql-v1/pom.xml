@@ -6,7 +6,7 @@
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
-		<artifactId>jenax-parent</artifactId>
+		<artifactId>jenax-graphql-parent</artifactId>
 		<version>5.2.0-1-SNAPSHOT</version>
 	</parent>
 
