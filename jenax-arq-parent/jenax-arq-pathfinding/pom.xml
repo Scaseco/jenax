@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-parent</artifactId>
-		<version>5.2.0-2-SNAPSHOT</version>
+		<version>5.2.0-1-SNAPSHOT</version>
 	</parent>
 	<dependencies>
 		<!-- Self Dependencies -->

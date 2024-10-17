@@ -9,7 +9,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>5.2.0-2-SNAPSHOT</version>
+	<version>5.2.0-1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Unofficial Jena eXtension Components</name>
 	<description>Unofficial modular extensions for Apache Jena</description>
@@ -55,7 +55,7 @@
                 <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 		-->
 
-                <ee.version>9</ee.version>
+        <ee.version>9</ee.version>
 		<jetty.version>12.0.14</jetty.version>
 		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
@@ -1254,6 +1254,14 @@
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>					
 					<!-- <exclusion> <groupId>org.codehaus.woodstox</groupId>
 					<artifactId>stax2-api</artifactId> 
 						</exclusion> <exclusion> <groupId>com.fasterxml.woodstox</groupId>
