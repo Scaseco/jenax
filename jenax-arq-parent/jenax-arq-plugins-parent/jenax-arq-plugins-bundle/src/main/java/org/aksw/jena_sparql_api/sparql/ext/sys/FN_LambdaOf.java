@@ -1,13 +1,17 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.datatype.lambda.Lambda;
 import org.aksw.jenax.arq.datatype.lambda.NodeValueLambda;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
@@ -15,6 +19,7 @@ import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Substitute;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.expr.Expr;
@@ -22,6 +27,7 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
 import org.apache.jena.sparql.function.FunctionEnv;
+import org.apache.jena.sparql.service.enhancer.impl.util.VarScopeUtils;
 
 /**
  * A function that returns an RDF term that encapsulates a lambda.
@@ -85,18 +91,21 @@ public class FN_LambdaOf
         if (n == 0) {
             throw new RuntimeException("At least 1 argument required which is an expression");
         }
-        List<Expr> el = args.getList();
-        List<Expr> argList = el.subList(0, n - 1);
+        List<Expr> scopedExprs = args.getList();
+        List<Expr> scopedArgList = scopedExprs.subList(0, n - 1);
 
-        List<Var> argVars = argList.stream().map(e -> e.asVar()).collect(Collectors.toList());
-        Set<Var> argVarsSet = new HashSet<>(argVars);
-        Expr rawExpr = el.get(n - 1);
+        List<Var> scopedArgVars = scopedArgList.stream().map(e -> e.asVar()).collect(Collectors.toList());
+        Set<Var> scopedArgVarsSet = new HashSet<>(scopedArgVars);
+        Expr scopedRawExpr = scopedExprs.get(n - 1);
 
         // Remove all argVars from the binding
-        Binding effBinding = BindingUtils.project(binding, binding.vars(), argVarsSet);
-        Expr expr = Substitute.substitute(rawExpr, effBinding);
+        Binding effBinding = BindingUtils.project(binding, binding.vars(), scopedArgVarsSet);
+        Expr scopedExpr = Substitute.substitute(scopedRawExpr, effBinding);
 
-        Lambda lambda = new Lambda(argVars, expr);
+        List<Var> unscopedArgVars = scopedArgVars.stream().map(v -> (Var)Rename.reverseVarRename(v)).toList();
+        Expr unscopedExpr = ExprUtils.reverseVarRename(scopedExpr);
+
+        Lambda lambda = new Lambda(unscopedArgVars, unscopedExpr);
         NodeValue result = new NodeValueLambda(lambda);
         return result;
     }

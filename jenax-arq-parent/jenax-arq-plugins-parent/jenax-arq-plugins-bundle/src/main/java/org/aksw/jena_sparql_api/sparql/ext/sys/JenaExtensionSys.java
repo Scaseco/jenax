@@ -10,7 +10,7 @@ import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryExec
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.norse.term.core.NorseTerms;
-import org.aksw.jenax.norse.term.rdf.NorseTermsLambda;
+import org.aksw.jenax.norse.term.sparql.NorseTermsSparql;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.function.FunctionRegistry;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry;
@@ -35,9 +35,14 @@ public class JenaExtensionSys {
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
-        registry.put(NorseTermsLambda.fnOf, FN_LambdaOf.class);
-        registry.put(NorseTermsLambda.fnCall, FN_LambdaCall.class);
-        registry.put(NorseTermsLambda.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
+        // Legacy registrations
+        // registry.put(NorseTermsLambda.fnOf, FN_LambdaOf.class);
+        // registry.put(NorseTermsLambda.fnCall, FN_LambdaCall.class);
+        // registry.put(NorseTermsLambda.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
+
+        registry.put(NorseTermsSparql.fnOf, FN_LambdaOf.class);
+        registry.put(NorseTermsSparql.fnCall, FN_LambdaCall.class);
+        registry.put(NorseTermsSparql.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
 
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);
