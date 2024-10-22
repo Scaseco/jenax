@@ -13,6 +13,25 @@
 	<artifactId>jenax-graphql-v2</artifactId>
 	<packaging>jar</packaging>
 
+    <build>
+    <!--
+      <plugins>
+        <plugin>
+    <groupId>org.teavm</groupId>
+    <artifactId>teavm-maven-plugin</artifactId>
+    <version>0.7.0</version>
+          <executions>
+                <execution>
+                    <goals>
+                        <goal>compile</goal>
+                    </goals>
+                </execution>
+            </executions>
+</plugin>
+      </plugins>
+    -->
+    </build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
