@@ -53,7 +53,7 @@ public class FN_LambdaOf
                 "PREFIX norse: <https://w3id.org/aksw/norse#>",
                 "PREFIX sys: <http://jsa.aksw.org/fn/sys/>",
                 "SELECT ?fn {",
-                "  BIND(norse:fn.of(?x, IRI(CONCAT(STR(eg:), STR(sys:nextLong())))) AS ?fn)",
+                "  BIND(norse:sparql.fn.of(?x, IRI(CONCAT(STR(eg:), STR(sys:nextLong())))) AS ?fn)",
                 "  LATERAL {",
                 "      { BIND(norse:map.computeIfAbsent('myMap', 'key1', ?fn) AS ?v) }",
                 "    UNION",
@@ -68,8 +68,8 @@ public class FN_LambdaOf
                 "PREFIX norse: <https://w3id.org/aksw/norse#>",
                 "SELECT ?helloFn ?msg {",
                 "  BIND('Hi' AS ?salutation)",
-                "  BIND(norse:fn.of(?x, CONCAT(?salutation, ' ', ?x)) AS ?helloFn)",
-                "  BIND(norse:fn.call(?helloFn, 'Lorenz') AS ?msg)",
+                "  BIND(norse:sparql.fn.of(?x, CONCAT(?salutation, ' ', ?x)) AS ?helloFn)",
+                "  BIND(norse:sparql.fn.call(?helloFn, 'Lorenz') AS ?msg)",
                 "}"
                 );
 
