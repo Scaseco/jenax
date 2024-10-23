@@ -1,9 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,7 +9,6 @@ import org.aksw.jenax.arq.datatype.lambda.Lambda;
 import org.aksw.jenax.arq.datatype.lambda.NodeValueLambda;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
-import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
@@ -27,7 +24,6 @@ import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase;
 import org.apache.jena.sparql.function.FunctionEnv;
-import org.apache.jena.sparql.service.enhancer.impl.util.VarScopeUtils;
 
 /**
  * A function that returns an RDF term that encapsulates a lambda.
