@@ -1,6 +1,6 @@
 package org.aksw.jenax.arq.datatype.lambda;
 
-import org.aksw.jenax.norse.term.sparql.NorseTermsSparql;
+import org.aksw.jenax.norse.term.lambda.NorseTermsLambda;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
@@ -14,7 +14,7 @@ import org.apache.jena.datatypes.RDFDatatype;
 public class RDFDatatypeLambda
     extends BaseDatatype
 {
-    public static final String IRI = NorseTermsSparql.fn;
+    public static final String IRI = NorseTermsLambda.lambda;
     public static final RDFDatatypeLambda INSTANCE = new RDFDatatypeLambda();
 
     // Legacy IRI

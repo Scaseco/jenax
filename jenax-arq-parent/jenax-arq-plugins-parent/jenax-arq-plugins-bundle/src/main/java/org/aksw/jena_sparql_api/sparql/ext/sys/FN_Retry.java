@@ -61,25 +61,26 @@ public class FN_Retry
 
         if (predicate.getParams().size() != 1) {
             // NodeValue.raise(new ExprEvalTypeException("Lambda"));
-            throw new RuntimeException("Lambda for validating values must only accept one argument");
+            throw new RuntimeException("Lambda for validation values must only accept one argument.");
         }
 
         NodeValue result = null;
         long i;
         // Repeat as long as i is less than the retry count and the cancel signal is either null or false
         for (i = 0; i < retryCount && (cancelSignal == null || !cancelSignal.get()); ++i) {
-
             NodeValue tmp = Lambdas.eval(supplier, List.of(), env);
 
             NodeValue verdict = null;
             try {
                 verdict = Lambdas.eval(predicate, List.of(tmp), env);
             } catch (Exception e) {
-                // XXX Log error
+                if (logger.isWarnEnabled()) {
+                    logger.info("Lambda evaluation raised an exception.", e);
+                }
             }
 
             if (logger.isInfoEnabled()) {
-                logger.info("Verdict for {} is {}. Value supplied by {} and evaluated with {}", tmp, verdict, supplier, predicate);
+                logger.info("Verdict for {} is {}. Value supplied by {} and evaluated with {}.", tmp, verdict, supplier, predicate);
             }
 
             if (verdict != null && Boolean.TRUE.equals(verdict.getBoolean())) {
