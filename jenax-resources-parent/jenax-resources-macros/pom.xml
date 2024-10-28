@@ -4,34 +4,26 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-arq-quadengine</artifactId>
+	<artifactId>jenax-resources-macros</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
-		<artifactId>jenax-arq-parent</artifactId>
+		<artifactId>jenax-resources-parent</artifactId>
 		<version>5.3.0-1-SNAPSHOT</version>
 	</parent>
 
+	<build>
+	</build>
 	<dependencies>
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-connection-core</artifactId>
-		</dependency>
-
-
-		<!-- Unit Testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<artifactId>jenax-arq-utils</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-resources-test-config</artifactId>
-			<scope>test</scope>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
 		</dependency>
-
 	</dependencies>
 </project>
