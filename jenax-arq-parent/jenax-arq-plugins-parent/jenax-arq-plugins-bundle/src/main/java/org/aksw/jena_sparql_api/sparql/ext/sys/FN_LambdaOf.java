@@ -1,9 +1,9 @@
 package org.aksw.jena_sparql_api.sparql.ext.sys;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.datatype.lambda.Lambda;
 import org.aksw.jenax.arq.datatype.lambda.NodeValueLambda;
@@ -90,7 +90,17 @@ public class FN_LambdaOf
         List<Expr> scopedExprs = args.getList();
         List<Expr> scopedArgList = scopedExprs.subList(0, n - 1);
 
-        List<Var> scopedArgVars = scopedArgList.stream().map(e -> e.asVar()).collect(Collectors.toList());
+        List<Var> scopedArgVars = new ArrayList<>(scopedArgList.size());
+        int argIdx = 1;
+        for (Expr arg : scopedArgList) {
+            Var v = arg.asVar();
+            if (v == null) {
+                throw new RuntimeException("Argument #" + argIdx + " is not a variable");
+            }
+            scopedArgVars.add(v);
+            ++argIdx;
+        }
+
         Set<Var> scopedArgVarsSet = new HashSet<>(scopedArgVars);
         Expr scopedRawExpr = scopedExprs.get(n - 1);
 
