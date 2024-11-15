@@ -46,10 +46,15 @@ public abstract class QueryIterOverQueryIteratorSupplier<T extends QueryIterator
     @Override
     protected void closeIterator() {
         synchronized (this) {
-            if (currentIt != null) {
-                isFinished = true;
-                currentIt.close();
-            }
+            closeIteratorActual();
+        }
+    }
+
+    /** This method is called from closeIterator in a synchronized block. */
+    protected void closeIteratorActual() {
+        if (currentIt != null) {
+            isFinished = true;
+            currentIt.close();
         }
     }
 

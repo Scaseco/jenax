@@ -103,10 +103,20 @@ public class RdfDataSourceWithPagination
                 }
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Paginated execution #" + execId + " finished.");
+                    logger.info("Paginated execution #" + execId + " finished (consumed).");
                 }
             }
             return result;
+        }
+
+        @Override
+        protected void closeIteratorActual() {
+            if (execId >= 0 && !isFinished) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Paginated execution #" + execId + " finished (closed).");
+                }
+            }
+            super.closeIteratorActual();
         }
 
         public static QueryIterPaginated of(Query query, long pageSize, Supplier<QueryExecBuilder> queryExecBuilderSupplier) {
