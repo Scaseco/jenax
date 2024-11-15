@@ -131,11 +131,9 @@ public class RdfDataSourceWithLocalLateral
             if (opExec.getService().equals(REMOTE_NODE)) {
                 // Transform assigns to extend - assign ops may be injected by Jena v5.0.0 QueryIterLateral
                 OpService finalOp = (OpService)Transformer.transform(TransformAssignToExtend.get(), opExec);
-
                 // TODO Evaluate table-based algebra locally.
-
                 RDFConnection base = delegate.getConnection();
-                r = RDFConnectionUtils.execService(binding, execCxt, finalOp, base, true);
+                r = RDFConnectionUtils.execService(binding, execCxt, finalOp, base, true, true);
             } else {
                 r = chain.createExecution(opExec, opOrig, binding, execCxt);
             }

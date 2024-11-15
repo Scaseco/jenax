@@ -835,8 +835,7 @@ public class QueryUtils {
         return result;
     }
 
-    public static void applyDatasetDescription(Query query,
-            DatasetDescription dd) {
+    public static void applyDatasetDescription(Query query, DatasetDescription dd) {
         DatasetDescription present = query.getDatasetDescription();
         if (present == null && dd != null) {
             {
@@ -851,6 +850,38 @@ public class QueryUtils {
             {
                 List<String> items = dd.getNamedGraphURIs();
                 if (items != null) {
+                    for (String item : items) {
+                        query.addNamedGraphURI(item);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void overwriteDatasetDescription(Query query, DatasetDescription dd) {
+        if (dd != null) {
+            {
+                List<String> items = dd.getDefaultGraphURIs();
+                if (items != null && !items.isEmpty()) {
+                    List<String> queryGraphs = query.getGraphURIs();
+                    if (queryGraphs != null) {
+                        queryGraphs.clear();
+                    }
+
+                    for (String item : items) {
+                        query.addGraphURI(item);
+                    }
+                }
+            }
+
+            {
+                List<String> items = dd.getNamedGraphURIs();
+                if (items != null && !items.isEmpty()) {
+                    List<String> queryGraphs = query.getNamedGraphURIs();
+                    if (queryGraphs != null) {
+                        queryGraphs.clear();
+                    }
+
                     for (String item : items) {
                         query.addNamedGraphURI(item);
                     }
@@ -991,4 +1022,21 @@ public class QueryUtils {
         return result;
     }
 
+    /** Restrict a query's limit to the given argument. */
+    public static Query restrictToLimit(Query query, long limit, boolean cloneOnChange) {
+        Query result = query;
+        if (limit != Query.NOLIMIT) {
+            long queryLimit = query.getLimit();
+            long adjustedLimit = queryLimit == Query.NOLIMIT
+                    ? limit
+                    : Math.min(limit, queryLimit);
+            if (adjustedLimit != queryLimit) {
+                if (cloneOnChange) {
+                    result = result.cloneQuery();
+                }
+                result.setLimit(adjustedLimit);
+            }
+        }
+        return result;
+    }
 }

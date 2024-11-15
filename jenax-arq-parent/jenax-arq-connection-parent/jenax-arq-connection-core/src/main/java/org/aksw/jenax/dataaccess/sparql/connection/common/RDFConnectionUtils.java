@@ -2,18 +2,19 @@ package org.aksw.jenax.dataaccess.sparql.connection.common;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
+import org.aksw.jenax.arq.util.dataset.DynamicDatasetUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
@@ -34,8 +35,11 @@ import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
-import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DynamicDatasets;
+import org.apache.jena.sparql.core.DynamicDatasets.DynamicDatasetGraph;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -317,12 +321,24 @@ public class RDFConnectionUtils {
      *          Otherwise the method materializes the data before returning.
      *          If opService.isSilent() is true then isStreaming has no effect because
      *          all data must be materialized first in order to detect errors.
+     * @param applyDatasetDescription If true, then check if the execCxt's datasat is a {@link DynamicDatasets} and apply its
+     *          default and named graph IRIs to the generated query.
      *
      * @implNote
      *   This method calls {@link #execService(OpService, RDFConnection)}.
      */
-    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target, boolean isStreamingAllowed) {
-        QueryIterator qIter = execService(opService, target, isStreamingAllowed);
+    public static QueryIterator execService(Binding binding, ExecutionContext execCxt, OpService opService, RDFConnection target, boolean isStreamingAllowed, boolean applyDatasetDescription) {
+        DatasetDescription dd = null;
+        if (applyDatasetDescription) {
+            DatasetGraph dg = execCxt.getDataset();
+            if (dg != null) {
+                DynamicDatasetGraph ddg = DynamicDatasetUtils.asUnwrappableDynamicDatasetOrNull(dg);
+                if (ddg != null) {
+                    dd = DatasetDescriptionUtils.ofNodes(ddg.getOriginalDefaultGraphs(), ddg.getOriginalNamedGraphs());
+                }
+            }
+        }
+        QueryIterator qIter = execService(opService, target, isStreamingAllowed, dd);
         qIter = QueryIter.makeTracked(qIter, execCxt);
         return new QueryIterCommonParent(qIter, binding, execCxt);
     }
@@ -333,13 +349,18 @@ public class RDFConnectionUtils {
      * @implNote
      *   Adapted from {@link Service#exec(OpService, Context)}.
      */
-    public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed) {
+    public static QueryIterator execService(OpService opService, RDFConnection target, boolean isStreamingAllowed, DatasetDescription datasetDescription) {
         boolean isSilent = opService.getSilent();
         Op opRemote = opService.getSubOp();
         // Query query = OpAsQuery.asQuery(opRemote);
 
         Op opRestored = Rename.reverseVarRename(opRemote, true);
         Query query = OpAsQuery.asQuery(opRestored);
+
+        if (datasetDescription != null) {
+            QueryUtils.overwriteDatasetDescription(query, datasetDescription);
+        }
+
         Map<Var, Var> varMapping = QueryExecUtils.computeVarMapping(opRemote, opRestored);
 
         RDFLink link = RDFLinkAdapter.adapt(target);

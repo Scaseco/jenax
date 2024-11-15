@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
 import org.aksw.jenax.arq.util.op.RewriteList;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
@@ -25,6 +26,7 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
+import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithPagination;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransformViaRewrite;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
@@ -113,7 +115,6 @@ public class RdfDataSources {
         SparqlStmtTransform stmtTransform = SparqlStmtTransforms.of(transformSupplier);
         return wrapWithStmtTransform(dataSource, stmtTransform);
     }
-
 
     /**
      * Returns a new data source that applies the given rewrite.
@@ -275,5 +276,15 @@ public class RdfDataSources {
             ? RdfDataSources.wrapWithLinkTransform(dataSource, link -> RDFLinkUtils.wrapWithAutoTxn(link, dataset))
             : dataSource;
         return result;
+    }
+
+    public static RdfDataSource withPagination(RdfDataSource dataSource, long pageSize) {
+        return new RdfDataSourceWithPagination(dataSource, pageSize);
+    }
+
+    public static RdfDataSource withLimit(RdfDataSource dataSource, long limit) {
+        return limit == Query.NOLIMIT
+            ? dataSource
+            : () -> RDFConnectionUtils.wrapWithQueryTransform(dataSource.getConnection(), q -> QueryUtils.restrictToLimit(q, limit, true));
     }
 }

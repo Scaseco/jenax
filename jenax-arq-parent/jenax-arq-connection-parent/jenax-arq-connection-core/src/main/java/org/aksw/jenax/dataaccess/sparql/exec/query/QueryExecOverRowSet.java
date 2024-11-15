@@ -18,7 +18,7 @@ public abstract class QueryExecOverRowSet
 {
 
     /** QueryExec wrapper for just the row set. */
-    public class QueryExecOverRowSetInternal
+    public static class QueryExecOverRowSetInternal
         extends AutoCloseableWithLeakDetectionBase
         implements QueryExecAdapter {
         protected RowSet rowSet;

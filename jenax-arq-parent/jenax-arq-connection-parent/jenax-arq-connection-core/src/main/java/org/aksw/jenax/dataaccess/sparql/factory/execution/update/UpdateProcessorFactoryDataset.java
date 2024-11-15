@@ -6,6 +6,7 @@ import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.engine.Timeouts.Timeout;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingRoot;
 import org.apache.jena.sparql.modify.UpdateEngineFactory;
@@ -70,7 +71,7 @@ public class UpdateProcessorFactoryDataset
 
         Binding initialBinding = BindingRoot.create();
 
-        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, cxt, f);
+        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, cxt, f, Timeout.UNSET);
         UpdateProcessor result = UpdateProcessorWrapperTxn.wrap(tmp, dsg);
 
 

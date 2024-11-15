@@ -84,6 +84,7 @@ public class MainCliSparqlPolyfillModel {
         model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Rewrite empty table")
             .setComment("Rewrite VALUES blocks with empty bindings")
+            // TODO Use this test query: SELECT * { VALUES () { () () () } BIND (<urn:x> AS ?x) }
             .setCondition(virtuoso)
             .setLevel(10000)
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)

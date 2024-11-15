@@ -25,6 +25,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.update.UpdateProcessor
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.engine.Timeouts.Timeout;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingRoot;
 import org.apache.jena.sparql.exec.UpdateExec;
@@ -74,7 +75,7 @@ public class UpdateExecDatasetBuilderEx<T extends UpdateExecDatasetBuilderEx<T>>
         // Merge the contexts
         Context finalCxt = Context.setupContextForDataset(cxt, dataset);
         Binding initialBinding = BindingRoot.create();
-        UpdateExec result = new UpdateExecDataset(updateRequest, dataset, initialBinding, finalCxt, f) {};
+        UpdateExec result = new UpdateExecDataset(updateRequest, dataset, initialBinding, finalCxt, f, Timeout.UNSET) {};
 
         // FIXME The Txn wrapper is far not ideal here I suppose?
         // UpdateExec result = new DatasetExecWrapperTxn<>(tmp, dataset);

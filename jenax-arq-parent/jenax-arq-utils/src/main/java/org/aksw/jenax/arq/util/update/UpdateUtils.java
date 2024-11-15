@@ -236,6 +236,56 @@ public class UpdateUtils {
         }
     }
 
+    public static boolean overwriteDatasetDescription(UpdateWithUsing update, DatasetDescription dd) {
+        boolean result = false;
+        if (dd != null) {
+            {
+                List<String> items = dd.getDefaultGraphURIs();
+                if (items != null && !items.isEmpty()) {
+                    result = true;
+                    List<Node> usingGraphs = update.getUsing();
+                    if (usingGraphs != null) {
+                        usingGraphs.clear();
+                    }
+
+                    for(String dgu : items) {
+                        Node node = NodeFactory.createURI(dgu);
+                        update.addUsing(node);
+                    }
+                }
+            }
+
+            {
+                List<String> items = dd.getNamedGraphURIs();
+                if (items != null && !items.isEmpty()) {
+                    result = true;
+                    List<Node> usingGraphs = update.getUsingNamed();
+                    if (usingGraphs != null) {
+                        usingGraphs.clear();
+                    }
+
+                    for(String dgu : items) {
+                        Node node = NodeFactory.createURI(dgu);
+                        update.addUsingNamed(node);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public static boolean overwriteDatasetDescriptionIfApplicable(Update update, DatasetDescription dg) {
+        boolean result;
+        if(update instanceof UpdateWithUsing) {
+            UpdateWithUsing x = (UpdateWithUsing)update;
+            result = overwriteDatasetDescription(x, dg);
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+
     public static Update copyWithIri(Update update, String withIriStr, boolean substituteDefaultGraph) {
         Update result = copyWithIri(update, NodeFactory.createURI(withIriStr), substituteDefaultGraph);
         return result;

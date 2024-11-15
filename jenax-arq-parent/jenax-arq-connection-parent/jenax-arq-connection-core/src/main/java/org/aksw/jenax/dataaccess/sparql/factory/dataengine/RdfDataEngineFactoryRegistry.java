@@ -51,5 +51,4 @@ public class RdfDataEngineFactoryRegistry {
     public RdfDataSourceDecorator getDecorator(String name) {
         return decoratorRegistry.get(name);
     }
-
 }

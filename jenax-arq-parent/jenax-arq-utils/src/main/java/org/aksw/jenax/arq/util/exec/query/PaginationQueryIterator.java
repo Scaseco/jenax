@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.pagination.extra;
+package org.aksw.jenax.arq.util.exec.query;
 
 /**
  * @author Claus Stadler
@@ -10,12 +10,6 @@ package org.aksw.jena_sparql_api.pagination.extra;
 import org.aksw.commons.collections.SinglePrefetchIterator;
 import org.apache.jena.query.Query;
 
-/**
- *
- *
- * @author raven
- *
- */
 public class PaginationQueryIterator
     extends SinglePrefetchIterator<Query>
 {
@@ -35,6 +29,9 @@ public class PaginationQueryIterator
         this.pageSize = pageSize;
     }
 
+    public long getPageSize() {
+        return pageSize;
+    }
 
     /**
      * Returns the next query or null
@@ -42,6 +39,7 @@ public class PaginationQueryIterator
      * @return
      * @throws Exception
      */
+    @Override
     public Query prefetch()
     {
         Query result = queryPaginator.nextPage(pageSize);
@@ -51,5 +49,4 @@ public class PaginationQueryIterator
 
         return result;
     }
-
 }

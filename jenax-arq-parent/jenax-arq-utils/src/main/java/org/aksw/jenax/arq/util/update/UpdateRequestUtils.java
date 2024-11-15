@@ -13,8 +13,6 @@ import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.quad.SetFromDatasetGraph;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
@@ -36,6 +34,9 @@ import org.apache.jena.sparql.util.PrefixMapping2;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 
 public class UpdateRequestUtils {
@@ -203,6 +204,12 @@ public class UpdateRequestUtils {
     public static void applyDatasetDescription(UpdateRequest updateRequest, DatasetDescription dg) {
         for(Update update : updateRequest.getOperations()) {
             UpdateUtils.applyDatasetDescriptionIfApplicable(update, dg);
+        }
+    }
+
+    public static void overwriteDatasetDescription(UpdateRequest updateRequest, DatasetDescription dg) {
+        for(Update update : updateRequest.getOperations()) {
+            UpdateUtils.overwriteDatasetDescriptionIfApplicable(update, dg);
         }
     }
 

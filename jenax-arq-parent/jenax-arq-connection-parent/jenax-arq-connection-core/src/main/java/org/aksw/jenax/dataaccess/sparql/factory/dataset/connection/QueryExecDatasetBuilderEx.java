@@ -7,6 +7,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.engine.QueryEngineFactory;
+import org.apache.jena.sparql.engine.Timeouts.Timeout;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecDataset;
@@ -62,7 +63,7 @@ public class QueryExecDatasetBuilderEx<T extends QueryExecDatasetBuilderEx<T>>
 
         defaultTimeoutsFromContext(this, finalCxt);
 
-        QueryExec qExec = new QueryExecDataset(query, query.toString(), dataset, finalCxt, f, initialTimeoutValue, initialTimeoutUnit, overallTimeoutValue, overallTimeoutUnit, initialBinding) {};
+        QueryExec qExec = new QueryExecDataset(query, query.toString(), dataset, finalCxt, f, Timeout.UNSET, initialBinding) {};
         return qExec;
     }
 }

@@ -42,7 +42,6 @@ import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.http.HttpOp;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -57,6 +56,7 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -72,6 +72,7 @@ import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
+import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateRequest;
 
 import com.google.common.base.Charsets;
@@ -515,16 +516,36 @@ public class SparqlStmtUtils {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 
             // conn.update(u);
-            Context cxt = ARQ.getContext().copy();
-            if (cxtMutator != null) {
+//            Context cxt = ARQ.getContext().copy();
+//            if (cxtMutator != null) {
+//                cxtMutator.accept(cxt);
+//            }
+            UpdateExecution ue = conn.newUpdate().update(u).build();
+            Context cxt = ue.getContext();
+            if (cxtMutator != null && ue != null) {
                 cxtMutator.accept(cxt);
             }
-            conn.newUpdate().update(u).context(cxt).execute();
+
+            ue.execute();
+            // .context(cxt).execute();
 
             result = SPARQLResultEx.createUpdateType();
         }
 
         return result;
+    }
+
+    /** In-place update. */
+    public static void overwriteDatasetDescription(SparqlStmt stmt, DatasetDescription dd) {
+        if (stmt.isParsed()) {
+            if (stmt.isQuery()) {
+                QueryUtils.overwriteDatasetDescription(stmt.getQuery(), dd);
+            } else if (stmt.isUpdateRequest()) {
+                UpdateRequestUtils.overwriteDatasetDescription(stmt.getUpdateRequest(), dd);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot apply dataset description to a SPARQL query that has not been parsed.");
+        }
     }
 
     /**

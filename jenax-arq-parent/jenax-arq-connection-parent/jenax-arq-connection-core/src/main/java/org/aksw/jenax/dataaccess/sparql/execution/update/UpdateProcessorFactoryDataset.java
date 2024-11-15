@@ -20,7 +20,6 @@ public class UpdateProcessorFactoryDataset
     protected Context context;
     protected UpdateEngineFactoryProvider updateEngineFactoryProvider;
 
-
     public UpdateProcessorFactoryDataset(Dataset dataset) {
         this(dataset, null);
     }
@@ -65,7 +64,7 @@ public class UpdateProcessorFactoryDataset
 
         Binding initialBinding = BindingRoot.create();
 
-        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f);
+        UpdateProcessorBase tmp = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f, null);
         UpdateProcessor result = UpdateProcessorWrapperTxn.wrap(tmp, dsg);
 
 

@@ -1,4 +1,4 @@
-package org.aksw.jena_sparql_api.pagination.extra;
+package org.aksw.jenax.arq.util.exec.query;
 
 import org.apache.jena.query.Query;
 
