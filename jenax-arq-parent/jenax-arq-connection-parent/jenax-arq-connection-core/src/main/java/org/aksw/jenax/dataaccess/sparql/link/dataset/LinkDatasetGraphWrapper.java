@@ -202,6 +202,11 @@ public interface LinkDatasetGraphWrapper
     }
 
     @Override
+    default Graph get(String graphName) {
+        return getDelegate().get(graphName);
+    }
+
+    @Override
     default Graph get() {
         return getDelegate().get();
     }
