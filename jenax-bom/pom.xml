@@ -225,6 +225,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-resources-macros</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-extra</artifactId>
 				<version>${project.version}</version>
 			</dependency>
