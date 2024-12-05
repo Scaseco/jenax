@@ -46,9 +46,15 @@ public class Evaluator {
                                           OpVisitor beforeVisitor, OpVisitor afterVisitor) {
         if ( evaluation == null )
             evaluation = new EvaluationBase<>();
-        //Evaluation<T> transform2 = new EvaluationSkipService<>(evaluation) ;
+        // Evaluation<T> evaluation2 = new EvaluationSkipService<>(evaluation) ;
         // transform2 = opTransform ;
-        ApplyEvaluationVisitor<T> aev = new ApplyEvaluationVisitor<>(evaluation) ;
+        ApplyEvaluationVisitor<T> aev = new ApplyEvaluationVisitor<>(evaluation) {
+            @Override
+            public void visit(OpService op) {
+                T value = evaluator.eval(op, null);
+                push(opStack, value);
+            }
+        };
         Walker.walkSkipService(op, aev, null, beforeVisitor, afterVisitor);
         T result = aev.opResult();
         return result;

@@ -521,9 +521,17 @@ public class SparqlStmtUtils {
 //                cxtMutator.accept(cxt);
 //            }
             UpdateExecution ue = conn.newUpdate().update(u).build();
-            Context cxt = ue.getContext();
-            if (cxtMutator != null && ue != null) {
-                cxtMutator.accept(cxt);
+//            if (ue.getContext() == null) {
+//                System.err.println("Context of update request was null");
+//            }
+            if (cxtMutator != null) {
+                Context cxt = ue.getContext();
+
+                if (cxt != null) {
+                    cxtMutator.accept(cxt);
+                } else {
+                    // XXX Perhaps better log a warning if the cxt is null and cxtMutator is given?
+                }
             }
 
             ue.execute();

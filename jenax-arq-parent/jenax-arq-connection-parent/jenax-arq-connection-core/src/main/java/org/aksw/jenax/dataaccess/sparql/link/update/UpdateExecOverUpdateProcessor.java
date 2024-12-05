@@ -3,6 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.link.update;
 import java.util.Objects;
 
 import org.apache.jena.sparql.exec.UpdateExec;
+import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
 
 public class UpdateExecOverUpdateProcessor
@@ -22,18 +23,23 @@ public class UpdateExecOverUpdateProcessor
                 : new UpdateExecOverUpdateProcessor(delegate);
     }
 
-//    @Override
-//    public Context getContext() {
-//        return delegate.getContext();
-//    }
-//
-//    @Override
-//    public DatasetGraph getDatasetGraph() {
-//        return delegate.getDatasetGraph();
-//    }
+    @Override
+    public Context getContext() {
+        return delegate.getContext();
+    }
+
+    @Override
+    public void abort() {
+        delegate.abort();
+    }
 
     @Override
     public void execute() {
         delegate.execute();
     }
+
+//  @Override
+//  public DatasetGraph getDatasetGraph() {
+//      return delegate.getDatasetGraph();
+//  }
 }

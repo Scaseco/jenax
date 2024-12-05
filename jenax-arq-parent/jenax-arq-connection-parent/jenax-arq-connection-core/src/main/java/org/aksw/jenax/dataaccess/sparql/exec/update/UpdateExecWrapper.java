@@ -1,18 +1,12 @@
 package org.aksw.jenax.dataaccess.sparql.exec.update;
 
+import org.aksw.jenax.dataaccess.sparql.execution.update.UpdateProcessorWrapper;
 import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.update.UpdateProcessor;
 
 public interface UpdateExecWrapper
-    extends UpdateExec
+    extends UpdateProcessorWrapper<UpdateProcessor>, UpdateExec
 {
-    UpdateProcessor getDelegate();
-
-//    @Override
-//    default Context getContext() {
-//        return getDelegate().getContext();
-//    }
-
 //    @Override
 //    default DatasetGraph getDatasetGraph() {
 //        return getDelegate().getDatasetGraph();

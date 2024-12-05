@@ -1,8 +1,6 @@
 package org.aksw.jenax.sparql.algebra.transform2;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
@@ -71,7 +69,7 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor {
 //        System.out.println("    O:"+x);
 //    }
 
-    private void push(Stack<T> stack, T value) {
+    protected void push(Stack<T> stack, T value) {
         if ( value == null )
             Log.warn(ApplyEvaluationVisitor.class, "Pushing null onto the "+stackLabel(stack)+" stack") ;
         stack.push(value) ;

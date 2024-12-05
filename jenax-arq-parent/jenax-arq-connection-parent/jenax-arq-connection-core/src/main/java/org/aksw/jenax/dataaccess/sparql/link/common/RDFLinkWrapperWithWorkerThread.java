@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.common.WorkerThreadBase;
+import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.query.IteratorDelegateWithWorkerThread;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
@@ -242,13 +243,10 @@ public class RDFLinkWrapperWithWorkerThread
     }
 
     class UpdateExecWrapper
-        implements UpdateExec {
-
-        protected UpdateExec delegate;
+        extends UpdateExecWrapperBase<UpdateExec> {
 
         public UpdateExecWrapper(UpdateExec delegate) {
-            super();
-            this.delegate = delegate;
+            super(delegate);
         }
 
         @Override
