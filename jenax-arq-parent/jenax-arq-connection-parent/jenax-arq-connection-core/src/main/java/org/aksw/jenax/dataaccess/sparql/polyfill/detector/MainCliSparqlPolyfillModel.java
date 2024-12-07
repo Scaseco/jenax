@@ -19,8 +19,6 @@ import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggestionRule;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDFS;
 
 public class MainCliSparqlPolyfillModel {

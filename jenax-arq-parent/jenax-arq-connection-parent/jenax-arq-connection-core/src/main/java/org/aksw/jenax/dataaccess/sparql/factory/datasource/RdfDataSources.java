@@ -3,6 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -17,6 +18,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
+import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
@@ -42,8 +44,12 @@ import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.system.Txn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RdfDataSources {
+
+    private static final Logger logger = LoggerFactory.getLogger(RdfDataSources.class);
 
     /**
      * Create a datasource where any attempt to <b>execute</b> a query or an update will fail.
@@ -286,5 +292,26 @@ public class RdfDataSources {
         return limit == Query.NOLIMIT
             ? dataSource
             : () -> RDFConnectionUtils.wrapWithQueryTransform(dataSource.getConnection(), q -> QueryUtils.restrictToLimit(q, limit, true));
+    }
+
+    public static RdfDataSource wrapWithLogging(RdfDataSource delegate) {
+        return new RdfDataSourceWrapperBase<>(delegate) {
+            protected AtomicInteger counter = new AtomicInteger();
+
+            @Override
+            public RDFConnection getConnection() {
+                RDFConnection base = super.getConnection();
+                return RDFConnectionUtils.wrapWithQueryTransform(base, null, qe ->
+                    new QueryExecWrapperBase<QueryExec>(qe) {
+                        @Override
+                        public void beforeExec() {
+                            int value = counter.incrementAndGet();
+                            if (logger.isInfoEnabled()) {
+                                logger.info("{}: Request #{}: {}", Thread.currentThread().getName(), value, getDelegate().getQueryString());
+                            }
+                        }
+                    });
+            }
+        };
     }
 }
