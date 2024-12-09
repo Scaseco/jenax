@@ -32,15 +32,23 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpLateral;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorCloseable;
 import org.apache.jena.sparql.exec.QueryExec;
+import org.apache.jena.sparql.expr.E_Exists;
+import org.apache.jena.sparql.expr.E_NotExists;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprFunctionOp;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
@@ -48,6 +56,7 @@ import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementLateral;
 import org.apache.jena.sparql.syntax.ElementService;
+import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,8 +171,35 @@ public class RdfDataSourceWithLocalLateral
     protected PolyfillLateralConfig config;
 
 
-    // TODO Convert to test case
     public static void main(String[] args) {
+        Query a = QueryFactory.create("""
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX lgdo: <http://linkedgeodata.org/ontology/>
+            SELECT * {
+              { SELECT # DISTINCT
+                  ?t
+                {
+                  ?t a ?c .
+                  # FILTER (?c IN (rdfs:Class, owl:Class))
+                  # FILTER(isURI(?t)) FILTER(STRSTARTS(STR(?t), STR(lgdo:)))
+                }
+                #ORDER BY ?t
+                LIMIT 5
+              }
+              LATERAL {
+                ?t a ?c
+                FILTER NOT EXISTS { SELECT * { ?s a ?t } LIMIT 2 }
+                # { SELECT * { ?s a ?t } LIMIT 2 }
+              }
+            }
+            """);
+        Query b = OpRewriteInjectRemoteOps.rewriteQuery(a);
+        System.out.println(b);
+    }
+
+    // TODO Convert to test case
+    public static void mainX(String[] args) {
         for (int i= 0; i < 10; ++i) {
             mainActual(args);
         }
@@ -315,6 +351,40 @@ public class RdfDataSourceWithLocalLateral
         return result;
     }
 
+
+    // TODO Adapt to evaluation
+    /**
+     * A copying transform that applies an ElementTransform syntax pattern of
+     * E_Exist and E_NoExists
+     * */
+    public class ExprTransformApplyElementTransform extends ExprTransformCopy
+    {
+        private final ElementTransform transform;
+
+        public ExprTransformApplyElementTransform(ElementTransform transform) {
+            this(transform, false);
+        }
+
+        public ExprTransformApplyElementTransform(ElementTransform transform, boolean alwaysDuplicate) {
+            super(alwaysDuplicate);
+            this.transform = transform;
+        }
+
+        @Override
+        public Expr transform(ExprFunctionOp funcOp, ExprList args, Op opArg)
+        {
+            Element el2 = ElementTransformer.transform(funcOp.getElement(), transform, this);
+
+            if ( el2 == funcOp.getElement() )
+                return super.transform(funcOp, args, opArg);
+            if ( funcOp instanceof E_Exists )
+                return new E_Exists(el2);
+            if ( funcOp instanceof E_NotExists )
+                return new E_NotExists(el2);
+            throw new ARQInternalErrorException("Unrecognized ExprFunctionOp: \n"+funcOp);
+        }
+    }
+
     /** Rewriter that injects caching operations after group by operations
      *
      * (Op, true) means that op contains some rewrite that references remote
@@ -343,6 +413,12 @@ public class RdfDataSourceWithLocalLateral
                 return r;
             });
             return result;
+        }
+
+        @Override
+        public Entry<Op, Boolean> eval(OpFilter op, Entry<Op, Boolean> subOp) {
+
+            return EvaluationCopy.super.eval(op, subOp);
         }
 
         @Override
@@ -387,5 +463,4 @@ public class RdfDataSourceWithLocalLateral
 
         // public static List<Op> forceAllRemote()
     }
-
 }

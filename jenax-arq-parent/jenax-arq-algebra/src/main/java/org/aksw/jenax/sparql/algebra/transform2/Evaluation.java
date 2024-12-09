@@ -80,4 +80,6 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      T eval(OpSlice op, T subOp);
      T eval(OpGroup op, T subOp);
      T eval(OpUnfold op, T subOp);
+
+     // Op valueToOp(T value);
 }

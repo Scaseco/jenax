@@ -55,7 +55,7 @@ public class Evaluator {
                 push(opStack, value);
             }
         };
-        Walker.walkSkipService(op, aev, null, beforeVisitor, afterVisitor);
+        Walker.walkSkipService(op, aev, aev, beforeVisitor, afterVisitor);
         T result = aev.opResult();
         return result;
     }
@@ -67,7 +67,7 @@ public class Evaluator {
 
     /** Evaluate an {@link Op}. */
     public <T> T evaluate(Op op, ApplyEvaluationVisitor<T> v, OpVisitor beforeVisitor, OpVisitor afterVisitor) {
-        Walker.walk(op, v, null, beforeVisitor, afterVisitor);
+        Walker.walk(op, v, v, beforeVisitor, afterVisitor);
         T result = v.opResult();
         return result;
     }
