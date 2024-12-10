@@ -60,7 +60,6 @@ public class ElementNode
         }
     }
 
-
     /* parent / child management */
 
     protected ParentLink parentLink;
@@ -134,7 +133,7 @@ public class ElementNode
     /** Starting from this node and moving up its ancestors, find the first node which declares var.
      *  Returns null if there is no match. */
     public ElementNode findVarInAncestors(Var var) {
-        ElementNode result = connective.getVisibleVars().contains(var)
+        ElementNode result = connective.getVisibleVars().contains(var) || binds.getVars().contains(var)
             ? this
             : parentLink == null
                 ? null
@@ -275,7 +274,6 @@ public class ElementNode
         return addChild(thisVars, child, child.getConnective().getConnectVars());
     }
 
-
     public ElementNode setLimit(Long limit) {
         this.limit = limit;
         return this;
@@ -354,8 +352,6 @@ public class ElementNode
         getChildrenByName().put(finalName, link);
         child.setParent(new ParentLink(this, finalName));
     }
-
-
 
     void unlinkFromParent() {
         if (parentLink != null) {
@@ -509,5 +505,4 @@ public class ElementNode
             return childNode;
         }
     }
-
 }
