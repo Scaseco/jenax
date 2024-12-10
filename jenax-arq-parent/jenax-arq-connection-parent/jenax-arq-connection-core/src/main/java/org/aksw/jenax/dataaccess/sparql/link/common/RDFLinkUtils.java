@@ -268,20 +268,20 @@ public class RDFLinkUtils {
 //    }
 
     public static RDFLink wrapWithQueryTransform(
-            RDFLink conn,
+            RDFLink rdfLink,
             QueryTransform queryTransform,
             QueryExecTransform queryExecTransform) {
         LinkSparqlQueryTransform queryLinkTransform = queryLink -> new LinkSparqlQueryQueryTransform(queryLink, queryTransform, queryExecTransform);
-        RDFLink result = wrapWithQueryLinkTransform(conn, queryLinkTransform);
+        RDFLink result = wrapWithQueryLinkTransform(rdfLink, queryLinkTransform);
         return result;
     }
 
     public static RDFLink wrapWithQueryLinkTransform(
-            RDFLink conn,
+            RDFLink rdfLink,
             LinkSparqlQueryTransform linkQueryTransform) {
-        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(conn);
-        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(conn);
-        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(conn);
+        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(rdfLink);
+        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(rdfLink);
+        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(rdfLink);
         RDFLink result = new RDFLinkModular(linkQueryTransform.apply(queryLink), updateLink, dgLink);
         return result;
     }

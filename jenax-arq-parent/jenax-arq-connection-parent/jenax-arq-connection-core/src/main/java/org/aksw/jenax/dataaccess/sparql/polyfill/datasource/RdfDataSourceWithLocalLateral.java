@@ -16,6 +16,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.sparql.algebra.transform2.Evaluation;
 import org.aksw.jenax.sparql.algebra.transform2.EvaluationCopy;
 import org.aksw.jenax.sparql.algebra.transform2.Evaluator;
@@ -32,6 +33,10 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdflink.RDFConnectionAdapter;
+import org.apache.jena.rdflink.RDFLink;
+import org.apache.jena.rdflink.RDFLinkAdapter;
+import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.TransformCopy;
@@ -335,14 +340,28 @@ public class RdfDataSourceWithLocalLateral
 
     @Override
     public RDFConnection getConnection() {
-        RDFConnection base = RDFConnection.connect(proxyDataset);
+        RDFConnection proxyConn = RDFConnection.connect(proxyDataset);
+        RDFConnection originalConn = getDelegate().getConnection();
+
+        RDFLink originalLink = RDFLinkAdapter.adapt(originalConn);
+
+        // FIXME The current implementation does not support LATERAL polyfill for update requests
+        // Update requests are currently just sent to the original link without further processing
+        RDFLink hybridLink = new RDFLinkModular(
+            RDFLinkAdapter.adapt(proxyConn),
+            originalLink,
+            originalLink
+        );
+
         // TODO Properly generalize to stmts / update requests
-        RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(base,
+        RDFLink finalLink = RDFLinkUtils.wrapWithQueryTransform(hybridLink,
                 q -> rewriteStatement(new SparqlStmtQuery(q)).getQuery(),
                 qe -> {
                     ServiceEnhancerInit.wrapOptimizer(qe.getContext());
                     return qe;
                 });
+
+        RDFConnection result = RDFConnectionAdapter.adapt(finalLink);
         return result;
     }
 
