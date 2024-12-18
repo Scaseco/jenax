@@ -23,6 +23,8 @@ import graphql.language.DirectivesContainer;
 public class GraphQlFieldExecImpl<K>
     implements GraphQlFieldExec<K>
 {
+    protected GraphQlProcessor<K> processor;
+
     protected final Query query;
     protected final QueryExec queryExec;
     protected final RowSet rs;
@@ -43,9 +45,10 @@ public class GraphQlFieldExecImpl<K>
      * @param stateVarMap
      * @param driver
      */
-    public GraphQlFieldExecImpl(boolean isSingle, Query query, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver,
+    public GraphQlFieldExecImpl(GraphQlProcessor<K> processor, boolean isSingle, Query query, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver,
             QueryMapping<K> queryMapping) {
         super();
+        this.processor = processor;
         this.isSingle = isSingle;
         this.query = query;
         this.queryExec = Objects.requireNonNull(queryExec);
@@ -57,6 +60,11 @@ public class GraphQlFieldExecImpl<K>
     }
 
     @Override
+    public GraphQlProcessor<K> getProcessor() {
+        return processor;
+    }
+
+    @Override
     public boolean isSingle() {
         return isSingle;
     }
@@ -64,6 +72,53 @@ public class GraphQlFieldExecImpl<K>
     /** Get the underlying Jena {@link QueryExec}. */
     public QueryExec getQueryExec() {
         return queryExec;
+    }
+
+    @Override
+    public long sendRemainingItemsToWriter(ObjectNotationWriter<K, Node> writer) throws IOException {
+        long result[] = {0};
+        driver.getContext().setWriter(writer);
+
+        if (isFinished) {
+            // nothing to do
+        } else if (!rs.hasNext()) {
+            isFinished = true;
+            boolean emittedItem = driver.end();
+            if (emittedItem) {
+                ++result[0];
+            }
+        } else {
+            rs.forEachRemaining(binding -> {
+                boolean emittedItem = processBinding(binding);
+                if (emittedItem) {
+                    ++result[0];
+                }
+            });
+
+            boolean emittedItem2 = driver.end();
+            if (emittedItem2) {
+                ++result[0];
+            }
+        }
+        return result[0];
+    }
+
+    private boolean processBinding(Binding binding) {
+        Object state = driver.getInputToStateId().apply(binding, functionEnv);
+        Map<Var, Var> originalToEnum = stateVarMap.get(state);
+        if (originalToEnum == null) {
+            throw new IllegalStateException("No variable mapping obtained for state: " + state);
+        }
+        // XXX We could avoid creating a binding wrapper if we had Adapter.getNode(originalBinding, originalToEnum, var);
+        Binding mappedBinding = BindingRemapped.of(binding, originalToEnum);
+
+        boolean emittedItem;
+        try {
+            emittedItem = driver.accumulate(mappedBinding, functionEnv);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return emittedItem;
     }
 
     @Override
@@ -80,15 +135,16 @@ public class GraphQlFieldExecImpl<K>
             boolean completedObject = false;
             while (rs.hasNext()) {
                 Binding binding = rs.next();
-                Object state = driver.getInputToStateId().apply(binding, functionEnv);
-                Map<Var, Var> originalToEnum = stateVarMap.get(state);
-                if (originalToEnum == null) {
-                    throw new IllegalStateException("No variable mapping obtained for state: " + state);
-                }
-                // XXX We could avoid creating a binding wrapper if we had Adapter.getNode(originalBinding, originalToEnum, var);
-                Binding mappedBinding = BindingRemapped.of(binding, originalToEnum);
-
-                completedObject = driver.accumulate(mappedBinding, functionEnv);
+//                Object state = driver.getInputToStateId().apply(binding, functionEnv);
+//                Map<Var, Var> originalToEnum = stateVarMap.get(state);
+//                if (originalToEnum == null) {
+//                    throw new IllegalStateException("No variable mapping obtained for state: " + state);
+//                }
+//                // XXX We could avoid creating a binding wrapper if we had Adapter.getNode(originalBinding, originalToEnum, var);
+//                Binding mappedBinding = BindingRemapped.of(binding, originalToEnum);
+//
+//                completedObject = driver.accumulate(mappedBinding, functionEnv);
+                completedObject = processBinding(binding);
                 if (completedObject) {
                     break;
                 }

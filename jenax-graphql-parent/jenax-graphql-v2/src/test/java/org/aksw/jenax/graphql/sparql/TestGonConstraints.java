@@ -4,9 +4,7 @@ import org.aksw.jenax.graphql.sparql.v2.gon.meta.GonType;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class TestGonConstraints {
-
     @Test
     public void test() {
         Assert.assertTrue(GonType.ARRAY.isValidChildOf(GonType.ARRAY));

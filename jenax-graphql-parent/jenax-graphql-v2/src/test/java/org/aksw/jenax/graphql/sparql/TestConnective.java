@@ -384,7 +384,7 @@ public class TestConnective {
         System.out.println(harmonized.node());
         }
 
-        ElementMapping eltMap = ElementGeneratorLateral.toLateral(rootField, stateVar);
+        ElementMapping eltMap = ElementGeneratorLateral.toLateral(false, rootField, stateVar);
         Element elt = eltMap.element();
         Map<Node, Map<Var, Var>> stateVarMap = eltMap.stateVarMap();
 

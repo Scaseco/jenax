@@ -28,11 +28,14 @@ public class GraphQlFieldExecBuilderImpl<K>
 {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlFieldExecBuilderImpl.class);
 
+    private GraphQlProcessor<K> processor;
+
     private QueryMapping<K> mapping;
     private Creator<QueryExecBuilder> queryExecBuilderCreator;
 
-    public GraphQlFieldExecBuilderImpl(QueryMapping<K> mapping) {
+    public GraphQlFieldExecBuilderImpl(GraphQlProcessor<K> processor, QueryMapping<K> mapping) {
         super();
+        this.processor = processor;
         this.mapping = Objects.requireNonNull(mapping);
     }
 
@@ -86,7 +89,7 @@ public class GraphQlFieldExecBuilderImpl<K>
 
         QueryExec queryExec = queryExecBuilder.query(query).build();
 
-        GraphQlFieldExec<K> result = new GraphQlFieldExecImpl<>(isSingle, query, queryExec, stateVarMap, driver, mapping);
+        GraphQlFieldExec<K> result = new GraphQlFieldExecImpl<>(processor, isSingle, query, queryExec, stateVarMap, driver, mapping);
         return result;
     }
 

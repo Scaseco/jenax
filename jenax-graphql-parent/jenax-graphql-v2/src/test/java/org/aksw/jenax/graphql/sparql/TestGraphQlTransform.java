@@ -457,7 +457,7 @@ public class TestGraphQlTransform {
 
         Document inputDoc = Parser.parse(inputStr);
         Document actualDoc = GraphQlUtils.applyTransform(inputDoc, transform);
-        System.out.println(AstPrinter.printAst(actualDoc));
+        // System.out.println(AstPrinter.printAst(actualDoc));
 
         Assert.assertTrue(AstComparator.isEqual(actualDoc, expectedDoc));
     }

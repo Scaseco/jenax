@@ -18,6 +18,7 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformAssignGlobalIds;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformDebugToQuery;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformExpandShorthands;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPrettyToQuery;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.atlas.lib.Creator;
@@ -39,6 +40,9 @@ import graphql.language.NodeTraverser;
 public class GraphQlProcessor<K> {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlProcessor.class);
 
+    /** The preprocessed document. This is not the original document. */
+    protected Document preprocessedDocument;
+
     /** The processor for the query operation (across all top-level fields). */
     protected GraphQlFieldProcessor<K> queryProcessor;
 
@@ -46,8 +50,9 @@ public class GraphQlProcessor<K> {
     protected Map<String, Integer> nameToIndex;
     protected List<GraphQlFieldProcessor<K>> fieldProcessors;
 
-    public GraphQlProcessor(GraphQlFieldProcessor<K> queryProcessor, Map<String, Integer> nameToIndex, List<GraphQlFieldProcessor<K>> fieldProcessors) {
+    public GraphQlProcessor(Document preprocessedDocument, GraphQlFieldProcessor<K> queryProcessor, Map<String, Integer> nameToIndex, List<GraphQlFieldProcessor<K>> fieldProcessors) {
         super();
+        this.preprocessedDocument = preprocessedDocument;
         this.queryProcessor = queryProcessor;
         this.nameToIndex = nameToIndex;
         this.fieldProcessors = fieldProcessors;
@@ -56,6 +61,10 @@ public class GraphQlProcessor<K> {
     // @Override
     public Set<String> getDataProviderNames() {
         return nameToIndex.keySet();
+    }
+
+    public Document getPreprocessedDocument() {
+        return preprocessedDocument;
     }
 
     public GraphQlFieldProcessor<K> getOnlyFieldProcessor() {
@@ -83,7 +92,8 @@ public class GraphQlProcessor<K> {
     public static <K> GraphQlProcessor<K> of(Document document, Map<String, Node> assignments, Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory) {
         Document b = GraphQlUtils.applyTransform(document, new TransformExpandShorthands());
         Document c = GraphQlUtils.applyTransform(b, new TransformDebugToQuery());
-        Document preprocessedDoc = GraphQlUtils.applyTransform(c, TransformAssignGlobalIds.of("state_", 0));
+        Document d = GraphQlUtils.applyTransform(c, new TransformPrettyToQuery());
+        Document preprocessedDoc = GraphQlUtils.applyTransform(d, TransformAssignGlobalIds.of("state_", 0));
 
         if (logger.isDebugEnabled()) {
             logger.debug("Preprocessing GraphQl document: " + AstPrinter.printAst(preprocessedDoc));
@@ -114,7 +124,14 @@ public class GraphQlProcessor<K> {
             // GraphQlDataProviderExec<P_Path0, Node> result = GraphQlExecUtils2.exec(elementNode, agg, query -> queryExecBuilder.query(query).build());
         }
 
-        GraphQlProcessor<K> result = new GraphQlProcessor<>(queryProcessor, nameToIndex, fieldProcessors);
+        GraphQlProcessor<K> result = new GraphQlProcessor<>(preprocessedDoc, queryProcessor, nameToIndex, fieldProcessors);
+
+        // Somewhat ugly post processing to set the overall processor on every field processor
+        ((GraphQlFieldProcessorImpl<K>)queryProcessor).setGraphQlProcessor(result);
+        for (GraphQlFieldProcessor<K> fieldProcessor : fieldProcessors) {
+            ((GraphQlFieldProcessorImpl<K>)fieldProcessor).setGraphQlProcessor(result);
+        }
+
         return result;
     }
 
@@ -127,7 +144,8 @@ public class GraphQlProcessor<K> {
 
         // Important: stateIds are jena Nodes (not java objects)!
 
-        ElementMapping eltMap = ElementGeneratorLateral.toLateral(elementNode, stateVar);
+        boolean globalOrderBy = true;
+        ElementMapping eltMap = ElementGeneratorLateral.toLateral(globalOrderBy, elementNode, stateVar);
         Element elt = eltMap.element();
         Map<?, Map<Var, Var>> stateVarMap = eltMap.stateVarMap();
 
@@ -151,6 +169,10 @@ public class GraphQlProcessor<K> {
         query.setQueryResultStar(false);
         query.addProjectVars(projectVars);
         query.setQueryPattern(elt);
+
+        if (globalOrderBy) {
+            eltMap.sortConditions().forEach(query::addOrderBy);
+        }
 
         AggStateGon<Binding, FunctionEnv, K, Node> agg = fieldRewrite.rootAggBuilder().newAggregator();
 

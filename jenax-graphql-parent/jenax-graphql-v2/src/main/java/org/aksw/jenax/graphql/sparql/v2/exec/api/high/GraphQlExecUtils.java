@@ -21,9 +21,41 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+import graphql.language.Document;
+import graphql.language.OperationDefinition;
+import graphql.language.OperationDefinition.Operation;
+
 public class GraphQlExecUtils {
 
+    /**
+     * Returns true iff in the underlying preprocessed GraphQL document there exists
+     * an OperationDefinition of type Query with a {@code @pretty} directive.
+     */
+    public static boolean isFormatPretty(GraphQlExec<?> exec) {
+        boolean result = false;
+        Document document = exec.getDelegate().getProcessor().getPreprocessedDocument();
+        if (document != null) {
+            // Find an OperationDefinition of type Query with the pretty directive present
+            result = document.getDefinitionsOfType(OperationDefinition.class).stream()
+                .filter(od -> Operation.QUERY.equals(od.getOperation()))
+                .filter(od -> od.hasDirective("pretty"))
+                .findAny()
+                .map(od -> true).orElse(false);
+        }
+        return result;
+    }
+
+    /** Write out the execution result as JSON. Will use pretty formatting if the pretty directive is present on the query node. */
     public static void write(OutputStream out, GraphQlExec<String> exec) throws IOException {
+        boolean isFormatPretty = isFormatPretty(exec);
+        if (isFormatPretty) {
+            writePretty(out, exec);
+        } else {
+            writeCompact(out, exec);
+        }
+    }
+
+    public static void writeCompact(OutputStream out, GraphQlExec<String> exec) throws IOException {
         write(out, exec, new GsonBuilder().serializeNulls().create());
     }
 

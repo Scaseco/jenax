@@ -84,15 +84,22 @@ public class TestGraphQlToJsonSimple {
             """
             {
               matches(limit: 2)
-                  @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o }", from: "s", to: "s")
+                  @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s")
                   @prefix(name: "afn", iri: "http://jena.apache.org/ARQ/function#")
               {
-                properties @pattern(of: "?x ?y ?z . { SELECT ?y (COUNT(DISTINCT(?z)) AS ?c) { ?x ?y ?z } GROUP BY ?x ?y}", from: "x", to: ["z", "c"]) @index(by: "afn:localname(?y)", oneIf: "?c <= 1")
+                properties @pattern(of: "SELECT * { ?x ?y ?z . { SELECT ?y (COUNT(DISTINCT(?z)) AS ?c) { ?x ?y ?z } GROUP BY ?x ?y } } ORDER BY ?y", from: "x", to: ["z", "c"]) @index(by: "afn:localname(?y)", oneIf: "?c <= 1")
               }
             }
             """,
             """
-            {"matches":[{"p1":"<http://www.example.org/o1> 1"},{"p1":"<http://www.example.org/o1> 1","p2":"<http://www.example.org/o2> 1"}]}
+            {"matches":[
+              {
+                "p1":"<http://www.example.org/o1> 1",
+                "p2":"<http://www.example.org/o2> 1"
+              }, {
+                "p1":"<http://www.example.org/o1> 1"
+              }
+            ]}
             """);
     }
 

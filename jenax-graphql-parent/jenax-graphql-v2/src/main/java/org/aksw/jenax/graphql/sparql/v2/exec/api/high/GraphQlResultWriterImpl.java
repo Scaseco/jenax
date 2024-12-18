@@ -45,9 +45,10 @@ public class GraphQlResultWriterImpl
             writer.beginArray();
         }
 
-        while (exec.sendNextItemToWriter(writer)) {
-            // Loop until done
-        }
+        exec.sendRemainingItemsToWriter(writer);
+//        while (exec.sendNextItemToWriter(writer)) {
+//            // Loop until done
+//        }
 
         if (!exec.isSingle()) {
             writer.endArray();

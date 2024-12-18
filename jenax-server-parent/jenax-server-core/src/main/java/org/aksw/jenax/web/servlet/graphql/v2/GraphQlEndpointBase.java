@@ -109,7 +109,9 @@ public abstract class GraphQlEndpointBase {
     public static Response createResponse(GraphQlExec<String> ge) {
         String contentTypeStr = WebContent.contentTypeJSON;
         StreamingOutput processor = out -> {
-            GraphQlExecUtils.writePretty(out, ge);
+            // TODO Make configurable:
+            // - via params (e.g. pretty=true or variant=pretty)
+            GraphQlExecUtils.write(out, ge);
         };
         Response result = Response.ok(processor, contentTypeStr).build();
         return result;

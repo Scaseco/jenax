@@ -40,7 +40,7 @@ public class TestGraphQlVarAccess {
                 style {
                   color @bind(of: "'red'")
                   fillColor @bind(of: "CONCAT('#', SUBSTR(MD5(STR(?s)), 1, 6))")
-                  colors @pattern(of: "VALUES ?x { 'red' 'blue' }", from: [], to: "x")
+                  colors @pattern(of: "SELECT * { VALUES ?x { 'red' 'blue' } } ORDER BY DESC(?x)", from: [], to: "x")
                 }
               }
             }

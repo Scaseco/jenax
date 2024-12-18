@@ -27,6 +27,10 @@ public class GraphQlExec<K>
         return delegate;
     }
 
+    public long sendRemainingItemsToWriter(ObjectNotationWriter<K, Node> writer) throws IOException {
+        return delegate.sendRemainingItemsToWriter(writer);
+    }
+
     public boolean sendNextItemToWriter(ObjectNotationWriter<K, Node> writer) throws IOException {
         return delegate.sendNextItemToWriter(writer);
     }

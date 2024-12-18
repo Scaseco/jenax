@@ -10,7 +10,7 @@ import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccStateGon;
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccStateTypeNonObject;
 import org.aksw.jenax.graphql.sparql.v2.gon.meta.GonType;
 
-// An acc state that does nothing but transition to the root state
+/** An acc state that merely transitions to the root state. */
 public class AccStateInit<I, E, K, V>
     extends AccStateBase<I, E, K, V>
     implements AccStateTypeNonObject<I, E, K, V>

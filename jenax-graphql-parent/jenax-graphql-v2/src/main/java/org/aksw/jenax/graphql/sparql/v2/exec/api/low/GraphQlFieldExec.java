@@ -17,6 +17,9 @@ import org.apache.jena.graph.Node;
 public interface GraphQlFieldExec<K>
     extends GraphQlExecCore
 {
+    /** Return the processor from which this instance was created. */
+    GraphQlProcessor<K> getProcessor();
+
     /**
      * Send the next item to the writer. If {@link #isSingle()} is true then the whole response will be streamed.
      *
@@ -25,6 +28,9 @@ public interface GraphQlFieldExec<K>
      * @throws IOException
      */
     boolean sendNextItemToWriter(ObjectNotationWriter<K, Node> writer) throws IOException;
+
+    /** This method is likely to be more efficient because it can use Iterator.forEachRemaining. */
+    long sendRemainingItemsToWriter(ObjectNotationWriter<K, Node> writer) throws IOException;
 
     /**
      * Write out data for the extension block of a graphql response.
