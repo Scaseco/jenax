@@ -48,7 +48,7 @@ public class JenaExtensionsGeoSparqlX {
 
         registry.put(GeoSPARQL_URI.GEOF_URI + "wkb2wkt", F_Wkb2Wkt.class);
         registry.put(GeoSPARQL_URI.GEOF_URI + "parsePolyline", F_ParsePolyline.class);
-        registry.put(GeoSPARQL_URI.GEOF_URI + "asGeoJSON", F_AsGeoJSON.class);
+        // registry.put(GeoSPARQL_URI.GEOF_URI + "asGeoJSON", F_AsGeoJSON.class);
 
         // Ensure GeoSPARQL datatypes are available
         // TODO Our plugin should be loaded after geosparql; but I couldn't find whether the geosparql module
