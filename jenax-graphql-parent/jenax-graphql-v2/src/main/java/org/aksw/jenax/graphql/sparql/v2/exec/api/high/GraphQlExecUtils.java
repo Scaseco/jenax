@@ -14,6 +14,7 @@ import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterExt;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterMapper;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterMapperImpl;
+import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.graph.Node;
 
 import com.google.gson.Gson;
@@ -22,8 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 import graphql.language.Document;
-import graphql.language.OperationDefinition;
-import graphql.language.OperationDefinition.Operation;
 
 public class GraphQlExecUtils {
 
@@ -32,17 +31,8 @@ public class GraphQlExecUtils {
      * an OperationDefinition of type Query with a {@code @pretty} directive.
      */
     public static boolean isFormatPretty(GraphQlExec<?> exec) {
-        boolean result = false;
         Document document = exec.getDelegate().getProcessor().getPreprocessedDocument();
-        if (document != null) {
-            // Find an OperationDefinition of type Query with the pretty directive present
-            result = document.getDefinitionsOfType(OperationDefinition.class).stream()
-                .filter(od -> Operation.QUERY.equals(od.getOperation()))
-                .filter(od -> od.hasDirective("pretty"))
-                .findAny()
-                .map(od -> true).orElse(false);
-        }
-        return result;
+        return GraphQlUtils.hasQueryDirective(document, "pretty");
     }
 
     /** Write out the execution result as JSON. Will use pretty formatting if the pretty directive is present on the query node. */

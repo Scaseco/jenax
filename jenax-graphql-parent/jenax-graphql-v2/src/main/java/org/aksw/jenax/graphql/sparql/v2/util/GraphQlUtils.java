@@ -26,6 +26,8 @@ import graphql.language.Node;
 import graphql.language.NodeVisitorStub;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
+import graphql.language.OperationDefinition;
+import graphql.language.OperationDefinition.Operation;
 import graphql.language.ScalarValue;
 import graphql.language.StringValue;
 import graphql.language.Value;
@@ -41,6 +43,27 @@ public class GraphQlUtils {
 //    public static String safeFieldName(String name) {
 //        return VarUtils.safeIdentifier(name, '_', GraphQlUtils::isValidCharForFieldName);
 //    }
+
+    public static boolean hasQueryDirective(Document document, String directiveName) {
+        List<Directive> matches = getQueryDirectives(document, directiveName);
+        boolean result = !matches.isEmpty();
+        return result;
+    }
+
+    public static List<Directive> getQueryDirectives(Document document, String directiveName) {
+        List<Directive> result;
+        if (document != null) {
+            // Find an OperationDefinition of type Query with the given directive name present
+            result = document.getDefinitionsOfType(OperationDefinition.class).stream()
+                .filter(od -> Operation.QUERY.equals(od.getOperation()))
+                .flatMap(od -> od.getDirectives(directiveName).stream())
+                .collect(Collectors.toList());
+        } else {
+            result = List.of();
+        }
+
+        return result;
+    }
 
     public static Optional<Node<?>> tryGetNode(Node<?> node, String ... path) {
         Node<?> result = node;

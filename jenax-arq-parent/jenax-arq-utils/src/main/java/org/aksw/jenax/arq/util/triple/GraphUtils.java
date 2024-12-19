@@ -25,7 +25,6 @@ import com.google.common.collect.Streams;
 
 public class GraphUtils {
 
-
     public static Stream<Node> streamNodes(Graph graph) {
         return stream(graph)
             .flatMap(TripleUtils::streamNodes);

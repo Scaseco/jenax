@@ -523,7 +523,9 @@ public class ElementGeneratorLateral {
 
             // SortNode childSortNode = new SortNode(thisSortNode, memberIdx, stateIdNode, thisSortConditions, new ArrayList<>());
             //thisSortNode.children().add(childSortNode);
-            thisSortNode.sortConditions().addAll(thisSortConditions);
+            if (globalOrderBy) {
+                thisSortNode.sortConditions().addAll(thisSortConditions);
+            }
         }
 
         Element primary = group;

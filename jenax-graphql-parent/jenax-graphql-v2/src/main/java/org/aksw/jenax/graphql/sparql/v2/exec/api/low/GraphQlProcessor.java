@@ -16,9 +16,10 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.GraphQlFieldRewrite;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.GraphQlToSparqlConverterBase;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformAssignGlobalIds;
-import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformDebugToQuery;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformExpandShorthands;
-import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPrettyToQuery;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullDebug;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullOrdered;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullPretty;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.atlas.lib.Creator;
@@ -91,13 +92,19 @@ public class GraphQlProcessor<K> {
 
     public static <K> GraphQlProcessor<K> of(Document document, Map<String, Node> assignments, Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory) {
         Document b = GraphQlUtils.applyTransform(document, new TransformExpandShorthands());
-        Document c = GraphQlUtils.applyTransform(b, new TransformDebugToQuery());
-        Document d = GraphQlUtils.applyTransform(c, new TransformPrettyToQuery());
-        Document preprocessedDoc = GraphQlUtils.applyTransform(d, TransformAssignGlobalIds.of("state_", 0));
+
+        Document c = b;
+        c = GraphQlUtils.applyTransform(c, new TransformPullDebug());
+        c = GraphQlUtils.applyTransform(c, new TransformPullPretty());
+        c = GraphQlUtils.applyTransform(c, new TransformPullOrdered());
+
+        Document preprocessedDoc = GraphQlUtils.applyTransform(c, TransformAssignGlobalIds.of("state_", 0));
 
         if (logger.isDebugEnabled()) {
             logger.debug("Preprocessing GraphQl document: " + AstPrinter.printAst(preprocessedDoc));
         }
+
+        boolean globalOrderBy = GraphQlUtils.hasQueryDirective(preprocessedDoc, "ordered");
 
         NodeTraverser nodeTraverser = new NodeTraverser(); //rootVars, Node::getChildren);
         GraphQlToSparqlConverterBase<K> graphqlToSparqlConverter = converterFactory.create();
@@ -107,7 +114,7 @@ public class GraphQlProcessor<K> {
         RewriteResult<K> rewriteResult = graphqlToSparqlConverter.getRewriteResult();
 
         // The processor for the whole query operation (not just an individual top level field)
-        GraphQlFieldProcessor<K> queryProcessor = makeProcessor("root", rewriteResult.root());
+        GraphQlFieldProcessor<K> queryProcessor = makeProcessor(globalOrderBy, "root", rewriteResult.root());
 
         // Set up processors for the individual top level fields
         List<GraphQlFieldProcessor<K>> fieldProcessors = new ArrayList<>(rewriteResult.map().size());
@@ -116,7 +123,7 @@ public class GraphQlProcessor<K> {
         for (Entry<String, GraphQlFieldRewrite<K>> entry : rewriteResult.map().entrySet()) {
 
             String name = entry.getKey();
-            GraphQlFieldProcessor<K> fieldProcessor = makeProcessor(name, entry.getValue());
+            GraphQlFieldProcessor<K> fieldProcessor = makeProcessor(globalOrderBy, name, entry.getValue());
 
             fieldProcessors.add(fieldProcessor);
             nameToIndex.put(name, i);
@@ -135,7 +142,7 @@ public class GraphQlProcessor<K> {
         return result;
     }
 
-    private static <K> GraphQlFieldProcessor<K> makeProcessor(String name, GraphQlFieldRewrite<K> fieldRewrite) {
+    private static <K> GraphQlFieldProcessor<K> makeProcessor(boolean globalOrderBy, String name, GraphQlFieldRewrite<K> fieldRewrite) {
         ElementNode elementNode = fieldRewrite.rootElementNode();
         boolean isSingle = fieldRewrite.isSingle();
 
@@ -144,7 +151,6 @@ public class GraphQlProcessor<K> {
 
         // Important: stateIds are jena Nodes (not java objects)!
 
-        boolean globalOrderBy = true;
         ElementMapping eltMap = ElementGeneratorLateral.toLateral(globalOrderBy, elementNode, stateVar);
         Element elt = eltMap.element();
         Map<?, Map<Var, Var>> stateVarMap = eltMap.stateVarMap();
