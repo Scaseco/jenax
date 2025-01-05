@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.util.ExprUtils;
 
@@ -22,6 +23,10 @@ public record BindDirective(String exprStr, String varName, Boolean isTarget)
         return result;
     }
 
+    public Var getVar() {
+        return varName == null ? null : Var.alloc(varName);
+    }
+
     public Expr parseExpr() {
         Expr result = ExprUtils.parse(exprStr);
         return result;
@@ -36,8 +41,8 @@ public record BindDirective(String exprStr, String varName, Boolean isTarget)
 
     public Directive toDirective() {
         return GraphQlUtils.newDirective("bind",
-            GraphQlUtils.newArgumentString("of", exprStr),
-            GraphQlUtils.newArgumentString("as", varName),
-            GraphQlUtils.newArgumentBoolean("target", isTarget));
+            GraphQlUtils.newArgString("of", exprStr),
+            GraphQlUtils.newArgString("as", varName),
+            GraphQlUtils.newArgBoolean("target", isTarget));
     }
 }

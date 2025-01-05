@@ -14,6 +14,7 @@ import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementData;
+import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
@@ -125,6 +126,16 @@ public class ElementTransformSubst2 extends ElementTransformCopyBase {
             b2.add(v2, n2);
         }
         return b2.build();
+    }
+
+    // Newer Jena versions handle this transform in ApplyElementVisitor.
+    @Override
+    public Element transform(ElementNamedGraph el, Node gn, Element elt1) {
+        Node gn2 = transform(gn);
+        Element result = gn == gn2
+            ? super.transform(el, gn, elt1)
+            : new ElementNamedGraph(gn2, elt1);
+        return result;
     }
 
     @Override

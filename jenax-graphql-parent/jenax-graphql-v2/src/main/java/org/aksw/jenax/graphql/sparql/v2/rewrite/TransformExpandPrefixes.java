@@ -1,18 +1,19 @@
 package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapStd;
 
 import graphql.language.Argument;
 import graphql.language.Directive;
+import graphql.language.DirectivesContainer;
 import graphql.language.Field;
 import graphql.language.Node;
 import graphql.language.NodeVisitorStub;
-import graphql.language.Value;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
 import graphql.util.TreeTransformerUtil;
@@ -51,21 +52,12 @@ public class TransformExpandPrefixes
         return TraversalControl.CONTINUE;
     }
 
-    protected boolean process(Directive node, PrefixMap prefixes) {
+    public static boolean process(Directive node, PrefixMap prefixes) {
         boolean result = false;
         String name = node.getName();
         switch (name) {
         case "prefix": {
-            String prefix = GraphQlUtils.getArgAsString(node, "name");
-            String iri = GraphQlUtils.getArgAsString(node, "iri");
-            if (prefix != null && iri != null) { // XXX Validate
-                prefixes.add(prefix, iri);
-            }
-
-            Value<?> map = GraphQlUtils.getArgValue(node, "map");
-            if (map != null) {
-                JenaGraphQlUtils.readPrefixMap(prefixes, map);
-            }
+            JenaGraphQlUtils.collectPrefixes(node, prefixes);
             result = true;
             break;
         }

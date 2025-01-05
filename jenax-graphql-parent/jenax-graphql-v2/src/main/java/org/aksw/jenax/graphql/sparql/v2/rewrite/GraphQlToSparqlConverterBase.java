@@ -33,7 +33,11 @@ import org.aksw.jenax.graphql.sparql.v2.context.GraphDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.IndexDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.JoinDirective;
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
+import org.aksw.jenax.graphql.sparql.v2.model.XGraphQlConstants;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.Bind.BindingMapper;
+import org.aksw.jenax.graphql.sparql.v2.schema.Fragment;
+import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
+import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.Vars;
 import org.apache.jena.graph.NodeFactory;
@@ -50,6 +54,7 @@ import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.vocabulary.RDF;
 
 import graphql.language.Argument;
 import graphql.language.Directive;
@@ -76,9 +81,16 @@ public abstract class GraphQlToSparqlConverterBase<K>
 {
     public static final CardinalityDirective DFT_CARDINALITY = new CardinalityDirective(false, true, false);
 
+    protected Map<String, FragmentDefinition> nameToFragment;
+    protected SchemaNavigator schemaNavigator;
+
     protected RewriteResult<K> rewriteResult;
 
-    protected Map<String, FragmentDefinition> nameToFragment;
+    public GraphQlToSparqlConverterBase(Map<String, FragmentDefinition> nameToFragment, SchemaNavigator schemaNavigator) {
+        super();
+        this.nameToFragment = nameToFragment;
+        this.schemaNavigator = schemaNavigator;
+    }
 
     public RewriteResult<K> getRewriteResult() {
         return rewriteResult;
@@ -183,7 +195,6 @@ public abstract class GraphQlToSparqlConverterBase<K>
     public void processFieldOnEnter(Node<?> node, String nodeName, List<Argument> arguments, DirectivesContainer<?> directives, SelectionSet selectionSet, TraverserContext<Node> context) {
 
         boolean isRoot = XGraphQlUtils.isRootNode(node, context);
-        // boolean isRoot = isRoot(context);
 
         /* Handle the case where the parent is a fragment spread or inline fragment */
 
@@ -221,17 +232,46 @@ public abstract class GraphQlToSparqlConverterBase<K>
 
         List<Var> parentVars = null;
 
-        if (connective == null) {
-            connective = Connective.newBuilder()
-                    .connectVarNames()
-                    .targetVarNames()
-                    .element(new ElementGroup())
-                    .build();
 
-            parentVars = List.of();
+        String typeIri = JenaGraphQlUtils.parseRdfIri(nodeName, directives, XGraphQlConstants.type, "iri", "ns", null);
+        org.apache.jena.graph.Node typeNode = typeIri == null ? null : NodeFactory.createURI(typeIri);
+
+        if (connective == null) {
+            if (typeNode != null) {
+                connective = Connective.newBuilder()
+                        .connectVars(Vars.s)
+                        .targetVars(Vars.s)
+                        .element(ElementUtils.createElementTriple(Vars.s, RDF.type.asNode(), typeNode))
+                        .build();
+
+            } else {
+                connective = Connective.newBuilder()
+                        .connectVarNames()
+                        .targetVarNames()
+                        .element(new ElementGroup())
+                        .build();
+
+                parentVars = List.of();
+            }
 //        	connective = Connective.newBuilder()
 //        			.tar$
             // throw new RuntimeException("No pattern for field " + directives);
+        } else {
+            if (typeNode != null) {
+                List<Var> targetVars = connective.getDefaultTargetVars();
+                Var targetVar = targetVars.iterator().next();
+                if (targetVars.size() != 1) {
+                    throw new RuntimeException("@class can only be used when there is a single target variable. Target variables are: " + targetVars);
+                }
+
+                Element a = connective.getElement();
+                Element b = ElementUtils.createElementTriple(targetVar, RDF.type.asNode(), typeNode);
+                Element merged = ElementUtils.flatGroup(a, b);
+                connective = Connective.of(
+                        connective.getConnectVars(),
+                        connective.getDefaultTargetVars(),
+                        merged);
+            }
         }
 
         List<Var> connectVars = connective.getConnectVars();
@@ -251,6 +291,29 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 connectVars = Var.varList(joinDirective.thisVars());
             }
         }
+
+        /* Process @class - merges another pattern on the single target variable */
+        // May be superseded by a more general approach
+//        Directive classDirective = GraphQlUtils.expectAtMostOneDirective(directives, XGraphQlConstants.type);
+//        if (classDirective != null) {
+//            String typeIri = GraphQlUtils.getArgAsString(classDirective, "iri");
+//            org.apache.jena.graph.Node typeNode = NodeFactory.createURI(typeIri);
+//
+//            List<Var> targetVars = connective.getDefaultTargetVars();
+//            Var targetVar = targetVars.iterator().next();
+//            if (targetVars.size() != 1) {
+//                throw new RuntimeException("@class can only be used when there is a single target variable. Target variables are: " + targetVars);
+//            }
+//
+//            Element a = connective.getElement();
+//            Element b = ElementUtils.createElementTriple(targetVar, RDF.type.asNode(), typeNode);
+//            Element merged = ElementUtils.flatGroup(a, b);
+//            connective = Connective.of(
+//                    connective.getConnectVars(),
+//                    connective.getDefaultTargetVars(),
+//                    merged);
+//        }
+
 
         /* Process @index */
 
@@ -351,28 +414,26 @@ public abstract class GraphQlToSparqlConverterBase<K>
             }
         }
 
-        /* Process @bind */
+        /* Process @to and @from */
 
         boolean isBindValue = false;
+
+        if (directives.hasDirective("to")) {
+            List<Var> parentTargetVars = elementNode.getParentLink().parent().getEffectiveTargetVars();
+            targetVars = parentTargetVars.stream().map(parentTargetVar -> {
+                Var localVar = processBind(node, elementNode, null, new ExprVar(parentTargetVar));
+                return localVar;
+            }).toList();
+            elementNode.setLocalTargetVars(targetVars);
+            isBindValue = true;
+        }
+
+        /* Process @bind */
+
         for (Directive directive : directives.getDirectives("bind")) {
             BindDirective bind = BindDirective.PARSER.parser(directive);
             Expr expr = bind.parseExpr();
-            // Check whether the referenced variables exist
-            Set<Var> vars = expr.getVarsMentioned();
-            for (Var var : vars) {
-                ElementNode varSource = elementNode.findVarInAncestors(var);
-                if (varSource == null) {
-                    throw new RuntimeException("Could not resolve variable " + var + " at " + node);
-                }
-            }
-
-            String bindVarName = bind.varName();
-            if (bindVarName == null) {
-                // TODO Properly allocate name to avoid clash
-                bindVarName = "bindvar_" + (elementNode.getBinds().size() + 1);
-            }
-            Var bindVar = Var.alloc(bindVarName);
-            elementNode.getBinds().add(bindVar, expr);
+            Var bindVar = processBind(node, elementNode, bind.varName(), expr);
 
             // If there is no pattern then use a single bind expression as the target
             if (connective.isEmpty() || Boolean.TRUE.equals(bind.isTarget())) {
@@ -382,7 +443,6 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 isBindValue = true;
             }
         }
-
 
         if (isRoot) {
             RewriteResult<K> rewriteResult = context.getVarFromParents(RewriteResult.class);
@@ -512,6 +572,27 @@ public abstract class GraphQlToSparqlConverterBase<K>
         }
 
         // return TraversalControl.CONTINUE;
+    }
+
+    private Var processBind(Node<?> node, ElementNode elementNode, String bindVarName, Expr expr) {
+        // Expr expr = bind.parseExpr();
+        // Check whether the referenced variables exist
+        Set<Var> vars = expr.getVarsMentioned();
+        for (Var var : vars) {
+            ElementNode varSource = elementNode.findVarInAncestors(var);
+            if (varSource == null) {
+                throw new RuntimeException("Could not resolve variable " + var + " at " + node);
+            }
+        }
+
+        // String bindVarName = bind.varName();
+        if (bindVarName == null) {
+            // TODO Properly allocate name to avoid clash
+            bindVarName = "bindvar_" + (elementNode.getBinds().size() + 1);
+        }
+        Var bindVar = Var.alloc(bindVarName);
+        elementNode.getBinds().add(bindVar, expr);
+        return bindVar;
     }
 
     public TraversalControl leaveField(Field field, TraverserContext<Node> context) {

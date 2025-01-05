@@ -103,12 +103,15 @@ public abstract class QueryExecBaseSelect
             }
 
             activeQueryExec = queryExec;
-            if (isCancelled) {
-                activeQueryExec.abort();
-            }
 
-            if (isClosed) {
-                this.activeQueryExec.close();
+            if (activeQueryExec != null) {
+                if (isCancelled) {
+                    activeQueryExec.abort();
+                }
+
+                if (isClosed) {
+                    this.activeQueryExec.close();
+                }
             }
         }
     }

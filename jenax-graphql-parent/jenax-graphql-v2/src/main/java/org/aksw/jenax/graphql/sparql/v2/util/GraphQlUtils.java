@@ -1,9 +1,14 @@
 package org.aksw.jenax.graphql.sparql.v2.util;
 
+import java.io.PrintStream;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.jena.sparql.expr.NodeValue;
@@ -12,6 +17,7 @@ import graphql.com.google.common.collect.Multimap;
 import graphql.com.google.common.collect.Multimaps;
 import graphql.language.Argument;
 import graphql.language.ArrayValue;
+import graphql.language.AstPrinter;
 import graphql.language.AstTransformer;
 import graphql.language.BooleanValue;
 import graphql.language.Directive;
@@ -20,6 +26,7 @@ import graphql.language.DirectivesContainer;
 import graphql.language.Document;
 import graphql.language.EnumValue;
 import graphql.language.Field;
+import graphql.language.FieldDefinition;
 import graphql.language.FloatValue;
 import graphql.language.IntValue;
 import graphql.language.Node;
@@ -32,8 +39,43 @@ import graphql.language.ScalarValue;
 import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.language.VariableReference;
+import graphql.util.TraverserContext;
+import graphql.util.TreeTransformerUtil;
 
 public class GraphQlUtils {
+
+    /**
+     * Creates a copy of a node with the given list of directives.
+     * Returns the new node.
+     *
+     * replaceDirectives(node, context, (n, newDirectives) -> n.transform(builder -> builder.directives(newDirectives)), remainingDirectives)
+     */
+    public static <T extends Node<T>> T replaceDirectivesOld(T node, TraverserContext<Node> context,
+            BiFunction<T, List<Directive>, T> transform, LinkedList<Directive> remainingDirectives) {
+        List<Directive> finalRemainingDirectives = remainingDirectives;
+        T replacementNode = transform.apply(node, finalRemainingDirectives);
+        TreeTransformerUtil.changeNode(context, replacementNode);
+        return replacementNode;
+    }
+
+    public static <T extends Node<T>> T replaceDirectives(T node, TraverserContext<Node> context,
+            Function<T, Function<List<Directive>, T>> transform, List<Directive> remainingDirectives) {
+        List<Directive> finalRemainingDirectives = remainingDirectives;
+        Function<List<Directive>, T> factory = transform.apply(node);
+        // T replacementNode = transform.apply(node, finalRemainingDirectives);
+        T replacementNode = factory.apply(finalRemainingDirectives);
+        TreeTransformerUtil.changeNode(context, replacementNode);
+        return replacementNode;
+    }
+
+    public static Function<List<Directive>, Field> directivesSetterField(Field node) {
+        return newDirectives -> node.transform(builder -> builder.directives(newDirectives));
+    }
+
+    public static Function<List<Directive>, FieldDefinition> directivesSetterFieldDefinition(FieldDefinition node) {
+        return newDirectives -> node.transform(builder -> builder.directives(newDirectives));
+    }
+
     /** FIXME Update to the graphqls pec*/
 //    public static boolean isValidCharForFieldName(int ch) {
 //        return VarUtils.isValidFirstCharForVarName(ch);
@@ -298,6 +340,11 @@ public class GraphQlUtils {
         return result;
     }
 
+    public static void println(PrintStream printStream, Document doc) {
+        String str = AstPrinter.printAst(doc);
+        printStream.println(str);
+    }
+
     public static Directive expectAtMostOneDirective(DirectivesContainer<?> container, String name) {
         List<Directive> directives = container.getDirectives(name);
         if (directives.size() > 1) {
@@ -343,21 +390,21 @@ public class GraphQlUtils {
         return ArrayValue.newArrayValue().values(strs.stream().map(x -> (Value)StringValue.of(x)).toList()).build();
     }
 
-    public static Argument newArgumentString(String name, String value) {
+    public static Argument newArgString(String name, String value) {
         return value == null ? null : Argument.newArgument()
                 .name(name)
                 .value(StringValue.of(value))
                 .build();
     }
 
-    public static Argument newArgumentBoolean(String name, Boolean value) {
+    public static Argument newArgBoolean(String name, Boolean value) {
         return value == null ? null : Argument.newArgument()
                 .name(name)
                 .value(BooleanValue.of(value))
                 .build();
     }
 
-    public static Argument newArgumentString(String name, List<String> values) {
+    public static Argument newArgString(String name, List<String> values) {
         return values == null ? null : Argument.newArgument()
                 .name(name)
                 .value(toArrayValue(values))
@@ -373,5 +420,9 @@ public class GraphQlUtils {
             }
         }
         return builder.build();
+    }
+
+    public static void removeDirectivesByName(Collection<Directive> directives, String name) {
+        directives.removeIf(d -> d.getName().equals(name));
     }
 }

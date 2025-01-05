@@ -18,6 +18,7 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.RewriteResult;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformAssignGlobalIds;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformExpandShorthands;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullDebug;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullNdJson;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullOrdered;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullPretty;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
@@ -90,12 +91,13 @@ public class GraphQlProcessor<K> {
         return result;
     }
 
-    public static <K> GraphQlProcessor<K> of(Document document, Map<String, Node> assignments, Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory) {
+    public static <K> GraphQlProcessor<K> of(Document document, Map<String, Node> assignments, GraphQlToSparqlConverterBase<K> graphqlToSparqlConverter) {
         Document b = GraphQlUtils.applyTransform(document, new TransformExpandShorthands());
 
         Document c = b;
         c = GraphQlUtils.applyTransform(c, new TransformPullDebug());
         c = GraphQlUtils.applyTransform(c, new TransformPullPretty());
+        c = GraphQlUtils.applyTransform(c, new TransformPullNdJson());
         c = GraphQlUtils.applyTransform(c, new TransformPullOrdered());
 
         Document preprocessedDoc = GraphQlUtils.applyTransform(c, TransformAssignGlobalIds.of("state_", 0));
@@ -107,7 +109,7 @@ public class GraphQlProcessor<K> {
         boolean globalOrderBy = GraphQlUtils.hasQueryDirective(preprocessedDoc, "ordered");
 
         NodeTraverser nodeTraverser = new NodeTraverser(); //rootVars, Node::getChildren);
-        GraphQlToSparqlConverterBase<K> graphqlToSparqlConverter = converterFactory.create();
+        // GraphQlToSparqlConverterBase<K> graphqlToSparqlConverter = converterFactory.create();
 
         // RewriteResult rewriteResult = (RewriteResult)nodeTraverser.depthFirst(graphqlToSparqlConverter, preprocessedDoc);
         nodeTraverser.depthFirst(graphqlToSparqlConverter, preprocessedDoc);

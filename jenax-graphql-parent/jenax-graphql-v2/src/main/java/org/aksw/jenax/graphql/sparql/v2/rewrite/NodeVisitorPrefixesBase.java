@@ -9,10 +9,13 @@ import org.apache.jena.riot.system.PrefixMapFactory;
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;
 import graphql.language.Field;
+import graphql.language.FieldDefinition;
 import graphql.language.FragmentSpread;
 import graphql.language.InlineFragment;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.language.Node;
 import graphql.language.NodeVisitorStub;
+import graphql.language.ObjectTypeDefinition;
 import graphql.language.OperationDefinition;
 import graphql.language.OperationDefinition.Operation;
 import graphql.util.TraversalControl;
@@ -76,6 +79,25 @@ public abstract class NodeVisitorPrefixesBase
     }
 
     @Override
+    public final TraversalControl visitFieldDefinition(FieldDefinition fieldDefinition, TraverserContext<Node> context) {
+        processPrefixes(fieldDefinition, context);
+        return visitFieldDefinitionActual(fieldDefinition, context);
+    }
+
+
+    @Override
+    public TraversalControl visitInterfaceTypeDefinition(InterfaceTypeDefinition node, TraverserContext<Node> context) {
+        processPrefixes(node, context);
+        return visitInterfaceTypeDefinitionActual(node, context);
+    }
+
+    @Override
+    public TraversalControl visitObjectTypeDefinition(ObjectTypeDefinition node, TraverserContext<Node> context) {
+        processPrefixes(node, context);
+        return visitObjectTypeDefinitionActual(node, context);
+    }
+
+    @Override
     public final TraversalControl visitInlineFragment(InlineFragment node, TraverserContext<Node> context) {
         processPrefixes(node, context);
         return visitInlineFragmentActual(node, context);
@@ -90,4 +112,8 @@ public abstract class NodeVisitorPrefixesBase
     public abstract TraversalControl visitFieldActual(Field field, TraverserContext<Node> context);
     public abstract TraversalControl visitInlineFragmentActual(InlineFragment node, TraverserContext<Node> context);
     public abstract TraversalControl visitFragmentSpreadActual(FragmentSpread node, TraverserContext<Node> context);
+
+    public abstract TraversalControl visitFieldDefinitionActual(FieldDefinition node, TraverserContext<Node> context);
+    public abstract TraversalControl visitObjectTypeDefinitionActual(ObjectTypeDefinition node, TraverserContext<Node> context);
+    public abstract TraversalControl visitInterfaceTypeDefinitionActual(InterfaceTypeDefinition node, TraverserContext<Node> context);
 }

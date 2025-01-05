@@ -45,8 +45,7 @@ public class GraphQlFieldExecImpl<K>
      * @param stateVarMap
      * @param driver
      */
-    public GraphQlFieldExecImpl(GraphQlProcessor<K> processor, boolean isSingle, Query query, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver,
-            QueryMapping<K> queryMapping) {
+    public GraphQlFieldExecImpl(GraphQlProcessor<K> processor, boolean isSingle, Query query, QueryExec queryExec, Map<?, Map<Var, Var>> stateVarMap, AccStateDriver<Binding, FunctionEnv, K, Node> driver, QueryMapping<K> queryMapping) {
         super();
         this.processor = processor;
         this.isSingle = isSingle;
@@ -57,6 +56,10 @@ public class GraphQlFieldExecImpl<K>
         this.stateVarMap = Objects.requireNonNull(stateVarMap);
         this.driver = Objects.requireNonNull(driver);
         this.queryMapping = queryMapping;
+    }
+
+    public Query getQuery() {
+        return query;
     }
 
     @Override

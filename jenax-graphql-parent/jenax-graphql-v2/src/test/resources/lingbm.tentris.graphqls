@@ -1,0 +1,142 @@
+type Query 
+{
+	faculty(uri: ID!): Faculty
+	university(uri: ID!): University
+	researchGroup(uri: ID!): ResearchGroup
+	lecturer(uri: ID!): Lecturer
+	department(uri: ID!): Department
+	graduateStudents: [GraduateStudent]
+	publications(name: String!): [Publication]
+}
+
+type University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#University")
+{ 
+	uri: ID! 
+	undergraduateDegreeObtainedByFaculty: [Faculty] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom") @inverse @filter
+	mastergraduateDegreeObtainers: [Faculty] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#masterDegreeFrom") @inverse
+	doctoralDegreeObtainers: [Faculty] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#doctoralDegreeFrom") @inverse
+	undergraduateDegreeObtainedBystudent: [GraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom") @inverse @filter
+	departments: [Department] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#subOrganizationOf") @inverse @filter
+} 
+
+interface Faculty @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Faculty") 
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress") 
+	undergraduateDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom")
+	masterDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#masterDegreeFrom")
+	doctoralDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#doctoralDegreeFrom")
+	worksFor: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor")
+	teacherOfGraduateCourses: [GraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	teacherOfUndergraduateCourses: [UndergraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	publications: [Publication] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#publicationAuthor") @inverse
+} 
+
+type Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Department")
+{ 
+	uri: ID! 
+	subOrganizationOf: University  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#subOrganizationOf") @filter
+	head: Professor @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#headOf") @inverse
+	researchGroups: [ResearchGroup] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#subOrganizationOf") @inverse @filter
+	faculties: [Faculty] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor") @inverse 
+	professors: [Professor] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor") @inverse @filter
+	lecturers: [Lecturer] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor") @inverse @filter
+	graduateStudents: [GraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#memberOf") @inverse @filter
+	undergraduateStudents: [UndergraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#memberOf") @inverse @filter 
+}
+
+type ResearchGroup @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#ResearchGroup")
+{
+	uri: ID! 
+	subOrganizationOf: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#subOrganizationOf") @filter 
+} 
+
+interface Author  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Author")
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress")
+} 
+
+type Professor implements Faculty & Author @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Professor")
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress")
+	researchInterest: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#researchInterest")
+	profType: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#profType")
+	undergraduateDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom")
+	masterDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#masterDegreeFrom")
+	doctoralDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#doctoralDegreeFrom")
+	worksFor: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor")
+	teacherOfGraduateCourses: [GraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	teacherOfUndergraduateCourses: [UndergraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	publications: [Publication] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#publicationAuthor") @inverse
+	supervisedUndergraduateStudents: [UndergraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#advisor") @inverse @filter
+	supervisedGraduateStudents: [GraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#advisor") @inverse @filter
+} 
+
+ 
+type Lecturer implements Faculty & Author @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Lecturer")
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress")
+	position: String
+	undergraduateDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom")
+	masterDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#masterDegreeFrom")
+	doctoralDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#doctoralDegreeFrom")
+	worksFor: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#worksFor")
+	teacherOfGraduateCourses: [GraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	teacherOfUndergraduateCourses: [UndergraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @filter
+	publications: [Publication] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#publicationAuthor") @inverse
+} 
+ 
+type Publication @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#Publication")
+{ 
+	uri: ID! 
+	name: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#name")
+	abstract: String 
+	authors: [Author] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#publicationAuthor")
+}  
+
+type GraduateStudent implements Author @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#GraduateStudent")
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress")
+	age: Int
+	memberOf: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#memberOf")
+	undergraduateDegreeFrom: University @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#undergraduateDegreeFrom")
+	advisor: Professor @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#advisor")
+	takeGraduateCourses: [GraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#takesCourse") @filter
+	assistCourses: [UndergraduateCourse]  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teachingAssistantOf")
+} 
+ 
+type UndergraduateStudent  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#UndergraduateStudent")
+{ 
+	uri: ID! 
+	telephone: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#telephone")
+	emailAddress: String @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#emailAddress")
+	age: Int
+	memberOf: Department @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#memberOf")
+	advisor: Professor @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#advisor")
+	takeCourses: [UndergraduateCourse] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#takesCourse") @filter
+} 
+
+type GraduateCourse  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#GraduateCourse")
+{ 
+	uri: ID! 
+	teachedby: Faculty @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @inverse
+	graduateStudents: [GraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#takesCourse") @inverse @filter
+} 
+
+type UndergraduateCourse  @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#UndergraduateCourse")
+{ 
+	uri: ID! 
+	teachedby: Faculty @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teacherOf") @inverse
+	undergraduateStudents: [UndergraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#takesCourse") @inverse @filter
+	teachingAssistants: [GraduateStudent] @uri(value: "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#teachingAssistantOf") @inverse
+}
+

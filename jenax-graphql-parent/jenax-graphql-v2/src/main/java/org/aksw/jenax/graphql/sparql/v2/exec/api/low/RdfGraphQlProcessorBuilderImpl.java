@@ -1,22 +1,24 @@
 package org.aksw.jenax.graphql.sparql.v2.exec.api.low;
 
-import java.util.Objects;
-
 import org.aksw.jenax.graphql.sparql.v2.rewrite.GraphQlToSparqlConverterBase;
-import org.apache.jena.atlas.lib.Creator;
 
 public class RdfGraphQlProcessorBuilderImpl<K>
     extends RdfGraphQlProcessorBuilderBase<K>
 {
-    protected Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory;
-
-    public RdfGraphQlProcessorBuilderImpl(Creator<? extends GraphQlToSparqlConverterBase<K>> converterFactory) {
-        super();
-        this.converterFactory = Objects.requireNonNull(converterFactory);
+    public RdfGraphQlProcessorBuilderImpl(GraphQlToSparqlConverterBuilder<K> converterBuilder) {
+        super(converterBuilder);
     }
+
+    // protected Creator<? extends GraphQlToSparqlConverterBuilder<K>> converterBuilder;
+
+//    public RdfGraphQlProcessorBuilderImpl(Creator<? extends GraphQlToSparqlConverterBuilder<K>> converterBuilder) {
+//        super();
+//        this.converterBuilder = Objects.requireNonNull(converterBuilder);
+//    }
 
     @Override
     public GraphQlProcessor<K> build() {
-        return GraphQlProcessor.of(document, assignments, converterFactory);
+        GraphQlToSparqlConverterBase<K> converter = converterBuilder.build();
+        return GraphQlProcessor.of(document, assignments, converter);
     }
 }

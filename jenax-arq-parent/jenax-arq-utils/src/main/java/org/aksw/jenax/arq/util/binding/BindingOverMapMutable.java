@@ -3,6 +3,7 @@ package org.aksw.jenax.arq.util.binding;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
 import org.apache.jena.atlas.iterator.Iter;
@@ -21,7 +22,7 @@ public class BindingOverMapMutable extends BindingBase {
     protected final Map<Var, Node> map;
 
     public BindingOverMapMutable(Binding parent) {
-    	this(parent, new HashMap<>());
+        this(parent, new HashMap<>());
     }
 
     public BindingOverMapMutable(Binding parent, Map<Var, Node> map) {
@@ -30,13 +31,13 @@ public class BindingOverMapMutable extends BindingBase {
     }
 
     public static BindingOverMapMutable copyOf(Binding parent) {
-    	return new  BindingOverMapMutable(null, BindingLib.bindingToMap(parent));
+        return new  BindingOverMapMutable(null, BindingLib.bindingToMap(parent));
     }
-    
+
     public void add(Var var, Node node) {
-    	map.put(var, node);
+        map.put(var, node);
     }
-    
+
     @Override
     protected Iterator<Var> vars1() {
         return Iter.noRemove(map.keySet().iterator());
@@ -60,5 +61,10 @@ public class BindingOverMapMutable extends BindingBase {
     @Override
     protected boolean isEmpty1() {
         return map.isEmpty();
+    }
+
+    @Override
+    protected void forEach1(BiConsumer<Var, Node> action) {
+        map.forEach(action);
     }
 }

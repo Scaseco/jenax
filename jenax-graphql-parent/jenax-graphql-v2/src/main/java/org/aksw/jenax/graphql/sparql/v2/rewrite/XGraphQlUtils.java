@@ -1,6 +1,7 @@
 package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
@@ -21,6 +22,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.PrefixMappingAdapter;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
@@ -109,6 +111,21 @@ public class XGraphQlUtils {
         if (result instanceof ElementGroup g && g.size() == 1) {
             result = g.get(0);
         }
+        return result;
+    }
+
+    public static Connective parsePattern(DirectivesContainer<?> directivesContainer, PrefixMap prefixMap) {
+        Directive patternDirective = GraphQlUtils.expectAtMostOneDirective(directivesContainer, "pattern");
+        Connective connective = patternDirective == null ? null :
+            XGraphQlUtils.parsePattern(patternDirective, prefixMap);
+        return connective;
+    }
+
+    public static Directive newDirectivePattern(Connective connective) {
+        Directive result = GraphQlUtils.newDirective("pattern",
+            GraphQlUtils.newArgString("of", Objects.toString(connective.getElement())),
+            GraphQlUtils.newArgString("from", Var.varNames(connective.getConnectVars())),
+            GraphQlUtils.newArgString("to", Var.varNames(connective.getDefaultTargetVars())));
         return result;
     }
 
@@ -252,6 +269,17 @@ public class XGraphQlUtils {
         }
         return result;
     }
+
+    public static ViaDirective parseType(DirectivesContainer<?> directives, PrefixMap prefixMap) {
+        ViaDirective result = null;
+        Directive directive = GraphQlUtils.expectAtMostOneDirective(directives, "type");
+        if (directive != null) {
+            List<String> varNames = GraphQlUtils.getArgAsStrings(directive, "iri");
+            result = new ViaDirective(varNames);
+        }
+        return result;
+    }
+
 
     /** null: Empty string:*/
 //    public static String parseVocab(Field directive) {

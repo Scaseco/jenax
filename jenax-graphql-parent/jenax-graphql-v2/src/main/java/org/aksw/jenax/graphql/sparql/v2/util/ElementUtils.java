@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.graphql.sparql.v2.util.backport.syntaxtransform.ElementTransformer;
 import org.apache.jena.atlas.lib.tuple.Tuple;
@@ -124,6 +125,26 @@ public class ElementUtils {
         return result;
     }
 
+    /** If the argument is an element group then stream its members. Otherwise, return a singleton stream
+     * of the argument. */
+    public static Stream<Element> steamGroupMembersOrSelf(Element elt) {
+        return elt instanceof ElementGroup g
+                ? g.getElements().stream()
+                : Stream.of(elt);
+    }
+
+    public static Element flatGroup(Element ...elts) {
+        return flatGroup(Arrays.asList(elts));
+    }
+
+    public static Element flatGroup(Collection<Element> elts) {
+        ElementGroup group = new ElementGroup();
+        elts.stream()
+            .flatMap(ElementUtils::steamGroupMembersOrSelf)
+            .forEach(group::addElement);
+        return group.size() == 1 ? group.get(0) : group;
+    }
+
     public static ElementGroup copyElements(ElementGroup target, Element source) {
         if(source instanceof ElementGroup) {
             ElementGroup es = (ElementGroup)source;
@@ -200,7 +221,9 @@ public class ElementUtils {
 
 //            Set<Var> allVars = new LinkedHashSet<>();
 //            OpVars.mentionedVars(op, allVars);
-//            OpVars.visibleVars(op, allVars);
+            Set<Var> visibleVars = OpVars.visibleVars(op);
+
+            // TODO We probably need to filter the mentions by whether they are visible!
 
             // If there is just a single variable in subject and object that use that
             Tuple<Set<Var>> mentions = OpVars.mentionedVarsByPosition(op);
@@ -218,6 +241,14 @@ public class ElementUtils {
                 }
                 if (oo.size() == 1) {
                     result.add(oo.iterator().next());
+                }
+            }
+
+            // If we did not derive a var:
+            //   if there is just one var then use that.
+            if (result == null) {
+                if (visibleVars.size() == 1) {
+                    result = List.of(visibleVars.iterator().next());
                 }
             }
         }

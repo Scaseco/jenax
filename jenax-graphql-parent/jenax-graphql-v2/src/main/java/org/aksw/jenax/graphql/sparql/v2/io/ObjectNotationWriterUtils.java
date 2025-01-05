@@ -38,7 +38,7 @@ public class ObjectNotationWriterUtils {
             // VO outValue = valueMapper.apply(inValue);
             writer.value(inValue);
         } else if (provider.isNull(obj)) {
-            writer.value(null);
+            writer.nullValue();
         } else {
             throw new IllegalArgumentException("Provider could not handle argument: " + obj);
         }

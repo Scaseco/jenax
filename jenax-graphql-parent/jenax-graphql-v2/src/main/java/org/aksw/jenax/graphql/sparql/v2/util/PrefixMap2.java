@@ -16,10 +16,23 @@ public class PrefixMap2
     protected PrefixMap global;
     protected PrefixMap local;
 
+    /**
+     * If both arguments are non-null then a PrefixMap2 is returned.
+     * If both arguments are null then null is returned.
+     * Otherwise, the non-null argument is returned as is.
+     */
+    public static PrefixMap of(PrefixMap global, PrefixMap local) {
+        return global == null
+            ? local
+            : local == null
+                ? global
+                : new PrefixMap2(global, local);
+    }
+
     public PrefixMap2(PrefixMap global, PrefixMap local) {
         super();
         this.global = Objects.requireNonNull(global);
-        this.local = Objects.requireNonNull(local);;
+        this.local = Objects.requireNonNull(local);
     }
 
     public PrefixMap getGlobal() {

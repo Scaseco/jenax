@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -24,9 +23,12 @@ import graphql.language.BooleanValue;
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;
 import graphql.language.Field;
+import graphql.language.FieldDefinition;
 import graphql.language.FragmentSpread;
 import graphql.language.InlineFragment;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.language.Node;
+import graphql.language.ObjectTypeDefinition;
 import graphql.language.StringValue;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
@@ -84,6 +86,27 @@ public class TransformExpandShorthands
         return process(field.getName(), field, field, context, (node, newDirectives) -> node.transform(builder -> builder.directives(newDirectives)));
     }
 
+    @Override
+    public TraversalControl visitFieldDefinitionActual(FieldDefinition node, TraverserContext<Node> context) {
+        return process(node.getName(), node, node, context, (n, newDirectives) -> n.transform(builder -> builder.directives(newDirectives)));
+    }
+
+    @Override
+    public TraversalControl visitInterfaceTypeDefinitionActual(InterfaceTypeDefinition node, TraverserContext<Node> context) {
+        return process(node.getName(), node, node, context, (n, newDirectives) -> n.transform(builder -> builder.directives(newDirectives)));
+    }
+
+    @Override
+    public TraversalControl visitObjectTypeDefinitionActual(ObjectTypeDefinition node, TraverserContext<Node> context) {
+        return process(node.getName(), node, node, context, (n, newDirectives) -> n.transform(builder -> builder.directives(newDirectives)));
+    }
+
+//    @Override
+//    public TraversalControl visitTypeDefinitionActual(TypeDefinition node, TraverserContext<Node> context) {
+//    	node.tr
+//    	return process(node.getName(), node, node, context, (n, newDirectives) -> n.transform(builder -> builder.directives(newDirectives)));
+//    }
+
     public <T extends Node<T>> TraversalControl process(String nodeName, T node, DirectivesContainer<?> field, TraverserContext<Node> context, BiFunction<T, List<Directive>, T> transform) {
         // boolean isRootField = isRootField(field, context);
         PrefixMap pm = getEffectivePrefixMap(context);
@@ -98,7 +121,7 @@ public class TransformExpandShorthands
         // List<Directive> sparqlDirectives = field.getDirectives("sparql");
         List<Directive> rdfDirectives = field.getDirectives("rdf");
         boolean hasEmitRdfKey = field.hasDirective("emitRdfKey");
-        boolean hasClass = field.hasDirective("class");
+        // boolean hasClass = field.hasDirective("class");
 
         LinkedList<Directive> remainingDirectives = new LinkedList<>(field.getDirectives());
         boolean changed = false;
@@ -111,21 +134,23 @@ public class TransformExpandShorthands
         while (it.hasNext()) {
             Directive directive = it.next();
             if ("class".equals(directive.getName())) {
-                String tmpClassIri = null;
-                String rawNs = GraphQlUtils.getArgAsString(directive, "ns");
-                if (rawNs != null) {
-                    String resolved = pm.get(rawNs);
-                    if (resolved == null) {
-                        throw new RuntimeException("Namespace " + rawNs + " not declared");
-                    }
-                    tmpClassIri = resolved + nodeName;
-                }
-                String rawIri = GraphQlUtils.getArgAsString(directive, "iri");
-                String finalIri = rawIri != null
-                        ? pm.expand(rawIri)
-                        : tmpClassIri != null
-                            ? tmpClassIri
-                            : fieldIri;
+//                String tmpClassIri = null;
+//                String rawNs = GraphQlUtils.getArgAsString(directive, "ns");
+//                if (rawNs != null) {
+//                    String resolved = pm.get(rawNs);
+//                    if (resolved == null) {
+//                        throw new RuntimeException("Namespace " + rawNs + " not declared");
+//                    }
+//                    tmpClassIri = resolved + nodeName;
+//                }
+//                String rawIri = GraphQlUtils.getArgAsString(directive, "iri");
+                String finalIri = JenaGraphQlUtils.parseRdfIri(nodeName, directive, "iri", "ns", pm);
+
+//                String finalIri = rawIri != null
+//                        ? pm.expand(rawIri)
+//                        : tmpClassIri != null
+//                            ? tmpClassIri
+//                            : fieldIri;
 
                 if (finalIri == null) {
                     throw new RuntimeException("Could not resolve @class annotation to an IRI. Set @vocab or provide arguments to @class.");
@@ -143,21 +168,7 @@ public class TransformExpandShorthands
         if (!rdfDirectives.isEmpty()) {
             // Only last rdf directive takes effect
             Directive rdfDirective = rdfDirectives.get(rdfDirectives.size() - 1);
-            String iriStr = GraphQlUtils.getArgAsString(rdfDirective, "iri");
-            String nsStr = GraphQlUtils.getArgAsString(rdfDirective, "ns");
-
-            if (iriStr != null && nsStr != null) {
-                System.err.println("Warn: iri and ns are mutually exclusive");
-            }
-
-            String finalNs = nsStr == null ? null : Optional.ofNullable(pm.get(nsStr)).orElseGet(() -> pm.expand(nsStr));
-            String finalIri = iriStr == null ? null : Optional.ofNullable(pm.get(iriStr)).orElseGet(() -> pm.expand(iriStr));
-
-            String finalFieldName = nodeName;
-
-            fieldIri = finalIri != null
-                    ? finalIri
-                    : finalNs + finalFieldName;
+            fieldIri = JenaGraphQlUtils.parseRdfIri(nodeName, rdfDirective, "iri", "ns", pm);
 
             boolean removeShortcuts = true;
 
@@ -201,7 +212,7 @@ public class TransformExpandShorthands
                 builder.arguments(pattern.getArguments().stream().map(arg -> {
                     return "of".equals(arg.getName())
                             // ? Argument.newArgument("of", StringValue.of(XGraphQlUtils.tidyElementStr(elt.toString()))).build()
-                            ? GraphQlUtils.newArgumentString("of", elt.toString())
+                            ? GraphQlUtils.newArgString("of", elt.toString())
                             : arg;
                 }).toList());
             });
@@ -284,7 +295,64 @@ public class TransformExpandShorthands
         return TraversalControl.CONTINUE;
     }
 
-    private boolean processFilter(DirectivesContainer<?> directives, PrefixMapping pming, LinkedList<Directive> remainingDirectives) {
+//    // Returns true iff remainingDirectives was changed
+//    public static <T> boolean iriToPattern(String nodeName, T node, DirectivesContainer<?> field, LinkedList<Directive> remainingDirectives, TraverserContext<Node> context, BiFunction<T, List<Directive>, T> transform) {
+//        boolean result = false;
+//
+//        // boolean isRootField = isRootField(field, context);
+//        PrefixMap pm = getEffectivePrefixMap(context);
+//        PrefixMapping pming = new PrefixMappingAdapter(pm);
+//
+//        // If we don't have a pattern yet but there is a vocab then create one
+//        String vocabIri = processVocab(field, context);
+//
+//        // Tentative fieldIri
+//        String fieldIri = vocabIri == null ? null : vocabIri + nodeName;
+//        List<Directive> rdfDirectives = field.getDirectives("rdf");
+//        boolean isForward = !field.hasDirective("reverse");
+//
+//        // boolean hasEmitRdfKey = field.hasDirective("emitRdfKey");
+//        // boolean hasClass = field.hasDirective("class");
+//
+//        // From an iri directive generate emitRdfKey and pattern
+//        // If either exists then nothing is done - if neither exists issue a warning that iri is ignored
+//        if (!rdfDirectives.isEmpty()) {
+//            // Only last rdf directive takes effect
+//            Directive rdfDirective = rdfDirectives.get(rdfDirectives.size() - 1);
+//            fieldIri = GraphQlUtils.parseRdfIri(nodeName, rdfDirective, "iri", "ns", pm);
+//            boolean hasPattern = field.hasDirective("pattern");
+//            Set<String> handledFields = Set.of("rdf", "reverse");
+//
+//            remainingDirectives.removeIf(x -> handledFields.contains(x.getName()));
+//
+//            if (!hasPattern) {
+//                Directive p = newDirectivePattern(fieldIri, isForward);
+//                remainingDirectives.addFirst(p);
+//                result = true;
+//                hasPattern = true;
+//            }
+//
+////            if (!hasEmitRdfKey) {
+////                Directive.Builder pb = Directive.newDirective()
+////                    .name("emitRdfKey")
+////                    .argument(Argument.newArgument(
+////                        "iri",
+////                        StringValue.of(fieldIri))
+////                        .build());
+////                if (!isForward) {
+////                    pb.argument(Argument.newArgument("reverse", BooleanValue.of(true)).build());
+////                }
+////
+////                Directive p = pb.build();
+////                remainingDirectives.addFirst(p);
+////                changed = true;
+////            }
+//        }
+//
+//        return result;
+//    }
+
+    private static boolean processFilter(DirectivesContainer<?> directives, PrefixMapping pming, LinkedList<Directive> remainingDirectives) {
         boolean changed = false;
         Directive filter = GraphQlUtils.expectAtMostOneDirective(directives, "filter");
         if (filter != null) {
@@ -350,7 +418,7 @@ public class TransformExpandShorthands
         return result;
     }
 
-    public Directive newDirectiveSource(String effectiveIri) {
+    public static Directive newDirectiveSource(String effectiveIri) {
         Objects.requireNonNull(effectiveIri);
         Directive p = Directive.newDirective()
                 .name("source")
@@ -363,7 +431,7 @@ public class TransformExpandShorthands
     }
 
 
-    public Directive newDirectivePattern(String effectiveIri, boolean isForward) {
+    public static Directive newDirectivePattern(String effectiveIri, boolean isForward) {
         Objects.requireNonNull(effectiveIri);
         String src = isForward ? "s" : "o";
         String tgt = isForward ? "o" : "s";
@@ -371,7 +439,7 @@ public class TransformExpandShorthands
         return result;
     }
 
-    public Directive newDirectivePattern(String pattern, String src, String tgt) {
+    public static Directive newDirectivePattern(String pattern, String src, String tgt) {
         Directive p = Directive.newDirective()
                 .name("pattern")
                 .argument(Argument.newArgument(

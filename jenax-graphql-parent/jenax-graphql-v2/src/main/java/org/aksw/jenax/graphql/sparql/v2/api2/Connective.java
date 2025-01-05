@@ -87,4 +87,12 @@ public class Connective
                 .element(new ElementGroup())
                 .build();
     }
+
+    public static Connective of(List<Var> sourceVars, List<Var> targetVars, Element elt) {
+        return Connective.newBuilder()
+            .connectVars(sourceVars)
+            .targetVars(targetVars)
+            .element(elt)
+            .build();
+    }
 }
