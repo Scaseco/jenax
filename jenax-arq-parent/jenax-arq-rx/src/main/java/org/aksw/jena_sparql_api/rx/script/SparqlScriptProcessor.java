@@ -16,11 +16,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
-import org.aksw.jenax.arq.util.update.UpdateTransform;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -50,7 +50,6 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
-import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
@@ -320,11 +319,35 @@ public class SparqlScriptProcessor {
 
             cwd = null;
         } else if (filename.startsWith(graphKey)) {
+            boolean isForcedName = false;
             String targetGraphStr = filename.substring(graphKey.length()).trim();
-            targetGraph = targetGraphStr == null || targetGraphStr.isBlank()
-                    ? null
-                    : NodeFactory.createURI(targetGraphStr);
-            logger.info("Pinned target graph to " + targetGraph);
+            // Treat empty as null
+            if (targetGraphStr != null && targetGraphStr.isEmpty()) {
+                targetGraphStr = null;
+            }
+            if (targetGraphStr != null) {
+                isForcedName = targetGraphStr.startsWith("!");
+                if (isForcedName) {
+                    // Note: Currently, even with force we remove leading and trailing white spaces.
+                    targetGraphStr = targetGraphStr.substring(1, targetGraphStr.length()).trim();
+                    if (targetGraphStr.isEmpty()) {
+                        throw new RuntimeException("Cannot force an empty graph name.");
+                    }
+                } else {
+                    // Check for the mistake of having quote / backtick in the graph name
+                    // May happen with a malformed shell command
+                    String tmp = targetGraphStr;
+                    boolean needsForce = Stream.of("'", "\"", "`")
+                            .anyMatch(c -> tmp.startsWith(c)  || tmp.endsWith(c));
+                    if (needsForce) {
+                        throw new RuntimeException("Graph name starts or ends with likely unintended character. Prepend ! to force anway: !" + targetGraphStr);
+                    }
+                }
+                targetGraph = NodeFactory.createURI(targetGraphStr);
+            } else {
+                targetGraph = null;
+            }
+            logger.info("Pinned target graph to " + targetGraph + (isForcedName ? " (forced) " : ""));
         } else if (filename.equals(graphResetKey)) {
             targetGraph = null;
             logger.info("Unpinned target graph");
