@@ -27,6 +27,10 @@ public class SparqlLibSetAgg {
         return SparqlLibCollectionAgg.aggNodesFromExpr(expr, aggSet());
     }
 
+    public static Aggregator<Binding, FunctionEnv, NodeSet> aggNodeSetCollection(Expr expr, boolean distinct) {
+        return SparqlLibCollectionAgg.aggNodesFromCollectionExpr(expr, aggSet());
+    }
+
     /**
      * Creates an aggregator that collects geometries into a geometry collection
      * All geometries must have the same spatial reference system (SRS).

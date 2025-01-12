@@ -6,17 +6,17 @@ import java.util.Set;
 import org.aksw.jenax.arq.util.node.NodeSet;
 import org.aksw.jenax.arq.util.node.NodeSetImpl;
 import org.aksw.jenax.arq.util.node.NodeUtils;
+import org.aksw.jenax.norse.term.collection.NorseTermsSet;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
-import org.apache.jena.vocabulary.RDF;
 
 /** Datatype for 'arrays' of RDF terms */
 public class RDFDatatypeNodeSet
     extends BaseDatatype
 {
-    public static final String IRI = RDF.uri + "set";
+    public static final String IRI = NorseTermsSet.datatype; // RDF.uri + "set";
     public static final RDFDatatypeNodeSet INSTANCE = new RDFDatatypeNodeSet();
 
     public static RDFDatatype get() {

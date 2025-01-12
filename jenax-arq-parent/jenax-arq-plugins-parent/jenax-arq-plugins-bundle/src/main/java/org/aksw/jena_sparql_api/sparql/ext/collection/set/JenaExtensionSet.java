@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.sparql.ext.collection.set;
 import org.aksw.jena_sparql_api.sparql.ext.collection.base.PF_CollectionUnnest;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
+import org.aksw.jenax.norse.term.collection.NorseTermsSet;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.aggregate.AggregateRegistry;
 import org.apache.jena.sparql.function.FunctionRegistry;
@@ -19,6 +20,14 @@ public class JenaExtensionSet {
         AggregateRegistry.register(
                 NS + "collect",
                 SparqlLibSetAgg.wrap1(SparqlLibSetAgg::aggNodeSet));
+
+        AggregateRegistry.register(
+                NorseTermsSet.collect,
+                SparqlLibSetAgg.wrap1(SparqlLibSetAgg::aggNodeSet));
+
+        AggregateRegistry.register(
+                NorseTermsSet.aggUnion,
+                SparqlLibSetAgg.wrap1(SparqlLibSetAgg::aggNodeSetCollection));
     }
 
     public static void loadDefs(FunctionRegistry registry) {
@@ -39,6 +48,8 @@ public class JenaExtensionSet {
         binder.registerAll(SparqlLibSetFn.class);
 
         PropertyFunctionRegistry.get().put(NS + "unnest", PF_CollectionUnnest.class);
+
+        PropertyFunctionRegistry.get().put(NorseTermsSet.unnest, PF_CollectionUnnest.class);
         // PropertyFunctionRegistry.get().put(NS + "explode", PF_ArrayExplode.class);
     }
 
