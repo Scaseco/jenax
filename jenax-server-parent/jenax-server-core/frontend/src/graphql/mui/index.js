@@ -1,7 +1,10 @@
-import { basicSetup, EditorView } from 'codemirror';
 import { EditorState } from '@codemirror/state';
-import { graphql } from 'cm6-graphql';
+import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
+import { graphql, updateSchema } from 'cm6-graphql';
+import { buildSchema } from 'graphql';
+import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
+import { bracketMatching, syntaxHighlighting } from '@codemirror/language';
 
 const input = document.getElementById('input');
 
@@ -64,13 +67,18 @@ const startState = EditorState.create({
   doc: getInitialEditorContent(),
   extensions: [
     basicSetup,
+    bracketMatching(),
+    closeBrackets(),
+    autocompletion(),
+    // lineNumbers(),
     graphql(),
     EditorView.updateListener.of(update => {
       if (update.docChanged) {
         const editorContent = update.state.doc.toString();
         localStorage.setItem(saveKey, editorContent);
       }
-    }),
+    })
+    // history(),
   ],
 });
 
@@ -90,7 +98,6 @@ function setOutputContent(newContent, lang) {
     extensions: [basicSetup, lang, EditorView.editable.of(false)].filter(item => item !== null)
   }));
 }
-
 
 function getEditorContent() {
   const result = editorView.state.doc.toString();
@@ -224,6 +231,19 @@ window.showCurl = showCurl;
 window.createLink = createLink;
 window.scheduleSaveState = scheduleSaveState;
 
+// Fetch the graphql schema from an URL and update the editor view with it.
+async function fetchAndSetSchema(view, url) {
+    const response = await fetch(url);
 
+    if (!response.ok) {
+        throw new Error('Failed to fetch the schema');
+    }
+
+    const schemaStr = await response.text();
+    const schema = buildSchema(schemaStr);
+    updateSchema(view, schema);
+}
+
+fetchAndSetSchema(editorView, "/conf/graphql");
 
 

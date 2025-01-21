@@ -1,0 +1,44 @@
+
+# Custom scalar type to allow String, List of Strings, or null
+scalar StringList
+scalar StringMap
+
+directive @pattern (
+  from: StringList
+  to: StringList
+  via: String
+) on FIELD | FIELD_DEFINITION
+
+directive @from on FIELD | FIELD_DEFINITION
+directive @to on FIELD | FIELD_DEFINITION
+directive @reverse on FIELD | FIELD_DEFINITION
+
+directive @prefix (
+  map: StringMap,
+  name: String,
+  iri: String
+) on FIELD | FIELD_DEFINITION
+
+directive @rdf (
+  iri: String
+  ns: String
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @type (
+  iri: String
+  ns: String
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+# Output directives ----------------------------------------------------------
+
+directive @pretty on FIELD | FIELD_DEFINITION
+directive @debug  on FIELD | FIELD_DEFINITION
+directive @ndJson on FIELD | FIELD_DEFINITION
+
+# Tentris Compatibility ------------------------------------------------------
+
+directive @uri (
+  value: String
+) on FIELD | FIELD_DEFINITION
+
+directive @filter on FIELD | FIELD_DEFINITION

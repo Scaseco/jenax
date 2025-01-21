@@ -16,7 +16,6 @@ import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
-import org.aksw.jenax.dataaccess.sparql.exec.query.RowSetOverQueryExec;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;

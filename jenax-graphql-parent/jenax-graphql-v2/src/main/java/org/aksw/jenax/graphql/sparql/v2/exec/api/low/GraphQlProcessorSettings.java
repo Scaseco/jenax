@@ -19,6 +19,9 @@ public interface GraphQlProcessorSettings<X extends GraphQlProcessorSettings<X>>
     X document(Document document);
     X setVar(String name, Node value);
 
+    // queryExecBuilderFactory following is related to execution rather than rewriting - disabled.
+    // X queryExecBuilderFactory(Creator<QueryExecBuilder> queryExecBuilderFactory);
+
     X schemaNavigator(SchemaNavigator schemaNavigator);
     X nameToFragment(Map<String, FragmentDefinition> nameToFragment);
 

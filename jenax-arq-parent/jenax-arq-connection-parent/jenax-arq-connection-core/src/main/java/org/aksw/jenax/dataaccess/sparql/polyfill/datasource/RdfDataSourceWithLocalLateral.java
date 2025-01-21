@@ -55,7 +55,6 @@ import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
-import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
 import org.apache.jena.sparql.syntax.Element;
@@ -80,12 +79,16 @@ public class RdfDataSourceWithLocalLateral
     public record PolyfillLateralConfig(int bulkSize, int concurrentSlots) {
         /** Parse the settings of format [{bulkSize}[-{concurrentSlotCount}]]. */
         public static PolyfillLateralConfig parse(String val) {
+            return parse(val, "-");
+        }
+
+        public static PolyfillLateralConfig parse(String val, String separator) {
+            Preconditions.checkArgument(!separator.isEmpty(), "Separator must not be empty");
             int bulkSize = 10;
             int concurrentSlots = 0;
-
             String v = val == null ? "" : val.toLowerCase().trim();
             if (!v.isEmpty()) {
-                String[] parts = v.split("-", 2);
+                String[] parts = v.split(separator, 2);
                 if (parts.length > 0) {
                     bulkSize = parseInt(parts[0].trim(), 10);
                     Preconditions.checkArgument(bulkSize > 0, "Bulk size must be greater than 0.");
@@ -96,7 +99,6 @@ public class RdfDataSourceWithLocalLateral
                     }
                 }
             }
-
             return new PolyfillLateralConfig(bulkSize, concurrentSlots);
         }
     }
@@ -302,7 +304,7 @@ public class RdfDataSourceWithLocalLateral
     public static Dataset createProxyDataset(RdfDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
-        registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
+        // registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
         registry.getBulkChain().add(new ChainingServiceExecutorBulkServiceEnhancer());
         ServiceEnhancerInit.registerServiceExecutorSelf(registry);
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {

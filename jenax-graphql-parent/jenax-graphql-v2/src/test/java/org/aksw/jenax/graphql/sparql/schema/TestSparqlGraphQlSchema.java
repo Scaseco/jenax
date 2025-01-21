@@ -6,9 +6,9 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExec;
+import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecFactory;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExecImpl;
-import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderGson;
 import org.aksw.jenax.graphql.sparql.v2.io.GraphQlIoBridge;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformEnrichWithSchema;
@@ -93,22 +93,15 @@ public class TestSparqlGraphQlSchema {
 
         GraphQlUtils.println(System.out, queryDoc);
 
-        try (GraphQlFieldExec<String> qe = RdfGraphQlProcessorFactoryImpl.forJson().newBuilder()
+        try (GraphQlExec<String> qe = GraphQlExecFactory.of(() -> QueryExec.dataset(dataset), navigator)
+                .newBuilder()
                 .document(queryDoc)
-                .schemaNavigator(navigator)
-                // set mode?
-                .build() // or have buildForJson and buildForRdf here?
-                // .getFieldProcessor(1).newExecBuilder()
-                .newExecBuilder()
-                .service(() -> QueryExec.dataset(dataset))
-                // .service(() -> QueryExec.service("http://localhost:8642/sparql"))
-                .build()) {
+                .buildForJson()) {
 
-
-            GraphQlFieldExecImpl impl = (GraphQlFieldExecImpl)qe;
+            GraphQlFieldExecImpl impl = (GraphQlFieldExecImpl)qe.getDelegate();
             System.out.println("Query:" + impl.getQuery());
 
-            Iterator<JsonElement> it = qe.asIterator(GraphQlIoBridge.bridgeToJsonInMemory(GonProviderGson.of()));
+            Iterator<JsonElement> it = impl.asIterator(GraphQlIoBridge.bridgeToJsonInMemory(GonProviderGson.of()));
             while (it.hasNext()) {
                 System.out.println(it.next());
                 // actual = it.next();

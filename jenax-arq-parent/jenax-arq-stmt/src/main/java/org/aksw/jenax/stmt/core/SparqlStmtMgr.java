@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -169,7 +170,10 @@ public class SparqlStmtMgr {
 
         List<Query> result = new ArrayList<>();
         for(SparqlStmt stmt : stmts) {
-            Query query = stmt.getQuery();
+            if (!stmt.isParsed()) {
+                throw new RuntimeException(stmt.getParseException());
+            }
+            Query query = Objects.requireNonNull(stmt.getQuery());
             query.setBaseURI((String)null);
             QueryUtils.optimizePrefixes(query);
             result.add(query);

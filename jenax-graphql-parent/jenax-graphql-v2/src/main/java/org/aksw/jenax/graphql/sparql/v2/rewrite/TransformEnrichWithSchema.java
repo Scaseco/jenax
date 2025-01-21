@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
-import org.aksw.jenax.graphql.sparql.v2.schema.Fragment;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaEdge;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNode;
@@ -97,7 +96,7 @@ public class TransformEnrichWithSchema
             SchemaNode nextSchemaNode = schemaEdge != null ? schemaEdge.getTargetSchemaNode() : null;
             context.setVar(SchemaNode.class, nextSchemaNode);
 
-            Fragment fragment = nextSchemaNode.getFragment();
+            // Fragment fragment = nextSchemaNode.getFragment();
             // System.out.println(fragment);
 
             boolean hasPattern = hasPattern(node);
@@ -143,7 +142,7 @@ public class TransformEnrichWithSchema
     }
 
     public static boolean hasPattern(DirectivesContainer<?> dirs) {
-        boolean result = dirs.hasDirective("rdf") || dirs.hasDirective("pattern") || dirs.hasDirective("iri") || dirs.hasDirective("bind");
+        boolean result = dirs.hasDirective("rdf") || dirs.hasDirective("pattern") || dirs.hasDirective("iri") || dirs.hasDirective("bind") || dirs.hasDirective("from") || dirs.hasDirective("to");
         return result;
     }
 

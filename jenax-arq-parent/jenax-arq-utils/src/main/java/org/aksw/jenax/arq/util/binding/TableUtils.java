@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aksw.jenax.arq.util.var.VarUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.algebra.Table;
@@ -24,11 +23,23 @@ public class TableUtils {
     }
 
     public static Table createTable(List<Var> vars, Iterable<Binding> bindings) {
+        return createTable(vars, bindings.iterator());
+    }
+
+    public static Table createTable(List<Var> vars, Iterator<Binding> bindings) {
         Table result = TableFactory.create(vars);
-        for (Binding b : bindings) {
-            result.addBinding(b);
-        }
+        bindings.forEachRemaining(result::addBinding);
         return result;
+    }
+
+    public static Table createTable(RowSet rs) {
+        List<Var> vars = rs.getResultVars();
+        return createTable(vars, rs);
+    }
+
+    public static Table createTable(ResultSet rs) {
+        RowSet rowSet = RowSet.adapt(rs);
+        return createTable(rowSet);
     }
 
     public static Table createTable(Var var, Iterable<Node> nodesIt) {
@@ -43,27 +54,6 @@ public class TableUtils {
         }
         return result;
     }
-
-    public static Table createTable(RowSet rs) {
-        List<Var> vars = rs.getResultVars();
-        Table result = TableFactory.create(vars);
-        while (rs.hasNext()) {
-            result.addBinding(rs.next());
-        }
-        return result;
-    }
-
-    public static Table createTable(ResultSet rs) {
-        List<Var> vars = VarUtils.toList(rs.getResultVars());
-        Table result = TableFactory.create(vars);
-
-        while(rs.hasNext()) {
-            Binding binding = rs.nextBinding();
-            result.addBinding(binding);
-        }
-        return result;
-    }
-
 
     @Deprecated /** There is NodeTransformLib.transform() for tables */
     public static Table applyNodeTransform(Table table, NodeTransform transform) {
@@ -88,5 +78,4 @@ public class TableUtils {
 
         return result;
     }
-
 }

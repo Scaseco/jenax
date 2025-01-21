@@ -46,5 +46,4 @@ public abstract class RdfGraphQlProcessorBuilderBase<K>
         converterBuilder.nameToFragment(nameToFragment);
         return this;
     }
-
 }

@@ -93,4 +93,12 @@ public class BindingRemapped
     public String toString() {
         return delegate.toString() + ": " + varMap;
     }
+
+    @Override
+    public Binding detach() {
+        Binding d = delegate == null ? null : delegate.detach();
+        return d == delegate
+            ? this
+            : new BindingRemapped(d, varMap);
+    }
 }

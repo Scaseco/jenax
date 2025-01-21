@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
 import org.aksw.jenax.arq.util.op.RewriteList;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
@@ -32,17 +33,25 @@ import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithPag
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransformViaRewrite;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.TxnType;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.QueryExecBuilderAdapter;
+import org.apache.jena.sparql.exec.QueryExecutionBuilderAdapter;
 import org.apache.jena.system.Txn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,9 +73,25 @@ public class RdfDataSources {
         return result;
     }
 
+    public static RdfDataSource of(Graph graph) {
+        Model model = ModelFactory.createModelForGraph(graph);
+        return of(model);
+    }
+
+    public static RdfDataSource of(Model model) {
+        Dataset ds = DatasetFactory.wrap(model);
+        return of(ds);
+    }
+
+    public static RdfDataSource of(DatasetGraph dsg) {
+        Dataset ds = DatasetFactory.wrap(dsg);
+        return of(ds);
+    }
+
     public static RdfDataSource of(Dataset dataset) {
         return () -> RDFConnection.connect(dataset);
     }
+
 
     /**
      * Execute a query and invoke a function on the response.
@@ -313,5 +338,32 @@ public class RdfDataSources {
                     });
             }
         };
+    }
+
+    /** This method backs {@link RdfDataSource#newQuery()}. */
+    public static QueryExecutionBuilder newQueryBuilder(RdfDataSource rdfDataSource) {
+        QueryExecBuilder queryExecBuilder = new QueryExecBuilderCustomBase<>() {
+            @Override
+            public QueryExec build() {
+                // Acquire a fresh connection.
+                RDFConnection conn = rdfDataSource.getConnection();
+                QueryExecBuilder delegateBuilder = QueryExecBuilderAdapter.adapt(conn.newQuery());
+
+                // Apply all settings to the delegate.
+                applySettings(delegateBuilder);
+
+                QueryExec delegateExec = delegateBuilder.build();
+
+                // Wrap the delegate execution such that closing it closes the underlying connection.
+                return new QueryExecWrapperBase<>(delegateExec) {
+                    @Override
+                    public void close() {
+                        super.close();
+                        conn.close();
+                    }
+                };
+            }
+        };
+        return QueryExecutionBuilderAdapter.adapt(queryExecBuilder);
     }
 }

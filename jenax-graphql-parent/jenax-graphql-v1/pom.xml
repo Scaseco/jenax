@@ -20,6 +20,12 @@
 			<artifactId>graphql-java</artifactId>
 		</dependency>
 
+		<!-- Plugins bundle is needed for schema generator; specifically the norse:set extensions -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-plugins-bundle</artifactId>
+		</dependency>
+
 		<!-- TODO Move the NodeQuery API to the facete project -->
 
 		<dependency>
@@ -53,7 +59,7 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
-			<scope>test</scope>	
+			<!-- <scope>test</scope> -->
 		</dependency>
 
 		<dependency>

@@ -1,0 +1,58 @@
+# This query requires the norse extensions to be loaded (part of org.aksw.jenax:jenax-plugins-bundle)
+
+PREFIX norse: <https://w3id.org/aksw/norse#>
+
+# Note: Object types used 'untyped' to indicate that there are resource values without type.
+#       Subjects without type use the empty set.
+#       XXX Add a flag whether any object values per type appear as subject?
+
+SELECT * {
+  SELECT
+      ?sTypes
+      ?p
+      (norse:set.aggUnion(?oTypes) AS ?allOTypes)
+      (norse:set.aggUnion(?oDTypes) AS ?allODTypes)
+      (MAX(?oCard) AS ?maxOCard)
+      (MAX(?oDCard) AS ?maxODCard)
+  {
+    { SELECT DISTINCT ?s { ?s ?p ?o } }
+    LATERAL {
+      {
+        OPTIONAL {
+          { SELECT ?s (norse:set.collect(?st) AS ?sTypesRaw) {
+            ?s a ?st
+          } GROUP BY ?s }
+        }
+        BIND(IF(BOUND(?sTypesRaw), ?sTypesRaw, norse:set.of('untyped')) AS ?sTypes)
+      }
+      LATERAL {
+        { SELECT DISTINCT ?s ?p { ?s ?p ?o } }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?s ?p (norse:set.collect(?ot) AS ?oTypesRaw) (COUNT(DISTINCT ?o) AS ?oCardRaw) {
+              ?s ?p ?o .
+              FILTER(!isLiteral(?o))
+              OPTIONAL { # XXX Could use lateral to collect types for each o
+                ?o a ?otRaw
+              }
+              BIND(IF(BOUND(?otRaw), ?otRaw, 'untyped') AS ?ot)
+            } GROUP BY ?s ?p }
+          }
+          BIND(IF(BOUND(?oTypesRaw), ?oTypesRaw, norse:set.of()) AS ?oTypes)
+          BIND(IF(BOUND(?oCardRaw), ?oCardRaw, 0) AS ?oCard)
+        }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?s ?p (norse:set.collect(datatype(?o)) AS ?oDTypesRaw) (COUNT(?o) AS ?oDCardRaw) {
+              ?s ?p ?o
+              FILTER(isLiteral(?o))
+            } GROUP BY ?s ?p }
+          }
+          BIND(IF(BOUND(?oDTypesRaw), ?oDTypesRaw, norse:set.of()) AS ?oDTypes)
+          BIND(IF(BOUND(?oDCardRaw), ?oDCardRaw, 0) AS ?oDCard)
+        }
+      }
+    }
+  } GROUP BY ?sTypes ?p
+}
+# ORDER BY ?p ?sTypes ?oTypes ?oDTypes

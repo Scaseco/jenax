@@ -67,4 +67,9 @@ public class BindingOverMapMutable extends BindingBase {
     protected void forEach1(BiConsumer<Var, Node> action) {
         map.forEach(action);
     }
+
+    @Override
+    public Binding detachWithNewParent(Binding newParent) {
+        return new BindingOverMapMutable(newParent, map);
+    }
 }

@@ -68,6 +68,12 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
     }
 
     @Override
+    public QueryExecMod timeout(long timeout) {
+        overallTimeout(timeout, TimeUnit.MILLISECONDS);
+        return self();
+    }
+
+    @Override
     public T initialTimeout(long timeout, TimeUnit timeUnit) {
         this.initialTimeoutValue = timeout;
         this.initialTimeoutUnit = timeUnit;

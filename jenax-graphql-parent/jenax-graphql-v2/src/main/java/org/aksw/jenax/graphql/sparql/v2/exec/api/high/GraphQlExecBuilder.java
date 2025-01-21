@@ -2,13 +2,14 @@ package org.aksw.jenax.graphql.sparql.v2.exec.api.high;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlFieldExec;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessor;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessorSettings;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
+import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformEnrichWithSchema;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
+import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
@@ -31,9 +32,15 @@ public class GraphQlExecBuilder
     protected SchemaNavigator schemaNavigator = null;
     protected Map<String, FragmentDefinition> nameToFragment = new LinkedHashMap<>();
 
-    public GraphQlExecBuilder(Creator<QueryExecBuilder> queryExecBuilderFactory) {
-        super();
-        this.queryExecBuilderFactory = Objects.requireNonNull(queryExecBuilderFactory);
+//    public GraphQlExecBuilder(Creator<QueryExecBuilder> queryExecBuilderFactory) {
+//        super();
+//        this.queryExecBuilderFactory = Objects.requireNonNull(queryExecBuilderFactory);
+//    }
+
+    // @Override
+    public GraphQlExecBuilder queryExecBuilderFactory(Creator<QueryExecBuilder> queryExecBuilderFactory) {
+        this.queryExecBuilderFactory = queryExecBuilderFactory;
+        return this;
     }
 
     @Override
@@ -60,10 +67,19 @@ public class GraphQlExecBuilder
         return this;
     }
 
+    protected Document getEffectiveDocument() {
+        Document effectiveQueryDoc = schemaNavigator == null
+                ? document
+                : GraphQlUtils.applyTransform(document, new TransformEnrichWithSchema(schemaNavigator));
+        return effectiveQueryDoc;
+    }
+
     public GraphQlExec<String> buildForJson() {
+        Document effectiveQueryDoc = getEffectiveDocument();
+
         GraphQlProcessor<String> processor = RdfGraphQlProcessorFactoryImpl.forJson()
             .newBuilder()
-            .document(document)
+            .document(effectiveQueryDoc)
             .setVars(assignments)
             .schemaNavigator(schemaNavigator)
             .build();
@@ -72,9 +88,11 @@ public class GraphQlExecBuilder
     }
 
     public GraphQlExec<P_Path0> buildForRon() {
+        Document effectiveQueryDoc = getEffectiveDocument();
+
         GraphQlProcessor<P_Path0> processor = RdfGraphQlProcessorFactoryImpl.forRon()
             .newBuilder()
-            .document(document)
+            .document(effectiveQueryDoc)
             .setVars(assignments)
             .schemaNavigator(schemaNavigator)
             .build();

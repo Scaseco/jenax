@@ -89,13 +89,20 @@ public class Bind {
             List<Node> nodes = vars.stream().map(t::get).toList();
             // NodeList nodeList = new NodeListImpl(nodes);
             // HACK We don't have the list datatype here
-            String str = nodes.stream().map(n -> n == null ? "UNDEF" : NodeFmtLib.strNT(n)).collect(Collectors.joining(" "));
+            String str = nodes.stream().map(n -> n == null ? "UNDEF" : fmtNode(n)).collect(Collectors.joining(" "));
             return NodeFactory.createLiteralString(str);
         }
 
         @Override
         public String toString() {
             return "Binder(" + vars + ")";
+        }
+
+        public static String fmtNode(Node node) {
+            // Format numbers using turtle - otherwise use n-triples
+            return node.isLiteral() && node.getLiteralValue() instanceof Number
+                    ? NodeFmtLib.strTTL(node)
+                    : NodeFmtLib.strNT(node);
         }
     }
 

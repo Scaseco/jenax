@@ -23,7 +23,6 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullOrdered;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformPullPretty;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
-import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
