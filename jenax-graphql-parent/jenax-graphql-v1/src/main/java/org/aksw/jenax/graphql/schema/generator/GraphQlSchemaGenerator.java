@@ -87,7 +87,7 @@ import graphql.language.TypeName;
 
 
 
-public class SchemaGenerator {
+public class GraphQlSchemaGenerator {
 
     protected ShortNameMgr shortNameMgr = new ShortNameMgr();
     // Issue/Limitation: When we split a type, then we may not be able to preserve the property order
@@ -373,7 +373,7 @@ public class SchemaGenerator {
     protected FieldDefinition convertProperty(PropertyInfo propertyInfo) {
         Set<Node> objectTypes = propertyInfo.objectTypes();
         if (objectTypes.size() > 1) {
-            throw new IllegalStateException("Property had more than 1 type; multiple types should have been combined into a single new one.");
+            throw new IllegalStateException("Property had more than 1 type; multiple types should have been combined into a single new one: " + propertyInfo);
         }
 
         Node objectType = objectTypes.iterator().next();
@@ -550,7 +550,7 @@ public class SchemaGenerator {
         return result;
     }
 
-    public SchemaGenerator setDatasetMetadata(DatasetMetadata datasetMetadata) {
+    public GraphQlSchemaGenerator setDatasetMetadata(DatasetMetadata datasetMetadata) {
         this.datasetMetadata = datasetMetadata;
         return this;
     }

@@ -231,7 +231,6 @@ public class SparqlScriptProcessor {
         return sparqlParser;
     }
 
-
     /**
      * Create a script processor that substitutes references to environment variables
      * with the appropriate values.
@@ -240,6 +239,10 @@ public class SparqlScriptProcessor {
      * @return
      */
     public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes) {
+        if (globalPrefixes == null) {
+            globalPrefixes = new PrefixMappingImpl(); // new PrefixMappingAdapter(PrefixMapFactory.create());
+        }
+
         return createWithEnvSubstitution(globalPrefixes, System::getenv);
     }
 
@@ -256,9 +259,6 @@ public class SparqlScriptProcessor {
                 globalPrefixes);
         return result;
     }
-
-
-
 
     public void process(List<String> filenames) {
         int i = 1;
@@ -555,7 +555,6 @@ public class SparqlScriptProcessor {
         }
         return result;
     }
-
 
     public static UpdateRequest tryLoadFileAsUpdateRequestOld(String filename, PrefixMapping globalPrefixes) throws IOException {
         UpdateRequest result = null;
