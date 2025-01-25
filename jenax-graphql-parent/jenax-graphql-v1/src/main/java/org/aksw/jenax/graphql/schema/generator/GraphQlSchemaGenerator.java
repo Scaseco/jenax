@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.graphql.sparql.DatasetMetadata;
-import org.aksw.jenax.model.voidx.api.VoidClassPartition;
-import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -34,6 +32,7 @@ import graphql.language.Definition;
 import graphql.language.Directive;
 import graphql.language.Document;
 import graphql.language.FieldDefinition;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.StringValue;
 import graphql.language.Type;
@@ -103,6 +102,7 @@ public class GraphQlSchemaGenerator {
 
     protected Map<Node, ClassInfo> classMap = new HashMap<>();
 
+    // protected Map<Set<Node>, Node> rawToResolvedType = new HashMap<>();
     protected Map<Set<Node>, Node> unionClassToName = new HashMap<>();
 
     /** Artificial classes referred to by their properties. */
@@ -138,66 +138,27 @@ public class GraphQlSchemaGenerator {
     public Document process(List<TypeInfo> list) {
         init(list);
 
+        // Replace each set of object types with a single union object type.
         for (ClassInfo ci : new ArrayList<>(classMap.values())) {
             for (PropertyInfo pi : new ArrayList<>(ci.propertyMap().values())) {
-                 Node newType = createUnionType(pi.objectTypes());
-                 // TODO Replace the type of pi with the new type
-                 pi.objectTypes().clear();
-                 pi.objectTypes.add(newType);
+                makeUnionTypeProperty(pi);
             }
         }
 
-
-        // From the result set we know:
-        // - the subject type sets (STS)
-        // - the properties for each STS
-        // - the set of target types for each STS
-
-        // In graphql we want to be able to start a query which each available RDF type.
-
-        // So we need to break down the summary on the individual classes.
-        // The possibly advantage of the co-occurrent types is that we may be able to group related things together.
-
-        // For each class st, we iterate each property p. We can check whether the object property types are consisent
-        // for all types co-occurent with st.
-
-
-
-//        String b = "void/sportal/compact/";
-//        List<String> voidAll = List.of("qb2.rq", "qbAllBut2.rq", "qc3.rq", "qc5.rq" ,"qcAllBut35.rq", "qdAll.rq", "qeAll.rq", "qf10.rq", "qf1.rq", "qf2.rq", "qf3.rq", "qf4.rq", "qf5.rq", "qf6.rq", "qf7.rq", "qf8.rq", "qf9.rq", "qx1.rq");
-//        List<Query> voidQueries = voidAll.stream().map(s -> b + s).map(SparqlStmtMgr::loadQuery).toList();
-//
-//        DatasetMetadata meta = DatasetMetadata.fetch(RdfDataSources.of(model),
-//            voidQueries,
-//            DatasetMetadata.defaultShaclQueries);
-//        RDFDataMgr.write(System.out, meta.getVoidDataset().getModel(), RDFFormat.TURTLE_PRETTY);
-//
-//        for (VoidClassPartition cp : meta.getVoidDataset().getClassPartitionMap().values()) {
-//            Node classNode = cp.getVoidClass();
-//            System.out.println(classNode);
-//
-//            for (VoidPropertyPartition ppRaw : cp.getPropertyPartitions()) {
-//                VoidPropertyPartitionX pp = ppRaw.as(VoidPropertyPartitionX.class);
-//
-//                Node propertyNode = pp.getVoidProperty();
-//                if (propertyNode == null || !propertyNode.getURI().endsWith("nextProcess")) {
-//                    continue;
-//                }
-//
-//                System.out.println("  " + pp.getVoidProperty());
-//                Map<Node, VoidClassPartition> cpMap = pp.getClassPartitionMap();
-//
-//                // Node propertyNode = pp.getVoidProperty();
-//
-//                for (VoidClassPartition ppcp : pp.getClassPartitionMap().values()) {
-//                    System.out.println("    " + ppcp.getVoidClass());
-//                }
-//                // propertyPartition.get
-//            }
-//
-//        }
         Document result = convert();
         return result;
+    }
+
+    protected void makeUnionTypeProperty(PropertyInfo pi) {
+        Set<Node> ots = pi.objectTypes();
+        if (ots.size() > 1) {
+            // The types being combined into a union may result in properties with union types
+            // that themselves need to be combined into a single type again
+            Node newType = createUnionType(pi.objectTypes());
+            // TODO Replace the type of pi with the new type
+            pi.objectTypes().clear();
+            pi.objectTypes().add(newType);
+        }
     }
 
     protected void init(List<TypeInfo> list) {
@@ -224,10 +185,7 @@ public class GraphQlSchemaGenerator {
                 propertyDTypes.putAll(typeInfo.property(), typeInfo.objectDatatypes());
             }
 
-//            Set<Node> ps = typeInfos.stream().map(TypeInfo::property).collect(Collectors.toSet());
-//            Set<Node> tts = typeInfos.stream().map(TypeInfo::objectTypes).flatMap(Collection::stream).collect(Collectors.toSet());
-//            Set<Node> ods = typeInfos.stream().map(TypeInfo::objectDatatypes).flatMap(Collection::stream).collect(Collectors.toSet());
-            ClassInfo classInfo = new ClassInfo(sourceType, new HashMap<>(), Set.of());
+            ClassInfo classInfo = new ClassInfo(sourceType, new LinkedHashMap<>(), new LinkedHashSet<>());
             for (Node p : properties) {
                 Set<Node> objectTypes = (Set<Node>)propertyTypes.get(p);
                 Set<Node> objectDTypes = (Set<Node>)propertyDTypes.get(p);
@@ -235,11 +193,11 @@ public class GraphQlSchemaGenerator {
                 System.out.println("    Types : " + objectTypes);
                 System.out.println("    DTypes: " + objectDTypes);
                 if (objectTypes == null) {
-                    objectTypes = Set.of();
+                    objectTypes = new LinkedHashSet<>(); // Set.of();
                 }
 
                 if (objectDTypes == null) {
-                    objectDTypes = Set.of();
+                    objectDTypes = new LinkedHashSet<>(); // Set.of();
                 }
 
                 PropertyInfo pi = new PropertyInfo(p, objectTypes, -1, objectDTypes, -1);
@@ -247,23 +205,9 @@ public class GraphQlSchemaGenerator {
                 // createType(objectTypes);
             }
             registerClass(classInfo);
-
-            // For each class:
-            // Collect all of its properties
-            // For each property, collect all target types
-            // A minimal class defines just one property with one type.
-
-            // So the question is: should we group individual properties into larger classes (bottom-up)
-            // or should be split conflicting classes (top-down)?
-
-
-
-//        sIndex.forEach((k, v) -> {
-//            System.out.println(k + ": " + v);
         }
 
         // Add an empty 'untyped' class if it does not exist yet.
-
         classMap.computeIfAbsent(UNTYPED, cls -> {
             return new ClassInfo(cls, new LinkedHashMap<>(), new LinkedHashSet<>());
         });
@@ -329,30 +273,35 @@ public class GraphQlSchemaGenerator {
     }
 
 
-    protected ObjectTypeDefinition convertType(ClassInfo classInfo) {
+    protected InterfaceTypeDefinition convertType(ClassInfo classInfo) {
         Node nameNode = classInfo.name();
         String name = toName(nameNode);
 
         Directive dir = Directive.newDirective()
-                .name("uri")
-                .argument(Argument.newArgument("value", StringValue.of(toURI(nameNode))).build())
-                .build();
+            .name("uri")
+            .argument(Argument.newArgument("value", StringValue.of(toURI(nameNode))).build())
+            .build();
 
         List<Type> implementz = classInfo.superTypes().stream()
-                .map(t -> TypeName.newTypeName(toName(t)).build())
-                .map(t -> (Type)t)
-                .toList();
+            .map(t -> TypeName.newTypeName(toName(t)).build())
+            .map(t -> (Type)t)
+            .toList();
 
         List<FieldDefinition> fieldDefs = classInfo.propertyMap().values().stream()
-                .map(this::convertProperty)
-                .toList();
+            .map(this::convertProperty)
+            .toList();
 
-        ObjectTypeDefinition result = ObjectTypeDefinition.newObjectTypeDefinition()
-                .name(name)
-                .implementz(implementz)
-                .fieldDefinitions(fieldDefs)
-                .directive(dir)
-                .build();
+        if (fieldDefs.isEmpty()) {
+            fieldDefs = List.of(FieldDefinition.newFieldDefinition().name("_" + name + "_dummy").type(new TypeName("Scalar")).build());
+        }
+
+        InterfaceTypeDefinition result = InterfaceTypeDefinition.newInterfaceTypeDefinition()
+            .name(name)
+            .implementz(implementz)
+            // .fieldDefinitions(fieldDefs)
+            .definitions(fieldDefs)
+            .directive(dir)
+            .build();
 
         return result;
     }
@@ -376,24 +325,34 @@ public class GraphQlSchemaGenerator {
             throw new IllegalStateException("Property had more than 1 type; multiple types should have been combined into a single new one: " + propertyInfo);
         }
 
-        Node objectType = objectTypes.iterator().next();
+        Node objectType = objectTypes.isEmpty() ? null : objectTypes.iterator().next();
+
+        FieldDefinition result;
+        String name = toName(propertyInfo.name());
 
         Directive dir = Directive.newDirective()
                 .name("uri")
-                .argument(Argument.newArgument("value", StringValue.of(toURI(objectType))).build())
+                // StringValue.of(toURI(objectType))
+                .argument(Argument.newArgument("value", StringValue.of(toURI(propertyInfo.name()))).build())
                 .build();
 
-        String pTypeName = toName(objectType);
-        TypeName typeName = TypeName.newTypeName(pTypeName).build();
-
+        if (objectType != null) {
+            String pTypeName = toName(objectType);
+            TypeName typeName = TypeName.newTypeName(pTypeName).build();
+            result = FieldDefinition.newFieldDefinition()
+                .name(name)
+                .type(typeName)
+                .directive(dir)
+                .build();
+        } else {
+            TypeName typeName = TypeName.newTypeName("Scalar").build();
+            result = FieldDefinition.newFieldDefinition()
+                .name(name)
+                .type(typeName)
+                .directive(dir)
+                .build();
+        }
         // TODO Cardinality
-
-        String name = toName(propertyInfo.name());
-        FieldDefinition result = FieldDefinition.newFieldDefinition()
-            .name(name)
-            .type(typeName)
-            .directive(dir)
-            .build();
 
         return result;
     }
@@ -411,58 +370,105 @@ public class GraphQlSchemaGenerator {
         Node result = unionClassToName.get(types);
 
         if (result == null) {
-            // Derive a union type over the given types:
+            if (types.size() == 1) {
+                result = types.iterator().next();
+            } else {
+                // Allocate a type name for the input types
+                result = getOrCreateType(types);
+                ClassInfo resultCi = classMap.get(result);
 
-            // Create the property where the types are sets
-            Map<Node, PropertyInfo> propertyMap = createPropertyMap(types);
+                // Create the combined property map across the clasess -
+                // the property types are sets
+                Map<Node, PropertyInfo> propertyMap = createPropertyMap(types);
 
-            // Find all properties that differ from the original definition
-            Set<Node> conflictProperties = new HashSet<>();
+                // Create union types for the property types
+                // Replace each set of object types with a single union object type.
+                // for (PropertyInfo pi : new ArrayList<>(conflictPropertyMap.values())) {
+                for (PropertyInfo pi : new ArrayList<>(propertyMap.values())) {
+                    makeUnionTypeProperty(pi);
+//                    Set<Node> ots = pi.objectTypes();
+//                    if (ots.size() > 1) {
+//                        System.out.println("Trying to create union type for: " + ots);
+//                        if ("[\"untyped\", http://www.w3.org/2002/07/owl#Class]".equals(ots.toString())) {
+//                            System.out.println("DEBUG POINT");
+//                        }
+//
+//                        if ("[http://example.org/class1, \"untyped\"]".equals(ots.toString())) {
+//                            System.out.println("DEBUG POINT 5");
+//                        }
+//
+//                        Node newType = createUnionType(ots);
+//                        // TODO Replace the type of pi with the new type
+//                        pi.objectTypes().clear();
+//                        pi.objectTypes().add(newType);
+//                    }
+                }
 
-            for (Entry<Node, PropertyInfo> e : propertyMap.entrySet()) {
-                Node p = e.getKey();
-                Set<Node> pos = e.getValue().objectTypes();
-                for (Node typeName : types) {
-                    ClassInfo ci = classMap.get(typeName);
-                    PropertyInfo pi = ci.propertyMap().get(p);
-                    if (pi != null) {
-                        Set<Node> objectTypes = pi.objectTypes();
-                        if (!objectTypes.equals(pos)) {
-                            conflictProperties.add(p);
+
+                // Find all properties that differ from the original definition
+                Set<Node> conflictProperties = new HashSet<>();
+
+                for (Entry<Node, PropertyInfo> e : propertyMap.entrySet()) {
+                    Node p = e.getKey();
+                    Set<Node> allSeenObjectTypes = e.getValue().objectTypes();
+                    for (Node typeName : types) {
+                        ClassInfo ci = classMap.get(typeName);
+                        PropertyInfo pi = ci.propertyMap().get(p);
+                        if (pi != null) {
+                            Set<Node> objectTypes = pi.objectTypes();
+                            if (!objectTypes.equals(allSeenObjectTypes)) { // FIXME also the datatypes have to be equal
+                                conflictProperties.add(p);
+                            }
                         }
                     }
                 }
+
+
+                // Sever conflicting properties from the original types
+                Set<Node> safeTypes = types.stream()
+                    .map(type -> severProperty(type, conflictProperties))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+                // Create a new type from the conflicting properties
+                Map<Node, PropertyInfo> conflictPropertyMap = propertyMap.entrySet().stream()
+                    .filter(e -> conflictProperties.contains(e.getKey()))
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+                // Create a new type from the union of all safe types
+                // result = getOrCreateType(safeTypes);
+
+                // Also map the original types to the resolved type
+                unionClassToName.put(safeTypes, result);
+
+                // unionClassToName.put(types, result);
+
+                // Create a new type that contains all conflicting properties
+                if (!conflictPropertyMap.isEmpty()) {
+                    // getOrCreateStructuralType indexes by properties! must not change the object types!
+                    Node conflictResolvedType = getOrCreateStructuralType(conflictPropertyMap);
+                    safeTypes.add(conflictResolvedType);
+                }
+
+                // TODO Create union types for properties with set types
+
+                resultCi.superTypes().addAll(safeTypes);
+
+
+                // Get or create a type with the conflicting properties mapped to union types
+    //            for (Node type : types) {
+    //            	severProperty(result, conflictingProperties);
+    //            }
+                System.out.println("Union: " + types);
+                System.out.println("  PropertyMap: " + propertyMap);
             }
-
-            Set<Node> safeTypes = types.stream()
-                .map(type -> severProperty(type, conflictProperties))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            Map<Node, PropertyInfo> conflictPropertyMap = propertyMap.entrySet().stream()
-                .filter(e -> conflictProperties.contains(e.getKey()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-            if (!conflictPropertyMap.isEmpty()) {
-                Node conflictResolvedType = getOrCreateStructuralType(conflictPropertyMap);
-                safeTypes.add(conflictResolvedType);
-            }
-            result = getOrCreateType(safeTypes);
-
-            // Get or create a type with the conflicting properties mapped to union types
-//            for (Node type : types) {
-//            	severProperty(result, conflictingProperties);
-//            }
-            System.out.println("Union: " + types);
-            System.out.println("  PropertyMap: " + propertyMap);
         }
-
         return result;
     }
 
     protected Node getOrCreateType(Set<Node> superTypes) {
         return unionClassToName.computeIfAbsent(superTypes, set -> {
             Node r = allocateClassName(null, null);
-            ClassInfo ci = new ClassInfo(r, new LinkedHashMap<>(), superTypes);
+            ClassInfo ci = new ClassInfo(r, new LinkedHashMap<>(), new LinkedHashSet<>());
             classMap.put(r, ci);
             return r;
         });
@@ -473,7 +479,7 @@ public class GraphQlSchemaGenerator {
         // XXX Perhaps reuse registerClass method? (blocks use of propertiesToClass.computeIfAbsent).
         return propertiesToStructuralClass.computeIfAbsent(propertySet, pMap -> {
             Node r = allocateClassName(null, null);
-            ClassInfo ci = new ClassInfo(r, propertyMap, Set.of());
+            ClassInfo ci = new ClassInfo(r, propertyMap, new LinkedHashSet<>());
             classMap.put(r, ci);
             return r;
         });
@@ -483,15 +489,20 @@ public class GraphQlSchemaGenerator {
      *  A then becomes b union p. Returns the new class without the property.
      *
      *  This is a transitive operation that traverses all super classes and severs the properties from them.
+     *
+     *  Returns the severed class name.
      */
     protected Node severProperty(Node cls, Set<Node> exclusions) {
-        // TODO Recurse through the types implements
-
         Node result;
         if (exclusions.isEmpty()) {
             result = cls;
         } else {
             ClassInfo ci = classMap.get(cls);
+
+            // createUnionTypes for each property
+            for (PropertyInfo pi : ci.propertyMap.values()) {
+                makeUnionTypeProperty(pi);
+            }
 
             Map<Node, PropertyInfo> oldProperties = new LinkedHashMap<>();
             Map<Node, PropertyInfo> newProperties = new LinkedHashMap<>();
@@ -503,12 +514,43 @@ public class GraphQlSchemaGenerator {
                 }
             });
 
-            // The name of the class without conflicting properties
-            Node conflictFreeClassName = allocateClassName(cls, exclusions);
+            // if nothing was severed return the original class name
+            if (newProperties.isEmpty()) {
+                result = cls;
+            } else {
 
-            // The name of the class containing only the conflicting part
-            Node severedClassName = allocateClassName(conflictFreeClassName, exclusions);
-            result = severedClassName;
+                // 'Move' all conflicting properties to a new super type of cls.
+                ci.propertyMap().clear();
+                ci.propertyMap().putAll(oldProperties);
+
+                // The name of the class without conflicting properties
+                Node conflictFreeClassName = allocateClassName(cls, exclusions);
+
+                if (newProperties.values().stream().anyMatch(x -> x.objectTypes().size() > 1)) {
+                    System.out.println("DEBUG POINT 3");
+                }
+
+                ClassInfo conflictFreeCi = new ClassInfo(conflictFreeClassName, newProperties, new LinkedHashSet<>());
+                classMap.put(conflictFreeClassName, conflictFreeCi);
+
+                List<Node> newSuperTypes = ci.superTypes().stream()
+                    .map(superType -> severProperty(superType, exclusions))
+                    .toList();
+
+                if (newSuperTypes.contains(ci.name())) {
+                    System.out.println("DEBUG POINT 4");
+                }
+
+                ci.superTypes().clear();
+                ci.superTypes().addAll(newSuperTypes);
+
+                // Add the type containing the severed properties as a super type
+                // Note: This will change the order of the properties - i.e. conflicting properties
+                // will be grouped to the end
+                ci.superTypes().add(conflictFreeClassName);
+
+                result = conflictFreeClassName;
+            }
         }
         return result;
     }
@@ -516,85 +558,181 @@ public class GraphQlSchemaGenerator {
     int classCounter = 0;
 
     protected Node allocateClassName(Node baseName, Set<Node> exclusions) {
-        return NodeFactory.createURI("http://example.org/" + (classCounter++));
+
+        if (classCounter == 116) {
+            System.err.println("DEBUG POINT");
+        }
+        if (classCounter == 10) {
+            System.err.println("DEBUG POINT");
+        }
+        return NodeFactory.createURI("http://example.org/class" + (classCounter++));
     }
 
     public static final Node UNTYPED = NodeFactory.createLiteralString("untyped");
 
-    /** Compute the set of properties and their types for the given classes. */
+
+    /** Compute the set of properties and the union of all mentioned types for the given classes. */
     protected Map<Node, PropertyInfo> createPropertyMap(Set<Node> types) {
         Map<Node, PropertyInfo> result = new HashMap<>();
-        types.forEach(type -> {
-            ClassInfo ci = classMap.get(type);
-            if (ci == null) {
-                throw new IllegalStateException("No class info found for: " + type);
-            }
-
-            Multimap<Node, Node> propertyTypes = HashMultimap.create();
-            Multimap<Node, Node> propertyDTypes = HashMultimap.create();
-            Set<Node> properties = new HashSet<>();
-            // properties.addAll(ci.properties().keySet());
-            ci.propertyMap().forEach((property, typeInfo) -> {
-                properties.add(property);
-                propertyTypes.putAll(property, typeInfo.objectTypes());
-                propertyDTypes.putAll(property, typeInfo.objectDatatypes());
-            });
-
-            for (Node p : properties) {
-                Set<Node> objectTypes = (Set<Node>)propertyTypes.get(p);
-                Set<Node> objectDTypes = (Set<Node>)propertyDTypes.get(p);
-                PropertyInfo pi = new PropertyInfo(p, objectTypes, -1, objectDTypes, -1);
-                result.put(p, pi);
-            }
-        });
+        collectPropertyMap(types, result);
         return result;
+    }
+
+    protected void collectPropertyMap(Set<Node> types, Map<Node, PropertyInfo> result) {
+        for (Node type : types) {
+            collectPropertyMap(type, result);
+        }
+    }
+
+    protected void collectPropertyMap(Node type, Map<Node, PropertyInfo> result) {
+        ClassInfo ci = classMap.get(type);
+        if (ci == null) {
+            throw new IllegalStateException("No class info found for: " + type);
+        }
+
+        Multimap<Node, Node> propertyTypes = HashMultimap.create();
+        Multimap<Node, Node> propertyDTypes = HashMultimap.create();
+        Set<Node> properties = new HashSet<>();
+        // properties.addAll(ci.properties().keySet());
+        ci.propertyMap().forEach((property, typeInfo) -> {
+            properties.add(property);
+            propertyTypes.putAll(property, typeInfo.objectTypes());
+            propertyDTypes.putAll(property, typeInfo.objectDatatypes());
+        });
+
+        for (Node p : properties) {
+            Set<Node> objectTypes = (Set<Node>)propertyTypes.get(p);
+            Set<Node> objectDTypes = (Set<Node>)propertyDTypes.get(p);
+            PropertyInfo pi = new PropertyInfo(p, objectTypes, -1, objectDTypes, -1);
+
+            PropertyInfo before = result.get(p);
+            if (before != null) {
+                before.objectTypes().addAll(objectTypes);
+                before.objectDatatypes().addAll(objectDTypes);
+                pi = before;
+//                if (!before.equals(pi)) {
+//                    throw new IllegalStateException("Inconistent property definition: " + before + " -> " + pi);
+//                }
+            }
+
+            result.put(p, pi);
+        }
+
+        System.out.println("Collecting property map for super types of " + type + ": " + ci.superTypes());
+        collectPropertyMap(ci.superTypes(), result);
     }
 
     public GraphQlSchemaGenerator setDatasetMetadata(DatasetMetadata datasetMetadata) {
         this.datasetMetadata = datasetMetadata;
         return this;
     }
-
-    public void run() {
-        VoidDataset v = datasetMetadata.getVoidDataset();
-        List<FieldDefinition> fieldDefinitions = new ArrayList<>();
-
-        // For each class {
-        //   add an entry to the "Query" object type definition
-        //
-        //   create a union type of all interfaces
-        // }
-
-        ObjectTypeDefinition.newObjectTypeDefinition()
-            // .fieldDefinitions(fieldDefinitions)
-            .build();
-
-
-    }
-
-    protected void createUnionClass(List<VoidClassPartition> classes) {
-        // Create the union of all involved properties
-
-        // Find out all properties with conflicting types:
-        //  The properties which have more than one most specific type.
-
-        //
-
-        // We need a lookup whether for set of properties there already exists a generated "structural" class.
-
-        // structural classes are auto generated and are names for sets of properties.
-
-        // we need to be able to find the structural class that covers as many properties as possible of the structural class being generated.
-
-        // and then we need to be able to split structural classes with a common core and then two subclasses - one of the original
-        // conflicting properties and one for the other conflicting ones.
-
-        // ResolvedType implements CommonNonConflictingProperties, ResolvedConflictingProperties
-
-
-    }
-
-    public void resolveConflicts() {
-
-    }
 }
+
+
+//public void run() {
+//    VoidDataset v = datasetMetadata.getVoidDataset();
+//    List<FieldDefinition> fieldDefinitions = new ArrayList<>();
+//
+//    // For each class {
+//    //   add an entry to the "Query" object type definition
+//    //
+//    //   create a union type of all interfaces
+//    // }
+//
+//    ObjectTypeDefinition.newObjectTypeDefinition()
+//        // .fieldDefinitions(fieldDefinitions)
+//        .build();
+//}
+
+
+//protected void createUnionClass(List<VoidClassPartition> classes) {
+//// Create the union of all involved properties
+//
+//// Find out all properties with conflicting types:
+////  The properties which have more than one most specific type.
+//
+////
+//
+//// We need a lookup whether for set of properties there already exists a generated "structural" class.
+//
+//// structural classes are auto generated and are names for sets of properties.
+//
+//// we need to be able to find the structural class that covers as many properties as possible of the structural class being generated.
+//
+//// and then we need to be able to split structural classes with a common core and then two subclasses - one of the original
+//// conflicting properties and one for the other conflicting ones.
+//
+//// ResolvedType implements CommonNonConflictingProperties, ResolvedConflictingProperties
+//
+//
+//}
+//
+//public void resolveConflicts() {
+//
+//}
+
+// From the result set we know:
+// - the subject type sets (STS)
+// - the properties for each STS
+// - the set of target types for each STS
+
+// In graphql we want to be able to start a query which each available RDF type.
+
+// So we need to break down the summary on the individual classes.
+// The possibly advantage of the co-occurrent types is that we may be able to group related things together.
+
+// For each class st, we iterate each property p. We can check whether the object property types are consisent
+// for all types co-occurent with st.
+
+
+
+//String b = "void/sportal/compact/";
+//List<String> voidAll = List.of("qb2.rq", "qbAllBut2.rq", "qc3.rq", "qc5.rq" ,"qcAllBut35.rq", "qdAll.rq", "qeAll.rq", "qf10.rq", "qf1.rq", "qf2.rq", "qf3.rq", "qf4.rq", "qf5.rq", "qf6.rq", "qf7.rq", "qf8.rq", "qf9.rq", "qx1.rq");
+//List<Query> voidQueries = voidAll.stream().map(s -> b + s).map(SparqlStmtMgr::loadQuery).toList();
+//
+//DatasetMetadata meta = DatasetMetadata.fetch(RdfDataSources.of(model),
+//    voidQueries,
+//    DatasetMetadata.defaultShaclQueries);
+//RDFDataMgr.write(System.out, meta.getVoidDataset().getModel(), RDFFormat.TURTLE_PRETTY);
+//
+//for (VoidClassPartition cp : meta.getVoidDataset().getClassPartitionMap().values()) {
+//    Node classNode = cp.getVoidClass();
+//    System.out.println(classNode);
+//
+//    for (VoidPropertyPartition ppRaw : cp.getPropertyPartitions()) {
+//        VoidPropertyPartitionX pp = ppRaw.as(VoidPropertyPartitionX.class);
+//
+//        Node propertyNode = pp.getVoidProperty();
+//        if (propertyNode == null || !propertyNode.getURI().endsWith("nextProcess")) {
+//            continue;
+//        }
+//
+//        System.out.println("  " + pp.getVoidProperty());
+//        Map<Node, VoidClassPartition> cpMap = pp.getClassPartitionMap();
+//
+//        // Node propertyNode = pp.getVoidProperty();
+//
+//        for (VoidClassPartition ppcp : pp.getClassPartitionMap().values()) {
+//            System.out.println("    " + ppcp.getVoidClass());
+//        }
+//        // propertyPartition.get
+//    }
+//
+//}
+
+
+// For each class:
+// Collect all of its properties
+// For each property, collect all target types
+// A minimal class defines just one property with one type.
+
+// So the question is: should we group individual properties into larger classes (bottom-up)
+// or should be split conflicting classes (top-down)?
+//Set<Node> ps = typeInfos.stream().map(TypeInfo::property).collect(Collectors.toSet());
+//Set<Node> tts = typeInfos.stream().map(TypeInfo::objectTypes).flatMap(Collection::stream).collect(Collectors.toSet());
+//Set<Node> ods = typeInfos.stream().map(TypeInfo::objectDatatypes).flatMap(Collection::stream).collect(Collectors.toSet());
+
+
+
+//sIndex.forEach((k, v) -> {
+//System.out.println(k + ": " + v);

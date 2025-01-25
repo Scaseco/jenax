@@ -3,6 +3,8 @@
 scalar StringList
 scalar StringMap
 
+scalar Scalar
+
 directive @pattern (
   from: StringList
   to: StringList
@@ -17,7 +19,7 @@ directive @prefix (
   map: StringMap,
   name: String,
   iri: String
-) on FIELD | FIELD_DEFINITION
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
 
 directive @rdf (
   iri: String
@@ -39,6 +41,6 @@ directive @ndJson on FIELD | FIELD_DEFINITION
 
 directive @uri (
   value: String
-) on FIELD | FIELD_DEFINITION
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
 
 directive @filter on FIELD | FIELD_DEFINITION
