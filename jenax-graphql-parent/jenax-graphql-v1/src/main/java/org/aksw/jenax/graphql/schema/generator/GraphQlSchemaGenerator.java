@@ -353,7 +353,7 @@ public class GraphQlSchemaGenerator {
 
         Builder resultBuilder = ObjectTypeDefinition.newObjectTypeDefinition()
             .name(name)
-            // .implementz(implementz)
+            .implementz(implementz)
             .fieldDefinitions(fieldDefs);
             // .definitions(fieldDefs)
             //.directive(dir)
@@ -668,6 +668,7 @@ public class GraphQlSchemaGenerator {
 
                         ClassInfo conflictFreeCi = classMap.get(conflictFreeClassName);
                         if (conflictFreeCi == null) {
+                            if (true) { throw new RuntimeException("should not happen"); }
                             conflictFreeCi = new ClassInfo(conflictFreeClassName, conflictProperties, new LinkedHashSet<>());
                             classMap.put(conflictFreeClassName, conflictFreeCi);
                         } else {
@@ -678,24 +679,31 @@ public class GraphQlSchemaGenerator {
                             // result = getEmptyType();
                             result = conflictFreeClassName;
                         } else {
-                            if (conflictProperties.isEmpty()) {
-                                conflictFreeCi.superTypes().addAll(newSuperTypes);
-                                result = conflictFreeClassName;
-//                                result = createUnionType(newSuperTypes);
-//                                newSuperTypes.clear();
-//                                newSuperTypes.add(result);
-                            } else {
+                            if (!Objects.equals(conflictFreeClassName, EMPTY)) {
+                                newSuperTypes.add(conflictFreeClassName);
+                            }
+                            result = createUnionType(newSuperTypes);
 
-                            // Create a new type that only contains the new super types
-                            // result = getOrCreateUnionType(newSuperTypes);
-    //	                    if (!newProperties.isEmpty()) {
-                                Node tmp = allocateClassName();
-                                ClassInfo newCi = new ClassInfo(tmp, new LinkedHashMap<>(), new LinkedHashSet<>());
-                                classMap.put(tmp, newCi);
-                                newCi.superTypes().addAll(new LinkedHashSet<>(newSuperTypes));
-                                // newCi.superTypes().add(result);
-                                newCi.propertyMap().putAll(conflictProperties);
-                                result = tmp;
+                            if (false) {
+                                if (conflictProperties.isEmpty()) {
+                                    conflictFreeCi.superTypes().addAll(newSuperTypes);
+                                    result = conflictFreeClassName;
+    //                                result = createUnionType(newSuperTypes);
+    //                                newSuperTypes.clear();
+    //                                newSuperTypes.add(result);
+                                } else {
+
+                                // Create a new type that only contains the new super types
+                                // result = getOrCreateUnionType(newSuperTypes);
+        //	                    if (!newProperties.isEmpty()) {
+                                    Node tmp = allocateClassName();
+                                    ClassInfo newCi = new ClassInfo(tmp, new LinkedHashMap<>(), new LinkedHashSet<>());
+                                    classMap.put(tmp, newCi);
+                                    newCi.superTypes().addAll(new LinkedHashSet<>(newSuperTypes));
+                                    // newCi.superTypes().add(result);
+                                    newCi.propertyMap().putAll(conflictProperties);
+                                    result = tmp;
+                                }
                             }
                         }
 
@@ -779,17 +787,34 @@ public class GraphQlSchemaGenerator {
         if (classCounter == 37) {
             System.err.println("DEBUG POINT");
         }
+        if (classCounter == 103) {
+            System.err.println("DEBUG POINT");
+        }
         return NodeFactory.createURI("http://example.org/class" + (classCounter++));
     }
 
+    /** Allocate a name based on the remaining properties. */
     protected Node allocateExclusionClassName(Node baseName, Set<Node> exclusionProperties) {
+        // Node result = getOrCreateStructuralType(finalMap);
+        ExclusionType et = new ExclusionType(baseName, new LinkedHashSet<>(exclusionProperties));
+        // Node result = exclusionTypeMap.computeIfAbsent(et, x -> allocateClassName());
+        Node result = exclusionTypeMap.computeIfAbsent(et, x -> {
+            Map<Node, PropertyInfo> pMap = createPropertyMap(baseName);
+            Map<Node, PropertyInfo> finalMap = pMap.entrySet().stream()
+                .filter(e -> !exclusionProperties.contains(e.getKey()))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            Node r = getOrCreateStructuralType(finalMap);
+            return r;
+        });
+        return result;
+    }
+
+    /** Allocate a name based on the base class name and the set of excluded properties. */
+    protected Node allocateExclusionClassNameOld(Node baseName, Set<Node> exclusionProperties) {
         Map<Node, PropertyInfo> pMap = createPropertyMap(baseName);
         Map<Node, PropertyInfo> finalMap = pMap.entrySet().stream()
             .filter(e -> !exclusionProperties.contains(e.getKey()))
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-        // Node result = getOrCreateStructuralType(finalMap);
-
 
         ExclusionType et = new ExclusionType(baseName, new LinkedHashSet<>(exclusionProperties));
         Node result = exclusionTypeMap.computeIfAbsent(et, x -> allocateClassName());
