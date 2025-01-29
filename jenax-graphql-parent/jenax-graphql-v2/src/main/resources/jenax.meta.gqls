@@ -15,11 +15,23 @@ directive @from on FIELD | FIELD_DEFINITION
 directive @to on FIELD | FIELD_DEFINITION
 directive @reverse on FIELD | FIELD_DEFINITION
 
+directive @skipIfNull on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
 directive @prefix (
   map: StringMap,
   name: String,
   iri: String
-) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+
+directive @many (
+  self: Boolean = true
+  cascade: Boolean = true
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+
+directive @one (
+  self: Boolean = true
+  cascade: Boolean = true
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
 
 directive @rdf (
   iri: String
@@ -33,9 +45,9 @@ directive @type (
 
 # Output directives ----------------------------------------------------------
 
-directive @pretty on FIELD | FIELD_DEFINITION
-directive @debug  on FIELD | FIELD_DEFINITION
-directive @ndJson on FIELD | FIELD_DEFINITION
+directive @pretty on FIELD | FIELD_DEFINITION | QUERY
+directive @debug  on FIELD | FIELD_DEFINITION | QUERY
+directive @ndJson on FIELD | FIELD_DEFINITION | QUERY
 
 # Tentris Compatibility ------------------------------------------------------
 
