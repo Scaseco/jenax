@@ -229,31 +229,42 @@ public class RDFDataMgrEx {
 
         List<String> detectedEncodings = new ArrayList<>();
         CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
-        InputStream nextIn = is;
+        setDefaultMark(is);
+        InputStream probeIn = null;
         for (;;) {
-            setDefaultMark(is);
             String encoding;
             try {
-                encoding = CompressorStreamFactory.detect(is);
+                // Only buffer the outermost stream; requires decoding from the base input stream
+                InputStream shieldedIs = new BufferedInputStream(CloseShieldInputStream.wrap(is));
+                probeIn = decode(shieldedIs, detectedEncodings, csf);
+                probeIn = forceBuffered(probeIn);
+
+                encoding = CompressorStreamFactory.detect(probeIn);
             } catch (CompressorException e) {
                 break;
             } finally {
+                if (probeIn != null) {
+                    probeIn.close();
+                }
+                // Reset the mark on the initial stream
                 is.reset();
             }
             detectedEncodings.add(encoding);
             if (outEncodings != null) {
                 outEncodings.add(encoding);
             }
+        }
 
+        if (!detectedEncodings.isEmpty()) {
             try {
-                // Only buffer the outermost stream; requires decoding from the base input stream
-                nextIn = new BufferedInputStream(decode(is, detectedEncodings, csf));
+                probeIn = decode(is, detectedEncodings, csf);
             } catch (CompressorException e) {
                 // Should not fail here because we applied detect() before
                 throw new RuntimeException(e);
             }
         }
-        return nextIn;
+
+        return probeIn;
     }
 
     /**
@@ -296,7 +307,10 @@ public class RDFDataMgrEx {
         RdfEntityInfo result;
         try (InputStream is = in) {
             List<String> encodings = new ArrayList<>();
+
+            // The input stream returned by probeEncodings may not be buffered
             InputStream nextIn = probeEncodings(is, encodings);
+            nextIn = forceBuffered(nextIn);
             try (TypedInputStream tis = RDFDataMgrEx.probeLang(nextIn, candidates)) {
                 String contentType = tis.getContentType();
                 String charset = tis.getCharset();

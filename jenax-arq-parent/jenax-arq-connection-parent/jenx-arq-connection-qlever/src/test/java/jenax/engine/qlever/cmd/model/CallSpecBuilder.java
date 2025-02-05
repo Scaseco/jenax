@@ -2,7 +2,7 @@ package jenax.engine.qlever.cmd.model;
 
 import java.util.List;
 
-import org.aksw.jsheller.algebra.physical.CmdOp;
+import org.aksw.jsheller.algebra.physical.op.CmdOp;
 
 public class CallSpecBuilder {
     protected String outputUrl;

@@ -33,7 +33,8 @@ public class TestQleverLoader {
             .setIndexName("test")
             //.addPath("/home/raven/Projects/Eclipse/jena-sparql-api-parent/jena-sparql-api-concepts/src/main/resources/dataset-fp7.ttl")
             .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
-            .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+            // .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
             .build();
 
         System.out.println(fileSet);
