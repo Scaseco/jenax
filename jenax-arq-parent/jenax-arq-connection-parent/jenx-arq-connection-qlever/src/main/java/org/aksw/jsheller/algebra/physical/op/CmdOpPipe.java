@@ -12,4 +12,9 @@ public class CmdOpPipe
         T result = visitor.visit(this);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "(pipe " + getSubOp1() + " " + getSubOp2() + ")";
+    }
 }

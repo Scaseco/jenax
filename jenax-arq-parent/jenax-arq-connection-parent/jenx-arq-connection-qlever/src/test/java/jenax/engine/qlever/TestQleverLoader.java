@@ -1,11 +1,18 @@
 package jenax.engine.qlever;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
+import org.aksw.jenax.engine.qlever.QleverLoader;
+import org.aksw.jenax.engine.qlever.QleverLoader.QleverDbFileSet;
+import org.aksw.jenax.engine.qlever.SystemUtils;
+import org.aksw.jsheller.exec.SysRuntime;
+import org.aksw.jsheller.exec.SysRuntimeImpl;
+import org.aksw.jsheller.exec.SysRuntimeWrapperBase;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import jenax.engine.qlever.QleverLoader.QleverDbFileSet;
 
 
 public class TestQleverLoader {
@@ -16,6 +23,7 @@ public class TestQleverLoader {
     }
 
     @Test
+    @Ignore
     public void testSys() throws Exception {
         String str = SystemUtils.which("lbzip2");
         System.out.println(str);
@@ -24,19 +32,60 @@ public class TestQleverLoader {
     }
 
     @Test
-    public void test() throws Exception {
+    // @Ignore
+    public void testSystemBzip2() throws Exception {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
 
         QleverDbFileSet fileSet = new QleverLoader()
             .setOutputFolder(outputPath)
             .setIndexName("test")
+            .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-instance_types_transitive_es.ttl.bz2")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-infobox_properties_es.ttl.bz2")
+
+            // .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
             //.addPath("/home/raven/Projects/Eclipse/jena-sparql-api-parent/jena-sparql-api-concepts/src/main/resources/dataset-fp7.ttl")
-            .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
-            // .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
-            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
+//            .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+//            // .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+//            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
             .build();
 
         System.out.println(fileSet);
     }
+
+    @Test
+    @Ignore
+    public void testJavaBzip2() throws Exception {
+        Path outputPath = Path.of("/tmp/foobar");
+        Files.createDirectories(outputPath);
+
+        SysRuntime core = SysRuntimeImpl.forCurrentOs();
+        // Set up a system runtime that does not provide bzip2
+        // XXX A builder with an .excludeCommand() method would be a lot nicer.
+        SysRuntime runtime = new SysRuntimeWrapperBase<>(core) {
+            @Override
+            public String which(String cmdName) throws IOException, InterruptedException {
+                boolean isExcluded = Set.of("lbzip2", "bzip2", "pbzip2").contains(cmdName);
+                String result = isExcluded ? null : super.which(cmdName);
+                return result;
+            }
+        };
+
+        QleverDbFileSet fileSet = new QleverLoader()
+            .setSysRuntime(runtime)
+            .setOutputFolder(outputPath)
+            .setIndexName("test")
+            .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-instance_types_transitive_es.ttl.bz2")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-infobox_properties_es.ttl.bz2")
+            //.addPath("/home/raven/Projects/Eclipse/jena-sparql-api-parent/jena-sparql-api-concepts/src/main/resources/dataset-fp7.ttl")
+//            .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+//            // .addPath("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2")
+//            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
+            .build();
+
+        System.out.println(fileSet);
+    }
+
 }

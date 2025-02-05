@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.jsheller.algebra.logical.op.CodecOp;
 import org.aksw.jsheller.algebra.logical.op.CodecOpCodecName;
 import org.aksw.jsheller.algebra.logical.op.CodecOpCommand;
@@ -21,8 +22,6 @@ import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-
-import jenax.engine.qlever.SystemUtils;
 
 public class CodecOpVisitorStream
     implements CodecOpVisitor<InputStream>

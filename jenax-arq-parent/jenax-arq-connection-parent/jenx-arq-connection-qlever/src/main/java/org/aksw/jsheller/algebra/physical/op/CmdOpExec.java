@@ -3,6 +3,7 @@ package org.aksw.jsheller.algebra.physical.op;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CmdOpExec
     extends CmdOpN
@@ -39,5 +40,11 @@ public class CmdOpExec
     public <T> T accept(CmdOpVisitor<T> visitor) {
         T result = visitor.visit(this);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        String argsStr = getSubOps().stream().map(Object::toString).collect(Collectors.joining(" "));
+        return "(exec " + "(" + getName() + ")" + (argsStr.isEmpty() ? "" : " ") + argsStr + ")";
     }
 }

@@ -14,15 +14,29 @@ public class CmdStrOpsBash
 
     @Override
     public String quoteArg(String cmd) {
-        String result = cmd.contains(" ")
-            ? "'" + cmd.replaceAll("'", "\\'") + "'"
-            : cmd;
+        String result = cmd;
+
+//        result = result
+//            .replaceAll("\\{", "\\\\{")
+//            .replaceAll("\\|", "\\\\|")
+//            .replaceAll("\\}", "\\\\}");
+
+        boolean containsSingleQuote = result.contains("'");
+        if (containsSingleQuote) {
+            // Escape single quotes
+            result = "'" + result.replaceAll("\\'", "'\"'\"'") + "'"; // ' -> '"'"'
+        } else {
+            // Escape any white spaces
+            result = result.replaceAll(" ", "\\\\ ");
+        }
+
         return result;
     }
 
     @Override
     public String group(List<String> strs) {
-        String result = "{ " + strs.stream().collect(Collectors.joining(" ; ")) + " }";
+        // String result = "{ " + strs.stream().collect(Collectors.joining(" ; ")) + " }";
+        String result = "{ " + strs.stream().map(x -> x + " ; ").collect(Collectors.joining()) + "}";
         return result;
     }
 

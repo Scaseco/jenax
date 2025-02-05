@@ -1,7 +1,5 @@
 package org.aksw.jsheller.algebra.physical.transform;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +27,7 @@ public class CmdOpVisitorToString
     @Override
     public String visit(CmdOpExec op) {
         List<CmdOp> subOps = op.getSubOps();
-        List<String> argStrs = transformAll(this, subOps);
+        List<String> argStrs = CmdOpTransformLib.transformAll(this, subOps);
         String result = strOps.call(op.getName(), argStrs);
         return result;
     }
@@ -44,7 +42,7 @@ public class CmdOpVisitorToString
 
     @Override
     public String visit(CmdOpGroup op) {
-        List<String> strs = transformAll(this, op.getSubOps());
+        List<String> strs = CmdOpTransformLib.transformAll(this, op.getSubOps());
         String result = strOps.group(strs);
         return result;
     }
@@ -59,21 +57,6 @@ public class CmdOpVisitorToString
     @Override
     public String visit(CmdOpString op) {
         return op.getValue();
-    }
-
-    public static <T> List<T> transformAll(CmdOpVisitor<T> visitor, List<? extends CmdOp> ops) {
-        List<T> result = new ArrayList<>(ops.size());
-        transformAll(result, visitor, ops);
-        return result;
-    }
-
-    public static <T> void transformAll(Collection<T> accumulator, CmdOpVisitor<T> visitor, List<? extends CmdOp> ops) {
-        Objects.requireNonNull(accumulator);
-        Objects.requireNonNull(visitor);
-        for (CmdOp op : ops) {
-            T contrib = op.accept(visitor);
-            accumulator.add(contrib);
-        }
     }
 
     @Override

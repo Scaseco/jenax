@@ -8,4 +8,5 @@ public interface CmdStrOps {
     String group(List<String> strs);
     String pipe(String before, String after);
     String call(String cmdName, List<String> args);
+    // exprEval $(...) -> Eval expression and substitute argument with result
 }

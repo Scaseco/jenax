@@ -1,11 +1,13 @@
-package jenax.engine.qlever;
+package org.aksw.jenax.engine.qlever;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.input.ProxyInputStream;
@@ -23,31 +25,68 @@ public class SystemUtils {
         return exec(new ProcessBuilder(cmd));
     }
 
+    public static Process run(Consumer<String> logger, String ...cmd) throws IOException, InterruptedException {
+        return run(new ProcessBuilder(cmd), logger);
+    }
+
+    public static Process run(ProcessBuilder processBuilder, Consumer<String> logger) throws IOException, InterruptedException {
+        Process process = processBuilder
+            .redirectErrorStream(true)
+            .start();
+
+        InputStream in = process.getInputStream();
+        Thread outputReaderThread = new StreamReaderThread(process, in);
+        outputReaderThread.start();
+
+        return process;
+    }
+
+    protected static class StreamReaderThread extends Thread {
+        // private static final Logger logger = LoggerFactory.getLogger(StreamReaderThread.class);
+
+        protected Process process;
+        protected InputStream in;
+        protected Consumer<String> lineConsumer;
+        protected AtomicBoolean isTerminating;
+
+        public StreamReaderThread(Process process, InputStream in) {
+            this(process, in, new AtomicBoolean(), logger::info);
+        }
+
+        public StreamReaderThread(Process process, InputStream in, AtomicBoolean isTerminating, Consumer<String> lineHandler) {
+            super();
+            this.process = Objects.requireNonNull(process);
+            this.in = Objects.requireNonNull(in);
+            this.isTerminating = Objects.requireNonNull(isTerminating);
+            this.lineConsumer = Objects.requireNonNull(lineHandler);
+
+        }
+
+        @Override
+        public void run() {
+            try (BufferedReader read = new BufferedReader(new InputStreamReader(in))) {
+                read.lines().takeWhile(x -> !isInterrupted()).forEach(line -> lineConsumer.accept(line));
+            } catch (Exception e) {
+                handleException(e);
+            }
+        }
+
+        protected void handleException(Exception e) {
+            if (process.isAlive() && !isTerminating.get()) {
+                throw new RuntimeException(e);
+            } else {
+                // Ignore errors during termination
+            }
+        }
+    }
+
     public static InputStream exec(ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
 
         AtomicBoolean isTerminating = new AtomicBoolean(false);
         int terminationWaitTimeInSeconds = 5;
 
-        Thread errorReaderThread = new Thread() {
-            @Override
-            public void run() {
-                try (BufferedReader read = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                    read.lines().takeWhile(x -> !isInterrupted()).forEach(line -> logger.info(line));
-                } catch (Exception e) {
-                    handleException(e);
-                }
-            }
-
-            protected void handleException(Exception e) {
-                if (process.isAlive() && !isTerminating.get()) {
-                    throw new RuntimeException(e);
-                } else {
-                    // Ignore errors during termination
-                }
-            }
-        };
-
+        Thread errorReaderThread = new StreamReaderThread(process, process.getErrorStream(), isTerminating, logger::info);
         errorReaderThread.start();
 
         InputStream core = process.getInputStream();
@@ -58,6 +97,7 @@ public class SystemUtils {
                 if (!process.isAlive()) {
                     exitCode = process.exitValue();
                     if (exitCode != 0) {
+                        // TODO Check for non-zero exit value should also be made before read!
                         throw new RuntimeException("Process exited with non-zero code: " + exitCode);
                     }
                 } else {

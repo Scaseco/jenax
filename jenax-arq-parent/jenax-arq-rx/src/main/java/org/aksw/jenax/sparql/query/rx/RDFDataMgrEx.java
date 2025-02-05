@@ -255,13 +255,11 @@ public class RDFDataMgrEx {
             }
         }
 
-        if (!detectedEncodings.isEmpty()) {
-            try {
-                probeIn = decode(is, detectedEncodings, csf);
-            } catch (CompressorException e) {
-                // Should not fail here because we applied detect() before
-                throw new RuntimeException(e);
-            }
+        try {
+            probeIn = decode(is, detectedEncodings, csf);
+        } catch (CompressorException e) {
+            // Should not fail here because we applied detect() before
+            throw new RuntimeException(e);
         }
 
         return probeIn;
@@ -382,7 +380,7 @@ public class RDFDataMgrEx {
         Multimap<Long, Lang> successCountToLang = ArrayListMultimap.create();
         for(Lang cand : candidates) {
             @SuppressWarnings("resource")
-            CloseShieldInputStream wbin = new CloseShieldInputStream(in);
+            CloseShieldInputStream wbin = CloseShieldInputStream.wrap(in);
 
             AsyncParserBuilder builder = AsyncParser.of(wbin, cand, null)
                     .mutateSources(parser -> parser.errorHandler(ErrorHandlerFactory.errorHandlerSimple()))

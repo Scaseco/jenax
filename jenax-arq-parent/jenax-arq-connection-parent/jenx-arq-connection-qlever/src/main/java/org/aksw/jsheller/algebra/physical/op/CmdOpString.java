@@ -45,4 +45,9 @@ public class CmdOpString
         CmdOpString other = (CmdOpString) obj;
         return Objects.equals(value, other.value);
     }
+
+    @Override
+    public String toString() {
+        return "(str " + value + ")";
+    }
 }

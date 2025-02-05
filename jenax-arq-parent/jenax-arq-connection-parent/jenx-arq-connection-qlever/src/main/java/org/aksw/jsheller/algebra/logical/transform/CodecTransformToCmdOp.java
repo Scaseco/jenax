@@ -73,6 +73,11 @@ public class CodecTransformToCmdOp
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
+            if (resolvedCmdName == null) {
+                continue;
+            }
+
             // cmd[0] = resolvedCmdName;
             List<CmdOp> args = new ArrayList<>();
             Arrays.asList(cmd)
