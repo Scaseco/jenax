@@ -64,7 +64,7 @@ public class BindingUtils {
     }
 
     /** If key is null then return null.
-     *  If key is a variable then return the value in the binding - otherwise return the key itself */
+     *  If key is a variable then return the value in the binding (may be null) - otherwise return the key itself */
     public static Node getValue(Binding binding, Node key) {
         Node result = key == null
                 ? null

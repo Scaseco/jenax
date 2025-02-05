@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.schema.generator;
+package org.aksw.jenax.arq.util.prefix;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +8,16 @@ import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.util.SplitIRI;
 
-/** Allocate short name for IRIs. By default this is the IRI's localName but conflicts are resolved. */
+/** Allocate short name for IRIs.
+ *  By default this is the IRI's localName but conflicts are resolved.
+ *  The manager guarantees uniqueness of generated short names.
+ */
 public class ShortNameMgr {
     protected int namespaceCounter = 0;
     protected PrefixMap prefixMap = PrefixMapFactory.createForOutput();
     protected Map<String, Name> shortToFull = new HashMap<>();
 
-    record Name(String shortName, String prefix, String ns, String localName) {}
+    public record Name(String shortName, String prefix, String ns, String localName) {}
 
     public Name allocate(String iri) {
         Pair<String, String> pair = prefixMap.abbrev(iri);

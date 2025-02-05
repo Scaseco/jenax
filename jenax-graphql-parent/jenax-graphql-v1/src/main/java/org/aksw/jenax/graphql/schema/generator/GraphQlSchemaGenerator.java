@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.node.NodeCollection;
+import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.graphql.sparql.DatasetMetadata;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -79,7 +80,7 @@ public class GraphQlSchemaGenerator {
 
     public static List<TypeInfo> summarize(RdfDataSource dataSource) {
         Query dataSummary = SparqlStmtMgr.loadQuery("data-summary.rq");
-        Table table = QueryExecBuilderAdapter.adapt(dataSource.newQuery().query(dataSummary)).table();
+        Table table = dataSource.asLinkSource().newQuery().query(dataSummary).table();
         System.err.println(ResultSetFormatter.asText(table.toRowSet().asResultSet()));
         List<TypeInfo> result = table.toRowSet().stream().map(b -> new TypeInfo(
             (Set<Node>)NodeCollection.extractOrNull(b.get("sTypes")),

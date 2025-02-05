@@ -2,6 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.xml;
 
 import javax.xml.xpath.XPathFactory;
 
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -47,13 +48,9 @@ public class PropertyFunctionFactoryXmlUnnest
         return new PFuncSimpleAndList() {
 
             @Override
-            public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object,
-                    ExecutionContext execCxt) {
-
+            public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg object, ExecutionContext execCxt) {
                 // Get the subject's value
-                Node node = subject.isVariable()
-                        ? binding.get((Var)subject)
-                        : subject;
+                Node node = BindingUtils.getValue(binding, subject);
 
                 if(object.getArgListSize() != 2) {
                     throw new RuntimeException("property function for xpath evaluation requires two arguments");
@@ -69,7 +66,6 @@ public class PropertyFunctionFactoryXmlUnnest
 
                 return JenaXmlUtils.evalXPath(xPathFactory, binding, execCxt, node, xpathNode, outputVar);
             }
-
         };
     }
 }

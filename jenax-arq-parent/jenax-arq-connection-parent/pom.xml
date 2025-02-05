@@ -18,5 +18,6 @@
 		<module>jenax-arq-connection-extra</module>
 		<module>jenax-arq-connection-virtuoso</module>
 		<!-- <module>jenax-arq-connection-mods</module> -->
+		<module>jenx-arq-connection-qlever</module>
 	</modules>
 </project>

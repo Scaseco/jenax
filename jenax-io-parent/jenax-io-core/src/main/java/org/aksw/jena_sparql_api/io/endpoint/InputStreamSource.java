@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface InputStreamSource {
-    InputStream openInputStream()  throws IOException;
+    InputStream openInputStream() throws IOException;
 }

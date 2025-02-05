@@ -55,7 +55,7 @@
                 <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 		-->
 
-        <ee.version>9</ee.version>
+		<ee.version>9</ee.version>
 		<jetty.version>12.0.14</jetty.version>
 		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
@@ -145,13 +145,13 @@
 			</dependency>
 
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-framework-bom</artifactId>
-            <version>${spring.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
 			<!-- Shacl to HTML template rending -->
 			<dependency>
@@ -1275,7 +1275,7 @@
 					<exclusion>
 						<groupId>ch.qos.logback</groupId>
 						<artifactId>logback-classic</artifactId>
-					</exclusion>					
+					</exclusion>
 					<!-- <exclusion> <groupId>org.codehaus.woodstox</groupId>
 					<artifactId>stax2-api</artifactId> 
 						</exclusion> <exclusion> <groupId>com.fasterxml.woodstox</groupId>
@@ -1319,7 +1319,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-<!--
+			<!--
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
@@ -1503,6 +1503,13 @@
 				<artifactId>json-path</artifactId>
 				<version>2.7.0</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>1.19.7</version>
+			</dependency>
+
 			<!-- experimental dependencies -->
 			<!-- <dependency> <groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId> 

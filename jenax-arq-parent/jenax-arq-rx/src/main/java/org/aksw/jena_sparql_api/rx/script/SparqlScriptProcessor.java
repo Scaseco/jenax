@@ -77,6 +77,9 @@ import com.google.common.collect.Lists;
  * Relative paths are resolved against the current working directory as reported by the JVM.
  * Use "cwd=" (with an empty string) to reset the CWD to that of the JVM
  *
+ * Graphs can be pinned for all subsequent arguments using
+ * "graph=your://graph.name". Use "graph=" (nothing after the =) to use the default graph.
+ *
  * @author Claus Stadler
  *
  */
@@ -514,8 +517,7 @@ public class SparqlScriptProcessor {
 //                throw new FileNotFoundException(filename);
 //            }
 
-
-            // Unwrap the input stream for less overhead
+            // Unwrap the input stream to minimize overhead.
             InputStream in = tmpIn.getInputStream();
 
             String contentType = tmpIn.getContentType();

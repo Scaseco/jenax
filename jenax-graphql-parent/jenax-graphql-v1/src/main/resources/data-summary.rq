@@ -1,8 +1,8 @@
-# This query requires the norse extensions to be loaded (part of org.aksw.jenax:jenax-plugins-bundle)
+# This query requires the norse extensions to be loaded (part of the maven artifact org.aksw.jenax:jenax-plugins-bundle)
 
 PREFIX norse: <https://w3id.org/aksw/norse#>
 
-# Note: Object types used 'untyped' to indicate that there are resource values without type.
+# Note: Object types used "untyped" to indicate that there are resource values without type.
 #       Subjects without type use the empty set.
 #       XXX Add a flag whether any object values per type appear as subject?
 
@@ -10,6 +10,7 @@ SELECT * {
   SELECT
       ?sTypes
       ?p
+      (true AS ?isForward)
       (norse:set.aggUnion(?oTypes) AS ?allOTypes)
       (norse:set.aggUnion(?oDTypes) AS ?allODTypes)
       (MAX(?oCard) AS ?maxOCard)
@@ -23,7 +24,7 @@ SELECT * {
             ?s a ?st
           } GROUP BY ?s }
         }
-        BIND(IF(BOUND(?sTypesRaw), ?sTypesRaw, norse:set.of('untyped')) AS ?sTypes)
+        BIND(IF(BOUND(?sTypesRaw), ?sTypesRaw, norse:set.of("untyped")) AS ?sTypes)
       }
       LATERAL {
         { SELECT DISTINCT ?s ?p { ?s ?p ?o } }
@@ -35,7 +36,7 @@ SELECT * {
               OPTIONAL { # XXX Could use lateral to collect types for each o
                 ?o a ?otRaw
               }
-              BIND(IF(BOUND(?otRaw), ?otRaw, 'untyped') AS ?ot)
+              BIND(IF(BOUND(?otRaw), ?otRaw, "untyped") AS ?ot)
             } GROUP BY ?s ?p }
           }
           BIND(IF(BOUND(?oTypesRaw), ?oTypesRaw, norse:set.of()) AS ?oTypes)

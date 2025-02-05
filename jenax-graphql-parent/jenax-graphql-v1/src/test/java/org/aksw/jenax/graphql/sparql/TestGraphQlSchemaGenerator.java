@@ -1,6 +1,7 @@
 package org.aksw.jenax.graphql.sparql;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.graphql.schema.generator.GraphQlSchemaGenerator;
@@ -98,12 +99,18 @@ public class TestGraphQlSchemaGenerator {
     }
 
     private static Document validateRoundtrip(Document originalDoc) {
-        String str = AstPrinter.printAst(originalDoc);
-        Parser parser = new Parser();
-        Document copyDoc = parser.parse(str);
-
-        Assert.assertEquals(originalDoc, copyDoc);
-
+        String originalDocStr = AstPrinter.printAst(originalDoc);
+        Document copyDoc = Parser.parse(originalDocStr);
+        String copyDocStr = AstPrinter.printAst(copyDoc);
+        // boolean isEquals = Objects.equals(originalDoc, copyDoc);
+        boolean isEquals = Objects.equals(originalDocStr, copyDocStr);
+        if (!isEquals) {
+            System.err.println("Expected:");
+            System.err.println(AstPrinter.printAst(originalDoc));
+            System.err.println("Actual:");
+            System.err.println(AstPrinter.printAst(copyDoc));
+        }
+        Assert.assertTrue(isEquals);
         return originalDoc;
     }
 }
