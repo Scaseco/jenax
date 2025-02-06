@@ -22,4 +22,9 @@ public class CmdOpSubst
         T result = visitor.visit(this);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "(subst " + getSubOp() + ")";
+    }
 }

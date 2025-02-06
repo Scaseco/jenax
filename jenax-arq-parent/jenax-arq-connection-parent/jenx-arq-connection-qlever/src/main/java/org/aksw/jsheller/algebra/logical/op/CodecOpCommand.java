@@ -36,6 +36,6 @@ public class CodecOpCommand
 
     @Override
     public String toString() {
-        return "CodecOpCommand [cmd=" + cmdOp + "]";
+        return "(cmd " + cmdOp + ")";
     }
 }

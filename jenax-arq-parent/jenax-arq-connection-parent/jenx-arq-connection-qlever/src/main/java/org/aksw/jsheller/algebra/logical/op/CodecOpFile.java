@@ -24,6 +24,6 @@ public class CodecOpFile
 
     @Override
     public String toString() {
-        return "CodecOpFile [pathStr=" + path + "]";
+        return "(file (" + path + "))";
     }
 }

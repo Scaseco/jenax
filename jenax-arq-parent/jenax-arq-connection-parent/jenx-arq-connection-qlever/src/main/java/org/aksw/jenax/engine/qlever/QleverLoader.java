@@ -191,6 +191,12 @@ public class QleverLoader {
     }
 
     protected ByteSourceSpec buildByteSourceCmd(List<CodecOp> args, Lang lang) {
+        // Inject a dummy codec 'cat' to cat immediate file arguments
+        // XXX Is there a better way to handle this?
+        args = args.stream()
+                .map(x -> x instanceof CodecOpFile f ? new CodecOpCodecName("cat", f) : x)
+                .toList();
+
         CodecTransformToCmdOp sysCallTransform = sysCallTransform();
 
         CodecOp javaOp = CodecOpConcat.of(args);
@@ -243,7 +249,6 @@ public class QleverLoader {
         }
         return result;
     }
-
 
     protected String buildDockerImageName() {
         String qleverDockerTag = "latest";

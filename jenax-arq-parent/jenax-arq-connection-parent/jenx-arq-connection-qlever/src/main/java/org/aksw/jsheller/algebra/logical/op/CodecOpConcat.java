@@ -1,6 +1,7 @@
 package org.aksw.jsheller.algebra.logical.op;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CodecOpConcat
     extends CodecOpN
@@ -20,5 +21,12 @@ public class CodecOpConcat
             ? subOps.get(0)
             : new CodecOpConcat(subOps);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "(concat " + getSubOps().stream()
+            .map(Object::toString)
+            .collect(Collectors.joining(" ")) + ")";
     }
 }

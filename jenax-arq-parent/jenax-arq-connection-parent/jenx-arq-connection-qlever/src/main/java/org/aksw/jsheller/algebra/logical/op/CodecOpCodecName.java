@@ -22,6 +22,6 @@ public class CodecOpCodecName
 
     @Override
     public String toString() {
-        return "CodecOpCodecName [name=" + name + ", subOp=" + subOp + "]";
+        return "(codec (" + getName() + ") " + subOp + ")";
     }
 }

@@ -13,4 +13,9 @@ public class CmdOpToArg
         T result = visitor.visit(this);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "(toArg " + getSubOp() + ")";
+    }
 }

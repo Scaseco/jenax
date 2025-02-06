@@ -32,7 +32,7 @@ public class TestQleverLoader {
     }
 
     @Test
-    // @Ignore
+    @Ignore
     public void testSystemBzip2() throws Exception {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
@@ -40,6 +40,7 @@ public class TestQleverLoader {
         QleverDbFileSet fileSet = new QleverLoader()
             .setOutputFolder(outputPath)
             .setIndexName("test")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-dbpedia_2015-10.nt")
             .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-instance_types_transitive_es.ttl.bz2")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-infobox_properties_es.ttl.bz2")

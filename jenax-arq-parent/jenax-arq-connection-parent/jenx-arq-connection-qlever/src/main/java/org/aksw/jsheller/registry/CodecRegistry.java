@@ -57,6 +57,12 @@ public class CodecRegistry {
             spec.getVariants().add(CodecVariant.of("gzip", "-cd"));
             registry.add(spec);
         }
+
+        {
+            CodecSpec spec = new CodecSpec("cat");
+            spec.getVariants().add(CodecVariant.of("cat"));
+            registry.add(spec);
+        }
     }
 
     /*
