@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>5.3.0-1-SNAPSHOT</version>
+		<version>5.4.0-1-SNAPSHOT</version>
 	</parent>
 
 	<modules>

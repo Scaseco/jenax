@@ -81,7 +81,7 @@ public class GraphQlSchemaGenerator {
     public static List<TypeInfo> summarize(RdfDataSource dataSource) {
         Query dataSummary = SparqlStmtMgr.loadQuery("data-summary.rq");
         Table table = dataSource.asLinkSource().newQuery().query(dataSummary).table();
-        System.err.println(ResultSetFormatter.asText(table.toRowSet().asResultSet()));
+        // System.err.println(ResultSetFormatter.asText(table.toRowSet().asResultSet()));
         List<TypeInfo> result = table.toRowSet().stream().map(b -> new TypeInfo(
             (Set<Node>)NodeCollection.extractOrNull(b.get("sTypes")),
             b.get("p"),
