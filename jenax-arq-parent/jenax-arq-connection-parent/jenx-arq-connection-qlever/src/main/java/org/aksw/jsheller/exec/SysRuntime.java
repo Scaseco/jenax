@@ -14,6 +14,8 @@ public interface SysRuntime {
 
     String[] compileCommand(CmdOp op);
 
+    CmdStrOps getStrOps();
+
     /**
      * Resolve the first argument of the array against {@link #which(String)}.
      * Returned array is always a copy.

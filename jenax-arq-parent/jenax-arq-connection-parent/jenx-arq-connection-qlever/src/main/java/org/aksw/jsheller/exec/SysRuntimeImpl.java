@@ -35,6 +35,11 @@ public class SysRuntimeImpl
         this.stringifier = new CmdOpVisitorToCmdString(strOps);
     }
 
+    @Override
+    public CmdStrOps getStrOps() {
+        return strOps;
+    }
+
 //    public SysRuntimeImpl(CmdOpVisitor<String> stringifier) {
 //        super();
 //    }

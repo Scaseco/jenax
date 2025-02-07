@@ -23,4 +23,9 @@ public interface SysRuntimeWrapper<X extends SysRuntime>
     default String quoteFileArgument(String fileName) {
         return getDelegate().quoteFileArgument(fileName);
     }
+
+    @Override
+    default CmdStrOps getStrOps() {
+        return getDelegate().getStrOps();
+    }
 }
