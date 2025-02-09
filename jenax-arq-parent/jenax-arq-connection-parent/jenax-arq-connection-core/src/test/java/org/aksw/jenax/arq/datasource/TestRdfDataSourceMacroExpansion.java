@@ -42,12 +42,12 @@ public class TestRdfDataSourceMacroExpansion {
         RdfDataSource dataSource = dataSourceWithMacros(graph);
 
         dataSource.newUpdate().update("""
-                PREFIX eg: <http://www.example.org/>
-                  INSERT { eg:s eg:p ?x }
-                  WHERE  { BIND(eg:greet('Anne') AS ?x) }
-                """)
-                .build()
-                .execute();
+            PREFIX eg: <http://www.example.org/>
+              INSERT { eg:s eg:p ?x }
+              WHERE  { BIND(eg:greet('Anne') AS ?x) }
+            """)
+            .build()
+            .execute();
 
         Graph expectedGraph = SSE.parseGraph("(graph (eg:s eg:p 'Hello Anne!'))", PrefixMapping.Extended);
         Set<Triple> expectedSet = SetFromGraph.wrap(expectedGraph);
