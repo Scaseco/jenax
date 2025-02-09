@@ -365,7 +365,7 @@ public class SparqlStmtMgr {
             return r;
         };
         return result;
-    };
+    }
 
 //	public static Model execConstruct(RDFConnection conn, String queryStr) {
 //		Model result = ModelFactory.createDefaultModel();

@@ -6,7 +6,6 @@ import org.apache.jena.sys.JenaSubsystemLifecycle;
 public class JenaPluginAnyResource
     implements JenaSubsystemLifecycle
 {
-
     public void start() {
         init();
     }

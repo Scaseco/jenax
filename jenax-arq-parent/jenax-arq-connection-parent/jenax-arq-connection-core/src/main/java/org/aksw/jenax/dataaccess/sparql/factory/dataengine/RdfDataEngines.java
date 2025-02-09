@@ -1,6 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
-
 import java.util.Objects;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;

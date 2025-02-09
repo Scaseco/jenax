@@ -1,10 +1,13 @@
 package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 
+import java.util.Map;
+
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
+import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
@@ -13,10 +16,15 @@ import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithSim
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.UpdateExec;
+import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+/**
+ * Transformation views for use with {@link RdfDataEngine#decorate}.
+ * The transformations are mostly based on the methods of {@link RdfDataSources}.
+ */
 public class RdfDataSourceTransforms {
 
     public static RdfDataSourceTransform decorateWithBuilderTransform(QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
@@ -68,5 +76,9 @@ public class RdfDataSourceTransforms {
     public static RdfDataSourceTransform simpleCache(long maxSize) {
         Cache<Object, Object> cache = Caffeine.newBuilder().maximumSize(maxSize).recordStats().build();
         return ds -> new RdfDataSourceWithSimpleCache(ds, cache);
+    }
+
+    public static RdfDataSourceTransform macros(Map<String, UserDefinedFunctionDefinition> udfRegistry) {
+        return dataSource -> RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
     }
 }

@@ -12,7 +12,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
  * whereas plain rdf data sources are 'passive' and therefore don't need to be closed.
  * Every RDF engine supports opening connections to it and therefore extends RdfDataSource.
  *
- * The same design principle is followed by Spring's EmbeddedDatabase system.
+ * The same design principle is followed by Spring's EmbeddedDatabase interface.
  */
 public interface RdfDataEngine
     extends RdfDataSource, AutoCloseable

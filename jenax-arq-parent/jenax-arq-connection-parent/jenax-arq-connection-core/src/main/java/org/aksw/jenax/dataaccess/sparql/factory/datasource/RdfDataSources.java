@@ -1,8 +1,10 @@
 package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -13,6 +15,7 @@ import org.aksw.jenax.arq.util.op.RewriteList;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
@@ -30,6 +33,8 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithPagination;
+import org.aksw.jenax.model.udf.util.UserDefinedFunctions;
+import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransformViaRewrite;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
@@ -37,6 +42,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryCancelledException;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.query.ReadWrite;
@@ -45,6 +51,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -52,7 +59,19 @@ import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.QueryExecBuilderAdapter;
 import org.apache.jena.sparql.exec.QueryExecutionBuilderAdapter;
+import org.apache.jena.sparql.exec.UpdateExec;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
+import org.apache.jena.sparql.exec.UpdateExecBuilderAdapter;
+import org.apache.jena.sparql.exec.UpdateExecutionBuilderAdapter;
+import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprFunctionN;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransform;
+import org.apache.jena.sparql.expr.ExprTransformCopy;
+import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
+import org.apache.jena.sparql.util.Context;
 import org.apache.jena.system.Txn;
+import org.apache.jena.update.UpdateExecutionBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +142,6 @@ public class RdfDataSources {
         if (factory == null) {
             throw new RuntimeException("No RdfDataSourceFactory registered under name " + sourceType);
         }
-
 
         RdfDataEngine result = factory.create(options);
         return result;
@@ -365,5 +383,105 @@ public class RdfDataSources {
             }
         };
         return QueryExecutionBuilderAdapter.adapt(queryExecBuilder);
+    }
+
+    public static UpdateExecutionBuilder newUpdateBuilder(RdfDataSource rdfDataSource) {
+        UpdateExecBuilder updateExecBuilder = new UpdateExecBuilderCustomBase<>() {
+            @Override
+            public UpdateExec build() {
+                Context cxt = this.getContext();
+
+                return new UpdateExec() {
+                    protected volatile UpdateExec delegate = null;
+                    protected volatile boolean isAborted = false;
+
+                    @Override
+                    public void abort() {
+                        if (!isAborted) {
+                            UpdateExec current = null;
+                            boolean doAbort = false;
+                            synchronized (this) {
+                                if (!isAborted) {
+                                    isAborted = true;
+                                    doAbort = true;
+                                    current = delegate;
+                                }
+                            }
+                            if (doAbort && current != null) {
+                                current.abort();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public Context getContext() {
+                        return cxt;
+                    }
+
+                    @Override
+                    public void execute() {
+                        // Wrap the delegate execution such that the underlying connection is closed upon
+                        // completing the execution
+
+                        RDFConnection conn = null;
+                        try {
+                            synchronized (this) {
+                                if (isAborted) {
+                                    throw new QueryCancelledException();
+                                }
+
+                                if (delegate != null) {
+                                    throw new RuntimeException("Execution already started.");
+                                }
+
+                                // Acquire a fresh connection.
+                                conn = rdfDataSource.getConnection();
+                                UpdateExecBuilder delegateBuilder = UpdateExecBuilderAdapter.adapt(conn.newUpdate());
+                                // Apply all settings to the delegate.
+                                applySettings(delegateBuilder);
+
+                                delegate = delegateBuilder.build();
+                            }
+
+                            delegate.execute();
+                        } finally {
+                            if (conn != null) {
+                                conn.close();
+                            }
+                        }
+                    }
+                };
+            }
+        };
+        return UpdateExecutionBuilderAdapter.adapt(updateExecBuilder);
+    }
+
+    public static Map<String, UserDefinedFunctionDefinition> loadMacros(String macroSource) {
+        Map<String, UserDefinedFunctionDefinition> udfRegistry = new LinkedHashMap<>();
+        loadMacros(Set.of(), udfRegistry, macroSource);
+        return udfRegistry;
+    }
+
+    /** Load macros from a given source w.r.t. the given profiles and add them to the registry. */
+    public static void loadMacros(Set<String> macroProfiles, Map<String, UserDefinedFunctionDefinition> udfRegistry, String macroSource) {
+        Model model = RDFDataMgr.loadModel(macroSource);
+        SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
+        Map<String, UserDefinedFunctionDefinition> contrib = UserDefinedFunctions.load(model, macroProfiles);
+        udfRegistry.putAll(contrib);
+    }
+
+    /** Wrap a data source with query rewriting for macro expansion. */
+    public static RdfDataSource wrapWithMacros(RdfDataSource rdfDataSource, Map<String, UserDefinedFunctionDefinition> udfRegistry) {
+        // ExprTransform eform = new ExprTransformExpand(udfRegistry);
+        ExprTransform eform = new ExprTransformCopy() {
+            @Override
+            public Expr transform(ExprFunctionN func, ExprList args) {
+                // XXX Could avoid func.copy()
+                return UserDefinedFunctions.expandMacro(udfRegistry, func.copy(args));
+            }
+        };
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.ofExprTransform(eform);
+        RdfDataSource result = wrapWithStmtTransform(rdfDataSource, stmtTransform);
+        return result;
     }
 }

@@ -8,6 +8,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFa
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.update.UpdateExecutionBuilder;
 
 /**
  * A factory/supplier of RDFConnection instances. Similar to a JDBC DataSource.
@@ -39,6 +40,10 @@ public interface RdfDataSource
      */
     default QueryExecutionBuilder newQuery() {
         return RdfDataSources.newQueryBuilder(this);
+    }
+
+    default UpdateExecutionBuilder newUpdate() {
+        return RdfDataSources.newUpdateBuilder(this);
     }
 
     /**
