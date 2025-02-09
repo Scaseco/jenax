@@ -1,0 +1,13 @@
+PREFIX udf: <https://w3id.org/aksw/norse#udf.>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX eg: <http://www.example.org/>
+
+eg:prefixMapping
+  sh:declare [ sh:prefix "afn" ; sh:namespace "http://jena.apache.org/ARQ/function#" ] ;
+  .
+
+eg:greet
+  sh:prefixes eg:prefixMapping ;
+  udf:simpleDefinition ("CONCAT('Hello ', STR(?x), '!')" "x") ;
+  .
+
