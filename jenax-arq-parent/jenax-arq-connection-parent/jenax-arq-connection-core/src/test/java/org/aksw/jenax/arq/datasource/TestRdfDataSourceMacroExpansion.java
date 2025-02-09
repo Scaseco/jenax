@@ -17,13 +17,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestRdfDataSourceMacroExpansion {
-    @Test
-    public void testUpdate() {
-        Map<String, UserDefinedFunctionDefinition> udfRegistry = RdfDataSources.loadMacros("datasource-test-macros.ttl");
 
-        Graph graph = GraphFactory.createDefaultGraph();
+    public static RdfDataSource dataSourceWithMacros(Graph graph) {
+        Map<String, UserDefinedFunctionDefinition> udfRegistry = RdfDataSources.loadMacros("datasource-test-macros.ttl");
         RdfDataSource dataSource = RdfDataSources.of(graph);
-        dataSource = RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
+        return  RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
+    }
+
+    @Test
+    public void testMacrosInQuery() {
+        Graph graph = GraphFactory.createDefaultGraph();
+        RdfDataSource dataSource = dataSourceWithMacros(graph);
 
         Table expectedTable = SSE.parseTable("(table (row (?x 'Hello Anne!')))");
         Table actualTable = dataSource.asLinkSource()
@@ -31,14 +35,19 @@ public class TestRdfDataSourceMacroExpansion {
             .query("PREFIX eg: <http://www.example.org/> SELECT (eg:greet('Anne') AS ?x) { }")
             .table();
         Assert.assertEquals(expectedTable, actualTable);
+    }
+
+    public void testMacrosInUpdate() {
+        Graph graph = GraphFactory.createDefaultGraph();
+        RdfDataSource dataSource = dataSourceWithMacros(graph);
 
         dataSource.newUpdate().update("""
-            PREFIX eg: <http://www.example.org/>
-              INSERT { eg:s eg:p ?x }
-              WHERE  { BIND(eg:greet('Anne') AS ?x) }
-            """)
-            .build()
-            .execute();
+                PREFIX eg: <http://www.example.org/>
+                  INSERT { eg:s eg:p ?x }
+                  WHERE  { BIND(eg:greet('Anne') AS ?x) }
+                """)
+                .build()
+                .execute();
 
         Graph expectedGraph = SSE.parseGraph("(graph (eg:s eg:p 'Hello Anne!'))", PrefixMapping.Extended);
         Set<Triple> expectedSet = SetFromGraph.wrap(expectedGraph);
