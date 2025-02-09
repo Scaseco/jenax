@@ -11,11 +11,9 @@ public class JenaExtensionPrefix {
 
     public static void register() {
         FunctionRegistry registry = FunctionRegistry.get();
-
         registry.put(ns + "get", E_PrefixGet.class);
         registry.put(ns + "expand", E_PrefixExpand.class);
         registry.put(ns + "abbrev", E_PrefixAbbrev.class);
-
 
         // Tarql compatibility
         String iri;

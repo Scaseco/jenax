@@ -8,9 +8,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
 import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineBuilder;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.jsheller.exec.CmdStrOps;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
@@ -29,6 +31,7 @@ public class RdfDataEngineBuilderQlever<X extends RdfDataEngineBuilderQlever<X>>
     protected String qleverImageTag;
     protected Integer hostPort;
     protected QleverConfRun conf;
+    protected RdfDatabaseQlever database;
 
     public RdfDataEngineBuilderQlever() {
         this(null, null);
@@ -184,5 +187,20 @@ public class RdfDataEngineBuilderQlever<X extends RdfDataEngineBuilderQlever<X>>
     @Override
     public Boolean isAutoDeleteIfCreated() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public X setDatabase(RdfDatabase database) {
+        if (database instanceof RdfDatabaseQlever db) {
+            this.database = db;
+        } else {
+            throw new IllegalArgumentException("Argument is not a qlever database: " + database);
+        }
+        return self();
+    }
+
+    @Override
+    public RdfDatabase getDatabase() {
+        return database;
     }
 }
