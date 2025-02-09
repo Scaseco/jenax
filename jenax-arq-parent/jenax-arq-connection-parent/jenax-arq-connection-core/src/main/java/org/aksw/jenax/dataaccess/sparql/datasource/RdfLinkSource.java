@@ -2,6 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.datasource;
 
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
 
 /**
  * Interface for a link-based DataSource.
@@ -12,5 +13,7 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 public interface RdfLinkSource {
     RDFLink newLink();
     QueryExecBuilder newQuery();
-    RdfDataSource asDataSource();
+    UpdateExecBuilder newUpdate();
+
+    // RdfDataSource asDataSource();
 }

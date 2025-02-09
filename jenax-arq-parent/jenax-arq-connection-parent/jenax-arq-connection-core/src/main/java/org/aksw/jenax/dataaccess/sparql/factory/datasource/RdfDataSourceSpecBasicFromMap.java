@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.aksw.commons.collections.MapUtils;
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
 
-public class RdfDataSourceSpecBasicFromMap
-    implements RdfDataSourceSpecBasicMutable
+public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutable<X>>
+    implements RdfDataSourceSpecBasicMutable<X>
 {
     protected Map<String, Object> map;
 
@@ -33,9 +34,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setEngine(String engine) {
+    public X setEngine(String engine) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.ENGINE_KEY, engine);
-        return this;
+        return self();
     }
 
     @Override
@@ -44,9 +45,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLocationContext(String locationContext) {
+    public X setLocationContext(String locationContext) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY, locationContext);
-        return this;
+        return self();
     }
 
     @Override
@@ -55,9 +56,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLocation(String location) {
+    public X setLocation(String location) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_KEY, location);
-        return this;
+        return self();
     }
 
     @Override
@@ -69,9 +70,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setAutoDeleteIfCreated(Boolean onOrOff) {
+    public X setAutoDeleteIfCreated(Boolean onOrOff) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, Boolean.toString(onOrOff));
-        return this;
+        return self();
     }
 
     @Override
@@ -80,9 +81,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setTempDir(String tempDir) {
+    public X setTempDir(String tempDir) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.TEMP_DIR_KEY, tempDir);
-        return this;
+        return self();
     }
 
     @Override
@@ -96,8 +97,31 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLoader(String loader) {
+    public X setLoader(String loader) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOADER_KEY, loader);
-        return this;
+        return self();
+    }
+
+    @Override
+    public X setDatabase(RdfDatabase rdfDatabase) {
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.DATABASE_KEY, rdfDatabase);
+        return self();
+    }
+
+    @Override
+    public RdfDatabase getDatabase() {
+        return (RdfDatabase)map.get(RdfDataSourceSpecTerms.DATABASE_KEY);
+    }
+
+    @Override
+    public X setProperty(String key, Object value) {
+        MapUtils.putWithRemoveOnNull(map, key, value);
+        return self();
+    }
+
+    @Override
+    public X setProperties(Map<String, Object> values) {
+        values.forEach(this::setProperty);
+        return self();
     }
 }

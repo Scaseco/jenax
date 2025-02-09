@@ -64,19 +64,18 @@ public class QleverRunner {
             .withCommand(new String[]{cmdStr})
             ;
 
+        // Test containers will allocate a port if an explicit mapping is omitted.
         if (hostPort != null) {
             container.setPortBindings(List.of(hostPort + ":" + containerPort));
         }
 
-            // Note: To force a host port use .setPortBindings(List.of("1111:2222"));
-
         container.start();
 
         String serviceUrl = "http://" + container.getHost() + ":" + container.getMappedPort(containerPort);
-        System.out.println("Started at: " + serviceUrl);
+        logger.info("Started Qlever server at: " + serviceUrl);
 
         container.followOutput(outputFrame -> {
-            String msg = outputFrame.getUtf8String();
+            String msg = outputFrame.getUtf8StringWithoutLineEnding();
             logger.info(msg);
         });
 

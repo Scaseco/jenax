@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryIteratorException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -24,6 +22,8 @@ import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFileSet;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jsheller.algebra.logical.op.CodecOp;
 import org.aksw.jsheller.algebra.logical.op.CodecOpCodecName;
@@ -45,7 +45,6 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.sparql.core.Quad;
-import org.locationtech.jts.awt.PointShapeFactory.X;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -63,16 +62,21 @@ import com.nimbusds.jose.util.StandardCharset;
 
 import jenax.engine.qlever.docker.GenericContainer;
 
-public class QleverLoader {
+public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     public static final List<Lang> supportedLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS));
 
-    private static final Logger logger = LoggerFactory.getLogger(QleverLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(RdfDatabaseBuilderQlever.class);
 
     /** Record to capture arguments passed to this builder */
     public record FileArg(Path path, Lang lang, List<String> encodings, Node graph) {}
 
     /** Record to capture a set of files that make up a Qlever database. */
-    public record QleverDbFileSet(List<Path> paths) { }
+    public record QleverDbFileSet(List<Path> paths) implements RdfDatabaseFileSet {
+        @Override
+        public List<Path> getPaths() {
+            return paths;
+        }
+    }
 
     /** Mapping from absolute file paths on the host names to file names. */
     protected ShortNameMgr shortNameMgr = new ShortNameMgr();
@@ -86,28 +90,30 @@ public class QleverLoader {
 
     protected String indexName;
 
-    public QleverLoader setSysRuntime(SysRuntime sysRuntime) {
+    public RdfDatabaseBuilderQlever setSysRuntime(SysRuntime sysRuntime) {
         this.sysRuntime = sysRuntime;
         return this;
     }
 
-    public QleverLoader setIndexName(String name) {
+    @Override
+    public RdfDatabaseBuilder setName(String name) {
+        return setIndexName(name);
+    }
+
+    public RdfDatabaseBuilder setIndexName(String name) {
         this.indexName = name;
         return this;
     }
 
-    public QleverLoader setOutputFolder(Path outputFolder) {
+    @Override
+    public RdfDatabaseBuilderQlever setOutputFolder(Path outputFolder) {
         this.outputFolder = outputFolder;
         return this;
     }
 
-    public QleverLoader addPath(String source) throws IOException {
-        return addPath(source, null);
-    }
-
-    public QleverLoader addPath(String source, String graph) throws IOException {
+    @Override
+    public RdfDatabaseBuilder addPath(String source, Node g) throws IOException {
         Path path = Path.of(source);
-        Node g = graph == null ? null : NodeFactory.createURI(graph);
         RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedLangs);
         String contentType = entityInfo.getContentType();
         Lang lang = RDFLanguages.contentTypeToLang(contentType);
@@ -475,7 +481,8 @@ public class QleverLoader {
      * @throws IOException
      * @throws InterruptedException
      */
-    public QleverDbFileSet build() throws IOException, InterruptedException {
+    @Override
+    public RdfDatabaseQlever build() throws IOException, InterruptedException {
         InputSpec inputSpec = buildInputSpec();
 
         FileSpec fileSpec = inputSpec.fileSpec();
@@ -497,20 +504,8 @@ public class QleverLoader {
             }
         }
 
-        QleverDbFileSet result = assembleFileSet(outputFolder, indexName);
+        RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, indexName);
         return result;
-    }
-
-    public static QleverDbFileSet assembleFileSet(Path path, String indexName) {
-        List<Path> fileSet = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path, indexName + ".*")) {
-            for (Path entry : stream) {
-                fileSet.add(entry);
-            }
-        } catch (IOException | DirectoryIteratorException e) {
-            throw new RuntimeException(e);
-        }
-        return new QleverDbFileSet(fileSet);
     }
 }
 

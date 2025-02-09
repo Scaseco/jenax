@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-import org.aksw.jenax.engine.qlever.QleverLoader;
-import org.aksw.jenax.engine.qlever.QleverLoader.QleverDbFileSet;
+import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
+import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
@@ -37,7 +37,7 @@ public class TestQleverLoader {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
 
-        QleverDbFileSet fileSet = new QleverLoader()
+         RdfDatabase database = new RdfDatabaseBuilderQlever()
             .setOutputFolder(outputPath)
             .setIndexName("test")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-dbpedia_2015-10.nt")
@@ -52,7 +52,7 @@ public class TestQleverLoader {
 //            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
             .build();
 
-        System.out.println(fileSet);
+        System.out.println(database);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class TestQleverLoader {
             }
         };
 
-        QleverDbFileSet fileSet = new QleverLoader()
+        RdfDatabase database = new RdfDatabaseBuilderQlever()
             .setSysRuntime(runtime)
             .setOutputFolder(outputPath)
             .setIndexName("test")
@@ -86,7 +86,7 @@ public class TestQleverLoader {
 //            .addPath("/home/raven/tmp/codec-test/fp7_ict_project_partners_database_2007_2011.nt.bz2.gz")
             .build();
 
-        System.out.println(fileSet);
+        System.out.println(database);
     }
 
 }
