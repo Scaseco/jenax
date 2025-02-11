@@ -29,6 +29,7 @@ public class SystemUtils {
         return run(new ProcessBuilder(cmd), logger);
     }
 
+    // FIXME If the process exists fast then the reader thread still doesn't get all messages
     public static Process run(ProcessBuilder processBuilder, Consumer<String> logger) throws IOException, InterruptedException {
         Process process = processBuilder
             .redirectErrorStream(true)
@@ -37,8 +38,17 @@ public class SystemUtils {
         InputStream in = process.getInputStream();
         Thread outputReaderThread = new StreamReaderThread(process, in);
         outputReaderThread.start();
-
         return process;
+    }
+
+    public static void runAndWait(Consumer<String> logger, String ...cmd) throws IOException {
+        try {
+            Process p = run(logger, cmd);
+            int exitValue = p.waitFor();
+            failIfNonZero(exitValue);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected static class StreamReaderThread extends Thread {
@@ -80,6 +90,18 @@ public class SystemUtils {
         }
     }
 
+    public static void failIfNonZero(Process process) {
+        int exitValue = process.exitValue();
+        failIfNonZero(exitValue);
+    }
+
+    public static void failIfNonZero(int exitValue) {
+        if (exitValue != 0) {
+            // TODO Check for non-zero exit value should also be made before read!
+            throw new RuntimeException("Process exited with non-zero code: " + exitValue);
+        }
+    }
+
     public static InputStream exec(ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
 
@@ -95,11 +117,7 @@ public class SystemUtils {
             public void close() throws IOException {
                 int exitCode;
                 if (!process.isAlive()) {
-                    exitCode = process.exitValue();
-                    if (exitCode != 0) {
-                        // TODO Check for non-zero exit value should also be made before read!
-                        throw new RuntimeException("Process exited with non-zero code: " + exitCode);
-                    }
+                    failIfNonZero(process);
                 } else {
                     isTerminating.set(true);
 
@@ -130,16 +148,20 @@ public class SystemUtils {
         return result;
     }
 
-    public static String getCommandOutput(String... command) throws IOException, InterruptedException {
-        InputStream in = exec(command);
-        String result;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            result = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+    public static String getCommandOutput(String... command) throws IOException {
+        try {
+            InputStream in = exec(command);
+            String result;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                result = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
+            return result;
+        } catch (InterruptedException e) {
+            throw new IOException(e);
         }
-        return result;
     }
 
-    public static String which(String commandName) throws IOException, InterruptedException {
+    public static String which(String commandName) throws IOException {
         return getCommandOutput("which", commandName);
     }
 

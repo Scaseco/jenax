@@ -1,6 +1,6 @@
 package jenax.engine.qlever.cmd.model;
 
-import org.aksw.jsheller.algebra.physical.op.CmdOp;
+import org.aksw.jsheller.algebra.cmd.op.CmdOp;
 
 public class CallBuilderCodecBase {
     protected String[] baseCmd;

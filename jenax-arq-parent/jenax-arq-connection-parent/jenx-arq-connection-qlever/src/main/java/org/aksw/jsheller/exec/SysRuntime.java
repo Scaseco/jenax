@@ -1,10 +1,11 @@
 package org.aksw.jsheller.exec;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.aksw.jsheller.algebra.physical.op.CmdOp;
+import org.aksw.jsheller.algebra.cmd.op.CmdOp;
 
 public interface SysRuntime {
     String which(String cmdName) throws IOException, InterruptedException;
@@ -15,6 +16,9 @@ public interface SysRuntime {
     String[] compileCommand(CmdOp op);
 
     CmdStrOps getStrOps();
+
+    /** Create a named pipe at the given path. */
+    void createNamedPipe(Path path) throws IOException;
 
     /**
      * Resolve the first argument of the array against {@link #which(String)}.

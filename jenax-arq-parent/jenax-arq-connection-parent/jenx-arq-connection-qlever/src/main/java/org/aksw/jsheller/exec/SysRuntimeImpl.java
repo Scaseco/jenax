@@ -1,22 +1,27 @@
 package org.aksw.jsheller.exec;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.engine.qlever.SystemUtils;
-import org.aksw.jsheller.algebra.physical.op.CmdOp;
-import org.aksw.jsheller.algebra.physical.op.CmdOpTransformer;
-import org.aksw.jsheller.algebra.physical.op.CmdOpVisitor;
-import org.aksw.jsheller.algebra.physical.transform.CmdOpTransformArguments;
-import org.aksw.jsheller.algebra.physical.transform.CmdOpVisitorToCmdString;
-import org.aksw.jsheller.algebra.physical.transform.CmdString;
+import org.aksw.jsheller.algebra.cmd.op.CmdOp;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpVisitor;
+import org.aksw.jsheller.algebra.cmd.transform.CmdOpTransformArguments;
+import org.aksw.jsheller.algebra.cmd.transform.CmdOpVisitorToCmdString;
+import org.aksw.jsheller.algebra.cmd.transform.CmdString;
+import org.aksw.jsheller.algebra.cmd.transformer.CmdOpTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SysRuntimeImpl
     implements SysRuntime
 {
+    private static final Logger logger = LoggerFactory.getLogger(SysRuntimeImpl.class);
+
     protected CmdStrOps strOps;
     protected CmdOpVisitor<CmdString> stringifier;
 
@@ -55,7 +60,7 @@ public class SysRuntimeImpl
     }
 
     @Override
-    public String which(String cmdName) throws IOException, InterruptedException {
+    public String which(String cmdName) throws IOException {
         return SystemUtils.which(cmdName);
     }
 
@@ -106,5 +111,12 @@ public class SysRuntimeImpl
     @Override
     public String quoteFileArgument(String fileName) {
         return strOps.quoteArg(fileName);
+    }
+
+    @Override
+    public void createNamedPipe(Path path) throws IOException {
+        String absPathStr = path.toAbsolutePath().toString();
+        String resolvedCmd = which("mkfifo");
+        SystemUtils.runAndWait(logger::info, resolvedCmd, absPathStr);
     }
 }

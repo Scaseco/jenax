@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.aksw.jsheller.algebra.logical.op.CodecSpec;
+import org.aksw.jsheller.algebra.stream.op.CodecSpec;
 
 // So there are two similar but different views:
 // - The 'source' view: Supplier<InputStream> Here we take an op and build an input stream from it.

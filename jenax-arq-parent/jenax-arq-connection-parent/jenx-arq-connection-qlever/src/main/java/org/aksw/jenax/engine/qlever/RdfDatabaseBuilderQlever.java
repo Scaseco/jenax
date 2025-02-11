@@ -25,17 +25,18 @@ import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
 import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFileSet;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
-import org.aksw.jsheller.algebra.logical.op.CodecOp;
-import org.aksw.jsheller.algebra.logical.op.CodecOpCodecName;
-import org.aksw.jsheller.algebra.logical.op.CodecOpCommand;
-import org.aksw.jsheller.algebra.logical.op.CodecOpConcat;
-import org.aksw.jsheller.algebra.logical.op.CodecOpFile;
-import org.aksw.jsheller.algebra.logical.op.CodecOpTransformer;
-import org.aksw.jsheller.algebra.logical.op.CodecSysEnv;
-import org.aksw.jsheller.algebra.logical.transform.CodecTransformToCmdOp;
-import org.aksw.jsheller.algebra.physical.op.CmdOp;
-import org.aksw.jsheller.algebra.physical.op.CmdOpExec;
-import org.aksw.jsheller.algebra.physical.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.cmd.op.CmdOp;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.common.TranscodeMode;
+import org.aksw.jsheller.algebra.stream.op.CodecSysEnv;
+import org.aksw.jsheller.algebra.stream.op.StreamOp;
+import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
+import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
+import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
+import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
+import org.aksw.jsheller.algebra.stream.transform.CodecTransformToCmdOp;
+import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformer;
 import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
 import org.aksw.jsheller.registry.CodecRegistry;
@@ -127,10 +128,10 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         args.add(arg);
     }
 
-    public CodecOp convertArgToOp(FileArg arg) {
-        CodecOp result = new CodecOpFile(arg.path().toString());
+    public StreamOp convertArgToOp(FileArg arg) {
+        StreamOp result = new StreamOpFile(arg.path().toString());
         for (String encoding : arg.encodings()) {
-            result = new CodecOpCodecName(encoding, result);
+            result = new StreamOpTranscode(encoding, TranscodeMode.DECODE, result);
         }
         return result;
     }
@@ -166,7 +167,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
             .map(e -> new Bind(e.getKey(), new Volume(e.getValue()), AccessMode.ro))
             .toList();
 
-        String[] argParts = cmdParts.toArray(new String[0]);
+        String[] argParts = cmdParts.toArray(String[]::new);
 
         return new FileSpec(argParts, binds);
     }
@@ -196,23 +197,23 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         return sysCallTransform;
     }
 
-    protected ByteSourceSpec buildByteSourceCmd(List<CodecOp> args, Lang lang) {
+    protected ByteSourceSpec buildByteSourceCmd(List<StreamOp> args, Lang lang) {
         // Inject a dummy codec 'cat' to cat immediate file arguments
-        // XXX Is there a better way to handle this?
+        // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile.
         args = args.stream()
-                .map(x -> x instanceof CodecOpFile f ? new CodecOpCodecName("cat", f) : x)
+                .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode("cat", TranscodeMode.DECODE, f) : x)
                 .toList();
 
         CodecTransformToCmdOp sysCallTransform = sysCallTransform();
 
-        CodecOp javaOp = CodecOpConcat.of(args);
-        ByteSource javaByteSource = new ByteSourceOverCodecOp(javaOp);
+        StreamOp javaOp = StreamOpConcat.of(args);
+        ByteSource javaByteSource = new ByteSourceOverStreamOp(javaOp);
 
         // Try to compile the codec op to a system call.
-        CodecOp sysOp = CodecOpTransformer.transform(javaOp, sysCallTransform);
+        StreamOp sysOp = StreamOpTransformer.transform(javaOp, sysCallTransform);
 
         ByteSourceSpec result;
-        if (sysOp instanceof CodecOpCommand codecOp) {
+        if (sysOp instanceof StreamOpCommand codecOp) {
             CmdOp cmdOp = codecOp.getCmdOp();
             // String[] cmd = SysRuntimeImpl.forBash().compileCommand(cmdOp);
             result = new ByteSourceSpec(cmdOp, javaByteSource, lang);
@@ -236,9 +237,9 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         // TODO Remove subsumed languages
         // Check whether any arguments require decoding.
         // RDFLanguagesEx.streamSubLangs(null)
-        List<CodecOp> ops = args.stream().map(this::convertArgToOp).toList();
+        List<StreamOp> ops = args.stream().map(this::convertArgToOp).toList();
 
-        boolean isAllFiles = ops.stream().allMatch(op -> op instanceof CodecOpFile);
+        boolean isAllFiles = ops.stream().allMatch(op -> op instanceof StreamOpFile);
 
         InputSpec result;
         if (isAllFiles) {

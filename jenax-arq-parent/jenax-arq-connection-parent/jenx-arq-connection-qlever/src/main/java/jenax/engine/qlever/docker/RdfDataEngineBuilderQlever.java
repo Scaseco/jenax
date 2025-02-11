@@ -1,6 +1,7 @@
 package jenax.engine.qlever.docker;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ public class RdfDataEngineBuilderQlever<X extends RdfDataEngineBuilderQlever<X>>
     protected Integer hostPort;
     protected QleverConfRun conf;
     protected RdfDatabaseQlever database;
+
+    protected String indexName;
 
     public RdfDataEngineBuilderQlever() {
         this(null, null);
@@ -120,6 +123,15 @@ public class RdfDataEngineBuilderQlever<X extends RdfDataEngineBuilderQlever<X>>
         return result;
     }
 
+    public X setIndexName(String indexName) {
+        this.indexName = indexName;
+        return self();
+    }
+
+    public String getIndexName() {
+        return indexName;
+    }
+
     @Override
     public X setEngine(String engine) {
         throw new UnsupportedOperationException();
@@ -193,6 +205,11 @@ public class RdfDataEngineBuilderQlever<X extends RdfDataEngineBuilderQlever<X>>
     public X setDatabase(RdfDatabase database) {
         if (database instanceof RdfDatabaseQlever db) {
             this.database = db;
+            Path path = db.getPath().toAbsolutePath();
+            setLocationContext(null);
+            setLocation(path.toString());
+            setIndexName(db.getIndexName());
+
         } else {
             throw new IllegalArgumentException("Argument is not a qlever database: " + database);
         }

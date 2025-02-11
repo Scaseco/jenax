@@ -1,8 +1,9 @@
 package org.aksw.jsheller.exec;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
-import org.aksw.jsheller.algebra.physical.op.CmdOp;
+import org.aksw.jsheller.algebra.cmd.op.CmdOp;
 
 public interface SysRuntimeWrapper<X extends SysRuntime>
     extends SysRuntime
@@ -27,5 +28,10 @@ public interface SysRuntimeWrapper<X extends SysRuntime>
     @Override
     default CmdStrOps getStrOps() {
         return getDelegate().getStrOps();
+    }
+
+    @Override
+    default void createNamedPipe(Path path) throws IOException {
+        getDelegate().createNamedPipe(path);
     }
 }

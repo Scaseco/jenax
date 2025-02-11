@@ -89,6 +89,7 @@
 		<ver.commons-math>3.6.1</ver.commons-math>
 		<hadoop.version>3.4.0</hadoop.version>
 		<commons-text.version>1.10.0</commons-text.version>
+		<commons-exec.version>1.4.0</commons-exec.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.9.1</tika.version>
 		<aksw-commons.version>0.9.10-SNAPSHOT</aksw-commons.version>
@@ -187,6 +188,13 @@
 				<artifactId>commons-math3</artifactId>
 				<version>${ver.commons-math}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-exec</artifactId>
+				<version>${commons-exec.version}</version>
+			</dependency>
+
 			<!-- resolves conflicts between jersey, tika and hadoop -->
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
