@@ -214,10 +214,12 @@ public class GraphQlSchemaGenerator {
             e.setValue(materialize(e.getValue()));
         }
 
+        // TODO Should all types map to list types? Most likely this is useful - but we could check for classes with just a single instance.
+
         List<FieldDefinition> queryFields = classMap.values().stream()
             .map(x -> FieldDefinition.newFieldDefinition()
                     .name(toName(x.name()))
-                    .type(TypeName.newTypeName(toName(x.name())).build())
+                    .type(ListType.newListType(TypeName.newTypeName(toName(x.name())).build()).build())
                     .build())
             .filter(x -> !x.getName().startsWith("class") || x.getName().endsWith("dummy"))
             // .map(x -> (Definition)x)
