@@ -6,10 +6,16 @@ scalar StringMap
 scalar Scalar
 
 directive @pattern (
+  of: String
   from: StringList
   to: StringList
   via: String
-) on FIELD | FIELD_DEFINITION
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @bind (
+  of: String
+  as: String
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
 
 directive @from on FIELD | FIELD_DEFINITION
 directive @to on FIELD | FIELD_DEFINITION
@@ -21,7 +27,7 @@ directive @prefix (
   map: StringMap,
   name: String,
   iri: String
-) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
 
 directive @many (
   self: Boolean = true
