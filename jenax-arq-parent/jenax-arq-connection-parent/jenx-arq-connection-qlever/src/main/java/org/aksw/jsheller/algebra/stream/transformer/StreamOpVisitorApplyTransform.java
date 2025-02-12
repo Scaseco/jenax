@@ -8,6 +8,7 @@ import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
 import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
 import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
 import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
+import org.aksw.jsheller.algebra.stream.op.StreamOpVar;
 import org.aksw.jsheller.algebra.stream.op.StreamOpVisitor;
 
 public class StreamOpVisitorApplyTransform
@@ -43,6 +44,12 @@ public class StreamOpVisitorApplyTransform
 
     @Override
     public StreamOp visit(StreamOpCommand op) {
+        StreamOp result = transform.transform(op);
+        return result;
+    }
+
+    @Override
+    public StreamOp visit(StreamOpVar op) {
         StreamOp result = transform.transform(op);
         return result;
     }

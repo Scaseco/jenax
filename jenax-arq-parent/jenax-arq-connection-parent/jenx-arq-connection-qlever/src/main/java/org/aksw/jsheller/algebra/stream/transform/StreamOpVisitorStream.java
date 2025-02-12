@@ -17,36 +17,37 @@ import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
 import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
 import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
 import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
+import org.aksw.jsheller.algebra.stream.op.StreamOpVar;
 import org.aksw.jsheller.algebra.stream.op.StreamOpVisitor;
 import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
-public class CodecOpVisitorStream
+public class StreamOpVisitorStream
     implements StreamOpVisitor<InputStream>
 {
     protected CompressorStreamFactory compressorStreamFactory;
     protected SysRuntime runtime;
 
-    private static CodecOpVisitorStream singleton = null;
+    private static StreamOpVisitorStream singleton = null;
 
-    public static CodecOpVisitorStream getSingleton() {
+    public static StreamOpVisitorStream getSingleton() {
         if (singleton == null) {
-            synchronized (CodecOpVisitorStream.class) {
+            synchronized (StreamOpVisitorStream.class) {
                 if (singleton == null) {
-                    singleton = new CodecOpVisitorStream();
+                    singleton = new StreamOpVisitorStream();
                 }
             }
         }
         return singleton;
     }
 
-    public CodecOpVisitorStream() {
+    public StreamOpVisitorStream() {
         this(CompressorStreamFactory.getSingleton());
     }
 
-    public CodecOpVisitorStream(CompressorStreamFactory compressorStreamFactory) {
+    public StreamOpVisitorStream(CompressorStreamFactory compressorStreamFactory) {
         super();
         this.compressorStreamFactory = compressorStreamFactory;
     }
@@ -110,6 +111,12 @@ public class CodecOpVisitorStream
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // XXX Support setting a Function<StreamOpVar, StreamOp> resolver function.
+    @Override
+    public InputStream visit(StreamOpVar op) {
+        throw new UnsupportedOperationException("Variable not supported: " + op);
     }
 
 //    @Override

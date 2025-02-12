@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import org.aksw.jsheller.algebra.stream.op.StreamOp;
 import org.aksw.jsheller.algebra.stream.op.StreamOpVisitor;
-import org.aksw.jsheller.algebra.stream.transform.CodecOpVisitorStream;
+import org.aksw.jsheller.algebra.stream.transform.StreamOpVisitorStream;
 
 import com.google.common.io.ByteSource;
 
@@ -20,7 +20,7 @@ public class ByteSourceOverStreamOp
     protected StreamOpVisitor<InputStream> streamVisitor;
 
     public ByteSourceOverStreamOp(StreamOp op) {
-        this(op, CodecOpVisitorStream.getSingleton());
+        this(op, StreamOpVisitorStream.getSingleton());
     }
 
     public ByteSourceOverStreamOp(StreamOp op, StreamOpVisitor<InputStream> streamVisitor) {

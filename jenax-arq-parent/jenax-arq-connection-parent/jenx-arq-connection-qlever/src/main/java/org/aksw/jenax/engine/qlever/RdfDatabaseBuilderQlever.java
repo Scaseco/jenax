@@ -35,7 +35,7 @@ import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
 import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
 import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
 import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
-import org.aksw.jsheller.algebra.stream.transform.CodecTransformToCmdOp;
+import org.aksw.jsheller.algebra.stream.transform.StreamTransformToCmdOp;
 import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformer;
 import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.exec.SysRuntimeImpl;
@@ -189,11 +189,11 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         return result;
     }
 
-    protected CodecTransformToCmdOp sysCallTransform() {
+    protected StreamTransformToCmdOp sysCallTransform() {
         CodecRegistry reg = CodecRegistry.get();
         SysRuntime runtime = getRuntime();
         CodecSysEnv env = new CodecSysEnv(runtime);
-        CodecTransformToCmdOp sysCallTransform = new CodecTransformToCmdOp(reg, env); // , Mode.COMMAND_GROUP);
+        StreamTransformToCmdOp sysCallTransform = new StreamTransformToCmdOp(reg, env); // , Mode.COMMAND_GROUP);
         return sysCallTransform;
     }
 
@@ -201,10 +201,10 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         // Inject a dummy codec 'cat' to cat immediate file arguments
         // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile.
         args = args.stream()
-                .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode("cat", TranscodeMode.DECODE, f) : x)
-                .toList();
+            .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode("cat", TranscodeMode.DECODE, f) : x)
+            .toList();
 
-        CodecTransformToCmdOp sysCallTransform = sysCallTransform();
+        StreamTransformToCmdOp sysCallTransform = sysCallTransform();
 
         StreamOp javaOp = StreamOpConcat.of(args);
         ByteSource javaByteSource = new ByteSourceOverStreamOp(javaOp);

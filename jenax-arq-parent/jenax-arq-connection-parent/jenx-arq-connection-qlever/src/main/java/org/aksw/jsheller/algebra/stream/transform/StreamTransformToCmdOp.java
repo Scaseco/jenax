@@ -24,13 +24,13 @@ import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.registry.CodecRegistry;
 import org.aksw.jsheller.registry.CodecVariant;
 
-public class CodecTransformToCmdOp
+public class StreamTransformToCmdOp
     extends StreamOpTransformBase
 {
     private CodecRegistry registry;
     private CodecSysEnv env;
 
-    public CodecTransformToCmdOp(CodecRegistry registry, CodecSysEnv env) {
+    public StreamTransformToCmdOp(CodecRegistry registry, CodecSysEnv env) {
         super();
         this.registry = registry;
         this.env = env;

@@ -7,6 +7,7 @@ import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
 import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
 import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
 import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
+import org.aksw.jsheller.algebra.stream.op.StreamOpVar;
 
 public class StreamOpTransformBase
     implements StreamOpTransform {
@@ -34,6 +35,10 @@ public class StreamOpTransformBase
         // return new CodecOpCommand(op.getCmdArray());
     }
 
+    @Override
+    public StreamOp transform(StreamOpVar op) {
+        return op;
+    }
     /*
     @Override
     public CodecOp transform(CodecOpCommandGroup op, List<CodecOp> subOps) {

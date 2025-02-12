@@ -3,26 +3,33 @@ package org.aksw.jsheller.algebra.stream.op;
 import java.util.Objects;
 
 import org.aksw.jsheller.algebra.common.TranscodeMode;
+import org.aksw.jsheller.algebra.common.Transcoding;
 
 /** Encode/Decode the underlying stream with a codec of the given name. */
 public class StreamOpTranscode
   extends StreamOp1
 {
-    protected String name;
-    protected TranscodeMode transcodeMode;
+    protected Transcoding transcoding;
 
     public StreamOpTranscode(String name, TranscodeMode transcodeMode, StreamOp subOp) {
+        this(new Transcoding(name, transcodeMode), subOp);
+    }
+
+    public StreamOpTranscode(Transcoding transcoding, StreamOp subOp) {
         super(subOp);
-        this.transcodeMode = Objects.requireNonNull(transcodeMode);
-        this.name = Objects.requireNonNull(name);
+        this.transcoding = Objects.requireNonNull(transcoding);
+    }
+
+    public Transcoding getTranscoding() {
+        return transcoding;
     }
 
     public String getName() {
-        return name;
+        return transcoding.name();
     }
 
     public TranscodeMode getTranscodeMode() {
-        return transcodeMode;
+        return transcoding.mode();
     }
 
     @Override
