@@ -15,7 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 
-public class TestQleverLoader {
+public class TestRdfDatabaseLoaderQlever {
 
     @Test
     public void testRegistry() {

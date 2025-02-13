@@ -105,6 +105,11 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 
     protected String indexName;
 
+    /** Base path within the container where to mount any named pipes.
+     *  Must end with '/'.
+     */
+    protected String containerFifoPath = "/fifo/";
+
     public RdfDatabaseBuilderQlever setSysRuntime(SysRuntime sysRuntime) {
         this.sysRuntime = sysRuntime;
         return this;
@@ -268,17 +273,17 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
      * bind:         Docker bind specification of the hostFile into a container path
      * cmdContrib:   Contribution to the docker invocation. Contains the container file path and any post-processing.
      */
-    public record DataBridge(FileWriterTask hostFileTask, Bind bind, String[] cmdContrib) {}
+    public record DockerDataArgumentBridge(FileWriterTask hostFileTask, Bind bind, String[] cmdContrib) {}
 
     /** Record to capture whether to pass input data as files or as an input stream. */
     // XXX The lang argument is not ideal here - a mime type would be more generic.
     public record InputSpec(FileSpec fileSpec, ByteSourceSpec byteSourceSpec, Lang byteSourceSpecLang) {}
 
-    public record InputSpec2(List<DataBridge> dataBridges) {}
+    public record InputSpec2(List<DockerDataArgumentBridge> dataBridges) {}
 
     protected InputSpec2 buildInputSpec(Supplier<Path> hostTempPath) throws NoSuchFileException {
 
-        List<DataBridge> dataBridges = new ArrayList<>(args.size());
+        List<DockerDataArgumentBridge> dataBridges = new ArrayList<>(args.size());
         // For each file, check whether any operations need to be performed on the host
         for (FileArg fileArg : args) {
             Lang lang = fileArg.lang();
@@ -286,7 +291,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
             StreamOp op = convertArgToOp(fileArg);
 
             // Convert the host operations to FileWriterTasks
-            DataBridge fileSpec = buildHostToContainerDataBridge(hostTempPath, op, graph, lang);
+            DockerDataArgumentBridge fileSpec = buildHostToContainerDataBridge(hostTempPath, op, graph, lang);
             dataBridges.add(fileSpec);
         }
         return new InputSpec2(dataBridges);
@@ -340,7 +345,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
                 .map(l -> l.isEmpty() ? null : l.get(0))
                 .orElse("");
 
-        String[] cmdContrib = new String[] { "-f ", filePath, "-F", fmtArg, "-g", graphArg };
+        String[] cmdContrib = new String[] { "-f", filePath, "-F", fmtArg, "-g", graphArg };
         // String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
         // cmdParts.add(cmdPart);
         return new FileAndCmd(filePath, cmdContrib);
@@ -375,7 +380,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 
                 SysRuntime runtime = getRuntime();
                 String[] cmd = runtime.compileCommand(redirectOp);
-                hostFileWriter = new FileWriterTaskFromProcess(hostPath, PathLifeCycles.namedPipe(), cmd);
+                hostFileWriter = new FileWriterTaskFromProcess(hostPath, PathLifeCycles.deleteAfterExec(PathLifeCycles.namedPipe()), cmd);
             } else {
                 throw new IllegalStateException("Execution partitioner suggested that operation could be executed via sys call - but sys call generation failed.");
             }
@@ -387,7 +392,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 //
 //    }
 
-    protected DataBridge buildHostToContainerDataBridge(Supplier<Path> hostTempPathSupp, StreamOp op, Node graph, Lang lang) throws NoSuchFileException {
+    protected DockerDataArgumentBridge buildHostToContainerDataBridge(Supplier<Path> hostTempPathSupp, StreamOp op, Node graph, Lang lang) throws NoSuchFileException {
         StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
         StreamOpTransformExecutionPartitioner execPartitioner = new StreamOpTransformExecutionPartitioner(sysCallTransform);
 
@@ -427,14 +432,14 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 
             StreamOp finalOp = StreamOpTransformSubst.subst(nonSysCallOp, hostOps);
             ByteSource javaByteSource = new ByteSourceOverStreamOp(finalOp); // TODO Supply sysRuntime
-            hostFileWriter =  new FileWriterTaskFromByteSource(hostPath, PathLifeCycles.namedPipe(), javaByteSource);
+            hostFileWriter =  new FileWriterTaskFromByteSource(hostPath, PathLifeCycles.deleteAfterExec(PathLifeCycles.namedPipe()), javaByteSource);
         }
 
-        FileAndCmd containerFileAndCmd = buildCmdPart("/fifo/", op, plainFileName, graph, lang);
+        FileAndCmd containerFileAndCmd = buildCmdPart(containerFifoPath, op, plainFileName, graph, lang);
 
         Bind bind = new Bind(hostFileWriter.getOutputPath().toString(), new Volume(containerFileAndCmd.fileName()), AccessMode.ro);
 
-        DataBridge result = new DataBridge(hostFileWriter, bind, containerFileAndCmd.cmd());
+        DockerDataArgumentBridge result = new DockerDataArgumentBridge(hostFileWriter, bind, containerFileAndCmd.cmd());
         return result;
     }
 
@@ -690,57 +695,69 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
      */
     @Override
     public RdfDatabaseQlever build() throws IOException, InterruptedException {
-        Path[] tempPath = new Path[]{null};
-        Supplier<Path> getHostTempPath = () -> {
-            try {
-                Path r = tempPath[0] != null
-                    ? tempPath[0]
-                    : (tempPath[0] = Files.createTempDirectory("qlever-loader"));
-                return r;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        };
-
-        InputSpec2 spec = buildInputSpec(getHostTempPath);
-
-        logger.info("Attempting to launch container with binds and file arg");
-        SysRuntime runtime = SysRuntimeImpl.forCurrentOs();
-
-        String cmdSuffix = spec.dataBridges().stream()
-            .map(DataBridge::cmdContrib)
-            .flatMap(Stream::of)
-            .map(arg -> {
-                String str = runtime.quoteFileArgument(arg);
-                return str;
-            })
-            .collect(Collectors.joining(" "));
-
-        for (DataBridge dataBridge : spec.dataBridges()) {
-            String[] contrib = dataBridge.cmdContrib();
-        }
-
-
-        org.testcontainers.containers.GenericContainer<?> container = setupContainer(cmdSuffix);
-
-        // Declare binds on the container
-        for (DataBridge dataBridge : spec.dataBridges()) {
-            Bind bind = dataBridge.bind();
-            BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
-                ? BindMode.READ_ONLY
-                : null;
-            container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
-        }
-
-        // Add the output folder
-        // container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
-
         // Resource manager to close all task at the end
         FinallyRunAll closer = FinallyRunAll.create();
+
         try {
+            Path[] tempPath = new Path[]{null};
+            Supplier<Path> getHostTempPath = () -> {
+                try {
+                    Path r = tempPath[0] != null
+                        ? tempPath[0]
+                        : (tempPath[0] = Files.createTempDirectory("qlever-loader"));
+                    return r;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+
+            closer.add(() -> {
+                Path p = tempPath[0];
+                if (p != null) {
+                    try {
+                        Files.deleteIfExists(p);
+                    } catch (IOException e) {
+                        logger.warn("Could not delete fifo folder on host: " + p, e);
+                    }
+                }
+            });
+
+            InputSpec2 spec = buildInputSpec(getHostTempPath);
+
+            logger.info("Attempting to launch container with binds and file arg");
+            SysRuntime runtime = SysRuntimeImpl.forCurrentOs();
+
+            String cmdSuffix = spec.dataBridges().stream()
+                .map(DockerDataArgumentBridge::cmdContrib)
+                .flatMap(Stream::of)
+                .map(arg -> {
+                    String str = runtime.quoteFileArgument(arg);
+                    return str;
+                })
+                .collect(Collectors.joining(" "));
+
+            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
+                String[] contrib = dataBridge.cmdContrib();
+            }
+
+
+            org.testcontainers.containers.GenericContainer<?> container = setupContainer(cmdSuffix);
+
+            // Declare binds on the container
+            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
+                Bind bind = dataBridge.bind();
+                BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
+                    ? BindMode.READ_ONLY
+                    : null;
+                container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
+            }
+
+            // Add the output folder
+            // container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
+
 
             // Start writing host files
-            for (DataBridge dataBridge : spec.dataBridges()) {
+            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
                 FileWriterTask task = dataBridge.hostFileTask();
                 closer.addThrowing(task::close);
                 task.start();
