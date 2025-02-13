@@ -32,22 +32,10 @@ public class StreamOpTransformBase
     @Override
     public StreamOp transform(StreamOpCommand op) {
         return op;
-        // return new CodecOpCommand(op.getCmdArray());
     }
 
     @Override
     public StreamOp transform(StreamOpVar op) {
         return op;
     }
-    /*
-    @Override
-    public CodecOp transform(CodecOpCommandGroup op, List<CodecOp> subOps) {
-        return CodecOpCommandGroup.of(subOps);
-    }
-
-    @Override
-    public CodecOp transform(CodecOpPipe op, CodecOp subOp1, CodecOp subOp2) {
-        return new CodecOpPipe(subOp1, subOp2);
-    }
-    */
 }

@@ -8,6 +8,7 @@ import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpFile;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpGroup;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpRedirect;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpString;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpSubst;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpToArg;
@@ -79,6 +80,13 @@ public class CmdOpApplyTransformVisitor
     @Override
     public CmdOp visit(CmdOpFile op) {
         CmdOp result = transform.transform(op);
+        return result;
+    }
+
+    @Override
+    public CmdOp visit(CmdOpRedirect op) {
+        CmdOp newOp = op.getSubOp().accept(this);
+        CmdOp result = transform.transform(op, newOp);
         return result;
     }
 }

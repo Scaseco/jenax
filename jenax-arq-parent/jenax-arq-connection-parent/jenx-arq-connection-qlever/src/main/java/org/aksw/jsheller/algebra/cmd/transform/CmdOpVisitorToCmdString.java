@@ -12,6 +12,7 @@ import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpFile;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpGroup;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpRedirect;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpString;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpSubst;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpToArg;
@@ -104,6 +105,14 @@ public class CmdOpVisitorToCmdString
     public CmdString visit(CmdOpFile op) {
         String str = op.getPath(); // op.getSubOp().accept(this);
         CmdString result = new CmdString(strOps.quoteArg(str));
+        return result;
+    }
+
+    @Override
+    public CmdString visit(CmdOpRedirect op) {
+        String before = toArg(op.getSubOp().accept(this));
+        String fileName = op.getFileName();
+        CmdString result = new CmdString(strOps.redirect(before, fileName));
         return result;
     }
 }

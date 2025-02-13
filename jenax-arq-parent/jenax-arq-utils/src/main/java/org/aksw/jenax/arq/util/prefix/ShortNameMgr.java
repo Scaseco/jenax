@@ -30,7 +30,7 @@ public class ShortNameMgr {
             ns = prefixMap.get(prefix);
             localName = pair.getRight();
         } else {
-            int splitPoint = SplitIRI.splitXML(iri);
+            int splitPoint = SplitIRI.splitpoint(iri); // .splitXML(iri);
             if (splitPoint < 0) {
                 splitPoint = iri.length();
             }

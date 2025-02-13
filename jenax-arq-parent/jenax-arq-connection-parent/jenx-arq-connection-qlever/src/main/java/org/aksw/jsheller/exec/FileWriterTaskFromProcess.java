@@ -69,4 +69,9 @@ public class FileWriterTaskFromProcess extends FileWriterTaskViaExecutor {
     protected void onCompletion() throws IOException {
         // nothing to do
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + cmdLine;
+    }
 }

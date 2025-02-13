@@ -24,13 +24,13 @@ import org.aksw.jsheller.exec.SysRuntime;
 import org.aksw.jsheller.registry.CodecRegistry;
 import org.aksw.jsheller.registry.CodecVariant;
 
-public class StreamTransformToCmdOp
+public class StreamOpTransformToCmdOp
     extends StreamOpTransformBase
 {
     private CodecRegistry registry;
     private CodecSysEnv env;
 
-    public StreamTransformToCmdOp(CodecRegistry registry, CodecSysEnv env) {
+    public StreamOpTransformToCmdOp(CodecRegistry registry, CodecSysEnv env) {
         super();
         this.registry = registry;
         this.env = env;
@@ -55,6 +55,21 @@ public class StreamTransformToCmdOp
         return result;
     }
 
+    public static String resolveCmdName(CodecVariant codecVariant, SysRuntime runtime) {
+        String[] cmd = codecVariant.getCmd();
+        if (cmd.length == 0) {
+            throw new IllegalStateException("Encountered zero-length command");
+        }
+        String rawCmdName = cmd[0];
+        String resolvedCmdName;
+        try {
+            resolvedCmdName = runtime.which(rawCmdName);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return resolvedCmdName;
+    }
+
     @Override
     public StreamOp transform(StreamOpTranscode op, StreamOp subOp) {
         String name = op.getName();
@@ -63,20 +78,7 @@ public class StreamTransformToCmdOp
         CodecSpec spec = registry.requireCodec(name);
         for (CodecVariant variant : spec.getVariants()) {
             String[] cmd = variant.getCmd();
-            if (cmd.length == 0) {
-                throw new IllegalStateException("Encountered zero-length command");
-            }
-            String rawCmdName = cmd[0];
-            String resolvedCmdName;
-            try {
-                resolvedCmdName = env.getRuntime().which(rawCmdName);
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (resolvedCmdName == null) {
-                continue;
-            }
+            String resolvedCmdName = resolveCmdName(variant, env.getRuntime());
 
             // cmd[0] = resolvedCmdName;
             List<CmdOp> args = new ArrayList<>();
@@ -116,6 +118,7 @@ public class StreamTransformToCmdOp
             }
         }
 
+        // If no codec found then just to the default transform.
         if (result == null) {
             result = super.transform(op, subOp);
         }

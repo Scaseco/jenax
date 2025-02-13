@@ -2,8 +2,10 @@ package org.aksw.jsheller.algebra.stream.transform;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.aksw.jsheller.algebra.common.Transcoding;
+import org.aksw.jsheller.algebra.stream.op.StreamOp;
 import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
 import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
 import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
@@ -20,6 +22,17 @@ public class StreamOpVisitorFileName
         String baseName,
         List<Transcoding> transcodings
     ) {}
+
+    protected Function<String, ? extends StreamOp> varNameResolver;
+
+    public StreamOpVisitorFileName() {
+        this(null);
+    }
+
+    public StreamOpVisitorFileName(Function<String, ? extends StreamOp> varNameResolver) {
+        super();
+        this.varNameResolver = varNameResolver;
+    }
 
     @Override
     public FileName visit(StreamOpFile op) {
@@ -46,6 +59,18 @@ public class StreamOpVisitorFileName
 
     @Override
     public FileName visit(StreamOpVar op) {
-        throw new UnsupportedOperationException("Filename generation not implemented for this operator: " + op);
+        FileName result;
+        if (varNameResolver != null) {
+            String varName = op.getVarName();
+            StreamOp subOp = varNameResolver.apply(varName);
+            if (subOp != null) {
+                result = subOp.accept(this);
+            } else {
+                throw new RuntimeException("Variable name " + varName + " could not be resolved to a sub op.");
+            }
+        } else {
+            throw new UnsupportedOperationException("Filename generation not implemented for this operator: " + op);
+        }
+        return result;
     }
 }

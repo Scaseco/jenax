@@ -4,6 +4,10 @@ import org.aksw.jsheller.algebra.stream.op.StreamOp;
 
 /**
  * Operator to write a stream to a file.
+ * Typically a redirect:
+ * <pre>
+ * command arg > file.out
+ * </pre>
  */
 public class FileOpOverStreamOp
     extends FileOp0

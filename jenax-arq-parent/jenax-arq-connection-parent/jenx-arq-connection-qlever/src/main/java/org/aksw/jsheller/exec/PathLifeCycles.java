@@ -45,6 +45,11 @@ public class PathLifeCycles {
         public void beforeExec(Path path) throws IOException {
             SysRuntimeImpl.forCurrentOs().createNamedPipe(path);
         }
+
+        @Override
+        public String toString() {
+            return "namedPipe";
+        }
     }
 
     public static class PathLifeCycleDeleteAfterExec
@@ -57,6 +62,11 @@ public class PathLifeCycles {
         @Override
         public void afterExec(Path path) throws IOException {
             Files.deleteIfExists(path);
+        }
+
+        @Override
+        public String toString() {
+            return "deleteAfterExec/" + getDelegate();
         }
     }
 

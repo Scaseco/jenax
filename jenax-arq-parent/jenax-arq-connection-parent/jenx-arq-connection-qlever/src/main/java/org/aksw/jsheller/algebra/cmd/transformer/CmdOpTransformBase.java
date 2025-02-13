@@ -7,6 +7,7 @@ import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpFile;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpGroup;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpRedirect;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpString;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpSubst;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpToArg;
@@ -49,5 +50,10 @@ public class CmdOpTransformBase
     public CmdOp transform(CmdOpFile op) {
         return op;
         // return new CmdOpString(op.value);
+    }
+
+    @Override
+    public CmdOp transform(CmdOpRedirect op, CmdOp subOp) {
+        return new CmdOpRedirect(op.getFileName(), subOp);
     }
 }

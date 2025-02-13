@@ -1,15 +1,21 @@
 package org.aksw.jsheller.algebra.stream.transform;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.aksw.jsheller.algebra.stream.op.CodecSpec;
 import org.aksw.jsheller.algebra.stream.op.StreamOp;
+import org.aksw.jsheller.algebra.stream.op.StreamOpCommand;
+import org.aksw.jsheller.algebra.stream.op.StreamOpConcat;
+import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
 import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
 import org.aksw.jsheller.algebra.stream.op.StreamOpVar;
-import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformBase;
-import org.aksw.jsheller.registry.CodecRegistry;
+import org.aksw.jsheller.algebra.stream.transform.StreamOpTransformExecutionPartitioner.Location;
+import org.aksw.jsheller.algebra.stream.transformer.StreamOpEntry;
+import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransform;
+import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformGeneric;
+import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformer;
 
 /**
  * Partitions stream expressions based on the capabilities of a runtime.
@@ -34,16 +40,21 @@ import org.aksw.jsheller.registry.CodecRegistry;
  *
  */
 public class StreamOpTransformExecutionPartitioner
-    extends StreamOpTransformBase
+    implements StreamOpTransformGeneric<StreamOpEntry<Location>>
 {
-    protected CodecRegistry codecRegistry;
+    protected StreamOpTransform sysCallTransform;
 
     protected Map<String, StreamOp> varToOp = new LinkedHashMap<>();
     protected int nextVar = 0;
 
-    public StreamOpTransformExecutionPartitioner(CodecRegistry codecRegistry) {
+    public enum Location {
+        NOT_HANDLED,
+        HANDLED
+    }
+
+    public StreamOpTransformExecutionPartitioner(StreamOpTransform sysCallTransform) {
         super();
-        this.codecRegistry = Objects.requireNonNull(codecRegistry);
+        this.sysCallTransform = Objects.requireNonNull(sysCallTransform);
     }
 
     public Map<String, StreamOp> getVarToOp() {
@@ -51,23 +62,59 @@ public class StreamOpTransformExecutionPartitioner
     }
 
     protected boolean isSupported(StreamOpTranscode op) {
-        CodecSpec codecSpec = codecRegistry.getCodecSpec(op.getName());
-        boolean result = codecSpec != null;
+        boolean result;
+        try {
+            StreamOp testOp = StreamOpTransformer.transform(op, sysCallTransform);
+            result = testOp instanceof StreamOpCommand;
+        } catch (Exception e) {
+            // XXX Should check what exception we are getting
+            result = false;
+        }
         return result;
     }
 
     @Override
-    public StreamOp transform(StreamOpTranscode op, StreamOp subOp) {
-        StreamOp result;
-        boolean isSupported = isSupported(op);
-        if (!isSupported) {
-            String varName = "v" + (nextVar++);
-            varToOp.put(varName, subOp);
-            StreamOpVar v = new StreamOpVar(varName);
-            result = new StreamOpTranscode(op.getName(), op.getTranscodeMode(), v);
-        } else {
-            result = super.transform(op, subOp);
+    public StreamOpEntry<Location> transform(StreamOpTranscode op, StreamOpEntry<Location> subOp) {
+
+        StreamOpEntry<Location> result = null;
+        // Location newOpLocation;
+        // StreamOp newOp = subOp.getStreamOp();
+        if (subOp.getValue() == Location.HANDLED) {
+            boolean isSupported = isSupported(op);
+            if (!isSupported) {
+                String varName = "v" + (nextVar++);
+                StreamOp thisOp = new StreamOpTranscode(op.getTranscoding(), subOp.getStreamOp());
+                varToOp.put(varName, thisOp);
+                StreamOpVar v = new StreamOpVar(varName);
+                result = new StreamOpEntry<>(v, Location.NOT_HANDLED);
+            }
+        }
+
+        if (result == null) {
+            // StreamOp newOp = super.transform(op, subOp.getStreamOp());
+            StreamOpTranscode newOp = new StreamOpTranscode(op.getTranscoding(), subOp.getStreamOp());
+            result = new StreamOpEntry<>(newOp, subOp.getValue());
         }
         return result;
+    }
+
+    @Override
+    public StreamOpEntry<Location> transform(StreamOpFile op) {
+        return new StreamOpEntry<>(op, Location.HANDLED);
+    }
+
+    @Override
+    public StreamOpEntry<Location> transform(StreamOpVar op) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public StreamOpEntry<Location> transform(StreamOpCommand op) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public StreamOpEntry<Location> transform(StreamOpConcat op, List<StreamOpEntry<Location>> subOps) {
+        throw new UnsupportedOperationException();
     }
 }

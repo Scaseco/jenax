@@ -8,18 +8,19 @@ import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpFile;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpGroup;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpPipe;
+import org.aksw.jsheller.algebra.cmd.op.CmdOpRedirect;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpString;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpSubst;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpToArg;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpVisitor;
 import org.aksw.jsheller.exec.CmdStrOps;
 
-public class CmdOpVisitorToString
+public class CmdOpVisitorToProcessSubstString
     implements CmdOpVisitor<String>
 {
     protected CmdStrOps strOps;
 
-    public CmdOpVisitorToString(CmdStrOps strOps) {
+    public CmdOpVisitorToProcessSubstString(CmdStrOps strOps) {
         super();
         this.strOps = Objects.requireNonNull(strOps);
     }
@@ -73,6 +74,14 @@ public class CmdOpVisitorToString
     public String visit(CmdOpFile op) {
         String str = op.getPath(); // op.getSubOp().accept(this);
         String result = strOps.quoteArg(str);
+        return result;
+    }
+
+    @Override
+    public String visit(CmdOpRedirect op) {
+        String cmdStr = op.getSubOp().accept(this);
+        String fileName = op.getFileName();
+        String result = strOps.redirect(cmdStr, fileName);
         return result;
     }
 }

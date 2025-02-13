@@ -6,6 +6,7 @@ import java.util.Map;
 import org.aksw.jsheller.exec.SysRuntime;
 
 // Runtime + Cache of resolved commands
+// XXX Perhaps better implemented as a CachingSysRuntime.
 public class CodecSysEnv {
     private SysRuntime runtime;
 

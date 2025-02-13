@@ -53,4 +53,9 @@ public class CmdStrOpsBash
             .collect(Collectors.joining(" "));
         return result;
     }
+
+    @Override
+    public String redirect(String cmdStr, String fileName) {
+        return cmdStr + " > " + fileName;
+    }
 }

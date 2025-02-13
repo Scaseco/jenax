@@ -8,4 +8,5 @@ public interface CmdOpVisitor<T> {
     T visit(CmdOpSubst op);
     T visit(CmdOpToArg op);
     T visit(CmdOpFile op);
+    T visit(CmdOpRedirect op);
 }

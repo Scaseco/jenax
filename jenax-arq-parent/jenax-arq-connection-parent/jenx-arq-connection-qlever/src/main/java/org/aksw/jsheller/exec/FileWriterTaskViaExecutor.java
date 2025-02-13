@@ -155,4 +155,9 @@ public abstract class FileWriterTaskViaExecutor
         }
     }
     protected void closeActual() throws Exception { }
+
+    @Override
+    public String toString() {
+        return "(executorFileWriter " + getOutputPath() + "/" + pathLifeCycle + ")";
+    }
 }

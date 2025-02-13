@@ -8,6 +8,10 @@ import java.util.concurrent.ExecutionException;
 public class FileWriterTaskNoop
     extends FileWriterTaskBase
 {
+    public FileWriterTaskNoop(Path path) {
+        super(path, PathLifeCycles.none());
+    }
+
     public FileWriterTaskNoop(Path path, PathLifeCycle pathLifeCycle) {
         super(path, pathLifeCycle);
     }
@@ -42,5 +46,10 @@ public class FileWriterTaskNoop
 
     @Override
     public void waitForCompletion() throws ExecutionException, InterruptedException {
+    }
+
+    @Override
+    public String toString() {
+        return "(noOpWriter " + getOutputPath() + ")";
     }
 }
