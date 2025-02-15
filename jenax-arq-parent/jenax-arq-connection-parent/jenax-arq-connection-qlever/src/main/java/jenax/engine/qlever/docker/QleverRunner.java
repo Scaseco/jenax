@@ -52,7 +52,7 @@ public class QleverRunner {
         int containerPort = Optional.ofNullable(conf.getPort()).orElse(defaultContainerPort);
 
         // https://hub.docker.com/r/adfreiburg/qlever/tags
-        org.testcontainers.containers.GenericContainer<?> container = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
+        try (org.testcontainers.containers.GenericContainer<?> container = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
             .withWorkingDirectory("/data")
             .withExposedPorts(containerPort)
             // Setting UID does not work with latest image due to
@@ -61,24 +61,23 @@ public class QleverRunner {
             // .withEnv("GID", Integer.toString(gid))
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
             .withFileSystemBind(hostDbDir, "/data", BindMode.READ_WRITE)
-            .withCommand(new String[]{cmdStr})
-            ;
+            .withCommand(new String[]{cmdStr})) {
 
-        // Test containers will allocate a port if an explicit mapping is omitted.
-        if (hostPort != null) {
-            container.setPortBindings(List.of(hostPort + ":" + containerPort));
+            // Test containers will allocate a port if an explicit mapping is omitted.
+            if (hostPort != null) {
+                container.setPortBindings(List.of(hostPort + ":" + containerPort));
+            }
+
+            container.start();
+                String serviceUrl = "http://" + container.getHost() + ":" + container.getMappedPort(containerPort);
+                logger.info("Started Qlever server at: " + serviceUrl);
+
+                container.followOutput(outputFrame -> {
+                    String msg = outputFrame.getUtf8StringWithoutLineEnding();
+                    logger.info(msg);
+                });
+
+                container.getDockerClient().waitContainerCmd(container.getContainerId()).exec(new WaitContainerResultCallback()).awaitCompletion();
         }
-
-        container.start();
-
-        String serviceUrl = "http://" + container.getHost() + ":" + container.getMappedPort(containerPort);
-        logger.info("Started Qlever server at: " + serviceUrl);
-
-        container.followOutput(outputFrame -> {
-            String msg = outputFrame.getUtf8StringWithoutLineEnding();
-            logger.info(msg);
-        });
-
-        container.getDockerClient().waitContainerCmd(container.getContainerId()).exec(new WaitContainerResultCallback()).awaitCompletion();
     }
 }

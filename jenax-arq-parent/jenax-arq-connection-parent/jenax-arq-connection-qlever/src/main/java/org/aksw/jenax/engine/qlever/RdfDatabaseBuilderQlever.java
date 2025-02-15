@@ -762,44 +762,45 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 //                String[] contrib = dataBridge.cmdContrib();
 //            }
 
-            org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdSuffix);
+            try (org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdSuffix)) {
 
-            // Declare binds on the container
-            if (true) {
+                // Declare binds on the container
+                if (true) {
+                    for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
+                        Bind bind = dataBridge.bind();
+                        BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
+                            ? BindMode.READ_ONLY
+                            : null;
+                        container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
+                    }
+                } else {
+                    Path p = tempPath[0];
+                    if (p != null) {
+
+                        container.addFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
+                    }
+                }
+                // Add the output folder
+                // container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
+
+
+                // Start writing host files
                 for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-                    Bind bind = dataBridge.bind();
-                    BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
-                        ? BindMode.READ_ONLY
-                        : null;
-                    container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
+                    FileWriterTask task = dataBridge.hostFileTask();
+                    closer.addThrowing(task::close);
+                    task.start();
                 }
-            } else {
-                Path p = tempPath[0];
-                if (p != null) {
 
-                    container.addFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
-                }
+                container.start();
+        //        container.followOutput(outputFrame -> {
+        //            String msg = outputFrame.getUtf8String();
+        //            logger.info(msg);
+        //        });
+                container.getDockerClient()
+                    .waitContainerCmd(container.getContainerId())
+                    .exec(new WaitContainerResultCallback())
+                    .awaitCompletion();
             }
-            // Add the output folder
-            // container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
-
-
-            // Start writing host files
-            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-                FileWriterTask task = dataBridge.hostFileTask();
-                closer.addThrowing(task::close);
-                task.start();
-            }
-
-            container.start();
-    //        container.followOutput(outputFrame -> {
-    //            String msg = outputFrame.getUtf8String();
-    //            logger.info(msg);
-    //        });
-            container.getDockerClient()
-                .waitContainerCmd(container.getContainerId())
-                .exec(new WaitContainerResultCallback())
-                .awaitCompletion();
         } finally {
             closer.run();
         }
