@@ -37,11 +37,11 @@ public class QleverRunner {
         logger.info("Generated command line: " + cmdStr);
 
         if (qleverImageName == null) {
-            qleverImageName = "adfreiburg/qlever";
+            qleverImageName = QleverConstants.DOCKER_IMAGE_NAME;
         }
 
         if (qleverImageTag == null) {
-            qleverImageTag = "commit-a307781";
+            qleverImageTag = QleverConstants.DOCKER_IMAGE_TAG;
         }
 
         String dockerImageName = Stream.of(qleverImageName, qleverImageTag)

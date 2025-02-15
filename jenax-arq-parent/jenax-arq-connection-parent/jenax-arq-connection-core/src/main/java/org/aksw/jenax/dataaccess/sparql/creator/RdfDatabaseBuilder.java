@@ -31,6 +31,16 @@ public interface RdfDatabaseBuilder<X extends RdfDatabaseBuilder<X>>
         return addPath(source, graphNode);
     }
 
+//    default X addPath(String source, String graph, String sourceFormat) throws IOException {
+//        Node graphNode = graph == null ? null : NodeFactory.createURI(graph);
+//        return addPath(source, graphNode);
+//    }
+
+//  default X addPath(String source, String graph, String sourceFormat, List<String> sourceEncodings) throws IOException {
+//  Node graphNode = graph == null ? null : NodeFactory.createURI(graph);
+//  return addPath(source, graphNode);
+//}
+
     /**
      * Determine the types of arguments:
      * If all files are directly nq or ttl then use them as file arguments.
@@ -44,5 +54,5 @@ public interface RdfDatabaseBuilder<X extends RdfDatabaseBuilder<X>>
      * @throws InterruptedException
      */
     // TODO Should probably return a future to allow for concurrent cancel
-    RdfDatabase build() throws IOException, InterruptedException;
+    RDFDatabase build() throws IOException, InterruptedException;
 }

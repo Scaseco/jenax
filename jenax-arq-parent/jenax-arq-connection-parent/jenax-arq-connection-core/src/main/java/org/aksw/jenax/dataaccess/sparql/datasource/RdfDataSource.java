@@ -5,6 +5,8 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSource;
+import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSourceAdapter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -46,6 +48,10 @@ public interface RdfDataSource
         return RdfDataSources.newUpdateBuilder(this);
     }
 
+    default RdfLinkSource asLinkSource() {
+        return RdfLinkSourceAdapter.adapt(this);
+    }
+
     /**
      * Return a connection-less QueryExecutionFactory view of this data source.
      * Every QueryExecution created with the returned factory will obtain a fresh
@@ -58,9 +64,5 @@ public interface RdfDataSource
      */
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);
-    }
-
-    default RdfLinkSource asLinkSource() {
-        return new RdfLinkSourceAdapter(this);
     }
 }

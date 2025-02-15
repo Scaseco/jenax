@@ -7,7 +7,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceFactory;
 
 public class RdfDataEngineFactoryOverRdfDataSourceFactory
-    implements RdfDataEngineFactory
+    implements RDFEngineFactory
 {
     protected RdfDataSourceFactory rdfDataSourceFactory;
 
@@ -17,7 +17,7 @@ public class RdfDataEngineFactoryOverRdfDataSourceFactory
     }
 
     @Override
-    public RdfDataEngineBuilder<?> newEngineBuilder() {
+    public RDFEngineBuilder<?> newEngineBuilder() {
         return new RdfDataEngineBuilderBase() {
             @Override
             public RdfDataEngine build() throws Exception {

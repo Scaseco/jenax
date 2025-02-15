@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.aksw.commons.collections.MapUtils;
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 
 public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutable<X>>
     implements RdfDataSourceSpecBasicMutable<X>
@@ -39,16 +39,22 @@ public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutab
         return self();
     }
 
+//    @Override
+//    public Path getLocation() {
+//        return (Path)map.get(RdfDataSourceSpecTerms.LOCATION_KEY);
+//    }
+
     @Override
     public String getLocationContext() {
         return (String)map.get(RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY);
     }
 
     @Override
-    public X setLocationContext(String locationContext) {
-        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY, locationContext);
+    public X setLocationContext(String context) {
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY, context);
         return self();
     }
+
 
     @Override
     public String getLocation() {
@@ -63,15 +69,16 @@ public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutab
 
     @Override
     public Boolean isAutoDeleteIfCreated() {
-        return Optional.ofNullable(map.get(RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY))
-                .map(x -> (String)x)
-                .map(Boolean::parseBoolean)
+        return Optional.ofNullable((Boolean)map.get(RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY))
+                // .map(x -> (String)x)
+                // .map(Boolean::parseBoolean)
                 .orElse(false);
     }
 
     @Override
     public X setAutoDeleteIfCreated(Boolean onOrOff) {
-        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, Boolean.toString(onOrOff));
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, onOrOff);
+        // MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, Boolean.toString(onOrOff));
         return self();
     }
 
@@ -103,14 +110,14 @@ public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutab
     }
 
     @Override
-    public X setDatabase(RdfDatabase rdfDatabase) {
+    public X setDatabase(RDFDatabase rdfDatabase) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.DATABASE_KEY, rdfDatabase);
         return self();
     }
 
     @Override
-    public RdfDatabase getDatabase() {
-        return (RdfDatabase)map.get(RdfDataSourceSpecTerms.DATABASE_KEY);
+    public RDFDatabase getDatabase() {
+        return (RDFDatabase)map.get(RdfDataSourceSpecTerms.DATABASE_KEY);
     }
 
     @Override

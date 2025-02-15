@@ -11,8 +11,8 @@ public class QleverConfRun
     // protected String dbPath;
     protected String indexBaseName;
     protected Integer port;
-    protected String accessToken = "";
-    protected Integer numSimultaneousQueries = 1;
+    protected String accessToken; // = "";
+    protected Integer numSimultaneousQueries; // = 1;
     protected String memoryMaxSize;
     protected String cacheMaxSize;
     protected String cacheMaxSizeSingleEntry;

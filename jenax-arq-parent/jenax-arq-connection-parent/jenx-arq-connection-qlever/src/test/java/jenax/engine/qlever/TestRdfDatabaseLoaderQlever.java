@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.jsheller.exec.SysRuntime;
@@ -37,13 +37,13 @@ public class TestRdfDatabaseLoaderQlever {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
 
-         RdfDatabase database = new RdfDatabaseBuilderQlever()
+         RDFDatabase database = new RdfDatabaseBuilderQlever()
             .setOutputFolder(outputPath)
             .setIndexName("test")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-dbpedia_2015-10.nt")
             .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-instance_types_transitive_es.ttl.bz2")
-            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-infobox_properties_es.ttl.bz2")
+            .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-infobox_properties_es.ttl.bz2", "http://info.box/properties")
 
             // .addPath("/home/raven/.m2/repository/dcat/org/aksw/moin/moin/1.20220502.0-1/moin-1.20220502.0-1-dcat.ttl.bz2")
             //.addPath("/home/raven/Projects/Eclipse/jena-sparql-api-parent/jena-sparql-api-concepts/src/main/resources/dataset-fp7.ttl")
@@ -73,7 +73,7 @@ public class TestRdfDatabaseLoaderQlever {
             }
         };
 
-        RdfDatabase database = new RdfDatabaseBuilderQlever()
+        RDFDatabase database = new RdfDatabaseBuilderQlever()
             .setSysRuntime(runtime)
             .setOutputFolder(outputPath)
             .setIndexName("test")

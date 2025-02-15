@@ -2,9 +2,9 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
 
-public abstract class RdfDataEngineBuilderBase<X extends RdfDataEngineBuilder<X>>
+public abstract class RdfDataEngineBuilderBase<X extends RDFEngineBuilder<X>>
     extends RdfDataSourceSpecBasicFromMap<X>
-    implements RdfDataEngineBuilder<X>
+    implements RDFEngineBuilder<X>
 {
 //    @Override
 //    public RdfDataEngine build() throws Exception {

@@ -23,7 +23,7 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactory;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
@@ -138,7 +138,7 @@ public class RdfDataSources {
 
         String sourceType = Optional.ofNullable(spec.getEngine()).orElse("mem");
 
-        RdfDataEngineFactory factory = RdfDataEngineFactoryRegistry.get().getFactory(sourceType);
+        RDFEngineFactory factory = RdfDataEngineFactoryRegistry.get().getFactory(sourceType);
         if (factory == null) {
             throw new RuntimeException("No RdfDataSourceFactory registered under name " + sourceType);
         }

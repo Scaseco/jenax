@@ -6,7 +6,11 @@ import java.util.Objects;
 import org.aksw.jsheller.algebra.stream.op.HasStreamOp;
 import org.aksw.jsheller.algebra.stream.op.StreamOp;
 
-/** Helper record structure for use with {@link StreamOpTransformGeneric}. */
+/**
+ * Groups a StreamOp with a custom value.
+ * Because it implements {@link HasStreamOp} it can be used
+ * directly with {@link StreamOpTransformGeneric}.
+ */
 public record StreamOpEntry<T>(StreamOp op, T data)
     implements HasStreamOp, Entry<StreamOp, T>
 {

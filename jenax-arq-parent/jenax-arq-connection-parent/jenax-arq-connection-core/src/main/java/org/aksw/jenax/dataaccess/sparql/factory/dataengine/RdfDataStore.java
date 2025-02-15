@@ -7,19 +7,19 @@ import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
 
 /**
  * A helper data structure to bundle a specific combination of a
- * {@link RdfDataEngineFactory} and a {@link RdfDatabaseBuilder}.
+ * {@link RDFEngineFactory} and a {@link RdfDatabaseBuilder}.
  */
 public class RdfDataStore {
-    protected RdfDataEngineFactory engineFactory;
+    protected RDFEngineFactory engineFactory;
     protected RdfDatabaseFactory databaseFactory;
 
-    public RdfDataStore(RdfDataEngineFactory engineFactory, RdfDatabaseFactory databaseFactory) {
+    public RdfDataStore(RDFEngineFactory engineFactory, RdfDatabaseFactory databaseFactory) {
         super();
         this.engineFactory = Objects.requireNonNull(engineFactory);
         this.databaseFactory = databaseFactory;
     }
 
-    public RdfDataEngineFactory getEngineFactory() {
+    public RDFEngineFactory getEngineFactory() {
         return engineFactory;
     }
 

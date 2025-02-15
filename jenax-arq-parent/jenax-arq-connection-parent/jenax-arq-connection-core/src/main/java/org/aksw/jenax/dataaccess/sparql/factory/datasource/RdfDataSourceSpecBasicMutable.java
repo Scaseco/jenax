@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 import java.util.Map;
 
 import org.aksw.commons.util.obj.HasSelf;
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabase;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 
 public interface RdfDataSourceSpecBasicMutable<X extends RdfDataSourceSpecBasicMutable<X>>
     extends RdfDataSourceSpecBasic, HasSelf<X>
@@ -27,7 +27,7 @@ public interface RdfDataSourceSpecBasicMutable<X extends RdfDataSourceSpecBasicM
      * Set a database for the engine.
      * The provider database must be supported by the builder implementation.
      */
-    X setDatabase(RdfDatabase rdfDatabase);
+    X setDatabase(RDFDatabase rdfDatabase);
 
     /** Set a specific directory to use for temporary data. */
     X setTempDir(String location);

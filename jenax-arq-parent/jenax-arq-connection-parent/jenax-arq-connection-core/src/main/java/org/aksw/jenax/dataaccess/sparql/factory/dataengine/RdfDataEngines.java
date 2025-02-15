@@ -1,5 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
+import java.io.Closeable;
 import java.util.Objects;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
@@ -220,10 +221,22 @@ public class RdfDataEngines {
      * In this case use null.
      */
     public static RdfDataEngine of(RdfDataSource rdfDataSource, AutoCloseable closeAction) {
-        RdfDataEngine result = rdfDataSource instanceof RdfDataEngine && (closeAction == null || closeAction == rdfDataSource)
-                ? (RdfDataEngine)rdfDataSource
-                : new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
-
+        RdfDataEngine result;
+        if (rdfDataSource instanceof RdfDataEngine rde) {
+            if (closeAction == null || closeAction == rdfDataSource) {
+                result = (RdfDataEngine)rdfDataSource;
+            } else {
+                result = new RdfDataEngineOverRdfDataSource(rde, () -> {
+                    try {
+                        rde.close();
+                    } finally {
+                        closeAction.close();
+                    }
+                });
+            }
+        } else {
+            result = new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
+        }
         return result;
     }
 
@@ -318,5 +331,9 @@ public class RdfDataEngines {
         return dataEngine instanceof WrappedRdfDataEngine
             ? (WrappedRdfDataEngine)dataEngine
             : new WrappedRdfDataEngine(dataEngine, dataEngine);
+    }
+
+    public static RdfDataEngine wrapWithCloseAction(RdfDataEngine delegate, Closeable closeable) {
+        return RdfDataEngines.of(delegate, closeable);
     }
 }

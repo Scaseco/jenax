@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 import org.aksw.commons.util.exception.FinallyRunAll;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
+import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
 import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFileSet;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jsheller.algebra.cmd.op.CmdOp;
 import org.aksw.jsheller.algebra.cmd.op.CmdOpExec;
@@ -76,6 +76,7 @@ import com.google.common.io.ByteSource;
 import com.nimbusds.jose.util.StandardCharset;
 
 import jenax.engine.qlever.docker.GenericContainer;
+import jenax.engine.qlever.docker.QleverConstants;
 
 public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     public static final List<Lang> supportedLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS));
@@ -86,7 +87,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     public record FileArg(Path path, Lang lang, List<String> encodings, Node graph) {}
 
     /** Record to capture a set of files that make up a Qlever database. */
-    public record QleverDbFileSet(List<Path> paths) implements RdfDatabaseFileSet {
+    public record QleverDbFileSet(List<Path> paths) implements FileSet {
         @Override
         public List<Path> getPaths() {
             return paths;
@@ -137,7 +138,6 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedLangs);
         String contentType = entityInfo.getContentType();
         Lang lang = RDFLanguages.contentTypeToLang(contentType);
-
         addPath(path, g, entityInfo.getContentEncodings(), lang);
         return this;
     }
@@ -337,13 +337,14 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         String filePath = containerBasePath + shortName;
 
         String graphArg = Optional.ofNullable(graph)
-                .filter(g -> Quad.isDefaultGraph(g))
-                .map(Node::getURI).orElse("-");
+            .filter(Node::isURI)
+            .filter(g -> !Quad.isDefaultGraph(g))
+            .map(Node::getURI).orElse("-");
 
         String fmtArg = Optional.ofNullable(lang)
-                .map(l -> l.getFileExtensions())
-                .map(l -> l.isEmpty() ? null : l.get(0))
-                .orElse("");
+            .map(l -> l.getFileExtensions())
+            .map(l -> l.isEmpty() ? null : l.get(0))
+            .orElse("");
 
         String[] cmdContrib = new String[] { "-f", filePath, "-F", fmtArg, "-g", graphArg };
         // String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
@@ -469,16 +470,14 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     }
 
     protected String buildDockerImageName() {
-        String qleverDockerTag = "latest";
-
-        String result = Stream.of("adfreiburg/qlever", qleverDockerTag)
+        String qleverDockerTag = QleverConstants.DOCKER_IMAGE_TAG;
+        String result = Stream.of(QleverConstants.DOCKER_IMAGE_NAME, qleverDockerTag)
             .filter(x -> x != null)
             .collect(Collectors.joining(":"));
-
         return result;
     }
 
-    protected org.testcontainers.containers.GenericContainer<?> setupContainer(String cmdStr) throws NumberFormatException, IOException, InterruptedException {
+    protected org.testcontainers.containers.GenericContainer<?> setupContainer(String indexName, String cmdStr) throws NumberFormatException, IOException, InterruptedException {
         int uid = SystemUtils.getUID();
         int gid = SystemUtils.getGID();
         logger.info("Setting up qlever indexer container as UID: " + uid + ", GID: " + gid);
@@ -489,14 +488,14 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         String dockerImageName = buildDockerImageName();
 
         org.testcontainers.containers.GenericContainer<?> result = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
-            .withWorkingDirectory("/data")
+            .withWorkingDirectory("/data/")
             // .withExposedPorts(containerPort)
             // Setting UID does not work with latest image due to
             // error "UID 1000 already exists" ~ 2025-01-31
             // .withEnv("UID", Integer.toString(uid))
             // .withEnv("GID", Integer.toString(gid))
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
-            .withFileSystemBind(outputFolder.toString(), "/data", BindMode.READ_WRITE)
+            .withFileSystemBind(outputFolder.toString(), "/data/", BindMode.READ_WRITE)
             .withCommand(new String[]{str})
             .withLogConsumer(frame -> logger.info(frame.getUtf8StringWithoutLineEnding()))
             // .withCommand(new String[]{"ServerMain -h"})
@@ -506,13 +505,14 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     }
 
     protected void runContainerWithInputStream(ByteSource byteSource, Lang lang) throws InterruptedException, IOException {
+        String finalIndexName = getFinalIndexName();
 
         String fmt = langToFormat(lang);
         // Read from stdin, data in fmt, parallel parsing (true/false)
         String optsStr = "-f - -F " + fmt + " -p true";
 
         logger.info("Attempting to launch container with a JVM-based input stream.");
-        org.testcontainers.containers.GenericContainer<?> container = setupContainer(optsStr)
+        org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, optsStr)
             .withCreateContainerCmdModifier(cmd -> cmd
                 // .withTty(true)         // Required to keep input open
                 .withTty(false)
@@ -589,10 +589,12 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     }
 
     protected void runContainerWithFileArgs(FileSpec fileSpec) throws NumberFormatException, IOException, InterruptedException {
+        String finalIndexName = getFinalIndexName();
+
         logger.info("Attempting to launch container with binds and file arg");
         String cmdStr = Arrays.asList(fileSpec.fileArgs).stream().collect(Collectors.joining(" "));
 
-        org.testcontainers.containers.GenericContainer<?> container = setupContainer(cmdStr);
+        org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdStr);
 
         for (Bind bind : fileSpec.binds()) {
             BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
@@ -681,6 +683,11 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         }
     }
 
+    public String getFinalIndexName() {
+        String finalIndexName = indexName == null ? "default" : indexName;
+        return finalIndexName;
+    }
+
     /**
      * Determine the types of arguments:
      * If all files are directly nq or ttl then use them as file arguments.
@@ -695,16 +702,31 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
      */
     @Override
     public RdfDatabaseQlever build() throws IOException, InterruptedException {
+        // The parent directory must exist
+        Path parentFolder = outputFolder.getParent();
+        if (parentFolder != null) {
+            if (!Files.exists(parentFolder)) {
+                throw new NoSuchFileException("Folder does not exist: " + parentFolder);
+            }
+        }
+        Files.createDirectories(outputFolder);
+
+
+        String finalIndexName = getFinalIndexName();
+
         // Resource manager to close all task at the end
         FinallyRunAll closer = FinallyRunAll.create();
 
+        Path[] tempPath = new Path[]{null};
+
         try {
-            Path[] tempPath = new Path[]{null};
             Supplier<Path> getHostTempPath = () -> {
                 try {
                     Path r = tempPath[0] != null
                         ? tempPath[0]
                         : (tempPath[0] = Files.createTempDirectory("qlever-loader"));
+
+                    logger.info("Created fifo folder: " + tempPath[0]);
                     return r;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -736,22 +758,28 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
                 })
                 .collect(Collectors.joining(" "));
 
-            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-                String[] contrib = dataBridge.cmdContrib();
-            }
+//            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
+//                String[] contrib = dataBridge.cmdContrib();
+//            }
 
-
-            org.testcontainers.containers.GenericContainer<?> container = setupContainer(cmdSuffix);
+            org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdSuffix);
 
             // Declare binds on the container
-            for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-                Bind bind = dataBridge.bind();
-                BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
-                    ? BindMode.READ_ONLY
-                    : null;
-                container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
-            }
+            if (true) {
+                for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
+                    Bind bind = dataBridge.bind();
+                    BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
+                        ? BindMode.READ_ONLY
+                        : null;
+                    container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
+                }
+            } else {
+                Path p = tempPath[0];
+                if (p != null) {
 
+                    container.addFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
+                }
+            }
             // Add the output folder
             // container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
 
@@ -776,7 +804,7 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
             closer.run();
         }
 
-        RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, indexName);
+        RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, finalIndexName);
         return result;
     }
 
