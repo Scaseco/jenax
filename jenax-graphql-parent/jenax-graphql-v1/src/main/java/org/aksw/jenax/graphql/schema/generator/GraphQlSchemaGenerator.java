@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
@@ -22,9 +23,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.sparql.algebra.Table;
-import org.apache.jena.sparql.exec.QueryExecBuilderAdapter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -34,6 +33,7 @@ import graphql.language.Definition;
 import graphql.language.Directive;
 import graphql.language.Document;
 import graphql.language.FieldDefinition;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.language.ListType;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.ObjectTypeDefinition.Builder;
@@ -59,7 +59,7 @@ public class GraphQlSchemaGenerator {
     protected ShortNameMgr shortNameMgr = new ShortNameMgr();
     protected DatasetMetadata datasetMetadata;
 
-    public record TypeInfo(Set<Node> subjectTypes, Node property, Set<Node> objectTypes, boolean maxResourceCard, Set<Node> objectDatatypes, boolean maxLiteralCard) {}
+    public record TypeInfo(Set<Node> subjectTypes, Node property, boolean isForward, Set<Node> objectTypes, boolean maxResourceCard, Set<Node> objectDatatypes, boolean maxLiteralCard) {}
     public record ClassInfo(Node name, Map<Node, PropertyInfo> propertyMap, Set<Node> superTypes) {}
     public record PropertyInfo(Node name, Set<Node> objectTypes, boolean maxResourceCard, Set<Node> objectDatatypes, boolean maxLiteralCard) {
         @Override
@@ -83,12 +83,13 @@ public class GraphQlSchemaGenerator {
         Table table = dataSource.asLinkSource().newQuery().query(dataSummary).table();
         // System.err.println(ResultSetFormatter.asText(table.toRowSet().asResultSet()));
         List<TypeInfo> result = table.toRowSet().stream().map(b -> new TypeInfo(
-            (Set<Node>)NodeCollection.extractOrNull(b.get("sTypes")),
+            (Set<Node>)NodeCollection.extractOrNull(b.get("srcTypes")),
             b.get("p"),
-            (Set<Node>)NodeCollection.extractOrNull(b.get("allOTypes")),
-            ((Number)b.get("maxOCard").getLiteral().getValue()).longValue() > 1,
-            (Set<Node>)NodeCollection.extractOrNull(b.get("allODTypes")),
-            ((Number)b.get("maxODCard").getLiteral().getValue()).longValue() > 1))
+            (Boolean)b.get("isForward").getLiteral().getValue(),
+            (Set<Node>)NodeCollection.extractOrNull(b.get("allTgtTypes")),
+            ((Number)b.get("maxTgtCard").getLiteral().getValue()).longValue() > 1,
+            (Set<Node>)NodeCollection.extractOrNull(b.get("allTgtDTypes")),
+            ((Number)b.get("maxTgtDCard").getLiteral().getValue()).longValue() > 1))
         .toList();
 
         return result;
@@ -124,12 +125,12 @@ public class GraphQlSchemaGenerator {
         Multimap<Node, TypeInfo> sIndex = HashMultimap.create();
         list.forEach(item -> item.subjectTypes().forEach(st -> sIndex.put(st, item)));
 
-        System.err.println(list.iterator().next());
+        // System.err.println(list.iterator().next());
 
         Map<Node, Collection<TypeInfo>> map = sIndex.asMap();
         for (Entry<Node, Collection<TypeInfo>> sts : map.entrySet()) {
             Node sourceType = sts.getKey();
-            System.err.println("Class: " + sourceType);
+            // System.err.println("Class: " + sourceType);
 
             Collection<TypeInfo> typeInfos = sts.getValue();
 
@@ -156,9 +157,9 @@ public class GraphQlSchemaGenerator {
             for (Node p : properties) {
                 Set<Node> objectTypes = (Set<Node>)propertyTypes.get(p);
                 Set<Node> objectDTypes = (Set<Node>)propertyDTypes.get(p);
-                System.err.println("  Property: " + p);
-                System.err.println("    Types : " + objectTypes);
-                System.err.println("    DTypes: " + objectDTypes);
+//                System.err.println("  Property: " + p);
+//                System.err.println("    Types : " + objectTypes);
+//                System.err.println("    DTypes: " + objectDTypes);
                 if (objectTypes == null) {
                     objectTypes = new LinkedHashSet<>(); // Set.of();
                 }
@@ -210,8 +211,11 @@ public class GraphQlSchemaGenerator {
 
     protected Document convert() {
 
-        for (Entry<Node, ClassInfo> e : new ArrayList<>(classMap.entrySet())) {
-            e.setValue(materialize(e.getValue()));
+        boolean doMaterialize = true; //false;
+        if (doMaterialize) {
+            for (Entry<Node, ClassInfo> e : new ArrayList<>(classMap.entrySet())) {
+                e.setValue(materialize(e.getValue()));
+            }
         }
 
         // TODO Should all types map to list types? Most likely this is useful - but we could check for classes with just a single instance.
@@ -225,6 +229,7 @@ public class GraphQlSchemaGenerator {
             // .map(x -> (Definition)x)
             .toList();
 
+        // Entry Point: type Query { ... }
         ObjectTypeDefinition query = ObjectTypeDefinition.newObjectTypeDefinition()
             .name("Query")
             .fieldDefinitions(queryFields)
@@ -235,6 +240,7 @@ public class GraphQlSchemaGenerator {
             .map(x -> (Definition)x)
             .toList();
 
+        // Document: Definitions of all classes + entry point
         Document result = Document.newDocument()
             .definitions(definitions)
             .definition(query)
@@ -255,6 +261,7 @@ public class GraphQlSchemaGenerator {
     }
 
 
+    /** create a new node set that is free of subsumed types. */
     public Set<Node> normalize(Set<Node> types) {
         Set<Node> result = new LinkedHashSet<>(types);
         for (Node parent : types) {
@@ -271,11 +278,12 @@ public class GraphQlSchemaGenerator {
         return result;
     }
 
+    /** Move all properties of super types directly to this class. */
     protected ClassInfo materialize(ClassInfo classInfo) {
         Node name = classInfo.name();
-        if (name.isURI() && name.getURI().equals("http://example.org/class18")) {
-            System.err.println("DEBUG POINT");
-        }
+//        if (name.isURI() && name.getURI().equals("http://example.org/class18")) {
+//            System.err.println("DEBUG POINT");
+//        }
 
         Map<Node, PropertyInfo> propertyMap = createPropertyMap(name);
         normalize(propertyMap);
@@ -310,7 +318,7 @@ public class GraphQlSchemaGenerator {
         return result;
     }
 
-    protected ObjectTypeDefinition convertType(ClassInfo classInfo) {
+    protected Definition convertType(ClassInfo classInfo) {
         Node nameNode = classInfo.name();
         String name = toName(nameNode);
 
@@ -354,26 +362,32 @@ public class GraphQlSchemaGenerator {
             fieldDefs.add(dummyField);
         }
 
-        Builder resultBuilder = ObjectTypeDefinition.newObjectTypeDefinition()
-            .name(name)
-            .implementz(implementz)
-            .fieldDefinitions(fieldDefs);
-            // .definitions(fieldDefs)
-            //.directive(dir)
+        Definition result;
+        boolean generateObjectTypeDefinitions = true;
+        if (generateObjectTypeDefinitions) {
+            Builder resultBuilder = ObjectTypeDefinition.newObjectTypeDefinition()
+                .name(name)
+                .implementz(implementz)
+                .fieldDefinitions(fieldDefs);
 
-        if (dir != null) {
-            resultBuilder = resultBuilder.directive(dir);
+            if (dir != null) {
+                resultBuilder = resultBuilder.directive(dir);
+            }
+
+            result = resultBuilder.build();
+        } else {
+            // Debug code for displaying super types via Interface type definitions
+            graphql.language.InterfaceTypeDefinition.Builder bu = InterfaceTypeDefinition.newInterfaceTypeDefinition()
+                .name(name)
+                .implementz(implementz)
+                .definitions(fieldDefs);
+
+            if (dir != null) {
+                bu = bu.directive(dir);
+            }
+
+            result = bu.build();
         }
-
-        ObjectTypeDefinition result = resultBuilder.build();
-//        InterfaceTypeDefinition result = InterfaceTypeDefinition.newInterfaceTypeDefinition()
-//            .name(name)
-//            .implementz(implementz)
-//            // .fieldDefinitions(fieldDefs)
-//            .definitions(fieldDefs)
-//            .directive(dir)
-//            .build();
-
         return result;
     }
 
@@ -446,12 +460,15 @@ public class GraphQlSchemaGenerator {
      *
      */
     protected Node createUnionType(Set<Node> types) {
-        types = new LinkedHashSet<>(types);
+        // types = new LinkedHashSet<>(types);
+        types = normalize(types);
         // Check if there already is an entry for the given set of types.
+
+        // Note: Sets of types with different names may still result in equivalent structure
         Node result = unionClassToName.get(types);
 
         if (result == null) {
-            if (types.size() == 0) {
+            if (types.isEmpty()) {
                 result = getOrCreateUnionType(types);
             } else if (types.size() == 1) {
                 result = types.iterator().next();
@@ -533,9 +550,9 @@ public class GraphQlSchemaGenerator {
 
                 // TODO Create union types for properties with set types
 
-                if (safeTypes.stream().map(x -> x.toString()).anyMatch(x -> x.contains("class15"))) {
-                    System.err.println("DEBUG POINT");
-                }
+//                if (safeTypes.stream().map(x -> x.toString()).anyMatch(x -> x.contains("class15"))) {
+//                    System.err.println("DEBUG POINT");
+//                }
 
                 resultCi.superTypes().addAll(safeTypes);
 
@@ -548,8 +565,8 @@ public class GraphQlSchemaGenerator {
     //            for (Node type : types) {
     //            	severProperty(result, conflictingProperties);
     //            }
-                System.err.println("Union: " + types);
-                System.err.println("  PropertyMap: " + propertyMap);
+//                System.err.println("Union: " + types);
+//                System.err.println("  PropertyMap: " + propertyMap);
             }
         }
         return result;
@@ -580,21 +597,36 @@ public class GraphQlSchemaGenerator {
     }
 
     protected Node getOrCreateStructuralType(Map<Node, PropertyInfo> propertyMap) {
-        Set<PropertyInfo> propertySet = propertyMap.values().stream()
-            .map(x -> x.clone())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        if (propertySet.isEmpty()) {
+        if (propertyMap.isEmpty()) {
             return getEmptyType();
         }
 
+        Map<Node, PropertyInfo> pMap = propertyMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                e -> e.getKey(),
+                e -> e.getValue().clone(),
+                (u, v) -> v,
+                LinkedHashMap::new
+            ));
+
+        Set<PropertyInfo> pSet = new LinkedHashSet<>(pMap.values());
+
         // XXX Perhaps reuse registerClass method? (blocks use of propertiesToClass.computeIfAbsent).
-        return propertiesToStructuralClass.computeIfAbsent(propertySet, pMap -> {
+        return propertiesToStructuralClass.computeIfAbsent(pSet, ps -> {
             Node r = allocateClassName();
-            ClassInfo ci = new ClassInfo(r, propertyMap, new LinkedHashSet<>());
+            // ClassInfo ci = new ClassInfo(r, propertyMap, new LinkedHashSet<>());
+            ClassInfo ci = new ClassInfo(r, pMap, new LinkedHashSet<>());
             classMap.put(r, ci);
             return r;
         });
+    }
+
+    public Stream<Node> getTypes(Node node) {
+        Set<Node> superNodes = classMap.get(node).superTypes();
+        return Stream.concat(
+            Stream.of(node),
+            superNodes.stream().flatMap(this::getTypes));
     }
 
     /** Given a class with property p, create a new class b without p.
@@ -609,6 +641,7 @@ public class GraphQlSchemaGenerator {
         if (exclusions.isEmpty()) {
             result = cls;
         } else {
+            // System.err.println("Severing " + cls + " by excluding properties " + exclusions);
             ClassInfo ci = classMap.get(cls);
 
             // createUnionTypes for each property
@@ -629,90 +662,80 @@ public class GraphQlSchemaGenerator {
             // Issue: It can erroneously happen that newProperties is empty and still a new super type was created
 
             Set<Node> oldSuperTypes = new LinkedHashSet<>(ci.superTypes());
+
+            // Sever the excluded properties from all super types
             Set<Node> newSuperTypes = oldSuperTypes.stream()
                 .map(superType -> severProperty(superType, exclusions))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-                // Cases to consider:
-                // - There were no super types and all properties were in conflict -> returned safe type is the empty type
-                // - For class A, There were no super types, and some but not all properties were in conflict ->
-                //     Create a structural class B with the non conflict properties
-                //     Remove conflicting properties from A state A extends B
-                //     Return B
+            // Cases to consider:
+            // - There were no super types and all properties were in conflict -> returned safe type is the empty type
+            // - For class A, There were no super types, and some but not all properties were in conflict ->
+            //     Create a structural class B with the non conflict properties
+            //     Remove conflicting properties from A state A extends B
+            //     Return B
 
-                if (newSuperTypes.equals(oldSuperTypes) && conflictProperties.isEmpty()) {
-                // if (newProperties.isEmpty()) {
+            if (newSuperTypes.equals(oldSuperTypes) && conflictProperties.isEmpty()) {
+            // if (newProperties.isEmpty()) {
+                result = cls;
+            } else if (conflictProperties.isEmpty() && newSuperTypes.size() == 1) {
+                // If only one super type remained and there are no additional properties then the super class becomes the result
+                // FIXME Check: don't we lose the safe properties that way?
+                result = newSuperTypes.iterator().next();
+            } else if (newSuperTypes.size() > 1 && conflictProperties.isEmpty() && safeProperties.isEmpty()) {
+                result = getOrCreateUnionType(newSuperTypes);
+            } else {
+                // The name of the class without conflicting properties
+                Node conflictFreeClassName = allocateExclusionClassName(cls, exclusions);
+
+                // Issue: An exclusion class could also be identified by its structure - so its two different approaches to refer to the
+                // same thing!
+
+                // The exclusion class might already be a super class of the initial one!
+                // TODO It may also be the empty class
+                if (oldSuperTypes.contains(conflictFreeClassName)) {
                     result = cls;
-                } else if (conflictProperties.isEmpty() && newSuperTypes.size() == 1) {
-                    // If only one super type remained and there are no additional properties then the super class becomes the result
-                    result = newSuperTypes.iterator().next();
-                } else if (newSuperTypes.size() > 1 && conflictProperties.isEmpty() && safeProperties.isEmpty()) {
-                    result = getOrCreateUnionType(newSuperTypes);
                 } else {
-                    // if nothing was severed return the original class name
-                    // to determine this, we need to sever the properties from the super classes
-//                    if (newProperties.isEmpty()) {
-//                        result = cls;
-//                    } else {
+                    boolean nonEmptyConflictType = false;
 
-                    // The name of the class without conflicting properties
-                    Node conflictFreeClassName = allocateExclusionClassName(cls, exclusions);
-
-                    // Issue: An exclusion class could also be identified by its structure - so its two different approaches to refer to the
-                    // same thing!
-
-                    // The exclusion class might already be a super class of the initial one!
-                    if (oldSuperTypes.contains(conflictFreeClassName)) {
-                        result = cls;
+                    ClassInfo conflictFreeCi = classMap.get(conflictFreeClassName);
+                    if (conflictFreeCi == null) {
+                        if (true) { throw new RuntimeException("should not happen"); }
+                        conflictFreeCi = new ClassInfo(conflictFreeClassName, conflictProperties, new LinkedHashSet<>());
+                        classMap.put(conflictFreeClassName, conflictFreeCi);
                     } else {
-                        if (conflictProperties.values().stream().anyMatch(x -> x.objectTypes().size() > 1)) {
-                            System.err.println("DEBUG POINT 3");
-                        }
+                        // System.err.println("Found existing exclusion class: " + conflictFreeCi);
 
-                        ClassInfo conflictFreeCi = classMap.get(conflictFreeClassName);
-                        if (conflictFreeCi == null) {
-                            if (true) { throw new RuntimeException("should not happen"); }
-                            conflictFreeCi = new ClassInfo(conflictFreeClassName, conflictProperties, new LinkedHashSet<>());
-                            classMap.put(conflictFreeClassName, conflictFreeCi);
-                        } else {
-                            System.err.println("Found existing exclusion class: " + conflictFreeCi);
+                        // Create a new super type for the conflict properties
+                        if (!conflictProperties.isEmpty()) {
+                            Node conflictType = getOrCreateStructuralType(conflictProperties);
+                            Set<Node> allTypes = newSuperTypes.stream().flatMap(t -> getTypes(t)).collect(Collectors.toSet());
+                            if (!allTypes.contains(conflictType) && !cls.equals(conflictType)) {
+                                nonEmptyConflictType = true;
+                                newSuperTypes.add(conflictType);
+                            }
+                            newSuperTypes = normalize(newSuperTypes);
+                            newSuperTypes.remove(EMPTY);
+
+                            // System.err.println("Adding " + conflictType + " to " + newSuperTypes);
+                            // newSuperTypes = normalize(newSuperTypes);
                         }
+                    }
+
+                    if (!nonEmptyConflictType) {
 
                         if (newSuperTypes.isEmpty()) {
                             // result = getEmptyType();
-                            result = conflictFreeClassName;
+                            result = cls; // conflictFreeClassName;
                         } else {
                             if (!Objects.equals(conflictFreeClassName, EMPTY)) {
                                 newSuperTypes.add(conflictFreeClassName);
                             }
                             result = createUnionType(newSuperTypes);
-
-                            if (false) {
-                                if (conflictProperties.isEmpty()) {
-                                    conflictFreeCi.superTypes().addAll(newSuperTypes);
-                                    result = conflictFreeClassName;
-    //                                result = createUnionType(newSuperTypes);
-    //                                newSuperTypes.clear();
-    //                                newSuperTypes.add(result);
-                                } else {
-
-                                // Create a new type that only contains the new super types
-                                // result = getOrCreateUnionType(newSuperTypes);
-        //	                    if (!newProperties.isEmpty()) {
-                                    Node tmp = allocateClassName();
-                                    ClassInfo newCi = new ClassInfo(tmp, new LinkedHashMap<>(), new LinkedHashSet<>());
-                                    classMap.put(tmp, newCi);
-                                    newCi.superTypes().addAll(new LinkedHashSet<>(newSuperTypes));
-                                    // newCi.superTypes().add(result);
-                                    newCi.propertyMap().putAll(conflictProperties);
-                                    result = tmp;
-                                }
-                            }
                         }
 
-                        if (newSuperTypes.contains(ci.name())) {
-                            System.err.println("DEBUG POINT 4");
-                        }
+                        // This part assumes that the conflict-resolved properties were added as
+                        // a super class
 
                         // 'Move' all conflicting properties to a new super type of cls.
                         ci.propertyMap().clear();
@@ -730,74 +753,48 @@ public class GraphQlSchemaGenerator {
                         // will be grouped to the end
                         ci.superTypes().add(conflictFreeClassName);
 
-                        if (ci.superTypes().stream().map(x -> x.toString()).anyMatch(x -> x.contains("class15"))) {
-                            System.err.println("DEBUG POINT");
-                        }
+//                        if (ci.superTypes().stream().map(x -> x.toString()).anyMatch(x -> x.contains("class15"))) {
+//                            System.err.println("DEBUG POINT");
+//                        }
+                    } else {
+                        result = cls;
                     }
-                    // result = conflictFreeClassName;
                 }
+                // result = conflictFreeClassName;
+            }
         }
         ClassInfo xxx = classMap.get(result);
-        materialize(xxx);
+        // materialize(xxx);
         return result;
     }
 
     int classCounter = 0;
 
+//  if (newSuperTypes.contains(ci.name())) {
+//  System.err.println("DEBUG POINT 4");
+//}
+
+//    if (conflictProperties.values().stream().anyMatch(x -> x.objectTypes().size() > 1)) {
+//        System.err.println("DEBUG POINT 3");
+//    }
+
+//  if (newSuperTypes.size() == 1 && newSuperTypes.contains(EMPTY) && safeProperties.isEmpty()) {
+//	result = cls;
+//}
+
+
     protected Node allocateClassName() {
-        if (classCounter == 30) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 21) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 22) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 116) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 16) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 17) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 21) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 37) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 117) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 11) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 7) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 0) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 19) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 8) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 37) {
-            System.err.println("DEBUG POINT");
-        }
-        if (classCounter == 103) {
-            System.err.println("DEBUG POINT");
-        }
+//        if (classCounter == 5) {
+//            System.err.println("DEBUG POINT");
+//        }
+//        if (classCounter == 8) {
+//            System.err.println("DEBUG POINT");
+//        }
         return NodeFactory.createURI("http://example.org/class" + (classCounter++));
     }
 
     /** Allocate a name based on the remaining properties. */
-    protected Node allocateExclusionClassName(Node baseName, Set<Node> exclusionProperties) {
+    protected Node allocateExclusionClassNameFromType(Node baseName, Set<Node> exclusionProperties) {
         // Node result = getOrCreateStructuralType(finalMap);
         ExclusionType et = new ExclusionType(baseName, new LinkedHashSet<>(exclusionProperties));
         // Node result = exclusionTypeMap.computeIfAbsent(et, x -> allocateClassName());
@@ -812,8 +809,42 @@ public class GraphQlSchemaGenerator {
         return result;
     }
 
+//    if (false) {
+//        if (conflictProperties.isEmpty()) {
+//            conflictFreeCi.superTypes().addAll(newSuperTypes);
+//            result = conflictFreeClassName;
+////            result = createUnionType(newSuperTypes);
+////            newSuperTypes.clear();
+////            newSuperTypes.add(result);
+//        } else {
+//
+//        // Create a new type that only contains the new super types
+//        // result = getOrCreateUnionType(newSuperTypes);
+////	                    if (!newProperties.isEmpty()) {
+//            Node tmp = allocateClassName();
+//            ClassInfo newCi = new ClassInfo(tmp, new LinkedHashMap<>(), new LinkedHashSet<>());
+//            classMap.put(tmp, newCi);
+//            newCi.superTypes().addAll(new LinkedHashSet<>(newSuperTypes));
+//            // newCi.superTypes().add(result);
+//            newCi.propertyMap().putAll(conflictProperties);
+//            result = tmp;
+//        }
+//    }
+    protected Node allocateExclusionClassName(Node baseName, Set<Node> exclusionProperties) {
+        return allocateExclusionClassNameFromStructure(baseName, exclusionProperties);
+    }
+
+    protected Node allocateExclusionClassNameFromStructure(Node baseName, Set<Node> exclusionProperties) {
+        Map<Node, PropertyInfo> pMap = createPropertyMap(baseName);
+        Map<Node, PropertyInfo> finalMap = pMap.entrySet().stream()
+            .filter(e -> !exclusionProperties.contains(e.getKey()))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        Node r = getOrCreateStructuralType(finalMap);
+        return r;
+    }
+
     /** Allocate a name based on the base class name and the set of excluded properties. */
-    protected Node allocateExclusionClassNameOld(Node baseName, Set<Node> exclusionProperties) {
+    protected Node allocateExclusionClassNameFromStructureOld(Node baseName, Set<Node> exclusionProperties) {
         Map<Node, PropertyInfo> pMap = createPropertyMap(baseName);
         Map<Node, PropertyInfo> finalMap = pMap.entrySet().stream()
             .filter(e -> !exclusionProperties.contains(e.getKey()))
@@ -824,6 +855,7 @@ public class GraphQlSchemaGenerator {
         return result;
     }
 
+    /** Collect all properties of the given type and all its super types. */
     protected Map<Node, PropertyInfo> createPropertyMap(Node type) {
         Map<Node, PropertyInfo> result = new HashMap<>();
         collectPropertyMap(type, result);
@@ -898,7 +930,7 @@ public class GraphQlSchemaGenerator {
         }
 
         Set<Node> superTypes = ci.superTypes();
-        System.err.println("Collecting property map for super types of " + type + ": " + superTypes);
+        // System.err.println("Collecting property map for super types of " + type + ": " + superTypes);
         collectPropertyMap(superTypes, result);
     }
 

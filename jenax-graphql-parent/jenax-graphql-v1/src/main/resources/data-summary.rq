@@ -8,29 +8,29 @@ PREFIX norse: <https://w3id.org/aksw/norse#>
 
 SELECT * {
   SELECT
-      ?sTypes
+      ?srcTypes
       ?p
       (true AS ?isForward)
-      (norse:set.aggUnion(?oTypes) AS ?allOTypes)
-      (norse:set.aggUnion(?oDTypes) AS ?allODTypes)
-      (MAX(?oCard) AS ?maxOCard)
-      (MAX(?oDCard) AS ?maxODCard)
+      (norse:set.aggUnion(?tgtTypes) AS ?allTgtTypes)
+      (norse:set.aggUnion(?tgtDTypes) AS ?allTgtDTypes)
+      (MAX(?tgtCard) AS ?maxTgtCard)
+      (MAX(?tgtDCard) AS ?maxTgtDCard)
   {
     { SELECT DISTINCT ?s { ?s ?p ?o } }
     LATERAL {
       {
         OPTIONAL {
-          { SELECT ?s (norse:set.collect(?st) AS ?sTypesRaw) {
+          { SELECT ?s (norse:set.collect(?st) AS ?srcTypesRaw) {
             ?s a ?st
           } GROUP BY ?s }
         }
-        BIND(IF(BOUND(?sTypesRaw), ?sTypesRaw, norse:set.of("untyped")) AS ?sTypes)
+        BIND(IF(BOUND(?srcTypesRaw), ?srcTypesRaw, norse:set.of("untyped")) AS ?srcTypes)
       }
       LATERAL {
         { SELECT DISTINCT ?s ?p { ?s ?p ?o } }
         LATERAL {
           OPTIONAL {
-            { SELECT ?s ?p (norse:set.collect(?ot) AS ?oTypesRaw) (COUNT(DISTINCT ?o) AS ?oCardRaw) {
+            { SELECT ?s ?p (norse:set.collect(?ot) AS ?tgtTypesRaw) (COUNT(DISTINCT ?o) AS ?tgtCardRaw) {
               ?s ?p ?o .
               FILTER(!isLiteral(?o))
               OPTIONAL { # XXX Could use lateral to collect types for each o
@@ -39,21 +39,21 @@ SELECT * {
               BIND(IF(BOUND(?otRaw), ?otRaw, "untyped") AS ?ot)
             } GROUP BY ?s ?p }
           }
-          BIND(IF(BOUND(?oTypesRaw), ?oTypesRaw, norse:set.of()) AS ?oTypes)
-          BIND(IF(BOUND(?oCardRaw), ?oCardRaw, 0) AS ?oCard)
+          BIND(IF(BOUND(?tgtTypesRaw), ?tgtTypesRaw, norse:set.of()) AS ?tgtTypes)
+          BIND(IF(BOUND(?tgtCardRaw), ?tgtCardRaw, 0) AS ?tgtCard)
         }
         LATERAL {
           OPTIONAL {
-            { SELECT ?s ?p (norse:set.collect(datatype(?o)) AS ?oDTypesRaw) (COUNT(?o) AS ?oDCardRaw) {
+            { SELECT ?s ?p (norse:set.collect(datatype(?o)) AS ?tgtDTypesRaw) (COUNT(?o) AS ?tgtDCardRaw) {
               ?s ?p ?o
               FILTER(isLiteral(?o))
             } GROUP BY ?s ?p }
           }
-          BIND(IF(BOUND(?oDTypesRaw), ?oDTypesRaw, norse:set.of()) AS ?oDTypes)
-          BIND(IF(BOUND(?oDCardRaw), ?oDCardRaw, 0) AS ?oDCard)
+          BIND(IF(BOUND(?tgtDTypesRaw), ?tgtDTypesRaw, norse:set.of()) AS ?tgtDTypes)
+          BIND(IF(BOUND(?tgtDCardRaw), ?tgtDCardRaw, 0) AS ?tgtDCard)
         }
       }
     }
-  } GROUP BY ?sTypes ?p
+  } GROUP BY ?srcTypes ?p
 }
-# ORDER BY ?p ?sTypes ?oTypes ?oDTypes
+# ORDER BY ?p ?srcTypes ?tgtTypes ?tgtDTypes
