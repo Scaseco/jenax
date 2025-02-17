@@ -50,7 +50,7 @@ import graphql.language.TypeName;
 public class GraphQlSchemaGenerator {
 
     /** Node for the pseudo-class of untyped instances - i.e. all instances that have to rdf:type property. */
-    public static final Node UNTYPED = NodeFactory.createLiteralString("untyped");
+    public static final Node UNTYPED = NodeFactory.createLiteralString("Untyped");
 
     public static final Node EMPTY = NodeFactory.createLiteralString("emptyType");
 
@@ -327,7 +327,7 @@ public class GraphQlSchemaGenerator {
             .argument(Argument.newArgument("value", StringValue.of(toURI(nameNode))).build())
             .build();
 
-        if (name.startsWith("class") || name.equals("untyped")) {
+        if (name.startsWith("class") || name.equals("Untyped")) {
             dir = null;
         }
 

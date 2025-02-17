@@ -2,7 +2,7 @@
 
 PREFIX norse: <https://w3id.org/aksw/norse#>
 
-# Note: Object types used "untyped" to indicate that there are resource values without type.
+# Note: Object types used "Untyped" to indicate that there are resource values without type.
 #       Subjects without type use the empty set.
 #       XXX Add a flag whether any object values per type appear as subject?
 
@@ -24,7 +24,7 @@ SELECT * {
             ?s a ?st
           } GROUP BY ?s }
         }
-        BIND(IF(BOUND(?srcTypesRaw), ?srcTypesRaw, norse:set.of("untyped")) AS ?srcTypes)
+        BIND(IF(BOUND(?srcTypesRaw), ?srcTypesRaw, norse:set.of("Untyped")) AS ?srcTypes)
       }
       LATERAL {
         { SELECT DISTINCT ?s ?p { ?s ?p ?o } }
@@ -36,7 +36,7 @@ SELECT * {
               OPTIONAL { # XXX Could use lateral to collect types for each o
                 ?o a ?otRaw
               }
-              BIND(IF(BOUND(?otRaw), ?otRaw, "untyped") AS ?ot)
+              BIND(IF(BOUND(?otRaw), ?otRaw, "Untyped") AS ?ot)
             } GROUP BY ?s ?p }
           }
           BIND(IF(BOUND(?tgtTypesRaw), ?tgtTypesRaw, norse:set.of()) AS ?tgtTypes)
