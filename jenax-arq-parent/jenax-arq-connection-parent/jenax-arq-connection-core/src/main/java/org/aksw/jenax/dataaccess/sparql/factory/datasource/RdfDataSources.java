@@ -63,11 +63,7 @@ import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.exec.UpdateExecBuilderAdapter;
 import org.apache.jena.sparql.exec.UpdateExecutionBuilderAdapter;
-import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.expr.ExprFunctionN;
-import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransform;
-import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.system.Txn;
@@ -472,14 +468,13 @@ public class RdfDataSources {
 
     /** Wrap a data source with query rewriting for macro expansion. */
     public static RdfDataSource wrapWithMacros(RdfDataSource rdfDataSource, Map<String, UserDefinedFunctionDefinition> udfRegistry) {
-        // ExprTransform eform = new ExprTransformExpand(udfRegistry);
-        ExprTransform eform = new ExprTransformCopy() {
-            @Override
-            public Expr transform(ExprFunctionN func, ExprList args) {
-                // XXX Could avoid func.copy()
-                return UserDefinedFunctions.expandMacro(udfRegistry, func.copy(args));
-            }
-        };
+        ExprTransform eform = new ExprTransformPrettyMacroExpansion(udfRegistry);
+        RdfDataSource result = wrapWithExprTransform(rdfDataSource, eform);
+        return result;
+    }
+
+    /** Wrap a data source with query rewriting for macro expansion. */
+    public static RdfDataSource wrapWithExprTransform(RdfDataSource rdfDataSource, ExprTransform eform) {
         SparqlStmtTransform stmtTransform = SparqlStmtTransforms.ofExprTransform(eform);
         RdfDataSource result = wrapWithStmtTransform(rdfDataSource, stmtTransform);
         return result;

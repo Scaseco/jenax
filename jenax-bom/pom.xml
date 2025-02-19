@@ -196,6 +196,7 @@
 			</dependency>
 
 			<!-- resolves conflicts between jersey, tika and hadoop -->
+			<!-- Also needed to resolve: https://stackoverflow.com/questions/65444486/warning-jaxbcontext-implementation-could-not-be-found-wadl-feature-is-disabled-->
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>

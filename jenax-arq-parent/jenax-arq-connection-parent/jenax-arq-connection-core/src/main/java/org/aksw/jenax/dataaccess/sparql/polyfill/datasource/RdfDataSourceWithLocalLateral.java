@@ -41,6 +41,7 @@ import org.apache.jena.sparql.ARQInternalErrorException;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpFilter;
 import org.apache.jena.sparql.algebra.op.OpLateral;
 import org.apache.jena.sparql.algebra.op.OpSequence;
@@ -55,6 +56,7 @@ import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
+import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
 import org.apache.jena.sparql.syntax.Element;
@@ -304,7 +306,7 @@ public class RdfDataSourceWithLocalLateral
     public static Dataset createProxyDataset(RdfDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
-        // registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
+        registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
         registry.getBulkChain().add(new ChainingServiceExecutorBulkServiceEnhancer());
         ServiceEnhancerInit.registerServiceExecutorSelf(registry);
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
@@ -348,7 +350,8 @@ public class RdfDataSourceWithLocalLateral
         RDFLink originalLink = RDFLinkAdapter.adapt(originalConn);
 
         // FIXME The current implementation does not support LATERAL polyfill for update requests
-        // Update requests are currently just sent to the original link without further processing
+        // Update requests are currently just sent to the original link without
+        // any lateral processing.
         RDFLink hybridLink = new RDFLinkModular(
             RDFLinkAdapter.adapt(proxyConn),
             originalLink,
@@ -437,8 +440,12 @@ public class RdfDataSourceWithLocalLateral
         }
 
         @Override
-        public Entry<Op, Boolean> eval(OpFilter op, Entry<Op, Boolean> subOp) {
+        public Entry<Op, Boolean> eval(OpExtend op, Entry<Op, Boolean> subOp) {
+            return EvaluationCopy.super.eval(op, subOp);
+        }
 
+        @Override
+        public Entry<Op, Boolean> eval(OpFilter op, Entry<Op, Boolean> subOp) {
             return EvaluationCopy.super.eval(op, subOp);
         }
 

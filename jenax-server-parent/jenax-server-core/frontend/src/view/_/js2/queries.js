@@ -37,7 +37,7 @@
           OPTIONAL {
             bind(<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> as ?p)
             ?s_ ?p ?o_ .
-            bind(if(isblank(?o_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?o_))),?o_) as ?o)
+            bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
           }
         } UNION {
           {
@@ -49,7 +49,7 @@
             {
               SELECT ?s_ ?p ?o {
                 ?s_ ?p ?o_ .
-                bind(if(isblank(?o_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?o_))),?o_) as ?o)
+                bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
               } LIMIT 10
             } UNION {
               LATERAL {
@@ -71,7 +71,7 @@
           } bind(if(bound(?o),<${ldvDef.sourceGraphPropId}>,coalesce()) AS ?p)
         }
       }
-      bind(if(isblank(?s_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?s_))),?s_) as ?s)
+      bind(<http://ns.aksw.org/function/forceBnodeIri>(?s_) as ?s)
     }`, ... reverseEnabled === 'yes' ? [`{
       bind(?x AS ?s_) .
       LATERAL {
@@ -83,7 +83,7 @@
           {
             SELECT ?s_ ?rp ?o {
               ?o_ ?rp ?s_ .
-              bind(if(isblank(?o_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?o_))),?o_) as ?o)
+              bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
             } LIMIT 10
           } UNION {
             LATERAL {
@@ -99,7 +99,7 @@
         }
       }
       bind(uri(concat('${ldvDef.reversePropPrefix}:',str(?rp))) AS ?p)
-      bind(if(isblank(?s_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?s_))),?s_) as ?s)
+      bind(<http://ns.aksw.org/function/forceBnodeIri>(?s_) as ?s)
     }`] : [] ].join(` UNION `) + `
   }
   ${ infer ? '}' : '' }
@@ -110,7 +110,7 @@
 } {
   ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
   { SELECT ?o {
-      <${s}> <${p}> ?o_ . bind(if(isblank(?o_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?o_))),?o_) as ?o) .
+      <${s}> <${p}> ?o_ . bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o) .
     } LIMIT ${limit} OFFSET ${offset}
   } UNION {
     { SELECT (count(?ox) AS ?oCnt) {
@@ -130,7 +130,7 @@
 } {
   ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
   { SELECT ?s {
-      ?s_ <${p}> <${o}> . bind(if(isblank(?s_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?s_))),?s_) as ?s)
+      ?s_ <${p}> <${o}> . bind(<http://ns.aksw.org/function/forceBnodeIri>(?s_) as ?s)
     } LIMIT ${limit} OFFSET ${offset}
   } UNION {
     { SELECT (count(?sx) AS ?sCnt) {
@@ -154,7 +154,7 @@ JSON {
     "lang": ?lang
   } WHERE {
     VALUES ?uri_ { ${uris} }
-    bind(if(isblank(?uri_),iri(concat("bnode://",<http://jena.apache.org/ARQ/function#bnode>(?uri_))),?uri_) as ?uri)
+    bind(<http://ns.aksw.org/function/forceBnodeIri>(?uri_) as ?uri)
     LATERAL {
       ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
       SELECT ?uri ?uri_ ?label ?lang {

@@ -209,7 +209,6 @@ public class SparqlStmtUtils {
         } else {
             result = stmt;
         }
-
         return result;
     }
 
@@ -231,7 +230,6 @@ public class SparqlStmtUtils {
         } else {
             result = stmt;
         }
-
         return result;
     }
 

@@ -21,6 +21,7 @@ import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
+import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.QueryExecution;
@@ -32,6 +33,7 @@ import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecAdapter;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class RdfDataEngines {
     /**
@@ -315,6 +317,11 @@ public class RdfDataEngines {
 //        return of(unwrapDataSource(dataEngine));
 //    }
 //
+    public static RdfDataEngine wrapWithExprTransform(RdfDataEngine dataEngine, ExprTransform exprTransform) {
+        SparqlStmtTransform stmtTransform = SparqlStmtTransforms.ofExprTransform(exprTransform);
+        return wrapWithStmtTransform(dataEngine, stmtTransform);
+    }
+
     public static RdfDataEngine wrapWithStmtTransform(RdfDataEngine dataEngine, SparqlStmtTransform stmtTransform) {
         RdfDataSourceTransform dataSourceTransform = RdfDataSourceTransforms.of(stmtTransform);
         return wrapWithDataSourceTransform(dataEngine, dataSourceTransform);
