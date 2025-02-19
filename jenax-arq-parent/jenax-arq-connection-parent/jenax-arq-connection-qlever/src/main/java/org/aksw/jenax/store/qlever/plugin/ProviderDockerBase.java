@@ -1,4 +1,4 @@
-package org.aksw.shellgebra.store.qlever.plugin;
+package org.aksw.jenax.store.qlever.plugin;
 
 import java.util.Objects;
 

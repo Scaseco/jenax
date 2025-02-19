@@ -1,4 +1,4 @@
-package org.aksw.shellgebra.store.qlever.plugin;
+package org.aksw.jenax.store.qlever.plugin;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDatabaseFactoryProvider;
