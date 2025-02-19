@@ -4,20 +4,20 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.jsheller.algebra.common.TranscodeMode;
-import org.aksw.jsheller.algebra.stream.op.CodecSysEnv;
-import org.aksw.jsheller.algebra.stream.op.StreamOp;
-import org.aksw.jsheller.algebra.stream.op.StreamOpFile;
-import org.aksw.jsheller.algebra.stream.op.StreamOpTranscode;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpTransformExecutionPartitioner;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpTransformExecutionPartitioner.Location;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpTransformToCmdOp;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpVisitorFileName;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpVisitorFileName.FileName;
-import org.aksw.jsheller.algebra.stream.transformer.StreamOpEntry;
-import org.aksw.jsheller.algebra.stream.transformer.StreamOpTransformer;
-import org.aksw.jsheller.exec.SysRuntimeImpl;
-import org.aksw.jsheller.registry.CodecRegistry;
+import org.aksw.shellgebra.algebra.common.TranscodeMode;
+import org.aksw.shellgebra.algebra.stream.op.CodecSysEnv;
+import org.aksw.shellgebra.algebra.stream.op.StreamOp;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformToCmdOp;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpVisitorFileName;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner.Location;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpVisitorFileName.FileName;
+import org.aksw.shellgebra.algebra.stream.transformer.StreamOpEntry;
+import org.aksw.shellgebra.algebra.stream.transformer.StreamOpTransformer;
+import org.aksw.shellgebra.exec.SysRuntimeImpl;
+import org.aksw.shellgebra.registry.CodecRegistry;
 
 public class StreamOpPlanner {
     public static String streamOpToFileName(StreamOp op) {

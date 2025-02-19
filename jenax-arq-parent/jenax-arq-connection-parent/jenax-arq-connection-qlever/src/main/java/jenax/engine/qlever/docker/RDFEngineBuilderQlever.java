@@ -20,8 +20,8 @@ import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasi
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
-import org.aksw.jsheller.exec.CmdStrOps;
-import org.aksw.jsheller.exec.SysRuntimeImpl;
+import org.aksw.shellgebra.exec.CmdStrOps;
+import org.aksw.shellgebra.exec.SysRuntimeImpl;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

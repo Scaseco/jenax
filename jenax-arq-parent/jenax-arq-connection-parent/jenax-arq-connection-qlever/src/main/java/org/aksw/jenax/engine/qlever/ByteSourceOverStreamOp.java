@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-import org.aksw.jsheller.algebra.stream.op.StreamOp;
-import org.aksw.jsheller.algebra.stream.op.StreamOpVisitor;
-import org.aksw.jsheller.algebra.stream.transform.StreamOpVisitorStream;
+import org.aksw.shellgebra.algebra.stream.op.StreamOp;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpVisitor;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpVisitorStream;
 
 import com.google.common.io.ByteSource;
 

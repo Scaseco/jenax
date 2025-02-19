@@ -8,9 +8,9 @@ import java.util.Set;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
-import org.aksw.jsheller.exec.SysRuntime;
-import org.aksw.jsheller.exec.SysRuntimeImpl;
-import org.aksw.jsheller.exec.SysRuntimeWrapperBase;
+import org.aksw.shellgebra.exec.SysRuntime;
+import org.aksw.shellgebra.exec.SysRuntimeImpl;
+import org.aksw.shellgebra.exec.SysRuntimeWrapperBase;
 import org.junit.Ignore;
 import org.junit.Test;
 

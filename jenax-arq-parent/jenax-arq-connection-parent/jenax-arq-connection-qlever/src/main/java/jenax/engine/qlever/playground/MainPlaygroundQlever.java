@@ -2,8 +2,8 @@ package jenax.engine.qlever.playground;
 
 import java.nio.file.Path;
 
-import org.aksw.jsheller.exec.SysRuntime;
-import org.aksw.jsheller.exec.SysRuntimeImpl;
+import org.aksw.shellgebra.exec.SysRuntime;
+import org.aksw.shellgebra.exec.SysRuntimeImpl;
 
 public class MainPlaygroundQlever {
     public static void main(String[] args) throws Exception {
