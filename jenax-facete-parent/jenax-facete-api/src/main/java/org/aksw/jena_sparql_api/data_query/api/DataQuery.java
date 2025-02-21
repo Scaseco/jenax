@@ -15,7 +15,7 @@ import org.aksw.facete.v3.api.FacetValue;
 import org.aksw.jena_sparql_api.pathlet.Path;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
@@ -172,13 +172,13 @@ public interface DataQuery<T extends RDFNode> {
     // Filter injection without renaming variables
     DataQuery<T> filterDirect(Element element);
 
-    DataQuery<T> dataSource(RdfDataSource dataSource);
-    RdfDataSource dataSource();
+    DataQuery<T> dataSource(RDFDataSource dataSource);
+    RDFDataSource dataSource();
 
     @Deprecated
     default SparqlQueryConnection connection() {
-        RdfDataSource dataSource = dataSource();
-        SparqlQueryConnection result = Optional.ofNullable(dataSource).map(RdfDataSource::getConnection).orElse(null);
+        RDFDataSource dataSource = dataSource();
+        SparqlQueryConnection result = Optional.ofNullable(dataSource).map(RDFDataSource::getConnection).orElse(null);
         return result;
     }
 

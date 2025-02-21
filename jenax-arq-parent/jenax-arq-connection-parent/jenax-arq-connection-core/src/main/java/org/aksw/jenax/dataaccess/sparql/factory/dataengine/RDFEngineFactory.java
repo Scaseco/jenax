@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
 import java.util.Map;
 
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceFactory;
 
 /** Factory for RdfDataEngine instances based on a configuration object */
 public interface RDFEngineFactory {
-    default RdfDataEngine create(Map<String, Object> config) throws Exception {
+    default RDFEngine create(Map<String, Object> config) throws Exception {
         return newEngineBuilder().setProperties(config).build();
     }
 

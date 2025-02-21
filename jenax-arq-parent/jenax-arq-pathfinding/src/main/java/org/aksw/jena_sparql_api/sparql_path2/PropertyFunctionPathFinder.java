@@ -15,7 +15,7 @@ import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
@@ -74,10 +74,10 @@ public class PropertyFunctionPathFinder
     // public static final Symbol PROLOGUE = Symbol.create("prologue");
     // public static final Symbol SPARQL_SERVICE = Symbol.create("sparqlService");
 
-    protected Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder;
+    protected Function<RDFDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder;
     //protected Gson gson;
 
-    public PropertyFunctionPathFinder(Function<RdfDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder) { //Gson gson) {
+    public PropertyFunctionPathFinder(Function<RDFDataSource, SparqlKShortestPathFinder> dataSourceToPathFinder) { //Gson gson) {
         super(PropFuncArgType.PF_ARG_SINGLE, PropFuncArgType.PF_ARG_EITHER);
 //        this.gson = gson;
         this.dataSourceToPathFinder = dataSourceToPathFinder;
@@ -96,7 +96,7 @@ public class PropertyFunctionPathFinder
         if (prologue == null) {
             prologue = new Prologue(PrefixMapping.Extended);
         }
-        RdfDataSource dataSource = (RdfDataSource)ctx.get(RDFLinkUtils.symRdfDataSource);
+        RDFDataSource dataSource = (RDFDataSource)ctx.get(RDFLinkUtils.symRdfDataSource);
 
         if (dataSource == null) {
             DatasetGraph datasetGraph = execCxt.getDataset();

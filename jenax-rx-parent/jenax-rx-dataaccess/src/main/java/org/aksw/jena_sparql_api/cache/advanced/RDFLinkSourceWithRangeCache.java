@@ -25,23 +25,20 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.common.TransactionalMultiplex;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.link.dataset.LinkDatasetGraphWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateBase;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceWrapperBase;
 import org.aksw.jenax.io.kryo.jena.JenaKryoRegistratorLib;
 import org.aksw.jenax.sparql.query.rx.ResultSetRx;
 import org.aksw.jenax.sparql.query.rx.ResultSetRxImpl;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
-import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
-import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.core.Transactional;
 import org.apache.jena.sparql.core.TransactionalLock;
@@ -71,8 +68,8 @@ import io.reactivex.rxjava3.core.Flowable;
  * The wrapping includes an additional MRSW lock (multiple reads or single writer) -
  * so only a single write transaction is allowed at any time.
  */
-public class RdfDataSourceWithRangeCache
-    extends RdfDataSourceWrapperBase
+public class RDFLinkSourceWithRangeCache
+    extends RDFLinkSourceWrapperBase<RDFLinkSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecFactoryQueryRangeCache.class);
 
@@ -93,7 +90,7 @@ public class RdfDataSourceWithRangeCache
 
 
 
-    public RdfDataSourceWithRangeCache(RdfDataSource delegate, ObjectStore objectStore,
+    public RDFLinkSourceWithRangeCache(RDFLinkSource delegate, ObjectStore objectStore,
             HashCode datasetHash, int maxCachedQueries, AdvancedRangeCacheConfig cacheConfig) {
         super(delegate);
         this.objectStore = objectStore;
@@ -103,9 +100,8 @@ public class RdfDataSourceWithRangeCache
     }
 
     @Override
-    public RDFConnection getConnection() {
-        RDFConnection baseConn = getDelegate().getConnection();
-        RDFLink baseLink = RDFLinkAdapter.adapt(baseConn);
+    public RDFLink newLink() {
+        RDFLink baseLink = getDelegate().newLink();
 
         Transactional combined = new TransactionalMultiplex<>(transactional, baseLink);
 
@@ -145,8 +141,8 @@ public class RdfDataSourceWithRangeCache
                 linkQuery,
                 linkUpdate,
                 new LinkDatasetGraphWrapperTxn<>(baseLink, combined));
-        RDFConnection r = RDFConnectionAdapter.adapt(link);
-        return r;
+        // RDFConnection r = RDFConnectionAdapter.adapt(link);
+        return link;
     }
 
     public QueryExec createQueryExec(QueryExecBuilderCustomBase<?> builder) {
@@ -180,7 +176,7 @@ public class RdfDataSourceWithRangeCache
             Path<String> fullPath = PathStr.newRelativePath(datasetHashStr).resolve(queryHashPath);
 
             frontend = queryToCache.get(fullPath, () -> {
-                ListPaginator<Binding> backend = new ListPaginatorSparql(bodyQueryWithoutSlice, getDelegate().asQef());
+                ListPaginator<Binding> backend = new ListPaginatorSparql(bodyQueryWithoutSlice, (Query q) -> getDelegate().query(q));
                 // SequentialReaderSource<Binding[]> dataSource =
                 // SequentialReaderSourceRx.create(arrayOps, backend);
 
@@ -249,31 +245,30 @@ public class RdfDataSourceWithRangeCache
         return result;
     }
 
-
-    public static RdfDataSourceWithRangeCache create(RdfDataSource dataSource,
+    public static RDFLinkSourceWithRangeCache create(RDFLinkSource linkSource,
             java.nio.file.Path cacheFolder, HashCode datasetHash, int maxCachedQueries, AdvancedRangeCacheConfig cacheConfig) {
         KryoPool kryoPool = KryoUtils.createKryoPool(JenaKryoRegistratorLib::registerClasses);
         ObjectStore objectStore = ObjectStoreImpl.create(cacheFolder, ObjectSerializerKryo.create(kryoPool));
-        RdfDataSourceWithRangeCache result = new RdfDataSourceWithRangeCache(dataSource, objectStore,
+        RDFLinkSourceWithRangeCache result = new RDFLinkSourceWithRangeCache(linkSource, objectStore,
                 datasetHash, maxCachedQueries, cacheConfig);
         return result;
     }
 
-    public static RdfDataSourceWithRangeCache create(RdfDataSource dataSource,
+    public static RDFLinkSourceWithRangeCache create(RDFLinkSource linkSource,
             java.nio.file.Path cacheFolder, long maxRequestSize) {
         HashCode hashCode = stmtHashFn.hashInt(0);
-        return create(dataSource, cacheFolder, maxRequestSize, hashCode);
+        return create(linkSource, cacheFolder, maxRequestSize, hashCode);
     }
 
-    public static RdfDataSourceWithRangeCache create(RdfDataSource dataSource,
+    public static RDFLinkSourceWithRangeCache create(RDFLinkSource linkSource,
             java.nio.file.Path cacheFolder, long maxRequestSize, HashCode datasetHash) {
         AdvancedRangeCacheConfig arcc = AdvancedRangeCacheConfigImpl.newDefaultsForObjects(maxRequestSize);
-        RdfDataSourceWithRangeCache result = create(dataSource, cacheFolder, datasetHash, 1024, arcc);
+        RDFLinkSourceWithRangeCache result = create(linkSource, cacheFolder, datasetHash, 1024, arcc);
 
         return result;
     }
 //
-    public static RdfDataSourceWithRangeCache create(RdfDataSourceWithRangeCache dataSource, java.nio.file.Path cacheDir, long maxRequestSize) {
+    public static RDFLinkSourceWithRangeCache create(RDFLinkSourceWithRangeCache dataSource, java.nio.file.Path cacheDir, long maxRequestSize) {
         return create(dataSource, cacheDir, maxRequestSize);
     }
 

@@ -2,8 +2,8 @@ package org.aksw.jenax.sparql.datasource.observable;
 
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.binding.ResultTable;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFromDataset;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.apache.jena.query.Dataset;
@@ -20,12 +20,12 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 public class RdfDataSourceObservableImpl
-    extends RdfDataSourceWrapperBase
+    extends RDFDataSourceWrapperBase
     implements RdfDataSourceObservable
 {
     protected ObservableSourceImpl<Query, ResultTable> mapRx;
 
-    public RdfDataSourceObservableImpl(RdfDataSource delegate) {
+    public RdfDataSourceObservableImpl(RDFDataSource delegate) {
         super(delegate);
         mapRx = new ObservableSourceImpl<Query, ResultTable>(q -> execSelect(delegate, q));
     }
@@ -35,7 +35,7 @@ public class RdfDataSourceObservableImpl
         return mapRx.observe(query);
     }
 
-    public static ResultTable execSelect(RdfDataSource dataSource, Query query) {
+    public static ResultTable execSelect(RDFDataSource dataSource, Query query) {
         ResultTable result = RdfDataSources.exec(dataSource, query, qe -> createResultTable(qe.execSelect()));
         return result;
     }

@@ -2,7 +2,7 @@ package org.aksw.jenax.graphql.sparql;
 
 import java.util.Map;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExec;
 
 import graphql.language.Document;
@@ -11,10 +11,10 @@ import graphql.language.Value;
 public class GraphQlExecBuilderOverSparql
     extends RdfGraphQlExecBuilderFront
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected GraphQlToSparqlMappingFactory mappingFactory;
 
-    public GraphQlExecBuilderOverSparql(RdfDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
+    public GraphQlExecBuilderOverSparql(RDFDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
         super();
         this.dataSource = dataSource;
         this.mappingFactory = mappingFactory;

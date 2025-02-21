@@ -3,8 +3,14 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 import java.io.Closeable;
 import java.util.function.Function;
 
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceOverDataset;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdflink.RDFLinkDatasetBuilder;
+import org.apache.jena.sparql.core.DatasetGraph;
 
 /**
  * An RdfDataSource wrapper for a dataset. The connection supplier is
@@ -14,30 +20,30 @@ import org.apache.jena.rdfconnection.RDFConnection;
  *
  */
 public class RdfDataEngineFromDataset
-    implements RdfDataEngineWithDataset
+    implements RDFEngine
 {
-    protected Dataset dataset;
-    protected Function<? super Dataset, ? extends RDFConnection> connSupplier;
+    protected RDFDataSourceOverDataset dataSource;
     protected Closeable closeAction;
 
     public RdfDataEngineFromDataset(
-            Dataset dataset,
-            Function<? super Dataset, ? extends RDFConnection> connSupplier,
+            RDFDataSourceOverDataset dataSource,
             Closeable closeAction) {
         super();
-        this.dataset = dataset;
-        this.connSupplier = connSupplier;
+        this.dataSource = dataSource;
         this.closeAction = closeAction;
     }
 
     @Override
-    public Dataset getDataset() {
-        return dataset;
+    public RDFLinkBuilder newLinkBuilder() {
+        return new RDFLinkBuilderOverLinkSupplier(() ->
+            RDFLinkDatasetBuilder.newBuilder()
+                .dataset(dataSource.getDataset().asDatasetGraph())
+                .build());
     }
 
     @Override
-    public RDFConnection getConnection() {
-        return connSupplier.apply(dataset);
+    public DatasetGraph getDataset() {
+        return dataSource.getDataset().asDatasetGraph();
     }
 
     @Override
@@ -47,11 +53,19 @@ public class RdfDataEngineFromDataset
         }
     }
 
-    public static RdfDataEngineFromDataset create(Dataset dataset, Function<? super Dataset, ? extends RDFConnection> connSupplier, Closeable closeAction) {
-        return new RdfDataEngineFromDataset(dataset, connSupplier, closeAction);
+    public static RdfDataEngineFromDataset create(
+            Dataset dataset, Function<? super Dataset, ? extends RDFConnection> connectionFactory, Closeable closeAction)
+    {
+        RDFDataSourceOverDataset dataSource = new RDFDataSourceOverDataset(dataset, connectionFactory);
+        return new RdfDataEngineFromDataset(dataSource, closeAction);
     }
 
     public static RdfDataEngineFromDataset create(Dataset dataset, boolean closeDataset) {
-        return new RdfDataEngineFromDataset(dataset, RDFConnection::connect, closeDataset ? dataset::close : null);
+        return create(dataset, RDFConnection::connect, closeDataset ? dataset::close : null);
+    }
+
+    /** Create an engine whose close method closes the given dataset. */
+    public static RdfDataEngineFromDataset create(Dataset dataset) {
+        return create(dataset, true);
     }
 }

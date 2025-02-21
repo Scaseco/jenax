@@ -7,11 +7,13 @@ import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapp
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithSimpleCache;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.sparql.exec.QueryExec;
@@ -22,13 +24,13 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
- * Transformation views for use with {@link RdfDataEngine#decorate}.
+ * Transformation views for use with {@link RDFEngine#decorate}.
  * The transformations are mostly based on the methods of {@link RdfDataSources}.
  */
 public class RdfDataSourceTransforms {
 
     public static RdfDataSourceTransform decorateWithBuilderTransform(QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
-        return rdfDataSource -> new RdfDataSourceWrapperBase<>(rdfDataSource) {
+        return rdfDataSource -> new RDFDataSourceWrapperBase<>(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
                 RDFConnection result = RDFConnectionUtils.wrapWithBuilderTransform(
@@ -43,7 +45,7 @@ public class RdfDataSourceTransforms {
     /** Decorate a data source such that execution will fail. */
     public static RdfDataSourceTransform alwaysFail() {
         // XXX Perhaps also wrap the LinkDatasetGraph
-        return base -> base.decorate(decorateWithBuilderTransform(
+        return base -> RdfDataSources.decorate(base, decorateWithBuilderTransform(
             qeb -> new QueryExecBuilderWrapperBase(qeb) {
                 @Override
                 public QueryExec build() {
@@ -79,6 +81,8 @@ public class RdfDataSourceTransforms {
     }
 
     public static RdfDataSourceTransform macros(Map<String, UserDefinedFunctionDefinition> udfRegistry) {
-        return dataSource -> RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
+        return org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms.of(
+            (RDFLinkSource linkSource) -> RDFLinkSources.wrapWithMacros(linkSource, udfRegistry));
+        // return dataSource -> RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
     }
 }

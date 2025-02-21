@@ -6,7 +6,7 @@ import java.util.Set;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.ListServiceConcept;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -23,14 +23,14 @@ import org.apache.jena.sparql.core.Quad;
 public class DatasetGraphRdfDataSource
     extends DatasetGraphBaseFind
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected PrefixMap prefixes = PrefixMapFactory.emptyPrefixMap();
 
-    public DatasetGraphRdfDataSource(RdfDataSource dataSource) {
+    public DatasetGraphRdfDataSource(RDFDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public RdfDataSource getDataSource() {
+    public RDFDataSource getDataSource() {
         return dataSource;
     }
 

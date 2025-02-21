@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
 import org.aksw.jenax.graphql.impl.common.GraphQlExecUtils;
 import org.aksw.jenax.graphql.impl.common.RdfGraphQlExecUtils;
@@ -53,7 +53,7 @@ public class TestGraphQlSparql {
     @BeforeClass
     public static void beforeClass() {
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
-        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        RDFDataSource dataSource = RdfDataSources.of(ds);
         gef = GraphQlExecFactoryOverSparql.of(dataSource); //  .autoConfEager
     }
 
@@ -68,7 +68,7 @@ public class TestGraphQlSparql {
         JsonElement expected = getResourceAsJson("graphql/test01-result.json", gson);
 
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
-        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        RDFDataSource dataSource = RdfDataSources.of(ds);
         RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.autoConfEager(dataSource);
         JsonObject actual = GraphQlExecUtils.materialize(gef.toJson(), queryStr);
 
@@ -98,7 +98,7 @@ public class TestGraphQlSparql {
         // JsonElement expected = getResourceAsJson("graphql/test01-result.json", gson);
 
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
-        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        RDFDataSource dataSource = RdfDataSources.of(ds);
         RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
 
         JsonObject actual = GraphQlExecUtils.materialize(gef.toJson(), queryStr);
@@ -297,7 +297,7 @@ public class TestGraphQlSparql {
         // JsonElement expected = getResourceAsJson("graphql/test01-result.json", gson);
 
         Dataset ds = RDFDataMgr.loadDataset("pokedex.sample.ttl");
-        RdfDataSource dataSource = RdfDataEngines.of(ds);
+        RDFDataSource dataSource = RdfDataSources.of(ds);
         RdfGraphQlExecFactory gef = GraphQlExecFactoryOverSparql.of(dataSource);
         RdfObject actual = RdfGraphQlExecUtils.write(gef.newBuilder().setDocument(queryStr).setJsonMode(false).build());
 
@@ -326,7 +326,7 @@ public class TestGraphQlSparql {
         // Set up a local data source with polyfill suggestions
         Model model = ModelFactory.createDefaultModel();
         MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
-        RdfDataSource dataSource = RdfDataEngines.of(model);
+        RDFDataSource dataSource = RdfDataSources.of(model);
 
         String queryStr = """
             query($limit: Int!) {

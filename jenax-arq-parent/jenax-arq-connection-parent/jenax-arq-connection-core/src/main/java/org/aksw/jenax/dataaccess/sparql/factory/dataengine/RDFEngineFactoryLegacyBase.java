@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public abstract class RDFEngineFactoryLegacyBase
     public RDFEngineBuilder<?> newEngineBuilder() {
         return new RdfDataEngineBuilderBase() {
             @Override
-            public RdfDataEngine build() throws Exception {
+            public RDFEngine build() throws Exception {
                 // XXX Clash with RdfDataSourceSpecBasicFromMap.create()
                 return RDFEngineFactoryLegacyBase.this.create(map);
             }
@@ -39,7 +39,7 @@ public abstract class RDFEngineFactoryLegacyBase
     }
 
     @Override
-    public abstract RdfDataEngine create(Map<String, Object> config) throws Exception;
+    public abstract RDFEngine create(Map<String, Object> config) throws Exception;
 
     /**
      * The deteleOnClose flag tells whether calling close will attempt to delete the folder

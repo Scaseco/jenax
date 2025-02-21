@@ -12,8 +12,8 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformAssignToExtend;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
@@ -76,7 +76,7 @@ import com.google.common.base.Stopwatch;
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
 public class RdfDataSourceWithLocalLateral
-    extends RdfDataSourceWrapperBase<RdfDataSource>
+    extends RDFDataSourceWrapperBase<RDFDataSource>
 {
     public record PolyfillLateralConfig(int bulkSize, int concurrentSlots) {
         /** Parse the settings of format [{bulkSize}[-{concurrentSlotCount}]]. */
@@ -164,7 +164,7 @@ public class RdfDataSourceWithLocalLateral
         implements RdfDataSourceDecorator
     {
         @Override
-        public RdfDataSource decorate(RdfDataSource decoratee, Map<String, Object> options) {
+        public RDFDataSource decorate(RDFDataSource decoratee, Map<String, Object> options) {
             // TODO Extract options
             return RdfDataSourceWithLocalLateral.wrap(decoratee, null);
         }
@@ -256,8 +256,8 @@ public class RdfDataSourceWithLocalLateral
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
         // RdfDataSource coreX = () -> RDFConnection.connect("http://maven.aksw.org/sparql");
-        RdfDataSource coreX = () -> RDFConnection.connect("http://linkedgeodata.org/sparql");
-        RdfDataSource core = () -> RDFConnectionUtils.wrapWithQueryTransform(coreX.getConnection(), null, qe -> new QueryExecWrapperBase<QueryExec>(qe) {
+        RDFDataSource coreX = () -> RDFConnection.connect("http://linkedgeodata.org/sparql");
+        RDFDataSource core = () -> RDFConnectionUtils.wrapWithQueryTransform(coreX.getConnection(), null, qe -> new QueryExecWrapperBase<QueryExec>(qe) {
             @Override
             public void beforeExec() {
                 ++counter[0];
@@ -289,21 +289,21 @@ public class RdfDataSourceWithLocalLateral
         System.out.println("Done - Remote requests: " + counter[0] + " - resultSetSize: " + resultSetSize + " - time: " + sw.elapsed(TimeUnit.MILLISECONDS) + "ms");
     }
 
-    public RdfDataSourceWithLocalLateral(RdfDataSource delegate, PolyfillLateralConfig config) {
+    public RdfDataSourceWithLocalLateral(RDFDataSource delegate, PolyfillLateralConfig config) {
         super(delegate);
         this.proxyDataset = createProxyDataset(delegate);
         this.config = config;
     }
 
-    public static RdfDataSourceWithLocalLateral wrap(RdfDataSource delegate) {
+    public static RdfDataSourceWithLocalLateral wrap(RDFDataSource delegate) {
         return new RdfDataSourceWithLocalLateral(delegate, null);
     }
 
-    public static RdfDataSourceWithLocalLateral wrap(RdfDataSource delegate, PolyfillLateralConfig config) {
+    public static RdfDataSourceWithLocalLateral wrap(RDFDataSource delegate, PolyfillLateralConfig config) {
         return new RdfDataSourceWithLocalLateral(delegate, config);
     }
 
-    public static Dataset createProxyDataset(RdfDataSource delegate) {
+    public static Dataset createProxyDataset(RDFDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
         registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());

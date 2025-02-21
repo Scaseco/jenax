@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 import java.util.Optional;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RdfEngineCapability;
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicMutable;
 
 public interface RDFEngineBuilder<X extends RDFEngineBuilder<X>>
@@ -19,5 +19,5 @@ public interface RDFEngineBuilder<X extends RDFEngineBuilder<X>>
         return Optional.empty();
     }
 
-    RdfDataEngine build() throws Exception;
+    RDFEngine build() throws Exception;
 }

@@ -15,6 +15,7 @@ public class SparqlStmtTransforms {
     public static SparqlStmtTransform of(Supplier<Transform> transformSupplier) {
         return of(op -> Transformer.transform(transformSupplier.get(), op));
     }
+
     public static SparqlStmtTransform ofExprTransform(Supplier<? extends ExprTransform> transformSupplier) {
         return of(op -> Transformer.transform(null, transformSupplier.get(), op));
     }

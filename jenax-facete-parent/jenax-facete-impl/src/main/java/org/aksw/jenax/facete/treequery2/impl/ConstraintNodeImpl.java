@@ -5,7 +5,7 @@ import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.impl.FacetedDataQueryImpl;
 import org.aksw.facete.v4.impl.ElementGenerator;
 import org.aksw.jenax.arq.util.node.NodeCustom;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.facete.treequery2.api.ConstraintNode;
 import org.aksw.jenax.facete.treequery2.api.FacetPathMapping;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
@@ -110,7 +110,7 @@ public class ConstraintNodeImpl
         Fragment1 relation = eltGen.getAvailableValuesAt(sfp, applySelfConstraints);
         relation = relation.prependOn(relation.getVars()).with(baseRelation).toFragment1();
 
-        RdfDataSource dataSource = null; //facetedQuery.dataSource();
+        RDFDataSource dataSource = null; //facetedQuery.dataSource();
         FacetedDataQuery<RDFNode> result = new FacetedDataQueryImpl<>(
                 dataSource,
                 relation.getElement(),

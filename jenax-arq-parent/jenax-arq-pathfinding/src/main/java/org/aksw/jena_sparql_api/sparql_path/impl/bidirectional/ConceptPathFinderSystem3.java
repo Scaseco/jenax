@@ -13,7 +13,7 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint3;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
@@ -43,7 +43,7 @@ public class ConceptPathFinderSystem3
     implements ConceptPathFinderSystem
 {
     @Override
-    public Single<Model> computeDataSummary(RdfDataSource dataSource) {
+    public Single<Model> computeDataSummary(RDFDataSource dataSource) {
         InputStream in = ConceptPathFinderBidirectionalUtils.class.getClassLoader().getResourceAsStream("concept-path-finder-type-local.sparql");
         //Stream<SparqlStmt> stmts;
         Flowable<SparqlStmt> stmts;
@@ -117,7 +117,7 @@ public class ConceptPathFinderSystem3
     public static void main(String[] args) throws Exception {
         Model m = RDFDataMgr.loadModel("/home/raven/Projects/Eclipse/faceted-browsing-benchmark-parent/faceted-browsing-benchmark-parent/faceted-browsing-benchmark-v2-parent/faceted-browsing-benchmark-v2-core/src/main/resources/path-data-simple.ttl");
 
-        RdfDataSource dataSource = () -> RDFConnection.connect(DatasetFactory.wrap(m));
+        RDFDataSource dataSource = () -> RDFConnection.connect(DatasetFactory.wrap(m));
 
         ConceptPathFinderSystem system = new ConceptPathFinderSystem3();
         Model dataSummary = system.computeDataSummary(dataSource).blockingGet();
@@ -143,19 +143,19 @@ public class ConceptPathFinderSystem3
         //datasetDescription.addDefaultGraphURI("http://dbpedia.org/wkd_uris");
         datasetDescription.addDefaultGraphURI("http://dbpedia.org");
 
-        RdfDataSource dataSource = wrapWithDatasetAndXmlContentType("http://localhost:8890/sparql", datasetDescription);
+        RDFDataSource dataSource = wrapWithDatasetAndXmlContentType("http://localhost:8890/sparql", datasetDescription);
         ConceptPathFinderSystem system = new ConceptPathFinderSystem3();
         Model model = system.computeDataSummary(dataSource).blockingGet();
 
         RDFDataMgr.write(new FileOutputStream("/home/raven/dbpedia-data-summary.ttl"), model, RDFFormat.TURTLE_PRETTY);
     }
 
-    public static RdfDataSource wrapWithDatasetAndXmlContentType(String url, DatasetDescription datasetDescription) {
+    public static RDFDataSource wrapWithDatasetAndXmlContentType(String url, DatasetDescription datasetDescription) {
 //        qeh.setSelectContentType(WebContent.contentTypeResultsXML);
 //        qeh.setModelContentType(WebContent.contentTypeNTriples);
 //        qeh.setDatasetContentType(WebContent.contentTypeNQuads);
 
-        RdfDataSource result = () -> RDFConnectionRemote.newBuilder()
+        RDFDataSource result = () -> RDFConnectionRemote.newBuilder()
             .destination(url)
             .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML)
             .acceptHeaderGraph(WebContent.contentTypeNTriples)
@@ -171,7 +171,7 @@ public class ConceptPathFinderSystem3
         //datasetDescription.addDefaultGraphURI("http://dbpedia.org/wkd_uris");
         datasetDescription.addDefaultGraphURI("http://project-hobbit.eu/benchmark/fbb2/");
 
-        RdfDataSource dataSource = wrapWithDatasetAndXmlContentType("http://localhost:8890/sparql", datasetDescription);
+        RDFDataSource dataSource = wrapWithDatasetAndXmlContentType("http://localhost:8890/sparql", datasetDescription);
 
 
         //RDFConnection baseConn = RDFConnectionFactory.connect(DatasetFactory.create());

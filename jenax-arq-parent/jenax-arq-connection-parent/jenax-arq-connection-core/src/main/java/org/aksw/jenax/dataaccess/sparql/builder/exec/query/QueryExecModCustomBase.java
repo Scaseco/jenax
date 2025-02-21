@@ -120,7 +120,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
                 } else
                     Log.warn(builder, "Can't interpret timeout: " + obj);
             } catch (Exception ex) {
-                Log.warn(builder, "Exception setting timeouts (context) from: "+obj);
+                Log.warn(builder, "Exception setting timeouts (context) from: "+obj, ex);
             }
         }
         return builder;
@@ -149,7 +149,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
             } else
                 Log.warn(builder, "Can't interpret timeout: " + obj);
         } catch (Exception ex) {
-            Log.warn(builder, "Exception setting timeouts (context) from: "+obj);
+            Log.warn(builder, "Exception setting timeouts (context) from: "+obj, ex);
         }
     }
 

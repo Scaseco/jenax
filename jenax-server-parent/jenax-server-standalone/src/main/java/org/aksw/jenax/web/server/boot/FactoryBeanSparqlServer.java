@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsaBase;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
@@ -55,7 +55,7 @@ public class FactoryBeanSparqlServer {
             new RDFConnectionModular(new SparqlQueryConnectionJsaBase<>(qef), null, null));
     }
 
-    public FactoryBeanSparqlServer setSparqlServiceFactory(RdfDataSource dataSource) {
+    public FactoryBeanSparqlServer setSparqlServiceFactory(RDFDataSource dataSource) {
         return setSparqlServiceFactory((HttpServletRequest request) -> dataSource.getConnection());
     }
 

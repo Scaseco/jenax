@@ -1,6 +1,6 @@
 package org.aksw.jenax.web.server.boot;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -20,7 +20,7 @@ public class TestSparqlServer {
     @Test
     public void testSparqlServer() throws Exception {
         Dataset dataset = DatasetFactory.create();
-        RdfDataSource dataSource = () -> RDFConnection.connect(dataset);
+        RDFDataSource dataSource = () -> RDFConnection.connect(dataset);
 
         int port = 7529;
         Server server = ServerBuilder.newBuilder()

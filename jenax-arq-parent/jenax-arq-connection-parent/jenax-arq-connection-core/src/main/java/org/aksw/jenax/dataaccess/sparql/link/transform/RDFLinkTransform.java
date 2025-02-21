@@ -1,4 +1,4 @@
-package org.aksw.jenax.dataaccess.sparql.link.common;
+package org.aksw.jenax.dataaccess.sparql.link.transform;
 
 import java.util.function.Function;
 

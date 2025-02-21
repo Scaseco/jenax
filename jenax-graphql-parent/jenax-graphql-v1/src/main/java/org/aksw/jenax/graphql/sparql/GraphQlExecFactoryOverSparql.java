@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.graphql.impl.common.GraphQlResolverAlwaysFail;
 import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecBuilder;
 import org.aksw.jenax.graphql.rdf.api.RdfGraphQlExecFactory;
@@ -22,10 +22,10 @@ public class GraphQlExecFactoryOverSparql
 {
     private static final Logger logger = LoggerFactory.getLogger(GraphQlExecFactoryOverSparql.class);
 
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected GraphQlToSparqlMappingFactory mappingFactory;
 
-    public GraphQlExecFactoryOverSparql(RdfDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
+    public GraphQlExecFactoryOverSparql(RDFDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
         super();
         this.dataSource = dataSource;
         this.mappingFactory = mappingFactory;
@@ -36,7 +36,7 @@ public class GraphQlExecFactoryOverSparql
         return new GraphQlExecBuilderOverSparql(dataSource, mappingFactory);
     }
 
-    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
+    public static RdfGraphQlExecFactory of(RDFDataSource dataSource, GraphQlToSparqlMappingFactory mappingFactory) {
         return new GraphQlExecFactoryOverSparql(dataSource, mappingFactory); // GraphQlExecFactoryFront.of(new GraphQlExecFactoryOverSparql(dataSource, converter));
     }
 
@@ -45,11 +45,11 @@ public class GraphQlExecFactoryOverSparql
      * This means that any request to resolve a field to a class or property IRI will
      * cause the query to fail.
      */
-    public static RdfGraphQlExecFactory of(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory of(RDFDataSource dataSource) {
         return of(dataSource, new GraphQlResolverAlwaysFail());
     }
 
-    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, GraphQlResolver resolver) {
+    public static RdfGraphQlExecFactory of(RDFDataSource dataSource, GraphQlResolver resolver) {
         GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
         return of(dataSource, mappingFactory);
     }
@@ -59,7 +59,7 @@ public class GraphQlExecFactoryOverSparql
         return new GraphQlResolverImpl(metadata.getVoidDataset(), metadata.getShaclModel());
     }
 
-    public static RdfGraphQlExecFactory of(RdfDataSource dataSource, DatasetMetadata metadata) {
+    public static RdfGraphQlExecFactory of(RDFDataSource dataSource, DatasetMetadata metadata) {
         GraphQlResolver resolver = resolverOf(metadata);
         GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
         RdfGraphQlExecFactory result = of(dataSource, mappingFactory);
@@ -67,7 +67,7 @@ public class GraphQlExecFactoryOverSparql
     }
 
     /** Summarize the data in the data source and configure a resolver with it */
-    public static RdfGraphQlExecFactory autoConfEager(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory autoConfEager(RDFDataSource dataSource) {
         DatasetMetadata metadata = Futures.getUnchecked(DatasetMetadata.fetch(dataSource, MoreExecutors.listeningDecorator(MoreExecutors.newDirectExecutorService())));
         GraphQlResolver resolver = resolverOf(metadata);
         GraphQlToSparqlMappingFactory mappingFactory = () -> new GraphQlToSparqlMappingBuilderImpl().setResolver(resolver);
@@ -80,7 +80,7 @@ public class GraphQlExecFactoryOverSparql
      * Any further request made to the resolver while auto configuration is in progress will
      * block until completion.
      */
-    public static RdfGraphQlExecFactory autoConfLazy(RdfDataSource dataSource) {
+    public static RdfGraphQlExecFactory autoConfLazy(RDFDataSource dataSource) {
         GraphQlResolver resolver = GraphQlResolverImplLazy.of(() -> {
             ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
                     MoreExecutors.getExitingExecutorService((ThreadPoolExecutor)Executors.newCachedThreadPool()));

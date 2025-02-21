@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
@@ -25,7 +25,7 @@ public abstract class ConceptPathFinderFactorySummaryBase<T extends ConceptPathF
 {
     protected Model dataSummary;
     // protected SparqlQueryConnection dataConnection;
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
 
     // These flags are so general, it probably makes sense to add them here
     // We can add traits on the concept path finder system level, whether implementations actually make use of these flags
@@ -66,12 +66,12 @@ public abstract class ConceptPathFinderFactorySummaryBase<T extends ConceptPathF
     }
 
     @Override
-    public T setDataSource(RdfDataSource dataSource) {
+    public T setDataSource(RDFDataSource dataSource) {
         this.dataSource = dataSource;
         return self();
     }
 
-    public T setDataConnection(RdfDataSource dataSource) {
+    public T setDataConnection(RDFDataSource dataSource) {
         this.dataSource = dataSource;
         return self();
     }
@@ -105,7 +105,7 @@ public abstract class ConceptPathFinderFactorySummaryBase<T extends ConceptPathF
         // return dataConnection;
     }
 
-    public RdfDataSource getDataSource() {
+    public RDFDataSource getDataSource() {
         return dataSource;
     }
 

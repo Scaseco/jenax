@@ -30,7 +30,7 @@ import org.aksw.jena_sparql_api.http.repository.api.RdfHttpEntityFile;
 import org.aksw.jena_sparql_api.http.repository.impl.HttpResourceRepositoryFromFileSystemImpl;
 import org.aksw.jena_sparql_api.io.hdt.JenaPluginHdt;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataset.connection.DatasetRDFConnectionFactoryBuilder;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
@@ -370,7 +370,7 @@ public class DataPods {
         return result;
     }
 
-    public static RdfDataPod fromDataSource(RdfDataSource supplier) {
+    public static RdfDataPod fromDataSource(RDFDataSource supplier) {
         return new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {

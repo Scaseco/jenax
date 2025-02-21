@@ -11,7 +11,7 @@ import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
@@ -221,7 +221,7 @@ public abstract class SparqlEndpointBase {
 
         // Set up a QueryExecutionFactory view which runs each query on
         // its own connection and closes the connection upon termination of the QueryExecution
-        RdfDataSource dataSource = () -> getConnection();
+        RDFDataSource dataSource = () -> getConnection();
         QueryExecutionFactory qef = dataSource.asQef();
 
         Response x = processQuery(qef, stmt, format, qeCallback);

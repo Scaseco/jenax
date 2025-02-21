@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.shared.PrefixMapping;
@@ -18,16 +19,16 @@ import org.junit.Test;
 
 public class TestRdfDataSourceMacroExpansion {
 
-    public static RdfDataSource dataSourceWithMacros(Graph graph) {
-        Map<String, UserDefinedFunctionDefinition> udfRegistry = RdfDataSources.loadMacros("datasource-test-macros.ttl");
-        RdfDataSource dataSource = RdfDataSources.of(graph);
-        return  RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
+    public static RDFDataSource dataSourceWithMacros(Graph graph) {
+        Map<String, UserDefinedFunctionDefinition> udfRegistry = RDFLinkSources.loadMacros("datasource-test-macros.ttl");
+        RDFDataSource dataSource = RdfDataSources.of(graph);
+        return RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
     }
 
     @Test
     public void testMacrosInQuery() {
         Graph graph = GraphFactory.createDefaultGraph();
-        RdfDataSource dataSource = dataSourceWithMacros(graph);
+        RDFDataSource dataSource = dataSourceWithMacros(graph);
 
         Table expectedTable = SSE.parseTable("(table (row (?x 'Hello Anne!')))");
         Table actualTable = dataSource.asLinkSource()
@@ -39,7 +40,7 @@ public class TestRdfDataSourceMacroExpansion {
 
     public void testMacrosInUpdate() {
         Graph graph = GraphFactory.createDefaultGraph();
-        RdfDataSource dataSource = dataSourceWithMacros(graph);
+        RDFDataSource dataSource = dataSourceWithMacros(graph);
 
         dataSource.newUpdate().update("""
             PREFIX eg: <http://www.example.org/>

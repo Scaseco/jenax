@@ -3,10 +3,10 @@ package org.aksw.jenax.dataaccess.sparql.factory.execution.query;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactory;
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
@@ -29,21 +29,21 @@ public class QueryExecutionFactories {
         return new QueryExecutionFactoryOverSparqlQueryConnection(conn);
     }
 
-    public static QueryExecutionFactory of(RdfDataSource dataSource) {
+    public static QueryExecutionFactory of(RDFDataSource dataSource) {
         return new QueryExecutionFactoryOverRdfDataSource(dataSource);
     }
 
     /** Create a {@link QueryExecutionFactory} over a {@link Dataset} */
     public static QueryExecutionFactory of(Dataset dataset) {
-        return of(RdfDataEngines.of(dataset));
+        return of(RdfDataSources.of(dataset));
     }
 
     public static class QueryExecutionFactoryOverRdfDataSource
         implements QueryExecutionFactory
     {
-        protected RdfDataSource dataSource;
+        protected RDFDataSource dataSource;
 
-        public QueryExecutionFactoryOverRdfDataSource(RdfDataSource decoratee) {
+        public QueryExecutionFactoryOverRdfDataSource(RDFDataSource decoratee) {
             super();
             this.dataSource = decoratee;
         }

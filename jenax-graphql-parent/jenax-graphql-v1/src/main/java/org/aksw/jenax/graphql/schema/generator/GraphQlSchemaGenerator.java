@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.graphql.sparql.DatasetMetadata;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
@@ -78,7 +78,7 @@ public class GraphQlSchemaGenerator {
     /** Artificial classes referred to by their properties. */
     protected Map<Set<PropertyInfo>, Node> propertiesToStructuralClass = new LinkedHashMap<>();
 
-    public static List<TypeInfo> summarize(RdfDataSource dataSource) {
+    public static List<TypeInfo> summarize(RDFDataSource dataSource) {
         Query dataSummary = SparqlStmtMgr.loadQuery("data-summary.rq");
         Table table = dataSource.asLinkSource().newQuery().query(dataSummary).table();
         // System.err.println(ResultSetFormatter.asText(table.toRowSet().asResultSet()));

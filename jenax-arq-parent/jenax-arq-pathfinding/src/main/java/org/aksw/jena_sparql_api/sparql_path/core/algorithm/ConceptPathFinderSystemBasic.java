@@ -8,7 +8,7 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderFactorySummaryB
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.path.SimplePath;
@@ -21,7 +21,7 @@ public class ConceptPathFinderSystemBasic
     implements ConceptPathFinderSystem
 {
     @Override
-    public Single<Model> computeDataSummary(RdfDataSource dataSource) {
+    public Single<Model> computeDataSummary(RDFDataSource dataSource) {
         return Single.fromCallable(() -> org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinder.createDefaultJoinSummaryModel(
                 dataSource.asQef()));
     }

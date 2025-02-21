@@ -2,23 +2,23 @@ package org.aksw.jenax.dataaccess.sparql.datasource;
 
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSource;
-import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSourceAdapter;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceAdapter;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLink;
 
-public class RdfDataSourceAdapter
-    implements RdfDataSource
+public class RDFDataSourceAdapter
+    implements RDFDataSource
 {
-    protected RdfLinkSource delegate;
+    protected RDFLinkSource delegate;
 
-    protected RdfDataSourceAdapter(RdfLinkSource linkSource) {
+    protected RDFDataSourceAdapter(RDFLinkSource linkSource) {
         super();
         this.delegate = Objects.requireNonNull(linkSource);
     }
 
-    public RdfLinkSource getDelegate() {
+    public RDFLinkSource getDelegate() {
         return delegate;
     }
 
@@ -28,10 +28,10 @@ public class RdfDataSourceAdapter
         return RDFConnectionAdapter.adapt(link);
     }
 
-    public RdfDataSource adapt(RdfLinkSource linkSource) {
-        RdfDataSource result = linkSource instanceof RdfLinkSourceAdapter adapter
+    public static RDFDataSource adapt(RDFLinkSource linkSource) {
+        RDFDataSource result = linkSource instanceof RDFLinkSourceAdapter adapter
             ? adapter.getDelegate()
-            : new RdfDataSourceAdapter(linkSource);
+            : new RDFDataSourceAdapter(linkSource);
         return result;
     }
 }

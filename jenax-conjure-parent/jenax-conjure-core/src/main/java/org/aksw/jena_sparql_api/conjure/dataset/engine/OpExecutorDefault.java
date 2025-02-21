@@ -66,11 +66,11 @@ import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapper;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapper;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
@@ -777,7 +777,7 @@ public class OpExecutorDefault
         Op subOp = op.getSubOp();
         RdfDataPod subPod = subOp.accept(this);
 
-        RdfDataEngine tmp = subPod;
+        RDFEngine tmp = subPod;
 
         for (Rewrite rewrite : op.getRewrites()) {
             String javaClass = rewrite.getJavaClass();
@@ -791,7 +791,7 @@ public class OpExecutorDefault
             tmp = RdfDataEngines.transform(tmp, dataSourceTransform);
         }
 
-        RdfDataEngine engine = tmp;
+        RDFEngine engine = tmp;
         RdfDataPod result = new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
@@ -831,8 +831,8 @@ public class OpExecutorDefault
             // result = tmp -> RdfDataEngines.wrapWithStmtTransform(tmp, stmtTransform);
             // result = RdfDataSources.wrapWithStmtTransform(null, stmtTransform)
             result = RdfDataSourceTransforms.of(stmtTransform);
-        } else if (RdfDataSourceWrapper.class.isAssignableFrom(cls)) {
-            Constructor<?> ctor = cls.getConstructor(RdfDataSource.class);
+        } else if (RDFDataSourceWrapper.class.isAssignableFrom(cls)) {
+            Constructor<?> ctor = cls.getConstructor(RDFDataSource.class);
             // result = tmp -> RdfDataEngines.of(dataSource, tmp);
             result = tmp -> {
                 Object inst;
@@ -842,7 +842,7 @@ public class OpExecutorDefault
                         | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
-                RdfDataSource r = (RdfDataSource)inst;
+                RDFDataSource r = (RDFDataSource)inst;
                 return r;
             };
         } else if (RdfDataSourceTransform.class.isAssignableFrom(cls)) {

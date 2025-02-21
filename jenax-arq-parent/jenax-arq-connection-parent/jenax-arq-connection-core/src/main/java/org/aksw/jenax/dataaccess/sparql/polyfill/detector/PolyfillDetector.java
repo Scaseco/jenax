@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillCondition;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
@@ -33,7 +33,7 @@ public class PolyfillDetector {
     protected NavigableMap<Integer, List<Record>> suggesters = new TreeMap<>();
 
 
-    public List<Suggestion<String>> detect(RdfDataSource dataSource) {
+    public List<Suggestion<String>> detect(RDFDataSource dataSource) {
         List<Suggestion<String>> result = new ArrayList<>();
         for (Entry<Integer, List<Record>> entry : suggesters.entrySet()) {
             for (Record e : entry.getValue()) {

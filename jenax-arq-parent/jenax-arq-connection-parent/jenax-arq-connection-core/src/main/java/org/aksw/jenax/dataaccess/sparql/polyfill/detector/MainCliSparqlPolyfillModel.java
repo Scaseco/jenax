@@ -9,7 +9,7 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumns
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourcePolyfill;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalLateral;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
@@ -27,7 +27,7 @@ public class MainCliSparqlPolyfillModel {
         // String url = "http://maven.aksw.org/sparql";
         // String url = "http://localhost:9988/sparql";
 
-        RdfDataSource dataSource = () -> RDFConnectionRemote.newBuilder()
+        RDFDataSource dataSource = () -> RDFConnectionRemote.newBuilder()
                 .destination(url).build();
 
         List<Suggestion<String>> suggestions = RdfDataSourcePolyfill.suggestPolyfills(dataSource);

@@ -19,7 +19,7 @@ import org.apache.jena.sparql.core.DatasetDescription;
  * @author raven
  *
  */
-@Deprecated /** Use {@link RdfDataSource} instead */
+@Deprecated /** Use {@link RDFDataSource} instead */
 public interface SparqlService
 //    extends AutoCloseable
 {

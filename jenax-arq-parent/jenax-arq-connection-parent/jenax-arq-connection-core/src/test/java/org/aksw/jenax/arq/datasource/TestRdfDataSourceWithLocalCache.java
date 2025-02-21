@@ -3,7 +3,7 @@ package org.aksw.jenax.arq.datasource;
 import java.util.concurrent.Callable;
 
 import org.aksw.commons.util.benchmark.BenchmarkUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalCache;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
@@ -14,14 +14,14 @@ public class TestRdfDataSourceWithLocalCache {
 
     // @Test // TODO Add a 'delaying' data source to simulate latency
     public void test() {
-        RdfDataSource base = () -> RDFConnectionRemote.newBuilder()
+        RDFDataSource base = () -> RDFConnectionRemote.newBuilder()
                 //.destination("https://query.wikidata.org/sparql")
                 //.destination("https://dbpedia.org/sparql")
                 //.destination("https://coypu.demo.aksw.org/ds")
                 .destination("http://localhost:8642/sparql")
                 .build();
 
-        RdfDataSource ds = new RdfDataSourceWithLocalCache(base);
+        RDFDataSource ds = new RdfDataSourceWithLocalCache(base);
 
         // String str = "SELECT (COUNT(*) AS ?c) { SELECT * { ?s ?p ?o } LIMIT 5000000 }";
         String queryStr = "SELECT  DISTINCT ?v_1\n"

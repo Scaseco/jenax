@@ -13,8 +13,8 @@ import org.aksw.commons.util.closeable.AutoCloseableWithLeakDetectionBase;
 import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecBaseIterator;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.json.JsonObject;
@@ -41,11 +41,11 @@ import com.github.benmanes.caffeine.cache.Cache;
  * Cancelling a query execution while it is being cached caches the encountered cancellation exception.
  */
 public class RdfDataSourceWithSimpleCache
-    extends RdfDataSourceWrapperBase<RdfDataSource>
+    extends RDFDataSourceWrapperBase<RDFDataSource>
 {
     protected Cache<Object, Object> cache;
 
-    public RdfDataSourceWithSimpleCache(RdfDataSource delegate, Cache<Object, Object> cache) {
+    public RdfDataSourceWithSimpleCache(RDFDataSource delegate, Cache<Object, Object> cache) {
         super(delegate);
         this.cache = Objects.requireNonNull(cache);
     }

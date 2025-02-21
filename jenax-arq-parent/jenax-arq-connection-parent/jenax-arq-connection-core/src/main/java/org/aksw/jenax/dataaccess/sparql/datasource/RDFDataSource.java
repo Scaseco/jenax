@@ -1,15 +1,18 @@
 package org.aksw.jenax.dataaccess.sparql.datasource;
 
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSource;
-import org.aksw.jenax.dataaccess.sparql.linksource.RdfLinkSourceAdapter;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceAdapter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sparql.exec.QueryExecBuilder;
+import org.apache.jena.sparql.exec.QueryExecutionBuilderAdapter;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
+import org.apache.jena.sparql.exec.UpdateExecutionBuilderAdapter;
 import org.apache.jena.update.UpdateExecutionBuilder;
 
 /**
@@ -17,20 +20,25 @@ import org.apache.jena.update.UpdateExecutionBuilder;
  *
  * This interface does not provide resource management, i.e. a close() method.
  * It should only be used as follows:
- * (a) As a lambda in conjunction with {@link RdfDataEngines#of(RdfDataSource, AutoCloseable)}
+ * (a) As a lambda in conjunction with {@link RdfDataEngines#of(RDFDataSource, AutoCloseable)}
  * (b) in consuming code that does not need resource management
  *
- * Prefer {@link RdfDataEngine} whenever resources may need to be closed.
+ * Prefer {@link RDFEngine} whenever resources may need to be closed.
  *
  */
 @FunctionalInterface
-public interface RdfDataSource
+public interface RDFDataSource
 {
     RDFConnection getConnection();
 
-    /** Convenience method for applying decorators. Returns a new RdfDatasource that wraps this one. */
-    default RdfDataSource decorate(RdfDataSourceTransform rdfDataSourceTransform) {
-        return rdfDataSourceTransform.apply(this);
+//    default RDFConnection getConnection() {
+//        RDFLinkSource linkSource = asLinkSource();
+//        RDFLink link = linkSource.newLink();
+//        return RDFConnectionAdapter.adapt(link);
+//    }
+
+    default RDFLinkSource asLinkSource() {
+        return RDFLinkSourceAdapter.adapt(this);
     }
 
     /**
@@ -41,15 +49,15 @@ public interface RdfDataSource
      * @since 5.3.0-1
      */
     default QueryExecutionBuilder newQuery() {
-        return RdfDataSources.newQueryBuilder(this);
+        RDFLinkSource linkSource = asLinkSource();
+        QueryExecBuilder execBuilder = linkSource.newQuery();
+        return QueryExecutionBuilderAdapter.adapt(execBuilder);
     }
 
     default UpdateExecutionBuilder newUpdate() {
-        return RdfDataSources.newUpdateBuilder(this);
-    }
-
-    default RdfLinkSource asLinkSource() {
-        return RdfLinkSourceAdapter.adapt(this);
+        RDFLinkSource linkSource = asLinkSource();
+        UpdateExecBuilder execBuilder = linkSource.newUpdate();
+        return UpdateExecutionBuilderAdapter.adapt(execBuilder);
     }
 
     /**
@@ -62,6 +70,7 @@ public interface RdfDataSource
      * The behavior of {@link QueryExecutionFactory#close()} is implementation dependent.
      * By default it is a no-op but it may close the data source.
      */
+    @Deprecated
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);
     }

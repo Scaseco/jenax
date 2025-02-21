@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.collections.IterableUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
@@ -75,7 +75,7 @@ public class DatasetMetadata {
         return combiner.exec();
     }
 
-    public static ListenableFuture<String> fetchDatasetHash(RdfDataSource dataSource, ListeningExecutorService executorService) {
+    public static ListenableFuture<String> fetchDatasetHash(RDFDataSource dataSource, ListeningExecutorService executorService) {
         ListenableFuture<String> datasetHashFuture = executorService.submit(() -> RdfDataSources.fetchDatasetHash(dataSource));
         return datasetHashFuture;
     }
@@ -89,16 +89,16 @@ public class DatasetMetadata {
         return new DatasetMetadata(voidDataset, shaclModel);
     }
 
-    public static DatasetMetadata fetch(RdfDataSource dataSource) {
+    public static DatasetMetadata fetch(RDFDataSource dataSource) {
         return fetch(dataSource, defaultVoidQueries, defaultShaclQueries);
     }
 
-    public static ListenableFuture<DatasetMetadata> fetch(RdfDataSource dataSource, ListeningExecutorService executorService) {
+    public static ListenableFuture<DatasetMetadata> fetch(RDFDataSource dataSource, ListeningExecutorService executorService) {
         List<Query> voidQueries = Arrays.asList(classPartitionsQuery, propertyPartitionsQuery);
         return fetch(dataSource, executorService, voidQueries, defaultShaclQueries);
     }
 
-    public static DatasetMetadata fetch(RdfDataSource dataSource, List<Query> voidQueries, List<Query> shaclQueries) {
+    public static DatasetMetadata fetch(RDFDataSource dataSource, List<Query> voidQueries, List<Query> shaclQueries) {
         if (voidQueries == null) {
             voidQueries = defaultVoidQueries;
         }
@@ -128,7 +128,7 @@ public class DatasetMetadata {
         return result;
     }
 
-    public static ListenableFuture<DatasetMetadata> fetch(RdfDataSource dataSource, ListeningExecutorService executorService,
+    public static ListenableFuture<DatasetMetadata> fetch(RDFDataSource dataSource, ListeningExecutorService executorService,
             List<Query> voidQueries, List<Query> shaclQueries) {
         QueryExecutionFactoryQuery qef = dataSource.asQef();
 

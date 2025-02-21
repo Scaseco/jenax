@@ -13,9 +13,9 @@ import org.aksw.jena_sparql_api.algebra.transform.ProjectExtend;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.sparql.algebra.topdown.OpRewriter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 // Currently not functional - the goal is to improve handling of filter expressions
 public class RdfDataSourceWithLocalCacheRework
-    extends RdfDataSourceWrapperBase<RdfDataSource>
+    extends RDFDataSourceWrapperBase<RDFDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalCacheRework.class);
 
@@ -130,12 +130,12 @@ WHERE
         System.out.println(op);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
-        RdfDataSourceWithLocalCacheRework dataSource = new RdfDataSourceWithLocalCacheRework(RdfDataEngines.of(DatasetFactory.create()));
+        RdfDataSourceWithLocalCacheRework dataSource = new RdfDataSourceWithLocalCacheRework(RdfDataSources.of(DatasetFactory.create()));
         Query rewritten = OpRewriteInjectCacheOps.rewriteQuery(query);
         System.out.println(rewritten);
     }
 
-    public RdfDataSourceWithLocalCacheRework(RdfDataSource delegate) {
+    public RdfDataSourceWithLocalCacheRework(RDFDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
     }
@@ -147,7 +147,7 @@ WHERE
      * @param delegate
      * @return
      */
-    public static Dataset createProxyDataset(RdfDataSource delegate) {
+    public static Dataset createProxyDataset(RDFDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
         registry.addBulkLink(new ChainingServiceExecutorBulkServiceEnhancer());

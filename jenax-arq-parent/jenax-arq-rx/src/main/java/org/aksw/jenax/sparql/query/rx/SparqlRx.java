@@ -24,7 +24,7 @@ import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.quad.QuadPatternUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.VarUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactories;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactoryQuery;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
@@ -698,7 +698,7 @@ public class SparqlRx {
 //        return execConstructGrouped(q -> conn.query(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
 //    }
 
-    public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(RdfDataSource dataSource, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
+    public static Flowable<Entry<Binding, RDFNode>> execConstructGrouped(RDFDataSource dataSource, Query query, List<Var> primaryKeyVars, Node rootNode, boolean sortRowsByPartitionVar) {
         return execConstructGrouped(q -> dataSource.asQef().createQueryExecution(q), query, primaryKeyVars, rootNode, sortRowsByPartitionVar);
     }
 

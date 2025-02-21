@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.polyfill.detector;
 
 import java.util.List;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
 
 /**
@@ -10,5 +10,5 @@ import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
  */
 public interface SparqlPolyfillDetector {
     String getName();
-    List<Suggestion<String>> detect(RdfDataSource dataSource);
+    List<Suggestion<String>> detect(RDFDataSource dataSource);
 }

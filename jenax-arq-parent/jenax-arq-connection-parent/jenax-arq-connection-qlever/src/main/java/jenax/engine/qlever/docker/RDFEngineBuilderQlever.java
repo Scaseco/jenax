@@ -11,8 +11,9 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.dataaccess.sparql.creator.FileSetOverPathBase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineBuilder;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase.CloseablePath;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
@@ -67,7 +68,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         // this.conf = new QleverConfRun();
     }
 
-    public static RdfDataEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverConfRun conf) throws NumberFormatException, IOException, InterruptedException {
+    public static RDFEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverConfRun conf) throws NumberFormatException, IOException, InterruptedException {
 
         Integer containerPort = conf.getPort();
         if (containerPort == null) {
@@ -132,7 +133,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         });
 
         // TODO Make it possible to mutate the HTTP connection creation
-        RdfDataEngine result = RdfDataEngines.of(
+        RDFEngine result = RdfDataEngines.of(
             () -> RDFConnectionRemote.service(serviceUrl).build(),
             () -> container.stop());
 
@@ -140,13 +141,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
     }
 
     @Override
-    public RdfDataEngine build() throws Exception {
+    public RDFEngine build() throws Exception {
         RdfDataSourceSpecBasic spec = RdfDataSourceSpecBasicFromMap.wrap(map);
         CloseablePath entry = RDFEngineFactoryLegacyBase.setupPath("rpt-qlever-", spec);
         Path finalDbPath = entry.path();
         Closeable partialCloseAction = entry.closeable();
 
-        RdfDataEngine result;
+        RDFEngine result;
         try {
             String location = finalDbPath.toString(); // getLocation();
             String qleverImageName = getImageName();
@@ -186,7 +187,8 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             }
 
             result = run(location, qleverImageName, qleverImageTag, hostPort, finalConf);
-            result = RdfDataEngines.wrapWithCloseAction(result, partialCloseAction);
+            result = RDFEngineDecorator.of(result).addCloseAction(partialCloseAction).build();
+            // result = RdfDataEngines.wrapWithCloseAction(result, partialCloseAction);
         } catch (Throwable e) {
             partialCloseAction.close();
             throw new RuntimeException(e);

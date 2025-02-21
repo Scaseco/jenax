@@ -6,6 +6,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecAdapter;
 
+@Deprecated
 public class QueryExecFactoryOverQueryExecutionFactory
     implements QueryExecFactory
 {
@@ -38,7 +39,7 @@ public class QueryExecFactoryOverQueryExecutionFactory
         return QueryExecAdapter.adapt(qe);
     }
 
-    @Override
+    // @Override
     public void close() throws Exception {
         qef.close();
     }
