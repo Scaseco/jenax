@@ -17,6 +17,14 @@ public class LinkSparqlQueryTransformQueryTransform
         this.queryExecTransform = queryExecTransform;
     }
 
+    public QueryTransform getQueryTransform() {
+        return queryTransform;
+    }
+
+    public QueryExecTransform getQueryExecTransform() {
+        return queryExecTransform;
+    }
+
     @Override
     public LinkSparqlQuery apply(LinkSparqlQuery t) {
         return new LinkSparqlQueryQueryTransform(t, queryTransform, queryExecTransform);

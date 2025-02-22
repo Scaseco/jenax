@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
-import org.aksw.jenax.arq.util.op.RewriteList;
+import org.aksw.jenax.arq.util.op.OpTransformList;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
@@ -296,7 +296,7 @@ public class RDFLinkSources {
         if (dataSource instanceof RDFLinkSourceWrapperWithRewrite tmp) {
             Rewrite before = tmp.getRewrite();
             RDFLinkSource delegate = tmp.getDelegate();
-            Rewrite effectiveRewrite = RewriteList.flatten(true, before, rewrite);
+            Rewrite effectiveRewrite = OpTransformList.flatten(true, before, rewrite);
             result = new RDFLinkSourceWrapperWithRewrite<>(delegate, effectiveRewrite);
         } else {
             result = new RDFLinkSourceWrapperWithRewrite<>(dataSource, rewrite);

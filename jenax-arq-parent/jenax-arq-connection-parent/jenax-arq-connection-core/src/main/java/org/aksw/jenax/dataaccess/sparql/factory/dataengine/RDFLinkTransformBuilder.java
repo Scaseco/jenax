@@ -19,6 +19,10 @@ public class RDFLinkTransformBuilder
 {
     protected List<RDFLinkTransform> mods = new ArrayList<>();
 
+    protected LinkSparqlQueryTransformBuilder queryBuilder;
+    protected LinkSparqlUpdateTransformBuilder queryBuilder;
+
+
     public boolean isEmpty() {
         return mods.isEmpty();
     }

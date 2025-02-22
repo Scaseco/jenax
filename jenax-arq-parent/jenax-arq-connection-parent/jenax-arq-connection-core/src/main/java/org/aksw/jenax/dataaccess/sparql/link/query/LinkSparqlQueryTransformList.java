@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.link.query;
 
 import java.util.List;
 
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.TransformList;
+import org.aksw.jenax.arq.util.query.TransformList;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 
 /** Composite LinkSparqlQueryTransform */

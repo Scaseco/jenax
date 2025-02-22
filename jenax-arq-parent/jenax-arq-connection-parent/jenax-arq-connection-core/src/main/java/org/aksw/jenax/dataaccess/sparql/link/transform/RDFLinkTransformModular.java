@@ -1,6 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.link.transform;
 
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
+import org.aksw.jenax.dataaccess.sparql.link.dataset.LinkDatasetGraphTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.apache.jena.rdflink.LinkDatasetGraph;
@@ -14,14 +15,28 @@ public final class RDFLinkTransformModular
 {
     protected LinkSparqlQueryTransform queryTransform;
     protected LinkSparqlUpdateTransform updateTransform;
-    protected LinkDatasetGraph datasetTransform;
+    protected LinkDatasetGraphTransform datasetTransform;
 
     public RDFLinkTransformModular(
             LinkSparqlQueryTransform queryTransform,
-            LinkSparqlUpdateTransform updateTransform) {
+            LinkSparqlUpdateTransform updateTransform,
+            LinkDatasetGraphTransform datasetTransform) {
         super();
         this.queryTransform = queryTransform;
         this.updateTransform = updateTransform;
+        this.datasetTransform = datasetTransform;
+    }
+
+    public LinkSparqlQueryTransform getQueryTransform() {
+        return queryTransform;
+    }
+
+    public LinkSparqlUpdateTransform getUpdateTransform() {
+        return updateTransform;
+    }
+
+    public LinkDatasetGraphTransform getDatasetTransform() {
+        return datasetTransform;
     }
 
     @Override
