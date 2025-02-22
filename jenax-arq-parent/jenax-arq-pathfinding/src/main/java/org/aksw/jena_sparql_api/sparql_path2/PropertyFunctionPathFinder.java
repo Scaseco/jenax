@@ -14,9 +14,8 @@ import org.aksw.commons.util.triplet.TripletPath;
 import org.aksw.jenax.arq.datatype.RDFDatatypeNodeList;
 import org.aksw.jenax.arq.util.node.NodeList;
 import org.aksw.jenax.arq.util.node.NodeListImpl;
-import org.aksw.jenax.connectionless.SparqlService;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.apache.jena.graph.Node;
@@ -100,7 +99,7 @@ public class PropertyFunctionPathFinder
 
         if (dataSource == null) {
             DatasetGraph datasetGraph = execCxt.getDataset();
-            dataSource = RdfDataEngines.of(dataSource);
+            dataSource = RdfDataSources.of(datasetGraph);
 //            Dataset ds = DatasetFactory.wrap(datasetGraph);
 //            ss = new SparqlServiceImpl(
 //                    new QueryExecutionFactoryPostProcess(new QueryExecutionFactoryDataset(), qe -> new QueryExecutionDecoratorTxn<QueryExecution>(qe, ds)), null);

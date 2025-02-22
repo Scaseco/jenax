@@ -36,6 +36,7 @@ import org.apache.jena.rdflink.RDFConnectionAdapter;
 import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.rdflink.RDFLinkModular;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecAdapter;
 import org.apache.jena.sparql.expr.ExprTransform;
@@ -73,6 +74,11 @@ public class RdfDataEngines {
         @Override
         public RDFLinkBuilder newLinkBuilder() {
             return new RDFLinkBuilderOverLinkSupplier(() -> RDFLinkAdapter.adapt(conn));
+        }
+
+        @Override
+        public DatasetGraph getDataset() {
+            return null;
         }
     }
 
@@ -151,7 +157,10 @@ public class RdfDataEngines {
         }
 
         @Override
-        public RDFConnection getConnection() {
+        public RDFLinkBuilder newLinkBuilder() {
+            return new RDFLinkBuilderOverLinkSupplier(() -> {
+
+        // public RDFConnection getConnection() {
             LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
                 @Override
                 public QueryExec build() {
@@ -161,14 +170,21 @@ public class RdfDataEngines {
                             ? qef.createQueryExecution(str)
                             : qef.createQueryExecution(getParsedQuery());
                     return QueryExecAdapter.adapt(qe);
-                }
+                    }
+                });
+                return new RDFLinkModular(queryLink, null, null);
             });
-            return RDFConnectionAdapter.adapt(new RDFLinkModular(queryLink, null, null));
+            // return RDFConnectionAdapter.adapt();
         }
 
         @Override
         public void close() throws Exception {
             qef.close();
+        }
+
+        @Override
+        public DatasetGraph getDataset() {
+            return null;
         }
     }
 

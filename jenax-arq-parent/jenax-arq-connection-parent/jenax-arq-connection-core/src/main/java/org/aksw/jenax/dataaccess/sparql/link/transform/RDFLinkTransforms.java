@@ -4,6 +4,8 @@ import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
+import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransformPaginate;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransformQueryTransform;
@@ -25,6 +27,14 @@ public class RDFLinkTransforms {
     public static RDFLinkTransform withPaginate(long pageSize) {
         LinkSparqlQueryTransformPaginate queryMod = new LinkSparqlQueryTransformPaginate(pageSize);
         return of(queryMod);
+    }
+
+    public static RDFLinkTransform withAutoTxn() {
+        return link -> RDFLinkUtils.wrapWithAutoTxn(link, link);
+    }
+
+    public static RDFLinkTransform withWorkerThread() {
+        return RDFLinkWrapperWithWorkerThread::wrap;
     }
 
     public static RDFLinkTransform of(SparqlStmtTransform stmtTransform) {

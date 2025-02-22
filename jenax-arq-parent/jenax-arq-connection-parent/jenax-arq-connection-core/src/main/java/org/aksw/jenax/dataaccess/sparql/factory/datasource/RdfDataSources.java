@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceOverDataset;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
@@ -32,6 +34,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
+import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.expr.ExprTransform;
@@ -125,6 +128,38 @@ public class RdfDataSources {
         return result;
     }
 
+
+    // --- Legacy
+
+    /**
+     * This method creates an RdfDataSource view over a connection.
+     * Wrapping a connection as an engine is more a hack and should be avoided.
+     */
+    @Deprecated
+    public static RDFDataSource ofQueryConnection(SparqlQueryConnection conn) {
+        return new RDFDataSourceOverSparqlQueryConnection(new RDFConnectionModular(conn, null, null));
+    }
+
+    public static class RDFDataSourceOverSparqlQueryConnection
+        implements RDFDataSource
+    {
+        protected RDFConnection conn;
+
+        public RDFDataSourceOverSparqlQueryConnection(RDFConnection conn) {
+            super();
+            this.conn = conn;
+        }
+
+        @Override
+        public RDFConnection getConnection() {
+            return RDFConnectionUtils.withCloseShield(conn);
+        }
+
+//      @Override
+//      public void close() throws Exception {
+//          conn.close();
+//      }
+    }
 
 //    /**
 //     * Wrap a datasource such that a (stateless) algebra transform is applied to each statement.

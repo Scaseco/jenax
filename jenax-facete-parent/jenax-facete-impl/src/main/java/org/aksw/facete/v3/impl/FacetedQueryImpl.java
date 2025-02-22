@@ -11,7 +11,7 @@ import org.aksw.facete.v3.api.FacetedQueryResource;
 import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.facete.v3.bgp.api.XFacetedQuery;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -77,7 +77,7 @@ public class FacetedQueryImpl
 
     public static FacetedQueryImpl create(XFacetedQuery modelRoot, SparqlQueryConnection conn) {
         initResource(modelRoot);
-        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, RdfDataEngines.ofQueryConnection(conn));
+        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, RdfDataSources.ofQueryConnection(conn));
     }
 
     public FacetedQueryImpl(XFacetedQuery modelRoot, Supplier<? extends Fragment1> conceptSupplier, RDFDataSource rdfDataSource) {

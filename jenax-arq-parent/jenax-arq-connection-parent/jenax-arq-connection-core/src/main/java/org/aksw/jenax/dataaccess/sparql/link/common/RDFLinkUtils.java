@@ -445,6 +445,7 @@ public class RDFLinkUtils {
     }
 
 
+
     /**
      * Standard sparql does not support creating relative IRIs.
      * The spec states that the IRI function *must* return an absolute IRI.
