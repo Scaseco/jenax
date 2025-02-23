@@ -1,8 +1,10 @@
 package org.aksw.jenax.dataaccess.sparql.linksource;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.RDFLink;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
@@ -16,7 +18,18 @@ import org.apache.jena.update.UpdateRequest;
  */
 @FunctionalInterface
 public interface RDFLinkSource {
-    RDFLink newLink();
+    RDFLinkBuilder<?> newLinkBuilder();
+
+    /**
+     * A link source may optionally associated with a dataset graph.
+     */
+    default DatasetGraph getDatasetGraph() {
+        return null;
+    }
+
+    default RDFLink newLink() {
+        return newLinkBuilder().build();
+    }
 
     /**
      * Builder that executes a query statement on its own link.

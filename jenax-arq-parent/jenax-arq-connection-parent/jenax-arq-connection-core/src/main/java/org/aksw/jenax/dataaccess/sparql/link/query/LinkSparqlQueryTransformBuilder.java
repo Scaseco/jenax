@@ -10,6 +10,7 @@ import org.aksw.jenax.arq.util.query.QueryExecTransformBuilder;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.query.QueryTransformBuilder;
 import org.aksw.jenax.arq.util.query.TransformList;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class LinkSparqlQueryTransformBuilder {
     protected List<LinkSparqlQueryTransform> linkTransforms = new ArrayList<>();
@@ -63,6 +64,11 @@ public class LinkSparqlQueryTransformBuilder {
     }
 
     public LinkSparqlQueryTransformBuilder add(OpTransform transform) {
+        qTransformBuilder.add(transform);
+        return this;
+    }
+
+    public LinkSparqlQueryTransformBuilder add(ExprTransform transform) {
         qTransformBuilder.add(transform);
         return this;
     }

@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
-import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.TransformList;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransformBuilder;
-import org.aksw.jenax.arq.util.update.UpdateTransform;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class LinkSparqlUpdateTransformBuilder {
     protected List<LinkSparqlUpdateTransform> linkTransforms = new ArrayList<>();
@@ -20,9 +18,9 @@ public class LinkSparqlUpdateTransformBuilder {
     protected LinkSparqlUpdateTransform lastLink() {
         LinkSparqlUpdateTransform result = null;
         UpdateRequestTransform uTransform = uTransformBuilder.build();
-        UpdateExecTransform uExecTransform = uExecTransformBuilder.build();
-        if (uTransform != null || uExecTransform != null) {
-            result = new LinkSparqlUpdateTransformUpdateTransform(uTransform, uExecTransform);
+        // UpdateExecTransform uExecTransform = uExecTransformBuilder.build();
+        if (uTransform != null) {
+            result = new LinkSparqlUpdateTransformUpdateTransform(uTransform, null);
         }
         return result;
     }
@@ -38,15 +36,15 @@ public class LinkSparqlUpdateTransformBuilder {
 
     protected void addInternal(LinkSparqlUpdateTransform transform) {
         if (transform instanceof LinkSparqlUpdateTransformUpdateTransform t) {
-            UpdateTransform qt = t.getQueryTransform();
-            if (qt != null) {
-                uTransformBuilder.add(qt);
+            UpdateRequestTransform urt = t.getUpdateTransform();
+            if (urt != null) {
+                uTransformBuilder.add(urt);
             }
 
-            QueryExecTransform qet = t.getQueryExecTransform();
-            if (qet != null) {
-                uExecTransformBuilder.add(qet);
-            }
+//            QueryExecTransform qet = t.getQueryExecTransform();
+//            if (qet != null) {
+//                uExecTransformBuilder.add(qet);
+//            }
         } else {
             finalizeSubBuilder();
             linkTransforms.add(transform);
@@ -64,6 +62,11 @@ public class LinkSparqlUpdateTransformBuilder {
     }
 
     public LinkSparqlUpdateTransformBuilder add(OpTransform transform) {
+        uTransformBuilder.add(transform);
+        return this;
+    }
+
+    public LinkSparqlUpdateTransformBuilder add(ExprTransform transform) {
         uTransformBuilder.add(transform);
         return this;
     }

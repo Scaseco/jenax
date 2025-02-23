@@ -8,13 +8,13 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.DecoratedRDFEngine;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFactoryRegistry;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryRegistry;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFromDataset;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransforms;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.algebra.Table;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,8 +24,8 @@ class MyRdfDataEngineFactoryMem
 {
     @Override
     public RDFEngine create(Map<String, Object> config) {
-        Dataset dataset = DatasetFactory.create();
-        RDFEngine result = RdfDataEngineFromDataset.create(dataset);
+        DatasetGraph dsg = DatasetGraphFactory.create();
+        RDFEngine result = RdfDataEngineFromDataset.create(dsg);
         return result;
     }
 }
@@ -34,7 +34,7 @@ class MyRdfDataEngineFactoryMem
 public class TestRDFEngineAPI {
     @Test
     public void test() throws Exception {
-        RdfDataEngineFactoryRegistry registry = new RdfDataEngineFactoryRegistry();
+        RDFEngineFactoryRegistry registry = new RDFEngineFactoryRegistry();
 
         // Register our own engine factory
         registry.putFactory("test-mem", new MyRdfDataEngineFactoryMem());
@@ -53,7 +53,7 @@ public class TestRDFEngineAPI {
             .setAutoDeleteIfCreated(true)
             .build();
 
-        try (RDFLink link = engine.newLinkBuilder().build()) {
+        try (RDFLink link = engine.getLinkSource().newLink()) {
             link.update("INSERT DATA { <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .}");
             link.update("INSERT DATA { <urn:s> <urn:p> <urn:o> .}");
         }
@@ -63,7 +63,7 @@ public class TestRDFEngineAPI {
         engineDecorator.decorate(RDFLinkTransforms.withLimit(1));
 
         try (DecoratedRDFEngine<?> decoratedEngine = engineDecorator.build()) {
-            RDFDataSource dataSource = decoratedEngine.getDataSource();
+            RDFDataSource dataSource = RDFDataSource.of(decoratedEngine.getLinkSource());
 
             // Test 1: The Resource abstraction is expected to work.
             TestResource.testResource(dataSource);

@@ -42,11 +42,11 @@ public class RDFLinkTransforms {
     }
 
     public static RDFLinkTransform of(LinkSparqlQueryTransform transform) {
-        return new RDFLinkTransformModular(transform, null);
+        return new RDFLinkTransformModular(transform, null, null);
     }
 
     public static RDFLinkTransform of(LinkSparqlUpdateTransform transform) {
-        return new RDFLinkTransformModular(null, transform);
+        return new RDFLinkTransformModular(null, transform, null);
     }
 
     public static RDFLinkTransform of(QueryTransform transform) {

@@ -15,14 +15,14 @@ import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorato
  *
  * This class provides the infrastructure for third party plugins.
  */
-public class RdfDataEngineFactoryRegistry {
-    private static RdfDataEngineFactoryRegistry INSTANCE;
+public class RDFEngineFactoryRegistry {
+    private static RDFEngineFactoryRegistry INSTANCE;
 
-    public static RdfDataEngineFactoryRegistry get() {
+    public static RDFEngineFactoryRegistry get() {
         if (INSTANCE == null) {
-            synchronized (RdfDataEngineFactoryRegistry.class) {
+            synchronized (RDFEngineFactoryRegistry.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new RdfDataEngineFactoryRegistry();
+                    INSTANCE = new RDFEngineFactoryRegistry();
                 }
             }
         }
@@ -39,7 +39,7 @@ public class RdfDataEngineFactoryRegistry {
      * requesting that name.
      * This method will override a previously registered provider with the same name.
      */
-    public RdfDataEngineFactoryRegistry putFactory(String providerAndFactoryName, RDFEngineFactory factory) {
+    public RDFEngineFactoryRegistry putFactory(String providerAndFactoryName, RDFEngineFactory factory) {
         Objects.requireNonNull(providerAndFactoryName);
         Objects.requireNonNull(factory);
         RdfDataEngineFactoryProviderSimple provider = new RdfDataEngineFactoryProviderSimple(providerAndFactoryName, factory);
@@ -48,14 +48,14 @@ public class RdfDataEngineFactoryRegistry {
     }
 
     /** Registers a provider under a specific name. The name only identifies the provider. */
-    public RdfDataEngineFactoryRegistry putEngineProvider(String providerName, RDFEngineFactoryProvider provider) {
+    public RDFEngineFactoryRegistry putEngineProvider(String providerName, RDFEngineFactoryProvider provider) {
         Objects.requireNonNull(providerName);
         Objects.requireNonNull(provider);
         engineProviderRegistry.put(providerName, provider);
         return this;
     }
 
-    public RdfDataEngineFactoryRegistry putDatabaseProvider(String providerName, RdfDatabaseFactoryProvider provider) {
+    public RDFEngineFactoryRegistry putDatabaseProvider(String providerName, RdfDatabaseFactoryProvider provider) {
         Objects.requireNonNull(providerName);
         Objects.requireNonNull(provider);
         databaseProviderRegistry.put(providerName, provider);
@@ -100,7 +100,7 @@ public class RdfDataEngineFactoryRegistry {
         return result;
     }
 
-    public RdfDataEngineFactoryRegistry putDecorator(String name, RdfDataSourceDecorator factory) {
+    public RDFEngineFactoryRegistry putDecorator(String name, RdfDataSourceDecorator factory) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(factory);
         decoratorRegistry.put(name, factory);

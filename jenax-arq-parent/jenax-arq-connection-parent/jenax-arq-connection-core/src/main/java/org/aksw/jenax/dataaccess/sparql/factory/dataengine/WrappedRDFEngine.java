@@ -4,10 +4,7 @@ import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngineWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverRDFLinkSource;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
-import org.apache.jena.sparql.core.DatasetGraph;
 
 public class WrappedRDFEngine<X extends RDFEngine>
     extends RDFEngineWrapperBase<X>
@@ -20,8 +17,8 @@ public class WrappedRDFEngine<X extends RDFEngine>
     }
 
     @Override
-    public RDFLinkBuilder newLinkBuilder() {
-        return new RDFLinkBuilderOverRDFLinkSource(effectiveLinkSource);
+    public RDFLinkSource getLinkSource() {
+        return effectiveLinkSource;
     }
 
     @Override
@@ -29,8 +26,13 @@ public class WrappedRDFEngine<X extends RDFEngine>
         getDelegate().close();
     }
 
-    @Override
-    public DatasetGraph getDataset() {
-        return getDelegate().getDataset();
-    }
+//    @Override
+//    public DatasetGraph getDataset() {
+//        return getDelegate().getDataset();
+//    }
+//  @Override
+//  public RDFLinkBuilder newLinkBuilder() {
+//      return new RDFLinkBuilderOverRDFLinkSource(effectiveLinkSource);
+//  }
+
 }

@@ -22,7 +22,11 @@ public class RdfDataEngineFactoryOverRdfDataSourceFactory
             @Override
             public RDFEngine build() throws Exception {
                 RDFDataSource dataSource = rdfDataSourceFactory.create(map);
-                RDFEngine result = RdfDataEngines.of(dataSource);
+                RDFEngine result = null;
+                if (true) {
+                    throw new RuntimeException("TODO Migrate");
+                }
+                // RDFEngine result = RdfDataEngines.of(dataSource);
                 return result;
             }
         };

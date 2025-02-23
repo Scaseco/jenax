@@ -2,8 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.engine;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
-import org.apache.jena.sparql.core.DatasetGraph;
+import org.aksw.jenax.dataaccess.sparql.linksource.HasRDFLinkSource;
 
 /**
  * An RDFEngine represents a running database systems.
@@ -25,10 +24,10 @@ import org.apache.jena.sparql.core.DatasetGraph;
  * {@link RDFEngineDecorator}.
  */
 public interface RDFEngine
-    extends AutoCloseable
+    extends HasRDFLinkSource, AutoCloseable
 {
-    DatasetGraph getDataset();
-    RDFLinkBuilder newLinkBuilder();
+    // DatasetGraph getDataset();
+    // RDFLinkBuilder<?> newLinkBuilder();
 
 //    default RDFDataSource asDataSource() {
 //        return RDFDataSourceAdapter.adapt(RDFLinkSourceOverRDFEngine.of(this));

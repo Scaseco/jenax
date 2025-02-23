@@ -5,8 +5,12 @@ import java.util.function.Supplier;
 
 import org.apache.jena.rdflink.RDFLink;
 
-public class RDFLinkBuilderOverLinkSupplier
-    implements RDFLinkBuilder
+/**
+ * A link builder without any configurable properties.
+ * It returns links from the given supplier.
+ */
+public class RDFLinkBuilderOverLinkSupplier<X extends RDFLinkBuilderOverLinkSupplier<X>>
+    extends RDFLinkBuilderBase<X>
 {
     protected Supplier<RDFLink> linkSupplier;
 
@@ -16,7 +20,7 @@ public class RDFLinkBuilderOverLinkSupplier
     }
 
     @Override
-    public RDFLink build() {
+    public RDFLink buildBaseLink() {
         return linkSupplier.get();
     }
 }

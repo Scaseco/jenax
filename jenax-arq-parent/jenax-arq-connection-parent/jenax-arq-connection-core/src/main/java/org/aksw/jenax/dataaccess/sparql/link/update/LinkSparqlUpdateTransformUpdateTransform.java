@@ -19,6 +19,14 @@ public class LinkSparqlUpdateTransformUpdateTransform
         this.updateExecTransform = updateExecTransform;
     }
 
+    public UpdateRequestTransform getUpdateTransform() {
+        return updateTransform;
+    }
+
+//    public BiFunction<? super UpdateRequest, ? super UpdateProcessor, ? extends UpdateProcessor> getUpdateExecTransform() {
+//        return updateExecTransform;
+//    }
+
     @Override
     public LinkSparqlUpdate apply(LinkSparqlUpdate base) {
         return new LinkSparqlUpdateUpdateTransform(base, updateTransform, updateExecTransform);

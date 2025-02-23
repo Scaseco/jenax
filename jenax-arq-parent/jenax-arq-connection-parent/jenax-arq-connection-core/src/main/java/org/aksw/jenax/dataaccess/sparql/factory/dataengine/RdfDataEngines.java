@@ -1,86 +1,56 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
-import java.io.Closeable;
-
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
-import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
-import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
-import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngineWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
-import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
-import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithWorkerThread;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
-import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
-import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
-import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceTransform;
-import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
-import org.aksw.jenax.stmt.core.SparqlStmtTransform;
-import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.rdflink.LinkSparqlQuery;
-import org.apache.jena.rdflink.RDFConnectionAdapter;
-import org.apache.jena.rdflink.RDFLinkAdapter;
-import org.apache.jena.rdflink.RDFLinkModular;
-import org.apache.jena.sparql.algebra.optimize.Rewrite;
-import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.QueryExecAdapter;
-import org.apache.jena.sparql.expr.ExprTransform;
 
 public class RdfDataEngines {
     /**
      * This method creates an RdfDataSource view over a connection.
      * Wrapping a connection as an engine is more a hack and should be avoided.
      */
-    @Deprecated
-    public static RDFEngine ofQueryConnection(SparqlQueryConnection conn) {
-        return new RdfDataEngineOverSparqlQueryConnection(new RDFConnectionModular(conn, null, null));
-    }
+//    @Deprecated
+//    public static RDFEngine ofQueryConnection(SparqlQueryConnection conn) {
+//        return new RdfDataEngineOverSparqlQueryConnection(new RDFConnectionModular(conn, null, null));
+//    }
 
-    public static class RdfDataEngineOverSparqlQueryConnection
-        implements RDFEngine
-    {
-        protected RDFConnection conn;
-
-        public RdfDataEngineOverSparqlQueryConnection(RDFConnection conn) {
-            super();
-            this.conn = conn;
-        }
-
-//        @Override
-//        public RDFConnection getConnection() {
-//            return RDFConnectionUtils.withCloseShield(conn);
+//    public static class RdfDataEngineOverSparqlQueryConnection
+//        implements RDFEngine
+//    {
+//        protected RDFConnection conn;
+//
+//        public RdfDataEngineOverSparqlQueryConnection(RDFConnection conn) {
+//            super();
+//            this.conn = conn;
 //        }
-
-        @Override
-        public void close() throws Exception {
-            conn.close();
-        }
-
-        @Override
-        public RDFLinkBuilder newLinkBuilder() {
-            return new RDFLinkBuilderOverLinkSupplier(() -> RDFLinkAdapter.adapt(conn));
-        }
-
-        @Override
-        public DatasetGraph getDataset() {
-            return null;
-        }
-    }
+//
+////        @Override
+////        public RDFConnection getConnection() {
+////            return RDFConnectionUtils.withCloseShield(conn);
+////        }
+//
+//        @Override
+//        public void close() throws Exception {
+//            conn.close();
+//        }
+//
+//        @Override
+//        public RDFLinkBuilder newLinkBuilder() {
+//            return new RDFLinkBuilderOverLinkSupplier(() -> RDFLinkAdapter.adapt(conn));
+//        }
+//
+//        @Override
+//        public DatasetGraph getDataset() {
+//            return null;
+//        }
+//    }
 
 //    public static class RdfDataEngineOverRdfDataSource
 //        implements RDFEngine
@@ -146,47 +116,47 @@ public class RdfDataEngines {
 //        };
 //    }
 
-    public static class RdfDataEngineOverQueryExecutionFactory
-        implements RDFEngine
-    {
-        protected QueryExecutionFactory qef;
-
-        public RdfDataEngineOverQueryExecutionFactory(QueryExecutionFactory qef) {
-            super();
-            this.qef = qef;
-        }
-
-        @Override
-        public RDFLinkBuilder newLinkBuilder() {
-            return new RDFLinkBuilderOverLinkSupplier(() -> {
-
-        // public RDFConnection getConnection() {
-            LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
-                @Override
-                public QueryExec build() {
-                    // TODO Raise warnings when unsupported features are requested.
-                    String str = this.getQueryString();
-                    QueryExecution qe = str != null
-                            ? qef.createQueryExecution(str)
-                            : qef.createQueryExecution(getParsedQuery());
-                    return QueryExecAdapter.adapt(qe);
-                    }
-                });
-                return new RDFLinkModular(queryLink, null, null);
-            });
-            // return RDFConnectionAdapter.adapt();
-        }
-
-        @Override
-        public void close() throws Exception {
-            qef.close();
-        }
-
-        @Override
-        public DatasetGraph getDataset() {
-            return null;
-        }
-    }
+//    public static class RdfDataEngineOverQueryExecutionFactory
+//        implements RDFEngine
+//    {
+//        protected QueryExecutionFactory qef;
+//
+//        public RdfDataEngineOverQueryExecutionFactory(QueryExecutionFactory qef) {
+//            super();
+//            this.qef = qef;
+//        }
+//
+//        @Override
+//        public RDFLinkBuilder newLinkBuilder() {
+//            return new RDFLinkBuilderOverLinkSupplier(() -> {
+//
+//        // public RDFConnection getConnection() {
+//            LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
+//                @Override
+//                public QueryExec build() {
+//                    // TODO Raise warnings when unsupported features are requested.
+//                    String str = this.getQueryString();
+//                    QueryExecution qe = str != null
+//                            ? qef.createQueryExecution(str)
+//                            : qef.createQueryExecution(getParsedQuery());
+//                    return QueryExecAdapter.adapt(qe);
+//                    }
+//                });
+//                return new RDFLinkModular(queryLink, null, null);
+//            });
+//            // return RDFConnectionAdapter.adapt();
+//        }
+//
+//        @Override
+//        public void close() throws Exception {
+//            qef.close();
+//        }
+//
+//        @Override
+//        public DatasetGraph getDataset() {
+//            return null;
+//        }
+//    }
 
     /** Return a new RdfDataEngine which applies the given transformation to each created link */
 //    public static RDFEngine wrapWithLinkTransform(RDFEngine dataEngine, RDFLinkTransform xform) {
@@ -200,20 +170,20 @@ public class RdfDataEngines {
 //        };
 //    }
 
-    public static RDFEngine adapt(QueryExecutionFactory qef) {
-        return new RdfDataEngineOverQueryExecutionFactory(qef);
-    }
+//    public static RDFEngine adapt(QueryExecutionFactory qef) {
+//        return new RdfDataEngineOverQueryExecutionFactory(qef);
+//    }
 
 
     /**
      * Returns the argument if it already is a RdfDataEngine.
      * Otherwise, wrap an RdfDataSource as an RdfDataEngine with a no-op close method.
      */
-    public static RDFEngine of(RDFDataSource rdfDataSource) {
-        return rdfDataSource instanceof RDFEngine
-                ? (RDFEngine)rdfDataSource
-                : of(rdfDataSource, null);
-    }
+//    public static RDFEngine of(RDFDataSource rdfDataSource) {
+//        return rdfDataSource instanceof RDFEngine
+//                ? (RDFEngine)rdfDataSource
+//                : of(rdfDataSource, null);
+//    }
 
     /**
      * Wrap an {@link RDFDataSource} with a close action to create an RdfDataEngine.
@@ -222,25 +192,25 @@ public class RdfDataEngines {
      * do not use the lambda <pre>() -> dataEngine.close()</pre> because it introduces needless wrapping.
      * In this case use null.
      */
-    public static RDFEngine of(RDFDataSource rdfDataSource, AutoCloseable closeAction) {
-        RDFEngine result;
-        if (rdfDataSource instanceof RDFEngine rde) {
-            if (closeAction == null || closeAction == rdfDataSource) {
-                result = (RDFEngine)rdfDataSource;
-            } else {
-                result = new RdfDataEngineOverRdfDataSource(rde, () -> {
-                    try {
-                        rde.close();
-                    } finally {
-                        closeAction.close();
-                    }
-                });
-            }
-        } else {
-            result = new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
-        }
-        return result;
-    }
+//    public static RDFEngine of(RDFDataSource rdfDataSource, AutoCloseable closeAction) {
+//        RDFEngine result;
+//        if (rdfDataSource instanceof RDFEngine rde) {
+//            if (closeAction == null || closeAction == rdfDataSource) {
+//                result = (RDFEngine)rdfDataSource;
+//            } else {
+//                result = new RdfDataEngineOverRdfDataSource(rde, () -> {
+//                    try {
+//                        rde.close();
+//                    } finally {
+//                        closeAction.close();
+//                    }
+//                });
+//            }
+//        } else {
+//            result = new RdfDataEngineOverRdfDataSource(rdfDataSource, closeAction);
+//        }
+//        return result;
+//    }
 
     /**
      * If the dataSource is already a data engine then return it.
@@ -255,21 +225,21 @@ public class RdfDataEngines {
      * @param baseDataEngine
      * @return
      */
-    public static RDFEngine of(RDFDataSource dataSource, RDFEngine baseDataEngine) {
-        RDFEngine result = dataSource instanceof RDFEngine
-            ? (RDFEngine)dataSource
-            : baseDataEngine == null
-                ? new RdfDataEngineOverRdfDataSource(dataSource, null)
-                : new RDFEngineDecorator(asWrappedEngine(baseDataEngine).getDelegate(), dataSource);
-        return result;
-    }
+//    public static RDFEngine of(RDFDataSource dataSource, RDFEngine baseDataEngine) {
+//        RDFEngine result = dataSource instanceof RDFEngine
+//            ? (RDFEngine)dataSource
+//            : baseDataEngine == null
+//                ? new RdfDataEngineOverRdfDataSource(dataSource, null)
+//                : new RDFEngineDecorator(asWrappedEngine(baseDataEngine).getDelegate(), dataSource);
+//        return result;
+//    }
 
     public static RDFEngine of(Model model) {
         return of(DatasetFactory.wrap(model));
     }
 
     public static RDFEngine of(Dataset dataset) {
-        return RdfDataEngineFromDataset.create(dataset, true);
+        return new RdfDataEngineFromDataset(dataset.asDatasetGraph(), true);
     }
 
     /**
@@ -280,21 +250,21 @@ public class RdfDataEngines {
      * @param queryExecTransform
      * @return
      */
-    public static RDFEngine wrapWithQueryTransform(
-            RDFEngine dataEngine,
-            QueryTransform queryTransform,
-            QueryExecTransform queryExecTransform
-            ) {
-
-        return new RDFEngineWrapperBase<>(dataEngine) {
-            @Override
-            public RDFConnection getConnection() {
-                RDFConnection raw = delegate.getConnection();
-                RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(raw, queryTransform, queryExecTransform);
-                return result;
-            }
-        };
-    }
+//    public static RDFEngine wrapWithQueryTransform(
+//            RDFEngine dataEngine,
+//            QueryTransform queryTransform,
+//            QueryExecTransform queryExecTransform
+//            ) {
+//
+//        return new RDFEngineWrapperBase<>(dataEngine) {
+//            @Override
+//            public RDFConnection getConnection() {
+//                RDFConnection raw = delegate.getConnection();
+//                RDFConnection result = RDFConnectionUtils.wrapWithQueryTransform(raw, queryTransform, queryExecTransform);
+//                return result;
+//            }
+//        };
+//    }
 
 //    public static RDFEngine wrapWithAutoTxn(RDFEngine dataEngine, Dataset dataset) {
 //        // RDFLinkSources.wrapWithAutoTxn(null, dataset)

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.OpTransformBuilder;
 import org.aksw.jenax.arq.util.query.TransformList;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class UpdateRequestTransformBuilder {
     protected List<UpdateRequestTransform> uTransforms = new ArrayList<>();
@@ -45,6 +46,11 @@ public class UpdateRequestTransformBuilder {
     }
 
     public UpdateRequestTransformBuilder add(OpTransform transform) {
+        opTransformBuilder.add(transform);
+        return this;
+    }
+
+    public UpdateRequestTransformBuilder add(ExprTransform transform) {
         opTransformBuilder.add(transform);
         return this;
     }

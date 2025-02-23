@@ -7,11 +7,13 @@ import java.util.stream.Stream;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.query.TransformList;
+import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
 import org.aksw.jenax.dataaccess.sparql.link.dataset.LinkDatasetGraphTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransformBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransformBuilder;
+import org.apache.jena.sparql.expr.ExprTransform;
 
 public class RDFLinkModularTransformBuilder {
     protected List<RDFLinkTransform> linkTransforms = new ArrayList<>();
@@ -77,7 +79,23 @@ public class RDFLinkModularTransformBuilder {
         return this;
     }
 
+    public RDFLinkModularTransformBuilder add(LinkSparqlUpdateTransform transform) {
+        uBuilder.add(transform);
+        return this;
+    }
+
+    public RDFLinkModularTransformBuilder add(UpdateRequestTransform transform) {
+        uBuilder.add(transform);
+        return this;
+    }
+
     public RDFLinkModularTransformBuilder add(OpTransform transform) {
+        qBuilder.add(transform);
+        uBuilder.add(transform);
+        return this;
+    }
+
+    public RDFLinkModularTransformBuilder add(ExprTransform transform) {
         qBuilder.add(transform);
         uBuilder.add(transform);
         return this;
@@ -92,5 +110,11 @@ public class RDFLinkModularTransformBuilder {
             stream = Stream.concat(stream, Stream.of(lastLink));
         }
         return TransformList.flattenOrNull(true, RDFLinkTransformList::new, stream);
+    }
+
+    public void reset() {
+        linkTransforms.clear();
+        qBuilder.reset();
+        uBuilder.reset();
     }
 }

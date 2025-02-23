@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
@@ -26,6 +28,11 @@ public class RDFLinkSourceAdapter
 
     public RDFDataSource getDelegate() {
         return delegate;
+    }
+
+    @Override
+    public RDFLinkBuilder<?> newLinkBuilder() {
+        return new RDFLinkBuilderOverLinkSupplier<>(this::newLink);
     }
 
     @Override

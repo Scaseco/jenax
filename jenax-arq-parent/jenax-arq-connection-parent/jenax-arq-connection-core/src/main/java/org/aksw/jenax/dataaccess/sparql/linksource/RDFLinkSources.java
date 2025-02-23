@@ -9,12 +9,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
-import org.aksw.jenax.arq.util.exec.update.UpdateExecTransform;
-import org.aksw.jenax.arq.util.op.OpTransformList;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
-import org.aksw.jenax.dataaccess.deleted.RDFLinkSourceWrapperWithRewrite;
 import org.aksw.jenax.dataaccess.deleted.RDFLinkSourceWrapperWithSparqlStmtTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBaseParse;
@@ -32,7 +29,6 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUpdateTransform;
-import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateUtils;
 import org.aksw.jenax.model.udf.util.UserDefinedFunctions;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
@@ -46,6 +42,7 @@ import org.apache.jena.query.TxnType;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.exec.QueryExec;
@@ -184,11 +181,13 @@ public class RDFLinkSources {
     /**
      * Wrap an RdfDataSource that any update link is wrapped.
      */
-    public static RDFLinkSource decorateUpdate(RDFLinkSource linkSource, UpdateExecTransform updateExecTransform) {
-        LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
-        RDFLinkSource result = () -> RDFLinkUtils.apply(linkSource.newLink(), componentTransform);
-        return result;
-    }
+//    public static RDFLinkSource decorateUpdate(RDFLinkSource linkSource, UpdateExecTransform updateExecTransform) {
+//        return RDFLinkSourceDecorator.of(linkSource).decorate(updateExecTransform).build();
+//
+////        LinkSparqlUpdateTransform componentTransform = LinkSparqlUpdateUtils.newTransform(updateExecTransform);
+////        RDFLinkSource result = () -> RDFLinkUtils.apply(linkSource.newLink(), componentTransform);
+//        // return result;
+//    }
 
     /**
      * Wrap a LinkSparqlQuery such that a possible write action is run when txn.begin() is invoked.
@@ -222,7 +221,8 @@ public class RDFLinkSources {
      */
     public static RDFLinkSource execQueryViaSelect(RDFLinkSource linkSource, Predicate<Query> convertToSelect) {
         LinkSparqlQueryTransform decorizer = execQueryViaSelect(convertToSelect);
-        RDFLinkSource result = () -> RDFLinkUtils.apply(linkSource.newLink(), decorizer);
+        RDFLinkSource result = RDFLinkSourceDecorator.of(linkSource).decorate(decorizer).build();
+        // RDFLinkSource result = () -> RDFLinkUtils.apply(linkSource.newLink(), decorizer);
         return result;
     }
 
@@ -292,16 +292,19 @@ public class RDFLinkSources {
      * the rewrite is unwrapped and combined with the given rewrite.
      */
     public static RDFLinkSource wrapWithOpTransform(RDFLinkSource dataSource, Rewrite rewrite) {
-        RDFLinkSource result;
-        if (dataSource instanceof RDFLinkSourceWrapperWithRewrite tmp) {
-            Rewrite before = tmp.getRewrite();
-            RDFLinkSource delegate = tmp.getDelegate();
-            Rewrite effectiveRewrite = OpTransformList.flatten(true, before, rewrite);
-            result = new RDFLinkSourceWrapperWithRewrite<>(delegate, effectiveRewrite);
-        } else {
-            result = new RDFLinkSourceWrapperWithRewrite<>(dataSource, rewrite);
-        }
-        return result;
+        return RDFLinkSourceDecorator.of(dataSource).decorate((Op op) -> rewrite.rewrite(op)).build();
+
+//        RDFLinkSource result;
+//        if (dataSource instanceof RDFLinkSourceWrapperWithRewrite tmp) {
+//            Rewrite before = tmp.getRewrite();
+//            RDFLinkSource delegate = tmp.getDelegate();
+//            // Rewrite effectiveRewrite = OpTransformList.flatten(true, before, rewrite);
+//            OpTransform effectiveRewrite = TransformList.flatten(true, OpTransformList::new, before, rewrite);
+//            result = new RDFLinkSourceWrapperWithRewrite<>(delegate, effectiveRewrite);
+//        } else {
+//            result = new RDFLinkSourceWrapperWithRewrite<>(dataSource, rewrite);
+//        }
+//        return result;
     }
 
     public static RDFLinkSource wrapWithLinkTransform(RDFLinkSource linkSource, RDFLinkTransform transform) {

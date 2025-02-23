@@ -74,4 +74,8 @@ public interface RDFDataSource
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);
     }
+
+    public static RDFDataSource of(RDFLinkSource linkSource) {
+        return new RDFDataSourceAdapter(linkSource);
+    }
 }

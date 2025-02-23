@@ -1,6 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.linksource;
 
-import org.apache.jena.rdflink.RDFLink;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 
 public interface RDFLinkSourceWrapper<X extends RDFLinkSource>
     extends RDFLinkSource
@@ -8,8 +8,8 @@ public interface RDFLinkSourceWrapper<X extends RDFLinkSource>
     X getDelegate();
 
     @Override
-    default RDFLink newLink() {
+    default RDFLinkBuilder<?> newLinkBuilder() {
         X tmp = getDelegate();
-        return tmp.newLink();
+        return tmp.newLinkBuilder();
     }
 }
