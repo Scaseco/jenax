@@ -4,6 +4,7 @@ import org.aksw.commons.util.ref.Ref;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.io.hdt.HDTHeaderGraph;
 import org.aksw.jenax.arq.util.triple.GraphUtils;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;

@@ -12,18 +12,18 @@ import java.util.stream.Stream;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSetOverPathBase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFLinkSourceHTTP;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineBuilder;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase.CloseablePath;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderHTTP;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.CmdStrOps;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
-import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -132,11 +132,18 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             logger.info(msg);
         });
 
-        // TODO Make it possible to mutate the HTTP connection creation
-        RDFEngine result = RdfDataEngines.of(
-            () -> RDFConnectionRemote.service(serviceUrl).build(),
-            () -> container.stop());
 
+        RDFLinkSourceHTTP linkSource = new RDFLinkSourceHTTP() {
+            @Override
+            public RDFLinkBuilderHTTP<?> newLinkBuilder() {
+                RDFLinkBuilderHTTP<?> result = new RDFLinkBuilderHTTP<>();
+                result.destination(serviceUrl);
+                return result;
+            }
+        };
+
+        // TODO Make it possible to mutate the HTTP connection creation
+        RDFEngine result = RDFEngines.of(linkSource, () -> container.stop());
         return result;
     }
 
@@ -187,7 +194,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             }
 
             result = run(location, qleverImageName, qleverImageTag, hostPort, finalConf);
-            result = RDFEngineDecorator.of(result).addCloseAction(partialCloseAction).build();
+            result = RDFEngines.decorate(result).addCloseAction(partialCloseAction).build();
             // result = RdfDataEngines.wrapWithCloseAction(result, partialCloseAction);
         } catch (Throwable e) {
             partialCloseAction.close();

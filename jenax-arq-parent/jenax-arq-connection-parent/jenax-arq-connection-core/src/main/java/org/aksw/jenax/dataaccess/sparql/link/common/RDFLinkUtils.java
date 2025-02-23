@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
@@ -12,6 +13,7 @@ import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTrans
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperTxn;
@@ -30,6 +32,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
@@ -503,6 +506,13 @@ public class RDFLinkUtils {
     public static RDFLink wrapWithQueryOnly(RDFLink link) {
         LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(link);
         return new RDFLinkModular(queryLink, null, null);
+    }
+
+    public static RDFLink wrapWithAutoDisableReorder(RDFLink link) {
+        return RDFLinkUtils.wrapWithQueryTransform(link, null, qe -> {
+            QueryExecutionUtils.wrapWithAutoDisableReorder(qe.getQuery(), qe.getContext());
+            return qe;
+        });
     }
 }
 

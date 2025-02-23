@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.query.TransformList;
@@ -18,6 +19,7 @@ import org.apache.jena.sparql.expr.ExprTransform;
 
 
 public class RDFLinkSourceTransformBuilder {
+    // protected List<RDFLinkBuilderTransform> linkBuilderTransforms = new ArrayList<>();
     protected List<RDFLinkSourceTransform> sourceTransforms = new ArrayList<>();
     protected RDFLinkModularTransformBuilder lBuilder = new RDFLinkModularTransformBuilder();
 
@@ -66,6 +68,11 @@ public class RDFLinkSourceTransformBuilder {
     }
 
     public RDFLinkSourceTransformBuilder add(QueryTransform transform) {
+        lBuilder.add(transform);
+        return this;
+    }
+
+    public RDFLinkSourceTransformBuilder add(QueryExecTransform transform) {
         lBuilder.add(transform);
         return this;
     }

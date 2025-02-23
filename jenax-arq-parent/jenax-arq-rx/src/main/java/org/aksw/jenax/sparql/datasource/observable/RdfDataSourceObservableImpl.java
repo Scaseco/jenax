@@ -4,7 +4,7 @@ import org.aksw.jenax.arq.util.binding.ResultSetUtils;
 import org.aksw.jenax.arq.util.binding.ResultTable;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngineFromDataset;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -55,7 +55,7 @@ public class RdfDataSourceObservableImpl
     public static void main(String[] args) {
         Dataset dataset = DatasetFactory.create();
         dataset.getDefaultModel().add(RDF.type, RDF.type, RDF.Property);
-        RdfDataSourceObservableImpl ds = new RdfDataSourceObservableImpl(RdfDataEngineFromDataset.create(dataset, true));
+        RdfDataSourceObservableImpl ds = new RdfDataSourceObservableImpl(RDFEngines.of(dataset.asDatasetGraph(), true).getLinkSource().asDataSource());
 
         Flowable<ResultTable> flow = ds.observeSelect(QueryFactory.create("SELECT * { ?s ?p ?o }"));
         // ds.refreshAll();

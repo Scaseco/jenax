@@ -57,7 +57,7 @@ public abstract class FileSetOverPathBase
         String sizeStr;
 
         try {
-            sizeStr = Long.toString(size());
+            sizeStr = Long.toString(byteSize());
         } catch (Throwable e) {
             sizeStr = "(failed to compute size: " + e + ")";
         }

@@ -2,6 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.linksource;
 
 import java.util.Objects;
 
+import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
@@ -12,6 +13,7 @@ import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.expr.ExprTransform;
 
@@ -103,17 +105,27 @@ public class RDFLinkSourceDecorator
         return this;
     }
 
+    public RDFLinkSourceDecorator decorate(LinkSparqlQueryTransform transform) {
+        linkSourceTransformBuilder.add(transform);
+        return this;
+    }
+
     public RDFLinkSourceDecorator decorate(QueryTransform transform) {
         linkSourceTransformBuilder.add(transform);
         return this;
     }
 
-    public RDFLinkSourceDecorator decorate(UpdateRequestTransform transform) {
+    public RDFLinkSourceDecorator decorate(QueryExecTransform transform) {
         linkSourceTransformBuilder.add(transform);
         return this;
     }
 
-    public RDFLinkSourceDecorator decorate(LinkSparqlQueryTransform transform) {
+    public RDFLinkSourceDecorator decorate(LinkSparqlUpdateTransform transform) {
+        linkSourceTransformBuilder.add(transform);
+        return this;
+    }
+
+    public RDFLinkSourceDecorator decorate(UpdateRequestTransform transform) {
         linkSourceTransformBuilder.add(transform);
         return this;
     }

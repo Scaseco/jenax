@@ -6,10 +6,12 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkAdapter;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.QueryExecBuilderAdapter;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
@@ -24,6 +26,13 @@ public class RDFLinkSourceAdapter
     public RDFLinkSourceAdapter(RDFDataSource delegate) {
         super();
         this.delegate = Objects.requireNonNull(delegate);
+    }
+
+    @Override
+    public DatasetGraph getDatasetGraph() {
+        Dataset ds = getDelegate().getDataset();
+        DatasetGraph result = ds == null ? null : ds.asDatasetGraph();
+        return result;
     }
 
     public RDFDataSource getDelegate() {
@@ -58,7 +67,7 @@ public class RDFLinkSourceAdapter
 
     public static RDFLinkSource adapt(RDFDataSource dataSource) {
         RDFLinkSource result = dataSource instanceof RDFDataSourceAdapter adapter
-            ? adapter.getDelegate()
+            ? adapter.getLinkSource()
             : new RDFLinkSourceAdapter(dataSource);
         return result;
     }

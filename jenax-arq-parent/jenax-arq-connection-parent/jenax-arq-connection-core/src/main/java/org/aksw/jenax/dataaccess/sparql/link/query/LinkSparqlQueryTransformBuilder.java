@@ -58,6 +58,12 @@ public class LinkSparqlQueryTransformBuilder {
         return this;
     }
 
+    public LinkSparqlQueryTransformBuilder add(QueryExecTransform transform) {
+        // qTransformBuilder.add(transform);
+        add(new LinkSparqlQueryTransformQueryTransform(null, transform));
+        return this;
+    }
+
     public LinkSparqlQueryTransformBuilder add(QueryTransform transform) {
         qTransformBuilder.add(transform);
         return this;

@@ -54,6 +54,10 @@ public final class RDFLinkTransformModular
             u = updateTransform.apply(u);
         }
 
+        if (datasetTransform != null) {
+            d = datasetTransform.apply(d);
+        }
+
         RDFLink result = new RDFLinkModular(q, u, d);
         return result;
     }

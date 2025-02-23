@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
@@ -77,6 +78,16 @@ public class RdfDataSources {
 
     public static RDFDataSource of(Dataset dataset) {
         return new RDFDataSourceOverDataset(dataset);
+    }
+
+    public static RDFDataSource of(Dataset dataset, Supplier<RDFConnection> connectionFactory) {
+        return new RDFDataSourceOverDataset(dataset) {
+            @Override
+            public RDFConnection getConnection() {
+                RDFConnection r = connectionFactory.get();
+                return r;
+            }
+        };
     }
 
     /**

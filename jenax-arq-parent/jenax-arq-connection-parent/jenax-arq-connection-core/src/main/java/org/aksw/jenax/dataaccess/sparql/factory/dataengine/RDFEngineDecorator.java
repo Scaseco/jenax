@@ -5,10 +5,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 
+import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
 import org.aksw.jenax.arq.util.op.OpTransform;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
@@ -20,15 +22,10 @@ import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.expr.ExprTransform;
 
 /**
- * A wrapper for an {@link RDFEngine} that supports transformations on several levels.
- * The levels are: data source, link source, link, stmt, algebra and expr.
- * All transforms are uniformly treated as transformations on the data source.
- * Each transform returns a new {@link RDFEngineDecorator} instance with the
- * data source transformation applied.
- *
- * Note, that transformations may be grouped. For example, adding multiple
- * Rewrite transformations on the algebra level will group than as to avoid
- * query-algebra-query roundtrips.
+ * A wrapper for an {@link RDFEngine} that supports applying transformations
+ * on several levels. The levels are: link source, link, algebra and expression.
+ * Internally, transformation builders are used to group transformations on the same
+ * level such to minimize the amount of needed (un-)wrapping.
  */
 public class RDFEngineDecorator<X extends RDFEngine>
 {
@@ -37,13 +34,10 @@ public class RDFEngineDecorator<X extends RDFEngine>
 
     protected Deque<Closeable> closeActions = new ArrayDeque<>();
 
-    protected RDFEngineDecorator(X baseEngine) {
+    /** Constructed from {@link RDFEngines#decorate(RDFEngine)}. */
+    public RDFEngineDecorator(X baseEngine) {
         this.baseEngine = Objects.requireNonNull(baseEngine);
         this.linkSourceDecorator = new RDFLinkSourceDecorator(baseEngine.getLinkSource());
-    }
-
-    public static <X extends RDFEngine> RDFEngineDecorator<X> of(X baseEngine) {
-        return new RDFEngineDecorator<>(baseEngine);
     }
 
     public RDFLinkSource snapshotLinkSource() {
@@ -91,10 +85,10 @@ public class RDFEngineDecorator<X extends RDFEngine>
         return this;
     }
 
-//    public RDFEngineDecorator<X> decorate(QueryExecTransform transform) {
-//    	linkSourceDecorator.decorate(transform);
-//        return this;
-//    }
+    public RDFEngineDecorator<X> decorate(QueryExecTransform transform) {
+        linkSourceDecorator.decorate(transform);
+        return this;
+    }
 
     public RDFEngineDecorator<X> decorate(UpdateRequestTransform transform) {
         linkSourceDecorator.decorate(transform);

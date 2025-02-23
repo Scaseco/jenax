@@ -1,18 +1,25 @@
 package org.aksw.jenax.dataaccess.sparql.linksource;
 
+import java.util.Objects;
+
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.DatasetGraph;
 
-public class RDFLinkSourceOverDataset
+/**
+ * Link source over a DatasetGraph.
+ * In order to alter the default link creation, it is recommended to
+ * override the {@link #newLink()} method.
+ */
+public class RDFLinkSourceOverDatasetGraph
     implements RDFLinkSource
 {
     protected DatasetGraph datasetGraph;
 
-    public RDFLinkSourceOverDataset(DatasetGraph datasetGraph) {
+    public RDFLinkSourceOverDatasetGraph(DatasetGraph datasetGraph) {
         super();
-        this.datasetGraph = datasetGraph;
+        this.datasetGraph = Objects.requireNonNull(datasetGraph);
     }
 
     @Override
@@ -21,7 +28,12 @@ public class RDFLinkSourceOverDataset
     }
 
     @Override
+    public RDFLink newLink() {
+        return RDFLink.connect(datasetGraph);
+    }
+
+    @Override
     public RDFLinkBuilder<?> newLinkBuilder() {
-        return new RDFLinkBuilderOverLinkSupplier<>(() -> RDFLink.connect(datasetGraph));
+        return new RDFLinkBuilderOverLinkSupplier<>(this::newLink);
     }
 }

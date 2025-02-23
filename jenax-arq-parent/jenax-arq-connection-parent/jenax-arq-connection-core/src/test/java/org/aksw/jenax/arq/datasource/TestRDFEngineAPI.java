@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.DecoratedRDFEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase;
@@ -43,8 +43,6 @@ public class TestRDFEngineAPI {
         // In this case we just use Jena's default in-memory engine
         RDFEngineFactory engineFactory = registry.getEngineFactory("test-mem");
 
-        // RdfDatabaseBuilder<?> databaseBuilder= registry.getDatabaseFactory("test-mem");
-
         // Build a concrete instance of the engine and start it.
         RDFEngine engine = engineFactory.newEngineBuilder()
             // Delete all generated database files upon closing the engine
@@ -53,17 +51,22 @@ public class TestRDFEngineAPI {
             .setAutoDeleteIfCreated(true)
             .build();
 
+        // Get the engine's link source to run some updates.
+        // Link sources should not require resource management.
+        // If a link source does need it then resource management should
+        // be woven into an accompanying RDFEngine.
         try (RDFLink link = engine.getLinkSource().newLink()) {
             link.update("INSERT DATA { <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> a <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .}");
             link.update("INSERT DATA { <urn:s> <urn:p> <urn:o> .}");
         }
 
-        // Decorate the raw engine
-        RDFEngineDecorator<?> engineDecorator = RDFEngineDecorator.of(engine);
+        // Decorate the raw engine. The decorated RDF engine inherits the resource
+        // management of the base engine.
+        RDFEngineDecorator<?> engineDecorator = RDFEngines.decorate(engine);
         engineDecorator.decorate(RDFLinkTransforms.withLimit(1));
 
-        try (DecoratedRDFEngine<?> decoratedEngine = engineDecorator.build()) {
-            RDFDataSource dataSource = RDFDataSource.of(decoratedEngine.getLinkSource());
+        try (RDFEngine decoratedEngine = engineDecorator.build()) {
+            RDFDataSource dataSource = decoratedEngine.getLinkSource().asDataSource();
 
             // Test 1: The Resource abstraction is expected to work.
             TestResource.testResource(dataSource);

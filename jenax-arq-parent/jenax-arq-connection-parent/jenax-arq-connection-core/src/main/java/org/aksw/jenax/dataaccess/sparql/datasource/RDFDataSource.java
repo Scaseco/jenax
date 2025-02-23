@@ -6,6 +6,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFa
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceAdapter;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -30,6 +31,10 @@ import org.apache.jena.update.UpdateExecutionBuilder;
 public interface RDFDataSource
 {
     RDFConnection getConnection();
+
+    default Dataset getDataset() {
+        return null;
+    }
 
 //    default RDFConnection getConnection() {
 //        RDFLinkSource linkSource = asLinkSource();
@@ -73,9 +78,5 @@ public interface RDFDataSource
     @Deprecated
     default QueryExecutionFactory asQef() {
         return QueryExecutionFactories.of(this);
-    }
-
-    public static RDFDataSource of(RDFLinkSource linkSource) {
-        return new RDFDataSourceAdapter(linkSource);
     }
 }

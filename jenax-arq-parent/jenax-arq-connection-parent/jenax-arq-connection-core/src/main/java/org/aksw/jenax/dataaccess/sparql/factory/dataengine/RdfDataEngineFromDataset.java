@@ -2,7 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
-import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceOverDataset;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceOverDatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraph;
 
 /**
@@ -22,7 +22,7 @@ public class RdfDataEngineFromDataset
             DatasetGraph datasetGraph,
             boolean closeDataset) {
         super();
-        this.linkSource = new RDFLinkSourceOverDataset(datasetGraph);
+        this.linkSource = new RDFLinkSourceOverDatasetGraph(datasetGraph);
         this.closeDataset = closeDataset;
     }
 

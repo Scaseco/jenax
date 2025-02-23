@@ -3,6 +3,7 @@ package org.aksw.jena_sparql_api.conjure.datapod.impl;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionWrapper;
 
@@ -55,6 +56,11 @@ public abstract class RdfDataPodBase
         };
 
         return newConnection[0];
+    }
+
+    @Override
+    public RDFDataSource getDataSource() {
+        return () -> newConnection();
     }
 
     abstract protected RDFConnection newConnection();

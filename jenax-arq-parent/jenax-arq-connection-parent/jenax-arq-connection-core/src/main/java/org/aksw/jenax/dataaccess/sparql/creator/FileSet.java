@@ -12,7 +12,7 @@ public interface FileSet {
     List<Path> getPaths() throws IOException;
 
     /** Return sum of the file byte sizes. */
-    default long size() throws IOException {
+    default long byteSize() throws IOException {
         List<Path> paths = getPaths();
         long result = 0;
         for (Path path : paths) {

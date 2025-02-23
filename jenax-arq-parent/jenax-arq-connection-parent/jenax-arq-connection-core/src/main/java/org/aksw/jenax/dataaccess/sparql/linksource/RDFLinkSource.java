@@ -1,6 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.linksource;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdflink.RDFLink;
@@ -71,5 +72,9 @@ public interface RDFLinkSource {
 
     default void update(Update update) {
         newUpdate().update(update).execute();
+    }
+
+    default RDFDataSource asDataSource() {
+        return RDFDataSourceAdapter.adapt(this);
     }
 }
