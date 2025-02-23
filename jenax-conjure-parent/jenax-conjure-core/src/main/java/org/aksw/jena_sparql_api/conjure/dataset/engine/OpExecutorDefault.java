@@ -67,11 +67,11 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapper;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
-import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
-import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapper;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.pod.RDFDataPod;
+import org.aksw.jenax.dataaccess.sparql.pod.RDFDataPods;
 import org.aksw.jenax.sparql.fragment.api.Fragment3;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
@@ -777,7 +777,7 @@ public class OpExecutorDefault
         Op subOp = op.getSubOp();
         RdfDataPod subPod = subOp.accept(this);
 
-        RDFEngine tmp = subPod;
+        RDFDataPod tmp = subPod;
 
         for (Rewrite rewrite : op.getRewrites()) {
             String javaClass = rewrite.getJavaClass();
@@ -788,14 +788,18 @@ public class OpExecutorDefault
                     | IllegalArgumentException | InvocationTargetException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            tmp = RdfDataEngines.transform(tmp, dataSourceTransform);
+            // tmp = RdfDataEngines.transform(tmp, dataSourceTransform);
+            RDFDataSource before = tmp.getDataSource();
+            RDFDataSource after = dataSourceTransform.apply(before);
+
+            tmp = RDFDataPods.of(after, tmp::close);
         }
 
-        RDFEngine engine = tmp;
+        RDFDataPod engine = tmp;
         RdfDataPod result = new RdfDataPodBase() {
             @Override
             protected RDFConnection newConnection() {
-                return engine.getConnection();
+                return engine.getDataSource().getConnection();
             }
 
             @Override

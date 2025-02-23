@@ -9,10 +9,10 @@ public class RDFEngineSimple
     implements RDFEngine
 {
     protected RDFLinkSource linkSource;
-    protected Closeable closeAction;
+    protected AutoCloseable closeAction;
 
     /** Constructed with {@link RDFEngines#of(RDFLinkSource, Closeable)}. */
-    protected RDFEngineSimple(RDFLinkSource linkSource, Closeable closeAction) {
+    protected RDFEngineSimple(RDFLinkSource linkSource, AutoCloseable closeAction) {
         super();
         this.linkSource = Objects.requireNonNull(linkSource);
         this.closeAction = closeAction;

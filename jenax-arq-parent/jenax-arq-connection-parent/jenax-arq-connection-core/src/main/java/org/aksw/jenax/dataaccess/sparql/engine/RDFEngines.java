@@ -14,7 +14,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
  * for presentation layer views (Dataset / RDFConnection) are provided here.
  */
 public class RDFEngines {
-    public static RDFEngine of(RDFLinkSource linkSource, Closeable closeAction) {
+    public static RDFEngine of(RDFLinkSource linkSource, AutoCloseable closeAction) {
         return new RDFEngineSimple(linkSource, closeAction);
     }
 
