@@ -1,5 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.creator;
 
-public interface RdfDatabaseFactory {
+public interface RDFDatabaseFactory {
     RdfDatabaseBuilder<?> newBuilder();
 }

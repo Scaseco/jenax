@@ -27,4 +27,6 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 public interface RDFEngine
     extends HasRDFLinkSource, AutoCloseable
 {
+//    @Override
+//    void close();
 }

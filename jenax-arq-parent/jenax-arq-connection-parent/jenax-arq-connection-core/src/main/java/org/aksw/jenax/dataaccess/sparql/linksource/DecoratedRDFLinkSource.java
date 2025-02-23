@@ -16,7 +16,8 @@ public class DecoratedRDFLinkSource<X extends RDFLinkSource>
 
     @Override
     public RDFLink newLink() {
-        return effectiveLinkSource.newLink();
+        RDFLink result = effectiveLinkSource.newLink();
+        return result;
 //        RDFLink result = super.newLink();
 //        for (RDFLinkTransform mod : mods) {
 //            RDFLink next = mod.apply(result);

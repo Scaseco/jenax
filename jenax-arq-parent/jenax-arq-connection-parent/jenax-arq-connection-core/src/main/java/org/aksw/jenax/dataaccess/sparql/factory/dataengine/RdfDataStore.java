@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseFactory;
 
 /**
  * A helper data structure to bundle a specific combination of a
@@ -11,9 +11,9 @@ import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
  */
 public class RdfDataStore {
     protected RDFEngineFactory engineFactory;
-    protected RdfDatabaseFactory databaseFactory;
+    protected RDFDatabaseFactory databaseFactory;
 
-    public RdfDataStore(RDFEngineFactory engineFactory, RdfDatabaseFactory databaseFactory) {
+    public RdfDataStore(RDFEngineFactory engineFactory, RDFDatabaseFactory databaseFactory) {
         super();
         this.engineFactory = Objects.requireNonNull(engineFactory);
         this.databaseFactory = databaseFactory;
@@ -23,7 +23,7 @@ public class RdfDataStore {
         return engineFactory;
     }
 
-    public RdfDatabaseFactory getDatabaseFactory() {
+    public RDFDatabaseFactory getDatabaseFactory() {
         return databaseFactory;
     }
 }

@@ -1,11 +1,11 @@
 package org.aksw.jenax.store.qlever.plugin;
 
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDatabaseFactoryProvider;
 import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
 
 public class RdfDatabaseFactoryProviderQlever
-    extends ProviderDockerBase<RdfDatabaseFactory>
+    extends ProviderDockerBase<RDFDatabaseFactory>
     implements RdfDatabaseFactoryProvider
 {
     public static final String PREFIX = QleverConstants.PREFIX;
@@ -19,7 +19,7 @@ public class RdfDatabaseFactoryProviderQlever
     }
 
     @Override
-    protected RdfDatabaseFactory provide(String imageName, String tag) {
+    protected RDFDatabaseFactory provide(String imageName, String tag) {
         return () -> new RdfDatabaseBuilderQlever();
     }
 }

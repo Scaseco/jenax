@@ -58,9 +58,12 @@ public class RDFLinkSourceDecorator
 //    }
 
     public RDFLinkSource snapshotLinkSource() {
-        RDFLinkSourceTransform x = linkSourceTransformBuilder.build();
-        RDFLinkSource tmp = x.apply(baseLinkSource);
-        return tmp;
+        RDFLinkSource result = baseLinkSource;
+        RDFLinkSourceTransform linkSourceTransform = linkSourceTransformBuilder.build();
+        if (linkSourceTransform != null) {
+            result = linkSourceTransform.apply(result);
+        }
+        return result;
     }
 
     public RDFLinkBuilder<?> snapshotLinkBuilder() {

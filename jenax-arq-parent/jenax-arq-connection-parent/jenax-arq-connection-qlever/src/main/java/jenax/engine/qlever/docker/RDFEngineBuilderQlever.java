@@ -2,6 +2,7 @@ package jenax.engine.qlever.docker;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +21,17 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegac
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderHTTP;
+import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransforms;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
+import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateWrapperBase;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.CmdStrOps;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.jena.sparql.exec.UpdateExecBuilder;
+import org.apache.jena.sparql.exec.http.UpdateExecHTTPBuilder;
+import org.apache.jena.sparql.exec.http.UpdateSendMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -133,11 +141,31 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         });
 
 
+        // Automatically inject a provided access token on update requests
+        String accessToken = conf.accessToken;
+        LinkSparqlUpdateTransform injectAccessTokenTransform = accessToken == null
+            ? null
+            : lsu -> {
+                return new LinkSparqlUpdateWrapperBase(lsu) {
+                    @Override
+                    public UpdateExecBuilder newUpdate() {
+                        UpdateExecBuilder base = lsu.newUpdate();
+                        UpdateExecHTTPBuilder http = (UpdateExecHTTPBuilder)base;
+                        http.sendMode(UpdateSendMode.asPostForm);
+                        http.param("access-token", accessToken);
+                        return http;
+                    }
+                };
+            };
+
         RDFLinkSourceHTTP linkSource = new RDFLinkSourceHTTP() {
             @Override
             public RDFLinkBuilderHTTP<?> newLinkBuilder() {
                 RDFLinkBuilderHTTP<?> result = new RDFLinkBuilderHTTP<>();
                 result.destination(serviceUrl);
+                if (injectAccessTokenTransform != null) {
+                    result.linkTransform(RDFLinkTransforms.of(injectAccessTokenTransform));
+                }
                 return result;
             }
         };
@@ -246,16 +274,17 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
     @Override
     public X setProperty(String key, Object value) {
         map.put(key, value);
-//        try {
-//            logger.info("Setting attribute: " + key + " -> " + value);
-//            try {
-//                BeanUtils.setProperty(this, key, value);
-//            } catch (IllegalAccessException | InvocationTargetException e) {
-//                logger.error("Error:", e);
-//            }
-//        } catch (Throwable e) { // May raise NoClassDefFoundError
-//            throw new RuntimeException("Failed to set attribute: " + key + " -> " + value, e);
-//        }
+        try {
+            logger.info("Setting attribute: " + key + " -> " + value);
+            try {
+                QleverConfRun runConf = getConfig();
+                BeanUtils.setProperty(runConf, key, value);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                logger.error("Error:", e);
+            }
+        } catch (Throwable e) { // May raise NoClassDefFoundError
+            throw new RuntimeException("Failed to set attribute: " + key + " -> " + value, e);
+        }
         return self();
     }
 

@@ -11,6 +11,7 @@ public class RDFLinkBuilderHTTP<X extends RDFLinkBuilderHTTP<X>>
 {
     protected RDFLinkModularTransformBuilder linkTransformBuilder = new RDFLinkModularTransformBuilder();
 
+    // XXX There is RDFLinkHTTPBuilder.creator for going from LinkBuilder to Link.
     @Override
     public X linkTransform(RDFLinkTransform linkTransform) {
         linkTransformBuilder.add(linkTransform);

@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseFactory;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorator;
+import org.apache.jena.sys.JenaSystem;
 
 /**
  * A registry for instances of
@@ -16,6 +17,9 @@ import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceDecorato
  * This class provides the infrastructure for third party plugins.
  */
 public class RDFEngineFactoryRegistry {
+
+    static { JenaSystem.init(); }
+
     private static RDFEngineFactoryRegistry INSTANCE;
 
     public static RDFEngineFactoryRegistry get() {
@@ -82,7 +86,7 @@ public class RDFEngineFactoryRegistry {
 
     public RdfDataStore getStore(String name) {
         RDFEngineFactory engineFactory = getEngineFactory(name);
-        RdfDatabaseFactory databaseFactory = getDatabaseFactory(name);
+        RDFDatabaseFactory databaseFactory = getDatabaseFactory(name);
         return new RdfDataStore(engineFactory, databaseFactory);
     }
 
@@ -95,8 +99,8 @@ public class RDFEngineFactoryRegistry {
         return result;
     }
 
-    public RdfDatabaseFactory getDatabaseFactory(String name) {
-        RdfDatabaseFactory result = provide(databaseProviderRegistry, name);
+    public RDFDatabaseFactory getDatabaseFactory(String name) {
+        RDFDatabaseFactory result = provide(databaseProviderRegistry, name);
         return result;
     }
 
