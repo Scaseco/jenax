@@ -44,9 +44,9 @@ import org.apache.jena.system.Txn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RdfDataSources {
+public class RDFDataSources {
 
-    private static final Logger logger = LoggerFactory.getLogger(RdfDataSources.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDFDataSources.class);
 
     /**
      * Create a datasource where any attempt to <b>execute</b> a query or an update will fail.
@@ -57,7 +57,7 @@ public class RdfDataSources {
         // The builder for local dataset connections parses query eagerly.
         RDFDataSource dummy = () -> RDFConnectionRemote.newBuilder().destination("urn:dummy").parseCheckSPARQL(false).build();
         // RdfDataSource dummy = of(DatasetFactory.empty());
-        RDFDataSource result = RdfDataSources.decorate(dummy, org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms.alwaysFail());
+        RDFDataSource result = RDFDataSources.decorate(dummy, org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms.alwaysFail());
         return result;
     }
 
@@ -66,13 +66,13 @@ public class RdfDataSources {
         return of(model);
     }
 
-    public static RDFDataSource of(Model model) {
-        Dataset ds = DatasetFactory.wrap(model);
+    public static RDFDataSource of(DatasetGraph dsg) {
+        Dataset ds = DatasetFactory.wrap(dsg);
         return of(ds);
     }
 
-    public static RDFDataSource of(DatasetGraph dsg) {
-        Dataset ds = DatasetFactory.wrap(dsg);
+    public static RDFDataSource of(Model model) {
+        Dataset ds = DatasetFactory.wrap(model);
         return of(ds);
     }
 

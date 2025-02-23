@@ -15,7 +15,7 @@ import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -46,7 +46,7 @@ public class RdfDataSourcePolyfill {
 
         // Wrap the datasource with a cache for polyfill detection
         // The cache stores all query results in-memory
-        RDFDataSource cachedDataSource = RdfDataSources.decorate(rdfDataSource, RdfDataSourceTransforms.simpleCache());
+        RDFDataSource cachedDataSource = RDFDataSources.decorate(rdfDataSource, RdfDataSourceTransforms.simpleCache());
         // RdfDataSource cachedDataSource = rdfDataSource;
 
         PolyfillDetector detector = new PolyfillDetector();
@@ -57,7 +57,7 @@ public class RdfDataSourcePolyfill {
 
     public static List<Suggestion<String>> suggestPolyfillsOld(RDFDataSource rdfDataSource) {
         List<Suggestion<String>> result = null;
-        String profile = RdfDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
+        String profile = RDFDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
 
         if (profile != null && profile.equals("virtuoso")) {
             result = virtuosoProfile();

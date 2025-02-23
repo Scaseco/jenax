@@ -47,7 +47,7 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
@@ -305,7 +305,7 @@ public class DataQueryImpl<T extends RDFNode>
             Var defaultVar,
             Template template,
             Class<T> resultClass) {
-        this(RdfDataSources.ofQueryConnection(conn), baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
+        this(RDFDataSources.ofQueryConnection(conn), baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
     }
 
 

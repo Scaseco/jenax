@@ -1,7 +1,7 @@
 package org.aksw.jenax.arq.datasource;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.QueryExecution;
@@ -22,7 +22,7 @@ public class TestResource {
         ds.getDefaultModel().getGraph()
             .add(RDF.Nodes.type, RDF.Nodes.type, RDF.Nodes.Property);
 
-        RDFDataSource dataSource = RdfDataSources.of(ds);
+        RDFDataSource dataSource = RDFDataSources.of(ds);
         testResource(dataSource);
     }
 

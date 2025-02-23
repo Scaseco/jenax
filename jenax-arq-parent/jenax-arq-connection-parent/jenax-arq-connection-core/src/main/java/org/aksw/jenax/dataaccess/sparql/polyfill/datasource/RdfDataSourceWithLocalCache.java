@@ -15,7 +15,7 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.algebra.topdown.OpRewriter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -85,7 +85,7 @@ public class RdfDataSourceWithLocalCache
         Query query = QueryFactory.create(queryStr);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
-        RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RdfDataSources.of(DatasetFactory.create()));
+        RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RDFDataSources.of(DatasetFactory.create()));
         Query rewritten = OpRewriteInjectCacheOps.rewriteQuery(query);
         System.out.println(rewritten);
     }

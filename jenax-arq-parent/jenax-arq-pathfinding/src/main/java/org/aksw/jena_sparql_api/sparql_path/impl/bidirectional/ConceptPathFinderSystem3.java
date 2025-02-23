@@ -14,7 +14,7 @@ import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint3;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -61,7 +61,7 @@ public class ConceptPathFinderSystem3
             .map(SparqlStmt::getAsQueryStmt)
             .map(SparqlStmtQuery::getQuery)
             .filter(q -> q.isConstructType())
-            .map(q -> RdfDataSources.exec(dataSource, q, QueryExecution::execConstruct))
+            .map(q -> RDFDataSources.exec(dataSource, q, QueryExecution::execConstruct))
             .toList()
             .map(list -> {
                 Model r = ModelFactory.createDefaultModel();

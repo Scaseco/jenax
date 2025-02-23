@@ -6,7 +6,7 @@ import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecFactory;
 import org.aksw.jenax.dataaccess.sparql.execution.query.QueryExecutionWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
@@ -35,7 +35,7 @@ public class QueryExecutionFactories {
 
     /** Create a {@link QueryExecutionFactory} over a {@link Dataset} */
     public static QueryExecutionFactory of(Dataset dataset) {
-        return of(RdfDataSources.of(dataset));
+        return of(RDFDataSources.of(dataset));
     }
 
     public static class QueryExecutionFactoryOverRdfDataSource

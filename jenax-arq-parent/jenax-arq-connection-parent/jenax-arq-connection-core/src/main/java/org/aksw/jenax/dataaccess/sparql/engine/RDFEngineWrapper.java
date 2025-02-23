@@ -13,6 +13,14 @@ public interface RDFEngineWrapper<X extends RDFEngine>
         return delegate.getLinkSource();
     }
 
+    @Override
+    default void close() throws Exception {
+        X delegate = getDelegate();
+       if (delegate != null) {
+            delegate.close();
+        }
+    }
+
 //    @Override
 //    default RDFLinkBuilder newLinkBuilder() {
 //        X delegate = getDelegate();

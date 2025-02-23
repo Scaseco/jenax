@@ -2,7 +2,7 @@ package org.aksw.jenax.arq.datasource;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithSimpleCache;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
@@ -12,10 +12,10 @@ import org.junit.Test;
 public class TestRdfDataSourceWithSimpleCache {
     @Test
     public void testErrorCache01() {
-        RDFDataSource base = RdfDataSources.alwaysFail();
+        RDFDataSource base = RDFDataSources.alwaysFail();
         // RdfDataSource base = () -> RDFConnectionRemote.newBuilder().destination("http://dbpedia.org/sparql").build();
 
-        RdfDataSourceWithSimpleCache ds = (RdfDataSourceWithSimpleCache)RdfDataSources.decorate(base, RdfDataSourceTransforms.simpleCache());
+        RdfDataSourceWithSimpleCache ds = (RdfDataSourceWithSimpleCache)RDFDataSources.decorate(base, RdfDataSourceTransforms.simpleCache());
 
         String queryString = "FOO";
         // String queryString = "SELECT (COUNT(*) AS ?c) { ?s a <http://dbpedia.org/ontology/Person> }";

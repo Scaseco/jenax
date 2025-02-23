@@ -3,7 +3,7 @@ package org.aksw.jenax.graphql.sparql;
 import java.util.List;
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
 import org.aksw.jenax.graphql.schema.generator.GraphQlSchemaGenerator;
 import org.aksw.jenax.graphql.schema.generator.GraphQlSchemaGenerator.TypeInfo;
 import org.apache.jena.graph.Graph;
@@ -85,7 +85,7 @@ public class TestGraphQlSchemaGenerator {
 
     private static void test(String dataStr) {
         Graph graph = RDFParserBuilder.create().fromString(dataStr).lang(Lang.TURTLE).toGraph();
-        List<TypeInfo> types = GraphQlSchemaGenerator.summarize(RdfDataSources.of(graph));
+        List<TypeInfo> types = GraphQlSchemaGenerator.summarize(RDFLinkSources.of(graph).asDataSource());
         System.out.println("Begin of summary:");
         types.forEach(t -> System.out.println(t));
         System.out.println("End of summary.");

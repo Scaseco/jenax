@@ -16,7 +16,7 @@ import org.aksw.jena_sparql_api.pathlet.Path;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
@@ -184,7 +184,7 @@ public interface DataQuery<T extends RDFNode> {
 
     @Deprecated
     default DataQuery<T> connection(SparqlQueryConnection connection) {
-        return dataSource(RdfDataSources.ofQueryConnection(connection));
+        return dataSource(RDFDataSources.ofQueryConnection(connection));
     }
 
     default DataQuery<T> only(Iterable<Node> nodes) {

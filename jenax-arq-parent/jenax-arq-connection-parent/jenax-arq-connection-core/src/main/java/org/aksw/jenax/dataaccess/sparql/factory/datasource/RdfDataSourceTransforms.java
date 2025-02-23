@@ -25,7 +25,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Transformation views for use with {@link RDFEngine#decorate}.
- * The transformations are mostly based on the methods of {@link RdfDataSources}.
+ * The transformations are mostly based on the methods of {@link RDFDataSources}.
  */
 public class RdfDataSourceTransforms {
 
@@ -45,7 +45,7 @@ public class RdfDataSourceTransforms {
     /** Decorate a data source such that execution will fail. */
     public static RdfDataSourceTransform alwaysFail() {
         // XXX Perhaps also wrap the LinkDatasetGraph
-        return base -> RdfDataSources.decorate(base, decorateWithBuilderTransform(
+        return base -> RDFDataSources.decorate(base, decorateWithBuilderTransform(
             qeb -> new QueryExecBuilderWrapperBase(qeb) {
                 @Override
                 public QueryExec build() {

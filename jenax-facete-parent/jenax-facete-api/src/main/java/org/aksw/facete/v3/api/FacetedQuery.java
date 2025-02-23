@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -60,7 +60,7 @@ public interface FacetedQuery
 
     @Deprecated
     default FacetedQuery connection(SparqlQueryConnection connection) {
-        return dataSource(connection == null ? null : RdfDataSources.ofQueryConnection(connection));
+        return dataSource(connection == null ? null : RDFDataSources.ofQueryConnection(connection));
     }
 
 

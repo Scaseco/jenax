@@ -34,6 +34,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransformViaRewrite;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryCancelledException;
@@ -45,6 +46,8 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.UpdateExec;
@@ -57,6 +60,15 @@ import org.slf4j.LoggerFactory;
 
 public class RDFLinkSources {
     private static final Logger logger = LoggerFactory.getLogger(RDFLinkSources.class);
+
+    public static RDFLinkSource of(Graph graph) {
+        DatasetGraph dsg = DatasetGraphFactory.wrap(graph);
+        return of(dsg);
+    }
+
+    public static RDFLinkSource of(DatasetGraph datasetGraph) {
+        return new RDFLinkSourceOverDatasetGraph(datasetGraph);
+    }
 
     /** This method backs {@link RDFLinkSource#newQuery()}. */
     public static QueryExecBuilder newQueryBuilder(RDFLinkSource linkSource) {

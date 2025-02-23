@@ -4,7 +4,7 @@ import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.lookup.MapPaginatorConcept;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -47,7 +47,7 @@ public class MapServiceBBox
     }
 
     public static void main(String[] args) {
-        RDFDataSource ds = RdfDataSources.of(RDFDataMgr.loadDataset("/home/raven/Datasets/coypu/events.coypu.10000.ttl"));
+        RDFDataSource ds = RDFDataSources.of(RDFDataMgr.loadDataset("/home/raven/Datasets/coypu/events.coypu.10000.ttl"));
         System.out.println("data loaded.");
 
         // RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2"));

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.model.voidx.util.VoidUtils;
@@ -76,7 +76,7 @@ public class DatasetMetadata {
     }
 
     public static ListenableFuture<String> fetchDatasetHash(RDFDataSource dataSource, ListeningExecutorService executorService) {
-        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> RdfDataSources.fetchDatasetHash(dataSource));
+        ListenableFuture<String> datasetHashFuture = executorService.submit(() -> RDFDataSources.fetchDatasetHash(dataSource));
         return datasetHashFuture;
     }
 

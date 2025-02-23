@@ -27,7 +27,7 @@ import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
@@ -96,7 +96,7 @@ public class ConceptPathFinderBidirectionalUtils {
             .map(SparqlStmt::getAsQueryStmt)
             .map(SparqlStmtQuery::getQuery)
             .filter(q -> q.isConstructType())
-            .map(q -> RdfDataSources.exec(dataSource, q, QueryExecution::execConstruct))
+            .map(q -> RDFDataSources.exec(dataSource, q, QueryExecution::execConstruct))
             .toList()
             .map(list -> {
                 Model r = ModelFactory.createDefaultModel();
@@ -572,7 +572,7 @@ public class ConceptPathFinderBidirectionalUtils {
 //        }
 
         // TODO Make timeouts configurable
-        boolean result = RdfDataSources.exec(dataSource, query, QueryExecution::execAsk);
+        boolean result = RDFDataSources.exec(dataSource, query, QueryExecution::execAsk);
         Rewrite rewrite = AlgebraUtils.createDefaultRewriter();
         query = QueryUtils.rewrite(query, rewrite::rewrite);
 

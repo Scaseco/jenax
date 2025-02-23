@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
@@ -21,8 +21,8 @@ public class TestRdfDataSourceMacroExpansion {
 
     public static RDFDataSource dataSourceWithMacros(Graph graph) {
         Map<String, UserDefinedFunctionDefinition> udfRegistry = RDFLinkSources.loadMacros("datasource-test-macros.ttl");
-        RDFDataSource dataSource = RdfDataSources.of(graph);
-        return RdfDataSources.wrapWithMacros(dataSource, udfRegistry);
+        RDFDataSource dataSource = RDFDataSources.of(graph);
+        return RDFDataSources.wrapWithMacros(dataSource, udfRegistry);
     }
 
     @Test
