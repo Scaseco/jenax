@@ -31,7 +31,8 @@ public class RDFDataSourceAdapter
         return ds;
     }
 
-    public RDFLinkSource getLinkSource() {
+    @Override
+    public RDFLinkSource asLinkSource() {
         return linkSource;
     }
 
@@ -55,7 +56,7 @@ public class RDFDataSourceAdapter
     public static RDFDataSource adapt(RDFLinkSource linkSource) {
         Objects.requireNonNull(linkSource);
         RDFDataSource result = linkSource instanceof RDFLinkSourceAdapter adapter
-            ? adapter.getDelegate()
+            ? adapter.asDataSource()
             : new RDFDataSourceAdapter(linkSource);
         return result;
     }

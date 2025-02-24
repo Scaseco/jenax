@@ -7,6 +7,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFa
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceAdapter;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -14,7 +15,9 @@ import org.apache.jena.sparql.exec.QueryExecBuilder;
 import org.apache.jena.sparql.exec.QueryExecutionBuilderAdapter;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
 import org.apache.jena.sparql.exec.UpdateExecutionBuilderAdapter;
+import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateExecutionBuilder;
+import org.apache.jena.update.UpdateRequest;
 
 /**
  * A factory/supplier of RDFConnection instances. Similar to a JDBC DataSource.
@@ -35,12 +38,6 @@ public interface RDFDataSource
     default Dataset getDataset() {
         return null;
     }
-
-//    default RDFConnection getConnection() {
-//        RDFLinkSource linkSource = asLinkSource();
-//        RDFLink link = linkSource.newLink();
-//        return RDFConnectionAdapter.adapt(link);
-//    }
 
     default RDFLinkSource asLinkSource() {
         return RDFLinkSourceAdapter.adapt(this);
@@ -63,6 +60,30 @@ public interface RDFDataSource
         RDFLinkSource linkSource = asLinkSource();
         UpdateExecBuilder execBuilder = linkSource.newUpdate();
         return UpdateExecutionBuilderAdapter.adapt(execBuilder);
+    }
+
+    // ----- Shorthands: Query -----
+
+    default QueryExecution query(String queryString) {
+        return newQuery().query(queryString).build();
+    }
+
+    default QueryExecution query(Query query) {
+        return newQuery().query(query).build();
+    }
+
+    // ----- Shorthands: Update -----
+
+    default void update(String updateRequestString) {
+        newUpdate().update(updateRequestString).execute();
+    }
+
+    default void update(UpdateRequest updateRequest) {
+        newUpdate().update(updateRequest).execute();
+    }
+
+    default void update(Update update) {
+        newUpdate().update(update).execute();
     }
 
     /**

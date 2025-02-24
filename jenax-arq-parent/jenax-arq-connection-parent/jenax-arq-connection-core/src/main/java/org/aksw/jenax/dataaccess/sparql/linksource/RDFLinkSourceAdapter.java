@@ -7,17 +7,14 @@ import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.QueryExecutionBuilder;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.rdflink.RDFLinkAdapter;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExecBuilder;
-import org.apache.jena.sparql.exec.QueryExecBuilderAdapter;
 import org.apache.jena.sparql.exec.UpdateExecBuilder;
-import org.apache.jena.sparql.exec.UpdateExecBuilderAdapter;
-import org.apache.jena.update.UpdateExecutionBuilder;
 
+/** All implemented methods are based on {@link RDFDataSource#getConnection()}. */
 public class RDFLinkSourceAdapter
     implements RDFLinkSource
 {
@@ -30,12 +27,13 @@ public class RDFLinkSourceAdapter
 
     @Override
     public DatasetGraph getDatasetGraph() {
-        Dataset ds = getDelegate().getDataset();
+        Dataset ds = asDataSource().getDataset();
         DatasetGraph result = ds == null ? null : ds.asDatasetGraph();
         return result;
     }
 
-    public RDFDataSource getDelegate() {
+    @Override
+    public RDFDataSource asDataSource() {
         return delegate;
     }
 
@@ -46,28 +44,33 @@ public class RDFLinkSourceAdapter
 
     @Override
     public RDFLink newLink() {
-        RDFConnection conn = getDelegate().getConnection();
+        RDFConnection conn = asDataSource().getConnection();
         RDFLink result = RDFLinkAdapter.adapt(conn);
         return result;
     }
 
     @Override
     public QueryExecBuilder newQuery() {
-        QueryExecutionBuilder builder = getDelegate().newQuery();
-        QueryExecBuilder result = QueryExecBuilderAdapter.adapt(builder);
+        // Create a RDFLinkSource view over this. newLinkBuilder().
+        RDFLinkSource view = () -> newLinkBuilder();
+        QueryExecBuilder result = view.newQuery();
         return result;
     }
 
     @Override
     public UpdateExecBuilder newUpdate() {
-        UpdateExecutionBuilder builder = getDelegate().newUpdate();
-        UpdateExecBuilder result = UpdateExecBuilderAdapter.adapt(builder);
+        // Create a RDFLinkSource view over this. newLinkBuilder().
+        RDFLinkSource view = () -> newLinkBuilder();
+        UpdateExecBuilder result = view.newUpdate();
+
+//        UpdateExecutionBuilder builder = asDataSource().newUpdate();
+//        UpdateExecBuilder result = UpdateExecBuilderAdapter.adapt(builder);
         return result;
     }
 
     public static RDFLinkSource adapt(RDFDataSource dataSource) {
         RDFLinkSource result = dataSource instanceof RDFDataSourceAdapter adapter
-            ? adapter.getLinkSource()
+            ? adapter.asLinkSource()
             : new RDFLinkSourceAdapter(dataSource);
         return result;
     }

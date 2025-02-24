@@ -88,8 +88,11 @@ public class RDFLinkSources {
                 return new QueryExecWrapperBase<>(delegateExec) {
                     @Override
                     public void close() {
-                        super.close();
-                        link.close();
+                        try {
+                            super.close();
+                        } finally {
+                            link.close();
+                        }
                     }
                 };
             }
