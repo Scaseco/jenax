@@ -1,5 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.engine;
 
+import java.util.Optional;
+
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.linksource.HasRDFLinkSource;
@@ -27,6 +29,12 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 public interface RDFEngine
     extends HasRDFLinkSource, AutoCloseable
 {
-//    @Override
-//    void close();
+    /**
+     * An engine may optionally expose a way to start and stop
+     * the underlying service. Note that only a call to
+     * {@link RDFEngine#close()} must guarantee to stop the service and
+     * free any resources. Only calling {@link ServiceControl#stop()} is generally
+     * NOT sufficient.
+     */
+    Optional<ServiceControl> getServiceControl();
 }

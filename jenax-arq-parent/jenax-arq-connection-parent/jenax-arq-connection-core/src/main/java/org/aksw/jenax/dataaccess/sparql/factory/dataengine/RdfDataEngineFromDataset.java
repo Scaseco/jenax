@@ -1,6 +1,9 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
+import java.util.Optional;
+
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.ServiceControl;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceOverDatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraph;
@@ -29,6 +32,11 @@ public class RdfDataEngineFromDataset
     @Override
     public RDFLinkSource getLinkSource() {
         return linkSource;
+    }
+
+    @Override
+    public Optional<ServiceControl> getServiceControl() {
+        return Optional.empty();
     }
 
     @Override

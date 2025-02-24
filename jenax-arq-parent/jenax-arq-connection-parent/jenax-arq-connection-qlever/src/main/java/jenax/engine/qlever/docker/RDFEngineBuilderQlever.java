@@ -20,18 +20,11 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegac
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase.CloseablePath;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderHTTP;
-import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransforms;
-import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
-import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateWrapperBase;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.CmdStrOps;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.jena.sparql.exec.UpdateExecBuilder;
-import org.apache.jena.sparql.exec.http.UpdateExecHTTPBuilder;
-import org.apache.jena.sparql.exec.http.UpdateSendMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
@@ -130,48 +123,18 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             container.setPortBindings(List.of(hostPort + ":" + containerPort));
         }
 
-        container.start();
-
-        String serviceUrl = "http://" + container.getHost() + ":" + container.getMappedPort(containerPort);
-        logger.info("Started Qlever server at: " + serviceUrl);
+        ServiceControlQlever serviceControl = new ServiceControlQlever(container, conf);
+        serviceControl.start();
 
         container.followOutput(outputFrame -> {
             String msg = outputFrame.getUtf8StringWithoutLineEnding();
             logger.info(msg);
         });
 
-
-        // Automatically inject a provided access token on update requests
-        String accessToken = conf.accessToken;
-        LinkSparqlUpdateTransform injectAccessTokenTransform = accessToken == null
-            ? null
-            : lsu -> {
-                return new LinkSparqlUpdateWrapperBase(lsu) {
-                    @Override
-                    public UpdateExecBuilder newUpdate() {
-                        UpdateExecBuilder base = lsu.newUpdate();
-                        UpdateExecHTTPBuilder http = (UpdateExecHTTPBuilder)base;
-                        http.sendMode(UpdateSendMode.asPostForm);
-                        http.param("access-token", accessToken);
-                        return http;
-                    }
-                };
-            };
-
-        RDFLinkSourceHTTP linkSource = new RDFLinkSourceHTTP() {
-            @Override
-            public RDFLinkBuilderHTTP<?> newLinkBuilder() {
-                RDFLinkBuilderHTTP<?> result = new RDFLinkBuilderHTTP<>();
-                result.destination(serviceUrl);
-                if (injectAccessTokenTransform != null) {
-                    result.linkTransform(RDFLinkTransforms.of(injectAccessTokenTransform));
-                }
-                return result;
-            }
-        };
+        RDFLinkSourceHTTP linkSource = new RDFLinkSourceHTTPQlever(serviceControl);
 
         // TODO Make it possible to mutate the HTTP connection creation
-        RDFEngine result = RDFEngines.of(linkSource, () -> container.stop());
+        RDFEngine result = RDFEngines.of(linkSource, serviceControl, () -> container.stop());
         return result;
     }
 

@@ -22,6 +22,10 @@ public class RDFEngines {
         return new RDFEngineSimple(linkSource, closeAction);
     }
 
+    public static RDFEngine of(RDFLinkSource linkSource, ServiceControl service, AutoCloseable closeAction) {
+        return new RDFEngineSimple(linkSource, service, closeAction);
+    }
+
     public static RDFEngine of(DatasetGraph datasetGraph) {
         return of(datasetGraph, true);
     }

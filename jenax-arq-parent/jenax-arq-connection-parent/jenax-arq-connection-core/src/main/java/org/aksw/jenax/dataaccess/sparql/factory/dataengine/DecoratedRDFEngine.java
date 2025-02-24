@@ -3,9 +3,11 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 import java.io.Closeable;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
+import org.aksw.jenax.dataaccess.sparql.engine.ServiceControl;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 
 /**
@@ -31,6 +33,11 @@ public class DecoratedRDFEngine<X extends RDFEngine>
     /** Get the base engine. Never null. */
     public X getBaseEngine() {
         return baseEngine;
+    }
+
+    @Override
+    public Optional<ServiceControl> getServiceControl() {
+        return baseEngine.getServiceControl();
     }
 
     @Override

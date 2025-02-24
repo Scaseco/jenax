@@ -70,7 +70,12 @@ public class TestQleverSystem {
                 engineDecorator.decorate(RDFLinkTransforms.withLimit(1));
 
                 try (RDFEngine decoratedEngine = engineDecorator.build()) {
+
+                    decoratedEngine.getServiceControl().get().stop();
+
                     RDFDataSource dataSource = decoratedEngine.getLinkSource().asDataSource();
+
+                    decoratedEngine.getServiceControl().get().start();
 
                     // The "limit 1" decorator is expected to work.
                     Table table = dataSource.asLinkSource().newQuery().query("SELECT * { ?s ?p ?o }").table();
