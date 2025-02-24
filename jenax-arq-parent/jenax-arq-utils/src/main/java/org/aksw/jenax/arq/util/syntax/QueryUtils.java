@@ -96,7 +96,10 @@ public class QueryUtils {
     }
 
     public static Query applyElementTransform(Query beforeQuery, Function<? super Element, ? extends Element> transform) {
-        Query result = QueryTransformOps.shallowCopy(beforeQuery);
+        // Must use full close because shallow clone loses aggregators:
+        //   E.g SELECT (COUNT(*) AS ?c) becomes merely SELECT (?.0 AS ?c).
+        // Query result = QueryTransformOps.shallowCopy(beforeQuery);
+        Query result = beforeQuery.cloneQuery();
         Element beforePattern = result.getQueryPattern();
         if (beforePattern != null) {
             Element afterPattern = transform.apply(beforePattern);
