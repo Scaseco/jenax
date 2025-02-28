@@ -1,7 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.datasource;
 
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFDataEngines;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
@@ -24,7 +24,7 @@ import org.apache.jena.update.UpdateRequest;
  *
  * This interface does not provide resource management, i.e. a close() method.
  * It should only be used as follows:
- * (a) As a lambda in conjunction with {@link RdfDataEngines#of(RDFDataSource, AutoCloseable)}
+ * (a) As a lambda in conjunction with {@link RDFDataEngines#of(RDFDataSource, AutoCloseable)}
  * (b) in consuming code that does not need resource management
  *
  * Prefer {@link RDFEngine} whenever resources may need to be closed.

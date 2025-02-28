@@ -11,7 +11,7 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 
-public class RdfDataEngines {
+public class RDFDataEngines {
     /**
      * This method creates an RdfDataSource view over a connection.
      * Wrapping a connection as an engine is more a hack and should be avoided.
