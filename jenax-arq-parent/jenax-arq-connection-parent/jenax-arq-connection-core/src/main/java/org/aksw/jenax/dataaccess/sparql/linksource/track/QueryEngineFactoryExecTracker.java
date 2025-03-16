@@ -79,6 +79,7 @@ public class QueryEngineFactoryExecTracker
         public QueryIterator iterator() {
             QueryIterator base = getDelegate().iterator();
 
+            // Set before this method returns.
             long[] idRef = {-1};
 
             QueryIterator result = new QueryIteratorWrapper(base) {
