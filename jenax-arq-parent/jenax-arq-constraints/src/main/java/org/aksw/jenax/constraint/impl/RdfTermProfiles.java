@@ -42,7 +42,7 @@ public class RdfTermProfiles {
         NodeRanges nr = NodeRanges.createOpen();
         nr.addEmptyDimension(ValueSpace.VSPACE_URI);
         nr.addEmptyDimension(ValueSpace.VSPACE_BLANKNODE);
-        nr.addEmptyDimension(ValueSpace.VSPACE_QUOTED_TRIPLE);
+        nr.addEmptyDimension(ValueSpace.VSPACE_TRIPLE_TERM);
         return VSpaceImpl.create(nr);
     }
 
@@ -51,7 +51,7 @@ public class RdfTermProfiles {
         NodeRanges nr = NodeRanges.createClosed();
         nr.addOpenDimension(ValueSpace.VSPACE_URI);
         nr.addOpenDimension(ValueSpace.VSPACE_BLANKNODE);
-        nr.addOpenDimension(ValueSpace.VSPACE_QUOTED_TRIPLE);
+        nr.addOpenDimension(ValueSpace.VSPACE_TRIPLE_TERM);
         return VSpaceImpl.create(nr);
     }
 

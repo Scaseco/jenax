@@ -12,7 +12,6 @@ import org.apache.jena.sparql.algebra.op.Op2;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -88,11 +87,11 @@ public class TransformCopyAdapter
         return fallback.apply(op);
     }
 
-    
+
     /*
      * Op0
      */
-    
+
     @Override
     public Op transform(OpTriple op) {
         return transformOp0(op, super::transform);
@@ -117,8 +116,8 @@ public class TransformCopyAdapter
     public Op transform(OpTable op) {
         return transformOp0(op, super::transform);
     }
-    
-    
+
+
     /*
      * Op1
      */
@@ -159,7 +158,7 @@ public class TransformCopyAdapter
     }
 
     /* OpModifier */
-    
+
     @Override
     public Op transform(OpList op, Op subOp) {
         return transformOp1(op, subOp, super::transform);
@@ -199,11 +198,11 @@ public class TransformCopyAdapter
     public Op transform(OpGroup op, Op subOp) {
         return transformOp1(op, subOp, super::transform);
     }
-    
+
     /*
      * Op2
      */
-    
+
     @Override
     public Op transform(OpJoin op, Op left, Op right) {
         return transformOp2(op, left, right, super::transform);
@@ -214,10 +213,10 @@ public class TransformCopyAdapter
         return transformOp2(op, left, right, super::transform);
     }
 
-    @Override
-    public Op transform(OpDiff op, Op left, Op right) {
-        return transformOp2(op, left, right, super::transform);
-    }
+//    @Override
+//    public Op transform(OpDiff op, Op left, Op right) {
+//        return transformOp2(op, left, right, super::transform);
+//    }
 
     @Override
     public Op transform(OpMinus op, Op left, Op right) {
@@ -234,7 +233,7 @@ public class TransformCopyAdapter
         return transformOp2(op, left, right, super::transform);
     }
 
-    
+
     /*
      * OpN
      */
@@ -249,7 +248,7 @@ public class TransformCopyAdapter
         return transformOpN(op, elts, super::transform);
     }
 
-    
+
     /*
      * OpExt
      */

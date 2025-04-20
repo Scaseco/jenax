@@ -7,11 +7,11 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
 import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.Op2;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -36,6 +36,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -67,7 +68,9 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      @Override default T eval(OpExtend op, T subOp) { return evalOp1(op, subOp); }
      @Override default T eval(OpJoin op, T left, T right) { return evalOp2(op, left, right); }
      @Override default T eval(OpLeftJoin op, T left, T right) { return evalOp2(op, left, right); }
-     @Override default T eval(OpDiff op, T left, T right) { return evalOp2(op, left, right); }
+     // @Override default T eval(OpDiff op, T left, T right) { return evalOp2(op, left, right); }
+     @Override default T eval(OpSemiJoin op, T left, T right) { return evalOp2(op, left, right); }
+     @Override default T eval(OpAntiJoin op, T left, T right) { return evalOp2(op, left, right); }
      @Override default T eval(OpMinus op, T left, T right) { return evalOp2(op, left, right); }
      @Override default T eval(OpUnion op, T left, T right) { return evalOp2(op, left, right); }
      @Override default T eval(OpLateral op, T left, T right) { return evalOp2(op, left, right); }

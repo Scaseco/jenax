@@ -12,11 +12,11 @@ import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.SortCondition;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitor;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExtend;
@@ -39,6 +39,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -243,8 +244,24 @@ public class ApplyEvaluationVisitor<T> implements OpVisitor, ExprVisitor {
         push(opStack, value) ;
     }
 
+//    @Override
+//    public void visit(OpDiff op) {
+//        T right = pop(opStack, op.getRight());
+//        T left = pop(opStack, op.getLeft());
+//        T value = evaluator.eval(op, left, right);
+//        push(opStack, value) ;
+//    }
+
     @Override
-    public void visit(OpDiff op) {
+    public void visit(OpSemiJoin op) {
+        T right = pop(opStack, op.getRight());
+        T left = pop(opStack, op.getLeft());
+        T value = evaluator.eval(op, left, right);
+        push(opStack, value) ;
+    }
+
+    @Override
+    public void visit(OpAntiJoin op) {
         T right = pop(opStack, op.getRight());
         T left = pop(opStack, op.getLeft());
         T value = evaluator.eval(op, left, right);

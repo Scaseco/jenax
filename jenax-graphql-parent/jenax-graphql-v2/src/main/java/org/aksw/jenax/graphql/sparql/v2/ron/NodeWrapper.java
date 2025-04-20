@@ -69,7 +69,7 @@ public abstract class NodeWrapper<T>
     public String getLiteralLanguage() { return getDelegate().getLiteralLanguage(); }
 
     @Override
-    public TextDirection getLiteralTextDirection() { return getDelegate().getLiteralTextDirection(); }
+    public TextDirection getLiteralBaseDirection() { return getDelegate().getLiteralBaseDirection(); }
 
     @Override
     public String getLiteralDatatypeURI() { return getDelegate().getLiteralDatatypeURI(); }

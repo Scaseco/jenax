@@ -2,11 +2,11 @@ package org.aksw.jenax.sparql.algebra.transform2;
 
 import java.util.List;
 
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -30,6 +30,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -72,7 +73,9 @@ public class EvaluationWrapper<T>
 
     @Override public T eval(OpJoin opJoin, T left, T right)           { return evaluator.eval(opJoin, left, right) ; }
     @Override public T eval(OpLeftJoin opLeftJoin, T left, T right)   { return evaluator.eval(opLeftJoin, left, right) ; }
-    @Override public T eval(OpDiff opDiff, T left, T right)           { return evaluator.eval(opDiff, left, right) ; }
+    // @Override public T eval(OpDiff opDiff, T left, T right)           { return evaluator.eval(opDiff, left, right) ; }
+    @Override public T eval(OpSemiJoin opSemiJoin, T left, T right)           { return evaluator.eval(opSemiJoin, left, right) ; }
+    @Override public T eval(OpAntiJoin opAntiJoin, T left, T right)           { return evaluator.eval(opAntiJoin, left, right) ; }
     @Override public T eval(OpMinus opMinus, T left, T right)         { return evaluator.eval(opMinus, left, right) ; }
     @Override public T eval(OpUnion opUnion, T left, T right)         { return evaluator.eval(opUnion, left, right) ; }
     @Override public T eval(OpLateral opLateral, T left, T right)     { return evaluator.eval(opLateral, left, right) ; }
