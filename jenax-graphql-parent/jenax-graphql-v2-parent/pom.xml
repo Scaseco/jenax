@@ -4,17 +4,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jenax-graphql-parent</artifactId>
+	<artifactId>jenax-graphql-v2-parent</artifactId>
 	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
-		<artifactId>jenax-parent</artifactId>
+		<artifactId>jenax-graphql-parent</artifactId>
 		<version>5.5.0-1-SNAPSHOT</version>
 	</parent>
 
 	<modules>
-		<module>jenax-graphql-v1</module>
-		<module>jenax-graphql-v2-parent</module>
+		<module>jenax-graphql-v2-engine</module>
+		<module>jenax-graphql-v2-fmod</module>
 	</modules>
 </project>

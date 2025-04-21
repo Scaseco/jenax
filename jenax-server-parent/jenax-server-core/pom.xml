@@ -148,7 +148,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-graphql-v2</artifactId>
+			<artifactId>jenax-graphql-v2-engine</artifactId>
 		</dependency>
 
 		<dependency>
