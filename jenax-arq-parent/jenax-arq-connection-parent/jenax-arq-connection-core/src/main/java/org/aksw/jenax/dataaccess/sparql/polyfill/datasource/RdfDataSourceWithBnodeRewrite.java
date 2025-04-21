@@ -85,8 +85,8 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
-    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegatee) {
-        return new RdfDataSourceWithBnodeRewrite(delegatee, AUTO);
+    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
+        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO);
     }
 
 }

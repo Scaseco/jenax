@@ -1,15 +1,20 @@
 package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
-import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
-import org.aksw.jenax.arq.util.query.QueryTransform;
-import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
-import org.aksw.jenax.dataaccess.sparql.engine.RDFEngineWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
+import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdflink.LinkSparqlQuery;
+import org.apache.jena.rdflink.RDFLinkModular;
+import org.apache.jena.sparql.exec.QueryExec;
 
 public class RDFDataEngines {
     /**
@@ -116,37 +121,36 @@ public class RDFDataEngines {
 //        };
 //    }
 
-//    public static class RdfDataEngineOverQueryExecutionFactory
-//        implements RDFEngine
-//    {
-//        protected QueryExecutionFactory qef;
-//
-//        public RdfDataEngineOverQueryExecutionFactory(QueryExecutionFactory qef) {
-//            super();
-//            this.qef = qef;
-//        }
-//
-//        @Override
-//        public RDFLinkBuilder newLinkBuilder() {
-//            return new RDFLinkBuilderOverLinkSupplier(() -> {
-//
-//        // public RDFConnection getConnection() {
-//            LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
-//                @Override
-//                public QueryExec build() {
-//                    // TODO Raise warnings when unsupported features are requested.
-//                    String str = this.getQueryString();
-//                    QueryExecution qe = str != null
-//                            ? qef.createQueryExecution(str)
-//                            : qef.createQueryExecution(getParsedQuery());
-//                    return QueryExecAdapter.adapt(qe);
-//                    }
-//                });
-//                return new RDFLinkModular(queryLink, null, null);
-//            });
-//            // return RDFConnectionAdapter.adapt();
-//        }
-//
+    public static class RDFLinkSourceOverQueryExecutionFactory
+        implements RDFLinkSource
+    {
+        protected QueryExecutionFactory qef;
+
+        public RDFLinkSourceOverQueryExecutionFactory(QueryExecutionFactory qef) {
+            super();
+            this.qef = qef;
+        }
+
+        @Override
+        public RDFLinkBuilder<?> newLinkBuilder() {
+            return new RDFLinkBuilderOverLinkSupplier(() -> {
+
+        // public RDFConnection getConnection() {
+            LinkSparqlQuery queryLink = LinkSparqlQueryBase.of(() -> new QueryExecBuilderCustomBase<>() {
+                @Override
+                public QueryExec build() {
+                    // TODO Raise warnings when unsupported features are requested.
+                    String str = this.getQueryString();
+                    QueryExecution qe = str != null
+                            ? qef.createQueryExecution(str)
+                            : qef.createQueryExecution(getParsedQuery());
+                    return QueryExec.adapt(qe);
+                    }
+                });
+                return new RDFLinkModular(queryLink, null, null);
+            });
+            // return RDFConnectionAdapter.adapt();
+        }
 //        @Override
 //        public void close() throws Exception {
 //            qef.close();
@@ -156,7 +160,7 @@ public class RDFDataEngines {
 //        public DatasetGraph getDataset() {
 //            return null;
 //        }
-//    }
+    }
 
     /** Return a new RdfDataEngine which applies the given transformation to each created link */
 //    public static RDFEngine wrapWithLinkTransform(RDFEngine dataEngine, RDFLinkTransform xform) {
@@ -170,10 +174,10 @@ public class RDFDataEngines {
 //        };
 //    }
 
-//    public static RDFEngine adapt(QueryExecutionFactory qef) {
-//        return new RdfDataEngineOverQueryExecutionFactory(qef);
-//    }
-
+    public static RDFEngine adapt(QueryExecutionFactory qef) {
+        RDFLinkSource linkSource = new RDFLinkSourceOverQueryExecutionFactory(qef);
+        return RDFEngines.of(linkSource, qef::close);
+    }
 
     /**
      * Returns the argument if it already is a RdfDataEngine.
