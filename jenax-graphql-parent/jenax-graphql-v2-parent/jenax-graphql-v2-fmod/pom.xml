@@ -37,25 +37,68 @@
 
     </dependencies>
 
-    <build>
+  <!-- Profile to build a "plugin jar bundle" that can be loaded with fuseki or any other jena-based app -->
+  <profiles>
+    <profile>
+      <id>bundle</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-arq</artifactId>
+          <!-- <version>5.5.0-SNAPSHOT</version> -->
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-fuseki-main</artifactId>
+          <!-- <version>5.5.0-SNAPSHOT</version> -->
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-geosparql</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+      <build>  
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
                 <configuration>
-                    <artifactSet>
-                        <!-- Dependencies
-                        <includes>
-                          <include>...</include>
-                        </includes>
-                        -->
-                        <excludes>
-                            <exclude>org.apache.jena:jena-fuseki-main</exclude>
-                        </excludes>
-                    </artifactSet>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+                      <addHeader>false</addHeader>
+                    </transformer>
+                  </transformers>
+                  <filters>
+                    <filter>
+                      <artifact>*:*</artifact>
+                      <excludes>
+                        <exclude>META-INF/*.SF</exclude>
+                        <exclude>META-INF/*.DSA</exclude>
+                        <exclude>META-INF/*.RSA</exclude>
+                        <exclude>META-INF/DEPENDENCIES</exclude>
+                        <exclude>META-INF/MANIFEST.MF</exclude>
+                        <exclude>**/module-info.class</exclude>
+                      </excludes>
+                    </filter>
+                  </filters>
                 </configuration>
-            </plugin>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-    </build>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
