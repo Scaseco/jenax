@@ -7,6 +7,7 @@ import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceTransformFromLinkTransform;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceTransforms;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
@@ -26,7 +27,7 @@ public class RdfDataSourceTransforms {
     }
 
     public static RdfDataSourceTransform of(RDFLinkTransform transform) {
-        return of(transform);
+        return of(new RDFLinkSourceTransformFromLinkTransform(transform));
     }
 
     public static RdfDataSourceTransform of(LinkSparqlQueryTransform transform) {
