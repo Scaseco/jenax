@@ -65,6 +65,6 @@ public class TestGraphQLFuseki {
 
     @Test
     public void test() throws InterruptedException {
-        Thread.sleep(100000);
+        // Thread.sleep(100000);
     }
 }

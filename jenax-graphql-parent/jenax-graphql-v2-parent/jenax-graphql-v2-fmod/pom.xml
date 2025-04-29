@@ -19,11 +19,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-geosparql</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-graphql-v2-engine</artifactId>
 		</dependency>
@@ -49,16 +44,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-resources-test-config</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.1.0</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -104,6 +99,12 @@
 					<version>6.1.0</version>
 					<scope>provided</scope>
 				</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.apache.jena</groupId>-->
+<!--			<artifactId>jena-geosparql</artifactId>-->
+<!--					<scope>provided</scope>-->
+<!--		</dependency>-->
 
 				<!--				<dependency>-->
 				<!--					<groupId>org.apache.jena</groupId>-->

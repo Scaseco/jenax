@@ -96,114 +96,114 @@
 
 
 	<dependencies>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-commons</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm-commons</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-tree</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-util</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm-tree</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm-util</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-analysis</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.ow2.asm</groupId>-->
+<!--			<artifactId>asm-analysis</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-connection-core</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-arq-connection-core</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-stmt</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-arq-stmt</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-utils</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-arq-utils</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-arq</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.apache.jena</groupId>-->
+<!--			<artifactId>jena-arq</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-graphql-v1</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-graphql-v1</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-graphql-v2-engine</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-graphql-v2-engine</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.slf4j</groupId>-->
+<!--			<artifactId>slf4j-api</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-api</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-beans</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-context</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.glassfish.jersey.ext</groupId>
-			<artifactId>jersey-spring6</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.glassfish.jersey.ext</groupId>-->
+<!--			<artifactId>jersey-spring6</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-web</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>
-			<artifactId>jetty-ee${ee.version}-servlet</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.eclipse.jetty.ee${ee.version}</groupId>-->
+<!--			<artifactId>jetty-ee${ee.version}-servlet</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.google.code.gson</groupId>-->
+<!--			<artifactId>gson</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-resources-test-config</artifactId>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.aksw.jenax</groupId>-->
+<!--			<artifactId>jenax-resources-test-config</artifactId>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>jakarta.servlet</groupId>-->
+<!--			<artifactId>jakarta.servlet-api</artifactId>-->
+<!--		</dependency>-->
 
-		<dependency>
-			<groupId>jakarta.ws.rs</groupId>
-			<artifactId>jakarta.ws.rs-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>jakarta.ws.rs</groupId>-->
+<!--			<artifactId>jakarta.ws.rs-api</artifactId>-->
+<!--		</dependency>-->
 	</dependencies>
 </project>
