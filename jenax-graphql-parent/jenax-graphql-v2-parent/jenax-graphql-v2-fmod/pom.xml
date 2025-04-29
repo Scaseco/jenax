@@ -1,104 +1,157 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.aksw.jenax</groupId>
-        <artifactId>jenax-graphql-v2-parent</artifactId>
-        <version>5.5.0-1-SNAPSHOT</version>
-    </parent>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-graphql-v2-parent</artifactId>
+		<version>5.5.0-1-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>jenax-graphql-v2-fmod</artifactId>
+	<artifactId>jenax-graphql-v2-fmod</artifactId>
 
-    <description>GraphQL Fuseki Module</description>
+	<description>GraphQL Fuseki Module</description>
 
-    <properties>
-      <automatic.module.name>org.apache.jena.fuseki.graphql</automatic.module.name>
-    </properties>
+	<properties>
+		<automatic.module.name>org.apache.jena.fuseki.graphql</automatic.module.name>
+	</properties>
 
-    <dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-geosparql</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-geosparql</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-graphql-v2-engine</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.aksw.jenax</groupId>
-            <artifactId>jenax-graphql-v2-engine</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-graphql-v2-ui</artifactId>
+			<version>5.5.0-1-SNAPSHOT</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-fuseki-main</artifactId>
-            <scope>provided</scope>
-        </dependency>
+		<!-- Temporary dependency for the newer GraphQL frontend; needs to be
+		separated from the server -->
+		<!--		<dependency>-->
+		<!--			<groupId>org.aksw.jenax</groupId>-->
+		<!--			<artifactId>jenax-server-core</artifactId>-->
+		<!--		</dependency>-->
 
-    </dependencies>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-fuseki-server</artifactId>
+			<version>5.5.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
 
-  <!-- Profile to build a "plugin jar bundle" that can be loaded with fuseki or any other jena-based app -->
-  <profiles>
-    <profile>
-      <id>bundle</id>
-      <dependencies>
-        <dependency>
-          <groupId>org.apache.jena</groupId>
-          <artifactId>jena-arq</artifactId>
-          <!-- <version>5.5.0-SNAPSHOT</version> -->
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.jena</groupId>
-          <artifactId>jena-fuseki-main</artifactId>
-          <!-- <version>5.5.0-SNAPSHOT</version> -->
-          <scope>provided</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.jena</groupId>
-          <artifactId>jena-geosparql</artifactId>
-          <scope>provided</scope>
-        </dependency>
-      </dependencies>
-      <build>  
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-shade-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                  <goal>shade</goal>
-                </goals>
-                <configuration>
-                  <transformers>
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-                      <addHeader>false</addHeader>
-                    </transformer>
-                  </transformers>
-                  <filters>
-                    <filter>
-                      <artifact>*:*</artifact>
-                      <excludes>
-                        <exclude>META-INF/*.SF</exclude>
-                        <exclude>META-INF/*.DSA</exclude>
-                        <exclude>META-INF/*.RSA</exclude>
-                        <exclude>META-INF/DEPENDENCIES</exclude>
-                        <exclude>META-INF/MANIFEST.MF</exclude>
-                        <exclude>**/module-info.class</exclude>
-                      </excludes>
-                    </filter>
-                  </filters>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-resources-test-config</artifactId>
+			<scope>test</scope>
+		</dependency>
 
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.1.0</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<!-- Profile to build a "plugin jar bundle" that can be loaded with fuseki
+	or any other jena-based app -->
+	<profiles>
+		<!--		<profile>-->
+		<!--			<id>test-deps</id>-->
+		<!--			<activation>-->
+		<!--				<activeByDefault>true</activeByDefault>-->
+		<!--			</activation>-->
+		<!--			<dependencies>-->
+		<!--				<dependency>-->
+		<!--					<groupId>org.apache.jena</groupId>-->
+		<!--					<artifactId>jena-fuseki-main</artifactId>-->
+		<!--					<scope>compile</scope>-->
+		<!--				</dependency>-->
+		<!--			</dependencies>-->
+		<!--		</profile>-->
+
+		<profile>
+			<id>bundle</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-arq</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-fuseki-main</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>jakarta.servlet</groupId>
+					<artifactId>jakarta.servlet-api</artifactId>
+					<version>6.1.0</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<!--				<dependency>-->
+				<!--					<groupId>org.apache.jena</groupId>-->
+				<!--					<artifactId>jena-geosparql</artifactId>-->
+				<!--					<scope>provided</scope>-->
+				<!--				</dependency>-->
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<transformers>
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+										<transformer
+											implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+											<addHeader>false</addHeader>
+										</transformer>
+									</transformers>
+									<filters>
+										<filter>
+											<artifact>*:*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+												<exclude>META-INF/DEPENDENCIES</exclude>
+												<exclude>META-INF/MANIFEST.MF</exclude>
+												<exclude>**/module-info.class</exclude>
+											</excludes>
+										</filter>
+									</filters>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

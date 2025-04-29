@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphQL Editor</title>
+<style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.textarea {
+    width: 100%;
+    height: 350px;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: vertical; /* Allow vertical resizing only */
+}
+
+/* CSS Source: https://pagehelper.lets-script.com/blog/codemirror6-resize/ */
+.a-demo-cm6  {
+  resize: vertical;
+  overflow: auto;
+  border: 1px solid;
+}
+
+.a-demo-cm6 .cm-editor {
+  height: 100%;
+  max-height: 400px;
+}
+.a-demo-cm6 .cm-gutter, .a-demo-cm6 .cm-content { /* .cm-contnet */
+  min-height: 350px;
+}
+
+
+button {
+    display: block;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.button-container {
+  display: flex;
+}
+</style>
+
+<script defer="defer" src="<%= scriptSrc %>"></script>
+
+</head>
+<body>
+  <div class="container">
+    <h2>Minimal UI for GraphQL</h2>
+
+    <!-- <textarea id="input" onkeyup="scheduleSaveState()" spellcheck="false" placeholder="Enter a GraphQL query here."></textarea> -->
+    <div class="a-demo-cm6 cm-editor-wrap" id="input" ></div>
+
+    <div class="button-container">
+      <button id="sendBtn" onclick="sendRequest()">Send</button>
+      <button id="abortBtn" onclick="abortRequest()" disabled="true">Abort</button>
+      <button onclick="showCurl()" title="Create a curl request for copy&amp;paste">Curl</button>
+      <button onclick="createLink()" title="Create a link request for copy&amp;paste">Link</button>
+      <button id="sparqlBtn" disabled onclick="showSparql()" title="Show SPARQL in Yasgui (requires executed GraphQL query with @debug on query operation or top level field)">Sparql</button>
+    </div>
+
+    <!-- <textarea class="textarea" id="output" readonly="true" placeholder="Response area. Click 'Send' or 'Curl' to see the response. Can be JSON data or an error message."></textarea> -->
+    <div class="a-demo-cm6 cm-editor-wrap" id="output"></div>
+    <textarea class="textarea" id="debug" readonly="true" placeholder="Debug information area. Annotate a top-level field with @debug to show the generated SPARQL query."></textarea>
+  </div>
+</body>
+</html>
+

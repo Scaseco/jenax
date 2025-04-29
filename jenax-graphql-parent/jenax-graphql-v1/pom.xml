@@ -67,9 +67,6 @@
 			<artifactId>jenax-models-polyfill</artifactId>
 			<scope>test</scope>	
 		</dependency>
-
-
-
 	</dependencies>
 </project>
 

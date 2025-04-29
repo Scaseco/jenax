@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>jenax-graphql-v2-engine</module>
+		<module>jenax-graphql-v2-ui</module>
 		<module>jenax-graphql-v2-fmod</module>
 	</modules>
 </project>

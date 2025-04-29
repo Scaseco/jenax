@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExec;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecBuilder;
@@ -30,7 +29,6 @@ import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecFactory;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.high.GraphQlExecUtils;
 import org.aksw.jenax.graphql.sparql.v2.io.GraphQlJsonUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.atlas.io.IO;
 import org.apache.jena.fuseki.FusekiException;
 import org.apache.jena.fuseki.servlets.BaseActionREST;
 import org.apache.jena.fuseki.servlets.HttpAction;
@@ -50,7 +48,7 @@ public class GraphQlQueryService extends BaseActionREST {
     @Override
     protected void doGet(HttpAction action) {
         // Serves the minimal graphql ui
-        String resourceName = "graphql/mui/index.html";
+        String resourceName = "static/graphql/mui/index.html";
         String str = null;
         try (InputStream in = GraphQlQueryService.class.getClassLoader().getResourceAsStream(resourceName)) {
             str = IOUtils.toString(in, StandardCharsets.UTF_8);

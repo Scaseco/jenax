@@ -17,11 +17,14 @@
  */
 package org.apache.jena.fuseki.mod.graphql;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.jenax.web.servlet.graphql.GraphQlUi;
 import org.apache.jena.fuseki.Fuseki;
+import org.apache.jena.fuseki.FusekiException;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.apache.jena.fuseki.main.sys.FusekiAutoModule;
 import org.apache.jena.fuseki.server.DataAccessPoint;
@@ -51,8 +54,21 @@ public class FMod_GraphQl implements FusekiAutoModule {
     @Override
     public void prepare(FusekiServer.Builder builder, Set<String> datasetNames, Model configModel) {
         Fuseki.configLog.info(name() + ": Module adds GraphQL servlet");
+
+        String jsBundleName = "static/graphql/mui/graphql.bundle.js";
+        byte[] jsBundleBytes;
+        try {
+            jsBundleBytes = IO2.readResourceAsBytes(GraphQlUi.class, jsBundleName);
+        } catch (IOException e) {
+            throw new FusekiException(e);
+        }
+
         builder.registerOperation(graphQlQueryOperation, new GraphQlQueryService());
-        datasetNames.forEach(name -> builder.addEndpoint(name, "graphql", graphQlQueryOperation));
+
+        for (String name : datasetNames) {
+            builder.addEndpoint(name, "graphql", graphQlQueryOperation);
+            builder.addServlet(name + "/graphql.bundle.js",  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
+        }
     }
 
     @Override
