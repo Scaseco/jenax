@@ -67,7 +67,9 @@ public class FMod_GraphQl implements FusekiAutoModule {
 
         for (String name : datasetNames) {
             builder.addEndpoint(name, "graphql", graphQlQueryOperation);
-            builder.addServlet(name + "/graphql.bundle.js",  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
+            String resServletName = name + "/graphql.bundle.js";
+            Fuseki.configLog.info(name() + ": Registering " + resServletName);
+            builder.addServlet(resServletName,  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
         }
     }
 
