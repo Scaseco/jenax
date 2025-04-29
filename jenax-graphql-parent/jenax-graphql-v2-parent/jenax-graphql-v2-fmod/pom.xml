@@ -88,15 +88,28 @@
 					<artifactId>jena-arq</artifactId>
 					<scope>provided</scope>
 				</dependency>
+				<!--
 				<dependency>
 					<groupId>org.apache.jena</groupId>
 					<artifactId>jena-fuseki-main</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				-->
+				<dependency>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-fuseki-server</artifactId>
+					<version>5.5.0-SNAPSHOT</version>
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
 					<groupId>jakarta.servlet</groupId>
 					<artifactId>jakarta.servlet-api</artifactId>
 					<version>6.1.0</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
 					<scope>provided</scope>
 				</dependency>
 
