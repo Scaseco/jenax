@@ -54,28 +54,12 @@ public class FMod_GraphQl implements FusekiAutoModule {
     @Override
     public void prepare(FusekiServer.Builder builder, Set<String> datasetNames, Model configModel) {
         Fuseki.configLog.info(name() + ": Module adds GraphQL servlet");
-
-        String jsBundleName = "static/graphql/mui/graphql.bundle.js";
-        byte[] jsBundleBytes;
-        try {
-            jsBundleBytes = IO2.readResourceAsBytes(GraphQlUi.class, jsBundleName);
-        } catch (IOException e) {
-            throw new FusekiException(e);
-        }
-
         builder.registerOperation(graphQlQueryOperation, new GraphQlQueryService());
-
-        for (String name : datasetNames) {
-            builder.addEndpoint(name, "graphql", graphQlQueryOperation);
-            String resServletName = name + "/graphql.bundle.js";
-            Fuseki.configLog.info(name() + ": Registering " + resServletName);
-            builder.addServlet(resServletName,  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
-        }
     }
 
     @Override
-    public void configured(FusekiServer.Builder serverBuilder, DataAccessPointRegistry dapRegistry, Model configModel) {
-        FusekiAutoModule.super.configured(serverBuilder, dapRegistry, configModel);
+    public void configured(FusekiServer.Builder builder, DataAccessPointRegistry dapRegistry, Model configModel) {
+        FusekiAutoModule.super.configured(builder, dapRegistry, configModel);
 
         List<DataAccessPoint> daps = dapRegistry.accessPoints().stream().map(dap -> {
             Endpoint endpoint = Endpoint.create()
@@ -88,10 +72,26 @@ public class FMod_GraphQl implements FusekiAutoModule {
         }).collect(Collectors.toList());
 
         // "replace" each DataAccessPoint
-        daps.forEach(dap -> {
-            dapRegistry.remove(dap.getName());
-            dapRegistry.register(dap);
-        });
+//        daps.forEach(dap -> {
+//            dapRegistry.remove(dap.getName());
+//            dapRegistry.register(dap);
+//        });
+
+        String jsBundleName = "static/graphql/mui/graphql.bundle.js";
+        byte[] jsBundleBytes;
+        try {
+            jsBundleBytes = IO2.readResourceAsBytes(GraphQlUi.class, jsBundleName);
+        } catch (IOException e) {
+            throw new FusekiException(e);
+        }
+
+        for (DataAccessPoint dap : daps) {
+            String name = dap.getName();
+            builder.addEndpoint(name, "graphql", graphQlQueryOperation);
+            String resServletName = name + "/graphql.bundle.js";
+            Fuseki.configLog.info(name() + ": Registering " + resServletName);
+            builder.addServlet(resServletName,  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
+        }
     }
 
     @Override
