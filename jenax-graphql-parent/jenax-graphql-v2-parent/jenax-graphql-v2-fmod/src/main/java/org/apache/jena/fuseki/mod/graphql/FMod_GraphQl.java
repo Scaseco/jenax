@@ -71,12 +71,6 @@ public class FMod_GraphQl implements FusekiAutoModule {
             return new DataAccessPoint(dap.getName(), dSrv);
         }).collect(Collectors.toList());
 
-        // "replace" each DataAccessPoint
-//        daps.forEach(dap -> {
-//            dapRegistry.remove(dap.getName());
-//            dapRegistry.register(dap);
-//        });
-
         String jsBundleName = "static/graphql/mui/graphql.bundle.js";
         byte[] jsBundleBytes;
         try {
@@ -92,6 +86,12 @@ public class FMod_GraphQl implements FusekiAutoModule {
             Fuseki.configLog.info(name() + ": Registering " + resServletName);
             builder.addServlet(resServletName,  new HttpServletStaticPayload("text/javascript", jsBundleBytes));
         }
+
+        // "replace" each DataAccessPoint
+        daps.forEach(dap -> {
+            dapRegistry.remove(dap.getName());
+            dapRegistry.register(dap);
+        });
     }
 
     @Override
