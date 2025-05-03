@@ -236,15 +236,16 @@ async function fetchAndSetSchema(view, url) {
   const response = await fetch(url);
 
   if (!response.ok) {
-      throw new Error('Failed to fetch the schema');
+    console.log(`Failed to load a graphql schema at ${url}`);
+    // throw new Error('Failed to fetch the schema');
+  } else {
+    const schemaStr = await response.text();
+    const schema = buildSchema(schemaStr);
+    updateSchema(view, schema);
   }
-
-  const schemaStr = await response.text();
-  const schema = buildSchema(schemaStr);
-  updateSchema(view, schema);
 }
 
-const graphQlSchemaUrl = null
+const graphQlSchemaUrl = "schema.graphql";
 
 if (graphQlSchemaUrl) {
   fetchAndSetSchema(editorView, graphQlSchemaUrl);

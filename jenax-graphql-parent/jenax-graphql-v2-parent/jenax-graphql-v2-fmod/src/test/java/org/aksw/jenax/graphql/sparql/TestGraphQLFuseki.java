@@ -6,6 +6,7 @@ import org.apache.jena.fuseki.main.cmds.FusekiMain;
 import org.apache.jena.fuseki.mod.graphql.ServerUtils;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,9 +30,11 @@ public class TestGraphQLFuseki {
 //        // Variante 2:
 //        HttpServlet serv = null;
 
+        System.setProperty("FUSEKI_BASE", "/home/raven/Repositories/coypu/fuseki-with-jenax/run/configuration");
 
         String[] argv = new String[] { "--empty" };
         server = FusekiMain.builder(argv)
+            .parseConfigFile("/home/raven/Repositories/coypu/fuseki-with-jenax/run/config.ttl")
             // .addServlet("graphql.bundle.js", serv)
             // .staticFileBase("/home/raven/Projects/Eclipse/jenax/jenax-graphql-parent/jenax-graphql-v2-parent/jenax-graphql-v2-ui/frontend/build")
             // .staticFileBase(Path.of("").toAbsolutePath().toString())
@@ -45,6 +48,7 @@ public class TestGraphQLFuseki {
     }
 
     private void setupTestData(DatasetGraph dsg) {
+        dsg.getDefaultGraph().add(RDF.Nodes.type, RDF.Nodes.type, RDF.Nodes.type);
 //        // Fill the graph with a few geometries; spatial index construction will derive the SRS from them.
 //        Envelope envelope = new Envelope(-175, 175, -85, 85);
 //
@@ -65,6 +69,6 @@ public class TestGraphQLFuseki {
 
     @Test
     public void test() throws InterruptedException {
-        // Thread.sleep(100000);
+         // Thread.sleep(100000);
     }
 }
