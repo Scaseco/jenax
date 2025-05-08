@@ -41,7 +41,7 @@
 										<excludes>
 											<exclude>org.apache.jena:*</exclude>
 											<exclude>classworlds:classworlds</exclude>
-											<exclude>junit:junit</exclude>
+											<!-- <exclude>junit:junit</exclude> excluded for testcontainers --> 
 											<exclude>jmock:*</exclude>
 											<exclude>*:xml-apis</exclude>
 											<exclude>org.apache.maven:lib:tests</exclude>
