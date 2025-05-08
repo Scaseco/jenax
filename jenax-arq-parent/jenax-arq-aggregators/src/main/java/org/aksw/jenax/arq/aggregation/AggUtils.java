@@ -1,5 +1,7 @@
 package org.aksw.jenax.arq.aggregation;
 
+import org.aksw.jenax.arq.util.binding.BindingMapper;
+import org.aksw.jenax.arq.util.binding.BindingMapperExpr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.engine.binding.Binding;

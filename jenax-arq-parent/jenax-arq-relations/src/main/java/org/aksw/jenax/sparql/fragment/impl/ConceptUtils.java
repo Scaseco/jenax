@@ -73,7 +73,8 @@ public class ConceptUtils {
     public static Fragment1 listUsedClasses = Concept.create("?s a ?t", "t");
 
     public static Fragment1 listAllPredicates = Concept.create("?s ?p ?o", "p");
-    public static Fragment1 listAllGraphs = Concept.create("Graph ?g { ?s ?p ?o }", "g");
+    public static Fragment1 listAllGraphsLegacy = Concept.create("Graph ?g { ?s ?p ?o }", "g");
+    public static Fragment1 listAllGraphs = Concept.create("Graph ?g { }", "g");
 
 
     /**

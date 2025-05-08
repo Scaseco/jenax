@@ -56,7 +56,7 @@ import org.aksw.jenax.arq.aggregation.Agg;
 import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.AggMap;
 import org.aksw.jenax.arq.aggregation.AggTransform;
-import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
+import org.aksw.jenax.arq.util.binding.BindingMapperProjectVar;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;

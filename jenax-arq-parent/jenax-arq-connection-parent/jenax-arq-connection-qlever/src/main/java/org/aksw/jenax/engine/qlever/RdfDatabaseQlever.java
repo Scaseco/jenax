@@ -16,15 +16,17 @@ public class RdfDatabaseQlever
 {
     protected Path path;
     protected String indexName;
-
     protected FileSetOverPathBase fileSet;
 
     public RdfDatabaseQlever(Path path, String indexName) {
         super();
         this.path = Objects.requireNonNull(path);
         this.indexName = Objects.requireNonNull(indexName);
+        this.fileSet = getFileSet(path, indexName);
+    }
 
-        this.fileSet = new FileSetOverPathMatcher(path, new FileSetMatcherQlever(indexName));
+    public static FileSetOverPathBase getFileSet(Path path, String indexName) {
+        return new FileSetOverPathMatcher(path, new FileSetMatcherQlever(indexName));
     }
 
     public Path getPath() {

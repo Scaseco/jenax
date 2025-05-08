@@ -151,9 +151,9 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             String qleverImageName = getImageName();
             String qleverImageTag = getImageTag();
             // Integer hostPort = getPort();
-            QleverConfRun conf = getConfig();
+            QleverConfApi conf = getConfig();
 
-            String indexName = getImageName();
+            String indexName = getIndexName();
             if (indexName == null) {
                 indexName = "default";
             }
@@ -224,14 +224,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         return (String)map.get(IMAGE_NAME_KEY);
     }
 
-
-    public X setConfig(QleverConfRun qleverConfRun) {
+    public X setConfig(QleverConfRun qleverConfRun) { // QleverConfRun rather than QleverConfApi because bean utils may not work property with methods - needs to be tested.
         map.put(CONFIG_KEY, qleverConfRun);
         return self();
     }
 
-    public QleverConfRun getConfig() {
-        return (QleverConfRun)map.get(CONFIG_KEY);
+    public QleverConfApi getConfig() {
+        return (QleverConfApi)map.get(CONFIG_KEY);
     }
 
     @Override
@@ -240,7 +239,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         try {
             logger.info("Setting attribute: " + key + " -> " + value);
             try {
-                QleverConfRun runConf = getConfig();
+                QleverConfApi runConf = getConfig();
                 BeanUtils.setProperty(runConf, key, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 logger.error("Error:", e);
@@ -265,7 +264,6 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             setLocationContext(null);
             setLocation(path.toString());
             setIndexName(db.getIndexName());
-
         } else {
             throw new IllegalArgumentException("Argument is not a qlever database: " + database);
         }

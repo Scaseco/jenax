@@ -7,7 +7,7 @@ import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.AggMap;
 import org.aksw.jenax.arq.aggregation.AggTransform;
 import org.aksw.jenax.arq.aggregation.AggUtils;
-import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
+import org.aksw.jenax.arq.util.binding.BindingMapperProjectVar;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.Vars;

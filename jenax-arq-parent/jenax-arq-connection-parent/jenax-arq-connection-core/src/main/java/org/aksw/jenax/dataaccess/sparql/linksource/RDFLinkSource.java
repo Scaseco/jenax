@@ -74,6 +74,7 @@ public interface RDFLinkSource {
         newUpdate().update(update).execute();
     }
 
+    /** This method is the default 'upcast' to RDFDataSource. */
     default RDFDataSource asDataSource() {
         return RDFDataSourceAdapter.adapt(this);
     }

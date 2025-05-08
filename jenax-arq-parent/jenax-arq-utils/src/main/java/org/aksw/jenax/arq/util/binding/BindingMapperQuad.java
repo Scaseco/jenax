@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.aggregation;
+package org.aksw.jenax.arq.util.binding;
 
 import org.aksw.jenax.arq.util.quad.QuadUtils;
 import org.apache.jena.sparql.core.Quad;

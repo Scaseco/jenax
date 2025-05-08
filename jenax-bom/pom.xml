@@ -196,7 +196,8 @@
 			</dependency>
 
 			<!-- resolves conflicts between jersey, tika and hadoop -->
-			<!-- Also needed to resolve: https://stackoverflow.com/questions/65444486/warning-jaxbcontext-implementation-could-not-be-found-wadl-feature-is-disabled-->
+			<!-- Also needed to resolve:
+			https://stackoverflow.com/questions/65444486/warning-jaxbcontext-implementation-could-not-be-found-wadl-feature-is-disabled-->
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
@@ -245,6 +246,11 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-extra</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection-qlever</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -818,7 +824,8 @@
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-tdb2</artifactId>
 				<version>${jena.version}</version>
-			</dependency>			<dependency>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-fuseki-main</artifactId>
 				<version>${jena.version}</version>
@@ -1527,8 +1534,7 @@
 				<artifactId>testcontainers</artifactId>
 				<version>1.20.4</version>
 			</dependency>
-			
-		
+
 
 			<!-- experimental dependencies -->
 			<!-- <dependency> <groupId>org.quartz-scheduler</groupId>

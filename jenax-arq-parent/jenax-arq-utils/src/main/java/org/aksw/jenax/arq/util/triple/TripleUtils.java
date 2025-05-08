@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.aksw.commons.util.string.StringUtils;
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.io.NTripleUtils;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
@@ -300,4 +301,10 @@ public class TripleUtils {
         return toReturn;
     }
 
+    public static Triple copySubstitute(Triple quad, Binding binding) {
+        return Triple.create(
+            BindingUtils.substitute(quad.getSubject(), binding),
+            BindingUtils.substitute(quad.getPredicate(), binding),
+            BindingUtils.substitute(quad.getObject(), binding));
+    }
 }

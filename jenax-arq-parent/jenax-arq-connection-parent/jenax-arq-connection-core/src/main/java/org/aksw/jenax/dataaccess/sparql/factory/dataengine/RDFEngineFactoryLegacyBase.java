@@ -51,6 +51,17 @@ public abstract class RDFEngineFactoryLegacyBase
             spec.getTempDir(), tempDirPrefix, spec.isAutoDeleteIfCreated());
     }
 
+
+    /**
+     *
+     * @param location A path to be resolved against the root of some file system.
+     * @param locationContext The url of a virtual filesystem, such as a zip file.
+     * @param tempDir
+     * @param tempDirPrefix
+     * @param isAutoDeleteIfCreated
+     * @return
+     * @throws IOException
+     */
     public static CloseablePath setupPath(
             String location, String locationContext,
             String tempDir, String tempDirPrefix, boolean isAutoDeleteIfCreated) throws IOException {

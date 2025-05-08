@@ -12,6 +12,9 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
  * It features an {@link RDFLinkSource} to build connections
  * and a {@link #close()} method to shut the system down.
  *
+ * Optionally, an engine may support {@link #getServiceControl()} which can be used
+ * to start and stop it.
+ *
  * The link builder can be cast to specific subclasses in order to configure it.
  * For example, an RDFLinkBuilder that can be cast to an RDFLinkBuilderHTTP
  * supports configuring the content types for each SPARQL query form.

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class QleverConfRun
-    implements Serializable
+    implements Serializable, QleverConfApi
 {
     private static final long serialVersionUID = 1L;
 
@@ -34,185 +34,164 @@ public class QleverConfRun
 //        this.dbPath = dbPath;
 //    }
 
+    @Override
     public String getIndexBaseName() {
         return indexBaseName;
     }
 
+    @Override
     public void setIndexBaseName(String indexBaseName) {
         this.indexBaseName = indexBaseName;
     }
 
+    @Override
     public Integer getPort() {
         return port;
     }
 
+    @Override
     public void setPort(Integer port) {
         this.port = port;
     }
 
+    @Override
     public String getAccessToken() {
         return accessToken;
     }
 
+    @Override
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
 
+    @Override
     public Integer getNumSimultaneousQueries() {
         return numSimultaneousQueries;
     }
 
+    @Override
     public void setNumSimultaneousQueries(Integer numSimultaneousQueries) {
         this.numSimultaneousQueries = numSimultaneousQueries;
     }
 
+    @Override
     public String getMemoryMaxSize() {
         return memoryMaxSize;
     }
 
+    @Override
     public void setMemoryMaxSize(String memoryMaxSize) {
         this.memoryMaxSize = memoryMaxSize;
     }
 
+    @Override
     public String getCacheMaxSize() {
         return cacheMaxSize;
     }
 
+    @Override
     public void setCacheMaxSize(String cacheMaxSize) {
         this.cacheMaxSize = cacheMaxSize;
     }
 
+    @Override
     public String getCacheMaxSizeSingleEntry() {
         return cacheMaxSizeSingleEntry;
     }
 
+    @Override
     public void setCacheMaxSizeSingleEntry(String cacheMaxSizeSingleEntry) {
         this.cacheMaxSizeSingleEntry = cacheMaxSizeSingleEntry;
     }
 
+    @Override
     public String getLazyResultMaxCacheSize() {
         return lazyResultMaxCacheSize;
     }
 
+    @Override
     public void setLazyResultMaxCacheSize(String lazyResultMaxCacheSize) {
         this.lazyResultMaxCacheSize = lazyResultMaxCacheSize;
     }
 
+    @Override
     public Long getCacheMaxNumEntries() {
         return cacheMaxNumEntries;
     }
 
+    @Override
     public void setCacheMaxNumEntries(Long cacheMaxNumEntries) {
         this.cacheMaxNumEntries = cacheMaxNumEntries;
     }
 
+    @Override
     public Boolean getNoPatterns() {
         return noPatterns;
     }
 
+    @Override
     public void setNoPatterns(Boolean noPatterns) {
         this.noPatterns = noPatterns;
     }
 
+    @Override
     public Boolean getNoPatternTrick() {
         return noPatternTrick;
     }
 
+    @Override
     public void setNoPatternTrick(Boolean noPatternTrick) {
         this.noPatternTrick = noPatternTrick;
     }
 
+    @Override
     public Boolean getText() {
         return text;
     }
 
+    @Override
     public void setText(Boolean text) {
         this.text = text;
     }
 
+    @Override
     public Boolean getOnlyPsoAndPosPermutations() {
         return onlyPsoAndPosPermutations;
     }
 
+    @Override
     public void setOnlyPsoAndPosPermutations(Boolean onlyPsoAndPosPermutations) {
         this.onlyPsoAndPosPermutations = onlyPsoAndPosPermutations;
     }
 
+    @Override
     public String getDefaultQueryTimeout() {
         return defaultQueryTimeout;
     }
 
+    @Override
     public void setDefaultQueryTimeout(String defaultQueryTimeout) {
         this.defaultQueryTimeout = defaultQueryTimeout;
     }
 
+    @Override
     public Long getServiceMaxValueRows() {
         return serviceMaxValueRows;
     }
 
+    @Override
     public void setServiceMaxValueRows(Long serviceMaxValueRows) {
         this.serviceMaxValueRows = serviceMaxValueRows;
     }
 
+    @Override
     public Boolean getThrowOnUnboundVariables() {
         return throwOnUnboundVariables;
     }
 
+    @Override
     public void setThrowOnUnboundVariables(Boolean throwOnUnboundVariables) {
         this.throwOnUnboundVariables = throwOnUnboundVariables;
-    }
-
-    public void copyInto(QleverConfRun dest, boolean copyNulls) {
-        String str;
-        Boolean b;
-        Integer i;
-        Long l;
-
-//        if ((str = getDbPath()) != null || copyNulls) {
-//            dest.setDbPath(str);
-//        }
-        if((str = getIndexBaseName()) != null || copyNulls) {
-            dest.setIndexBaseName(str);
-        }
-        if((i = getPort()) != null || copyNulls) {
-            dest.setPort(i);
-        }
-        if((str = getAccessToken()) != null || copyNulls) {
-            dest.setAccessToken(str);
-        }
-        if((i = getNumSimultaneousQueries()) != null || copyNulls) {
-            dest.setNumSimultaneousQueries(i);
-        }
-        if((str = getMemoryMaxSize()) != null || copyNulls) {
-            dest.setMemoryMaxSize(str);
-        }
-        if((str = getCacheMaxSize()) != null || copyNulls) {
-            dest.setCacheMaxSize(str);
-        }
-        if((str = getCacheMaxSizeSingleEntry()) != null || copyNulls) {
-            dest.setCacheMaxSizeSingleEntry(str);
-        }
-        if((str = getLazyResultMaxCacheSize()) != null || copyNulls) {
-            dest.setLazyResultMaxCacheSize(str);
-        }
-        if((l = getCacheMaxNumEntries()) != null || copyNulls) {
-            dest.setCacheMaxNumEntries(l);
-        }
-        if((b = getNoPatterns()) != null || copyNulls) {
-            dest.setNoPatterns(b);
-        }
-        if((b = getNoPatternTrick()) != null || copyNulls) {
-            dest.setNoPatternTrick(b);
-        }
-        if((b = getText()) != null || copyNulls) {
-            dest.setText(b);
-        }
-        if((l = getServiceMaxValueRows()) != null || copyNulls) {
-            dest.setServiceMaxValueRows(l);
-        }
-        if((b = getThrowOnUnboundVariables()) != null || copyNulls) {
-            dest.setThrowOnUnboundVariables(b);
-        }
     }
 
     @Override

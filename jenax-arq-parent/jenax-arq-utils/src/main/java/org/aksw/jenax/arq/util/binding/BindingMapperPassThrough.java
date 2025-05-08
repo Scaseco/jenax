@@ -1,4 +1,4 @@
-package org.aksw.jenax.arq.aggregation;
+package org.aksw.jenax.arq.util.binding;
 
 import org.apache.jena.sparql.engine.binding.Binding;
 
