@@ -64,6 +64,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope> <!-- compile due to test container dependency on junit -->
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-resources-test-config</artifactId>
 			<scope>test</scope>
