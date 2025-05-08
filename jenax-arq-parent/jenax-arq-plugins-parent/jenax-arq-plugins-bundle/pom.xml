@@ -267,7 +267,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<scope>compile</scope> <!-- HACK because current test container version needs junit bundled. -->
 		</dependency>
 
 		<dependency>
