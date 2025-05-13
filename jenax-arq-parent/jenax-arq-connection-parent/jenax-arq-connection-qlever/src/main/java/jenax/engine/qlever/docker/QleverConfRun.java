@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class QleverConfRun
-    implements Serializable, QleverConfApi
+    implements Serializable, QleverConfig
 {
     private static final long serialVersionUID = 1L;
 

@@ -14,6 +14,7 @@ import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransformUpd
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransforms;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.expr.ExprTransform;
 
@@ -29,12 +30,31 @@ public class RDFLinkTransforms {
         return of(queryMod);
     }
 
+    public static class RDFLinkTransformAutoTxn
+        implements RDFLinkTransform
+    {
+        @Override
+        public RDFLink apply(RDFLink link) {
+            return RDFLinkUtils.wrapWithAutoTxn(link, link);
+        }
+    }
+
     public static RDFLinkTransform withAutoTxn() {
-        return link -> RDFLinkUtils.wrapWithAutoTxn(link, link);
+        // XXX Could make singleton
+        return new RDFLinkTransformAutoTxn();
+    }
+
+    public static class RDFLinkTransformWorkerThread
+        implements RDFLinkTransform
+    {
+        @Override
+        public RDFLink apply(RDFLink link) {
+            return RDFLinkWrapperWithWorkerThread.wrap(link);
+        }
     }
 
     public static RDFLinkTransform withWorkerThread() {
-        return RDFLinkWrapperWithWorkerThread::wrap;
+        return new RDFLinkTransformWorkerThread();
     }
 
     public static RDFLinkTransform of(SparqlStmtTransform stmtTransform) {

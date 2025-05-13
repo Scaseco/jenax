@@ -70,4 +70,10 @@ public class UpdateRequestTransformBuilder {
         uTransforms.clear();
         opTransformBuilder.reset();
     }
+
+    @Override
+    public String toString() {
+        return "UpdateRequestTransformBuilder [uTransforms=" + uTransforms + ", opTransformBuilder="
+                + opTransformBuilder + "]";
+    }
 }

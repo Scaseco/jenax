@@ -11,7 +11,7 @@ import org.apache.jena.atlas.lib.SetUtils;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.lang.ParserARQ;
+import org.apache.jena.sparql.lang.arq.ParserARQ;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;

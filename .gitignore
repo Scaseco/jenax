@@ -20,6 +20,8 @@ bin
 *.iml
 *.log
 
+# Fuseki run folder
+run
 
 pom.xml.releaseBackup
 pom.xml.versionsBackup

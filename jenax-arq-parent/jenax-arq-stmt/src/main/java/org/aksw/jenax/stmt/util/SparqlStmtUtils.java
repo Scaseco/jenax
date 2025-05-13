@@ -62,7 +62,6 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.syntax.Element;
@@ -283,7 +282,7 @@ public class SparqlStmtUtils {
 
 
     public static SparqlStmtIterator processFile(PrefixMapping pm, String filenameOrURI)
-            throws FileNotFoundException, IOException, ParseException {
+            throws FileNotFoundException, IOException {
 
         return processFile(pm, filenameOrURI, null);
     }
@@ -360,10 +359,9 @@ public class SparqlStmtUtils {
      * @return
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ParseException
      */
     public static SparqlStmtIterator processFile(PrefixMapping pm, String filenameOrURI, String baseIri)
-            throws FileNotFoundException, IOException, ParseException {
+            throws FileNotFoundException, IOException {
 
         InputStream in = openInputStream(filenameOrURI);
         if(in == null) {
@@ -397,7 +395,7 @@ public class SparqlStmtUtils {
      */
     @Deprecated
     public static SparqlStmtIterator processInputStream(PrefixMapping pm, String baseIri, InputStream in)
-            throws IOException, ParseException {
+            throws IOException {
 
 //		File file = new File(filename).getAbsoluteFile();
 //		if(!file.exists()) {

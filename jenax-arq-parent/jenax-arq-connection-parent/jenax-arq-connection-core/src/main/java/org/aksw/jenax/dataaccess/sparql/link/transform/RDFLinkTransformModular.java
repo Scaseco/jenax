@@ -61,5 +61,11 @@ public final class RDFLinkTransformModular
         RDFLink result = new RDFLinkModular(q, u, d);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "RDFLinkTransformModular [queryTransform=" + queryTransform + ", updateTransform=" + updateTransform
+                + ", datasetTransform=" + datasetTransform + "]";
+    }
 }
 

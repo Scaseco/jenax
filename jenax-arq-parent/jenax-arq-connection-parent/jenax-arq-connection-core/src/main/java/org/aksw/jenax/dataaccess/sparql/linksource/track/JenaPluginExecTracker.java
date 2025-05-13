@@ -30,6 +30,8 @@ public class JenaPluginExecTracker
 
     @Override
     public int level() {
-        return 1000000;
+        // Register the 'wrapper engine factories' late
+        // such that upon execution they are consulted early.
+        return 1_000_000;
     }
 }

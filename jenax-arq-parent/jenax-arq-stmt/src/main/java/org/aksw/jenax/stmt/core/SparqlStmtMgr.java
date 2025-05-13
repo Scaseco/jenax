@@ -36,7 +36,6 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
@@ -114,7 +113,6 @@ public class SparqlStmtMgr {
      * @return
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ParseException
      */
     public static Query loadQuery(String filenameOrURI) {
         return loadQuery(filenameOrURI, DefaultPrefixes.get());
@@ -138,7 +136,7 @@ public class SparqlStmtMgr {
 //		return result;
 //	}
 
-    public static List<Query> loadQueries(InputStream in, PrefixMapping pm) throws FileNotFoundException, IOException, ParseException {
+    public static List<Query> loadQueries(InputStream in, PrefixMapping pm) throws FileNotFoundException, IOException {
         List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processInputStream(pm, null, in))
                 .collect(Collectors.toList());
 
@@ -164,7 +162,7 @@ public class SparqlStmtMgr {
         return result;
     }
 
-    public static List<Query> loadQueries(String filenameOrURI, PrefixMapping pm) throws FileNotFoundException, IOException, ParseException {
+    public static List<Query> loadQueries(String filenameOrURI, PrefixMapping pm) throws FileNotFoundException, IOException {
         List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(pm, filenameOrURI))
                 .collect(Collectors.toList());
 
@@ -230,7 +228,7 @@ public class SparqlStmtMgr {
                 SparqlStmtUtils.process(conn, stmt2, null, new SPARQLResultSinkQuads(quadConsumer));
             }
 
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -312,13 +310,12 @@ public class SparqlStmtMgr {
      * @param baseIri
      * @param filenameOrStr
      * @return
-     * @throws ParseException
      * @throws IOException
      */
     public static Iterator<SparqlStmt> createIteratorSparqlStmts(
             String filenameOrStr,
             // PrefixMapping globalPrefixes,
-            SparqlStmtParser sparqlParser) throws ParseException, IOException {
+            SparqlStmtParser sparqlParser) throws IOException {
 
         // Check whether the argument is an inline sparql statement
         Iterator<SparqlStmt> it = null;
@@ -356,7 +353,7 @@ public class SparqlStmtMgr {
      * Load a query of which one variable acts as a placeholder as a function.
      * This method may be refactored to use a {@link ParameterizedSparqlString} as a base.
      */
-    public static Function<String, Query> loadTemplate(String fileOrURI, String templateArgName) throws FileNotFoundException, IOException, ParseException {
+    public static Function<String, Query> loadTemplate(String fileOrURI, String templateArgName) throws FileNotFoundException, IOException {
         Query templateQuery = SparqlStmtMgr.loadQuery(fileOrURI);
 
         Function<String, Query> result = value -> {

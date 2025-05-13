@@ -27,17 +27,16 @@ import org.aksw.jenax.sparql.rx.op.ResultSetMappers;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.apache.commons.lang3.StringEscapeUtils;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.Context;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -277,7 +276,6 @@ public class DatasetFlowOps {
      * @return
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ParseException
      */
     public static <T, X> FlowableTransformer<T, X> createMapperDataset(
             //PrefixMapping pm,

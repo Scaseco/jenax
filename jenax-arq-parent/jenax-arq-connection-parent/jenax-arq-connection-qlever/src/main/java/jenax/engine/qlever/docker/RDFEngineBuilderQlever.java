@@ -151,7 +151,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             String qleverImageName = getImageName();
             String qleverImageTag = getImageTag();
             // Integer hostPort = getPort();
-            QleverConfApi conf = getConfig();
+            QleverConfig conf = getConfig();
 
             String indexName = getIndexName();
             if (indexName == null) {
@@ -229,8 +229,8 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         return self();
     }
 
-    public QleverConfApi getConfig() {
-        return (QleverConfApi)map.get(CONFIG_KEY);
+    public QleverConfig getConfig() {
+        return (QleverConfig)map.get(CONFIG_KEY);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         try {
             logger.info("Setting attribute: " + key + " -> " + value);
             try {
-                QleverConfApi runConf = getConfig();
+                QleverConfig runConf = getConfig();
                 BeanUtils.setProperty(runConf, key, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 logger.error("Error:", e);

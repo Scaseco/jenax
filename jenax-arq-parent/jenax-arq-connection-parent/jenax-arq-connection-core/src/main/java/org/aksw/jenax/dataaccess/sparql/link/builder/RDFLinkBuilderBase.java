@@ -7,10 +7,18 @@ import org.apache.jena.rdflink.RDFLink;
 public abstract class RDFLinkBuilderBase<X extends RDFLinkBuilderBase<X>>
     implements RDFLinkBuilder<X>
 {
-    protected RDFLinkModularTransformBuilder linkTransformBuilder = new RDFLinkModularTransformBuilder();
+    protected RDFLinkModularTransformBuilder linkTransformBuilder = null;
+
+    protected RDFLinkModularTransformBuilder ensureLinkTransformBuilder() {
+        if (linkTransformBuilder == null) {
+            linkTransformBuilder = new RDFLinkModularTransformBuilder();
+        }
+        return linkTransformBuilder;
+    }
 
     @Override
     public X linkTransform(RDFLinkTransform linkTransform) {
+        ensureLinkTransformBuilder();
         linkTransformBuilder.add(linkTransform);
         return self();
     }
@@ -18,7 +26,7 @@ public abstract class RDFLinkBuilderBase<X extends RDFLinkBuilderBase<X>>
     @Override
     public RDFLink build() {
         RDFLink base = buildBaseLink();
-        RDFLinkTransform linkTransform = linkTransformBuilder.build();
+        RDFLinkTransform linkTransform = linkTransformBuilder == null ? null : linkTransformBuilder.build();
         RDFLink result = (linkTransform == null)
             ? base
             : linkTransform.apply(base);
@@ -26,4 +34,9 @@ public abstract class RDFLinkBuilderBase<X extends RDFLinkBuilderBase<X>>
     }
 
     public abstract RDFLink buildBaseLink();
+
+    @Override
+    public String toString() {
+        return "RDFLinkBuilderBase [linkTransformBuilder=" + linkTransformBuilder + "]";
+    }
 }

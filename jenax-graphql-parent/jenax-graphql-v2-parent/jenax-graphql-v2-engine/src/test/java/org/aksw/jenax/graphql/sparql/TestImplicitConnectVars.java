@@ -2,16 +2,14 @@ package org.aksw.jenax.graphql.sparql;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
-import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.Rename;
-import org.apache.jena.sparql.lang.ParserARQ;
+import org.apache.jena.sparql.lang.arq.ParserARQ;
 import org.apache.jena.sparql.syntax.Element;
 import org.junit.Assert;
 import org.junit.Test;

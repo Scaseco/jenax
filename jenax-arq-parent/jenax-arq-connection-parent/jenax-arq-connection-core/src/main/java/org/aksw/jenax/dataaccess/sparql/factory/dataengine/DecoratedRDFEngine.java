@@ -57,6 +57,11 @@ public class DecoratedRDFEngine<X extends RDFEngine>
             baseEngine.close();
         }
     }
+
+    @Override
+    public String toString() {
+        return "DecoratedRDFEngine [effectiveLinkSource=" + effectiveLinkSource + ", baseEngine=" + baseEngine + ", closeActions=" + closeActions + "]";
+    }
 }
 
 //@Override

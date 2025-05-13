@@ -105,7 +105,8 @@ public class RDFLinkSourceTransformBuilder {
         if (lastLink != null) {
             stream = Stream.concat(stream, Stream.of(lastLink));
         }
-        return TransformList.flattenOrNull(true, RDFLinkSourceTransformList::new, stream);
+        RDFLinkSourceTransform result = TransformList.flattenOrNull(true, RDFLinkSourceTransformList::new, stream);
+        return result;
     }
 }
 //public class RDFLinkSourceTransformBuilder

@@ -108,7 +108,6 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathParser;
 import org.apache.jena.sparql.util.ExprUtils;
@@ -615,7 +614,7 @@ public class OpExecutorDefault
                 List<Query> queries;
                 try {
                     queries = SparqlStmtMgr.loadQueries(in, DefaultPrefixes.get());
-                } catch (IOException | ParseException e) {
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
                 for(Query query : queries) {

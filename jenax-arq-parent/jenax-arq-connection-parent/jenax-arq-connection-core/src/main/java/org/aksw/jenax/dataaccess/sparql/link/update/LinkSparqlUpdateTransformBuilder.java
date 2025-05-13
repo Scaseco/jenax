@@ -86,4 +86,10 @@ public class LinkSparqlUpdateTransformBuilder {
         linkTransforms.clear();
         uTransformBuilder.reset();
     }
+
+    @Override
+    public String toString() {
+        return "LinkSparqlUpdateTransformBuilder [linkTransforms=" + linkTransforms + ", uTransformBuilder="
+                + uTransformBuilder + "]";
+    }
 }

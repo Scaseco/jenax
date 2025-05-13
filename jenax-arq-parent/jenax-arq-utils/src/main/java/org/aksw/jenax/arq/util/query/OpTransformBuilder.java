@@ -28,4 +28,9 @@ public class OpTransformBuilder {
     public void reset() {
         transforms.clear();
     }
+
+    @Override
+    public String toString() {
+        return "OpTransformBuilder [transforms=" + transforms + "]";
+    }
 }

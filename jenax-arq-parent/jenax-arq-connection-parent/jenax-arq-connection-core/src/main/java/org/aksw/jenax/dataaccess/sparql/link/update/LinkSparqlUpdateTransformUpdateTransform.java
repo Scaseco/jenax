@@ -31,4 +31,9 @@ public class LinkSparqlUpdateTransformUpdateTransform
     public LinkSparqlUpdate apply(LinkSparqlUpdate base) {
         return new LinkSparqlUpdateUpdateTransform(base, updateTransform, updateExecTransform);
     }
+
+    @Override
+    public String toString() {
+        return "LinkSparqlUpdateTransformUpdateTransform [updateTransform=" + updateTransform + ", updateExecTransform=" + updateExecTransform + "]";
+    }
 }

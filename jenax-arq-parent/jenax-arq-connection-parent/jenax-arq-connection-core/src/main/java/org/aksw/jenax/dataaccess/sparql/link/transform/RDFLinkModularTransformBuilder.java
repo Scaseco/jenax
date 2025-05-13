@@ -123,4 +123,10 @@ public class RDFLinkModularTransformBuilder {
         qBuilder.reset();
         uBuilder.reset();
     }
+
+    @Override
+    public String toString() {
+        return "RDFLinkModularTransformBuilder [linkTransforms=" + linkTransforms + ", qBuilder=" + qBuilder
+                + ", uBuilder=" + uBuilder + "]";
+    }
 }

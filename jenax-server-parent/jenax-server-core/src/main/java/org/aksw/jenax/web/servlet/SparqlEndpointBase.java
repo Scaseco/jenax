@@ -230,9 +230,14 @@ public abstract class SparqlEndpointBase {
     }
 
     public static QueryExecution exec(QueryExecutionFactory qef, SparqlStmtQuery stmt) {
-        QueryExecution result = stmt.isParsed()
-                ? qef.createQueryExecution(stmt.getQuery())
-                : qef.createQueryExecution(stmt.getOriginalString());
+        QueryExecution result;
+        if (stmt.isParsed()) {
+            Query query = stmt.getQuery();
+            result = qef.createQueryExecution(query);
+        } else {
+            String queryStr = stmt.getOriginalString();
+            result = qef.createQueryExecution(queryStr);
+        }
         return result;
     }
 

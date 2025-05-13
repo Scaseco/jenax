@@ -25,4 +25,9 @@ public class UpdateExecTransformBuilder {
     public void reset() {
         execTransforms.clear();
     }
+
+    @Override
+    public String toString() {
+        return "UpdateExecTransformBuilder [execTransforms=" + execTransforms + "]";
+    }
 }

@@ -24,4 +24,9 @@ public class QueryExecTransformBuilder {
     public void reset() {
         execTransforms.clear();
     }
+
+    @Override
+    public String toString() {
+        return "QueryExecTransformBuilder [execTransforms=" + execTransforms + "]";
+    }
 }

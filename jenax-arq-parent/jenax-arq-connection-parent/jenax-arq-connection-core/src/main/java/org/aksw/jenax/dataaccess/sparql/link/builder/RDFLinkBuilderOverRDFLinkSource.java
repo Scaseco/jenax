@@ -5,6 +5,9 @@ import java.util.Objects;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 import org.apache.jena.rdflink.RDFLink;
 
+/**
+ * Pseudo-RDFLinkBuilder that implements buildBaseLink over linkSource.newLink();
+ */
 public class RDFLinkBuilderOverRDFLinkSource<X extends RDFLinkBuilderOverRDFLinkSource<X>>
     extends RDFLinkBuilderBase<X>
 {
@@ -23,5 +26,10 @@ public class RDFLinkBuilderOverRDFLinkSource<X extends RDFLinkBuilderOverRDFLink
     public RDFLink buildBaseLink() {
         RDFLink result = linkSource.newLink();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RDFLinkBuilder [linkSource=" + linkSource + "]";
     }
 }

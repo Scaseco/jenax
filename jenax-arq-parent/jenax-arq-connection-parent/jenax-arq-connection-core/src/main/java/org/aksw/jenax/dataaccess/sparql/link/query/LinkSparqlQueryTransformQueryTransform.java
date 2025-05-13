@@ -29,4 +29,9 @@ public class LinkSparqlQueryTransformQueryTransform
     public LinkSparqlQuery apply(LinkSparqlQuery t) {
         return new LinkSparqlQueryQueryTransform(t, queryTransform, queryExecTransform);
     }
+
+    @Override
+    public String toString() {
+        return "LinkSparqlQueryTransformQueryTransform [queryTransform=" + queryTransform + ", queryExecTransform=" + queryExecTransform + "]";
+    }
 }

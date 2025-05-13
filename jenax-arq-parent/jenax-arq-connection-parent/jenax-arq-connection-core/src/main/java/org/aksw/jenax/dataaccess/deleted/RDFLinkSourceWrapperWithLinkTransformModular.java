@@ -4,7 +4,7 @@ import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.dataaccess.sparql.link.update.LinkSparqlUpdateTransform;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
-import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSourceWrapperOverNewLinkBase;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
@@ -13,7 +13,7 @@ import org.apache.jena.rdflink.RDFLinkModular;
 
 @Deprecated // Use RDFLinkSourceWrapperLinkTransform with a RDFLinkTransformModular
 public class RDFLinkSourceWrapperWithLinkTransformModular<X extends RDFLinkSource>
-    extends RDFLinkSourceWrapperBase<X>
+    extends RDFLinkSourceWrapperOverNewLinkBase<X>
 {
     protected LinkSparqlQueryTransform queryTransform;
     protected LinkSparqlUpdateTransform updateTransform;
@@ -28,7 +28,7 @@ public class RDFLinkSourceWrapperWithLinkTransformModular<X extends RDFLinkSourc
     }
 
     @Override
-    public RDFLink newLink() {
+    public RDFLink buildLink() {
         RDFLink base = super.newLink();
 
         RDFLinkModular mod = RDFLinkUtils.asModular(base);

@@ -9,13 +9,13 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 
-import jenax.engine.qlever.docker.QleverConfApi;
+import jenax.engine.qlever.docker.QleverConfig;
 
-public class QleverConfig
+public class QleverConfigRdf
     extends ResourceImpl
-    implements QleverConfApi
+    implements QleverConfig
 {
-    public QleverConfig(Node n, EnhGraph m) {
+    public QleverConfigRdf(Node n, EnhGraph m) {
         super(n, m);
     }
 
@@ -65,158 +65,131 @@ public class QleverConfig
 
     @Override
     public Integer getNumSimultaneousQueries() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.numSimultaneousQueries, Integer.class);
     }
 
     @Override
     public void setNumSimultaneousQueries(Integer numSimultaneousQueries) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.numSimultaneousQueries, numSimultaneousQueries);
     }
 
     @Override
     public String getMemoryMaxSize() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.memoryMaxSize, String.class);
     }
 
     @Override
     public void setMemoryMaxSize(String memoryMaxSize) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.memoryMaxSize, memoryMaxSize);
     }
 
     @Override
     public String getCacheMaxSize() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.cacheMaxSize, String.class);
     }
 
     @Override
     public void setCacheMaxSize(String cacheMaxSize) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.cacheMaxSize, cacheMaxSize);
     }
 
     @Override
     public String getCacheMaxSizeSingleEntry() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.cacheMaxSizeSingleEntry, String.class);
     }
 
     @Override
     public void setCacheMaxSizeSingleEntry(String cacheMaxSizeSingleEntry) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.cacheMaxSizeSingleEntry, cacheMaxSizeSingleEntry);
     }
 
     @Override
     public String getLazyResultMaxCacheSize() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.lazyResultMaxCacheSize, String.class);
     }
 
     @Override
     public void setLazyResultMaxCacheSize(String lazyResultMaxCacheSize) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.lazyResultMaxCacheSize, lazyResultMaxCacheSize);
     }
 
     @Override
     public Long getCacheMaxNumEntries() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.cacheMaxNumEntries, Long.class);
     }
 
     @Override
     public void setCacheMaxNumEntries(Long cacheMaxNumEntries) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.cacheMaxNumEntries, cacheMaxNumEntries);
     }
 
     @Override
     public Boolean getNoPatterns() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.noPatterns, Boolean.class);
     }
 
     @Override
     public void setNoPatterns(Boolean noPatterns) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.noPatterns, noPatterns);
     }
 
     @Override
     public Boolean getNoPatternTrick() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.noPatternTrick, Boolean.class);
     }
 
     @Override
     public void setNoPatternTrick(Boolean noPatternTrick) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.noPatternTrick, noPatternTrick);
     }
 
     @Override
     public Boolean getText() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.text, Boolean.class);
     }
 
     @Override
     public void setText(Boolean text) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.text, text);
     }
 
     @Override
     public Boolean getOnlyPsoAndPosPermutations() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.onlyPsoAndPosPermutations, Boolean.class);
     }
 
     @Override
     public void setOnlyPsoAndPosPermutations(Boolean onlyPsoAndPosPermutations) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.onlyPsoAndPosPermutations, onlyPsoAndPosPermutations);
     }
 
     @Override
     public String getDefaultQueryTimeout() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.defaultQueryTimeout, String.class);
     }
 
     @Override
     public void setDefaultQueryTimeout(String defaultQueryTimeout) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.defaultQueryTimeout, defaultQueryTimeout);
     }
 
     @Override
     public Long getServiceMaxValueRows() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.serviceMaxValueRows, Long.class);
     }
 
     @Override
     public void setServiceMaxValueRows(Long serviceMaxValueRows) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.serviceMaxValueRows, serviceMaxValueRows);
     }
 
     @Override
     public Boolean getThrowOnUnboundVariables() {
-        // TODO Auto-generated method stub
-        return null;
+        return ResourceUtils.getLiteralPropertyValue(this, QleverAssemblerVocab.throwOnUnboundVariables, Boolean.class);
     }
 
     @Override
     public void setThrowOnUnboundVariables(Boolean throwOnUnboundVariables) {
-        // TODO Auto-generated method stub
-
+        ResourceUtils.setLiteralProperty(this, QleverAssemblerVocab.throwOnUnboundVariables, throwOnUnboundVariables);
     }
-
 }

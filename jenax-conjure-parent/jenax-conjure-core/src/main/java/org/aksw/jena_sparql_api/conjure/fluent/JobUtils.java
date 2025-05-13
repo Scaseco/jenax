@@ -22,7 +22,6 @@ import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
-import com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -31,10 +30,10 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.graph.NodeTransform;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.vocabulary.RDF;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 
 public class JobUtils {
 
@@ -54,13 +53,13 @@ public class JobUtils {
         return job;
     }
 
-    
+
     /**
      * Create a job to derive a new dataset using a set of sparql construct statements.
      * (Update statements could be made part of the workflow but are not supported by this method yet)
-     * 
+     *
      * The OpVar placeholder for the input dataset is "ARG".
-     * 
+     *
      * @param stmts
      * @param optionalArgs
      * @param varToExpr
@@ -130,7 +129,7 @@ public class JobUtils {
         return result;
     }
 
-    public static Job fromSparqlFile(String path) throws FileNotFoundException, IOException, ParseException {
+    public static Job fromSparqlFile(String path) throws FileNotFoundException, IOException {
         // TODO Add API for Query objects to fluent
         List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(DefaultPrefixes.get(), path))
                 .collect(Collectors.toList());

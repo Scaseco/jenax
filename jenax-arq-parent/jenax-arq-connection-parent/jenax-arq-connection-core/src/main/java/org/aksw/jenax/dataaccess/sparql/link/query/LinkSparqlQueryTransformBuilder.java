@@ -95,4 +95,10 @@ public class LinkSparqlQueryTransformBuilder {
         qTransformBuilder.reset();
         qExecTransformBuilder.reset();
     }
+
+    @Override
+    public String toString() {
+        return "LinkSparqlQueryTransformBuilder [linkTransforms=" + linkTransforms + ", qTransformBuilder="
+                + qTransformBuilder + ", qExecTransformBuilder=" + qExecTransformBuilder + "]";
+    }
 }

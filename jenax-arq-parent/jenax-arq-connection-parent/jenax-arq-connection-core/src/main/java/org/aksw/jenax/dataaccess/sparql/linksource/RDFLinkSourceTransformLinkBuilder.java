@@ -26,4 +26,9 @@ public class RDFLinkSourceTransformLinkBuilder
             }
         };
     }
+
+    @Override
+    public String toString() {
+        return "RDFLinkSourceTransformLinkBuilder [transform=" + transform + "]";
+    }
 }

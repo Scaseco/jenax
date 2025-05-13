@@ -1,5 +1,6 @@
 package org.aksw.jenax.dataaccess.sparql.linksource;
 
+/** Usually you want {@link RDFLinkSourceWrapperOverNewLinkBase}. */
 public class RDFLinkSourceWrapperBase<X extends RDFLinkSource>
     implements RDFLinkSourceWrapper<X>
 {

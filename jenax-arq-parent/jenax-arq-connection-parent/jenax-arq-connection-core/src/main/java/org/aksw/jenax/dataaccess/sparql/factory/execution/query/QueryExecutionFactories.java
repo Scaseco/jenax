@@ -66,7 +66,8 @@ public class QueryExecutionFactories {
         @Override
         public QueryExecution createQueryExecution(Query query) {
             RDFConnection conn = dataSource.getConnection();
-            return new QueryExecutionWrapperBase<QueryExecution>(conn.query(query)) {
+            QueryExecution qe = conn.query(query);
+            return new QueryExecutionWrapperBase<QueryExecution>(qe) {
                 @Override
                 public void close() {
                     try {

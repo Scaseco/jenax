@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverRDFLinkSource;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.RDFLink;
@@ -39,7 +39,7 @@ public class RDFLinkSourceAdapter
 
     @Override
     public RDFLinkBuilder<?> newLinkBuilder() {
-        return new RDFLinkBuilderOverLinkSupplier<>(this::newLink);
+        return new RDFLinkBuilderOverRDFLinkSource<>(this);
     }
 
     @Override
@@ -73,5 +73,10 @@ public class RDFLinkSourceAdapter
             ? adapter.asLinkSource()
             : new RDFLinkSourceAdapter(dataSource);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RDFLinkSourceAdapter [delegate=" + delegate + "]";
     }
 }

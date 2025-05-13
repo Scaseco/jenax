@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.linksource;
 import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
-import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverLinkSupplier;
+import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilderOverRDFLinkSource;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.core.DatasetGraph;
 
@@ -28,12 +28,17 @@ public class RDFLinkSourceOverDatasetGraph
     }
 
     @Override
+    public RDFLinkBuilder<?> newLinkBuilder() {
+        return new RDFLinkBuilderOverRDFLinkSource<>(this);
+    }
+
+    @Override
     public RDFLink newLink() {
         return RDFLink.connect(datasetGraph);
     }
 
     @Override
-    public RDFLinkBuilder<?> newLinkBuilder() {
-        return new RDFLinkBuilderOverLinkSupplier<>(this::newLink);
+    public String toString() {
+        return "RDFLinkSourceOverDatasetGraph [datasetGraph=" + System.identityHashCode(datasetGraph) + "]";
     }
 }

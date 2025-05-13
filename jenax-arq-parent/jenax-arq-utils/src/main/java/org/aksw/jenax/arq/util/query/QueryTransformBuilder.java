@@ -59,4 +59,10 @@ public class QueryTransformBuilder {
         queryTransforms.clear();
         opTransformBuilder.reset();
     }
+
+    @Override
+    public String toString() {
+        return "QueryTransformBuilder [queryTransforms=" + queryTransforms + ", opTransformBuilder="
+                + opTransformBuilder + "]";
+    }
 }

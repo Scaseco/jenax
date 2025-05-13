@@ -1,6 +1,6 @@
 package jenax.engine.qlever.docker;
 
-public interface QleverConfApi {
+public interface QleverConfig {
 
     String getIndexBaseName();
 
@@ -66,7 +66,7 @@ public interface QleverConfApi {
 
     void setThrowOnUnboundVariables(Boolean throwOnUnboundVariables);
 
-    default void copyInto(QleverConfApi dest, boolean copyNulls) {
+    default void copyInto(QleverConfig dest, boolean copyNulls) {
         String str;
         Boolean b;
         Integer i;

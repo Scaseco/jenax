@@ -6,7 +6,7 @@ import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
 import org.apache.jena.rdflink.RDFLink;
 
 public class RDFLinkSourceWrapperWithLinkTransform<X extends RDFLinkSource>
-    extends RDFLinkSourceWrapperBase<X>
+    extends RDFLinkSourceWrapperOverNewLinkBase<X>
 {
     protected RDFLinkTransform linkTransform;
 
@@ -20,9 +20,14 @@ public class RDFLinkSourceWrapperWithLinkTransform<X extends RDFLinkSource>
     }
 
     @Override
-    public RDFLink newLink() {
-        RDFLink base = super.newLink();
+    public RDFLink buildLink() {
+        RDFLink base = getDelegate().newLink();
         RDFLink result = linkTransform.apply(base);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RDFLinkSourceWrapperWithLinkTransform [linkTransform=" + linkTransform + ", delegate=" + getDelegate() + "]";
     }
 }

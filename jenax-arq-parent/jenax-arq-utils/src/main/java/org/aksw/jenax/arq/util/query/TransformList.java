@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.query;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -70,5 +71,11 @@ public class TransformList<X, Y extends Function<X, X>>
             result = ctor.apply(List.of());
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toString(mods);
+        // return "TransformList [mods=" + mods + "]";
     }
 }

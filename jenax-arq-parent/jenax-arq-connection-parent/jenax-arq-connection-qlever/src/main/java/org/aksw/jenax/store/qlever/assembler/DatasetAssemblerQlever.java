@@ -24,7 +24,7 @@ public class DatasetAssemblerQlever
 {
     @Override
     protected DatasetGraph createDataset(Assembler a, Resource root) {
-        QleverConfig res = new QleverConfig(root.asNode(), (EnhGraph)root.getModel());
+        QleverConfigRdf res = new QleverConfigRdf(root.asNode(), (EnhGraph)root.getModel());
 
         QleverConfRun confRun = new QleverConfRun();
         res.copyInto(confRun, false);

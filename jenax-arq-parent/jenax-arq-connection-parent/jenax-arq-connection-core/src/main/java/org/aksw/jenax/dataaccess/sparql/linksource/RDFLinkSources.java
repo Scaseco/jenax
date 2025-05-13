@@ -173,11 +173,11 @@ public class RDFLinkSources {
     }
 
     public static RDFLinkSource wrapWithLogging(RDFLinkSource delegate) {
-        return new RDFLinkSourceWrapperBase<>(delegate) {
+        return new RDFLinkSourceWrapperOverNewLinkBase<>(delegate) {
             protected AtomicInteger counter = new AtomicInteger();
 
             @Override
-            public RDFLink newLink() {
+            public RDFLink buildLink() {
                 RDFLink base = super.newLink();
                 return RDFLinkUtils.wrapWithQueryTransform(base, null, qe ->
                     new QueryExecWrapperBase<QueryExec>(qe) {

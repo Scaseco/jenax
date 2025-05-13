@@ -91,7 +91,9 @@ public class RDFLinkSourceDecorator
         RDFLinkSource snapshot = snapshotLinkSource();
         RDFLinkSource linkSource = linkSourceTransform.apply(snapshot);
         RDFLinkBuilder<?> linkBuilder = linkSource.newLinkBuilder();
-        RDFLink link = linkBuilder.build();
+        try (RDFLink link = linkBuilder.build()) {
+            // Just try to create the link for validation
+        }
 
         // Coming here means success - add the transform
         linkSourceTransformBuilder.add(linkSourceTransform);
