@@ -3,6 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.linksource;
 import java.util.Objects;
 
 import org.aksw.jenax.dataaccess.sparql.link.builder.RDFLinkBuilder;
+import org.apache.jena.sparql.core.DatasetGraph;
 
 /**
  * FIXME Confusing design:
@@ -19,6 +20,11 @@ public class DecoratedRDFLinkSource<X extends RDFLinkSource>
     public DecoratedRDFLinkSource(X delegate, RDFLinkSource effectiveLinkSource) {
         super(delegate);
         this.effectiveLinkSource = Objects.requireNonNull(effectiveLinkSource);
+    }
+
+    @Override
+    public DatasetGraph getDatasetGraph() {
+        return effectiveLinkSource.getDatasetGraph();
     }
 
     @Override
