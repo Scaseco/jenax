@@ -17,12 +17,8 @@ public class UpdateEngineFactoryExecTracker
         boolean result = false;
         if (datasetGraph instanceof DatasetGraphWithExecTracker tracker) {
             DatasetGraph backend = tracker.getWrapped();
-            // Find factory for the unwrapped dataset but pass the wrapped one.
-            // Otherwise the update processor will create queries against the unwrapped one
-            //   which bypasses the exec tracker.
-            result = UpdateEngineRegistry
-                .findFactory(backend, context)
-                .accept(tracker, context);
+            UpdateEngineFactory f = UpdateEngineRegistry.findFactory(backend, context);
+            result = f.accept(backend, context);
         }
         return result;
     }
@@ -32,16 +28,16 @@ public class UpdateEngineFactoryExecTracker
         DatasetGraphWithExecTracker tracker = (DatasetGraphWithExecTracker)datasetGraph;
         ExecTracker execTracker = ExecTracker.requireTracker(tracker.getContext());
         DatasetGraph backend = tracker.getWrapped();
-        UpdateEngine base = UpdateEngineRegistry
-            .findFactory(backend, context)
-            .create(tracker, inputBinding, context);
+        UpdateEngineFactory f = UpdateEngineRegistry.findFactory(backend, context);
+        UpdateEngine base = f.create(backend, inputBinding, context);
 
         long[] idRef = {-1};
 
         UpdateEngine result = new UpdateEngineWrapperBase(base) {
             @Override
             public void startRequest() {
-                AtomicBoolean cancelSignal = Context.getCancelSignal(context);
+                // Make sure there is a cancel signal in the context.
+                AtomicBoolean cancelSignal = context == null ? null : Context.getOrSetCancelSignal(context);
                 Runnable cancelAction = (cancelSignal == null)
                     ? null
                     : () -> cancelSignal.set(true);

@@ -2,6 +2,7 @@ package org.aksw.jenax.dataaccess.sparql.execution.update;
 
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
+import org.apache.jena.update.UpdateRequest;
 
 public interface UpdateProcessorWrapper<T extends UpdateProcessor>
     extends UpdateProcessor
@@ -30,4 +31,14 @@ public interface UpdateProcessorWrapper<T extends UpdateProcessor>
     default void execute() {
         getDelegate().execute();
     }
+
+//    @Override
+//    default UpdateRequest getUpdateRequest() {
+//        return getDelegate().getUpdateRequest();
+//    }
+//
+//    @Override
+//    default String getUpdateRequestString() {
+//        return getDelegate().getUpdateRequestString();
+//    }
 }
