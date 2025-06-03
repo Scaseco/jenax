@@ -356,15 +356,20 @@ public class TransformExpandShorthands
         boolean changed = false;
         Directive filter = GraphQlUtils.expectAtMostOneDirective(directives, "filter");
         if (filter != null) {
-            String exprStr = GraphQlUtils.getArgAsString(filter, "if");
-            if (exprStr != null) {
+            String byExprStr = GraphQlUtils.getArgAsString(filter, "by");
+            String whenExprStr = GraphQlUtils.getArgAsString(filter, "when");
+            if (byExprStr != null) {
                 remainingDirectives.removeIf(x -> "filter".equals(x.getName()));
-                Expr expr = ExprUtils.parse(exprStr, pming);
+
+                Expr byExpr = ExprUtils.parse(byExprStr, pming);
+                Expr whenExpr = whenExprStr == null ? null : ExprUtils.parse(whenExprStr, pming);
                 Directive newFilter = filter.transform(builder -> {
                     builder.arguments(filter.getArguments().stream().map(arg -> {
-                        return "if".equals(arg.getName())
-                                ? Argument.newArgument("if", StringValue.of(ExprUtils.fmtSPARQL(expr))).build()
-                                : arg;
+                        return "by".equals(arg.getName())
+                                ? Argument.newArgument("by", StringValue.of(ExprUtils.fmtSPARQL(byExpr))).build()
+                                : "when".equals(arg.getName()) && whenExpr != null
+                                    ? Argument.newArgument("when", StringValue.of(ExprUtils.fmtSPARQL(whenExpr))).build()
+                                    : arg;
                     }).toList());
                 });
                 remainingDirectives.addFirst(newFilter);

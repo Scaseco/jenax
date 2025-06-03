@@ -73,7 +73,6 @@ import org.apache.jena.sparql.expr.E_Divide;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_Exists;
 import org.apache.jena.sparql.expr.E_Function;
-import org.apache.jena.sparql.expr.E_FunctionDynamic;
 import org.apache.jena.sparql.expr.E_GreaterThan;
 import org.apache.jena.sparql.expr.E_GreaterThanOrEqual;
 import org.apache.jena.sparql.expr.E_IRI;
@@ -208,7 +207,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(E_Exists.class, fallbackExprSerializer);
         kryo.register(E_Function.class, new E_FunctionSerializer<>(E_Function::new));
         // E_FunctionDynamic subclass of E_Call
-        kryo.register(E_FunctionDynamic.class, fallbackExprSerializer);
+        // kryo.register(E_FunctionDynamic.class, fallbackExprSerializer); // Removed with jena 5.5.0
         kryo.register(E_GreaterThan.class, new ExprFunction2Serializer<>(E_GreaterThan::new));
         kryo.register(E_GreaterThanOrEqual.class, new ExprFunction2Serializer<>(E_GreaterThanOrEqual::new));
         kryo.register(E_IRI.class, new E_IRISerializer<>(E_IRI::new));

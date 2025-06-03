@@ -4,7 +4,6 @@ import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProviderJava;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class TestGonJava
     extends TS_Gon<String, Object>
 {

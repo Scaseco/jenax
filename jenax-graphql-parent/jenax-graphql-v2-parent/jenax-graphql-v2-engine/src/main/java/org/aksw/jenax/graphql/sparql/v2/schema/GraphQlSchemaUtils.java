@@ -18,8 +18,6 @@ import graphql.language.NonNullType;
 import graphql.language.Type;
 import graphql.language.TypeName;
 import graphql.parser.Parser;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
 
 public class GraphQlSchemaUtils {
 
@@ -75,38 +73,57 @@ public class GraphQlSchemaUtils {
         }
     }
 
-    /** Load a sparql/graphql schema resource and merge it against the meta schema. */
-    public static Document loadSchema(String graphQlSchemaResource) throws IOException {
-        SchemaNavigator graphqlSchemaNavigator = null;
-        // String graphQlSchemaPrettyStr = null;
+    public static Document loadMetaSchema() throws IOException {
+        return loadDocument("jenax.meta.gqls");
+    }
+
+    public static Document loadDocument(String resource) throws IOException {
         StreamManager streamMgr = StreamManager.get();
         Parser parser = new Parser();
-        String metaSchemaRawStr = toStringUtf8(streamMgr, "jenax.meta.gqls");
+        String metaSchemaRawStr = toStringUtf8(streamMgr, resource);
         Document metaDoc = parser.parseDocument(metaSchemaRawStr);
+        return metaDoc;
+    }
 
-        String graphQlSchemaRawStr = toStringUtf8(streamMgr, graphQlSchemaResource);
-        Document schemaDoc = parser.parseDocument(graphQlSchemaRawStr);
+    public static Document merge(Document ...documents) {
+        List<Definition> mergedDefinitions = new ArrayList<>();
+        for (Document doc : documents) {
+            mergedDefinitions.addAll(doc.getDefinitions());
+        }
+        Document mergedDoc = Document.newDocument().definitions(mergedDefinitions).build();
+        return mergedDoc;
+    }
+
+    public static Document harmonize(Document doc) {
+        Document result = GraphQlUtils.applyTransform(doc, new TransformHarmonizeTentris());
+        return result;
+    }
+
+    /** Load a sparql/graphql schema resource and merge it against the meta schema. */
+    public static Document loadSchema(String graphQlSchemaResource) throws IOException {
+        Document metaDoc = loadMetaSchema();
+        Document schemaDoc = loadDocument(graphQlSchemaResource);
 
         List<Definition> mergedDefinitions = new ArrayList<>();
         mergedDefinitions.addAll(metaDoc.getDefinitions());
         mergedDefinitions.addAll(schemaDoc.getDefinitions());
 
         // Create a new merged document
-        Document mergedDoc = Document.newDocument().definitions(mergedDefinitions).build();
+        Document mergedDoc = merge(metaDoc, schemaDoc);
 
-        mergedDoc = GraphQlUtils.applyTransform(mergedDoc, new TransformHarmonizeTentris());
+        mergedDoc = harmonize(mergedDoc);
+        return mergedDoc;
+        // graphqlSchemaNavigator = SchemaNavigator.of(schema);
+        // return graphqlSchemaNavigator;
+
         // GraphQlUtils.println(System.out, schemaDoc);
         // graphQlSchemaPrettyStr = AstPrinter.printAst(mergedDoc);
 
         // System.out.println(schemaDoc); //GraphQlUtils.toString(schemaDoc));
         // System.out.println("========");
 
-//        SchemaParser schemaParser = new SchemaParser();
-//        TypeDefinitionRegistry schema = schemaParser.buildRegistry(mergedDoc);
-
-        return mergedDoc;
-        // graphqlSchemaNavigator = SchemaNavigator.of(schema);
-        // return graphqlSchemaNavigator;
+        // SchemaParser schemaParser = new SchemaParser();
+        // TypeDefinitionRegistry schema = schemaParser.buildRegistry(mergedDoc);
     }
 
     public static String toStringUtf8(StreamManager streamMgr, String resourceName) throws IOException {

@@ -1,5 +1,6 @@
 package org.aksw.jenax.graphql.sparql.v2.api2;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
+import org.apache.jena.sparql.syntax.PatternVars;
 
 public class Connective
     extends BasicConnectInfo
@@ -70,6 +72,13 @@ public class Connective
         return element instanceof ElementGroup g
             ? g.isEmpty() && connectVars != null && connectVars.isEmpty() && defaultTargetVars != null && defaultTargetVars.isEmpty()
             : false;
+    }
+
+    /** Visible vars + variables mentioned in the pattern. */
+    public Set<Var> getMentionedVars() {
+        Set<Var> result = new LinkedHashSet<>(visibleVars);
+        PatternVars.vars(result, element);
+        return result;
     }
 
     public static ConnectiveBuilder<?> newBuilder() {

@@ -252,10 +252,11 @@ public class XGraphQlUtils {
         ConditionDirective result = null;
         Directive directive = GraphQlUtils.expectAtMostOneDirective(directives, "filter");
         if (directive != null) {
-            String exprStr = GraphQlUtils.getArgAsString(directive, "if");
+            String whenExprStr = GraphQlUtils.getArgAsString(directive, "when");
+            String byExprStr = GraphQlUtils.getArgAsString(directive, "by");
             List<String> parentVarNames = GraphQlUtils.getArgAsStrings(directive, "parent");
             List<String> thisVarNames = GraphQlUtils.getArgAsStrings(directive, "this");
-            result = new ConditionDirective(exprStr, thisVarNames, parentVarNames);
+            result = new ConditionDirective(whenExprStr, byExprStr, thisVarNames, parentVarNames);
         }
         return result;
     }

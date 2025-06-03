@@ -1,6 +1,7 @@
 package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,6 @@ import org.aksw.jenax.graphql.sparql.v2.context.JoinDirective;
 import org.aksw.jenax.graphql.sparql.v2.model.ElementNode;
 import org.aksw.jenax.graphql.sparql.v2.model.XGraphQlConstants;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.Bind.BindingMapper;
-import org.aksw.jenax.graphql.sparql.v2.schema.Fragment;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
 import org.aksw.jenax.graphql.sparql.v2.util.ElementUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
@@ -44,15 +44,20 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.expr.nodevalue.XSDFuncOp;
 import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
+import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.vocabulary.RDF;
 
@@ -69,6 +74,7 @@ import graphql.language.NodeVisitorStub;
 import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.language.SelectionSet;
+import graphql.language.Value;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
 
@@ -276,9 +282,99 @@ public abstract class GraphQlToSparqlConverterBase<K>
 
         List<Var> connectVars = connective.getConnectVars();
 
+        /* Process @filter */
+
+        // TODO Allow for multiple conditions.
+        // TODO Allow positional references to argument values of the field - probably using ?_1 ... ?_n.
+
+        ConditionDirective condition = XGraphQlUtils.parseCondition(directives);
+        if (condition != null) {
+            // Pattern of @filter connects to the variables of _this_ node's pattern!
+            // ElementNode parentEltNode = context.getVarFromParents(ElementNode.class);
+
+            boolean applyFilter = true;
+
+            String whenExprStr = condition.whenExprStr();
+            Map<Var, org.apache.jena.graph.Node> argMap = new HashMap<>();
+            if (whenExprStr != null) {
+                Expr whenExpr = ExprUtils.parse(whenExprStr);
+                // When expressions can only refer to arguments.
+                Set<Var> whenExprVars = whenExpr.getVarsMentioned();
+                BindingBuilder bb = BindingFactory.builder();
+                for (Var v : whenExprVars) {
+                    String argName = v.getName();
+                    Argument arg = arguments.stream().filter(a -> a.getName().equals(argName)).findFirst().orElseThrow(() -> new RuntimeException("No such argument: " + argName));
+                    org.apache.jena.graph.Node n = GraphQlUtils.toNodeValue(arg.getValue()).asNode();
+                    bb.add(v, n);
+                    argMap.put(v, n);
+                }
+                Binding b = bb.build();
+                NodeValue nv = ExprLib.evalOrNull(whenExpr, b, null);
+                applyFilter = XSDFuncOp.booleanEffectiveValue(nv);
+            }
+
+            // TODO The @filter expr can originate from the schema in order to filter by the type's
+            //   associated pattern. This shouldn't end up here.
+            if (condition.byExprStr() == null) {
+                applyFilter = false;
+            }
+
+            if (applyFilter) {
+                Connective filterConnective = filterToConnective(connective.getConnectVars(), condition, argMap);
+                List<Var> filterVars = filterConnective.getConnectVars();
+                List<Var> patternVars = connective.getDefaultTargetVars();
+
+                // Is there anything to transform for filters??!!
+                // So filters affect the 'to' vars - this means that a var mapping thisVars->parentVars needs to be established.
+                // xconnective.a
+                if (patternVars.size() != filterVars.size()) {
+                    throw new RuntimeException("Filter variables do not connect to the pattern: filterVars: " + filterVars + " patternVars: " + patternVars);
+                }
+
+                // Map filter variables to the pattern.
+                // Prefix filter variables by the current path.
+                // VarUtils.createJoinVarMap(filterConnective.getVisibleVars(), connective.getVisibleVars(), filterVars, patternVars, VarGeneratorImpl2.create());
+                Map<Var, org.apache.jena.graph.Node> varMap = new HashMap<>();
+                for (Var v : filterConnective.getMentionedVars()) {
+                    String varName = v.getName();
+                    if (varName.matches("^[0-9]+$")) {
+                        int argIdx = Integer.parseInt(varName.substring(1));
+                        Argument arg = arguments.get(argIdx);
+                        Value value = arg.getValue();
+                        org.apache.jena.graph.Node n = GraphQlUtils.toNodeValue(value).asNode();
+                        varMap.put(v, n);
+
+                    } else {
+                        varMap.put(v, Var.alloc(stateId + "_" + v.getVarName()));
+                    }
+                }
+
+                for (int i = 0; i < filterVars.size(); ++i) {
+                    Var filterVar = filterVars.get(i);
+                    Var patternVar = patternVars.get(i);
+                    varMap.put(filterVar, patternVar);
+                }
+
+                Connective fConn = filterConnective.applyNodeTransform(new NodeTransformSubst(varMap));
+
+                Element a = connective.getElement();
+                Element b = fConn.getElement();
+                Element merged = ElementUtils.flatGroup(a, b);
+                connective = Connective.of(
+                    connective.getConnectVars(),
+                    connective.getDefaultTargetVars(),
+                    merged);
+
+                // So one question is: Is a filter always a leaf? Does a filter never introduce new variables that can be filtered again?
+                // I think the answer is yes.
+                // System.err.println("Got filter: " + connective);
+            }
+        }
+
+        /* Process @join */
+
         // Read the parentVars directive (connect(to: ['foo'])
         // List<Var> childVars = null;
-
 
         JoinDirective joinDirective = XGraphQlUtils.parseJoin(directives);
 
@@ -443,6 +539,8 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 isBindValue = true;
             }
         }
+
+        /* Further processing */
 
         if (isRoot) {
             RewriteResult<K> rewriteResult = context.getVarFromParents(RewriteResult.class);
@@ -673,60 +771,16 @@ public abstract class GraphQlToSparqlConverterBase<K>
         org.apache.jena.graph.Node globalIdNode = globalIdToSparql(stateId);
 
         ConditionDirective condition = XGraphQlUtils.parseCondition(node);
+
+        // FIXME Allow no condition.
+        Objects.requireNonNull(condition.byExprStr(), "@filter(if: 'required key absent')");
+
         ElementNode parentEltNode = context.getVarFromParents(ElementNode.class);
 
-        Expr expr = null;
-        Set<Var> exprVars = null;
-        List<Var> parentVars = null;
-        List<Var> thisVars = null;
-        Connective connective = null;
-        if (condition != null) {
-            expr = ExprUtils.parse(condition.exprStr());
-            exprVars = expr.getVarsMentioned();
-
-            List<String> parentVarNames = condition.parentVars();
-            if (parentVarNames != null) {
-                parentVars = Var.varList(parentVarNames);
-            }
-
-            List<String> thisVarNames = condition.thisVars();
-            if (thisVarNames != null) {
-                thisVars = Var.varList(thisVarNames);
-            }
-        }
-
-//            if (expr == null) {
-//            	expr = NodeValue.TRUE;
-//            }
-
-        if (parentVars == null) {
-            parentVars = parentEltNode.getConnective().getDefaultTargetVars();
-        }
-
-        if (exprVars != null) {
-            // TODO If there is more than one variable then the order must be given!
-            if (thisVars == null) {
-                if (exprVars.size() == 1) {
-                    thisVars = List.of(exprVars.iterator().next());
-                } else {
-                    throw new RuntimeException("@filter(this: [varlist]) must be given if an expression has more than 1 variable");
-                }
-            }
-        }
-
-        if (expr != null) {
-            connective = Connective.newBuilder()
-                    .element(new ElementFilter(expr))
-                    .connectVars(parentVars)
-                    .targetVars(thisVars)
-                    .build();
-        } else {
-             connective = Connective.newBuilder()
-                    .element(new ElementBind(Vars.z, new ExprVar(Vars.x)))
-                    .connectVars(Vars.x)
-                    .targetVars(Vars.z)
-                    .build();
-        }
+        // The filter of the inline fragment affects the connective's target vars.
+        Connective connective = filterToConnective(parentEltNode.getConnective().getDefaultTargetVars(), condition, null);
+        List<Var> parentVars = connective.getConnectVars();
+        List<Var> thisVars = connective.getDefaultTargetVars();
 
         ElementNode thisElementNode = ElementNode.of(connective);
         thisElementNode.setIdentifier(stateId);
@@ -752,6 +806,68 @@ public abstract class GraphQlToSparqlConverterBase<K>
             // AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> tmp = (AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node>)parentAggBuilder;
             tmp.addMember(aggStateBuilder);
         }
+    }
+
+    protected static Connective filterToConnective(List<Var> connectVars, ConditionDirective condition, Map<Var, org.apache.jena.graph.Node> binding) {
+        Expr byExpr = null;
+        Set<Var> byExprVars = null;
+        List<Var> parentVars = null;
+        List<Var> thisVars = null;
+        Connective connective = null;
+        if (condition != null) {
+            byExpr = ExprUtils.parse(condition.byExprStr());
+
+            if (binding != null && !binding.isEmpty()) {
+                byExpr = byExpr.applyNodeTransform(new NodeTransformSubst(binding));
+            }
+
+            byExprVars = byExpr.getVarsMentioned();
+
+            List<String> parentVarNames = condition.parentVars();
+            if (parentVarNames != null) {
+                parentVars = Var.varList(parentVarNames);
+            }
+
+            List<String> thisVarNames = condition.thisVars();
+            if (thisVarNames != null) {
+                thisVars = Var.varList(thisVarNames);
+            }
+        }
+
+//            if (expr == null) {
+//            	expr = NodeValue.TRUE;
+//            }
+
+        if (parentVars == null) {
+            parentVars = connectVars; // parentEltNode.getConnective().getDefaultTargetVars();
+        }
+
+        if (byExprVars != null) {
+            // TODO If there is more than one variable then the order must be given!
+            if (thisVars == null) {
+                if (byExprVars.size() == 1) {
+                    thisVars = List.of(byExprVars.iterator().next());
+                } else {
+                    throw new RuntimeException("@filter(this: [varlist]) must be given if an expression has more than 1 variable");
+                }
+            }
+        }
+
+        if (byExpr != null) {
+            connective = Connective.newBuilder()
+                    .element(new ElementFilter(byExpr))
+                    .connectVars(parentVars)
+                    .targetVars(thisVars)
+                    .build();
+        } else {
+             connective = Connective.newBuilder()
+                    .element(new ElementBind(Vars.z, new ExprVar(Vars.x)))
+                    .connectVars(Vars.x)
+                    .targetVars(Vars.z)
+                    .build();
+        }
+
+        return connective;
     }
 
     /* At each field (node?) there is the result aggregator builder and for inner nodes also the aggregator builder for the transition.

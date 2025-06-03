@@ -48,7 +48,6 @@ public class TestSparqlGraphQlSchema {
         System.out.println(schemaDoc); //GraphQlUtils.toString(schemaDoc));
         System.out.println("========");
 
-
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry schema = schemaParser.buildRegistry(schemaDoc);
 
@@ -110,14 +109,10 @@ public class TestSparqlGraphQlSchema {
 
         // Assert.assertEquals(expected, actual);
 
-
-
         // Basic Idea:
         // In the graphql to sparql converter use the schema annotations as a base
         // The main question is: Do annotations on the field override or extend schema annotations?
         // Probably we can have some flag like @override - but I suppose override is the default.
         // I mean: if the field is defined in the schema then why would one override it?
-
-
     }
 }

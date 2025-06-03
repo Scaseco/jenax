@@ -68,7 +68,7 @@ public class FMod_GraphQl implements FusekiAutoModule {
         return cxt == null ? null : cxt.get(SYM_GRAPHQL_SCHEMA_NAVIGATOR);
     }
 
-    private Operation graphQlQueryOperation = null;
+    public static Operation graphQlQueryOperation = Operation.alloc(OP_NAME, "graphql", "GraphQL query service");
 
     private static byte[] jsBundleBytes = null;
 
@@ -96,8 +96,6 @@ public class FMod_GraphQl implements FusekiAutoModule {
     @Override
     public void start() {
         Fuseki.configLog.info(name() + ": Add GraphQL operation into global registry.");
-        graphQlQueryOperation = Operation.alloc(OP_NAME, "graphql",
-                "GraphQL query service");
     }
 
     @Override
@@ -113,13 +111,14 @@ public class FMod_GraphQl implements FusekiAutoModule {
     @Override
     public void configured(FusekiServer.Builder builder, DataAccessPointRegistry dapRegistry, Model configModel) {
         // FusekiAutoModule.super.configured(builder, dapRegistry, configModel);
+
         List<DataAccessPoint> daps = dapRegistry.accessPoints();
         for (DataAccessPoint dap : daps) {
             configDataAccessPoint(builder, dap, configModel);
         }
 
-        boolean registerForQueryEndpoints = true;
-        if (registerForQueryEndpoints) {
+        boolean autoRegisterGraphQlEndpointsForQueryEndpoints = false;
+        if (autoRegisterGraphQlEndpointsForQueryEndpoints) {
             registerGraphQlEndpointsForSparqlQueryEndpoints(builder, dapRegistry);
         }
     }
@@ -181,9 +180,12 @@ public class FMod_GraphQl implements FusekiAutoModule {
 
     public void configDataAccessPoint(FusekiServer.Builder builder, DataAccessPoint dap, Model configModel) {
         FusekiAutoModule.super.configDataAccessPoint(dap, configModel);
-        List<Endpoint> endpoints = Optional.ofNullable(dap.getDataService().getEndpoints(graphQlQueryOperation)).orElse(List.of());
+        DataService dataService = dap.getDataService();
+
+        List<Endpoint> endpoints = Optional.ofNullable(dataService.getEndpoints(graphQlQueryOperation)).orElse(List.of());
         for (Endpoint endpoint : endpoints) {
             processGraphQlSchema(builder, dap, endpoint);
+
         }
         String name = dap.getName();
         registerJsServlet(builder, name);
@@ -193,30 +195,31 @@ public class FMod_GraphQl implements FusekiAutoModule {
     public static void processGraphQlSchema(FusekiServer.Builder builder, DataAccessPoint dap, Endpoint endpoint) {
         Context cxt = endpoint.getContext();
         String graphQlSchemaFile = getGraphQlSchemaFile(cxt);
-        if (graphQlSchemaFile != null) {
-            TypeDefinitionRegistry graphQlSchema;
-            byte[] graphQlSchemaDocBytes;
-            try {
-                Document graphQlSchemaDoc = GraphQlSchemaUtils.loadSchema(graphQlSchemaFile);
-                SchemaParser schemaParser = new SchemaParser();
-                graphQlSchema = schemaParser.buildRegistry(graphQlSchemaDoc);
-                String graphQlSchemaPrettyStr = AstPrinter.printAst(graphQlSchemaDoc);
+        TypeDefinitionRegistry graphQlSchema;
+        byte[] graphQlSchemaDocBytes;
+        try {
+            Document graphQlSchemaDoc = graphQlSchemaFile == null
+                ? GraphQlSchemaUtils.loadMetaSchema()
+                : GraphQlSchemaUtils.loadSchema(graphQlSchemaFile);
 
-                graphQlSchemaDocBytes = graphQlSchemaPrettyStr.getBytes();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            SchemaParser schemaParser = new SchemaParser();
+            graphQlSchema = schemaParser.buildRegistry(graphQlSchemaDoc);
+            String graphQlSchemaPrettyStr = AstPrinter.printAst(graphQlSchemaDoc);
 
-            String dapName = dap.getName();
-            // String baseName = endpoint.getName();
-            // String prefix = baseName.isBlank() ? "" : baseName + "-";
-            // prefix = "/";
-            String servletName = dapName + "/schema.graphql";
-
-            builder.addServlet(servletName, new HttpServletStaticPayload("application/graphql", graphQlSchemaDocBytes));
-            SchemaNavigator graphqlSchemaNavigator = SchemaNavigator.of(graphQlSchema);
-            setGraphQlSchemaNavigator(cxt, graphqlSchemaNavigator);
+            graphQlSchemaDocBytes = graphQlSchemaPrettyStr.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+        String dapName = dap.getName();
+        // String baseName = endpoint.getName();
+        // String prefix = baseName.isBlank() ? "" : baseName + "-";
+        // prefix = "/";
+        String servletName = dapName + "/schema.graphql";
+
+        builder.addServlet(servletName, new HttpServletStaticPayload("application/graphql", graphQlSchemaDocBytes));
+        SchemaNavigator graphqlSchemaNavigator = SchemaNavigator.of(graphQlSchema);
+        setGraphQlSchemaNavigator(cxt, graphqlSchemaNavigator);
     }
 
     @Override

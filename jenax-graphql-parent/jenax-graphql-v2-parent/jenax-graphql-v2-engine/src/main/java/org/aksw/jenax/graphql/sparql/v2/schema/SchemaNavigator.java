@@ -47,7 +47,7 @@ public class SchemaNavigator {
 
     public SchemaNode getOrCreateSchemaNode(String typeName) {
         TypeDefinition<?> typeDefinition = schema.getType(typeName)
-                .orElseThrow(() -> new RuntimeException("No type: " + typeName));
+            .orElseThrow(() -> new RuntimeException("No type: " + typeName));
 
         SchemaNode result;
         if (typeDefinition instanceof ObjectTypeDefinition otd) {

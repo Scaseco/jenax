@@ -7,7 +7,6 @@ import org.apache.jena.riot.system.PrefixMap;
 
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;
-import graphql.language.NamedNode;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
 import graphql.language.StringValue;
