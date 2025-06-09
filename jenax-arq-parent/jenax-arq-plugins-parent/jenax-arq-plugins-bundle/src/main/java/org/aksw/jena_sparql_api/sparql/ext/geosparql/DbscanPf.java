@@ -20,6 +20,8 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.UnitsConversionException;
 import org.apache.jena.geosparql.implementation.vocabulary.Geo;
+import org.apache.jena.geosparql.spatial.SpatialIndexException;
+import org.apache.jena.geosparql.spatial.index.v2.SpatialIndexLib;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -164,12 +166,11 @@ public class DbscanPf
         Dataset index = DatasetFactory.wrap(DatasetGraphFactory.wrap(indexGraph));
         sw.reset().start();
 
-        logger.warn("Ad hoc spatial index construction temporarily disabled due to conflicting jena PRs - 2025-04-22");
-//        try {
-//            SpatialIndex.buildSpatialIndex(index);
-//        } catch (SpatialIndexException e1) {
-//            throw new RuntimeException(e1);
-//        }
+        try {
+            SpatialIndexLib.buildSpatialIndex(index.asDatasetGraph());
+        } catch (SpatialIndexException e1) {
+            throw new RuntimeException(e1);
+        }
 
         logger.info(String.format("Built spatial index from %d items in %.3f seconds",
                 clusterables.size(), sw.elapsed(TimeUnit.MILLISECONDS) * 0.001));

@@ -23,13 +23,12 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RelationletTest {
 
     @Test
-    @Ignore
+    // @Ignore
     public void testJoins() {
         RelationletJoinerImpl<Relationlet> joiner = new RelationletJoinerImpl<>();
 
