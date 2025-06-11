@@ -1,4 +1,4 @@
-package org.apache.jena.fuseki.mod.graphql;
+package org.aksw.jenax.fuseki.mod.graphql;
 
 import java.io.IOException;
 import java.io.InputStream;

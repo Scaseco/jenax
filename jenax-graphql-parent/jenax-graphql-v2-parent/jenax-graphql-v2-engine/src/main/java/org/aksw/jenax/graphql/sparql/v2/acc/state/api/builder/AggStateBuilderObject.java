@@ -8,6 +8,17 @@ public class AggStateBuilderObject<I, E, K, V>
     extends AggStateBuilderObjectLikeBase<I, E, K, V>
     implements AggStateBuilderNode<I, E, K, V>
 {
+    protected boolean isArray;
+
+    public AggStateBuilderObject(boolean isArray) {
+        super();
+        this.isArray = isArray;
+    }
+
+    public boolean isArray() {
+        return isArray;
+    }
+
     @Override
     public GonType getGonType() {
         return GonType.OBJECT;
@@ -21,7 +32,7 @@ public class AggStateBuilderObject<I, E, K, V>
     @Override
     public AggStateObject<I, E, K, V> newAggregator() {
         AggStateTransition<I, E, K, V>[] subAggs = buildSubAggs();
-        AggStateObject<I, E, K, V> result = AggStateObject.of(subAggs);
+        AggStateObject<I, E, K, V> result = AggStateObject.of(isArray, subAggs);
         return result;
     }
 }

@@ -104,6 +104,7 @@ public class GraphQlProcessor<K> {
         if (logger.isDebugEnabled()) {
             logger.debug("Preprocessing GraphQl document: " + AstPrinter.printAst(preprocessedDoc));
         }
+        System.err.println("Preprocessing GraphQl document: " + AstPrinter.printAst(preprocessedDoc));
 
         boolean globalOrderBy = GraphQlUtils.hasQueryDirective(preprocessedDoc, "ordered");
 

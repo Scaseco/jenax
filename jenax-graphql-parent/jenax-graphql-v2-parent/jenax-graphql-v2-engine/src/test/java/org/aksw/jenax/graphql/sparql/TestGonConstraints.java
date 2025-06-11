@@ -7,6 +7,9 @@ import org.junit.Test;
 public class TestGonConstraints {
     @Test
     public void test() {
+        // An array can be seen as both a non-object and a node-type.
+        // Assert.assertTrue(GonCategory.NODE_TYPE.getMembers().contains(GonType.ARRAY.getRawType()));
+
         Assert.assertTrue(GonType.ARRAY.isValidChildOf(GonType.ARRAY));
         Assert.assertTrue(GonType.ARRAY.isValidChildOf(GonType.ENTRY));
         Assert.assertFalse(GonType.ARRAY.isValidChildOf(GonType.LITERAL));

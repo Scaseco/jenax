@@ -7,12 +7,15 @@ import java.util.Objects;
 
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccJsonErrorHandler;
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccStateGon;
+import org.aksw.jenax.graphql.sparql.v2.gon.meta.GonType;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProvider;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 
 public class AccStateProperty<I, E, K, V>
     extends AccStatePropertyBase<I, E, K, V>
 {
+    protected ArrayMode arrayMode;
+
     // protected Node currentTarget = null;
     // protected AccStateTypeProduceNode<I, E, K, V> targetAcc;
     protected AccStateGon<I, E, K, V> targetAcc;
@@ -26,9 +29,21 @@ public class AccStateProperty<I, E, K, V>
 
     // public AccJsonProperty(TupleBridge3<Binding, Node> tripleAccessor, P_Path0 jsonKey, Node matchFieldId, boolean isForward, AccJsonNode targetAcc, boolean isSingle) {
     // public AccStateProperty(Object matchStateId, K memberKey, AccStateTypeProduceNode<I, E, K, V> targetAcc, boolean isSingle) {
-    public AccStateProperty(Object matchStateId, K memberKey, AccStateGon<I, E, K, V> targetAcc, boolean isSingle) {
+    public AccStateProperty(Object matchStateId, K memberKey, AccStateGon<I, E, K, V> targetAcc, boolean isSingle, ArrayMode arrayMode) {
         super(matchStateId, memberKey, isSingle);
         this.targetAcc = targetAcc;
+        this.arrayMode = Objects.requireNonNull(arrayMode);
+    }
+
+    @Override
+    public GonType getGonType() {
+        GonType result = switch (arrayMode) {
+        case OFF -> GonType.ENTRY;
+        case FLAT -> GonType.LITERAL;
+        case NESTED -> GonType.ARRAY;
+        default -> throw new IllegalStateException("Should not happen");
+        };
+        return result;
     }
 
 //    @Override
@@ -64,9 +79,13 @@ public class AccStateProperty<I, E, K, V>
 
             if (context.isSerialize()) {
                 ObjectNotationWriter<K, V> writer = context.getJsonWriter();
-                writer.name(memberKey);
+                if (ArrayMode.OFF.equals(arrayMode)) {
+                    writer.name(memberKey);
+                }
                 if (!isSingle) {
-                    writer.beginArray();
+                    if (!ArrayMode.FLAT.equals(arrayMode)) {
+                        writer.beginArray();
+                    }
                 }
             }
         }
@@ -130,7 +149,9 @@ public class AccStateProperty<I, E, K, V>
             if (context.isSerialize()) {
                 ObjectNotationWriter<K, V> jsonWriter = context.getJsonWriter();
                 if (!isSingle) {
-                    jsonWriter.endArray();
+                    if (!ArrayMode.FLAT.equals(arrayMode)) {
+                        jsonWriter.endArray();
+                    }
                 } else if (seenTargetCount == 0) {
                     jsonWriter.nullValue();
                 }

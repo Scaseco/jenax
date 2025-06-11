@@ -15,7 +15,12 @@ const sendBtn = document.getElementById('sendBtn');
 const abortBtn = document.getElementById('abortBtn');
 const sparqlBtn = document.getElementById('sparqlBtn');
 
-const endpoint = document.location.href
+const graphQlEndpoint = document.location.href;
+const apiEndpoint = graphQlEndpoint;
+
+var config = null;
+// var sparqlQueryEndpoint = null;
+
 const saveKey = "savedRequest";
 
 const queryParamName = "qtxt";
@@ -44,9 +49,27 @@ function setDebugContent(content, isSparql) {
   if (isSparql) {
     sparqlBtn.disabled = false;
     sparqlBtn.onclick = function() {
-      const params = new URLSearchParams();
-      params.set('query', content);
-      window.open('sparql#' + params.toString(), '_blank');
+      if (config != null && config.sparqlQueryViewer != null) {
+        let subst = config.sparqlQueryViewer;
+
+        const encodedContent = encodeURIComponent(content);
+        subst = subst.replace("{ENCODED_SPARQL_QUERY}", encodedContent);
+
+        const endpointUrlBase = config.sparqlQueryEndpoint;
+        let encodedEndpointUrlStr = '';
+        if (endpointUrlBase != null) {
+          const endpointUrl = new URL(endpointUrlBase, graphQlEndpoint);
+          const endpointUrlStr = endpointUrl.toString();
+          encodedEndpointUrlStr = encodeURIComponent(endpointUrlStr);
+        }
+        subst = subst.replace("{ENCODED_SPARQL_QUERY_ENDPOINT}", encodedEndpointUrlStr);
+
+        const url = new URL(subst, graphQlEndpoint);
+        const urlStr = url.toString();
+        window.open(urlStr, '_blank');
+      } else {
+    alert("No URL of a SPARQL query viewer has configured.");
+    }
       return !1;
     };
     debug.value = content;
@@ -126,7 +149,7 @@ function toBashString(str) {
 
 function showCurl() {
   const payloadStr = buildRequest();
-  setOutputContent(`curl -X POST '${toBashString(endpoint)}' -d '${toBashString(payloadStr)}'`, null);
+  setOutputContent(`curl -X POST '${toBashString(graphQlEndpoint)}' -d '${toBashString(payloadStr)}'`, null);
   setDebugContent('', false);
 }
 
@@ -220,7 +243,7 @@ function sendRequest() {
       }
     }
   }
-  xhr.open("POST", endpoint);
+  xhr.open("POST", graphQlEndpoint);
   xhr.send(payloadStr);
   pendingXhr = xhr;
 }
@@ -250,4 +273,30 @@ const graphQlSchemaUrl = "schema.graphql";
 if (graphQlSchemaUrl) {
   fetchAndSetSchema(editorView, graphQlSchemaUrl);
 }
+
+async function fetchJson(url, params) {
+  try {
+    const response = await fetch(url, params);
+    if (response.status != 200) {
+      const text = await response.text();
+      throw new Error("HTTP Error: " + text);
+    }
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    alert(`Error: ${error.message}`);
+  }
+}
+
+/** Retrieve the config. Especially the URL of the SPARQL query endpoint. */
+async function fetchConfig() {
+  const result = fetchJson(apiEndpoint + "?command=config", {})
+  return result;
+}
+
+async function initialize() {
+  config = await fetchConfig();
+}
+
+await initialize();
 

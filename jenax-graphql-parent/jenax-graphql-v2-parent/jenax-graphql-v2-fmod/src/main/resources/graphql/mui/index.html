@@ -65,6 +65,8 @@ button {
   const abortBtn = document.getElementById('abortBtn');
 
   const endpoint = document.location.href
+  const sparqlQueryEndpoint = null; // Initialized via request to ?command=status
+
   const saveKey = "savedRequest";
 
   const queryParamName = "qtxt";
@@ -211,6 +213,39 @@ button {
     xhr.send(payloadStr);
     pendingXhr = xhr;
   }
+
+  /** Retrieve the config. Especially the URL of the SPARQL query endpoint. */
+  async function fetchConfig() {
+    const result = fetchJson({ "command": "config" }, { "method": "POST", "body": params });
+    return result;
+  }
+
+  async function fetchJson(searchParams, httpParams) {
+    const params = new URLSearchParams(searchParams);
+    try {
+      const response = await fetch(apiEndpoint, httpParams)
+      if (response.status != 200) {
+        const text = await response.text();
+        throw new Error("HTTP Error: " + text);
+      }
+      const json = await response.json();
+      return json;
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  }
+
+  async function initialize() {
+    status = await fetchConfig();
+
+    // updateStatus();
+    // const graphs = await fetchGraphs();
+    // renderGraphs(graphs);
+    // updateApplyButtonLabel();
+  }
+
+  initialize();
+
 </script>
 </body>
 </html>

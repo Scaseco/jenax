@@ -30,6 +30,7 @@ public class AccStateObject<I, E, K, V>
 {
     //protected BiFunction<I, E, ?> inputToObjectId;
     protected Object value;
+    protected boolean isArray;
 
     /** Should not be used directly; use a builder. */
 //    public AccStateObject() {
@@ -37,8 +38,9 @@ public class AccStateObject<I, E, K, V>
 //    }
 
     // BiFunction<I, E, ?> inputToObjectId,
-    protected AccStateObject(Map<Object, Integer> fieldIdToIndex, AccStateTypeTransition<I, E, K, V>[] edgeAccs) {
+    protected AccStateObject(Map<Object, Integer> fieldIdToIndex, AccStateTypeTransition<I, E, K, V>[] edgeAccs, boolean isArray) {
         super(fieldIdToIndex, edgeAccs);
+        this.isArray = isArray;
     }
 
 //    @Override
@@ -53,8 +55,8 @@ public class AccStateObject<I, E, K, V>
 //    }
 
     /** Create a new instance and set it as the parent on all the property accumulators */
-    public static <I, E, K, V> AccStateObject<I, E, K, V> of(Map<Object, Integer> stateIdToIndex, AccStateTypeTransition<I, E, K, V>[] edgeAccs) {
-        AccStateObject<I, E, K, V> result = new AccStateObject<>(stateIdToIndex, edgeAccs);
+    public static <I, E, K, V> AccStateObject<I, E, K, V> of(boolean isArray, Map<Object, Integer> stateIdToIndex, AccStateTypeTransition<I, E, K, V>[] edgeAccs) {
+        AccStateObject<I, E, K, V> result = new AccStateObject<>(stateIdToIndex, edgeAccs, isArray);
         for (AccStateTypeTransition<I, E, K, V> acc : edgeAccs) {
             acc.setParent(result);
         }
@@ -75,7 +77,12 @@ public class AccStateObject<I, E, K, V>
             }
 
             if (context.isSerialize()) {
-                context.getJsonWriter().beginObject();
+                if (!isArray) {
+                    context.getJsonWriter().beginObject();
+                } else {
+                    // The array wrapping is created by the referencing property.
+                    // context.getJsonWriter().beginArray();
+                }
             }
         }
     }
@@ -99,7 +106,11 @@ public class AccStateObject<I, E, K, V>
             }
 
             if (context.isSerialize()) {
-                context.getJsonWriter().endObject();
+                if (!isArray) {
+                    context.getJsonWriter().endObject();
+                } else {
+                    // context.getJsonWriter().endArray();
+                }
             }
         }
 

@@ -3,7 +3,7 @@ package org.aksw.jenax.graphql.sparql.v2.acc.state.api.impl;
 public abstract class AccStatePropertyBase<I, E, K, V>
     extends AccStateTransitionBase<I, E, K, V>
 {
-    /** The member key being aggregated */
+    /** The member key (=name) being aggregated */
     protected K memberKey;
     protected boolean isSingle = false;
 

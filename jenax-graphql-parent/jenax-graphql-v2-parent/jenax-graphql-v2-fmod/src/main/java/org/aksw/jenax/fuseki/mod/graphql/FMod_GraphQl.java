@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.jena.fuseki.mod.graphql;
+package org.aksw.jenax.fuseki.mod.graphql;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,10 +54,20 @@ public class FMod_GraphQl implements FusekiAutoModule {
     public static final Symbol SYM_GRAPHQL_SCHEMA_NAVIGATOR = Symbol.create(NS + "graphQlSchemaNavigator");
     public static final Symbol SYM_GRAPHQL_SCHEMA = Symbol.create(NS + "schemaFile");
 
-    // Symbol.create("http://jena.apache.org/spatial#index");
+    /** A symbol for the graphql endpoint context with an URL for where to find the underlying SPARQL endpoint. */
+    public static final Symbol SYM_GRAPHQL_SPARQL_QUERY_ENDPOINT_URL = Symbol.create(NS + "sparqlQueryEndpoint");
+    public static final Symbol SYM_GRAPHQL_SPARQL_QUERY_VIEWER_URL = Symbol.create(NS + "sparqlQueryViewer");
 
     public static String getGraphQlSchemaFile(Context cxt) {
         return cxt == null ? null : cxt.getAsString(SYM_GRAPHQL_SCHEMA);
+    }
+
+    public static String getGraphQlSparqlQueryViewerUrl(Context cxt) {
+        return cxt == null ? null : cxt.getAsString(SYM_GRAPHQL_SPARQL_QUERY_VIEWER_URL);
+    }
+
+    public static String getGraphQlSparqlQueryEndpointUrl(Context cxt) {
+        return cxt == null ? null : cxt.getAsString(SYM_GRAPHQL_SPARQL_QUERY_ENDPOINT_URL);
     }
 
     public static void setGraphQlSchemaNavigator(Context cxt, SchemaNavigator schemaNavigator) {
@@ -167,10 +177,10 @@ public class FMod_GraphQl implements FusekiAutoModule {
     }
 
     protected void registerJsServlet(FusekiServer.Builder builder, String name) {
-        byte[] jsBundleBytes = loadJsBundle();
+        // byte[] jsBundleBytes = loadJsBundle();
         String resServletName = name + "/graphql.bundle.js";
         Fuseki.configLog.info(name() + ": Registering " + resServletName);
-        builder.addServlet(resServletName, new HttpServletStaticPayload("text/javascript", jsBundleBytes));
+        builder.addServlet(resServletName, HttpServletOverResource.ofNamedResource("text/javascript", "static/graphql/mui/graphql.bundle.js"));
     }
 
     @Override
@@ -217,7 +227,7 @@ public class FMod_GraphQl implements FusekiAutoModule {
         // prefix = "/";
         String servletName = dapName + "/schema.graphql";
 
-        builder.addServlet(servletName, new HttpServletStaticPayload("application/graphql", graphQlSchemaDocBytes));
+        builder.addServlet(servletName, HttpServletOverResource.of("application/graphql", graphQlSchemaDocBytes));
         SchemaNavigator graphqlSchemaNavigator = SchemaNavigator.of(graphQlSchema);
         setGraphQlSchemaNavigator(cxt, graphqlSchemaNavigator);
     }

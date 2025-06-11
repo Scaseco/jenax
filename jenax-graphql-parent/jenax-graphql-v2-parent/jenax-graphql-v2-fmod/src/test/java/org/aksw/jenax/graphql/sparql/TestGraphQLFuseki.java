@@ -1,9 +1,9 @@
 package org.aksw.jenax.graphql.sparql;
 
+import org.aksw.jenax.fuseki.mod.graphql.ServerUtils;
 import org.aksw.jenax.web.servlet.graphql.GraphQlUi;
 import org.apache.jena.fuseki.main.FusekiServer;
 import org.apache.jena.fuseki.main.cmds.FusekiMain;
-import org.apache.jena.fuseki.mod.graphql.ServerUtils;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.vocabulary.RDF;

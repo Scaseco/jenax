@@ -11,6 +11,6 @@ public interface AggStateTransition<I, E, K, V>
 
     // AggStateTypeProduceEntry<I, E, K, V> setTargetAgg(AggStateTypeProduceNode<I, E, K, V> targetAgg);
     // AggJsonEdge setSingle(boolean value);
-//    @Override
+    @Override
     AccStateTypeTransition<I, E, K, V> newAccumulator();
 }

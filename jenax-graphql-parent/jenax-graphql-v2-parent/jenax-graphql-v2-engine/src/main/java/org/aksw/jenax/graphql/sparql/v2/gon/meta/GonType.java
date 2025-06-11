@@ -5,24 +5,31 @@ package org.aksw.jenax.graphql.sparql.v2.gon.meta;
  *
  * <ul>
  *   <li>
- *     NonObjectType
+ *     NonObject category members:
  *     <ul>
  *       <li>Array (parent must be NonObject)</li>
  *       <li>Entry (parent must be Object)</li>
- *       <li>Root</li>
+ *       <li>Root (does not have a parent)</li>
  *     </ul>
  *   </li>
  *   <li>
- *     NodeType (parent must be NonObject)
+ *     Node category members: (parent must be of NonObject)
  *     <ul>
  *       <li>Literal</li>
  *       <li>Object</li>
+ *       <li>Array</li>
  *     </ul>
  *   </li>
  * </ul>
+ *
+ * Note, that Array exists in both categories.
+ * The non-object category is relevant to describe the set of valid parent types of a gon type.
+ *
+ * Node category is for constructs that "can exist by themselves" (in contrast to an entry
+ * which can't exist without an enclosing object).
  */
 public enum GonType {
-    ARRAY   (RawGonType.ARRAY,   GonCategory.NON_OBJECT, GonCategory.NON_OBJECT),
+    ARRAY   (RawGonType.ARRAY,   GonCategory.NODE_TYPE, GonCategory.NON_OBJECT),
     ENTRY   (RawGonType.ENTRY,   GonCategory.NON_OBJECT, GonCategory.OBJECT),
     ROOT    (RawGonType.ROOT,    GonCategory.NON_OBJECT, GonCategory.ROOT),
 
@@ -45,6 +52,14 @@ public enum GonType {
 
     public RawGonType getRawType() {
         return rawType;
+    }
+
+    /**
+     * Convenience method. True iff this' category is NODE_TYPE,
+     * which stands for literal, object or array.
+     */
+    public boolean isNodeType() {
+        return GonCategory.NODE_TYPE.equals(category);
     }
 
     public GonCategory getCategory() {

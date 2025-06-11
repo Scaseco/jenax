@@ -7,12 +7,14 @@ public abstract class AggStatePropertyBase<I, E, K, V>
     /** The member key being aggregated */
     protected K memberKey;
     protected boolean isSingle = false;
+    protected ArrayMode arrayMode;
 
-    protected AggStatePropertyBase(Object matchStateId, K memberKey, boolean isSingle) {
+    protected AggStatePropertyBase(Object matchStateId, K memberKey, boolean isSingle, ArrayMode arrayMode) {
         super(matchStateId);
         this.matchStateId = matchStateId;
         this.memberKey = memberKey;
         this.isSingle = isSingle;
+        this.arrayMode = arrayMode;
     }
 
     public K getMemberKey() {
@@ -21,5 +23,9 @@ public abstract class AggStatePropertyBase<I, E, K, V>
 
     public boolean isSingle() {
         return isSingle;
+    }
+
+    public ArrayMode getArrayMode() {
+        return arrayMode;
     }
 }

@@ -9,11 +9,23 @@ public class AggStateObject<I, E, K, V>
     extends AggStateMemberSet<I, E, K, V>
     implements AggStateTypeProduceNode<I, E, K, V>
 {
+    protected boolean isArray;
+
+    public AggStateObject(boolean isArray) {
+        super();
+        this.isArray = isArray;
+    }
 
     @SafeVarargs
     // public static <I, E, K, V> AggStateObject<I, E, K, V> of(AggStateGon<I, E, K, V> ...edgeAggregators) {
     public static <I, E, K, V> AggStateObject<I, E, K, V> of(AggStateTransition<I, E, K, V> ...edgeAggregators) {
-        AggStateObject<I, E, K, V> result = new AggStateObject<>();
+        return of(false, edgeAggregators);
+    }
+
+    @SafeVarargs
+    // public static <I, E, K, V> AggStateObject<I, E, K, V> of(AggStateGon<I, E, K, V> ...edgeAggregators) {
+    public static <I, E, K, V> AggStateObject<I, E, K, V> of(boolean isArray, AggStateTransition<I, E, K, V> ...edgeAggregators) {
+        AggStateObject<I, E, K, V> result = new AggStateObject<>(isArray);
         for (AggStateTransition<I, E, K, V> agg : edgeAggregators) {
             result.addPropertyAggregator(agg);
         }
@@ -35,7 +47,7 @@ public class AggStateObject<I, E, K, V>
     @Override
     public AccStateObject<I, E, K, V> newAccumulator() {
         MemberAccs<I, E, K, V> subAccs = buildMemberAccs();
-        AccStateObject<I, E, K, V> result = AccStateObject.of(subAccs.fieldIdToIndex(), subAccs.edgeAccs());
+        AccStateObject<I, E, K, V> result = AccStateObject.of(isArray, subAccs.fieldIdToIndex(), subAccs.edgeAccs());
         return result;
     }
 }

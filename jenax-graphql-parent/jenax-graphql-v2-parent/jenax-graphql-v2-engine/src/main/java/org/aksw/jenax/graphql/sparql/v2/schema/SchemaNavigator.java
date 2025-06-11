@@ -6,9 +6,11 @@ import java.util.Map;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 
+import graphql.language.Document;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.ScalarTypeDefinition;
 import graphql.language.TypeDefinition;
+import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 
 public class SchemaNavigator {
@@ -60,6 +62,12 @@ public class SchemaNavigator {
             throw new RuntimeException("Currently unsupported type definition: " + typeDefinition);
         }
         return result;
+    }
+
+    public static SchemaNavigator of(Document document) {
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry graphQlSchema = schemaParser.buildRegistry(document);
+        return of(graphQlSchema);
     }
 
     public static SchemaNavigator of(TypeDefinitionRegistry schema) {

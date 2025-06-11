@@ -22,6 +22,7 @@ import org.aksw.jenax.graphql.sparql.v2.acc.state.api.builder.AggStateBuilderObj
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.builder.AggStateBuilderProperty;
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.builder.AggStateBuilderTransitionBase;
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.builder.AggStateBuilderTransitionMatch;
+import org.aksw.jenax.graphql.sparql.v2.acc.state.api.impl.ArrayMode;
 import org.aksw.jenax.graphql.sparql.v2.api2.Connective;
 import org.aksw.jenax.graphql.sparql.v2.api2.ElementTransform;
 import org.aksw.jenax.graphql.sparql.v2.api2.QueryUtils;
@@ -142,7 +143,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
             ElementNode rootElementNode = ElementNode.of("root", Connective.newBuilder().element(new ElementGroup()).connectVars().targetVars().build());
             rootElementNode.setIdentifier(stateId);
 
-            AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> aggStateBuilderRoot = new AggStateBuilderObject<>();
+            AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> aggStateBuilderRoot = new AggStateBuilderObject<>(false);
             rr.root = new GraphQlFieldRewrite<>(rootElementNode, aggStateBuilderRoot, true, node);
         }
 
@@ -540,6 +541,19 @@ public abstract class GraphQlToSparqlConverterBase<K>
             }
         }
 
+        /* Process @array */
+
+        // If the parent is an array then all immediate fields do not produce entries but only values (i.e. the keys are omitted).
+        // But still, each sub-property must have its corresponding state!
+        AggStateBuilder<Binding, FunctionEnv, K, org.apache.jena.graph.Node> tmpMapper = parentAggBuilder == null ? null : parentAggBuilder.getTargetNodeMapper();
+        boolean isParentFieldArray = tmpMapper instanceof AggStateBuilderObject abo && abo.isArray();
+
+        boolean isArray = directives.hasDirective("array");
+        ArrayMode arrayMode = isParentFieldArray ? ArrayMode.FLAT : ArrayMode.OFF;
+        if (ArrayMode.FLAT.equals(arrayMode) && isArray) {
+            arrayMode = ArrayMode.NESTED;
+        }
+
         /* Further processing */
 
         if (isRoot) {
@@ -588,7 +602,7 @@ public abstract class GraphQlToSparqlConverterBase<K>
 
         AggStateBuilder<Binding, FunctionEnv, K, org.apache.jena.graph.Node> targetAggBuilder = null;
         if (!isLeafField) {
-            AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> objectBuilder = new AggStateBuilderObject<>();
+            AggStateBuilderObject<Binding, FunctionEnv, K, org.apache.jena.graph.Node> objectBuilder = new AggStateBuilderObject<>(isArray);
             targetAggBuilder = objectBuilder;
         }
 
@@ -644,12 +658,12 @@ public abstract class GraphQlToSparqlConverterBase<K>
                             : Bind.vars(targetVars);
 
                     AggStateBuilderLiteralProperty<Binding, FunctionEnv, K, org.apache.jena.graph.Node> propertyBuilder;
-                    propertyBuilder = AggStateBuilderLiteralProperty.of(globalIdNode, key, isSingle, skipIfNull, mapper);
+                    propertyBuilder = AggStateBuilderLiteralProperty.of(globalIdNode, key, isSingle, skipIfNull, arrayMode, mapper);
                     transitionBuilder = propertyBuilder;
                     setAggResult(context, propertyBuilder);
                 } else {
                     AggStateBuilderProperty<Binding, FunctionEnv, K, org.apache.jena.graph.Node> propertyBuilder;
-                    propertyBuilder = AggStateBuilderProperty.of(globalIdNode, key);
+                    propertyBuilder = AggStateBuilderProperty.of(globalIdNode, key, arrayMode);
                     propertyBuilder.setTargetBuilder(targetAggBuilder);
                     propertyBuilder.setSingle(isSingle);
                     transitionBuilder = propertyBuilder;

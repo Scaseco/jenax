@@ -12,9 +12,8 @@ public class TestGraphQlVarAccess {
 
     public static DatasetGraph testDsg;
 
-    @BeforeClass
-    public static void tearUp() {
-        testDsg = RDFParser.fromString(
+    public static DatasetGraph createTestData() {
+        DatasetGraph result = RDFParser.fromString(
                 """
                 PREFIX : <http://www.example.org/>
                 :s1 :p1 :o1 .
@@ -22,6 +21,12 @@ public class TestGraphQlVarAccess {
                 :s2 :p1 :o3 .
                 """, Lang.TRIG)
             .toDatasetGraph();
+        return result;
+    }
+
+    @BeforeClass
+    public static void tearUp() {
+        testDsg = createTestData();
     }
 
     @AfterClass
@@ -158,5 +163,27 @@ public class TestGraphQlVarAccess {
             """);
     }
 
+//    @Test
+//    public void test08() {
+//        GraphQlTestUtils.doAssertJson(testDsg,
+//            """
+//            {
+//              Subjects
+//                @prefix(name: "", iri: "http://www.example.org/")
+//                @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o } ORDER BY ?s", from: "s", to: "s") @index(by: "?s")
+//              {
+//                p2 @rdf(iri: ":p2") {
+//                  str @one @bind(of: "STR(?x)")
+//                }
+//              }
+//            }
+//            """,
+//            """
+//            {
+//              "http://www.example.org/s1":[{"properties":{"p1":"http://www.example.org/o1"}}],
+//              "http://www.example.org/s2":[{"properties":{"p1":"http://www.example.org/o3"}}]
+//            }
+//            """);
+//    }
 
 }

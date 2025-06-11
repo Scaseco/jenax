@@ -35,6 +35,8 @@
 
 		<module>jenax-graphql-parent</module>
 		<!-- <module>jenax-cli-core</module> -->
+
+		<module>jenax-playground</module>
 	</modules>
 
 	<properties>

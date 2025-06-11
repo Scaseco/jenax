@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 public enum GonCategory {
     NON_OBJECT(EnumSet.of(RawGonType.ARRAY, RawGonType.ENTRY, RawGonType.ROOT)),
-    NODE_TYPE (EnumSet.of(RawGonType.LITERAL, RawGonType.OBJECT)),
+    NODE_TYPE (EnumSet.of(RawGonType.LITERAL, RawGonType.OBJECT, RawGonType.ARRAY)),
     OBJECT    (EnumSet.of(RawGonType.OBJECT)), // The object and node type categories contain OBJECT
     ROOT      (EnumSet.of(RawGonType.ROOT)),
 

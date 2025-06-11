@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccJsonErrorHandler;
 import org.aksw.jenax.graphql.sparql.v2.acc.state.api.AccStateGon;
+import org.aksw.jenax.graphql.sparql.v2.gon.meta.GonType;
 import org.aksw.jenax.graphql.sparql.v2.gon.model.GonProvider;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 
@@ -15,6 +16,7 @@ public class AccStateLiteralProperty<I, E, K, V>
     extends AccStatePropertyBase<I, E, K, V>
 {
     protected boolean skipIfNull;
+    protected ArrayMode arrayMode;
     protected BiFunction<I, E, ? extends V> inputToValue;
 
     protected boolean skipOutputStartedHere = false;
@@ -24,14 +26,26 @@ public class AccStateLiteralProperty<I, E, K, V>
 
     protected Object value;
 
-    public AccStateLiteralProperty(Object matchStateId, K memberKey, boolean isSingle, boolean skipIfNull, BiFunction<I, E, ? extends V> inputToValue) {
+    public AccStateLiteralProperty(Object matchStateId, K memberKey, boolean isSingle, boolean skipIfNull, ArrayMode arrayMode, BiFunction<I, E, ? extends V> inputToValue) {
         super(matchStateId, memberKey, isSingle);
         this.skipIfNull = skipIfNull;
         this.inputToValue = inputToValue;
+        this.arrayMode = Objects.requireNonNull(arrayMode);
     }
 
-    public static <I, E, K, V> AccStateLiteralProperty<I, E, K, V> of(Object matchStateId, K memberKey, boolean isSingle, boolean skipIfNull, BiFunction<I, E, ? extends V> inputToValue) {
-        return new AccStateLiteralProperty<>(matchStateId, memberKey, isSingle, skipIfNull, inputToValue);
+    @Override
+    public GonType getGonType() {
+        GonType result = switch (arrayMode) {
+        case OFF -> GonType.ENTRY;
+        case FLAT -> GonType.LITERAL;
+        case NESTED -> GonType.ARRAY;
+        default -> throw new IllegalStateException("Should not happen");
+        };
+        return result;
+    }
+
+    public static <I, E, K, V> AccStateLiteralProperty<I, E, K, V> of(Object matchStateId, K memberKey, boolean isSingle, boolean skipIfNull, ArrayMode arrayMode, BiFunction<I, E, ? extends V> inputToValue) {
+        return new AccStateLiteralProperty<>(matchStateId, memberKey, isSingle, skipIfNull, arrayMode, inputToValue);
     }
 
     /**
@@ -48,6 +62,10 @@ public class AccStateLiteralProperty<I, E, K, V>
             if (context.isMaterialize()) {
                 GonProvider<K, V> gonProvider = context.getGonProvider();
 
+                if (true) {
+                    throw new RuntimeException("TODO update materialization");
+                }
+
                 value = isSingle
                         ? gonProvider.newNull()
                         : gonProvider.newArray();
@@ -56,14 +74,23 @@ public class AccStateLiteralProperty<I, E, K, V>
             if (context.isSerialize()) {
                 ObjectNotationWriter<K, V> writer = context.getJsonWriter();
                 if (!isSingle) {
-                    writer.name(memberKey);
-                    writer.beginArray();
+                    if (ArrayMode.OFF.equals(arrayMode)) {
+                        writer.name(memberKey);
+                    }
+
+                    if (!ArrayMode.FLAT.equals(arrayMode)) {
+                        writer.beginArray();
+                    }
+                } else {
+                    if (ArrayMode.NESTED.equals(arrayMode)) {
+                        writer.beginArray();
+                    }
                 }
             }
         }
     }
 
-    /** Accepts a triple if source and field id match that of the current state */
+    /** Accepts an input tuple (usually binding) if source and field id match that of the current state */
     @Override
     public AccStateGon<I, E, K, V> transitionActual(Object inputStateId, I input, E env) throws IOException {
         // AccStateTypeProduceNode<I, E, K, V> result = null;
@@ -94,7 +121,9 @@ public class AccStateLiteralProperty<I, E, K, V>
 
                                 // In array mode the member key is written on begin.
                                 if (isSingle) {
-                                    writer.name(memberKey);
+                                    if (ArrayMode.OFF.equals(arrayMode)) {
+                                        writer.name(memberKey);
+                                    }
                                 }
                                 writer.value(currentValue);
                             }
@@ -134,11 +163,21 @@ public class AccStateLiteralProperty<I, E, K, V>
             if (context.isSerialize()) {
                 ObjectNotationWriter<K, V> writer = context.getJsonWriter();
                 if (!isSingle) {
-                    writer.endArray();
-                } else if (seenTargetCount == 0) {
-                    if (!skipIfNull) {
-                        writer.name(memberKey);
-                        writer.nullValue();
+                    if (!ArrayMode.FLAT.equals(arrayMode)) {
+                        writer.endArray();
+                    }
+                } else {
+                    if (seenTargetCount == 0) {
+                        if (!skipIfNull) {
+                            if (ArrayMode.OFF.equals(arrayMode)) {
+                                writer.name(memberKey);
+                            }
+                            writer.nullValue();
+                        }
+                    }
+
+                    if (ArrayMode.NESTED.equals(arrayMode)) {
+                        writer.endArray();
                     }
                 }
             }

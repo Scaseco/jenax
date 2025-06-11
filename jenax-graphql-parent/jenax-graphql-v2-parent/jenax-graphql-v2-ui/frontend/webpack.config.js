@@ -45,10 +45,6 @@ module.exports = {
       patterns: [
         { from: './src/index.html', to: 'index.html' },
         { from: './src/style.css', to: 'style.css' },
-        { from: './src/logo', to: 'logo' },
-        { from: './src/snorql', to: 'snorql' },
-        { from: './src/view', to: 'view' },
-        { from: './src/yasgui', to: 'yasgui' },
       ]
     }),
     new HtmlWebpackPlugin({
@@ -65,6 +61,10 @@ module.exports = {
       filename: '[name].css',
     })
   ],
-  mode: 'production'
+  // mode: 'development'
+  mode: 'production',
+  optimization: {
+    minimize: false // This disables minification
+  }
 };
 

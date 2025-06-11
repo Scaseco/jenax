@@ -3,6 +3,7 @@ package org.aksw.jenax.graphql.sparql.v2.schema;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,8 +74,12 @@ public class GraphQlSchemaUtils {
         }
     }
 
-    public static Document loadMetaSchema() throws IOException {
-        return loadDocument("jenax.meta.gqls");
+    public static Document loadMetaSchema() {
+        try {
+            return loadDocument("jenax.meta.gqls");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Document loadDocument(String resource) throws IOException {
@@ -129,6 +134,9 @@ public class GraphQlSchemaUtils {
     public static String toStringUtf8(StreamManager streamMgr, String resourceName) throws IOException {
         String result;
         try (InputStream in = streamMgr.open(resourceName)) {
+            if (in == null) {
+                throw new NoSuchFileException("Resource not found: " + resourceName);
+            }
             result = IOUtils.toString(in, StandardCharsets.UTF_8);
         }
         return result;
