@@ -354,12 +354,14 @@ public class TransformExpandShorthands
 
     private static boolean processFilter(DirectivesContainer<?> directives, PrefixMapping pming, LinkedList<Directive> remainingDirectives) {
         boolean changed = false;
-        Directive filter = GraphQlUtils.expectAtMostOneDirective(directives, "filter");
-        if (filter != null) {
+        // Directive filter = GraphQlUtils.expectAtMostOneDirective(directives, "filter");
+        List<Directive> filters = directives.getDirectives("filter");
+        for (Directive filter : filters) {
             String byExprStr = GraphQlUtils.getArgAsString(filter, "by");
             String whenExprStr = GraphQlUtils.getArgAsString(filter, "when");
             if (byExprStr != null) {
-                remainingDirectives.removeIf(x -> "filter".equals(x.getName()));
+                remainingDirectives.removeIf(x -> filter.equals(x));
+                // remainingDirectives.removeIf(x -> "filter".equals(x.getName()));
 
                 Expr byExpr = ExprUtils.parse(byExprStr, pming);
                 Expr whenExpr = whenExprStr == null ? null : ExprUtils.parse(whenExprStr, pming);

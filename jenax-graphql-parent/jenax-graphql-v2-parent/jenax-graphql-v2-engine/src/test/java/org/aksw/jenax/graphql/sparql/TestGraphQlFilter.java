@@ -48,7 +48,7 @@ public class TestGraphQlFilter {
     }
 
     @Test
-    public void test02() {
+    public void test02a() {
         GraphQlTestUtils.doAssertJson(testDsg,
             """
             {
@@ -66,6 +66,27 @@ public class TestGraphQlFilter {
             """
         );
     }
+
+    @Test
+    public void test02b() {
+        GraphQlTestUtils.doAssertJson(testDsg,
+            """
+            {
+              match @one @pattern(of: "SELECT DISTINCT ?s { ?s ?p ?o }", from: "s", to: "s")
+                         @filter(by: "exists { ?s :modelVersion ?o }", this: "s")
+                         @prefix(name: "", iri: "http://www.example.org/")
+              {
+                id @to
+                label @one @rdf(iri: ":label")
+              }
+            }
+            """,
+            """
+            { "match": {"id": "http://www.example.org/Anne", "label": "Anne" } }
+            """
+        );
+    }
+
 
     @Test
     public void test03() {

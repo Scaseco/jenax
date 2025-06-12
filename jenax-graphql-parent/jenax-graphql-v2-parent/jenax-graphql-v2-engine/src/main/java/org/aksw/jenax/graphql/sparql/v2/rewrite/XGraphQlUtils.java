@@ -248,6 +248,22 @@ public class XGraphQlUtils {
         return result;
     }
 
+    public static List<ConditionDirective> parseConditions(DirectivesContainer<?> directives) {
+        List<Directive> filters = directives.getDirectives("filter");
+        List<ConditionDirective> result = filters.stream().map(XGraphQlUtils::parseCondition).toList();
+        return result;
+    }
+
+    public static ConditionDirective parseCondition(Directive directive) {
+        String whenExprStr = GraphQlUtils.getArgAsString(directive, "when");
+        String byExprStr = GraphQlUtils.getArgAsString(directive, "by");
+        List<String> parentVarNames = GraphQlUtils.getArgAsStrings(directive, "parent");
+        List<String> thisVarNames = GraphQlUtils.getArgAsStrings(directive, "this");
+        ConditionDirective result = new ConditionDirective(whenExprStr, byExprStr, thisVarNames, parentVarNames);
+        return result;
+    }
+    // TODO: Parse multiple directives
+    @Deprecated
     public static ConditionDirective parseCondition(DirectivesContainer<?> directives) {
         ConditionDirective result = null;
         Directive directive = GraphQlUtils.expectAtMostOneDirective(directives, "filter");

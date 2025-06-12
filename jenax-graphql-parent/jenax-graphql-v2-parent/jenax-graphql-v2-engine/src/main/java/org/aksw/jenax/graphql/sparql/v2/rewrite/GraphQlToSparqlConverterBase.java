@@ -43,12 +43,18 @@ import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
 import org.aksw.jenax.graphql.sparql.v2.util.Vars;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprLib;
+import org.apache.jena.sparql.expr.ExprList;
+import org.apache.jena.sparql.expr.ExprTransformBase;
+import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.expr.nodevalue.XSDFuncOp;
@@ -288,8 +294,8 @@ public abstract class GraphQlToSparqlConverterBase<K>
         // TODO Allow for multiple conditions.
         // TODO Allow positional references to argument values of the field - probably using ?_1 ... ?_n.
 
-        ConditionDirective condition = XGraphQlUtils.parseCondition(directives);
-        if (condition != null) {
+        List<ConditionDirective> conditions = XGraphQlUtils.parseConditions(directives);
+        for (ConditionDirective condition : conditions) {
             // Pattern of @filter connects to the variables of _this_ node's pattern!
             // ElementNode parentEltNode = context.getVarFromParents(ElementNode.class);
 
@@ -304,10 +310,14 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 BindingBuilder bb = BindingFactory.builder();
                 for (Var v : whenExprVars) {
                     String argName = v.getName();
-                    Argument arg = arguments.stream().filter(a -> a.getName().equals(argName)).findFirst().orElseThrow(() -> new RuntimeException("No such argument: " + argName));
-                    org.apache.jena.graph.Node n = GraphQlUtils.toNodeValue(arg.getValue()).asNode();
-                    bb.add(v, n);
-                    argMap.put(v, n);
+
+                    // Argument may be null if not provided.
+                    Argument arg = arguments.stream().filter(a -> a.getName().equals(argName)).findFirst().orElse(null);
+                    if (arg != null) {
+                        org.apache.jena.graph.Node n = GraphQlUtils.toNodeValue(arg.getValue()).asNode();
+                        bb.add(v, n);
+                        argMap.put(v, n);
+                    }
                 }
                 Binding b = bb.build();
                 NodeValue nv = ExprLib.evalOrNull(whenExpr, b, null);
@@ -336,15 +346,26 @@ public abstract class GraphQlToSparqlConverterBase<K>
                 // Prefix filter variables by the current path.
                 // VarUtils.createJoinVarMap(filterConnective.getVisibleVars(), connective.getVisibleVars(), filterVars, patternVars, VarGeneratorImpl2.create());
                 Map<Var, org.apache.jena.graph.Node> varMap = new HashMap<>();
-                for (Var v : filterConnective.getMentionedVars()) {
+                Set<Var> filterMentionedVars = filterConnective.getMentionedVars();
+                for (Var v : filterMentionedVars) {
                     String varName = v.getName();
-                    if (varName.matches("^[0-9]+$")) {
+                    Argument arg = null;
+
+                    // Whether numeric variables, such as ?0, should match arguments by position
+                    boolean matchPositionalVars = false;
+                    if (matchPositionalVars && varName.matches("^[0-9]+$")) {
                         int argIdx = Integer.parseInt(varName.substring(1));
-                        Argument arg = arguments.get(argIdx);
+                        arg = arguments.get(argIdx);
+                    }
+
+                    if (arg == null) {
+                        arg = arguments.stream().filter(a -> a.getName().equals(varName)).findFirst().orElse(null);
+                    }
+
+                    if (arg != null) {
                         Value value = arg.getValue();
                         org.apache.jena.graph.Node n = GraphQlUtils.toNodeValue(value).asNode();
                         varMap.put(v, n);
-
                     } else {
                         varMap.put(v, Var.alloc(stateId + "_" + v.getVarName()));
                     }
@@ -822,6 +843,8 @@ public abstract class GraphQlToSparqlConverterBase<K>
         }
     }
 
+    // FIXME The filter connective should use the same vars for connect and target - much like a unary relation.
+    //   I mixed up that connective only refers to its own visible variables and not the parent's variables.
     protected static Connective filterToConnective(List<Var> connectVars, ConditionDirective condition, Map<Var, org.apache.jena.graph.Node> binding) {
         Expr byExpr = null;
         Set<Var> byExprVars = null;
@@ -833,7 +856,20 @@ public abstract class GraphQlToSparqlConverterBase<K>
 
             if (binding != null && !binding.isEmpty()) {
                 byExpr = byExpr.applyNodeTransform(new NodeTransformSubst(binding));
-            }
+
+                // FIXME Jena issue: applyNodeTransform on FunctionOps causes
+                // Op and Element to go out of sync - because Element is not transformed.
+                ExprTransformBase repairEltTransform = new ExprTransformBase() {
+                    @Override
+                    public Expr transform(ExprFunctionOp funcOp, ExprList args, Op opArg) {
+                        Op op = funcOp.getGraphPattern();
+                        Element elt = OpAsQuery.asElement(op);
+                        Expr r = funcOp.copy(args, elt);
+                        return r;
+                    }
+                };
+                byExpr = ExprTransformer.transform(repairEltTransform, byExpr);
+             }
 
             byExprVars = byExpr.getVarsMentioned();
 
@@ -852,10 +888,6 @@ public abstract class GraphQlToSparqlConverterBase<K>
 //            	expr = NodeValue.TRUE;
 //            }
 
-        if (parentVars == null) {
-            parentVars = connectVars; // parentEltNode.getConnective().getDefaultTargetVars();
-        }
-
         if (byExprVars != null) {
             // TODO If there is more than one variable then the order must be given!
             if (thisVars == null) {
@@ -865,6 +897,11 @@ public abstract class GraphQlToSparqlConverterBase<K>
                     throw new RuntimeException("@filter(this: [varlist]) must be given if an expression has more than 1 variable");
                 }
             }
+        }
+
+        if (parentVars == null) {
+            // parentVars = connectVars; // parentEltNode.getConnective().getDefaultTargetVars();
+            parentVars = thisVars;
         }
 
         if (byExpr != null) {

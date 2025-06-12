@@ -12,6 +12,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.jena.sparql.expr.NodeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import graphql.com.google.common.collect.Multimap;
 import graphql.com.google.common.collect.Multimaps;
@@ -43,6 +45,8 @@ import graphql.util.TraverserContext;
 import graphql.util.TreeTransformerUtil;
 
 public class GraphQlUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphQlUtils.class);
 
     /**
      * Creates a copy of a node with the given list of directives.
@@ -349,7 +353,7 @@ public class GraphQlUtils {
         List<Directive> directives = container.getDirectives(name);
         if (directives.size() > 1) {
             // TODO log error to graphql processor and return last
-            System.err.println("Only one directive expected: " + name);
+            logger.warn("Only one directive expected: " + name);
         }
         return directives.isEmpty() ? null : directives.get(directives.size() - 1);
     }
