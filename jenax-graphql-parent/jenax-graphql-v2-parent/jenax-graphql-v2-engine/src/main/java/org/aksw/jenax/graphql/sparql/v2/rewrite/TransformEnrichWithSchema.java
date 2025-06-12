@@ -92,48 +92,50 @@ public class TransformEnrichWithSchema
         if (thisSchemaNode != null) {
 
             SchemaEdge schemaEdge = thisSchemaNode.getEdge(nodeName).orElse(null);
-            // SchemaNode nextSchemaNode = thisSchemaNode.getEdge(nodeName).orElse(null);
-            SchemaNode nextSchemaNode = schemaEdge != null ? schemaEdge.getTargetSchemaNode() : null;
-            context.setVar(SchemaNode.class, nextSchemaNode);
+            if (schemaEdge != null) {
+                // SchemaNode nextSchemaNode = thisSchemaNode.getEdge(nodeName).orElse(null);
+                SchemaNode nextSchemaNode = schemaEdge != null ? schemaEdge.getTargetSchemaNode() : null;
+                context.setVar(SchemaNode.class, nextSchemaNode);
 
-            // Fragment fragment = nextSchemaNode.getFragment();
-            // System.out.println(fragment);
+                // Fragment fragment = nextSchemaNode.getFragment();
+                // System.out.println(fragment);
 
-            boolean hasPattern = hasPattern(node);
-            if (!hasPattern) {
-                List<Directive> newDirectives = new ArrayList<>(node.getDirectives().size());
+                boolean hasPattern = hasPattern(node);
+                if (!hasPattern) {
+                    List<Directive> newDirectives = new ArrayList<>(node.getDirectives().size());
 
-                if (schemaEdge.isCardinalityOne()) {
-                    newDirectives.add(GraphQlUtils.newDirective("one"));
-                } else {
-                    newDirectives.add(GraphQlUtils.newDirective("many"));
+                    if (schemaEdge.isCardinalityOne()) {
+                        newDirectives.add(GraphQlUtils.newDirective("one"));
+                    } else {
+                        newDirectives.add(GraphQlUtils.newDirective("many"));
+                    }
+
+                    // Transfer directives from the field (the 'edge')
+                    newDirectives.addAll(schemaEdge.getFieldDefinition().getDirectives());
+
+                    if (nextSchemaNode instanceof SchemaNodeOverObjectTypeDefinition snotd) {
+                        ObjectTypeDefinition otd = snotd.getObjectTypeDefinition();
+                        newDirectives.addAll(otd.getDirectives());
+                    }
+
+                    newDirectives.addAll(node.getDirectives());
+
+                    // Inherit the pattern from the schema edge
+                    Connective connective = schemaEdge.getConnective();
+
+                    // If we are at the root schema node (usually the one named "Query") then
+                    // only infer the connective from the target type
+
+    //                if (connective != null) {
+    //                    newDirectives.addFirst(XGraphQlUtils.newDirectivePattern(connective));
+    //                    GraphQlUtils.replaceDirectives(node, context, GraphQlUtils::directivesSetterField, newDirectives);
+    //                }
+                    GraphQlUtils.replaceDirectives(node, context, GraphQlUtils::directivesSetterField, newDirectives);
                 }
-
-                // Transfer directives from the field (the 'edge')
-                newDirectives.addAll(schemaEdge.getFieldDefinition().getDirectives());
-
-                if (nextSchemaNode instanceof SchemaNodeOverObjectTypeDefinition snotd) {
-                    ObjectTypeDefinition otd = snotd.getObjectTypeDefinition();
-                    newDirectives.addAll(otd.getDirectives());
-                }
-
-                newDirectives.addAll(node.getDirectives());
-
-                // Inherit the pattern from the schema edge
-                Connective connective = schemaEdge.getConnective();
-
-                // If we are at the root schema node (usually the one named "Query") then
-                // only infer the connective from the target type
-
-//                if (connective != null) {
-//                    newDirectives.addFirst(XGraphQlUtils.newDirectivePattern(connective));
-//                    GraphQlUtils.replaceDirectives(node, context, GraphQlUtils::directivesSetterField, newDirectives);
-//                }
-                GraphQlUtils.replaceDirectives(node, context, GraphQlUtils::directivesSetterField, newDirectives);
-            }
 //            if (nextSchemaNode != null) {
 //                System.out.println("here" + nextSchemaNode);
 //            }
+            }
         }
     }
 
