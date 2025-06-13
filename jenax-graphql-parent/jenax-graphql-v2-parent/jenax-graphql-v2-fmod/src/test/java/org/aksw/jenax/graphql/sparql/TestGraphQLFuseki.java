@@ -9,8 +9,10 @@ import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("Test must build or unpack a Fuseki config")
 public class TestGraphQLFuseki {
     private DatasetGraph dsg;
     private FusekiServer server;
