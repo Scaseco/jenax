@@ -24,6 +24,17 @@
 			<artifactId>graphql-java</artifactId>
 		</dependency>
 
+		<!-- Plugins bundle is needed for schema generator; specifically the norse:set extensions -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-plugins-bundle</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-graphql-v2-utils</artifactId>
+		</dependency>
+
 		<!-- Unit Testing -->
 		<dependency>
 			<groupId>junit</groupId>

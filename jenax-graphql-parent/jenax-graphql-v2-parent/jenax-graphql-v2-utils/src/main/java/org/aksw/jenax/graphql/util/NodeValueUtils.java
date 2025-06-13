@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.sparql.v2.util;
+package org.aksw.jenax.graphql.util;
 
 import java.math.BigDecimal;
 

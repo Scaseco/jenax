@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.graphql.sparql.DatasetMetadata;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -56,8 +56,7 @@ public class GraphQlSchemaGenerator {
 
     public static final Type TYPE_SCALAR = TypeName.newTypeName("Scalar").build();
 
-    protected ShortNameMgr shortNameMgr = new ShortNameMgr();
-    protected DatasetMetadata datasetMetadata;
+    protected ShortNameMgr shortNameMgr = new ShortNameMgr(GraphQlUtils::safeName);
 
     public record TypeInfo(Set<Node> subjectTypes, Node property, boolean isForward, Set<Node> objectTypes, boolean maxResourceCard, Set<Node> objectDatatypes, boolean maxLiteralCard) {}
     public record ClassInfo(Node name, Map<Node, PropertyInfo> propertyMap, Set<Node> superTypes) {}
@@ -200,14 +199,14 @@ public class GraphQlSchemaGenerator {
         } else {
             throw new RuntimeException("Unexpected node name: " + node);
         }
-        // Sanitize here or in name mgr?
-        result = sanitize(result);
+        // Sanitize here or in name mgr? -> Moved to short name mgr.
+        // result = sanitize(result);
         return result;
     }
 
-    public static String sanitize(String name) {
-        return name;
-    }
+//    public static String sanitize(String name) {
+//        return name;
+//    }
 
     protected Document convert() {
 
@@ -934,10 +933,10 @@ public class GraphQlSchemaGenerator {
         collectPropertyMap(superTypes, result);
     }
 
-    public GraphQlSchemaGenerator setDatasetMetadata(DatasetMetadata datasetMetadata) {
-        this.datasetMetadata = datasetMetadata;
-        return this;
-    }
+//    public GraphQlSchemaGenerator setDatasetMetadata(DatasetMetadata datasetMetadata) {
+//        this.datasetMetadata = datasetMetadata;
+//        return this;
+//    }
 }
 
 

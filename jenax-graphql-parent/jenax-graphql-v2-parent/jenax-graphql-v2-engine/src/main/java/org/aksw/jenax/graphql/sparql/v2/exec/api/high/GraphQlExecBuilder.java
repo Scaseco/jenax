@@ -9,7 +9,7 @@ import org.aksw.jenax.graphql.sparql.v2.exec.api.low.GraphQlProcessorSettings;
 import org.aksw.jenax.graphql.sparql.v2.exec.api.low.RdfGraphQlProcessorFactoryImpl;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformEnrichWithSchema;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.atlas.lib.Creator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.exec.QueryExecBuilder;

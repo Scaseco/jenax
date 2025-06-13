@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import graphql.language.DirectivesContainer;
 import graphql.language.ObjectTypeDefinition;
 
 public class SchemaNodeOverObjectTypeDefinition

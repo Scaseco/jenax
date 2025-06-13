@@ -3,7 +3,6 @@ package org.aksw.jenax.graphql.sparql.v2.schema;
 
 import java.nio.file.Path;
 
-import graphql.language.ObjectTypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 

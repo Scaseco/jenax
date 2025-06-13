@@ -2,7 +2,7 @@ package org.aksw.jenax.graphql.sparql.v2.context;
 
 import java.util.Optional;
 
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;

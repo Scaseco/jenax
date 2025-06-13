@@ -1,8 +1,6 @@
 package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
-import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.jena.riot.system.PrefixMap;
@@ -10,7 +8,6 @@ import org.apache.jena.riot.system.PrefixMapStd;
 
 import graphql.language.Argument;
 import graphql.language.Directive;
-import graphql.language.DirectivesContainer;
 import graphql.language.Field;
 import graphql.language.Node;
 import graphql.language.NodeVisitorStub;

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.graphql.sparql.v2.context.BindDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.VocabDirective;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.expr.Expr;

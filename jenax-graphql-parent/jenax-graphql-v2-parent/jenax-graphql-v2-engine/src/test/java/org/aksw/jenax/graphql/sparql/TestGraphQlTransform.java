@@ -17,7 +17,7 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformAssignGlobalIds;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformExpandShorthands;
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformHarmonizePrefixes;
 import org.aksw.jenax.graphql.sparql.v2.ron.RdfElementVisitorRdfToJsonNt;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.path.P_Path0;
@@ -30,7 +30,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 import graphql.language.AstComparator;
-import graphql.language.AstPrinter;
 import graphql.language.Document;
 import graphql.language.NodeVisitorStub;
 import graphql.parser.Parser;

@@ -14,7 +14,7 @@ import org.aksw.jenax.graphql.sparql.v2.context.JoinDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.RootFieldMarker;
 import org.aksw.jenax.graphql.sparql.v2.context.ViaDirective;
 import org.aksw.jenax.graphql.sparql.v2.context.VocabDirective;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;

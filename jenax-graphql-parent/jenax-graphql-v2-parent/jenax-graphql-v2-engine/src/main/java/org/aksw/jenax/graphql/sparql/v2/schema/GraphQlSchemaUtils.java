@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformHarmonizeTentris;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.riot.system.stream.StreamManager;
 

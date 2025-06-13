@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import org.aksw.jenax.graphql.sparql.v2.model.XGraphQlConstants;
 import org.aksw.jenax.graphql.sparql.v2.schema.GraphQlSchemaUtils;
 import org.aksw.jenax.graphql.sparql.v2.schema.GraphQlSchemaUtils.TypeInfo;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 
 import graphql.language.Directive;
 import graphql.language.DirectivesContainer;

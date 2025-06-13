@@ -16,7 +16,7 @@ import org.aksw.jenax.graphql.sparql.v2.rewrite.TransformHarmonizeTentris;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaEdge;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNavigator;
 import org.aksw.jenax.graphql.sparql.v2.schema.SchemaNode;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.exec.QueryExec;

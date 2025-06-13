@@ -1,4 +1,4 @@
-package org.aksw.jenax.graphql.sparql.v2.util;
+package org.aksw.jenax.graphql.util;
 
 import java.io.PrintStream;
 import java.util.Collection;
@@ -45,9 +45,6 @@ import graphql.util.TraverserContext;
 import graphql.util.TreeTransformerUtil;
 
 public class GraphQlUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(GraphQlUtils.class);
-
     public static String safeName(String name) {
         return replaceIllegalChars(name, "_");
     }
@@ -73,6 +70,9 @@ public class GraphQlUtils {
             : c == '_' || Character.isLetterOrDigit(c);
         return result;
     }
+
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphQlUtils.class);
 
     /**
      * Creates a copy of a node with the given list of directives.

@@ -2,7 +2,7 @@ package org.aksw.jenax.graphql.sparql.v2.rewrite;
 
 import java.util.List;
 
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.riot.system.PrefixMap;
 
 import graphql.language.Directive;

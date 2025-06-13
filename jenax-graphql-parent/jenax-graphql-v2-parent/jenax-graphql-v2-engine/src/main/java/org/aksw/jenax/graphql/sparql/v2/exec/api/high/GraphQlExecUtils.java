@@ -14,7 +14,7 @@ import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriter;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterExt;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterMapper;
 import org.aksw.jenax.graphql.sparql.v2.io.ObjectNotationWriterMapperImpl;
-import org.aksw.jenax.graphql.sparql.v2.util.GraphQlUtils;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.graph.Node;
 
 import com.google.gson.Gson;
