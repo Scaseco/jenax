@@ -48,6 +48,32 @@ public class GraphQlUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQlUtils.class);
 
+    public static String safeName(String name) {
+        return replaceIllegalChars(name, "_");
+    }
+
+    public static String replaceIllegalChars(String name, String replacement) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < name.length(); ++i) {
+            char c = name.charAt(i);
+            if (isValidNameChar(c, i)) {
+                sb.append(c);
+            } else {
+                sb.append(replacement);
+            }
+        }
+        String result = sb.toString();
+        return result;
+    }
+
+    /** Whether the char is valid at the given index. */
+    public static boolean isValidNameChar(char c, int index) {
+        boolean result = index == 0
+            ? c == '_' || Character.isLetter(c)
+            : c == '_' || Character.isLetterOrDigit(c);
+        return result;
+    }
+
     /**
      * Creates a copy of a node with the given list of directives.
      * Returns the new node.

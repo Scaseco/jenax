@@ -225,6 +225,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-schemagen</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-graphql-v2-engine</artifactId>
 				<version>${project.version}</version>
 			</dependency>

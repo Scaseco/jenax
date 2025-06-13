@@ -14,6 +14,8 @@
 	</parent>
 
 	<modules>
+		<module>jenax-graphql-v2-utils</module>
+		<module>jenax-graphql-v2-schemagen</module>
 		<module>jenax-graphql-v2-engine</module>
 		<module>jenax-graphql-v2-ui</module>
 		<module>jenax-graphql-v2-fmod</module>

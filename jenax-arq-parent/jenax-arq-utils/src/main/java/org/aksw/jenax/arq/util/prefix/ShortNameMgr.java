@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.util.prefix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.riot.system.PrefixMap;
@@ -16,8 +17,18 @@ public class ShortNameMgr {
     protected int namespaceCounter = 0;
     protected PrefixMap prefixMap = PrefixMapFactory.createForOutput();
     protected Map<String, Name> shortToFull = new HashMap<>();
+    protected Function<String, String> shortNameSanitizer;
 
     public record Name(String shortName, String prefix, String ns, String localName) {}
+
+    public ShortNameMgr() {
+        this(null);
+    }
+
+    public ShortNameMgr(Function<String, String> shortNameSanitizer) {
+        super();
+        this.shortNameSanitizer = shortNameSanitizer;
+    }
 
     public Name allocate(String iri) {
         Pair<String, String> pair = prefixMap.abbrev(iri);
@@ -45,7 +56,9 @@ public class ShortNameMgr {
             baseName = "_";
         }
 
-        String shortName = baseName;
+        String shortName = shortNameSanitizer == null
+            ? baseName
+            : shortNameSanitizer.apply(baseName);
 
         Name result = null;
         for (int i = 0; (result = shortToFull.get(shortName)) != null && !result.ns().equals(ns); ++i) {
