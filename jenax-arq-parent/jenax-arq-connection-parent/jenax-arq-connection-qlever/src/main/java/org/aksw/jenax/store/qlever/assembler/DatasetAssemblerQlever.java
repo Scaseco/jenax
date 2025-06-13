@@ -54,7 +54,8 @@ public class DatasetAssemblerQlever
                 RdfDatabaseBuilderQlever dbBuilder = new RdfDatabaseBuilderQlever();
                 dbBuilder.setIndexName(indexName);
                 dbBuilder.setOutputFolder(path);
-                dbBuilder.addPath("/home/raven/Datasets/text2sparql2025/corporate-kg/corporate-kg-1.0.0-prod-inst.ttl");
+                // XXX Should we add support for loading initial data?
+                // dbBuilder.addPath("/home/raven/Datasets/text2sparql2025/corporate-kg/corporate-kg-1.0.0-prod-inst.ttl");
                 db = dbBuilder.build();
                 fileSet = db.getFileSet();
             }
