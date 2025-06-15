@@ -42,9 +42,9 @@ import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner;
+import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner.Location;
 import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformSubst;
 import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformToCmdOp;
-import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner.Location;
 import org.aksw.shellgebra.algebra.stream.transformer.StreamOpEntry;
 import org.aksw.shellgebra.algebra.stream.transformer.StreamOpTransformer;
 import org.aksw.shellgebra.exec.FileWriterTask;
@@ -78,7 +78,9 @@ import com.nimbusds.jose.util.StandardCharset;
 import jenax.engine.qlever.docker.GenericContainer;
 import jenax.engine.qlever.docker.QleverConstants;
 
-public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
+public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
+    implements RdfDatabaseBuilder<X>
+{
     public static final List<Lang> supportedLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS));
 
     private static final Logger logger = LoggerFactory.getLogger(RdfDatabaseBuilderQlever.class);
@@ -106,6 +108,8 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
 
     protected String indexName;
 
+    protected String stxxlMemory = null;
+
     /** Base path within the container where to mount any named pipes.
      *  Must end with '/'.
      */
@@ -117,29 +121,38 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
     }
 
     @Override
-    public RdfDatabaseBuilder setName(String name) {
+    public X setName(String name) {
         return setIndexName(name);
     }
 
-    public RdfDatabaseBuilder setIndexName(String name) {
+    public X setIndexName(String name) {
         this.indexName = name;
-        return this;
+        return self();
     }
 
     @Override
-    public RdfDatabaseBuilderQlever setOutputFolder(Path outputFolder) {
+    public X setOutputFolder(Path outputFolder) {
         this.outputFolder = outputFolder;
-        return this;
+        return self();
+    }
+
+    public X setStxxlMemory(String stxxlMemory) {
+        this.stxxlMemory = stxxlMemory;
+        return self();
+    }
+
+    public String getStxxlMemory() {
+        return stxxlMemory;
     }
 
     @Override
-    public RdfDatabaseBuilder addPath(String source, Node g) throws IOException {
+    public X addPath(String source, Node g) throws IOException {
         Path path = Path.of(source);
         RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedLangs);
         String contentType = entityInfo.getContentType();
         Lang lang = RDFLanguages.contentTypeToLang(contentType);
         addPath(path, g, entityInfo.getContentEncodings(), lang);
-        return this;
+        return self();
     }
 
     protected void addPath(Path source, Node graph, List<String> encodings, Lang lang) {
@@ -482,7 +495,18 @@ public class RdfDatabaseBuilderQlever implements RdfDatabaseBuilder {
         int gid = SystemUtils.getGID();
         logger.info("Setting up qlever indexer container as UID: " + uid + ", GID: " + gid);
 
-        String str = "IndexBuilderMain -i " + indexName + (cmdStr.isEmpty() ? " " : " ") + cmdStr;
+        List<String> cmdParts = new ArrayList<>();
+        cmdParts.add("IndexBuilderMain -i " + indexName);
+
+        if (stxxlMemory != null && !stxxlMemory.isBlank()) {
+            cmdParts.add("-m " + stxxlMemory); // XXX Not escaped!
+        }
+
+        if (cmdStr != null) {
+            cmdParts.add(cmdStr);
+        }
+
+        String str = cmdParts.stream().collect(Collectors.joining(" "));
         logger.info("Start command: " + str);
 
         String dockerImageName = buildDockerImageName();
