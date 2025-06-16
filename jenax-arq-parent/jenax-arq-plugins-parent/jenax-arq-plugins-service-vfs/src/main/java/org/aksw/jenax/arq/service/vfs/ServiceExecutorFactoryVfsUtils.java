@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.io.binseach.BinarySearcher;
@@ -28,6 +27,8 @@ import org.aksw.commons.io.hadoop.binseach.bz2.BlockSources;
 import org.aksw.commons.io.hadoop.binseach.v2.BinSearchResourceCache;
 import org.aksw.commons.io.hadoop.binseach.v2.BinarySearchBuilder;
 import org.aksw.commons.util.entity.EntityInfo;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
+import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromPrefixMatcher;
 import org.aksw.jena_sparql_api.io.binseach.GraphFromSubjectCache;
 import org.aksw.jena_sparql_api.io.binseach.StageGeneratorGraphFindRaw;
@@ -35,33 +36,27 @@ import org.aksw.jenax.arq.util.binding.QueryIterOverQueryExec;
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
-import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
-import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import org.aksw.jenax.sparql.rx.op.GraphOpsRx;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.SplittableCompressionCodec;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.jena.atlas.data.BagFactory;
-import org.apache.jena.atlas.data.DataBag;
-import org.apache.jena.atlas.data.ThresholdPolicy;
-import org.apache.jena.atlas.data.ThresholdPolicyFactory;
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.atlas.iterator.IteratorCloseable;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.ARQ;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.op.OpService;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
@@ -73,17 +68,12 @@ import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.graph.GraphFactory;
-import org.apache.jena.sparql.system.SerializationFactoryFinder;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Streams;
-
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * TODO Factory out into a more general class that delegates each bindings to custom processor
@@ -335,14 +325,14 @@ public class ServiceExecutorFactoryVfsUtils {
         Context context = execCxt.getContext();
         // OpService op = (OpService)QC.substitute(opService, outerBinding);
         boolean silent = opService.getSilent() ;
-        QueryIterator qIter ;
+        QueryIterator qIter = null;
         try {
             Op opRemote = opService.getSubOp();
             Op opRestored = Rename.reverseVarRename(opRemote, true);
             Query query = OpAsQuery.asQuery(opRestored);
             Map<Var, Var> varMapping = QueryExecUtils.computeVarMapping(opRemote, opRestored);
 
-            Flowable<Binding> bindingFlow = null;
+            //Flowable<Binding> bindingFlow = null;
             // Iterator<Binding> itBindings = null;
 
             boolean specialStreamProcessingApplied = false;
@@ -429,14 +419,32 @@ public class ServiceExecutorFactoryVfsUtils {
                     // Stream by subject - useful for answering star patterns
                     List<Lang> tripleLangs = RDFLanguagesEx.getTripleLangs();
                     TypedInputStream tmp = RDFDataMgrEx.open(path.toString(), tripleLangs);
+                    Lang lang = RDFLanguages.contentTypeToLang(tmp.getContentType());
+                    String base = tmp.getBaseURI();
+                    IteratorCloseable<Triple> baseIt = AsyncParser.of(tmp, lang, base).asyncParseTriples();
 
-                    bindingFlow = RDFDataMgrRx.createFlowableTriples(() -> tmp)
-                            .compose(GraphOpsRx.graphFromConsecutiveTriples(Triple::getSubject, GraphFactory::createDefaultGraph))
-                            .map(ModelFactory::createModelForGraph)
-                            //.parallel()
-                            .flatMap(m ->
-                                SparqlRx.execSelectRaw(() -> QueryExecutionFactory.create(query.cloneQuery(), m)));
-                            //.sequential();
+                    // Collapse triples with the same subject into graphs.
+                    Iterator<Entry<Node, Graph>> graphIt = StreamOperatorCollapseRuns
+                        .create(CollapseRunsSpec.create(Triple::getSubject, GraphFactory::createDefaultGraph, Graph::add))
+                        .transform(baseIt);
+                    graphIt = Iter.onClose(graphIt, baseIt::close);
+
+                    Iterator<Binding> bindingIt = Iter.flatMap(graphIt, e -> {
+                            Graph g = e.getValue();
+                            QueryExec qe2 = QueryExec.graph(g).query(query.cloneQuery()).build();
+                            QueryIterator qIter2 = new QueryIterOverQueryExec(execCxt, qe2);
+                            return qIter2;
+                        });
+
+                    qIter = QueryIterPlainWrapper.create(bindingIt, execCxt);
+
+//                    bindingFlow = RDFDataMgrRx.createFlowableTriples(() -> tmp)
+//                            .compose(GraphOpsRx.graphFromConsecutiveTriples(Triple::getSubject, GraphFactory::createDefaultGraph))
+//                            .map(ModelFactory::createModelForGraph)
+//                            //.parallel()
+//                            .flatMap(m ->
+//                                SparqlRx.execSelectRaw(() -> QueryExecutionFactory.create(query.cloneQuery(), m)));
+//                            //.sequential();
 
                     // itBindings = flow.blockingIterable().iterator();
                 } else {
@@ -445,7 +453,7 @@ public class ServiceExecutorFactoryVfsUtils {
             }
 
             if (!specialStreamProcessingApplied) {
-                Dataset dataset = DatasetFactory.create();
+                DatasetGraph dataset = DatasetGraphFactory.create();
                 try (InputStream in = RDFDataMgrEx.probeEncodings(Files.newInputStream(path), null)) {
                     TypedInputStream tis = RDFDataMgrEx.probeLang(in, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
 
@@ -461,45 +469,46 @@ public class ServiceExecutorFactoryVfsUtils {
 
 //                qe = QueryExecutionFactory.create(query, dataset);//, input);
 //                right = new QueryIteratorResultSet(qe.execSelect());
-                bindingFlow = SparqlRx.execSelectRaw(() -> QueryExecutionFactory.create(query, dataset));
+                // bindingFlow = SparqlRx.execSelectRaw(() -> QueryExecutionFactory.create(query, dataset));
                         // .blockingIterable().iterator();
+                Context cxt = context.copy();
+                QueryExec qe = QueryExec.dataset(dataset)
+                        .query(query)
+                        .context(cxt)
+                        .build();
+
+                qIter = new QueryIterOverQueryExec(execCxt, qe);
             }
 
 
             // In silent mode we consume all data into a data bag
             // so that any exception raised during iteration gets caught here
             if (silent && specialStreamProcessingApplied) {
-                Context cxt = execCxt.getContext();
-                ThresholdPolicy<Binding> policy = ThresholdPolicyFactory.policyFromContext(cxt);
-                DataBag<Binding> db = BagFactory.newDefaultBag(policy, SerializationFactoryFinder.bindingSerializationFactory());
-                Iterator<Binding> bindingIt = bindingFlow.blockingIterable().iterator();
-                db.addAll(bindingIt);
-                Stream<Binding> bindingStream = Streams.stream(db.iterator()).onClose(db::close);
-                bindingFlow = Flowable.fromStream(bindingStream);
+                qIter = new QueryIteratorMaterialize(qIter, execCxt);
             }
 
-            Iterator<Binding> tmp = bindingFlow.blockingIterable().iterator();
-            QueryIterator right = new QueryIterPlainWrapper(tmp) {
-                @Override
-                protected void requestCancel() {
-                    ((Disposable)tmp).dispose();
-                    super.requestCancel();
-                }
-
-                @Override
-                protected void closeIterator() {
-                    ((Disposable)tmp).dispose();
-                    super.closeIterator();
-                }
-            };
+//            Iterator<Binding> tmp = bindingFlow.blockingIterable().iterator();
+//            QueryIterator right = new QueryIterPlainWrapper(tmp) {
+//                @Override
+//                protected void requestCancel() {
+//                    ((Disposable)tmp).dispose();
+//                    super.requestCancel();
+//                }
+//
+//                @Override
+//                protected void closeIterator() {
+//                    ((Disposable)tmp).dispose();
+//                    super.closeIterator();
+//                }
+//            };
 
 
             // This iterator is materialized already otherwise we may end up
             // not servicing the HTTP connection as needed.
             // In extremis, can cause a deadlock when SERVICE loops back to this server.
             // Add tracking.
-            //qIter = QueryIter.makeTracked(right, getExecContext()) ;
-            qIter = right;
+            // qIter = QueryIter.makeTracked(right, getExecContext()) ;
+            // qIter = right;
 
             if (varMapping != null) {
                 qIter = QueryIter.map(qIter, varMapping);

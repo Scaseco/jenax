@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +58,7 @@ public class GraphQlSchemaGenerator {
     public static final Type TYPE_SCALAR = TypeName.newTypeName("Scalar").build();
 
     protected ShortNameMgr shortNameMgr = new ShortNameMgr(GraphQlUtils::safeName);
+    protected Function<String, String> iriToLabel;
 
     public record TypeInfo(Set<Node> subjectTypes, Node property, boolean isForward, Set<Node> objectTypes, boolean maxResourceCard, Set<Node> objectDatatypes, boolean maxLiteralCard) {}
     public record ClassInfo(Node name, Map<Node, PropertyInfo> propertyMap, Set<Node> superTypes) {}
@@ -92,6 +94,18 @@ public class GraphQlSchemaGenerator {
         .toList();
 
         return result;
+    }
+
+    public GraphQlSchemaGenerator() {
+        this(null);
+    }
+
+    /**
+     * Constructor that accepts a function that maps iris to labels.
+     */
+    public GraphQlSchemaGenerator(Function<String, String> iriToLabel) {
+        super();
+        this.iriToLabel = iriToLabel;
     }
 
     public Document process(List<TypeInfo> list) {
@@ -193,7 +207,9 @@ public class GraphQlSchemaGenerator {
         String result;
         if (node.isURI()) {
             String iri = node.getURI();
-            result = shortNameMgr.allocate(iri).shortName();
+            String label = iriToLabel.apply(iri);
+
+            result = shortNameMgr.allocate(iri, label).shortName();
         } else if (node.isLiteral()) {
             result = node.getLiteralLexicalForm();
         } else {
@@ -209,7 +225,6 @@ public class GraphQlSchemaGenerator {
 //    }
 
     protected Document convert() {
-
         boolean doMaterialize = true; //false;
         if (doMaterialize) {
             for (Entry<Node, ClassInfo> e : new ArrayList<>(classMap.entrySet())) {

@@ -9,10 +9,14 @@ import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
 import org.apache.jena.util.SplitIRI;
 
-/** Allocate short name for IRIs.
- *  By default this is the IRI's localName but conflicts are resolved.
- *  The manager guarantees uniqueness of generated short names.
+/**
+ * Allocate short name for IRIs.
+ * By default this is the IRI's localName but conflicts are resolved.
+ * The manager guarantees uniqueness of generated short names.
  */
+// XXX Probably a two-phase approach would be better:
+//   phase 1: collect all names and conflicts
+//   phase 2: resolve conflicts.
 public class ShortNameMgr {
     protected int namespaceCounter = 0;
     protected PrefixMap prefixMap = PrefixMapFactory.createForOutput();
@@ -30,9 +34,9 @@ public class ShortNameMgr {
         this.shortNameSanitizer = shortNameSanitizer;
     }
 
-    public Name allocate(String iri) {
+    public Name allocate(String iri, String label) {
         Pair<String, String> pair = prefixMap.abbrev(iri);
-        String prefix;
+        String prefix = null;
         String ns;
         String localName;
         if (pair != null) {
@@ -50,6 +54,19 @@ public class ShortNameMgr {
             localName = iri.substring(splitPoint);
         }
 
+        // XXX Hacky - shouldn't conflate label and localName.
+        if (label != null) {
+            localName = label;
+        }
+
+        return allocate(prefix, ns, localName);
+    }
+
+    public Name allocate(String iri) {
+        return allocate(iri, null);
+    }
+
+    protected Name allocate(String prefix, String ns, String localName) {
         String baseName = localName;
 
         if (baseName.isEmpty()) {
