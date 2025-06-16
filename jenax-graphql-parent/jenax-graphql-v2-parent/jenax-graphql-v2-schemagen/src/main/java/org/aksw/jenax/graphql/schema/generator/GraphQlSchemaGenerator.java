@@ -207,8 +207,7 @@ public class GraphQlSchemaGenerator {
         String result;
         if (node.isURI()) {
             String iri = node.getURI();
-            String label = iriToLabel.apply(iri);
-
+            String label = iriToLabel == null ? null : iriToLabel.apply(iri);
             result = shortNameMgr.allocate(iri, label).shortName();
         } else if (node.isLiteral()) {
             result = node.getLiteralLexicalForm();
