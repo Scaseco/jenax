@@ -47,6 +47,7 @@ module.exports = {
         { from: './src/logo', to: 'logo' },
         { from: './src/snorql', to: 'snorql' },
         { from: './src/view', to: 'view' },
+        { from: './src/graph-explorer', to: 'graph-explorer' },
         { from: './src/yasgui', to: 'yasgui' },
       ]
     }),

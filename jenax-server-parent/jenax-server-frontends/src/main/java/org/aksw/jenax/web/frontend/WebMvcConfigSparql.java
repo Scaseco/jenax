@@ -24,6 +24,9 @@ public class WebMvcConfigSparql
         registry.addViewController("/view").setViewName("redirect:/view/");
         registry.addViewController("/view/").setViewName("forward:/view/resource.html");
 
+        registry.addViewController("/graph-explorer").setViewName("redirect:/graph-explorer/");
+        registry.addViewController("/graph-explorer/").setViewName("forward:/graph-explorer/index.html");
+
         registry.addViewController("/snorql").setViewName("redirect:/snorql/");
         registry.addViewController("/snorql/").setViewName("forward:/snorql/index.html");
 
