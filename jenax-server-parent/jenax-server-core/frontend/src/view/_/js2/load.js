@@ -1,4 +1,4 @@
-/* global jsonld, makeMap, renderLd, renderSubNode, renderMoreResults, renderLdvLabelConfig, isLdvShowLabels, getLdvLabelLang, ldvResolveSubNodes, ldvUnresolveSubNodes, ldvQueries, ldvConfig, ldvDef */
+/* global jsonld, makeMap, renderLd, renderSubNode, renderMoreResults, renderLdvLabelConfig, isLdvShowLabels, getLdvLabelLang, ldvResolveSubNodes, ldvUnresolveSubNodes, ldvQueries, ldvConfig, ldvDef, loadStartpage */
 
 (() => {
   const xGeo = "http://www.opengis.net/ont/geosparql#"
@@ -231,17 +231,18 @@
       `<input type="checkbox" onclick="ldvChangeInferConfig(this)" ` +
       `id="inferx"${ldvConfig.infer ? ' checked' :''} />` +
       `<label for="inferx">Calculate inferences</label>`
+    const q = resourceIri === '' ? '' : '?'
 
     const switchLink = document.getElementById('localswitch')
     switchLink.innerHTML =
       (ldvConfig.localMode ?
        `<a href="` + (ldvConfig.fileOnly === 'yes' ?
-		      `??${resourceIri}` :
+		      `?${q}${resourceIri}` :
        (resourceIri.slice(0, ldvConfig.datasetBase.length) === ldvConfig.datasetBase ?
-	resourceIri.slice(ldvConfig.datasetBase.length) : `/?${resourceIri}`)) +
+	resourceIri.slice(ldvConfig.datasetBase.length) : `/${q}${resourceIri}`)) +
        `">Global Browsing</a>` :
        `<a href="` + (ldvConfig.fileOnly === 'yes' ?
-		      `?` : `/`) + `*?${resourceIri}">Local Browsing</a>`)
+		      `?` : `/`) + `*${q}${resourceIri}">Local Browsing</a>`)
 
     const configLink = document.getElementById('configlink')
     configLink.innerHTML = `<a href="` + (ldvConfig.fileOnly === 'yes' ? `?` : `/`) +
@@ -249,21 +250,35 @@
       `*label${ isLdvShowLabels() ? 1 : 0 }` +
       `*lang${ getLdvLabelLang() }` +
       (ldvConfig.localMode ? '*' : '') +
-      `?${resourceIri}">Link</a>`
+      `${q}${resourceIri}">Link</a>`
 
     const exploreLink = document.getElementById('explorelink')
+    const r = resourceIri === '' ? '' : '#r='
     if (ldvConfig.exploreUrl.slice(0, 1) !== '@')
-      exploreLink.innerHTML = `<a href="${ ldvConfig.exploreUrl }#r=${ resourceIri }" target="_blank">Explore</a>`
+      exploreLink.innerHTML = `<a href="${ ldvConfig.exploreUrl }${r}${ resourceIri }" target="_blank">Explore</a>`
   }
 
   const ldvLoadWindowResource = () => {
     if (window.location.pathname.substring(0, 2) === '/_') // internal files
       return
 
+    ldvConfig.infer = !! window.localStorage.getItem('/ldv/infer')
+
     var pathname
     var search
     if (ldvConfig.fileOnly === 'yes') {
       pathname = '/' + window.location.search.substring(1)
+      if (pathname === '/*' || pathname === '/') {
+	ldvConfig.localMode = (pathname === '/*')
+	if (ldvConfig.endpointUrl.slice(0, 1) !== '@') {
+	  loadStartpage()
+	  addUILinks('')
+	  renderLdvLabelConfig()
+	} else {
+	  alert("You need to configure ENDPOINT_URL in your config")
+	}
+	return
+      }
       let searchStart = pathname.indexOf("?", 1)
       if (searchStart !== -1) {
 	search = pathname.substring(searchStart)
@@ -279,10 +294,9 @@
       return
     }
 
-    var resourceIri
-
-    ldvConfig.infer = !! window.localStorage.getItem('/ldv/infer')
     ldvConfig.localMode = (pathname === '/*')
+
+    var resourceIri
 
     if ((pathname === '/' || pathname === '/*') && search)
       resourceIri = search.substring(1) + window.location.hash
@@ -486,4 +500,5 @@
   window.ldvUpdateConfigLink = ldvUpdateConfigLink
   window.ldvLookupGraph = ldvLookupGraph
   window.ldvLoadInlinePlus = ldvLoadInlinePlus
+  window.ldvFindMap = findMap
 })()

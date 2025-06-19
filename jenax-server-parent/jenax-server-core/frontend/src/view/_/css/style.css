@@ -268,6 +268,24 @@ a[href="urn:x-ldv:more-results"] {
     padding: 0 2px;
 }
 
+#yasqe {
+    padding-top: 5ex;
+    margin-right: -15em;
+}
+
+#startpage {
+    margin-right: 15em;
+}
+
+#query-error {
+    background-color: mistyrose;
+    padding: 1ex;
+    border-radius: 1ex;
+    white-space: preserve;
+    font-family: monospace;
+    font-size: smaller;
+}
+
 @media print {
     .ldv-expand-button { display: none; }
     .ldv-graph-lookup-button { display: none; }
