@@ -9,7 +9,42 @@
 <button onclick="ldvStartpageSparql()">SPARQL query</button>
 <div id="yasqe" style="display: none"></div>
 `
-    document.getElementById('graph').innerHTML = ``
+    const bIri = `urn:x-ldv:classes-root`
+    const describeQuery = `
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+CONSTRUCT {
+  ?s ?p ?o 
+} WHERE {
+  BIND(<${bIri}> AS ?s) .
+  {
+    BIND(<urn:x-ldv:reverse:http://www.w3.org/2000/01/rdf-schema#subClassOf> AS ?p )
+    {
+      SELECT ?o WHERE {
+        {
+          ?o a owl:Class .
+        } UNION {
+          ?o a rdfs:Class .
+        }
+        FILTER NOT EXISTS {
+          {
+            ?o rdfs:subClassOf []
+          } MINUS {
+            ?o rdfs:subClassOf owl:Thing
+          }
+        }
+      }
+    }
+  }
+}
+`
+    fetchJsonLd(describeQuery)
+      .then((json) => {
+	document.getElementById('data').innerHTML = JSON.stringify(json)
+	renderLd(bIri, ldvConfig.datasetBase, ldvConfig.localMode, json)
+      })
+
   }
 
   const fetchJsonLd = (query) => {
@@ -206,12 +241,11 @@ CONSTRUCT {
       yasgui_script.setAttribute('src', '/yasgui/yasgui.min.js')
       yasgui_script.onload = () => {
 	const load_yasqe = document.createElement('script')
-	const yasqe = new Yasqe(document.getElementById("yasqe"), {
+	const yasqe = new Yasqe(document.getElementById('yasqe'), {
 	  requestConfig: {
 	    endpoint: '/sparql',
 	  },
-	  value: `
-CONSTRUCT {
+	  value: `CONSTRUCT {
   ?s ?p ?o
 } WHERE {
   {
