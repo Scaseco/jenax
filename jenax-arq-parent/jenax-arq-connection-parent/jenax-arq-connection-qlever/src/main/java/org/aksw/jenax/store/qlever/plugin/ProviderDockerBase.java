@@ -26,15 +26,16 @@ public abstract class ProviderDockerBase<T>
             String suffix = name.substring(prefix.length());
             if (suffix.isEmpty()) {
                 isAccepted = true;
-                // nothing todo
+                // nothing to do.
             } else if (suffix.startsWith(":")) {
                 suffix = suffix.substring(1);
-                String[] imageAndTag = suffix.split(":", 2);
-                image = imageAndTag[0];
-                tag = imageAndTag.length >= 2 ? imageAndTag[1] : null;
+                String[] tagAndImage = suffix.split(":", 2);
+                tag = tagAndImage[0];
+                image = tagAndImage.length >= 2 ? tagAndImage[1] : null;
+                // TODO WARN if more than 2 components.
                 isAccepted = true;
             } else {
-                // reject
+                // rejected.
             }
         }
 

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aksw.jenax.dataaccess.sparql.creator.FileSetOverPathBase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
@@ -20,6 +19,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegac
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase.CloseablePath;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
+import org.aksw.jenax.engine.docker.common.ContainerPathResolver;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.CmdStrOps;
@@ -71,11 +71,16 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
 
     public static RDFEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverConfRun conf) throws NumberFormatException, IOException, InterruptedException {
 
+        ContainerPathResolver cpr = ContainerPathResolver.create();
+        if (cpr != null) {
+            logger.info("Detected docker-in-docker setup (dind).");
+            hostDbDir = ContainerPathResolver.resolvePath(cpr, Path.of(hostDbDir)).toAbsolutePath().toString();
+        }
+
         Integer containerPort = conf.getPort();
         if (containerPort == null) {
             throw new RuntimeException("Container port must be set.");
         }
-
 
         int uid = SystemUtils.getUID();
         int gid = SystemUtils.getGID();
@@ -92,18 +97,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         }
 
         logger.info("Generated command line: " + cmdStr);
-
-        if (qleverImageName == null) {
-            qleverImageName = QleverConstants.DOCKER_IMAGE_NAME;
-        }
-
-        if (qleverImageTag == null) {
-            qleverImageTag = QleverConstants.DOCKER_IMAGE_TAG;
-        }
-
-        String dockerImageName = Stream.of(qleverImageName, qleverImageTag)
-            .filter(x -> x != null)
-            .collect(Collectors.joining(":"));
+        String dockerImageName = QleverConstants.buildDockerImageName(qleverImageName, qleverImageTag);
 
         // https://hub.docker.com/r/adfreiburg/qlever/tags
         org.testcontainers.containers.GenericContainer<?> container = new org.testcontainers.containers.GenericContainer<>(dockerImageName)

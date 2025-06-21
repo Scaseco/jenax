@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
 import org.aksw.jenax.dataaccess.sparql.dataset.engine.DatasetGraphOverRDFEngine;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
-import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
+import org.aksw.jenax.engine.qlever.RDFDatabaseBuilderQlever;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.apache.jena.assembler.Assembler;
 import org.apache.jena.assembler.exceptions.AssemblerException;
@@ -51,7 +51,7 @@ public class DatasetAssemblerQlever
                 db = new RdfDatabaseQlever(path, indexName);
             } else {
                 // Create the database if it does not exist yet
-                RdfDatabaseBuilderQlever dbBuilder = new RdfDatabaseBuilderQlever();
+                RDFDatabaseBuilderQlever dbBuilder = new RDFDatabaseBuilderQlever();
                 dbBuilder.setIndexName(indexName);
                 dbBuilder.setOutputFolder(path);
                 // XXX Should we add support for loading initial data?

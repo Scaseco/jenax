@@ -2,12 +2,12 @@ package org.aksw.jenax.dataaccess.sparql.factory.dataengine;
 
 import java.util.Objects;
 
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseFactory;
 
 /**
  * A helper data structure to bundle a specific combination of a
- * {@link RDFEngineFactory} and a {@link RdfDatabaseBuilder}.
+ * {@link RDFEngineFactory} and a {@link RDFDatabaseBuilder}.
  */
 public class RdfDataStore {
     protected RDFEngineFactory engineFactory;

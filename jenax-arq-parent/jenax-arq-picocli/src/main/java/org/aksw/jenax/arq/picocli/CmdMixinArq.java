@@ -1,12 +1,14 @@
 package org.aksw.jenax.arq.picocli;
 
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.jenax.arq.util.exec.query.ContextUtils;
 import org.apache.jena.geosparql.InitGeoSPARQL;
 import org.apache.jena.geosparql.configuration.GeoSPARQLConfig;
+import org.apache.jena.geosparql.implementation.vocabulary.SRS_URI;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.mgt.Explain.InfoLevel;
 import org.apache.jena.sparql.util.Context;
@@ -29,6 +31,12 @@ public class CmdMixinArq
 
     @Option(names = { "--geoindex" },  description = "Build Geoindex")
     public boolean geoindex;
+
+    @Option(names = { "--geoindex-srs" },  arity="0..1", description = "GeoIndex SRS. If absent then data will be scanned for SRS. If given without argument then the default SRS will be used.", defaultValue = SRS_URI.DEFAULT_WKT_CRS84, fallbackValue = SRS_URI.DEFAULT_WKT_CRS84)
+    public String geoindexSrs;
+
+    @Option(names = { "--geoindex-file" },  description = "Geoindex filename")
+    public Path geoindexFile;
 
 
     /** Sets global options - does not configure context-specific options  */

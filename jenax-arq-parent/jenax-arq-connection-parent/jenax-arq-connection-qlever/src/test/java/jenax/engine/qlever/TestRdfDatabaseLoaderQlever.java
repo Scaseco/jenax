@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Set;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
-import org.aksw.jenax.engine.qlever.RdfDatabaseBuilderQlever;
+import org.aksw.jenax.engine.qlever.RDFDatabaseBuilderQlever;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.SysRuntime;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
@@ -37,7 +37,7 @@ public class TestRdfDatabaseLoaderQlever {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
 
-         RDFDatabase database = new RdfDatabaseBuilderQlever()
+         RDFDatabase database = new RDFDatabaseBuilderQlever()
             .setOutputFolder(outputPath)
             .setIndexName("test")
             .addPath("/home/raven/.m2/repository/org/aksw/data/text2sparql/2025/dbpedia/1.0.0/dbpedia-1.0.0-dbpedia_2015-10.nt")
@@ -73,7 +73,7 @@ public class TestRdfDatabaseLoaderQlever {
             }
         };
 
-        RDFDatabase database = new RdfDatabaseBuilderQlever()
+        RDFDatabase database = new RDFDatabaseBuilderQlever()
             .setSysRuntime(runtime)
             .setOutputFolder(outputPath)
             .setIndexName("test")

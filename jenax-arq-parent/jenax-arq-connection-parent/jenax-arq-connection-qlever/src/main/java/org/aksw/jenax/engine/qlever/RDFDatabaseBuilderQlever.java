@@ -12,12 +12,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,7 +24,8 @@ import org.aksw.commons.util.exception.FinallyRunAll;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
-import org.aksw.jenax.dataaccess.sparql.creator.RdfDatabaseBuilder;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
+import org.aksw.jenax.engine.docker.common.ContainerPathResolver;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.shellgebra.algebra.cmd.op.CmdOp;
 import org.aksw.shellgebra.algebra.cmd.op.CmdOpExec;
@@ -78,12 +77,12 @@ import com.nimbusds.jose.util.StandardCharset;
 import jenax.engine.qlever.docker.GenericContainer;
 import jenax.engine.qlever.docker.QleverConstants;
 
-public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
-    implements RdfDatabaseBuilder<X>
+public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
+    implements RDFDatabaseBuilder<X>
 {
     public static final List<Lang> supportedLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS));
 
-    private static final Logger logger = LoggerFactory.getLogger(RdfDatabaseBuilderQlever.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDFDatabaseBuilderQlever.class);
 
     /** Record to capture arguments passed to this builder */
     public record FileArg(Path path, Lang lang, List<String> encodings, Node graph) {}
@@ -95,6 +94,9 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
             return paths;
         }
     }
+
+    protected String dockerImageName;
+    protected String dockerImageTag;
 
     /** Mapping from absolute file paths on the host names to file names. */
     protected ShortNameMgr shortNameMgr = new ShortNameMgr();
@@ -115,9 +117,39 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
      */
     protected String containerFifoPath = "/fifo/";
 
-    public RdfDatabaseBuilderQlever setSysRuntime(SysRuntime sysRuntime) {
+    /** A resolver for host paths if the database builder is used from within docker (dind). */
+    protected ContainerPathResolver containerPathResolver = null;
+
+    public RDFDatabaseBuilderQlever() {
+        super();
+        this.containerPathResolver = ContainerPathResolver.create();
+
+        if (containerPathResolver != null) {
+            logger.info("Detected docker-in-docker setup (dind).");
+        }
+    }
+
+    public X setSysRuntime(SysRuntime sysRuntime) {
         this.sysRuntime = sysRuntime;
-        return this;
+        return self();
+    }
+
+    public X setDockerImageName(String dockerImageName) {
+        this.dockerImageName = dockerImageName;
+        return self();
+    }
+
+    public String getDockerImageName() {
+        return dockerImageName;
+    }
+
+    public X setDockerImageTag(String dockerImageTag) {
+        this.dockerImageTag = dockerImageTag;
+        return self();
+    }
+
+    public String getDockerImageTag() {
+        return dockerImageTag;
     }
 
     @Override
@@ -161,47 +193,12 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
     }
 
     public StreamOp convertArgToOp(FileArg arg) {
-        StreamOp result = new StreamOpFile(arg.path().toString());
+        Path path = arg.path();
+        StreamOp result = new StreamOpFile(path.toString());
         for (String encoding : arg.encodings()) {
             result = new StreamOpTranscode(encoding, TranscodeMode.DECODE, result);
         }
         return result;
-    }
-
-    protected FileSpec buildFileSpec() {
-        List<String> cmdParts = new ArrayList<>();
-        Map<String, String> fsBinds = new LinkedHashMap<>();
-        for (FileArg arg : args) {
-            String fileArg = Optional.ofNullable(arg.path())
-                    .map(Path::toAbsolutePath)
-                    .map(Path::toString)
-                    .orElse("-");
-
-            String uriStr = arg.path().toUri().toString();
-            String shortName = shortNameMgr.allocate(uriStr).localName();
-
-            String graphArg = Optional.ofNullable(arg.graph())
-                    .filter(g -> Quad.isDefaultGraph(g))
-                    .map(Node::getURI).orElse("-");
-
-            String fmtArg = Optional.ofNullable(arg.lang())
-                    .map(l -> l.getFileExtensions())
-                    .map(l -> l.isEmpty() ? null : l.get(0))
-                    .orElse("");
-
-            String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
-            cmdParts.add(cmdPart);
-
-            fsBinds.put(fileArg, "/data/" + shortName);
-        }
-
-        List<Bind> binds = fsBinds.entrySet().stream()
-            .map(e -> new Bind(e.getKey(), new Volume(e.getValue()), AccessMode.ro))
-            .toList();
-
-        String[] argParts = cmdParts.toArray(String[]::new);
-
-        return new FileSpec(argParts, binds);
     }
 
     /** Record to hold either a command for a ProcessBuilder that produces output or a ByteSource. */
@@ -281,20 +278,17 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
 
 
     /**
-     * hostFileTask: The name of a regular file or a named pipe on the host.
+     * hostFileWriterTask:
+     *               The name of a regular file or a named pipe on the host.
      *               The writer may be a noop or a generator for that file's content.
      * bind:         Docker bind specification of the hostFile into a container path
      * cmdContrib:   Contribution to the docker invocation. Contains the container file path and any post-processing.
      */
-    public record DockerDataArgumentBridge(FileWriterTask hostFileTask, Bind bind, String[] cmdContrib) {}
+    public record DockerDataArgumentBridge(FileWriterTask hostFileWriterTask, Bind bind, String[] cmdContrib) {}
 
-    /** Record to capture whether to pass input data as files or as an input stream. */
-    // XXX The lang argument is not ideal here - a mime type would be more generic.
-    public record InputSpec(FileSpec fileSpec, ByteSourceSpec byteSourceSpec, Lang byteSourceSpecLang) {}
+    public record InputSpec(List<DockerDataArgumentBridge> dataBridges) {}
 
-    public record InputSpec2(List<DockerDataArgumentBridge> dataBridges) {}
-
-    protected InputSpec2 buildInputSpec(Supplier<Path> hostTempPath) throws NoSuchFileException {
+    protected InputSpec buildInputSpec(Supplier<Path> hostTempPath) throws NoSuchFileException {
 
         List<DockerDataArgumentBridge> dataBridges = new ArrayList<>(args.size());
         // For each file, check whether any operations need to be performed on the host
@@ -307,7 +301,7 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
             DockerDataArgumentBridge fileSpec = buildHostToContainerDataBridge(hostTempPath, op, graph, lang);
             dataBridges.add(fileSpec);
         }
-        return new InputSpec2(dataBridges);
+        return new InputSpec(dataBridges);
         // List<StreamOp> ops = args.stream().map(this::convertArgToOp).toList();
     }
 
@@ -451,42 +445,11 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
 
         FileAndCmd containerFileAndCmd = buildCmdPart(containerFifoPath, op, plainFileName, graph, lang);
 
-        Bind bind = new Bind(hostFileWriter.getOutputPath().toString(), new Volume(containerFileAndCmd.fileName()), AccessMode.ro);
+        Path finalHostFileWriterPath = ContainerPathResolver.resolvePath(containerPathResolver, hostFileWriter.getOutputPath());
+
+        Bind bind = new Bind(finalHostFileWriterPath.toString(), new Volume(containerFileAndCmd.fileName()), AccessMode.ro);
 
         DockerDataArgumentBridge result = new DockerDataArgumentBridge(hostFileWriter, bind, containerFileAndCmd.cmd());
-        return result;
-    }
-
-    protected InputSpec buildInputSpecOld() {
-        Set<Lang> usedLangs = args.stream().map(FileArg::lang).collect(Collectors.toSet());
-        // TODO Remove subsumed languages
-        // Check whether any arguments require decoding.
-        // RDFLanguagesEx.streamSubLangs(null)
-        List<StreamOp> ops = args.stream().map(this::convertArgToOp).toList();
-
-        boolean isAllFiles = ops.stream().allMatch(op -> op instanceof StreamOpFile);
-
-        InputSpec result;
-        if (isAllFiles) {
-            FileSpec fileSpec = buildFileSpec();
-            result = new InputSpec(fileSpec, null, null);
-        } else {
-            if (usedLangs.contains(Lang.NQUADS) && usedLangs.contains(Lang.TURTLE)) {
-                throw new RuntimeException("Unsupported mix of languages: nq + ttl");
-            }
-
-            Lang finalLang = usedLangs.iterator().next();
-            ByteSourceSpec byteSourceCmd = buildByteSourceCmd(ops, finalLang);
-            result = new InputSpec(null, byteSourceCmd, finalLang);
-        }
-        return result;
-    }
-
-    protected String buildDockerImageName() {
-        String qleverDockerTag = QleverConstants.DOCKER_IMAGE_TAG;
-        String result = Stream.of(QleverConstants.DOCKER_IMAGE_NAME, qleverDockerTag)
-            .filter(x -> x != null)
-            .collect(Collectors.joining(":"));
         return result;
     }
 
@@ -509,9 +472,12 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
         String str = cmdParts.stream().collect(Collectors.joining(" "));
         logger.info("Start command: " + str);
 
-        String dockerImageName = buildDockerImageName();
+        String finalImageName = QleverConstants.buildDockerImageName(dockerImageName, dockerImageTag);
 
-        org.testcontainers.containers.GenericContainer<?> result = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
+        Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
+
+
+        org.testcontainers.containers.GenericContainer<?> result = new org.testcontainers.containers.GenericContainer<>(finalImageName)
             .withWorkingDirectory("/data/")
             // .withExposedPorts(containerPort)
             // Setting UID does not work with latest image due to
@@ -519,7 +485,7 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
             // .withEnv("UID", Integer.toString(uid))
             // .withEnv("GID", Integer.toString(gid))
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
-            .withFileSystemBind(outputFolder.toString(), "/data/", BindMode.READ_WRITE)
+            .withFileSystemBind(finalOutputFolder.toString(), "/data/", BindMode.READ_WRITE)
             .withCommand(new String[]{str})
             .withLogConsumer(frame -> logger.info(frame.getUtf8StringWithoutLineEnding()))
             // .withCommand(new String[]{"ServerMain -h"})
@@ -647,10 +613,10 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
         int gid = SystemUtils.getGID();
         logger.info("Attempting to launch container via syscall. UID: " + uid + ", GID: " + gid);
 
-        String dockerImageName = buildDockerImageName();
+        String finalImageName = QleverConstants.buildDockerImageName(dockerImageName, dockerImageTag);
         String fmt = langToFormat(lang);
 
-        GenericContainer<?> result = new GenericContainer<>(dockerImageName)
+        GenericContainer<?> result = new GenericContainer<>(finalImageName)
             .withWorkingDirectory("/data")
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
             .withFileSystemBind(outputFolder.toString(), "/data", BindMode.READ_WRITE)
@@ -741,6 +707,7 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
         // Resource manager to close all task at the end
         FinallyRunAll closer = FinallyRunAll.create();
 
+        // tempPath is only created on demand.
         Path[] tempPath = new Path[]{null};
 
         try {
@@ -748,7 +715,8 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
                 try {
                     Path r = tempPath[0] != null
                         ? tempPath[0]
-                        : (tempPath[0] = Files.createTempDirectory("qlever-loader"));
+                        : (tempPath[0] = ContainerPathResolver.resolvePath(containerPathResolver,
+                                Files.createTempDirectory("qlever-loader")));
 
                     logger.info("Created fifo folder: " + tempPath[0]);
                     return r;
@@ -768,7 +736,7 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
                 }
             });
 
-            InputSpec2 spec = buildInputSpec(getHostTempPath);
+            InputSpec spec = buildInputSpec(getHostTempPath);
 
             logger.info("Attempting to launch container with binds and file arg");
             SysRuntime runtime = SysRuntimeImpl.forCurrentOs();
@@ -810,7 +778,7 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
 
                 // Start writing host files
                 for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-                    FileWriterTask task = dataBridge.hostFileTask();
+                    FileWriterTask task = dataBridge.hostFileWriterTask();
                     closer.addThrowing(task::close);
                     task.start();
                 }
@@ -833,8 +801,38 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
         return result;
     }
 
+    /** Record to capture whether to pass input data as files or as an input stream. */
+    // XXX The lang argument is not ideal here - a mime type would be more generic.
+    /*
+    public record InputSpecOld(FileSpec fileSpec, ByteSourceSpec byteSourceSpec, Lang byteSourceSpecLang) {}
+
+    protected InputSpecOld buildInputSpecOld() {
+        Set<Lang> usedLangs = args.stream().map(FileArg::lang).collect(Collectors.toSet());
+        // TODO Remove subsumed languages
+        // Check whether any arguments require decoding.
+        // RDFLanguagesEx.streamSubLangs(null)
+        List<StreamOp> ops = args.stream().map(this::convertArgToOp).toList();
+
+        boolean isAllFiles = ops.stream().allMatch(op -> op instanceof StreamOpFile);
+
+        InputSpecOld result;
+        if (isAllFiles) {
+            FileSpec fileSpec = buildFileSpec();
+            result = new InputSpecOld(fileSpec, null, null);
+        } else {
+            if (usedLangs.contains(Lang.NQUADS) && usedLangs.contains(Lang.TURTLE)) {
+                throw new RuntimeException("Unsupported mix of languages: nq + ttl");
+            }
+
+            Lang finalLang = usedLangs.iterator().next();
+            ByteSourceSpec byteSourceCmd = buildByteSourceCmd(ops, finalLang);
+            result = new InputSpecOld(null, byteSourceCmd, finalLang);
+        }
+        return result;
+    }
+
     public RdfDatabaseQlever buildOld() throws IOException, InterruptedException {
-        InputSpec inputSpec = null ;// buildInputSpec();
+        InputSpecOld inputSpec = null ;// buildInputSpec();
 
         FileSpec fileSpec = inputSpec.fileSpec();
         if (fileSpec != null) {
@@ -858,5 +856,52 @@ public class RdfDatabaseBuilderQlever<X extends RdfDatabaseBuilderQlever<X>>
         RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, indexName);
         return result;
     }
+
+        protected FileSpec buildFileSpec() {
+        List<String> cmdParts = new ArrayList<>();
+        Map<String, String> fsBinds = new LinkedHashMap<>();
+        for (FileArg arg : args) {
+
+            Path path = arg.path();
+            if (containerPathResolver != null) {
+                if (path != null) {
+                    path = path.toAbsolutePath();
+                    Path resolvedPath = containerPathResolver.resolve(path);
+                    logger.info("Resolved path: " + path + " -> " + resolvedPath);
+                    path = resolvedPath;
+                }
+            }
+
+            String fileArg = Optional.ofNullable(path)
+                .map(Path::toString)
+                .orElse("-");
+
+            String uriStr = arg.path().toUri().toString();
+            String shortName = shortNameMgr.allocate(uriStr).localName();
+
+            String graphArg = Optional.ofNullable(arg.graph())
+                .filter(g -> Quad.isDefaultGraph(g))
+                .map(Node::getURI).orElse("-");
+
+            String fmtArg = Optional.ofNullable(arg.lang())
+                .map(l -> l.getFileExtensions())
+                .map(l -> l.isEmpty() ? null : l.get(0))
+                .orElse("");
+
+            String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
+            cmdParts.add(cmdPart);
+
+            fsBinds.put(fileArg, "/data/" + shortName);
+        }
+
+        List<Bind> binds = fsBinds.entrySet().stream()
+            .map(e -> new Bind(e.getKey(), new Volume(e.getValue()), AccessMode.ro))
+            .toList();
+
+        String[] argParts = cmdParts.toArray(String[]::new);
+
+        return new FileSpec(argParts, binds);
+    }
+    */
 }
 

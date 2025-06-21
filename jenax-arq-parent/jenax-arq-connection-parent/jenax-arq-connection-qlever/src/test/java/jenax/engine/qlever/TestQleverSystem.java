@@ -24,6 +24,7 @@ public class TestQleverSystem {
     public void test() throws Exception {
         RDFEngineFactoryRegistry registry = RDFEngineFactoryRegistry.get();
 
+        // String systemName = "qlever:commit-f59763c";
         String systemName = "qlever";
 
         Closer closer = Closer.create();

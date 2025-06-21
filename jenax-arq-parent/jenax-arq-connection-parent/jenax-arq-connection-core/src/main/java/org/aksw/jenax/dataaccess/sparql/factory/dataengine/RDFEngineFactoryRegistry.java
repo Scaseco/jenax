@@ -34,7 +34,7 @@ public class RDFEngineFactoryRegistry {
     }
 
     protected Map<String, RDFEngineFactoryProvider> engineProviderRegistry = Collections.synchronizedMap(new LinkedHashMap<>());
-    protected Map<String, RdfDatabaseFactoryProvider> databaseProviderRegistry = Collections.synchronizedMap(new LinkedHashMap<>());
+    protected Map<String, RDFDatabaseFactoryProvider> databaseProviderRegistry = Collections.synchronizedMap(new LinkedHashMap<>());
 
     protected Map<String, RdfDataSourceDecorator> decoratorRegistry = Collections.synchronizedMap(new LinkedHashMap<>());
 
@@ -59,7 +59,7 @@ public class RDFEngineFactoryRegistry {
         return this;
     }
 
-    public RDFEngineFactoryRegistry putDatabaseProvider(String providerName, RdfDatabaseFactoryProvider provider) {
+    public RDFEngineFactoryRegistry putDatabaseProvider(String providerName, RDFDatabaseFactoryProvider provider) {
         Objects.requireNonNull(providerName);
         Objects.requireNonNull(provider);
         databaseProviderRegistry.put(providerName, provider);

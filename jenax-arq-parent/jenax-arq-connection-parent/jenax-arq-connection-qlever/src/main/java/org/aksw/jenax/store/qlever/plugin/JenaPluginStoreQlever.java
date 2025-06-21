@@ -31,7 +31,7 @@ public class JenaPluginStoreQlever
 
     public static void init(RDFEngineFactoryRegistry registry) {
         registry.putEngineProvider(QleverConstants.PREFIX, new RDFEngineFactoryProviderQlever());
-        registry.putDatabaseProvider(QleverConstants.PREFIX, new RdfDatabaseFactoryProviderQlever());
+        registry.putDatabaseProvider(QleverConstants.PREFIX, new RDFDatabaseFactoryProviderQlever());
     }
 
     static void registerWith(AssemblerGroup g) {

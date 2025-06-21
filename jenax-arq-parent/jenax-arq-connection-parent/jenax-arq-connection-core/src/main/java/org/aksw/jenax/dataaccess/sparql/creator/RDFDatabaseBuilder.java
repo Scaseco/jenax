@@ -9,7 +9,7 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdflink.RDFLinkDataset;
 
 /** Essentially a batching version of the {@link RDFLinkDataset} API. */
-public interface RdfDatabaseBuilder<X extends RdfDatabaseBuilder<X>>
+public interface RDFDatabaseBuilder<X extends RDFDatabaseBuilder<X>>
     extends HasSelf<X>
 {
     /** The the folder of the database location. */

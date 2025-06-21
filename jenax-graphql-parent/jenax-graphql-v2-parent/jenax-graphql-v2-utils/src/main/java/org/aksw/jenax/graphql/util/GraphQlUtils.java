@@ -1,6 +1,7 @@
 package org.aksw.jenax.graphql.util;
 
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,9 @@ import graphql.language.ScalarValue;
 import graphql.language.StringValue;
 import graphql.language.Value;
 import graphql.language.VariableReference;
+import graphql.parser.Parser;
+import graphql.parser.ParserEnvironment;
+import graphql.parser.ParserOptions;
 import graphql.util.TraverserContext;
 import graphql.util.TreeTransformerUtil;
 
@@ -454,5 +458,32 @@ public class GraphQlUtils {
 
     public static void removeDirectivesByName(Collection<Directive> directives, String name) {
         directives.removeIf(d -> d.getName().equals(name));
+    }
+
+
+    public static Document parseUnrestricted(Reader reader) {
+        return parseUnrestricted(builder -> builder.document(reader));
+    }
+
+    public static Document parseUnrestricted(String documentStr) {
+        return parseUnrestricted(builder -> builder.document(documentStr));
+    }
+
+    public static Document parseUnrestricted(Function<ParserEnvironment.Builder, ? extends ParserEnvironment.Builder> builderCallback) {
+        ParserOptions parserOptions = ParserOptions.newParserOptions()
+            .maxTokens(Integer.MAX_VALUE)
+            .maxRuleDepth(Integer.MAX_VALUE)
+            .maxWhitespaceTokens(Integer.MAX_VALUE)
+            .maxCharacters(Integer.MAX_VALUE)
+            .build();
+
+        ParserEnvironment.Builder parserEnvBuilder = ParserEnvironment.newParserEnvironment()
+            .parserOptions(parserOptions);
+
+        parserEnvBuilder = builderCallback.apply(parserEnvBuilder);
+
+        ParserEnvironment parserEnv = parserEnvBuilder.build();
+        Document result = Parser.parse(parserEnv);
+        return result;
     }
 }
