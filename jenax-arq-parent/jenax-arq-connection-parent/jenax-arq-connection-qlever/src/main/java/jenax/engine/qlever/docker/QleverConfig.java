@@ -67,7 +67,7 @@ public interface QleverConfig {
     void setThrowOnUnboundVariables(Boolean throwOnUnboundVariables);
 
     default void copyInto(QleverConfig dest, boolean copyNulls) {
-        String str;
+        String s;
         Boolean b;
         Integer i;
         Long l;
@@ -75,29 +75,29 @@ public interface QleverConfig {
 //        if ((str = getDbPath()) != null || copyNulls) {
 //            dest.setDbPath(str);
 //        }
-        if((str = getIndexBaseName()) != null || copyNulls) {
-            dest.setIndexBaseName(str);
+        if((s = getIndexBaseName()) != null || copyNulls) {
+            dest.setIndexBaseName(s);
         }
         if((i = getPort()) != null || copyNulls) {
             dest.setPort(i);
         }
-        if((str = getAccessToken()) != null || copyNulls) {
-            dest.setAccessToken(str);
+        if((s = getAccessToken()) != null || copyNulls) {
+            dest.setAccessToken(s);
         }
         if((i = getNumSimultaneousQueries()) != null || copyNulls) {
             dest.setNumSimultaneousQueries(i);
         }
-        if((str = getMemoryMaxSize()) != null || copyNulls) {
-            dest.setMemoryMaxSize(str);
+        if((s = getMemoryMaxSize()) != null || copyNulls) {
+            dest.setMemoryMaxSize(s);
         }
-        if((str = getCacheMaxSize()) != null || copyNulls) {
-            dest.setCacheMaxSize(str);
+        if((s = getCacheMaxSize()) != null || copyNulls) {
+            dest.setCacheMaxSize(s);
         }
-        if((str = getCacheMaxSizeSingleEntry()) != null || copyNulls) {
-            dest.setCacheMaxSizeSingleEntry(str);
+        if((s = getCacheMaxSizeSingleEntry()) != null || copyNulls) {
+            dest.setCacheMaxSizeSingleEntry(s);
         }
-        if((str = getLazyResultMaxCacheSize()) != null || copyNulls) {
-            dest.setLazyResultMaxCacheSize(str);
+        if((s = getLazyResultMaxCacheSize()) != null || copyNulls) {
+            dest.setLazyResultMaxCacheSize(s);
         }
         if((l = getCacheMaxNumEntries()) != null || copyNulls) {
             dest.setCacheMaxNumEntries(l);
@@ -110,6 +110,9 @@ public interface QleverConfig {
         }
         if((b = getText()) != null || copyNulls) {
             dest.setText(b);
+        }
+        if((s = getDefaultQueryTimeout()) != null || copyNulls) {
+            dest.setDefaultQueryTimeout(s);
         }
         if((l = getServiceMaxValueRows()) != null || copyNulls) {
             dest.setServiceMaxValueRows(l);
