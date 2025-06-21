@@ -16,6 +16,7 @@ import org.testcontainers.DockerClientFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Volume;
 
 public class ContainerPathResolver {
@@ -151,6 +152,30 @@ public class ContainerPathResolver {
         }
 
         return result;
+    }
+
+    /**
+     * Find and inspect the container that matches this process's hostname.
+     *
+     * @return InspectContainerResponse of the matching container
+     * @throws IOException if /etc/hostname can't be read
+     * @throws RuntimeException if the container cannot be found
+     */
+    public static InspectContainerResponse findSelfByHostname() throws IOException {
+        String myHostname = Files.readString(Path.of("/etc/hostname")).trim();
+        DockerClient docker = DockerClientFactory.instance().client();
+
+        List<Container> containers = docker.listContainersCmd().withShowAll(true).exec();
+
+        for (Container container : containers) {
+            InspectContainerResponse inspect = docker.inspectContainerCmd(container.getId()).exec();
+            String containerHostname = inspect.getConfig().getHostName();
+            if (myHostname.equals(containerHostname)) {
+                return inspect;
+            }
+        }
+
+        throw new RuntimeException("Could not find container with hostname: " + myHostname);
     }
 
     private static boolean isLikelyContainerId(String s) {

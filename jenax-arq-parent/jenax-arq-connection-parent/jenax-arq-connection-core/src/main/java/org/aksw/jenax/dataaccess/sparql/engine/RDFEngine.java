@@ -30,7 +30,7 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
  * {@link RDFEngineDecorator}.
  */
 public interface RDFEngine
-    extends HasRDFLinkSource, AutoCloseable
+    extends HasRDFLinkSource, HasServiceControl, AutoCloseable
 {
     /**
      * An engine may optionally expose a way to start and stop
@@ -39,5 +39,6 @@ public interface RDFEngine
      * free any resources. Only calling {@link ServiceControl#stop()} is generally
      * NOT sufficient.
      */
+    @Override
     Optional<ServiceControl> getServiceControl();
 }
