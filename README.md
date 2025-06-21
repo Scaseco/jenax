@@ -38,7 +38,7 @@ played back to the official Jena.
 git clone https://github.com/Aklakan/jena.git jena-se
 cd jena-se
 git switch se-fixes-2023-11-29
-mvn -T1C -Dmaven.test.skip clean install
+mvn -Dmaven.test.skip clean install
 ```
 
 2. Build the JenaX plugins bundle, which includes the Qlever assembler. Note that `FUSEKI_EXTRA_JARS_FOLDER` is the folder for extra jars of your Fuseki setup.
