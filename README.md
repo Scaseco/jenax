@@ -80,7 +80,7 @@ PREFIX qlever:    <http://jena.apache.org/qlever#>
 
 ### Docker-outside-of-Docker (DooD) Setup.
 
-If Fuseki runs in a docker container then it can start qlever as a sidecar container based on the assembler config.
+If Fuseki runs in a docker container then it can start qlever as a secondary container based on the assembler config.
 However, this requires additional configuration which may differ between environments.
 The following describes a typical setup on Ubuntu 24.04.
 
