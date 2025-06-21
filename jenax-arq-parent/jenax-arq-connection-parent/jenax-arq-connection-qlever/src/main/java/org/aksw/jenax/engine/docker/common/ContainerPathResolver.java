@@ -95,16 +95,16 @@ public class ContainerPathResolver {
             logger.warn("Error trying to gather candidate container ids.", e);
             candidateIds = Set.of();
         }
-        InspectContainerResponse result = null;
 
+        logger.info("Candidate container ids: " + candidateIds);
+        InspectContainerResponse result = null;
         for (String candidateId : candidateIds) {
             try {
                 result = dockerClient
                     .inspectContainerCmd(candidateId)
                     .exec();
             } catch (Exception e) {
-                logger.info("Could not inspect candidate containerId.", e);
-                return null;
+                logger.info("Inspection failed for candidate containerId " + candidateId + ". Trying next.", e);
             }
         }
         return result;
