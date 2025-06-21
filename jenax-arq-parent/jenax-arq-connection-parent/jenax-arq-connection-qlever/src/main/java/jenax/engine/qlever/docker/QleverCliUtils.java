@@ -26,42 +26,42 @@ public class QleverCliUtils {
         Objects.requireNonNull(args);
         Objects.requireNonNull(cnf);
 
-        String str;
+        String s;
         Boolean b;
         Integer i;
         Long l;
 
-        if ((str = cnf.getIndexBaseName()) != null) {
+        if ((s = cnf.getIndexBaseName()) != null) {
             args.add("-i");
-            args.add(str);
+            args.add(s);
         }
         if((i = cnf.getPort()) != null) {
             args.add("-p");
             args.add(Integer.toString(i));
         }
-        if((str = cnf.getAccessToken()) != null) {
+        if((s = cnf.getAccessToken()) != null) {
             args.add("-a");
-            args.add(str);
+            args.add(s);
         }
         if((i = cnf.getNumSimultaneousQueries()) != null) {
             args.add("-j");
             args.add(Integer.toString(i));
         }
-        if((str = cnf.getMemoryMaxSize()) != null) {
+        if((s = cnf.getMemoryMaxSize()) != null) {
             args.add("-m");
-            args.add(str);
+            args.add(s);
         }
-        if((str = cnf.getCacheMaxSize()) != null) {
+        if((s = cnf.getCacheMaxSize()) != null) {
             args.add("-c");
-            args.add(str);
+            args.add(s);
         }
-        if((str = cnf.getCacheMaxSizeSingleEntry()) != null) {
+        if((s = cnf.getCacheMaxSizeSingleEntry()) != null) {
             args.add("-e");
-            args.add(str);
+            args.add(s);
         }
-        if((str = cnf.getLazyResultMaxCacheSize()) != null) {
+        if((s = cnf.getLazyResultMaxCacheSize()) != null) {
             args.add("-E");
-            args.add(str);
+            args.add(s);
         }
         if((l = cnf.getCacheMaxNumEntries()) != null) {
             args.add("-k");
@@ -75,6 +75,11 @@ public class QleverCliUtils {
         }
         if((b = cnf.getText()) != null && b) {
             args.add("-t");
+        }
+        // XXX --only-pso-and-pos-permutations
+        if((s = cnf.getDefaultQueryTimeout()) != null) {
+            args.add("-s");
+            args.add(s);
         }
         if((l = cnf.getServiceMaxValueRows()) != null) {
             args.add("-S");

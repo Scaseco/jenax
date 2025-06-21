@@ -17,6 +17,7 @@ import org.testcontainers.DockerClientFactory;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.NetworkSettings;
 import com.github.dockerjava.api.model.Volume;
 
 public class ContainerPathResolver {
@@ -46,6 +47,7 @@ public class ContainerPathResolver {
             return null;
         }
         logger.info("Detected container ID: " + containerInfo.getId());
+
 
         Map<Path, Path> mountMap = new HashMap<>();
         for (InspectContainerResponse.Mount mount : containerInfo.getMounts()) {
@@ -184,4 +186,32 @@ public class ContainerPathResolver {
         logger.info("Is container id: " + s + " -> " + result);
         return result;
     }
+
+//    public static GenericContainer<?> launchInSameNetworks(
+//            DockerClient docker,
+//            InspectContainerResponse primary,
+//            String image
+//        ) {
+//            Set<String> networks = primary.getNetworkSettings().getNetworks().keySet();
+//            Iterator<String> it = networks.iterator();
+//            String primaryNetwork = it.next();
+//
+//            Set<String> remainingNetworks = new HashSet<>(networks);
+//            remainingNetworks.remove(primaryNetwork);
+//
+//            GenericContainer<?> container = new GenericContainer<>(image)
+//                .withNetworkMode(primaryNetwork);
+//
+//            container.start();
+//
+//            String id = container.getContainerId();
+//            for (String network : remainingNetworks) {
+//                docker.connectToNetworkCmd()
+//                      .withContainerId(id)
+//                      .withNetworkId(network)
+//                      .exec();
+//            }
+//
+//            return container;
+//        }
 }
