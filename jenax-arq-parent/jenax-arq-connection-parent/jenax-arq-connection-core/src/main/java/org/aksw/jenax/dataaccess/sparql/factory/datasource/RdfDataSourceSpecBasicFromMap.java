@@ -127,8 +127,15 @@ public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutab
     }
 
     @Override
-    public X setProperties(Map<String, Object> values) {
+    public X setProperties(Map<String, ?> values) {
         values.forEach(this::setProperty);
         return self();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getProperty(String key) {
+        Object r = map.get(key);
+        return (T)r;
     }
 }

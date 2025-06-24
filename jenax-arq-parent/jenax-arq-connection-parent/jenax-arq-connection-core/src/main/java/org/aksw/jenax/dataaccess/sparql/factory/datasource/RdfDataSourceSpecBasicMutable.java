@@ -1,12 +1,10 @@
 package org.aksw.jenax.dataaccess.sparql.factory.datasource;
 
-import java.util.Map;
-
-import org.aksw.commons.util.obj.HasSelf;
+import org.aksw.jenax.dataaccess.sparql.creator.HasProperties;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 
 public interface RdfDataSourceSpecBasicMutable<X extends RdfDataSourceSpecBasicMutable<X>>
-    extends RdfDataSourceSpecBasic, HasSelf<X>
+    extends RdfDataSourceSpecBasic, HasProperties<X>
 {
     X setEngine(String engine);
 
@@ -37,10 +35,4 @@ public interface RdfDataSourceSpecBasicMutable<X extends RdfDataSourceSpecBasicM
 
     /** If the db did not yet exist yet and had to be created, delete it after use? true = yes*/
     X setAutoDeleteIfCreated(Boolean onOrOff);
-
-    /** Set a vendor specific property. */
-    X setProperty(String key, Object value);
-
-    /** Set a vendor specific properties. */
-    X setProperties(Map<String, Object> values);
 }

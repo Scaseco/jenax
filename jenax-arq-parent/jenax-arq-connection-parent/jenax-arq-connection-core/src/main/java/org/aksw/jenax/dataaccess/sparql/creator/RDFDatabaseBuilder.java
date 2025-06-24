@@ -3,19 +3,24 @@ package org.aksw.jenax.dataaccess.sparql.creator;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.aksw.commons.util.obj.HasSelf;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdflink.RDFLinkDataset;
 
 /** Essentially a batching version of the {@link RDFLinkDataset} API. */
 public interface RDFDatabaseBuilder<X extends RDFDatabaseBuilder<X>>
-    extends HasSelf<X>
+    extends HasProperties<X>
+    // extends HasSelf<X>
 {
     /** The the folder of the database location. */
     X setOutputFolder(Path outputFolder);
 
-    /** Set the database name. May not be supported by the underlying database management system. */
+    /**
+     * Set the database name.
+     * Interpretation of this property depends on the implementation.
+     * Typically, either a sub folder in the output folder is created,
+     * or the name is used as a file prefix.
+     */
     X setName(String name);
 
     /** Prepare an RDF file for loading. If the data is triple-based it will be added to the

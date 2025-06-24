@@ -98,6 +98,7 @@ public class StreamOpVisitorStream
         // or it can be run directly.
         String[] cmd = runtime.compileCommand(cmdOp);
 
+        // TODO This command should also be obtained from the system environment!
         List<String> c = new ArrayList<>();
         c.add("/usr/bin/bash");
         c.add("-c");

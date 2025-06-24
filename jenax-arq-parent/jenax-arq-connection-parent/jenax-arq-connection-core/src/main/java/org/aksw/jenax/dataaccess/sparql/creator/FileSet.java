@@ -2,12 +2,14 @@ package org.aksw.jenax.dataaccess.sparql.creator;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
 /** A file set is a set of regular files and directories. */
 public interface FileSet {
+
+    /** If false then the file set is a static snapshot, otherwise it reflects the available files. */
+    // boolean isLiveView();
 
     List<Path> getPaths() throws IOException;
 
@@ -17,7 +19,7 @@ public interface FileSet {
         long result = 0;
         for (Path path : paths) {
             // try {
-                if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                if (Files.isRegularFile(path)) { // , LinkOption.NOFOLLOW_LINKS)) {
                     result += Files.size(path);
                 }
 //            } catch (IOException e) {
@@ -33,6 +35,7 @@ public interface FileSet {
     }
 
     /** For safety reasons, delete must be implemented. */
+    @SuppressWarnings("unused")
     default void delete() throws IOException {
         throw new UnsupportedOperationException();
     }

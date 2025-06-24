@@ -19,7 +19,7 @@ import com.github.dockerjava.api.command.WaitContainerResultCallback;
 public class QleverRunner {
     private static final Logger logger = LoggerFactory.getLogger(QleverRunner.class);
 
-    public static void run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverConfRun conf) throws NumberFormatException, IOException, InterruptedException {
+    public static void run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverServerConfigPojo conf) throws NumberFormatException, IOException, InterruptedException {
         int uid = SystemUtils.getUID();
         int gid = SystemUtils.getGID();
         logger.info("Running as UID: " + uid + ", GID: " + gid);

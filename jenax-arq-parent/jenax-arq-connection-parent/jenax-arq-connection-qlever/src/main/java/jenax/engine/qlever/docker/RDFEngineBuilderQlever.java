@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.dataaccess.sparql.creator.FileSetOverPathBase;
@@ -63,13 +62,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         super();
         setImageName(qleverImageName);
         setImageTag(qleverImageTag);
-        setConfig(new QleverConfRun());
+        setConfig(new QleverServerConfigPojo());
 //        this.qleverImageName = qleverImageName;
 //        this.qleverImageTag = qleverImageTag;
         // this.conf = new QleverConfRun();
     }
 
-    public static RDFEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverConfRun conf) throws NumberFormatException, IOException, InterruptedException {
+    public static RDFEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverServerConfigPojo conf) throws NumberFormatException, IOException, InterruptedException {
 
         ContainerPathResolver cpr = ContainerPathResolver.create();
         if (cpr != null) {
@@ -145,7 +144,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             String qleverImageName = getImageName();
             String qleverImageTag = getImageTag();
             // Integer hostPort = getPort();
-            QleverConfig conf = getConfig();
+            QleverServerConfig conf = getConfig();
 
             String indexName = getIndexName();
             if (indexName == null) {
@@ -155,7 +154,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
 
             int defaultContainerPort = 8080;
 
-            QleverConfRun finalConf = new QleverConfRun();
+            QleverServerConfigPojo finalConf = new QleverServerConfigPojo();
             conf.copyInto(finalConf, false);
             finalConf.setIndexBaseName(indexName);
             finalConf.setPort(defaultContainerPort);
@@ -218,13 +217,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         return (String)map.get(IMAGE_NAME_KEY);
     }
 
-    public X setConfig(QleverConfRun qleverConfRun) { // QleverConfRun rather than QleverConfApi because bean utils may not work property with methods - needs to be tested.
+    public X setConfig(QleverServerConfigPojo qleverConfRun) { // QleverConfRun rather than QleverConfApi because bean utils may not work property with methods - needs to be tested.
         map.put(CONFIG_KEY, qleverConfRun);
         return self();
     }
 
-    public QleverConfig getConfig() {
-        return (QleverConfig)map.get(CONFIG_KEY);
+    public QleverServerConfig getConfig() {
+        return (QleverServerConfig)map.get(CONFIG_KEY);
     }
 
     @Override
@@ -233,7 +232,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         try {
             logger.info("Setting attribute: " + key + " -> " + value);
             try {
-                QleverConfig runConf = getConfig();
+                QleverServerConfig runConf = getConfig();
                 BeanUtils.setProperty(runConf, key, value);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 logger.error("Error:", e);
@@ -241,12 +240,6 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         } catch (Throwable e) { // May raise NoClassDefFoundError
             throw new RuntimeException("Failed to set attribute: " + key + " -> " + value, e);
         }
-        return self();
-    }
-
-    @Override
-    public X setProperties(Map<String, Object> values) {
-        values.forEach(this::setProperty);
         return self();
     }
 

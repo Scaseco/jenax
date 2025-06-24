@@ -15,7 +15,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.assembler.DatasetAssembler;
 
-import jenax.engine.qlever.docker.QleverConfRun;
+import jenax.engine.qlever.docker.QleverServerConfigPojo;
 import jenax.engine.qlever.docker.RDFEngineBuilderQlever;
 
 /** */
@@ -24,9 +24,9 @@ public class DatasetAssemblerQlever
 {
     @Override
     protected DatasetGraph createDataset(Assembler a, Resource root) {
-        QleverConfigRdf res = new QleverConfigRdf(root.asNode(), (EnhGraph)root.getModel());
+        QleverServerConfigRdf res = new QleverServerConfigRdf(root.asNode(), (EnhGraph)root.getModel());
 
-        QleverConfRun confRun = new QleverConfRun();
+        QleverServerConfigPojo confRun = new QleverServerConfigPojo();
         res.copyInto(confRun, false);
 
         // Location is currently a separate property because it needs to be fleshed out

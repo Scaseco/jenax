@@ -40,6 +40,12 @@ public class StreamOpTranscode
 
     @Override
     public String toString() {
-        return "(transcode (" + getName() + ") " + subOp + ")";
+        TranscodeMode mode = getTranscodeMode();
+        String s = switch (mode) {
+        case ENCODE -> "encode";
+        case DECODE -> "decode";
+        };
+
+        return "(" + s + " (" + getName() + ") " + subOp + ")";
     }
 }

@@ -11,14 +11,14 @@ public class ServiceControlQlever
 {
     private static final Logger logger = LoggerFactory.getLogger(ServiceControlQlever.class);
 
-    protected QleverConfig config;
+    protected QleverServerConfig config;
 
-    public ServiceControlQlever(GenericContainer<?> container, QleverConfRun config) {
+    public ServiceControlQlever(GenericContainer<?> container, QleverServerConfigPojo config) {
         super(container);
         this.config = Objects.requireNonNull(config);
     }
 
-    QleverConfig getConfig() {
+    QleverServerConfig getConfig() {
         return config;
     }
 
