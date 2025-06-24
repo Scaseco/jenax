@@ -1685,6 +1685,7 @@
 				<configuration>
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
+						<developmentBranch>jena-5.4.0-backport</developmentBranch>
 					</gitFlowConfig>
 				</configuration>
 			</plugin>
