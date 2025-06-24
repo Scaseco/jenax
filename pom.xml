@@ -4,17 +4,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<artifactId>jenax-parent</artifactId>
+	<name>jenax-parent</name>
+	<packaging>pom</packaging>
+
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-bom</artifactId>
 		<version>5.5.0-1-SNAPSHOT</version>
 		<relativePath>jenax-bom</relativePath>
 	</parent>
-
-	<!-- <groupId>org.aksw.jenax</groupId> -->
-	<artifactId>jenax-parent</artifactId>
-
-	<packaging>pom</packaging>
 
 	<modules>
 		<module>jenax-resources-parent</module>

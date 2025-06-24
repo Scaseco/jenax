@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-cli-parent</artifactId>
+        <name>jenax-cli-parent</name>
 	<packaging>pom</packaging>
 
 	<parent>

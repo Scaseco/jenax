@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jenax-models-geosparql</artifactId>
+        <name>jenax-models-geosparql</name>
     <packaging>jar</packaging>
 
     <parent>

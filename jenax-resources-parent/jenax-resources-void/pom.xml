@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-resources-void</artifactId>
+        <name>jenax-resources-void</name>
 	<packaging>jar</packaging>
 
 	<parent>

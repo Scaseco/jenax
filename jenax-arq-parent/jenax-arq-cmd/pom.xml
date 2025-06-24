@@ -6,6 +6,7 @@
 
     <groupId>org.aksw.jenax</groupId>
     <artifactId>jenax-arq-cmd</artifactId>
+        <name>jenax-arq-cmd</name>
 
     <parent>
         <groupId>org.aksw.jenax</groupId>

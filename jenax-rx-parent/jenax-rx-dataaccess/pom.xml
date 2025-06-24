@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-rx-dataaccess</artifactId>
+        <name>jenax-rx-dataaccess</name>
 	
 	<parent>
 		<groupId>org.aksw.jenax</groupId>

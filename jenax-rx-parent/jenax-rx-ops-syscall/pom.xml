@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-rx-ops-syscall</artifactId>
+        <name>jenax-rx-ops-syscall</name>
 	<packaging>jar</packaging>
 
 	<parent>

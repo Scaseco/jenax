@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-server-standalone</artifactId>
+        <name>jenax-server-standalone</name>
 	<packaging>jar</packaging>
 
 	<parent>

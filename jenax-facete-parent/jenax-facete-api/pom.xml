@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-facete-api</artifactId>
+        <name>jenax-facete-api</name>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>

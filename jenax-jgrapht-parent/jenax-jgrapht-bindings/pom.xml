@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jenax-jgrapht-bindings</artifactId>
+        <name>jenax-jgrapht-bindings</name>
     <packaging>jar</packaging>
 
     <parent>
