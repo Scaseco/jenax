@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-io-json</artifactId>
+        <name>jenax-io-json</name>
 	<packaging>jar</packaging>
 
 	<parent>

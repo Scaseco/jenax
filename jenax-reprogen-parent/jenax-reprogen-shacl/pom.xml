@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-reprogen-shacl</artifactId>
+        <name>jenax-reprogen-shacl</name>
 	<packaging>jar</packaging>
 
 	<parent>

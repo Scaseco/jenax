@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-datasets-parent</artifactId>
+        <name>jenax-arq-datasets-parent</name>
 	<packaging>pom</packaging>
 
 	<parent>

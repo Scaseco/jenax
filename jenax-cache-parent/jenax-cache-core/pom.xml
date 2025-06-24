@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jenax-cache-core</artifactId>
+        <name>jenax-cache-core</name>
     <packaging>jar</packaging>
 
 

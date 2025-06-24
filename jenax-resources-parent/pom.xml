@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-resources-parent</artifactId>
+        <name>jenax-resources-parent</name>
 	<packaging>pom</packaging>
 
 	<parent>

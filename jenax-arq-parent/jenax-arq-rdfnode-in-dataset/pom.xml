@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
+        <name>jenax-arq-rdfnode-in-dataset</name>
 	<packaging>jar</packaging>
 
 

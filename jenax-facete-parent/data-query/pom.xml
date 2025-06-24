@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>data-query</artifactId>
+        <name>data-query</name>
 
 	<parent>
 		<groupId>org.hobbit</groupId>

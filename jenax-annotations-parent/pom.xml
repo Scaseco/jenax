@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-annotations-parent</artifactId>
+        <name>jenax-annotations-parent</name>
 	<packaging>pom</packaging>
 
 	<parent>

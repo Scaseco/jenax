@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-models-udf</artifactId>
+        <name>jenax-models-udf</name>
 	<packaging>jar</packaging>
 
 	<parent>
