@@ -20,8 +20,8 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.UnitsConversionException;
 import org.apache.jena.geosparql.implementation.vocabulary.Geo;
+import org.apache.jena.geosparql.spatial.SpatialIndex;
 import org.apache.jena.geosparql.spatial.SpatialIndexException;
-import org.apache.jena.geosparql.spatial.index.v2.SpatialIndexLib;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -167,7 +167,7 @@ public class DbscanPf
         sw.reset().start();
 
         try {
-            SpatialIndexLib.buildSpatialIndex(index.asDatasetGraph());
+            SpatialIndex.buildSpatialIndex(index);
         } catch (SpatialIndexException e1) {
             throw new RuntimeException(e1);
         }

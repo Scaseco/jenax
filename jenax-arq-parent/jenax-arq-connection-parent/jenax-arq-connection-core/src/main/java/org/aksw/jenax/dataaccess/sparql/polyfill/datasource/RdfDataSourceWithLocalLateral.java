@@ -56,7 +56,6 @@ import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
-import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
 import org.apache.jena.sparql.syntax.Element;
@@ -306,7 +305,8 @@ public class RdfDataSourceWithLocalLateral
     public static Dataset createProxyDataset(RDFDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
-        registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
+        // FIMXE Disabling ChainingServiceExecutorBulkConcurrent breaks lateral polyfill!
+        // registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
         registry.getBulkChain().add(new ChainingServiceExecutorBulkServiceEnhancer());
         ServiceEnhancerInit.registerServiceExecutorSelf(registry);
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {

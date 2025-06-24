@@ -9,7 +9,7 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.Rename;
-import org.apache.jena.sparql.lang.arq.ParserARQ;
+import org.apache.jena.sparql.lang.ParserARQ;
 import org.apache.jena.sparql.syntax.Element;
 import org.junit.Assert;
 import org.junit.Test;

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-graphql-v2-parent</artifactId>
-		<version>5.5.0-1-SNAPSHOT</version>
+		<version>5.4.0-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jenax-graphql-v2-fmod</artifactId>
@@ -26,7 +26,6 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-graphql-v2-ui</artifactId>
-			<version>5.5.0-1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Temporary dependency for the newer GraphQL frontend; needs to be
@@ -39,8 +38,7 @@
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-fuseki-server</artifactId>
-			<version>5.5.0-SNAPSHOT</version>
-			<scope>compile</scope>
+			<!-- <scope>compile</scope> -->
 		</dependency>
 
 		<dependency>

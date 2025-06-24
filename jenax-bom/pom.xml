@@ -9,7 +9,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>5.5.0-1-SNAPSHOT</version>
+	<version>5.4.0-1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Unofficial Jena eXtension Components</name>
 	<description>Unofficial modular extensions for Apache Jena</description>
@@ -68,8 +68,8 @@
 		<javax.xml.version>2.3.1</javax.xml.version> <!-- legacy; superseded by
 		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
-		<!-- <jena.version>5.4.0</jena.version> -->
-		<jena.version>5.5.0-SNAPSHOT</jena.version>
+		<jena.version>5.4.0</jena.version>
+		<!-- jena.version>5.5.0-SNAPSHOT</jena.version> -->
 
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
@@ -233,9 +233,14 @@
 				<artifactId>jenax-graphql-v2-schemagen</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-graphql-v2-engine</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-graphql-v2-engine</artifactId>
+				<artifactId>jenax-graphql-v2-ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -779,6 +784,13 @@
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
+			<!-- Fuseki for Mods -->
+                       <dependency>
+                                <groupId>org.apache.jena</groupId>
+                                <artifactId>jena-fuseki-server</artifactId>
+                                <version>${jena.version}</version>
+                        </dependency>
+
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
 				<groupId>org.apache.jena</groupId>

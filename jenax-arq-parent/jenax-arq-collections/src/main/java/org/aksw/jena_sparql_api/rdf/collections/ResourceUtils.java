@@ -39,7 +39,6 @@ import org.apache.jena.rdf.model.impl.ModelCom;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 import org.apache.jena.rdf.model.impl.StatementImpl;
-import org.apache.jena.rdf.model.impl.StatementTermImpl;
 import org.apache.jena.rdf.model.impl.StmtIteratorImpl;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.sparql.ARQConstants;
@@ -1389,7 +1388,7 @@ public class ResourceUtils {
         if ( n.isLiteral() )
             return new LiteralImpl(n, g);
         if ( n.isTripleTerm() )
-            return new StatementTermImpl(n, g);
+            return new ResourceImpl(n, g);
         if (Node.ANY.equals(n) )
             return new ResourceImpl(n, g);
         if ( n.isVariable() ) // This line is the only change over core jena!
