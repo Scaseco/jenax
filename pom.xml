@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-bom</artifactId>
-		<version>5.4.0-2-SNAPSHOT</version>
+		<version>5.4.0-1-SNAPSHOT</version>
 		<relativePath>jenax-bom</relativePath>
 	</parent>
 

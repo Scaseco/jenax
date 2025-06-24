@@ -12,7 +12,7 @@
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-reprogen-parent</artifactId>
 		<!--< <artifactId>jena-sparql-api-mapper-parent</artifactId> -->
-		<version>5.4.0-2-SNAPSHOT</version>
+		<version>5.4.0-1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
