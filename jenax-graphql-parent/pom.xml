@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-graphql-parent</artifactId>
+        <name>jenax-graphql-parent</name>
 	<packaging>pom</packaging>
 
 	<parent>

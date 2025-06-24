@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jenax-models-table</artifactId>
+        <name>jenax-models-table</name>
     <packaging>jar</packaging>
 
     <parent>

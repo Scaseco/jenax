@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-graphql-v2-ui</artifactId>
+        <name>jenax-graphql-v2-ui</name>
 
 	<parent>
 		<groupId>org.aksw.jenax</groupId>

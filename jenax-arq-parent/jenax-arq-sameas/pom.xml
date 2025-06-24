@@ -5,6 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-sameas</artifactId>
+        <name>jenax-arq-sameas</name>
 	<packaging>jar</packaging>
 
 	<parent>
