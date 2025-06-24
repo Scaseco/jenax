@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -54,6 +55,7 @@ import org.aksw.shellgebra.exec.PathLifeCycles;
 import org.aksw.shellgebra.exec.SysRuntime;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
 import org.aksw.shellgebra.registry.CodecRegistry;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.Lang;
@@ -95,8 +97,10 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         }
     }
 
-    protected String dockerImageName;
-    protected String dockerImageTag;
+    protected QleverIndexBuilderConfig config = new QleverIndexBuilderConfigPojo();
+
+//    protected String dockerImageName;
+//    protected String dockerImageTag;
 
     /** Mapping from absolute file paths on the host names to file names. */
     protected ShortNameMgr shortNameMgr = new ShortNameMgr();
@@ -104,13 +108,13 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     /** */
     protected SysRuntime sysRuntime;
 
-    protected Path outputFolder = null;
+//    protected Path outputFolder = null;
     protected List<FileArg> args = new ArrayList<>();
     protected List<Entry<Lang, Throwable>> errorCollector = new ArrayList<>();
 
-    protected String indexName;
+//    protected String indexName;
 
-    protected String stxxlMemory = null;
+//    protected String stxxlMemory = null;
 
     /** Base path within the container where to mount any named pipes.
      *  Must end with '/'.
@@ -123,7 +127,6 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     public RDFDatabaseBuilderQlever() {
         super();
         this.containerPathResolver = ContainerPathResolver.create();
-
         if (containerPathResolver != null) {
             logger.info("Detected docker-in-docker setup (dind).");
         }
@@ -135,21 +138,21 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     }
 
     public X setDockerImageName(String dockerImageName) {
-        this.dockerImageName = dockerImageName;
+        config.setDockerImageName(dockerImageName);
         return self();
     }
 
     public String getDockerImageName() {
-        return dockerImageName;
+        return config.getDockerImageName();
     }
 
     public X setDockerImageTag(String dockerImageTag) {
-        this.dockerImageTag = dockerImageTag;
+        config.setDockerImageTag(dockerImageTag);
         return self();
     }
 
     public String getDockerImageTag() {
-        return dockerImageTag;
+        return config.getDockerImageTag();
     }
 
     @Override
@@ -158,23 +161,23 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     }
 
     public X setIndexName(String name) {
-        this.indexName = name;
+        config.setIndexName(name);
         return self();
     }
 
     @Override
     public X setOutputFolder(Path outputFolder) {
-        this.outputFolder = outputFolder;
+        config.setOutputFolder(outputFolder);
         return self();
     }
 
     public X setStxxlMemory(String stxxlMemory) {
-        this.stxxlMemory = stxxlMemory;
+        config.setStxxlMemory(stxxlMemory);
         return self();
     }
 
     public String getStxxlMemory() {
-        return stxxlMemory;
+        return config.getStxxlMemory();
     }
 
     @Override
@@ -244,7 +247,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
 
     protected ByteSourceSpec buildByteSourceCmd(List<StreamOp> args, Lang lang) {
         // Inject a dummy codec 'cat' to cat immediate file arguments
-        // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile.
+        // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile
         args = args.stream()
             .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode("cat", TranscodeMode.DECODE, f) : x)
             .toList();
@@ -439,13 +442,16 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
             // StreamOp sysOp = StreamOpTransformer.transform(sysCallOp, sysCallTransform);
 
             StreamOp finalOp = StreamOpTransformSubst.subst(nonSysCallOp, hostOps);
-            ByteSource javaByteSource = new ByteSourceOverStreamOp(finalOp); // TODO Supply sysRuntime
+            ByteSource javaByteSource = new ByteSourceOverStreamOp(finalOp, hostOps); // TODO Supply sysRuntime
+            logger.info("Transformed: " + hostPath + " -> " + finalOp);
+            logger.info("Host Ops: " + hostOps);
             hostFileWriter =  new FileWriterTaskFromByteSource(hostPath, PathLifeCycles.deleteAfterExec(PathLifeCycles.namedPipe()), javaByteSource);
         }
 
         FileAndCmd containerFileAndCmd = buildCmdPart(containerFifoPath, op, plainFileName, graph, lang);
 
-        Path finalHostFileWriterPath = ContainerPathResolver.resolvePath(containerPathResolver, hostFileWriter.getOutputPath());
+        // Path finalHostFileWriterPath = ContainerPathResolver.resolvePath(containerPathResolver, hostFileWriter.getOutputPath());
+        Path finalHostFileWriterPath = hostFileWriter.getOutputPath();
 
         Bind bind = new Bind(finalHostFileWriterPath.toString(), new Volume(containerFileAndCmd.fileName()), AccessMode.ro);
 
@@ -461,6 +467,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         List<String> cmdParts = new ArrayList<>();
         cmdParts.add("IndexBuilderMain -i " + indexName);
 
+        String stxxlMemory = config.getStxxlMemory();
         if (stxxlMemory != null && !stxxlMemory.isBlank()) {
             cmdParts.add("-m " + stxxlMemory); // XXX Not escaped!
         }
@@ -472,10 +479,11 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         String str = cmdParts.stream().collect(Collectors.joining(" "));
         logger.info("Start command: " + str);
 
-        String finalImageName = QleverConstants.buildDockerImageName(dockerImageName, dockerImageTag);
-
+        String imageName = config.getDockerImageName();
+        String imageTag = config.getDockerImageTag();
+        Path outputFolder = config.getOutputFolder();
+        String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
         Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
-
 
         org.testcontainers.containers.GenericContainer<?> result = new org.testcontainers.containers.GenericContainer<>(finalImageName)
             .withWorkingDirectory("/data/")
@@ -613,7 +621,13 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         int gid = SystemUtils.getGID();
         logger.info("Attempting to launch container via syscall. UID: " + uid + ", GID: " + gid);
 
-        String finalImageName = QleverConstants.buildDockerImageName(dockerImageName, dockerImageTag);
+        String indexName = config.getIndexName();
+        String imageName = config.getDockerImageName();
+        String imageTag = config.getDockerImageTag();
+        Path outputFolder = config.getOutputFolder();
+        // Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
+
+        String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
         String fmt = langToFormat(lang);
 
         GenericContainer<?> result = new GenericContainer<>(finalImageName)
@@ -674,6 +688,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     }
 
     public String getFinalIndexName() {
+        String indexName = config.getIndexName();
         String finalIndexName = indexName == null ? "default" : indexName;
         return finalIndexName;
     }
@@ -693,6 +708,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     @Override
     public RdfDatabaseQlever build() throws IOException, InterruptedException {
         // The parent directory must exist
+        Path outputFolder = config.getOutputFolder();
         Path parentFolder = outputFolder.getParent();
         if (parentFolder != null) {
             if (!Files.exists(parentFolder)) {
@@ -712,13 +728,24 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
 
         try {
             Supplier<Path> getHostTempPath = () -> {
-                try {
-                    Path r = tempPath[0] != null
-                        ? tempPath[0]
-                        : (tempPath[0] = ContainerPathResolver.resolvePath(containerPathResolver,
-                                Files.createTempDirectory("qlever-loader")));
+                // In a DooD or DinD setup, its easiest if the folder for the named pipes (fifo)
+                // resides within the database location.
+                // A check must be made that the database location is mounted from the host so that
+                // it can be shared with the secondary container.
 
-                    logger.info("Created fifo folder: " + tempPath[0]);
+                try {
+                    Path r = tempPath[0];
+                    if (r == null) {
+                        r = Files.createTempDirectory(outputFolder, "qlever-loader");
+                        // r = ContainerPathResolver.expectResolvePath(containerPathResolver, r);
+                        tempPath[0] = r;
+                    }
+//                    = tempPath[0] != null
+//                        ? tempPath[0]
+//                        : (tempPath[0] = ContainerPathResolver.resolvePath(containerPathResolver,
+//                                Files.createTempDirectory("qlever-loader")));
+
+                    logger.info("Created fifo folder: " + r);
                     return r;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -763,13 +790,17 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
                         BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
                             ? BindMode.READ_ONLY
                             : null;
-                        container.addFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
+
+                        String finalHostPathStr = ContainerPathResolver.resolvePathString(containerPathResolver, bind.getPath());
+
+                        logger.info("Adding binding: " + finalHostPathStr + " -> " + bind.getVolume().getPath());
+                        container.withFileSystemBind(finalHostPathStr, bind.getVolume().getPath(), bindMode);
                     }
                 } else {
                     Path p = tempPath[0];
                     if (p != null) {
 
-                        container.addFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
+                        container.withFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
                     }
                 }
                 // Add the output folder
@@ -799,6 +830,28 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
 
         RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, finalIndexName);
         return result;
+    }
+
+    @Override
+    public X setProperty(String key, Object value) {
+        try {
+            PropertyUtils.setProperty(config, key, value);
+            logger.info("Set property " + key + " -> " + value);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            logger.info("Unsupported property: " + key + "(value was: " + value + ")");
+        }
+        return self();
+    }
+
+    @Override
+    public <T> T getProperty(String key) {
+        Object r = null;
+        try {
+            r = PropertyUtils.getProperty(config, key);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            // Nothing to do.
+        }
+        return (T)r;
     }
 
     /** Record to capture whether to pass input data as files or as an input stream. */

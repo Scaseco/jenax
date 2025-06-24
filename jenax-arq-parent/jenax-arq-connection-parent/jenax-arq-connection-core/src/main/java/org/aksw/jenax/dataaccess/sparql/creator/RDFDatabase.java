@@ -1,8 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.creator;
 
 /**
- * Class to capture the information about
- * an RDF database.
+ * Class to capture the information about an RDF database.
  */
 public interface RDFDatabase {
     /**

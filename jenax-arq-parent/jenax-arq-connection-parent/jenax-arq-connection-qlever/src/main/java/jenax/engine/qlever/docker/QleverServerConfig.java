@@ -1,6 +1,6 @@
 package jenax.engine.qlever.docker;
 
-public interface QleverConfig {
+public interface QleverServerConfig {
 
     String getIndexBaseName();
 
@@ -66,7 +66,7 @@ public interface QleverConfig {
 
     void setThrowOnUnboundVariables(Boolean throwOnUnboundVariables);
 
-    default void copyInto(QleverConfig dest, boolean copyNulls) {
+    default void copyInto(QleverServerConfig dest, boolean copyNulls) {
         String s;
         Boolean b;
         Integer i;
@@ -75,49 +75,52 @@ public interface QleverConfig {
 //        if ((str = getDbPath()) != null || copyNulls) {
 //            dest.setDbPath(str);
 //        }
-        if((s = getIndexBaseName()) != null || copyNulls) {
+        if ((s = getIndexBaseName()) != null || copyNulls) {
             dest.setIndexBaseName(s);
         }
-        if((i = getPort()) != null || copyNulls) {
+        if ((i = getPort()) != null || copyNulls) {
             dest.setPort(i);
         }
-        if((s = getAccessToken()) != null || copyNulls) {
+        if ((s = getAccessToken()) != null || copyNulls) {
             dest.setAccessToken(s);
         }
-        if((i = getNumSimultaneousQueries()) != null || copyNulls) {
+        if ((i = getNumSimultaneousQueries()) != null || copyNulls) {
             dest.setNumSimultaneousQueries(i);
         }
-        if((s = getMemoryMaxSize()) != null || copyNulls) {
+        if ((s = getMemoryMaxSize()) != null || copyNulls) {
             dest.setMemoryMaxSize(s);
         }
-        if((s = getCacheMaxSize()) != null || copyNulls) {
+        if ((s = getCacheMaxSize()) != null || copyNulls) {
             dest.setCacheMaxSize(s);
         }
-        if((s = getCacheMaxSizeSingleEntry()) != null || copyNulls) {
+        if ((s = getCacheMaxSizeSingleEntry()) != null || copyNulls) {
             dest.setCacheMaxSizeSingleEntry(s);
         }
-        if((s = getLazyResultMaxCacheSize()) != null || copyNulls) {
+        if ((s = getLazyResultMaxCacheSize()) != null || copyNulls) {
             dest.setLazyResultMaxCacheSize(s);
         }
-        if((l = getCacheMaxNumEntries()) != null || copyNulls) {
+        if ((l = getCacheMaxNumEntries()) != null || copyNulls) {
             dest.setCacheMaxNumEntries(l);
         }
-        if((b = getNoPatterns()) != null || copyNulls) {
+        if ((b = getNoPatterns()) != null || copyNulls) {
             dest.setNoPatterns(b);
         }
-        if((b = getNoPatternTrick()) != null || copyNulls) {
+        if ((b = getNoPatternTrick()) != null || copyNulls) {
             dest.setNoPatternTrick(b);
         }
-        if((b = getText()) != null || copyNulls) {
+        if ((b = getText()) != null || copyNulls) {
             dest.setText(b);
         }
-        if((s = getDefaultQueryTimeout()) != null || copyNulls) {
+        if ((b = getOnlyPsoAndPosPermutations()) != null || copyNulls) {
+            dest.setOnlyPsoAndPosPermutations(b);
+        }
+        if ((s = getDefaultQueryTimeout()) != null || copyNulls) {
             dest.setDefaultQueryTimeout(s);
         }
-        if((l = getServiceMaxValueRows()) != null || copyNulls) {
+        if ((l = getServiceMaxValueRows()) != null || copyNulls) {
             dest.setServiceMaxValueRows(l);
         }
-        if((b = getThrowOnUnboundVariables()) != null || copyNulls) {
+        if ((b = getThrowOnUnboundVariables()) != null || copyNulls) {
             dest.setThrowOnUnboundVariables(b);
         }
     }

@@ -3,8 +3,8 @@ package jenax.engine.qlever.docker;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class QleverConfRun
-    implements Serializable, QleverConfig
+public class QleverServerConfigPojo
+    implements Serializable, QleverServerConfig
 {
     private static final long serialVersionUID = 1L;
 
@@ -222,7 +222,7 @@ public class QleverConfRun
             return false;
         if (getClass() != obj.getClass())
             return false;
-        QleverConfRun other = (QleverConfRun) obj;
+        QleverServerConfigPojo other = (QleverServerConfigPojo) obj;
         return Objects.equals(accessToken, other.accessToken)
                 && Objects.equals(cacheMaxNumEntries, other.cacheMaxNumEntries)
                 && Objects.equals(cacheMaxSize, other.cacheMaxSize)

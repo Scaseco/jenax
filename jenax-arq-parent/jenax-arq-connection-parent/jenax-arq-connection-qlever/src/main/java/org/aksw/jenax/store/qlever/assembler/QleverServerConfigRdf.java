@@ -9,13 +9,13 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
 
-import jenax.engine.qlever.docker.QleverConfig;
+import jenax.engine.qlever.docker.QleverServerConfig;
 
-public class QleverConfigRdf
+public class QleverServerConfigRdf
     extends ResourceImpl
-    implements QleverConfig
+    implements QleverServerConfig
 {
-    public QleverConfigRdf(Node n, EnhGraph m) {
+    public QleverServerConfigRdf(Node n, EnhGraph m) {
         super(n, m);
     }
 
