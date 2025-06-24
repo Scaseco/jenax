@@ -10,7 +10,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>5.4.0-1</version>
+	<version>5.4.0-2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Unofficial Jena eXtension Components</name>
 	<description>Unofficial modular extensions for Apache Jena</description>
