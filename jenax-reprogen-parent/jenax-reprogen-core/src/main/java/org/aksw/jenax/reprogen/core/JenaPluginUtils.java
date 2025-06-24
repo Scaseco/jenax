@@ -49,7 +49,6 @@ public class JenaPluginUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JenaPluginUtils.class);
 
-
     static {
         JenaSystem.init();
     }
@@ -66,8 +65,6 @@ public class JenaPluginUtils {
      * ensure to call JenaSystem.init() before calling methods on this class
      */
     protected static TypeDeciderImpl typeDecider;
-
-
 
     public static <T extends RDFNode> T polymorphicCast(RDFNode rdfNode, Class<T> viewClass, TypeDecider typeDecider) {
         T result = RDFNodeMapperImpl.castRdfNode(rdfNode, viewClass, typeDecider, false, false);
@@ -105,8 +102,6 @@ public class JenaPluginUtils {
 
         return result;
     }
-
-
 
     public static <T extends RDFNode> T inModel(T rdfNode, Class<T> viewClass, Model target) {
         RDFNode r = rdfNode.inModel(target);
@@ -462,5 +457,4 @@ public class JenaPluginUtils {
 
         return item;
     }
-
 }

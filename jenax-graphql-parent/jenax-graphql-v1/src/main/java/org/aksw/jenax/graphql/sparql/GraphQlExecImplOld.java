@@ -11,7 +11,7 @@ import org.aksw.commons.path.json.PathJson;
 import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
@@ -50,17 +50,17 @@ import io.reactivex.rxjava3.core.Flowable;
 public class GraphQlExecImplOld
     implements GraphQlExec
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected GraphQlToSparqlMapping mapping;
     protected List<GraphQlDataProvider> dataProviders;
 
-    public GraphQlExecImplOld(RdfDataSource dataSource, GraphQlToSparqlMapping mapping) {
+    public GraphQlExecImplOld(RDFDataSource dataSource, GraphQlToSparqlMapping mapping) {
         super();
         this.dataSource = dataSource;
         this.mapping = mapping;
     }
 
-    public RdfDataSource getDataSource() {
+    public RDFDataSource getDataSource() {
         return dataSource;
     }
 

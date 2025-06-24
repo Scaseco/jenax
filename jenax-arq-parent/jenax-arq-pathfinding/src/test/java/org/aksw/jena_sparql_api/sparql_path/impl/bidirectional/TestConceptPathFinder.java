@@ -7,7 +7,7 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinder;
 import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.core.algorithm.ConceptPathFinderSystemBasic;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.path.SimplePath;
@@ -79,7 +79,7 @@ public class TestConceptPathFinder {
         Fragment1 target,
         int n) {
         // Load some test data and create a sparql connection to it
-        RdfDataSource dataSource = () -> RDFConnection.connect(ds);
+        RDFDataSource dataSource = () -> RDFConnection.connect(ds);
 
         //dataConnection.update("DELETE WHERE { ?s a ?t }");
 

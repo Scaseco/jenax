@@ -167,6 +167,7 @@ public class ServerUtils {
         webAppContext.setContextPath("/");
         // context.setDescriptor(externalForm + "/WEB-INF/web.xml");
         webAppContext.setWar(externalForm);
+        webAppContext.setExtractWAR(false);
         server.setHandler(webAppContext);
         return server;
     }

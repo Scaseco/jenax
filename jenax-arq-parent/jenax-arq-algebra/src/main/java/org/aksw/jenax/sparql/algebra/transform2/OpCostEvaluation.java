@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -32,6 +32,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -170,9 +171,25 @@ public class OpCostEvaluation
         return result;
     }
 
+//    @Override
+//    public OpCost eval(OpDiff op, OpCost left, OpCost right) {
+//        Op newOp = op.getLeft() == left.getOp() && op.getRight() == right.getOp() ? op : OpDiff.create(left.getOp(), right.getOp());
+//        // TODO Assumes indexing of the rhs and n lookups with the rhs
+//        OpCost result = new OpCost(newOp, left.getCost() * (float)Math.log(right.getCost()));
+//        return result;
+//    }
+
     @Override
-    public OpCost eval(OpDiff op, OpCost left, OpCost right) {
-        Op newOp = op.getLeft() == left.getOp() && op.getRight() == right.getOp() ? op : OpDiff.create(left.getOp(), right.getOp());
+    public OpCost eval(OpSemiJoin op, OpCost left, OpCost right) {
+        Op newOp = op.getLeft() == left.getOp() && op.getRight() == right.getOp() ? op : OpSemiJoin.create(left.getOp(), right.getOp());
+        // TODO Assumes indexing of the rhs and n lookups with the rhs
+        OpCost result = new OpCost(newOp, left.getCost() * (float)Math.log(right.getCost()));
+        return result;
+    }
+
+    @Override
+    public OpCost eval(OpAntiJoin op, OpCost left, OpCost right) {
+        Op newOp = op.getLeft() == left.getOp() && op.getRight() == right.getOp() ? op : OpAntiJoin.create(left.getOp(), right.getOp());
         // TODO Assumes indexing of the rhs and n lookups with the rhs
         OpCost result = new OpCost(newOp, left.getCost() * (float)Math.log(right.getCost()));
         return result;

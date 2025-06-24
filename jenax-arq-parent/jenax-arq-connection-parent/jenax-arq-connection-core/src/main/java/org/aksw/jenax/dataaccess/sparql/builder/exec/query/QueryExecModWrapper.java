@@ -17,6 +17,11 @@ public interface QueryExecModWrapper<T extends QueryExecMod>
     }
 
     @Override
+    default QueryExecMod timeout(long timeout) {
+        return overallTimeout(timeout, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
     default T initialTimeout(long timeout, TimeUnit timeUnit) {
         getDelegate().initialTimeout(timeout, timeUnit);
         return self();

@@ -1,11 +1,11 @@
 package org.aksw.jenax.sparql.algebra.eval;
 
 import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -29,6 +29,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -86,7 +87,9 @@ public class EvaluatorBase<T>
     @Override public T eval(OpExtend opExtend, T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpJoin opJoin,  T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpLeftJoin opLeftJoin,  T input) { throw new UnsupportedOperationException(); }
-    @Override public T eval(OpDiff opDiff,  T input) { throw new UnsupportedOperationException(); }
+    // @Override public T eval(OpDiff opDiff,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpSemiJoin opSemiJoin,  T input) { throw new UnsupportedOperationException(); }
+    @Override public T eval(OpAntiJoin opAntiJoin,  T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpMinus opMinus,  T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpUnion opUnion,  T input) { throw new UnsupportedOperationException(); }
     @Override public T eval(OpLateral opLater,  T input) { throw new UnsupportedOperationException(); }

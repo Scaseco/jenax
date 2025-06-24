@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
 public class RdfDataSourceWithBnodeRewrite
-    extends RdfDataSourceWrapperBase<RdfDataSource>
+    extends RDFDataSourceWrapperBase<RDFDataSource>
 {
     private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithBnodeRewrite.class);
 
@@ -31,7 +31,7 @@ public class RdfDataSourceWithBnodeRewrite
     // null = not yet initialized, empty = no suitable transformer found
     protected Optional<ExprTransformVirtualBnodeUris> transformer = null;
 
-    public RdfDataSourceWithBnodeRewrite(RdfDataSource delegate, String givenProfileName) {
+    public RdfDataSourceWithBnodeRewrite(RDFDataSource delegate, String givenProfileName) {
         super(delegate);
         this.givenProfileName = givenProfileName;
         this.derivedProfileName = null;
@@ -85,8 +85,8 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
-    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RdfDataSource delegatee) {
-        return new RdfDataSourceWithBnodeRewrite(delegatee, AUTO);
+    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
+        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO);
     }
 
 }

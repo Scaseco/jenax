@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 public class VirtuosoBulkLoad {
 
-
     private static final Logger logger = LoggerFactory.getLogger(VirtuosoBulkLoad.class);
 
     public static void logEnable(Connection conn, int bits, int quiet) throws SQLException {
@@ -51,6 +50,7 @@ public class VirtuosoBulkLoad {
             logger.debug("Done executing " + opName + " graph");
         }
     }
+
     public static void ldDir(Connection conn, String dir, String fileNamePattern, String targetGraphIri) throws SQLException {
         try(PreparedStatement stmt = conn.prepareStatement("ld_dir(?, ?, ?)")) {
             stmt.setString(1, dir);
@@ -120,8 +120,6 @@ public class VirtuosoBulkLoad {
             file.delete();
         }
     }
-
-
 
     public static void graphGroupCreate(Connection conn, String iri, int quiet) throws SQLException {
         try(PreparedStatement stmt = conn.prepareStatement("DB.DBA.RDF_GRAPH_GROUP_CREATE(?, ?)")) {

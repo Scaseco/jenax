@@ -1,0 +1,109 @@
+@media (min-width: 768px) {
+  html {
+    font-size: 125%;
+    max-width: 1024px;
+    max-height: 1024px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  font: 100%/1.5 sans-serif;
+  word-wrap: break-word;
+  margin: auto;
+  padding: 1.5em;
+}
+
+h1, h2, h3, h4 {margin: 2.5rem 0 1.5rem 0;
+    line-height: 1.25;
+    color: #333;}
+
+a {color: #fa6432;
+    text-decoration: none;}
+a:hover, a:focus, a:active {text-decoration: underline;}
+
+p {margin: 1em 0;
+    line-height: 1.5;}
+p code {background-color: #eee;
+    padding: 0.05em 0.2em;
+    border: 1px solid #ccc;}
+
+ol, ul {margin: 1em;}
+ol li ol, ol li ul, ul li ol, ul li ul {margin: 0 2em;}
+ol li p, ul li p {margin: 0;}
+
+dl {font-family: monospace, monospace;}
+dl dt {font-weight: bold;}
+dl dd {margin: -1em 0 1em 1em;}
+
+content {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+content img {
+  display: block;
+  max-width: 256px;
+}
+
+content li > div {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  min-height:4.5em;
+  border: 1px solid lavender;
+  margin: 3px;
+  padding: 3px 1ex;
+}
+
+div.oc {display: table; height: 4.5em;}
+div.ic {display: table-cell; vertical-align: middle;}
+
+footer img {max-height: 2em; vertical-align: middle;}
+
+body {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+header h1 {
+  margin: auto;
+  text-align: center;
+}
+
+header img {max-height: 1.3em;
+  padding-top: 0.22em;
+  padding-right: 0.7ex;
+  vertical-align: middle;
+}
+
+/* ul {list-style-type: none;} */
+ /* Style to create a horizontal list */ 
+ul.horizontal-list {
+  width: 100%;
+  list-style-type: none; 
+  margin: 0; 
+  padding: 0; 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+} 
+  
+ul.horizontal-list li { 
+  margin-right: 10px; 
+} 
+
+footer {
+  margin: auto;
+}
+
+

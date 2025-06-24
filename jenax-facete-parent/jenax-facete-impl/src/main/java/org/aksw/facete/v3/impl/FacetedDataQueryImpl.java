@@ -5,7 +5,7 @@ import java.util.List;
 import org.aksw.facete.v3.api.FacetedDataQuery;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.jena_sparql_api.data_query.impl.DataQueryImpl;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.apache.jena.graph.Node;
@@ -32,19 +32,19 @@ public class FacetedDataQueryImpl<T extends RDFNode>
     extends DataQueryImpl<T>
     implements FacetedDataQuery<T>
 {
-    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseQueryPattern, Var rootVar, Template template,
+    public FacetedDataQueryImpl(RDFDataSource dataSource, Element baseQueryPattern, Var rootVar, Template template,
             Class<T> resultClass) {
         super(dataSource, baseQueryPattern, rootVar, template, resultClass);
     }
 
     @Deprecated
-    public FacetedDataQueryImpl(RdfDataSource dataSource, Fragment1 baseRelation, Template template,
+    public FacetedDataQueryImpl(RDFDataSource dataSource, Fragment1 baseRelation, Template template,
             Class<T> resultClass) {
         super(dataSource, baseRelation, template, resultClass);
     }
 
     @Deprecated
-    public FacetedDataQueryImpl(RdfDataSource dataSource, Element baseElement, List<Var> primaryKeyVars,
+    public FacetedDataQueryImpl(RDFDataSource dataSource, Element baseElement, List<Var> primaryKeyVars,
             Node superRootNode, Var defaultVar, Template template, Class<T> resultClass) {
         super(dataSource, baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
     }

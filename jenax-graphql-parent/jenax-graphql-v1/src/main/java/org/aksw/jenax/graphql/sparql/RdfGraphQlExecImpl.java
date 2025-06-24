@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecSelect;
 import org.aksw.jenax.facete.treequery2.api.NodeQuery;
 import org.aksw.jenax.facete.treequery2.api.RelationQuery;
@@ -37,17 +37,17 @@ import graphql.language.Field;
 public class RdfGraphQlExecImpl
     implements RdfGraphQlExec
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected GraphQlToSparqlMapping mapping;
     protected List<RdfGraphQlDataProvider> dataProviders;
 
-    public RdfGraphQlExecImpl(RdfDataSource dataSource, GraphQlToSparqlMapping mapping) {
+    public RdfGraphQlExecImpl(RDFDataSource dataSource, GraphQlToSparqlMapping mapping) {
         super();
         this.dataSource = dataSource;
         this.mapping = mapping;
     }
 
-    public RdfDataSource getDataSource() {
+    public RDFDataSource getDataSource() {
         return dataSource;
     }
 

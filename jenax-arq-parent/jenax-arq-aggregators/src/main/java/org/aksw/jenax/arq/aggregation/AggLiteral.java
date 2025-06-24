@@ -2,6 +2,8 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.Set;
 
+import org.aksw.jenax.arq.util.binding.BindingMapper;
+import org.aksw.jenax.arq.util.binding.BindingMapperVarAware;
 import org.apache.jena.sparql.core.Var;
 
 public class AggLiteral<T>

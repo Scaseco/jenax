@@ -1,0 +1,64 @@
+
+# Custom scalar type to allow String, List of Strings, or null
+scalar StringList
+scalar StringMap
+
+scalar Scalar
+
+directive @pattern (
+  of: String
+  from: StringList
+  to: StringList
+  via: String
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @bind (
+  of: String
+  as: String
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @from on FIELD | FIELD_DEFINITION
+directive @to on FIELD | FIELD_DEFINITION
+directive @reverse on FIELD | FIELD_DEFINITION
+
+directive @skipIfNull on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @prefix (
+  map: StringMap,
+  name: String,
+  iri: String
+) repeatable on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+
+directive @many (
+  self: Boolean = true
+  cascade: Boolean = true
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+
+directive @one (
+  self: Boolean = true
+  cascade: Boolean = true
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE | QUERY
+
+directive @rdf (
+  iri: String
+  ns: String
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @type (
+  iri: String
+  ns: String
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+# Output directives ----------------------------------------------------------
+
+directive @pretty on FIELD | FIELD_DEFINITION | QUERY
+directive @debug  on FIELD | FIELD_DEFINITION | QUERY
+directive @ndJson on FIELD | FIELD_DEFINITION | QUERY
+
+# Tentris Compatibility ------------------------------------------------------
+
+directive @uri (
+  value: String
+) on FIELD | FIELD_DEFINITION | OBJECT | INTERFACE
+
+directive @filter on FIELD | FIELD_DEFINITION

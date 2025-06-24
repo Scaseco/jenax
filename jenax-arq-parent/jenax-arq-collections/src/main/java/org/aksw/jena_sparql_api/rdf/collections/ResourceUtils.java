@@ -20,6 +20,7 @@ import org.aksw.commons.util.reflect.ClassUtils;
 import org.aksw.jena_sparql_api.mapper.proxy.TypeDecider;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -33,11 +34,13 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.rdf.model.impl.IteratorFactory;
 import org.apache.jena.rdf.model.impl.LiteralImpl;
 import org.apache.jena.rdf.model.impl.ModelCom;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
+import org.apache.jena.rdf.model.impl.StatementImpl;
+import org.apache.jena.rdf.model.impl.StmtIteratorImpl;
+import org.apache.jena.shared.JenaException;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -56,6 +59,7 @@ import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.apache.jena.util.CollectionFactory;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.util.iterator.WrappedIterator;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -358,7 +362,7 @@ public class ResourceUtils {
 
 
 
-         return IteratorFactory.asStmtIterator(it, (ModelCom)m);
+         return asStmtIterator(it, (ModelCom)m);
     }
 
     public static StmtIterator listProperties(Resource s) {
@@ -1353,5 +1357,42 @@ public class ResourceUtils {
         }
 
         return result;
+    }
+
+
+    /* Adaptions for jena 5.5.0 which no longer supports statements over triples with variables */
+
+    static public StmtIterator asStmtIterator( Iterator<Triple> i, final ModelCom m )
+    {
+        return new StmtIteratorImpl( WrappedIterator.create( i ).mapWith( t ->  toStatement( t, m ) ) );
+    }
+
+    /**
+     * create a Statement from the triple _t_ in the enhanced graph _eg_. The
+     * Statement has subject, predicate, and object corresponding to those of
+     * _t_.
+     */
+    public static Statement toStatement(Triple t, ModelCom eg) {
+        Resource s = new ResourceImpl(t.getSubject(), eg);
+        Property p = new PropertyImpl(t.getPredicate(), eg);
+        RDFNode o = createObject(t.getObject(), eg);
+        return new StatementImpl(s, p, o, eg);
+    }
+
+    /**
+     * Create an RDF node from a {@link Node} for a {@link Model}.
+     */
+    public static RDFNode createObject(Node n, EnhGraph g) {
+        if ( n.isBlank() || n.isURI() )
+            return new ResourceImpl(n, g);
+        if ( n.isLiteral() )
+            return new LiteralImpl(n, g);
+        if ( n.isTripleTerm() )
+            return new ResourceImpl(n, g);
+        if (Node.ANY.equals(n) )
+            return new ResourceImpl(n, g);
+        if ( n.isVariable() ) // This line is the only change over core jena!
+            return new ResourceImpl(n, g);
+        throw new JenaException("Node type not compatible with Model: "+n);
     }
 }

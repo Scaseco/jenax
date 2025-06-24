@@ -60,6 +60,8 @@ public class E_CsvParse
                 .acceptsAll(Arrays.asList("o"), "Output rows as objects")
                 ;
 
+        // TODO Add option to force arrays
+
         OptionSpec<?> firstRowAsHeadersOs = optionParser
                 .acceptsAll(Arrays.asList("h"), "First row as headers")
                 ;

@@ -49,39 +49,4 @@ public class QueryExecSelect
         QueryExec result = delegate.create(selectQuery);
         return result;
     }
-//
-//    @Override
-//    public DatasetGraph constructDataset(DatasetGraph dataset) {
-//        return super.constructDataset(dataset);
-//    }
-//
-//    @Override
-//    public DatasetGraph constructDataset() {
-//        return super.constructDataset();
-//    }
-//
-//    @Override
-//    public Graph describe(Graph graph) {
-//        return super.describe(graph);
-//    }
-//
-//    @Override
-//    public Graph describe() {
-//        return super.describe();
-//    }
-//
-//    @Override
-//    public JsonArray execJson() {
-//        return super.execJson();
-//    }
-//
-//    @Override
-//    public Graph construct(Graph result) {
-//        return super.construct(result);
-//    }
-//
-//    @Override
-//    public Graph construct() {
-//        return super.construct();
-//    }
 }

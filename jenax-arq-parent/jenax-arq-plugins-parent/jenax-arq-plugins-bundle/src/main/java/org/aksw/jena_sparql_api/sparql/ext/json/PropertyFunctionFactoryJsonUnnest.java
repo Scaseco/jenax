@@ -1,24 +1,20 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import java.util.List;
+
+import org.aksw.jena_sparql_api.sparql.ext.util.PropFuncArgUtils;
 import org.aksw.jenax.arq.util.binding.BindingUtils;
-import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.expr.ExprEvalException;
-import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.pfunction.PFuncSimpleAndList;
 import org.apache.jena.sparql.pfunction.PropFuncArg;
 import org.apache.jena.sparql.pfunction.PropertyFunction;
+import org.apache.jena.sparql.pfunction.PropertyFunctionBase;
 import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 
 /**
  * {
@@ -43,34 +39,28 @@ public class PropertyFunctionFactoryJsonUnnest
         this.gson = gson;
     }
 
-
-
     @Override
     public PropertyFunction create(final String uri)
     {
         // TODO Allow indexed access if the index variable is bound
         // Consider reusing ListBaseList or listIndex
-        return new PFuncSimpleAndList()
-        {
+        return new PropertyFunctionBase() {
             @Override
-            public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, PropFuncArg objects,
-                    ExecutionContext execCxt) {
+            public QueryIterator exec(Binding binding, PropFuncArg argSubject, Node predicate, PropFuncArg argObject, ExecutionContext execCxt) {
+                Node node = BindingUtils.getValue(binding, argSubject.getArg());
 
-                // Get the subject's value
-                Node node = BindingUtils.getValue(binding, subject);
+                List<Node> objects = PropFuncArgUtils.getAsList(argObject);
+                Node object = objects.get(0);
 
-                Node object = objects.getArg(0);
+                Node indexKey = objects.size() > 1 ? objects.get(1) : null;
+                Node index = BindingUtils.getValue(binding, indexKey, indexKey);
 
                 if(!object.isVariable()) {
                     throw new RuntimeException("Object of json array unnesting must be a variable");
                 }
                 Var outputVar = (Var)object;
 
-                Node indexKey = objects.getArgListSize() > 1 ? objects.getArg(1) : null;
-                Node index = BindingUtils.getValue(binding, indexKey, indexKey);
-
                 QueryIterator result = JenaJsonUtils.unnestJsonArray(gson, binding, index, execCxt, node, outputVar);
-
                 return result;
             }
         };

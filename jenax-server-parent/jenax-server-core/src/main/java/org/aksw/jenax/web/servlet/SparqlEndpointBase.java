@@ -1,21 +1,24 @@
 package org.aksw.jenax.web.servlet;
 
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtOverResultFmt;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlQueryFmtsUtils;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmts;
 import org.aksw.jenax.arq.util.fmt.SparqlResultFmtsImpl;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.AcceptList;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.Query;
@@ -36,6 +39,7 @@ import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.graph.GraphFactory;
@@ -77,10 +81,14 @@ public abstract class SparqlEndpointBase {
 
     protected abstract RDFConnection getConnection();
 
-    protected void executeAsync(AsyncResponse asyncResponse, String acceptHeaders, String queryString, String updateString) {
+    protected void executeAsync(AsyncResponse asyncResponse, String acceptHeaders, String queryString, String updateString,
+            List<String> graphIris, List<String> namedGraphIris,
+            List<String> usingGraphIris, List<String> usingNamedGraphIris) {
         AcceptList acceptList = new AcceptList(acceptHeaders);
         SparqlResultFmts fmts = SparqlResultFmtsImpl.forContentTypes(acceptList);
-        processStmtAsync(asyncResponse, queryString, updateString, fmts);
+        DatasetDescription queryDd = DatasetDescriptionUtils.ofStrings(graphIris, namedGraphIris);
+        DatasetDescription updateDd = DatasetDescriptionUtils.ofStrings(usingGraphIris, usingNamedGraphIris);
+        processStmtAsync(asyncResponse, queryString, updateString, fmts, queryDd, updateDd);
     }
 
     @POST
@@ -90,8 +98,12 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             @FormParam("query") String queryString,
-            @FormParam("update") String updateStr) {
-        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateStr);
+            @FormParam("update") String updateStr,
+            @FormParam("default-graph-uri") List<String> defaultGraphIris,
+            @FormParam("named-graph-uri") List<String> namedGraphIris,
+            @FormParam("using-graph-uri") List<String> usingGraphIris,
+            @FormParam("using-graph-uri") List<String> usingNamedGraphIris) {
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateStr, defaultGraphIris, namedGraphIris, usingGraphIris, usingNamedGraphIris);
     }
 
 
@@ -102,7 +114,7 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             String queryString) {
-        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, null);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, null, null, null, null, null);
     }
 
     @GET
@@ -111,8 +123,12 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             @QueryParam("query") String queryString,
-            @QueryParam("update") String updateString) {
-        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateString);
+            @QueryParam("update") String updateString,
+            @QueryParam("default-graph-uri") List<String> defaultGraphIris,
+            @QueryParam("named-graph-uri") List<String> namedGraphIris,
+            @QueryParam("using-graph-uri") List<String> usingGraphIris,
+            @QueryParam("using-named-graph-uri") List<String> usingNamedGraphIris) {
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), queryString, updateString, defaultGraphIris, namedGraphIris, usingGraphIris, usingNamedGraphIris);
     }
 
     @POST
@@ -122,10 +138,10 @@ public abstract class SparqlEndpointBase {
             @Suspended AsyncResponse asyncResponse,
             @Context HttpHeaders headers,
             String updateString) {
-        executeAsync(asyncResponse, headers.getHeaderString("Accept"), null, updateString);
+        executeAsync(asyncResponse, headers.getHeaderString("Accept"), null, updateString, null, null, null, null);
     }
 
-    public void processStmtAsync(AsyncResponse response, String queryStr, String updateStr, SparqlResultFmts format) {
+    public void processStmtAsync(AsyncResponse response, String queryStr, String updateStr, SparqlResultFmts format, DatasetDescription queryDd, DatasetDescription updateDd) {
         if(queryStr == null && updateStr == null) {
             throw new QueryException("No query/update statement provided");
         }
@@ -138,6 +154,14 @@ public abstract class SparqlEndpointBase {
 
         SparqlStmtParser sparqlStmtParser = getSparqlStmtParser();
         SparqlStmt stmt = sparqlStmtParser.apply(stmtStr);
+
+        if (stmt.isParsed()) {
+            if (stmt.isQuery()) {
+                SparqlStmtUtils.overwriteDatasetDescription(stmt, queryDd);
+            } else if (stmt.isUpdateRequest()) {
+                SparqlStmtUtils.overwriteDatasetDescription(stmt, updateDd);
+            }
+        }
 
         if(stmt.isQuery()) {
             processQueryAsync(response, stmt.getAsQueryStmt(), format);
@@ -197,7 +221,7 @@ public abstract class SparqlEndpointBase {
 
         // Set up a QueryExecutionFactory view which runs each query on
         // its own connection and closes the connection upon termination of the QueryExecution
-        RdfDataSource dataSource = () -> getConnection();
+        RDFDataSource dataSource = () -> getConnection();
         QueryExecutionFactory qef = dataSource.asQef();
 
         Response x = processQuery(qef, stmt, format, qeCallback);
@@ -206,9 +230,14 @@ public abstract class SparqlEndpointBase {
     }
 
     public static QueryExecution exec(QueryExecutionFactory qef, SparqlStmtQuery stmt) {
-        QueryExecution result = stmt.isParsed()
-                ? qef.createQueryExecution(stmt.getQuery())
-                : qef.createQueryExecution(stmt.getOriginalString());
+        QueryExecution result;
+        if (stmt.isParsed()) {
+            Query query = stmt.getQuery();
+            result = qef.createQueryExecution(query);
+        } else {
+            String queryStr = stmt.getOriginalString();
+            result = qef.createQueryExecution(queryStr);
+        }
         return result;
     }
 

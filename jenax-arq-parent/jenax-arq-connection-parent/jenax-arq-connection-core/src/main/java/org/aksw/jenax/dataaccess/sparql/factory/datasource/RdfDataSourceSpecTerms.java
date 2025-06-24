@@ -7,6 +7,7 @@ public class RdfDataSourceSpecTerms {
     public static final String AUTO_DELETE_IF_CREATED_KEY = "autoDeleteIfCreated";
     public static final String TEMP_DIR_KEY = "tempDir";
     public static final String LOADER_KEY = "loader";
+    public static final String DATABASE_KEY = "database";
 
     public static final String DELEGATE = "delegate";
     public static final String PARTITIONS = "partitions";

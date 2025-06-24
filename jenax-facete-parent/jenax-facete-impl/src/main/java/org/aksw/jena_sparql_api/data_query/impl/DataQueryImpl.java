@@ -46,8 +46,8 @@ import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactories;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
@@ -158,7 +158,7 @@ public class DataQueryImpl<T extends RDFNode>
     private static final Logger logger = LoggerFactory.getLogger(DataQueryImpl.class);
 
 
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
 
     /**
      * grouped mode (false): default semantic of construct queries
@@ -216,7 +216,7 @@ public class DataQueryImpl<T extends RDFNode>
     protected Set<Path> projectedPaths = new LinkedHashSet<>();
 
     public DataQueryImpl(
-            RdfDataSource dataSource,
+            RDFDataSource dataSource,
             Fragment1 baseRelation,
             Template template,
             Class<T> resultClass) {
@@ -229,7 +229,7 @@ public class DataQueryImpl<T extends RDFNode>
     }
 
     public DataQueryImpl(
-            RdfDataSource dataSource,
+            RDFDataSource dataSource,
             Element baseQueryPattern,
             Var rootVar,
             Template template,
@@ -245,7 +245,7 @@ public class DataQueryImpl<T extends RDFNode>
     }
 
     public DataQueryImpl(
-            RdfDataSource dataSource,
+            RDFDataSource dataSource,
             Element baseElement,
             List<Var> primaryKeyVars,
             Node superRootNode,
@@ -305,7 +305,7 @@ public class DataQueryImpl<T extends RDFNode>
             Var defaultVar,
             Template template,
             Class<T> resultClass) {
-        this(RdfDataEngines.ofQueryConnection(conn), baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
+        this(RDFDataSources.ofQueryConnection(conn), baseElement, primaryKeyVars, superRootNode, defaultVar, template, resultClass);
     }
 
 
@@ -348,12 +348,12 @@ public class DataQueryImpl<T extends RDFNode>
     }
 
     @Override
-    public RdfDataSource dataSource() {
+    public RDFDataSource dataSource() {
         return dataSource;
     }
 
     @Override
-    public DataQuery<T> dataSource(RdfDataSource dataSource) {
+    public DataQuery<T> dataSource(RDFDataSource dataSource) {
         this.dataSource = dataSource;
         return this;
     }

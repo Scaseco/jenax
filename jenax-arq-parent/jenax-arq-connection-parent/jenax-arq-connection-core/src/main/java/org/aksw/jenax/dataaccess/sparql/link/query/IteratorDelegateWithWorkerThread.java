@@ -57,8 +57,7 @@ public class IteratorDelegateWithWorkerThread<T, I extends Iterator<T>>
         return batch.isEmpty() ? null : batch.iterator();
     }
 
-    // FIXME The worker is blocked while retrieving so in that case
-    //  any close signal won't get through
+    // Note: The worker is blocked while retrieving so in that case any close signal won't get through
     @Override
     public void close() {
         helper.submit(() -> Iter.close(getDelegate()));

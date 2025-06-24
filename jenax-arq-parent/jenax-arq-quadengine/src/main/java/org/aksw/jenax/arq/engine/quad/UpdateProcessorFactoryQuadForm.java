@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.engine.quad;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.engine.Timeouts.Timeout;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingRoot;
 import org.apache.jena.sparql.modify.UpdateEngineFactory;
@@ -29,7 +30,7 @@ public class UpdateProcessorFactoryQuadForm
         // Set the query engine factory for the update processor
         // QC.setFactory(cxt, OpExecutorQuadForm.factory);
 
-        UpdateProcessorBase uProc = new UpdateProcessorBase(updateRequest, datasetGraph, inputBinding, cxt, f);
+        UpdateProcessorBase uProc = new UpdateProcessorBase(updateRequest, datasetGraph, inputBinding, cxt, f, Timeout.UNSET);
         return uProc;
     }
 }

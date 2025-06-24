@@ -24,6 +24,7 @@
   <script src="_/js2/bnodes.js?g0"></script>
   <script src="_/js2/render-ld.js?g0"></script>
   <script src="_/js2/map2.js?g0"></script>
+  <script src="_/js2/startpage.js?g0"></script>
   <script src="_/js2/iframe-auth.js?g0"></script>
   <script src="_/js2/load.js?g0"></script>
 
@@ -32,7 +33,7 @@
 
 <nav class="navbar navbar-default">
   <div class="container">
-    <div class="navbar-header"><a class="navbar-brand"><img class="ldv-logo-top" src='_/img/logo.svg'> Linked Data Viewer</a>
+    <div class="navbar-header"><a class="navbar-brand" href="/"><img class="ldv-logo-top" src='_/img/logo.svg'> Linked Data Viewer</a>
     </div>
   </div>
 </nav>
@@ -43,6 +44,7 @@
     <div class="col-xs-12">
       <div id="title"></div>
       <div id="subtitle"></div>
+      <div id="startpage"></div>
       <div id="graph">Loading...</div>
 <noscript>
   <p>
@@ -80,7 +82,7 @@
       <ul class="text-right list-unstyled">
         <li id="loadlabels"></li>
         <li id="inferswitch"></li>
-        <li><span id="localswitch"></span><span id="explorelink"></span><span id="configlink"></span></li>
+        <li><span id="localswitch"></span><span id="explorelink"></span><span class="sparqllink"><a href="/sparql" target="_blank">SPARQL</a></span><span id="configlink"></span></li>
       </ul>
     </div>
   </div>

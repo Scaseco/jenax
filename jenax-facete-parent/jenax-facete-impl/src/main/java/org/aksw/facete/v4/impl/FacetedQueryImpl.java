@@ -8,7 +8,7 @@ import org.aksw.facete.v3.api.FacetConstraint;
 import org.aksw.facete.v3.api.FacetNode;
 import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.facete.v3.api.TreeQueryNode;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
@@ -24,7 +24,7 @@ import com.google.common.cache.CacheBuilder;
 public class FacetedQueryImpl
     implements FacetedQuery
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
 
     protected FacetedRelationQuery relationQuery;
     protected Var baseVar;
@@ -120,12 +120,12 @@ public class FacetedQueryImpl
     }
 
     @Override
-    public RdfDataSource dataSource() {
+    public RDFDataSource dataSource() {
         return dataSource;
     }
 
     @Override
-    public FacetedQuery dataSource(RdfDataSource dataSource) {
+    public FacetedQuery dataSource(RDFDataSource dataSource) {
         this.dataSource = dataSource;
         return this;
     }

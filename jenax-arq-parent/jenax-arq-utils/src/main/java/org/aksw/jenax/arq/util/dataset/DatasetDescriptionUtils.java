@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.util.dataset;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.jena.graph.Node;
@@ -9,6 +10,33 @@ import org.apache.jena.sparql.core.Quad;
 import com.google.common.base.Joiner;
 
 public class DatasetDescriptionUtils {
+
+    /** Create method that treats null arguments as empty lists. */
+    public static DatasetDescription ofStrings(Collection<String> graphIris, Collection<String> namedGraphIris) {
+        return DatasetDescription.create(asListOrCopy(graphIris), asListOrCopy(namedGraphIris));
+    }
+
+    public static DatasetDescription ofNodes(Collection<Node> graphIris, Collection<Node> namedGraphIris) {
+        return DatasetDescription.create(
+            asListOrCopy(graphIris).stream().map(Node::getURI).toList(),
+            asListOrCopy(namedGraphIris).stream().map(Node::getURI).toList());
+    }
+
+    // Move to CollectionUtils / ListUtils
+    private static <T> List<T> asListOrCopy(Collection<T> items) {
+        return items == null
+            ? List.of()
+            : asListOrCopyOrNull(items);
+    }
+
+    // Move to CollectionUtils / ListUtils
+    private static <T> List<T> asListOrCopyOrNull(Collection<T> items) {
+        return items instanceof List<T> list
+            ? list
+            : items == null
+                ? null
+                : List.copyOf(items);
+    }
 
     /**
      * Add all default- and named graph iris from source to target

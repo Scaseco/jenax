@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementAntiJoin;
 import org.apache.jena.sparql.syntax.ElementAssign;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -17,6 +18,7 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
+import org.apache.jena.sparql.syntax.ElementSemiJoin;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
@@ -67,6 +69,8 @@ public class ElementVisitorGetSubElements
     @Override public void visit(ElementMinus el) { result = Collections.singletonList(el.getMinusElement()); }
     @Override public void visit(ElementService el) { result = Collections.singletonList(el.getElement()); }
     @Override public void visit(ElementLateral el) { result = Collections.singletonList(el.getLateralElement()); }
+    @Override public void visit(ElementSemiJoin el) { result = Collections.singletonList(el.getSubElement()); }
+    @Override public void visit(ElementAntiJoin el) { result = Collections.singletonList(el.getSubElement()); }
     @Override public void visit(ElementUnfold el) { result = Collections.emptyList(); }
 
     @Override

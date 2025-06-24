@@ -3,11 +3,11 @@ package org.aksw.jenax.sparql.algebra.transform2;
 import java.util.List;
 
 import org.apache.jena.sparql.algebra.Transform;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -31,6 +31,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -63,7 +64,9 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      T eval(OpExtend op, T subOp);
      T eval(OpJoin op, T left, T right);
      T eval(OpLeftJoin op, T left, T right);
-     T eval(OpDiff op, T left, T right);
+     // T eval(OpDiff op, T left, T right);
+     T eval(OpSemiJoin op, T left, T right);
+     T eval(OpAntiJoin op, T left, T right);
      T eval(OpMinus op, T left, T right);
      T eval(OpUnion op, T left, T right);
      T eval(OpLateral op, T left, T right);
@@ -80,4 +83,6 @@ import org.apache.jena.sparql.algebra.op.OpUnion;
      T eval(OpSlice op, T subOp);
      T eval(OpGroup op, T subOp);
      T eval(OpUnfold op, T subOp);
+
+     // Op valueToOp(T value);
 }

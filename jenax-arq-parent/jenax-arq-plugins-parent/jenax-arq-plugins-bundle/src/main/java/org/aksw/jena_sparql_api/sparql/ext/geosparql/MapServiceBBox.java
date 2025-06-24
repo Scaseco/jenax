@@ -3,8 +3,8 @@ package org.aksw.jena_sparql_api.sparql.ext.geosparql;
 import org.aksw.commons.rx.lookup.MapPaginator;
 import org.aksw.commons.rx.lookup.MapService;
 import org.aksw.jena_sparql_api.lookup.MapPaginatorConcept;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -23,11 +23,11 @@ import org.locationtech.jts.geom.Envelope;
 public class MapServiceBBox
     implements MapService<Envelope, Node, Node>
 {
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected GeoConstraintFactory geoConstraintFactory;
     protected Fragment1 concept;
 
-    public MapServiceBBox(RdfDataSource dataSource, Fragment1 concept, GeoConstraintFactory geoConstraintFactory) {
+    public MapServiceBBox(RDFDataSource dataSource, Fragment1 concept, GeoConstraintFactory geoConstraintFactory) {
         this.dataSource = dataSource;
         this.concept = concept;
         this.geoConstraintFactory = geoConstraintFactory;
@@ -47,7 +47,7 @@ public class MapServiceBBox
     }
 
     public static void main(String[] args) {
-        RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/coypu/events.coypu.10000.ttl"));
+        RDFDataSource ds = RDFDataSources.of(RDFDataMgr.loadDataset("/home/raven/Datasets/coypu/events.coypu.10000.ttl"));
         System.out.println("data loaded.");
 
         // RdfDataSource ds = RdfDataEngines.of(RDFDataMgr.loadDataset("/home/raven/Datasets/fp7_ict_project_partners_database_2007_2011.nt.bz2"));

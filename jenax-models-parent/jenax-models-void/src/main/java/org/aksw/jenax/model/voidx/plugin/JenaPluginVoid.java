@@ -3,6 +3,7 @@ package org.aksw.jenax.model.voidx.plugin;
 import org.aksw.jenax.model.voidx.api.VoidClassPartition;
 import org.aksw.jenax.model.voidx.api.VoidDataset;
 import org.aksw.jenax.model.voidx.api.VoidPropertyPartition;
+import org.aksw.jenax.model.voidx.api.VoidPropertyPartitionX;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.apache.jena.enhanced.Personality;
 import org.apache.jena.rdf.model.RDFNode;
@@ -11,6 +12,7 @@ import org.apache.jena.sys.JenaSubsystemLifecycle;
 public class JenaPluginVoid
     implements JenaSubsystemLifecycle
 {
+    @Override
     public void start() {
         init();
     }
@@ -24,6 +26,10 @@ public class JenaPluginVoid
             VoidDataset.class,
             VoidClassPartition.class,
             VoidPropertyPartition.class
+        );
+
+        JenaPluginUtils.registerResourceClasses(
+            VoidPropertyPartitionX.class
         );
     }
 

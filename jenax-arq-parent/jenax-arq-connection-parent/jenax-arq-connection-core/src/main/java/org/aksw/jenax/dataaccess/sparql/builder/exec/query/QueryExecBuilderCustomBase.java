@@ -34,6 +34,17 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         super();
     }
 
+    /** Copy constructor.
+     *  Does not clone the query object. */
+    public QueryExecBuilderCustomBase(QueryExecBuilderCustomBase<?> that) {
+        super(that);
+        this.query = that.query; // that.query.cloneQuery();
+        this.queryString = that.queryString;
+        this.querySyntax = that.querySyntax;
+        this.parseCheck = that.parseCheck;
+        this.substitution = Binding.builder().addAll(that.substitution.build());
+    }
+
     public Query getQuery() {
         return query;
     }
@@ -143,7 +154,7 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         return self();
     }
 
-    public void applySettings(QueryExecBuilder dst) {
+    public <X extends QueryExecBuilder> X applySettings(X dst) {
         super.applySettings(dst);
 
         if (parseCheck != null) {
@@ -159,8 +170,14 @@ public abstract class QueryExecBuilderCustomBase<T extends QueryExecBuilder>
         }
 
         Binding binding = substitution.build();
+
+        // Calling build() invalidates the builder - so we have to reset it.
+        substitution.reset().addAll(binding);
+
         if (!binding.isEmpty()) {
             dst.substitution(binding);
         }
+
+        return dst;
     }
 }

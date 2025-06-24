@@ -90,8 +90,8 @@ public interface ResultSetRx {
                 Flowable<Binding> flowable = getBindings();
                 Iterator<Binding> it = flowable.blockingIterable().iterator();
                 disposable = (Disposable)it;
-                RowSet result = RowSetStream.create(vars, it);
-                return result;
+                RowSet r = RowSetStream.create(vars, it);
+                return r;
             }
         };
 

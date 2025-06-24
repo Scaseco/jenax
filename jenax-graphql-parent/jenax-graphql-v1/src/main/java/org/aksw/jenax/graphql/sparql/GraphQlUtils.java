@@ -327,5 +327,4 @@ public class GraphQlUtils {
     public static ArrayValue toArrayValue(List<String> strs) {
         return ArrayValue.newArrayValue().values(strs.stream().map(x -> (Value)StringValue.of(x)).toList()).build();
     }
-
 }

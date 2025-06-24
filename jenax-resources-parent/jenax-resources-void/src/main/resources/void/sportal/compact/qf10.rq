@@ -7,10 +7,11 @@ CONSTRUCT {
 
   ?l
     v:property ?p ;
-    s:objectTypes ?k .
+    s:objectTypes ?k . # targets are classPartitions for the object types
 
   ?k
-    s:objectClass ?t ;
+    # s:objectClass ?t ;
+    v:class ?t ;
     s:distinctMembers ?x
 }
 {
@@ -29,3 +30,4 @@ CONSTRUCT {
     GROUP BY ?p ?t
   }
 }
+

@@ -10,11 +10,11 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>5.2.0-1</version>
+		<version>5.4.0-1</version>
 	</parent>
 
 	<modules>
 		<module>jenax-graphql-v1</module>
-		<module>jenax-graphql-v2</module>
+		<module>jenax-graphql-v2-parent</module>
 	</modules>
 </project>

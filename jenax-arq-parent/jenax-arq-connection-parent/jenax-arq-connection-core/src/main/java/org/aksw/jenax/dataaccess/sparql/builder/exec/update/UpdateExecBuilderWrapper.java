@@ -1,5 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.builder.exec.update;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
@@ -72,6 +74,12 @@ public interface UpdateExecBuilderWrapper
     @Override
     default UpdateExecBuilder substitution(String var, Node value) {
         getDelegate().substitution(var, value);
+        return this;
+    }
+
+    @Override
+    default UpdateExecBuilder timeout(long value, TimeUnit timeUnit) {
+        getDelegate().timeout(value, timeUnit);
         return this;
     }
 

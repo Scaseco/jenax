@@ -1,7 +1,10 @@
 package org.aksw.jenax.dataaccess.sparql.builder.exec.update;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.Timeouts.TimeoutBuilderImpl;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
@@ -20,7 +23,7 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
     protected Update update;
     protected String updateString;
     protected boolean parseCheck = true;
-
+    protected TimeoutBuilderImpl timeoutBuilder = new TimeoutBuilderImpl();
     protected BindingBuilder substitution = BindingFactory.builder();
     protected ContextAccumulator contextAccumulator;
 
@@ -124,6 +127,12 @@ public abstract class UpdateExecBuilderCustomBase<T extends UpdateExecBuilder>
             }
         }
         // this.contextAccumulator.putAll(context);
+        return self();
+    }
+
+    @Override
+    public UpdateExecBuilder timeout(long value, TimeUnit timeUnit) {
+        timeoutBuilder.timeout(value, timeUnit);
         return self();
     }
 

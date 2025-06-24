@@ -1,6 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
+import org.aksw.commons.util.gson.GsonUtils;
 import org.aksw.jenax.annotation.reprogen.IriNs;
+import org.aksw.jenax.norse.term.json.NorseTermsJson;
 import org.apache.jena.graph.Node;
 
 import com.google.gson.JsonElement;
@@ -33,6 +35,12 @@ public class SparqlFnLibJson {
         JsonObject result = json.getAsJsonObject().deepCopy();
         JsonElement elt = JenaJsonUtils.nodeToJsonElement(value);
         result.add(key, elt);
+        return result;
+    }
+
+    @IriNs(NorseTermsJson.merge)
+    public static JsonElement merge(JsonElement a, JsonElement b) {
+        JsonElement result = GsonUtils.merge(GsonUtils.copyOrNull(a), b);
         return result;
     }
 }

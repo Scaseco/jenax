@@ -37,6 +37,15 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
         this.contextAccumulator = contextAccumulator;
     }
 
+    public QueryExecModCustomBase(QueryExecModCustomBase<?> that) {
+        super();
+        this.contextAccumulator = that.contextAccumulator.clone();
+        this.initialTimeoutValue = that.initialTimeoutValue;
+        this.initialTimeoutUnit = that.initialTimeoutUnit;
+        this.overallTimeoutValue = that.overallTimeoutValue;
+        this.overallTimeoutUnit = that.overallTimeoutUnit;
+    }
+
     public TimeUnit getInitialTimeoutUnit() {
         return initialTimeoutUnit;
     }
@@ -56,6 +65,12 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
     @SuppressWarnings("unchecked")
     protected T self() {
         return (T)this;
+    }
+
+    @Override
+    public QueryExecMod timeout(long timeout) {
+        overallTimeout(timeout, TimeUnit.MILLISECONDS);
+        return self();
     }
 
     @Override
@@ -105,7 +120,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
                 } else
                     Log.warn(builder, "Can't interpret timeout: " + obj);
             } catch (Exception ex) {
-                Log.warn(builder, "Exception setting timeouts (context) from: "+obj);
+                Log.warn(builder, "Exception setting timeouts (context) from: "+obj, ex);
             }
         }
         return builder;
@@ -134,11 +149,11 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
             } else
                 Log.warn(builder, "Can't interpret timeout: " + obj);
         } catch (Exception ex) {
-            Log.warn(builder, "Exception setting timeouts (context) from: "+obj);
+            Log.warn(builder, "Exception setting timeouts (context) from: "+obj, ex);
         }
     }
 
-    public void applySettings(QueryExecMod dst) {
+    public <X  extends QueryExecMod> X applySettings(X dst) {
         if (initialTimeoutUnit != null) {
             dst.initialTimeout(initialTimeoutValue, initialTimeoutUnit);
         }
@@ -157,5 +172,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
                 dstCxt.putAll(context);
             }
         }
+
+        return dst;
     }
 }

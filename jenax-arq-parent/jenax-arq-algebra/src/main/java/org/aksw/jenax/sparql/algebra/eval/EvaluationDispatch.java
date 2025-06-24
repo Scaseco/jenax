@@ -5,11 +5,11 @@ import java.util.Stack;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitor;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -33,6 +33,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -147,13 +148,26 @@ public class EvaluationDispatch<T>
         push(value);
     }
 
+//    @Override
+//    public void visit(OpDiff opDiff) {
+//        T input = pop();
+//        T value = evaluator.eval(opDiff, input);
+//        push(value);
+//    }
+
     @Override
-    public void visit(OpDiff opDiff) {
+    public void visit(OpSemiJoin opSemiJoin) {
         T input = pop();
-        T value = evaluator.eval(opDiff, input);
+        T value = evaluator.eval(opSemiJoin, input);
         push(value);
     }
 
+    @Override
+    public void visit(OpAntiJoin opAntiJoin) {
+        T input = pop();
+        T value = evaluator.eval(opAntiJoin, input);
+        push(value);
+    }
     @Override
     public void visit(OpMinus opMinus) {
         T input = pop();

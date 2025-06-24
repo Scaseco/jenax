@@ -26,8 +26,8 @@ import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
@@ -78,7 +78,7 @@ public class ConceptPathFinderBidirectionalUtils {
     private static final Logger logger = LoggerFactory.getLogger(ConceptPathFinderBidirectionalUtils.class);
 
 
-    public static Single<Model> createDefaultDataSummary(RdfDataSource dataSource) {
+    public static Single<Model> createDefaultDataSummary(RDFDataSource dataSource) {
         InputStream in = ConceptPathFinderBidirectionalUtils.class.getClassLoader().getResourceAsStream("concept-path-finder.conf.sparql");
         //Stream<SparqlStmt> stmts;
         Flowable<SparqlStmt> stmts;
@@ -96,7 +96,7 @@ public class ConceptPathFinderBidirectionalUtils {
             .map(SparqlStmt::getAsQueryStmt)
             .map(SparqlStmtQuery::getQuery)
             .filter(q -> q.isConstructType())
-            .map(q -> RdfDataSources.exec(dataSource, q, QueryExecution::execConstruct))
+            .map(q -> RDFDataSources.exec(dataSource, q, QueryExecution::execConstruct))
             .toList()
             .map(list -> {
                 Model r = ModelFactory.createDefaultModel();
@@ -142,7 +142,7 @@ public class ConceptPathFinderBidirectionalUtils {
 
 
     public static Flowable<SimplePath> findPathsCore(
-            RdfDataSource dataSource,
+            RDFDataSource dataSource,
             Fragment1 sourceConcept,
             Fragment1 tmpTargetConcept,
             Long nPaths,
@@ -402,7 +402,7 @@ public class ConceptPathFinderBidirectionalUtils {
 //    }
 
     public static Predicate<SimplePath> createSparqlPathValidator(
-        RdfDataSource dataSource,
+        RDFDataSource dataSource,
         Fragment1 sourceConcept,
         Fragment1 tmpTargetConcept) {
 
@@ -520,7 +520,7 @@ public class ConceptPathFinderBidirectionalUtils {
     }
 
 
-    public static boolean validatePath(RdfDataSource dataSource, Fragment1 sourceConcept, Fragment1 targetConcept, SimplePath path, Generator<Var> generator) {
+    public static boolean validatePath(RDFDataSource dataSource, Fragment1 sourceConcept, Fragment1 targetConcept, SimplePath path, Generator<Var> generator) {
 
         List<Element> pathElements = SimplePath.pathToElements(path, sourceConcept.getVar(), targetConcept.getVar(), generator);
 
@@ -572,7 +572,7 @@ public class ConceptPathFinderBidirectionalUtils {
 //        }
 
         // TODO Make timeouts configurable
-        boolean result = RdfDataSources.exec(dataSource, query, QueryExecution::execAsk);
+        boolean result = RDFDataSources.exec(dataSource, query, QueryExecution::execAsk);
         Rewrite rewrite = AlgebraUtils.createDefaultRewriter();
         query = QueryUtils.rewrite(query, rewrite::rewrite);
 

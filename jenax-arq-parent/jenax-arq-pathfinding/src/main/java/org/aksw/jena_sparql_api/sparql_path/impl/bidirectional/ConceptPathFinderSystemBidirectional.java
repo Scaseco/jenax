@@ -7,7 +7,7 @@ import org.aksw.jena_sparql_api.sparql_path.api.ConceptPathFinderSystem;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearch;
 import org.aksw.jena_sparql_api.sparql_path.api.PathSearchSparqlBase;
 import org.aksw.jena_sparql_api.sparql_path.core.PathConstraint2;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.path.SimplePath;
 import org.apache.jena.rdf.model.Model;
@@ -22,7 +22,7 @@ public class ConceptPathFinderSystemBidirectional
 
 
     @Override
-    public Single<Model> computeDataSummary(RdfDataSource dataSource) {
+    public Single<Model> computeDataSummary(RDFDataSource dataSource) {
         return ConceptPathFinderBidirectionalUtils.createDefaultDataSummary(dataSource);
     }
 

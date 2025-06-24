@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.binding.BindingUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.tuple.TupleUtils;
 import org.aksw.jenax.arq.util.tuple.adapter.TupleBridgeQuad;
@@ -163,23 +164,12 @@ public class QuadUtils {
         return Arrays.asList(quadToArray(quad));
     }
 
-    public static Node substitute(Node node, Binding binding) {
-        Node result = node;
-
-        if (node.isVariable()) {
-            result = binding.get((Var) node);
-            if (result == null) {
-                throw new RuntimeException("Variable " + node + "not bound");
-            }
-        }
-        return result;
-    }
-
     public static Quad copySubstitute(Quad quad, Binding binding) {
-        return new Quad(substitute(quad.getGraph(), binding),
-                substitute(quad.getSubject(), binding),
-                substitute(quad.getPredicate(), binding),
-                substitute(quad.getObject(), binding));
+        return Quad.create(
+            BindingUtils.substitute(quad.getGraph(), binding),
+            BindingUtils.substitute(quad.getSubject(), binding),
+            BindingUtils.substitute(quad.getPredicate(), binding),
+            BindingUtils.substitute(quad.getObject(), binding));
     }
 
     public static Set<Var> getVarsMentioned(Quad quad) {

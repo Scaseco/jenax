@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.aggregation;
 
 import java.util.function.Function;
 
+import org.aksw.jenax.arq.util.binding.BindingMapper;
 import org.apache.jena.sparql.engine.binding.Binding;
 
 /**

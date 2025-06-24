@@ -49,7 +49,10 @@ public class E_UrlFetch
 {
     private static final Logger logger = LoggerFactory.getLogger(E_UrlFetch.class);
 
-    public static final Pattern jsonContentTypePattern = Pattern.compile("^application/(.+\\+)?json$");
+    /** Liberal pattern that checks for any content type ending in json.*/
+    public static final Pattern jsonContentTypePattern = Pattern.compile("^[^/]*/([^;+]+\\+)*json\\s*(;.*)?$");
+    //                                                                    ^Anything without /
+    //                                                                           ^All groups ending on '+'
 
     @Override
     public NodeValue exec(List<NodeValue> args, FunctionEnv env) {

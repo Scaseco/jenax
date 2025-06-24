@@ -7,10 +7,10 @@ import org.apache.jena.sparql.function.FunctionBase1;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+/** Convert RDF terms to corresponding JSON elements (if possible) */
 public class E_JsonConvert
     extends FunctionBase1
 {
-
     @Override
     public NodeValue exec(NodeValue v) {
         Node node = v == null ? null : v.asNode();

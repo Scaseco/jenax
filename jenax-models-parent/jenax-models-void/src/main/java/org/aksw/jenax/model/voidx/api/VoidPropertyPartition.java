@@ -8,6 +8,10 @@ import org.apache.jena.graph.Node;
 public interface VoidPropertyPartition
     extends VoidEntity
 {
-    @Iri(VoidTerms._class)
+    @Iri(VoidTerms.property)
     Node getVoidProperty();
+
+    // triples
+    // distinctSubjects
+    // distinctObjects
 }

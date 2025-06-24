@@ -16,11 +16,11 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.prefix.PrefixUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
-import org.aksw.jenax.arq.util.update.UpdateTransform;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -50,7 +50,6 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.modify.request.UpdateLoad;
-import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.SplitIRI;
 import org.slf4j.Logger;
@@ -77,6 +76,9 @@ import com.google.common.collect.Lists;
  * Effectively it sets the base URL of the following SPARQL queries.
  * Relative paths are resolved against the current working directory as reported by the JVM.
  * Use "cwd=" (with an empty string) to reset the CWD to that of the JVM
+ *
+ * Graphs can be pinned for all subsequent arguments using
+ * "graph=your://graph.name". Use "graph=" (nothing after the =) to use the default graph.
  *
  * @author Claus Stadler
  *
@@ -232,7 +234,6 @@ public class SparqlScriptProcessor {
         return sparqlParser;
     }
 
-
     /**
      * Create a script processor that substitutes references to environment variables
      * with the appropriate values.
@@ -241,6 +242,10 @@ public class SparqlScriptProcessor {
      * @return
      */
     public static SparqlScriptProcessor createWithEnvSubstitution(PrefixMapping globalPrefixes) {
+        if (globalPrefixes == null) {
+            globalPrefixes = new PrefixMappingImpl(); // new PrefixMappingAdapter(PrefixMapFactory.create());
+        }
+
         return createWithEnvSubstitution(globalPrefixes, System::getenv);
     }
 
@@ -257,9 +262,6 @@ public class SparqlScriptProcessor {
                 globalPrefixes);
         return result;
     }
-
-
-
 
     public void process(List<String> filenames) {
         int i = 1;
@@ -320,11 +322,35 @@ public class SparqlScriptProcessor {
 
             cwd = null;
         } else if (filename.startsWith(graphKey)) {
+            boolean isForcedName = false;
             String targetGraphStr = filename.substring(graphKey.length()).trim();
-            targetGraph = targetGraphStr == null || targetGraphStr.isBlank()
-                    ? null
-                    : NodeFactory.createURI(targetGraphStr);
-            logger.info("Pinned target graph to " + targetGraph);
+            // Treat empty as null
+            if (targetGraphStr != null && targetGraphStr.isEmpty()) {
+                targetGraphStr = null;
+            }
+            if (targetGraphStr != null) {
+                isForcedName = targetGraphStr.startsWith("!");
+                if (isForcedName) {
+                    // Note: Currently, even with force we remove leading and trailing white spaces.
+                    targetGraphStr = targetGraphStr.substring(1, targetGraphStr.length()).trim();
+                    if (targetGraphStr.isEmpty()) {
+                        throw new RuntimeException("Cannot force an empty graph name.");
+                    }
+                } else {
+                    // Check for the mistake of having quote / backtick in the graph name
+                    // May happen with a malformed shell command
+                    String tmp = targetGraphStr;
+                    boolean needsForce = Stream.of("'", "\"", "`")
+                            .anyMatch(c -> tmp.startsWith(c)  || tmp.endsWith(c));
+                    if (needsForce) {
+                        throw new RuntimeException("Graph name starts or ends with likely unintended character. Prepend ! to force anway: !" + targetGraphStr);
+                    }
+                }
+                targetGraph = NodeFactory.createURI(targetGraphStr);
+            } else {
+                targetGraph = null;
+            }
+            logger.info("Pinned target graph to " + targetGraph + (isForcedName ? " (forced) " : ""));
         } else if (filename.equals(graphResetKey)) {
             targetGraph = null;
             logger.info("Unpinned target graph");
@@ -491,8 +517,7 @@ public class SparqlScriptProcessor {
 //                throw new FileNotFoundException(filename);
 //            }
 
-
-            // Unwrap the input stream for less overhead
+            // Unwrap the input stream to minimize overhead.
             InputStream in = tmpIn.getInputStream();
 
             String contentType = tmpIn.getContentType();
@@ -532,7 +557,6 @@ public class SparqlScriptProcessor {
         }
         return result;
     }
-
 
     public static UpdateRequest tryLoadFileAsUpdateRequestOld(String filename, PrefixMapping globalPrefixes) throws IOException {
         UpdateRequest result = null;

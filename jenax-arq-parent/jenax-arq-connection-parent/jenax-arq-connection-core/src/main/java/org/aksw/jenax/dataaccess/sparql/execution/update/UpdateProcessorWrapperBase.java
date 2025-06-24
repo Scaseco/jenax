@@ -3,7 +3,7 @@ package org.aksw.jenax.dataaccess.sparql.execution.update;
 import org.apache.jena.update.UpdateProcessor;
 
 public class UpdateProcessorWrapperBase<T extends UpdateProcessor>
-    implements UpdateProcessorWrapper
+    implements UpdateProcessorWrapper<T>
 {
     protected T delegate;
 
@@ -13,7 +13,7 @@ public class UpdateProcessorWrapperBase<T extends UpdateProcessor>
     }
 
     @Override
-    public UpdateProcessor getDelegate() {
+    public T getDelegate() {
         return delegate;
     }
 

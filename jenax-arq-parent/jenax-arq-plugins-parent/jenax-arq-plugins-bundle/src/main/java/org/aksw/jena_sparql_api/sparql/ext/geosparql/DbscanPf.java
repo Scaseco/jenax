@@ -165,6 +165,7 @@ public class DbscanPf
 
         Dataset index = DatasetFactory.wrap(DatasetGraphFactory.wrap(indexGraph));
         sw.reset().start();
+
         try {
             SpatialIndex.buildSpatialIndex(index);
         } catch (SpatialIndexException e1) {
@@ -188,7 +189,7 @@ public class DbscanPf
                     throw new RuntimeException(e);
                 }
                 return r;
-            };
+            }
 
             @Override
             protected List<CustomClusterable> getNeighbors(CustomClusterable point,

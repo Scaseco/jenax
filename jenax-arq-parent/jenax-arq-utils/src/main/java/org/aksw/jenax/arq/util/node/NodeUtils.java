@@ -250,26 +250,35 @@ public class NodeUtils {
         return sw.toString();
     }
 
+    /** Expect the string to parse as a single node. */
     public static Node parseNode(String str) {
         Node result = null;
         // NodeFmtLib.strNodes encodes labels - so we need to decode them
         LabelToNode decoder = LabelToNode.createUseLabelEncoded();
 
         Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
-        if (tokenizer.hasNext()) {
-            Token token = tokenizer.next() ;
-            Node node = token.asNode() ;
-//            if ( node == null )
-//                throw new RiotException("Bad RDF Term: " + str) ;
+        try {
+            if (tokenizer.hasNext()) {
+                Token token = tokenizer.next() ;
+                Node node = token.asNode() ;
+    //            if ( node == null )
+    //                throw new RiotException("Bad RDF Term: " + str) ;
 
-            if (node != null) {
-                if (node.isBlank()) {
-                    String label = node.getBlankNodeLabel();
-                    node = decoder.get(null, label);
+                if (node != null) {
+                    if (node.isBlank()) {
+                        String label = node.getBlankNodeLabel();
+                        node = decoder.get(null, label);
+                    }
                 }
+
+                result = node;
             }
 
-            result = node;
+            if (tokenizer.hasNext()) {
+                throw new IllegalArgumentException("String parsed into more than 1 node.");
+            }
+        } finally {
+            tokenizer.close();
         }
 
         return result;
@@ -281,20 +290,24 @@ public class NodeUtils {
         LabelToNode decoder = LabelToNode.createUseLabelEncoded();
 
         Tokenizer tokenizer = TokenizerText.create().fromString(str).build();
-        while (tokenizer.hasNext()) {
-            Token token = tokenizer.next() ;
-            Node node = token.asNode() ;
-//            if ( node == null )
-//                throw new RiotException("Bad RDF Term: " + str) ;
+        try {
+            while (tokenizer.hasNext()) {
+                Token token = tokenizer.next() ;
+                Node node = token.asNode() ;
+    //            if ( node == null )
+    //                throw new RiotException("Bad RDF Term: " + str) ;
 
-            if (node != null) {
-                if (node.isBlank()) {
-                    String label = node.getBlankNodeLabel();
-                    node = decoder.get(null, label);
+                if (node != null) {
+                    if (node.isBlank()) {
+                        String label = node.getBlankNodeLabel();
+                        node = decoder.get(null, label);
+                    }
                 }
-            }
 
-            segments.add(node);
+                segments.add(node);
+            }
+        } finally {
+            tokenizer.close();
         }
 
         return segments;
@@ -322,11 +335,26 @@ public class NodeUtils {
         return result;
     }
 
+    public static boolean isValid(String str, Node node) {
+        boolean result = false;
+        try {
+            validate(str, node);
+            result = true;
+        } catch (Exception e) {
+            // Ignore
+        }
+        return result;
+    }
+
     /** Throws an {@link IllegalArgumentException} if {@link #isValid(Node)} returns false. */
     public static void validate(Node node) {
+        String str = NodeFmtLib.strNT(node);
+        validate(str, node);
+    }
+
+    public static void validate(String str, Node node) {
         List<Node> nodes;
         try {
-            String str = NodeFmtLib.strNT(node);
             nodes = parseNodes(str, new ArrayList<>());
         } catch (Exception e) {
             throw new ExprEvalException("Node " + node + " did not print-parse");

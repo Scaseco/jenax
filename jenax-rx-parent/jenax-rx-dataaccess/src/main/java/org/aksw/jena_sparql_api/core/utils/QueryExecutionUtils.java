@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.aksw.jena_sparql_api.mapper.BindingMapperUtils;
-import org.aksw.jenax.arq.aggregation.BindingMapper;
-import org.aksw.jenax.arq.aggregation.BindingMapperQuad;
 import org.aksw.jenax.arq.util.binding.TableUtils;
-import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.atlas.iterator.Iter;
@@ -128,14 +124,6 @@ public class QueryExecutionUtils {
             throw new RuntimeException("Unknown query type - should not happen: queryType = " + queryType);
         }
 
-        return result;
-    }
-
-    public static Iterator<Quad> findQuads(QueryExecutionFactory qef, Node g, Node s, Node p, Node o) {
-        Quad quad = new Quad(g, s, p, o);
-        Query query = QueryGenerationUtils.createQueryQuad(new Quad(g, s, p, o));
-        BindingMapper<Quad> mapper = new BindingMapperQuad(quad);
-        Iterator<Quad> result = BindingMapperUtils.execMapped(qef, query, mapper);
         return result;
     }
 

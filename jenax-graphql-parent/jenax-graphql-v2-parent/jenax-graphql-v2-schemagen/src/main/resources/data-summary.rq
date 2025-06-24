@@ -1,0 +1,59 @@
+# This query requires the norse extensions to be loaded (part of the maven artifact org.aksw.jenax:jenax-plugins-bundle)
+
+PREFIX norse: <https://w3id.org/aksw/norse#>
+
+# Note: Object types used "Untyped" to indicate that there are resource values without type.
+#       Subjects without type use the empty set.
+#       XXX Add a flag whether any object values per type appear as subject?
+
+SELECT * {
+  SELECT
+      ?srcTypes
+      ?p
+      (true AS ?isForward)
+      (norse:set.aggUnion(?tgtTypes) AS ?allTgtTypes)
+      (norse:set.aggUnion(?tgtDTypes) AS ?allTgtDTypes)
+      (MAX(?tgtCard) AS ?maxTgtCard)
+      (MAX(?tgtDCard) AS ?maxTgtDCard)
+  {
+    { SELECT DISTINCT ?s { ?s ?p ?o } }
+    LATERAL {
+      {
+        OPTIONAL {
+          { SELECT ?s (norse:set.collect(?st) AS ?srcTypesRaw) {
+            ?s a ?st
+          } GROUP BY ?s }
+        }
+        BIND(IF(BOUND(?srcTypesRaw), ?srcTypesRaw, norse:set.of("Untyped")) AS ?srcTypes)
+      }
+      LATERAL {
+        { SELECT DISTINCT ?s ?p { ?s ?p ?o } }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?s ?p (norse:set.collect(?ot) AS ?tgtTypesRaw) (COUNT(DISTINCT ?o) AS ?tgtCardRaw) {
+              ?s ?p ?o .
+              FILTER(!isLiteral(?o))
+              OPTIONAL { # XXX Could use lateral to collect types for each o
+                ?o a ?otRaw
+              }
+              BIND(IF(BOUND(?otRaw), ?otRaw, "Untyped") AS ?ot)
+            } GROUP BY ?s ?p }
+          }
+          BIND(IF(BOUND(?tgtTypesRaw), ?tgtTypesRaw, norse:set.of()) AS ?tgtTypes)
+          BIND(IF(BOUND(?tgtCardRaw), ?tgtCardRaw, 0) AS ?tgtCard)
+        }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?s ?p (norse:set.collect(datatype(?o)) AS ?tgtDTypesRaw) (COUNT(?o) AS ?tgtDCardRaw) {
+              ?s ?p ?o
+              FILTER(isLiteral(?o))
+            } GROUP BY ?s ?p }
+          }
+          BIND(IF(BOUND(?tgtDTypesRaw), ?tgtDTypesRaw, norse:set.of()) AS ?tgtDTypes)
+          BIND(IF(BOUND(?tgtDCardRaw), ?tgtDCardRaw, 0) AS ?tgtDCard)
+        }
+      }
+    }
+  } GROUP BY ?srcTypes ?p
+}
+# ORDER BY ?p ?srcTypes ?tgtTypes ?tgtDTypes

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.apache.jena.http.auth.AuthLib;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
@@ -21,14 +21,14 @@ public class RdfDataSourceFactoryRemote
     implements RdfDataSourceFactory
 {
     @Override
-    public RdfDataSource create(Map<String, Object> config) {
+    public RDFDataSource create(Map<String, Object> config) {
         RdfDataSourceSpecBasic spec = RdfDataSourceSpecBasicFromMap.wrap(config);
 
         String url = Objects.requireNonNull(spec.getLocation(), "Location not set (key = " + RdfDataSourceSpecTerms.LOCATION_KEY + ")");
 
         UrlUserInfo userInfo = UrlUserInfo.create(url);
 
-        RdfDataSource result = () -> {
+        RDFDataSource result = () -> {
             RDFConnectionRemoteBuilder b = RDFConnectionRemote.newBuilder();
             if (userInfo.hasUserInfo()) {
                 b = b.destination(userInfo.getUrlWithoutUserInfo());

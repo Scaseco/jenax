@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-arq-plugins-parent</artifactId>
-		<version>5.2.0-1</version>
+		<version>5.4.0-1</version>
 	</parent>
 
 	<dependencies>
@@ -127,6 +127,11 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-io-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection-qlever</artifactId>
 		</dependency>
 
 		<!-- Auto-binding of SPARQL and Java functions -->
@@ -262,7 +267,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<scope>compile</scope> <!-- HACK because current test container version needs junit bundled. -->
 		</dependency>
 
 		<dependency>

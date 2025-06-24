@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.pagination.core;
 
-import org.aksw.jena_sparql_api.pagination.extra.PaginationQueryIterator;
+import org.aksw.jenax.arq.util.exec.query.PaginationQueryIterator;
 import org.apache.jena.query.Query;
 
 public class PagingQuery {

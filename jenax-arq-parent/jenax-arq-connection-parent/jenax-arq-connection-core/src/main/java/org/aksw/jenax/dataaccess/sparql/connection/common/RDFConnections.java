@@ -28,7 +28,6 @@ public class RDFConnections {
         LinkSparqlQuery queryLink = QueryExecFactories.toLink(qef);
         RDFLink rdfLink = new RDFLinkModular(queryLink, null, null);
         RDFConnection result = RDFConnectionAdapter.adapt(rdfLink);
-
         return result;
     }
 }

@@ -16,9 +16,8 @@ import org.apache.jena.sparql.exec.RowSet;
 public abstract class QueryExecOverRowSet
     extends QueryExecBaseSelect
 {
-
     /** QueryExec wrapper for just the row set. */
-    public class QueryExecOverRowSetInternal
+    public static class QueryExecOverRowSetInternal
         extends AutoCloseableWithLeakDetectionBase
         implements QueryExecAdapter {
         protected RowSet rowSet;
@@ -39,22 +38,8 @@ public abstract class QueryExecOverRowSet
         }
     }
 
-    protected RowSet activeRowSet = null;
-
     public QueryExecOverRowSet(Query query) {
         super(query);
-    }
-
-    protected synchronized void setActiveRowSet(RowSet rowSet) {
-        this.activeRowSet = rowSet;
-
-        if (isClosed()) {
-            activeRowSet.close();
-        }
-    }
-
-    protected RowSet getActiveRowSet() {
-        return activeRowSet;
     }
 
     /**
@@ -67,18 +52,9 @@ public abstract class QueryExecOverRowSet
     @Override
     protected QueryExec doSelect(Query query) {
         RowSet rowSet = createRowSet(query);
-        return new QueryExecOverRowSetInternal(rowSet);
+        QueryExec result = new QueryExecOverRowSetInternal(rowSet);
+        return result;
     }
-
-//    @Override
-//    public DatasetGraph getDataset() {
-//        return null;
-//    }
-//
-//    @Override
-//    public Context getContext() {
-//        return null;
-//    }
 
     @Override
     public boolean isClosed() {
@@ -86,15 +62,7 @@ public abstract class QueryExecOverRowSet
     }
 
     @Override
-    public void closeActual() {
-        RowSet rowSet = getActiveRowSet();
-        if (rowSet != null) {
-            rowSet.close();
-        }
-    }
-
-    @Override
     public void abort() {
-        close();
+        // close();
     }
 }

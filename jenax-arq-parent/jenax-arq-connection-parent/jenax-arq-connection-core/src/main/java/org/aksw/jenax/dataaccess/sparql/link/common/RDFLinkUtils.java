@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecTransform;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.prologue.PrologueUtils;
 import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
@@ -12,6 +13,7 @@ import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderTrans
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTransform;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
+import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWithNodeTransform;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperTxn;
 import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperTxn;
@@ -30,6 +32,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdflink.LinkDatasetGraph;
 import org.apache.jena.rdflink.LinkSparqlQuery;
 import org.apache.jena.rdflink.LinkSparqlUpdate;
@@ -267,18 +270,37 @@ public class RDFLinkUtils {
 //        return result[0];
 //    }
 
+    public static RDFLink wrapWithQueryTransform(RDFLink rdfLink, QueryTransform queryTransform) {
+        RDFLink result = wrapWithQueryTransform(rdfLink, queryTransform, null);
+        return result;
+    }
+
     public static RDFLink wrapWithQueryTransform(
-            RDFLink conn,
+            RDFLink rdfLink,
             QueryTransform queryTransform,
-            QueryExecTransform queryExecTransform
-            ) {
-        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(conn);
-        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(conn);
-        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(conn);
+            QueryExecTransform queryExecTransform) {
+        LinkSparqlQueryTransform queryLinkTransform = queryLink -> new LinkSparqlQueryQueryTransform(queryLink, queryTransform, queryExecTransform);
+        RDFLink result = wrapWithQueryLinkTransform(rdfLink, queryLinkTransform);
+        return result;
+    }
 
-        RDFLink result = new RDFLinkModular(
-                new LinkSparqlQueryQueryTransform(queryLink, queryTransform, queryExecTransform), updateLink, dgLink);
+    public static RDFLink wrapWithQueryLinkTransform(
+            RDFLink rdfLink,
+            LinkSparqlQueryTransform linkQueryTransform) {
+        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(rdfLink);
+        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(rdfLink);
+        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(rdfLink);
+        RDFLink result = new RDFLinkModular(linkQueryTransform.apply(queryLink), updateLink, dgLink);
+        return result;
+    }
 
+    public static RDFLink wrapWithUpdateLinkTransform(
+            RDFLink rdfLink,
+            LinkSparqlUpdateTransform linkUpdateTransform) {
+        LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(rdfLink);
+        LinkSparqlUpdate updateLink = unwrapLinkSparqlUpdate(rdfLink);
+        LinkDatasetGraph dgLink = unwrapLinkDatasetGraph(rdfLink);
+        RDFLink result = new RDFLinkModular(queryLink, linkUpdateTransform.apply(updateLink), dgLink);
         return result;
     }
 
@@ -426,6 +448,7 @@ public class RDFLinkUtils {
     }
 
 
+
     /**
      * Standard sparql does not support creating relative IRIs.
      * The spec states that the IRI function *must* return an absolute IRI.
@@ -483,6 +506,13 @@ public class RDFLinkUtils {
     public static RDFLink wrapWithQueryOnly(RDFLink link) {
         LinkSparqlQuery queryLink = unwrapLinkSparqlQuery(link);
         return new RDFLinkModular(queryLink, null, null);
+    }
+
+    public static RDFLink wrapWithAutoDisableReorder(RDFLink link) {
+        return RDFLinkUtils.wrapWithQueryTransform(link, null, qe -> {
+            QueryExecutionUtils.wrapWithAutoDisableReorder(qe.getQuery(), qe.getContext());
+            return qe;
+        });
     }
 }
 

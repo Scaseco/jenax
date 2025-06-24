@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jenax.arq.util.binding.TableUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
@@ -29,7 +29,7 @@ public class ConditionQuery
     }
 
     @Override
-    public boolean test(RdfDataSource dataSource) {
+    public boolean test(RDFDataSource dataSource) {
         boolean result;
         try (RDFConnection conn = dataSource.getConnection()) {
             try (QueryExecution qe = conn.query(query.getQuery())) {

@@ -29,6 +29,18 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
 public class BindingUtils {
 
+    public static Node substitute(Node node, Binding binding) {
+        Node result = node;
+
+        if (node.isVariable()) {
+            result = binding.get((Var) node);
+            if (result == null) {
+                throw new RuntimeException("Variable " + node + "not bound");
+            }
+        }
+        return result;
+    }
+
     /**
      * Add a mapping to the given binding builder based on the i-th entry in a list of nodes
      * and a supplier of values.
@@ -64,7 +76,7 @@ public class BindingUtils {
     }
 
     /** If key is null then return null.
-     *  If key is a variable then return the value in the binding - otherwise return the key itself */
+     *  If key is a variable then return the value in the binding (may be null) - otherwise return the key itself */
     public static Node getValue(Binding binding, Node key) {
         Node result = key == null
                 ? null

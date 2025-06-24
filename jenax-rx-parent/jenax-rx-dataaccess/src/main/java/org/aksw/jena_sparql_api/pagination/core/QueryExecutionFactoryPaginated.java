@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.pagination.core;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactoryBackQuery;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
-import org.aksw.jena_sparql_api.pagination.extra.PaginationQueryIterator;
+import org.aksw.jenax.arq.util.exec.query.PaginationQueryIterator;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;

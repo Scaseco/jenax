@@ -6,7 +6,6 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 
 public class RDFConnectionBuilder<T, P> {
     protected P parent;
@@ -45,7 +44,7 @@ public class RDFConnectionBuilder<T, P> {
 
     @SuppressWarnings("unchecked")
     public RDFConnectionBuilder<T, P> setSource(Dataset dataset) {
-        connection = (T)RDFConnectionFactory.connect(dataset);
+        connection = (T)RDFConnection.connect(dataset);
         return this;
     }
 

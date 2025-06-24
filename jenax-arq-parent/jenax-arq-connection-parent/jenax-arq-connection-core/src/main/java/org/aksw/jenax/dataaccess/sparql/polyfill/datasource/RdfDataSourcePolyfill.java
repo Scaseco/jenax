@@ -13,9 +13,9 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemova
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
 import org.aksw.jenax.arq.util.expr.FunctionUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceTransforms;
-import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSources;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.MainCliSparqlPolyfillModel;
 import org.aksw.jenax.dataaccess.sparql.polyfill.detector.PolyfillDetector;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
@@ -40,13 +40,13 @@ import com.google.common.collect.Iterables;
  */
 public class RdfDataSourcePolyfill {
 
-    public static List<Suggestion<String>> suggestPolyfills(RdfDataSource rdfDataSource) {
+    public static List<Suggestion<String>> suggestPolyfills(RDFDataSource rdfDataSource) {
         Model model = ModelFactory.createDefaultModel();
         MainCliSparqlPolyfillModel.initDefaultSuggestions(model);
 
         // Wrap the datasource with a cache for polyfill detection
         // The cache stores all query results in-memory
-        RdfDataSource cachedDataSource = rdfDataSource.decorate(RdfDataSourceTransforms.simpleCache());
+        RDFDataSource cachedDataSource = RDFDataSources.decorate(rdfDataSource, RdfDataSourceTransforms.simpleCache());
         // RdfDataSource cachedDataSource = rdfDataSource;
 
         PolyfillDetector detector = new PolyfillDetector();
@@ -55,9 +55,9 @@ public class RdfDataSourcePolyfill {
         return result;
     }
 
-    public static List<Suggestion<String>> suggestPolyfillsOld(RdfDataSource rdfDataSource) {
+    public static List<Suggestion<String>> suggestPolyfillsOld(RDFDataSource rdfDataSource) {
         List<Suggestion<String>> result = null;
-        String profile = RdfDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
+        String profile = RDFDataSources.compute(rdfDataSource, RdfDataSourcePolyfill::detectProfile);
 
         if (profile != null && profile.equals("virtuoso")) {
             result = virtuosoProfile();
@@ -98,7 +98,7 @@ public class RdfDataSourcePolyfill {
                 // try {
                 // These requests materialize the result set, so the connection should be idle
                 // once execService returns
-                    r = RDFConnectionUtils.execService(binding, execCxt, opExec, conn, false);
+                    r = RDFConnectionUtils.execService(binding, execCxt, opExec, conn, false, true);
                     // RDFLinkAdapter.adapt(base).query(query).sel
                     // r = new QueryIteratorResultSet(base.query(query).execSelect());
 //                    } catch (Exception e) {

@@ -42,7 +42,6 @@ import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.http.HttpOp;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -57,12 +56,12 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Transform;
 import org.apache.jena.sparql.algebra.Transformer;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.graph.NodeTransform;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.modify.request.UpdateData;
 import org.apache.jena.sparql.modify.request.UpdateModify;
 import org.apache.jena.sparql.syntax.Element;
@@ -72,6 +71,7 @@ import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
+import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateRequest;
 
 import com.google.common.base.Charsets;
@@ -208,7 +208,6 @@ public class SparqlStmtUtils {
         } else {
             result = stmt;
         }
-
         return result;
     }
 
@@ -230,7 +229,6 @@ public class SparqlStmtUtils {
         } else {
             result = stmt;
         }
-
         return result;
     }
 
@@ -284,7 +282,7 @@ public class SparqlStmtUtils {
 
 
     public static SparqlStmtIterator processFile(PrefixMapping pm, String filenameOrURI)
-            throws FileNotFoundException, IOException, ParseException {
+            throws FileNotFoundException, IOException {
 
         return processFile(pm, filenameOrURI, null);
     }
@@ -361,10 +359,9 @@ public class SparqlStmtUtils {
      * @return
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ParseException
      */
     public static SparqlStmtIterator processFile(PrefixMapping pm, String filenameOrURI, String baseIri)
-            throws FileNotFoundException, IOException, ParseException {
+            throws FileNotFoundException, IOException {
 
         InputStream in = openInputStream(filenameOrURI);
         if(in == null) {
@@ -398,7 +395,7 @@ public class SparqlStmtUtils {
      */
     @Deprecated
     public static SparqlStmtIterator processInputStream(PrefixMapping pm, String baseIri, InputStream in)
-            throws IOException, ParseException {
+            throws IOException {
 
 //		File file = new File(filename).getAbsoluteFile();
 //		if(!file.exists()) {
@@ -515,16 +512,44 @@ public class SparqlStmtUtils {
             UpdateRequest u = stmt.getAsUpdateStmt().getUpdateRequest();
 
             // conn.update(u);
-            Context cxt = ARQ.getContext().copy();
+//            Context cxt = ARQ.getContext().copy();
+//            if (cxtMutator != null) {
+//                cxtMutator.accept(cxt);
+//            }
+            UpdateExecution ue = conn.newUpdate().update(u).build();
+//            if (ue.getContext() == null) {
+//                System.err.println("Context of update request was null");
+//            }
             if (cxtMutator != null) {
-                cxtMutator.accept(cxt);
+                Context cxt = ue.getContext();
+
+                if (cxt != null) {
+                    cxtMutator.accept(cxt);
+                } else {
+                    // XXX Perhaps better log a warning if the cxt is null and cxtMutator is given?
+                }
             }
-            conn.newUpdate().update(u).context(cxt).execute();
+
+            ue.execute();
+            // .context(cxt).execute();
 
             result = SPARQLResultEx.createUpdateType();
         }
 
         return result;
+    }
+
+    /** In-place update. */
+    public static void overwriteDatasetDescription(SparqlStmt stmt, DatasetDescription dd) {
+        if (stmt.isParsed()) {
+            if (stmt.isQuery()) {
+                QueryUtils.overwriteDatasetDescription(stmt.getQuery(), dd);
+            } else if (stmt.isUpdateRequest()) {
+                UpdateRequestUtils.overwriteDatasetDescription(stmt.getUpdateRequest(), dd);
+            }
+        } else {
+            throw new IllegalArgumentException("Cannot apply dataset description to a SPARQL query that has not been parsed.");
+        }
     }
 
     /**

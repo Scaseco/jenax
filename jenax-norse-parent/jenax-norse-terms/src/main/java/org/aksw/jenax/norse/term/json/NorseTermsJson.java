@@ -12,4 +12,6 @@ public class NorseTermsJson {
     public static final String get = NS + "get";
     public static final String getStrict = NS + "getStrict";
     public static final String path = NS + "path";
+
+    public static final String merge = NS + "merge";
 }

@@ -72,7 +72,7 @@ public class UpdateExecutionFactoryDataset
         // UpdateEngine updateEngine = f.create(dsg, null, context);
 
         Binding initialBinding = BindingRoot.create();
-        UpdateProcessorBase result = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f);
+        UpdateProcessorBase result = new UpdateProcessorBase(updateRequest, dsg, initialBinding, context, f, null);
 
         // UpdateProcessor result = updateProcessorFactory.create(updateRequest, dataset, context);
         return result;

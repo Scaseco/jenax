@@ -56,13 +56,13 @@ import org.aksw.jenax.arq.aggregation.Agg;
 import org.aksw.jenax.arq.aggregation.AggLiteral;
 import org.aksw.jenax.arq.aggregation.AggMap;
 import org.aksw.jenax.arq.aggregation.AggTransform;
-import org.aksw.jenax.arq.aggregation.BindingMapperProjectVar;
+import org.aksw.jenax.arq.util.binding.BindingMapperProjectVar;
 import org.aksw.jenax.arq.util.dataset.DatasetDescriptionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.connectionless.SparqlService;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryQuery;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
@@ -127,7 +127,7 @@ public class MainSparqlPath2 {
                 .end()
                 .create();
 
-        RdfDataSource dataSource = () -> result.getRDFConnection();
+        RDFDataSource dataSource = () -> result.getRDFConnection();
 
         // context.put(PropertyFunctionKShortestPaths.PROLOGUE, prologue);
         context.put(RDFLinkUtils.symRdfDataSource, dataSource);

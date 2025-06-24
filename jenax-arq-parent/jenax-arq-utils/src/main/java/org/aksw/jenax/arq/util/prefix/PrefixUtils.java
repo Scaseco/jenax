@@ -143,15 +143,20 @@ public class PrefixUtils {
         return result;
     }
 
+    public static PrefixMap readPrefixes(PrefixMap sink, InputStream in, Lang lang) {
+        return readPrefixes(sink, in, lang, 1000);
+    }
+
     /**
      * Reads prefixes from the given input stream into the provided sink.
      *
      * @param sink
      * @param in
      * @param lang
+     * @param maxNonPrefixEventCount Stop prefix scan upon encountering that many non-prefix parsing events, such as Triples. See {@link EltStreamRDF}.
      * @return If the sink is null then a new prefix map is returned, otherwise the sink is returned.
      */
-    public static PrefixMap readPrefixes(PrefixMap sink, InputStream in, Lang lang) {
+    public static PrefixMap readPrefixes(PrefixMap sink, InputStream in, Lang lang, long maxNonPrefixEventCount) {
         PrefixMap dst = sink == null
                 ? PrefixMapFactory.create()
                 : sink;
@@ -162,7 +167,6 @@ public class PrefixUtils {
                 .streamElements()) {
             Iterator<EltStreamRDF> it = stream.iterator();
             long nonPrefixEventCount = 0;
-            long maxNonPrefixEventCount = 1000;
             while (it.hasNext() && nonPrefixEventCount < maxNonPrefixEventCount) {
                 EltStreamRDF event = it.next();
                 if (event.isPrefix()) {

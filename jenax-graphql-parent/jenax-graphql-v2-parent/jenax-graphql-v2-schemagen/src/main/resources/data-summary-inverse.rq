@@ -1,0 +1,59 @@
+# This query requires the norse extensions to be loaded (part of the maven artifact org.aksw.jenax:jenax-plugins-bundle)
+
+PREFIX norse: <https://w3id.org/aksw/norse#>
+
+# Note: Object types used 'untyped' to indicate that there are resource values without type.
+#       Subjects without type use the empty set.
+#       XXX Add a flag whether any object values per type appear as subject?
+
+SELECT * {
+  SELECT
+      ?oTypes
+      ?p
+      (false AS ?isForward)
+      (norse:set.aggUnion(?sTypes) AS ?allSTypes)
+      (norse:set.aggUnion(?sDTypes) AS ?allSDTypes)
+      (MAX(?oCard) AS ?maxOCard)
+      (MAX(?oDCard) AS ?maxODCard)
+  {
+    { SELECT DISTINCT ?o { ?s ?p ?o } }
+    LATERAL {
+      {
+        OPTIONAL {
+          { SELECT ?o (norse:set.collect(?ot) AS ?oTypesRaw) {
+            ?o a ?ot
+          } GROUP BY ?o }
+        }
+        BIND(IF(BOUND(?oTypesRaw), ?oTypesRaw, norse:set.of('untyped')) AS ?oTypes)
+      }
+      LATERAL {
+        { SELECT DISTINCT ?o ?p { ?s ?p ?o } }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?o ?p (norse:set.collect(?st) AS ?sTypesRaw) (COUNT(DISTINCT ?s) AS ?sCardRaw) {
+              ?s ?p ?o .
+              FILTER(!isLiteral(?s))
+              OPTIONAL { # XXX Could use lateral to collect types for each o
+                ?s a ?stRaw
+              }
+              BIND(IF(BOUND(?stRaw), ?stRaw, 'untyped') AS ?st)
+            } GROUP BY ?o ?p }
+          }
+          BIND(IF(BOUND(?sTypesRaw), ?sTypesRaw, norse:set.of()) AS ?sTypes)
+          BIND(IF(BOUND(?sCardRaw), ?sCardRaw, 0) AS ?sCard)
+        }
+        LATERAL {
+          OPTIONAL {
+            { SELECT ?o ?p (norse:set.collect(datatype(?s)) AS ?sDTypesRaw) (COUNT(?s) AS ?sDCardRaw) {
+              ?s ?p ?o
+              FILTER(isLiteral(?s))
+            } GROUP BY ?o ?p }
+          }
+          BIND(IF(BOUND(?sDTypesRaw), ?sDTypesRaw, norse:set.of()) AS ?sDTypes)
+          BIND(IF(BOUND(?sDCardRaw), ?sDCardRaw, 0) AS ?sDCard)
+        }
+      }
+    }
+  } GROUP BY ?oTypes ?p
+}
+# ORDER BY ?p ?oTypes ?sTypes ?oDTypes

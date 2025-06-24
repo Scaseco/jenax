@@ -28,6 +28,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarAlloc;
+import org.apache.jena.sparql.engine.Rename;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Equals;
@@ -173,6 +174,11 @@ public class ExprUtils {
             return r;
         }), expr);
         return result;
+    }
+
+    /** Repeatedly reverse var naming of {@link Rename#renameVars(Expr, Set)}. */
+    public static Expr reverseVarRename(Expr expr) {
+        return applyNodeTransform(expr, Rename::reverseVarRename);
     }
 
     public static E_OneOf oneOf(Node v, Iterable<Node> args) {

@@ -10,6 +10,7 @@ import java.io.SequenceInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -162,6 +164,10 @@ public class RDFDataMgrEx {
     }
 
 
+    public static InputStream decode(InputStream in, List<String> codecs) throws CompressorException {
+        return decode(in, codecs, CompressorStreamFactory.getSingleton());
+    }
+
     /**
      * Decode a given input stream based on a sequence of codec names.
      *
@@ -223,31 +229,40 @@ public class RDFDataMgrEx {
 
         List<String> detectedEncodings = new ArrayList<>();
         CompressorStreamFactory csf = CompressorStreamFactory.getSingleton();
-        InputStream nextIn = is;
+        setDefaultMark(is);
+        InputStream probeIn = null;
         for (;;) {
-            is.mark(1024 * 1024 * 1024);
             String encoding;
             try {
-                encoding = CompressorStreamFactory.detect(is);
+                // Only buffer the outermost stream; requires decoding from the base input stream
+                InputStream shieldedIs = new BufferedInputStream(CloseShieldInputStream.wrap(is));
+                probeIn = decode(shieldedIs, detectedEncodings, csf);
+                probeIn = forceBuffered(probeIn);
+
+                encoding = CompressorStreamFactory.detect(probeIn);
             } catch (CompressorException e) {
                 break;
             } finally {
+                if (probeIn != null) {
+                    probeIn.close();
+                }
+                // Reset the mark on the initial stream
                 is.reset();
             }
             detectedEncodings.add(encoding);
             if (outEncodings != null) {
                 outEncodings.add(encoding);
             }
-
-            try {
-                // Only buffer the outermost stream; requires decoding from the base input stream
-                nextIn = new BufferedInputStream(decode(is, detectedEncodings, csf));
-            } catch (CompressorException e) {
-                // Should not fail here because we applied detect() before
-                throw new RuntimeException(e);
-            }
         }
-        return nextIn;
+
+        try {
+            probeIn = decode(is, detectedEncodings, csf);
+        } catch (CompressorException e) {
+            // Should not fail here because we applied detect() before
+            throw new RuntimeException(e);
+        }
+
+        return probeIn;
     }
 
     /**
@@ -265,16 +280,35 @@ public class RDFDataMgrEx {
      * @return
      * @throws IOException
      */
+    public static RdfEntityInfo probeEntityInfo(Callable<InputStream> inSupp, Iterable<Lang> candidates) throws IOException {
+        RdfEntityInfo result;
+        try (InputStream in = forceBuffered(inSupp.call())) {
+            result = probeEntityInfo(in, candidates);
+        } catch (IOException e) {
+            e.addSuppressed(new RuntimeException());
+            throw e;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+        return result;
+    }
+
+    public static RdfEntityInfo probeEntityInfo(Path path, Iterable<Lang> candidates) throws IOException {
+        return probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), candidates);
+    }
+
+    /** This method closes the input stream when it returns. */
     public static RdfEntityInfo probeEntityInfo(InputStream in, Iterable<Lang> candidates) throws IOException {
         if (!in.markSupported()) {
             in = new BufferedInputStream(in);
         }
-        // in.mark(1024 * 1024 * 1024);
-
         RdfEntityInfo result;
         try (InputStream is = in) {
             List<String> encodings = new ArrayList<>();
+
+            // The input stream returned by probeEncodings may not be buffered
             InputStream nextIn = probeEncodings(is, encodings);
+            nextIn = forceBuffered(nextIn);
             try (TypedInputStream tis = RDFDataMgrEx.probeLang(nextIn, candidates)) {
                 String contentType = tis.getContentType();
                 String charset = tis.getCharset();
@@ -283,7 +317,6 @@ public class RDFDataMgrEx {
                 result.getContentEncodings().addAll(encodings);
                 result.setContentType(contentType);
                 result.setCharset(charset);
-
                 // result = new EntityInfoImpl(encodings, contentType, charset);
             }
         }
@@ -306,6 +339,10 @@ public class RDFDataMgrEx {
      */
     public static TypedInputStream probeLang(InputStream in, Iterable<Lang> candidates) {
         return probeLang(in, candidates, new ArrayList<>());
+    }
+
+    public static void setDefaultMark(InputStream in) {
+        in.mark(1 * 1024 * 1024 * 1024);
     }
 
     /**
@@ -338,12 +375,12 @@ public class RDFDataMgrEx {
         // using this as the max buffer size
         // 1GB should be safe enough even for cases with huge literals such as for
         // large spatial geometries (I encountered some around ~50MB)
-        in.mark(1 * 1024 * 1024 * 1024);
+        setDefaultMark(in);
 
         Multimap<Long, Lang> successCountToLang = ArrayListMultimap.create();
         for(Lang cand : candidates) {
             @SuppressWarnings("resource")
-            CloseShieldInputStream wbin = new CloseShieldInputStream(in);
+            CloseShieldInputStream wbin = CloseShieldInputStream.wrap(in);
 
             AsyncParserBuilder builder = AsyncParser.of(wbin, cand, null)
                     .mutateSources(parser -> parser.errorHandler(ErrorHandlerFactory.errorHandlerSimple()))
@@ -496,8 +533,7 @@ public class RDFDataMgrEx {
 
 
     public static void peek(InputStream in) {
-        in.mark(1 * 1024 * 1024 * 1024);
-
+        setDefaultMark(in);
         try {
             System.err.println("GOT:");
             System.err.println(IOUtils.toString(in));

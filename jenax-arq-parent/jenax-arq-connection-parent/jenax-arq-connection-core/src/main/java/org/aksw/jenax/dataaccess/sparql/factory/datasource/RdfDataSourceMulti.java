@@ -17,7 +17,7 @@ import org.aksw.jenax.arq.util.binding.QueryIterOverQueryExec;
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.dataaccess.sparql.builder.exec.query.QueryExecBuilderCustomBase;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryBase;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -82,7 +82,7 @@ record MultiRequestElt(
     Element element,
 
     /** The data source on which to execute the element. */
-    RdfDataSource dataSource,
+    RDFDataSource dataSource,
 
     /** A binding to merge into all bindings obtained from the data source */
     @Deprecated /** It is better to substitute special rdf terms with values from an environment (e.g. env://SOURCE),
@@ -132,7 +132,7 @@ class MultiRequestBuilder {
         return result;
     }
 
-    public void add(Node serviceNode, Element element, RdfDataSource dataSource, Binding binding) {
+    public void add(Node serviceNode, Element element, RDFDataSource dataSource, Binding binding) {
         members.add(new MultiRequestElt(serviceNode, element, dataSource, binding));
     }
 
@@ -153,10 +153,10 @@ class MultiRequestBuilder {
     public QueryExec build(Function<Element, Query> eltToQuery) {
         // Assign each data source a service Node
         Set<Node> seenDataSourceNodes = new HashSet<>();
-        IdentityHashMap<RdfDataSource, Node> sourceToNode = new IdentityHashMap<>();
+        IdentityHashMap<RDFDataSource, Node> sourceToNode = new IdentityHashMap<>();
         for (int i = 0; i < members.size(); ++i) {
             MultiRequestElt member = members.get(i);
-            RdfDataSource dataSource = member.dataSource();
+            RDFDataSource dataSource = member.dataSource();
             if (dataSource != null) {
                 Node sourceNode = sourceToNode.get(dataSource);
                 if (sourceNode == null) {
@@ -170,7 +170,7 @@ class MultiRequestBuilder {
                 }
             }
         }
-        Map<Node, RdfDataSource> nodeToSource = sourceToNode.entrySet().stream().collect(Collectors.toMap(Entry::getValue, Entry::getKey));
+        Map<Node, RDFDataSource> nodeToSource = sourceToNode.entrySet().stream().collect(Collectors.toMap(Entry::getValue, Entry::getKey));
 
         List<Element> elts = new ArrayList<>();
         for (MultiRequestElt member : members) {
@@ -204,7 +204,7 @@ class MultiRequestBuilder {
         reg.addBulkLink((opService, input, execCxt, chain) -> {
             Node serviceNode = opService.getService();
 
-            RdfDataSource dataSource = nodeToSource.get(serviceNode);
+            RDFDataSource dataSource = nodeToSource.get(serviceNode);
             QueryIterator r;
             if (dataSource != null) {
                 Query qq = OpAsQuery.asQuery(opService.getSubOp());
@@ -229,48 +229,48 @@ class MultiRequestBuilder {
 }
 
 public class RdfDataSourceMulti
-    implements RdfDataSource
+    implements RDFDataSource
 {
     public static Builder newBuilder() {
         return new Builder();
     }
 
     public static class Builder {
-        protected Map<Node, RdfDataSource> dataSources = new LinkedHashMap<>();
+        protected Map<Node, RDFDataSource> dataSources = new LinkedHashMap<>();
 
-        public Builder add(RdfDataSource dataSource) {
+        public Builder add(RDFDataSource dataSource) {
             add(NodeFactory.createURI("urn:service:" + System.identityHashCode(dataSource)), dataSource);
             return this;
         }
 
-        public Builder add(String dataSourceIri, RdfDataSource dataSource) {
+        public Builder add(String dataSourceIri, RDFDataSource dataSource) {
             add(NodeFactory.createURI(dataSourceIri), dataSource);
             return this;
         }
 
-        public Builder add(Node dataSourceNode, RdfDataSource dataSource) {
+        public Builder add(Node dataSourceNode, RDFDataSource dataSource) {
             dataSources.put(dataSourceNode, dataSource);
             return this;
         }
 
         public RdfDataSourceMulti build() {
-            Map<Node, RdfDataSource> map = new LinkedHashMap<>(dataSources);
+            Map<Node, RDFDataSource> map = new LinkedHashMap<>(dataSources);
             return new RdfDataSourceMulti(map);
         }
     }
 
-    protected Map<Node, RdfDataSource> dataSources = new LinkedHashMap<>();
+    protected Map<Node, RDFDataSource> dataSources = new LinkedHashMap<>();
 
     public RdfDataSourceMulti() {
         super();
     }
 
-    protected RdfDataSourceMulti(Map<Node, RdfDataSource> dataSources) {
+    protected RdfDataSourceMulti(Map<Node, RDFDataSource> dataSources) {
         super();
         this.dataSources = dataSources;
     }
 
-    public Map<Node, RdfDataSource> getDataSources() {
+    public Map<Node, RDFDataSource> getDataSources() {
         return dataSources;
     }
 
@@ -315,19 +315,19 @@ public class RdfDataSourceMulti
     }
 
     public static void main(String[] args) {
-        RdfDataSource ds1 = () -> RDFConnectionRemote.newBuilder().destination("http://maven.aksw.org/sparql").build();
-        RdfDataSource ds2 = () -> RDFConnectionRemote.newBuilder().destination("http://linkedgeodata.org/sparql").build();
-        RdfDataSource ds3 = () -> RDFConnectionRemote.newBuilder().destination("https://staging.databus.dbpedia.org/repo/sparql").build();
+        RDFDataSource ds1 = () -> RDFConnectionRemote.newBuilder().destination("http://maven.aksw.org/sparql").build();
+        RDFDataSource ds2 = () -> RDFConnectionRemote.newBuilder().destination("http://linkedgeodata.org/sparql").build();
+        RDFDataSource ds3 = () -> RDFConnectionRemote.newBuilder().destination("https://staging.databus.dbpedia.org/repo/sparql").build();
 
         // RdfDataSource dsRaw = new RdfDataSourceMulti(Arrays.asList(ds1, ds2));
-        RdfDataSource dsRaw = RdfDataSourceMulti.newBuilder()
+        RDFDataSource dsRaw = RdfDataSourceMulti.newBuilder()
                 .add("http://maven.aksw.org/sparql", ds1)
                 .add("http://linkedgeodata.org/sparql", ds2)
                 .add("urn://p.p.p.org/sparql", ds3)
                 .build()
                 ;
 
-        RdfDataSource ds = dsRaw; //dsRaw.decorate(RdfDataSourceTransforms.)
+        RDFDataSource ds = dsRaw; //dsRaw.decorate(RdfDataSourceTransforms.)
 
         // XX Future optimization could detect grouping by source, so that aggregation is pushed
         // to each source individually

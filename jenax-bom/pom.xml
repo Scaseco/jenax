@@ -9,7 +9,7 @@
 	<artifactId>jenax-bom</artifactId> -->
 	<groupId>org.aksw.jenax</groupId>
 	<artifactId>jenax-bom</artifactId>
-	<version>5.2.0-1</version>
+	<version>5.4.0-1</version>
 	<packaging>pom</packaging>
 	<name>Unofficial Jena eXtension Components</name>
 	<description>Unofficial modular extensions for Apache Jena</description>
@@ -55,8 +55,8 @@
                 <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 		-->
 
-                <ee.version>9</ee.version>
-		<jetty.version>12.0.14</jetty.version>
+		<ee.version>9</ee.version>
+		<jetty.version>12.0.19</jetty.version>
 		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 
@@ -68,8 +68,8 @@
 		<javax.xml.version>2.3.1</javax.xml.version> <!-- legacy; superseded by
 		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
-		<!-- <jena.version>4.10.0</jena.version> -->
-		<jena.version>5.2.0</jena.version>
+		<jena.version>5.4.0</jena.version>
+		<!-- jena.version>5.5.0-SNAPSHOT</jena.version> -->
 
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
@@ -89,9 +89,10 @@
 		<ver.commons-math>3.6.1</ver.commons-math>
 		<hadoop.version>3.4.0</hadoop.version>
 		<commons-text.version>1.10.0</commons-text.version>
+		<commons-exec.version>1.4.0</commons-exec.version>
 		<junit.version>4.13.2</junit.version>
 		<tika.version>2.9.1</tika.version>
-		<aksw-commons.version>0.9.9</aksw-commons.version>
+		<aksw-commons.version>0.9.10</aksw-commons.version>
 		<jts.version>1.20.0</jts.version>
 		<gson.version>2.9.0</gson.version>
 		<annotation-api.version>1.3.2</annotation-api.version>
@@ -144,6 +145,15 @@
 				<type>pom</type>
 			</dependency>
 
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<!-- Shacl to HTML template rending -->
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
@@ -178,7 +188,16 @@
 				<artifactId>commons-math3</artifactId>
 				<version>${ver.commons-math}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-exec</artifactId>
+				<version>${commons-exec.version}</version>
+			</dependency>
+
 			<!-- resolves conflicts between jersey, tika and hadoop -->
+			<!-- Also needed to resolve:
+			https://stackoverflow.com/questions/65444486/warning-jaxbcontext-implementation-could-not-be-found-wadl-feature-is-disabled-->
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
@@ -206,7 +225,27 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-graphql-v2</artifactId>
+				<artifactId>jenax-graphql-v2-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-schemagen</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+                        <dependency>
+                                <groupId>org.aksw.jenax</groupId>
+                                <artifactId>jenax-graphql-v2-engine</artifactId>
+                                <version>${project.version}</version>
+                        </dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-fmod</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -216,7 +255,17 @@
 			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-resources-macros</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-extra</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection-qlever</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -735,6 +784,13 @@
 				<artifactId>asyncretry-jdk7</artifactId>
 				<version>0.0.6</version>
 			</dependency>
+			<!-- Fuseki for Mods -->
+                       <dependency>
+                                <groupId>org.apache.jena</groupId>
+                                <artifactId>jena-fuseki-server</artifactId>
+                                <version>${jena.version}</version>
+                        </dependency>
+
 			<!-- Declared because of hdt from wdaqua -->
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -789,6 +845,11 @@
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-tdb2</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-fuseki-main</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
@@ -1254,6 +1315,14 @@
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
 					<!-- <exclusion> <groupId>org.codehaus.woodstox</groupId>
 					<artifactId>stax2-api</artifactId> 
 						</exclusion> <exclusion> <groupId>com.fasterxml.woodstox</groupId>
@@ -1297,6 +1366,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
@@ -1317,6 +1387,7 @@
 				<artifactId>spring-expression</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+			-->
 			<!-- <dependency> -->
 			<!-- <groupId>org.springframework</groupId> -->
 			<!-- <artifactId>spring-utils</artifactId> -->
@@ -1374,17 +1445,21 @@
 			<!-- <artifactId>spring-io</artifactId> -->
 			<!-- <version>${spring.version}</version> -->
 			<!-- </dependency> -->
+			<!--
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-jdbc</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+			-->
 			<!-- Spring Framework -->
+			<!--
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-web</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-webmvc</artifactId>
@@ -1475,6 +1550,14 @@
 				<artifactId>json-path</artifactId>
 				<version>2.7.0</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>1.20.4</version>
+			</dependency>
+
+
 			<!-- experimental dependencies -->
 			<!-- <dependency> <groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId> 
@@ -1524,10 +1607,12 @@
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
+	    <!--
 		<repository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
+		-->
 		<snapshotRepository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
@@ -1602,6 +1687,7 @@
 				<configuration>
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
+						<developmentBranch>jena-5.4.0-backport</developmentBranch>
 					</gitFlowConfig>
 				</configuration>
 			</plugin>
@@ -1799,6 +1885,7 @@
 							</execution>
 						</executions>
 					</plugin>
+					<!--
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -1810,6 +1897,17 @@
 							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
 					</plugin>
+					-->
+					        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.7.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <publishingServerId>central</publishingServerId>
+          </configuration>
+        </plugin>
+
 				</plugins>
 			</build>
 		</profile>

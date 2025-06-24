@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.aksw.commons.collections.MapUtils;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 
-public class RdfDataSourceSpecBasicFromMap
-    implements RdfDataSourceSpecBasicMutable
+public class RdfDataSourceSpecBasicFromMap<X extends RdfDataSourceSpecBasicMutable<X>>
+    implements RdfDataSourceSpecBasicMutable<X>
 {
     protected Map<String, Object> map;
 
@@ -33,10 +34,15 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setEngine(String engine) {
+    public X setEngine(String engine) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.ENGINE_KEY, engine);
-        return this;
+        return self();
     }
+
+//    @Override
+//    public Path getLocation() {
+//        return (Path)map.get(RdfDataSourceSpecTerms.LOCATION_KEY);
+//    }
 
     @Override
     public String getLocationContext() {
@@ -44,10 +50,11 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLocationContext(String locationContext) {
-        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY, locationContext);
-        return this;
+    public X setLocationContext(String context) {
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_CONTEXT_KEY, context);
+        return self();
     }
+
 
     @Override
     public String getLocation() {
@@ -55,23 +62,24 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLocation(String location) {
+    public X setLocation(String location) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOCATION_KEY, location);
-        return this;
+        return self();
     }
 
     @Override
     public Boolean isAutoDeleteIfCreated() {
-        return Optional.ofNullable(map.get(RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY))
-                .map(x -> (String)x)
-                .map(Boolean::parseBoolean)
+        return Optional.ofNullable((Boolean)map.get(RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY))
+                // .map(x -> (String)x)
+                // .map(Boolean::parseBoolean)
                 .orElse(false);
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setAutoDeleteIfCreated(Boolean onOrOff) {
-        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, Boolean.toString(onOrOff));
-        return this;
+    public X setAutoDeleteIfCreated(Boolean onOrOff) {
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, onOrOff);
+        // MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.AUTO_DELETE_IF_CREATED_KEY, Boolean.toString(onOrOff));
+        return self();
     }
 
     @Override
@@ -80,9 +88,9 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setTempDir(String tempDir) {
+    public X setTempDir(String tempDir) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.TEMP_DIR_KEY, tempDir);
-        return this;
+        return self();
     }
 
     @Override
@@ -96,8 +104,38 @@ public class RdfDataSourceSpecBasicFromMap
     }
 
     @Override
-    public RdfDataSourceSpecBasicMutable setLoader(String loader) {
+    public X setLoader(String loader) {
         MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.LOADER_KEY, loader);
-        return this;
+        return self();
+    }
+
+    @Override
+    public X setDatabase(RDFDatabase rdfDatabase) {
+        MapUtils.putWithRemoveOnNull(map, RdfDataSourceSpecTerms.DATABASE_KEY, rdfDatabase);
+        return self();
+    }
+
+    @Override
+    public RDFDatabase getDatabase() {
+        return (RDFDatabase)map.get(RdfDataSourceSpecTerms.DATABASE_KEY);
+    }
+
+    @Override
+    public X setProperty(String key, Object value) {
+        MapUtils.putWithRemoveOnNull(map, key, value);
+        return self();
+    }
+
+    @Override
+    public X setProperties(Map<String, ?> values) {
+        values.forEach(this::setProperty);
+        return self();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getProperty(String key) {
+        Object r = map.get(key);
+        return (T)r;
     }
 }

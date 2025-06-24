@@ -9,7 +9,7 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformFactorizeTableColumns
 import org.aksw.jena_sparql_api.algebra.transform.TransformOpDatasetNamesToOpGraph;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantFilterRemoval;
 import org.aksw.jena_sparql_api.algebra.transform.TransformRedundantProjectionRemoval;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourcePolyfill;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalLateral;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.Suggestion;
@@ -19,8 +19,6 @@ import org.aksw.jenax.model.polyfill.domain.api.PolyfillRewriteJava;
 import org.aksw.jenax.model.polyfill.domain.api.PolyfillSuggestionRule;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDFS;
 
 public class MainCliSparqlPolyfillModel {
@@ -29,7 +27,7 @@ public class MainCliSparqlPolyfillModel {
         // String url = "http://maven.aksw.org/sparql";
         // String url = "http://localhost:9988/sparql";
 
-        RdfDataSource dataSource = () -> RDFConnectionRemote.newBuilder()
+        RDFDataSource dataSource = () -> RDFConnectionRemote.newBuilder()
                 .destination(url).build();
 
         List<Suggestion<String>> suggestions = RdfDataSourcePolyfill.suggestPolyfills(dataSource);
@@ -84,6 +82,7 @@ public class MainCliSparqlPolyfillModel {
         model.createResource().as(PolyfillSuggestionRule.class)
             .setLabel("Virtuoso - Rewrite empty table")
             .setComment("Rewrite VALUES blocks with empty bindings")
+            // TODO Use this test query: SELECT * { VALUES () { () () () } BIND (<urn:x> AS ?x) }
             .setCondition(virtuoso)
             .setLevel(10000)
             .setSuggestion(model.createResource().as(PolyfillRewriteJava.class)

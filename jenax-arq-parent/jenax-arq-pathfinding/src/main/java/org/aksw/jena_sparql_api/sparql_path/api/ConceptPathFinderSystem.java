@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql_path.api;
 
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -20,7 +20,7 @@ import io.reactivex.rxjava3.core.Single;
 public interface ConceptPathFinderSystem {
     // TODO Add support to specify a custom base IRI
     // XXX Maybe even return a data summary builder
-    Single<Model> computeDataSummary(RdfDataSource dataSource);
+    Single<Model> computeDataSummary(RDFDataSource dataSource);
     ConceptPathFinderFactory<?> newPathFinderBuilder();
 
     // We could add capabilities such as whether the implemented approach supports non-simple paths

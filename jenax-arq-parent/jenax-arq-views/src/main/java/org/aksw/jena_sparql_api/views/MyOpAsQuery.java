@@ -39,11 +39,11 @@ import org.apache.jena.sparql.ARQNotImplemented;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.OpVisitor;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -67,6 +67,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -368,9 +369,17 @@ public class MyOpAsQuery
             g.addElement(opt) ;
         }
 
+//        @Override
+//        public void visit(OpDiff opDiff)
+//        { throw new ARQNotImplemented("OpDiff") ; }
+
         @Override
-        public void visit(OpDiff opDiff)
-        { throw new ARQNotImplemented("OpDiff") ; }
+        public void visit(OpSemiJoin op)
+        { throw new ARQNotImplemented("OpSemiJoin") ; }
+
+        @Override
+        public void visit(OpAntiJoin opDiff)
+        { throw new ARQNotImplemented("OpAntiJoin") ; }
 
         @Override
         public void visit(OpMinus opMinus)

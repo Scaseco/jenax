@@ -1,16 +1,25 @@
 package org.aksw.jena_sparql_api.conjure.datapod.api;
 
-import org.aksw.jenax.dataaccess.sparql.dataengine.RdfDataEngine;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.pod.RDFDataPod;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 
 /** FIXME Consolidate RdfDataPod and RdfDataSource; are they the some or is the RdfDataPod more high level? */
+/** RESOLUTION: RDFDataPod (upper case RDF) := HasDataSource + Closeable */
+/** TODO Remove RdfDataPod (camed case Rdf) and replace with RDFDataPod. */
 // @Deprecated // Use RdfDataEngine instead of RdfDataPod
 public interface RdfDataPod
-    extends RdfDataEngine, DataPod
+    extends RDFDataPod, DataPod
 {
+    RDFConnection getConnection();
+
+    @Override
+    default RDFDataSource getDataSource() {
+        return () -> getConnection();
+    }
 //	@Override
 //	default RdfEntityInfo persist(Path file) throws IOException {
 //		try(RDFConnection conn = openConnection()) {

@@ -32,6 +32,7 @@ import org.apache.jena.sparql.expr.ExprTransform;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementAntiJoin;
 import org.apache.jena.sparql.syntax.ElementAssign;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -45,6 +46,7 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
+import org.apache.jena.sparql.syntax.ElementSemiJoin;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
@@ -339,6 +341,16 @@ public class ElementTransformer {
             if ( expr == null || exprTransform == null )
                 return expr ;
             return ExprTransformer.transform(exprTransform, expr) ;
+        }
+
+        @Override
+        public void visit(ElementSemiJoin el) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void visit(ElementAntiJoin el) {
+            throw new UnsupportedOperationException();
         }
 
 //        @Override

@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.collection.base;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.function.BiFunction;
 
 import org.aksw.commons.collector.core.AggBuilder;
@@ -7,6 +9,7 @@ import org.aksw.commons.collector.domain.Aggregator;
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.jena_sparql_api.sparql.ext.collection.array.SparqlLibArrayAgg;
 import org.aksw.jena_sparql_api.sparql.ext.util.AccAdapterJena;
+import org.aksw.jenax.arq.util.node.NodeCollection;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -49,19 +52,43 @@ public class SparqlLibCollectionAgg {
     public static <T> Aggregator<Binding, FunctionEnv, T> aggNodesFromExpr(
             Expr expr,
             ParallelAggregator<Node, FunctionEnv, T, ?> agg) {
-
         return
             AggBuilder.errorHandler(
                 AggBuilder.inputTransform2(
                     (Binding b, FunctionEnv env) -> {
-                        Node node = null;
+                        NodeValue nv;
                         try {
-                            NodeValue nv = expr.eval(b, env);
-                            node = nv == null ? null : nv.asNode();
+                            nv = expr.eval(b, env);
                         } catch (VariableNotBoundException e) {
+                            nv = null;
                             // Ignored
                         }
+                        Node node = nv == null ? null : nv.asNode();
                         return node;
+                    },
+                    agg),
+                false,
+                ex -> logger.warn("Error while aggregating a nodes", ex),
+                null);
+    }
+
+    public static <T> Aggregator<Binding, FunctionEnv, T> aggNodesFromCollectionExpr(
+            Expr expr,
+            ParallelAggregator<Node, FunctionEnv, T, ?> agg) {
+        return
+            AggBuilder.errorHandler(
+                AggBuilder.inputFlatMap2(
+                    (Binding b, FunctionEnv env) -> {
+                        NodeValue nv;
+                        try {
+                            nv = expr.eval(b, env);
+                        } catch (VariableNotBoundException e) {
+                            nv = null;
+                            // Ignored
+                        }
+                        NodeCollection nc = nv == null ? null : NodeCollection.extractOrNull(nv.asNode());
+                        Iterator<Node> r = nc == null ? Collections.emptyIterator() : nc.iterator();
+                        return r;
                     },
                     agg),
                 false,

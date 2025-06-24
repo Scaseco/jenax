@@ -27,6 +27,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var ;
 import org.apache.jena.sparql.expr.Expr ;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementAntiJoin;
 import org.apache.jena.sparql.syntax.ElementAssign;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -40,6 +41,7 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
+import org.apache.jena.sparql.syntax.ElementSemiJoin;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
@@ -96,6 +98,10 @@ public final class ElementTransformIdentity implements ElementTransform
     public Element transform(ElementLateral el, Element subElt) { return el ; }
     @Override
     public Element transform(ElementUnfold el, Expr expr, Var v1, Var v2) { return el ; }
+    @Override
+    public Element transform(ElementSemiJoin el, Element subElt) { return el; }
+    @Override
+    public Element transform(ElementAntiJoin el, Element subElt) { return el; }
 
 //    @Override
 //    public Element transform(ElementFind el, Var v, Triple triple2) {

@@ -3,6 +3,8 @@ package org.aksw.jenax.arq.aggregation;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.jenax.arq.util.binding.BindingMapper;
+import org.aksw.jenax.arq.util.binding.BindingMapperVarAware;
 import org.apache.jena.sparql.core.Var;
 
 import com.google.common.collect.Sets;

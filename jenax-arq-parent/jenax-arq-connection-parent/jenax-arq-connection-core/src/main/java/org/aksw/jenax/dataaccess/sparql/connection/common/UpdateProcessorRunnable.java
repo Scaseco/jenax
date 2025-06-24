@@ -18,10 +18,15 @@ public class UpdateProcessorRunnable
         this.delegate = delegate;
     }
 
-//	@Override
-//	public Context getContext() {
-//		return context;
-//	}
+    @Override
+    public Context getContext() {
+        return context;
+    }
+
+    @Override
+    public void abort() {
+        // no op
+    }
 
 //	@Override
 //	public DatasetGraph getDatasetGraph() {

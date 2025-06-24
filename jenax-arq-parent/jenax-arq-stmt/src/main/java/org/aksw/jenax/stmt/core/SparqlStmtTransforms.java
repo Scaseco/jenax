@@ -20,6 +20,10 @@ public class SparqlStmtTransforms {
         return of(op -> Transformer.transform(null, transformSupplier.get(), op));
     }
 
+    public static SparqlStmtTransform ofExprTransform(ExprTransform exprTransform) {
+        return of(op -> Transformer.transform(null, exprTransform, op));
+    }
+
     public static SparqlStmtTransform of(Rewrite rewrite) {
         return new SparqlStmtTransformViaRewrite(rewrite);
     }

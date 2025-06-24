@@ -88,7 +88,36 @@ public abstract class QueryExecBaseSelect
         }
     }
 
+    @Override
+    protected void closeActual() throws Exception {
+        // Synchronized on 'this' by base class
+        if (activeQueryExec != null) {
+            activeQueryExec.close();
+        }
+    }
+
+    protected void setActiveQueryExec(QueryExec queryExec) {
+        synchronized (this) {
+            if (activeQueryExec != null) {
+                activeQueryExec.close();
+            }
+
+            activeQueryExec = queryExec;
+
+            if (activeQueryExec != null) {
+                if (isCancelled) {
+                    activeQueryExec.abort();
+                }
+
+                if (isClosed) {
+                    this.activeQueryExec.close();
+                }
+            }
+        }
+    }
+
     protected RowSet internalSelect(Query selectQuery) {
+        QueryExec tmp;
         synchronized (this) {
             ensureOpen();
 
@@ -100,9 +129,10 @@ public abstract class QueryExecBaseSelect
                 throw new QueryCancelledException();
             }
 
-            activeQueryExec = doSelect(selectQuery);
+            tmp = doSelect(selectQuery);
+            setActiveQueryExec(tmp);
         }
-        return activeQueryExec.select();
+        return tmp.select();
     }
 
     public static Query adjust(Query query) {

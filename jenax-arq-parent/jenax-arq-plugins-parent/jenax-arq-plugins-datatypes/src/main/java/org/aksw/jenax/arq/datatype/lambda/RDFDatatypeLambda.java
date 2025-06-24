@@ -1,11 +1,9 @@
 package org.aksw.jenax.arq.datatype.lambda;
 
+import org.aksw.jenax.norse.term.lambda.NorseTermsLambda;
 import org.apache.jena.datatypes.BaseDatatype;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.sparql.expr.Expr;
-import org.apache.jena.sparql.expr.ExprEvalException;
-import org.apache.jena.sparql.util.ExprUtils;
 
 ///**
 // * A datatype for storing SPARQL expressions in RDF literals.
@@ -16,8 +14,11 @@ import org.apache.jena.sparql.util.ExprUtils;
 public class RDFDatatypeLambda
     extends BaseDatatype
 {
-    public static final String IRI = "http://jsa.aksw.org/dt/sparql/lambda";
+    public static final String IRI = NorseTermsLambda.lambda;
     public static final RDFDatatypeLambda INSTANCE = new RDFDatatypeLambda();
+
+    // Legacy IRI
+    // public static final String IRI = "http://jsa.aksw.org/dt/sparql/lambda";
 
     public static RDFDatatype get() {
         return INSTANCE;

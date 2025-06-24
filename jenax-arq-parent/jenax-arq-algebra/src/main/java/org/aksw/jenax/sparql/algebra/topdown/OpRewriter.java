@@ -2,11 +2,11 @@ package org.aksw.jenax.sparql.algebra.topdown;
 
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpVisitor;
+import org.apache.jena.sparql.algebra.op.OpAntiJoin;
 import org.apache.jena.sparql.algebra.op.OpAssign;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpConditional;
 import org.apache.jena.sparql.algebra.op.OpDatasetNames;
-import org.apache.jena.sparql.algebra.op.OpDiff;
 import org.apache.jena.sparql.algebra.op.OpDisjunction;
 import org.apache.jena.sparql.algebra.op.OpDistinct;
 import org.apache.jena.sparql.algebra.op.OpExt;
@@ -30,6 +30,7 @@ import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadBlock;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.algebra.op.OpReduced;
+import org.apache.jena.sparql.algebra.op.OpSemiJoin;
 import org.apache.jena.sparql.algebra.op.OpSequence;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.algebra.op.OpSlice;
@@ -67,7 +68,9 @@ public interface OpRewriter<T> {
     default T rewrite(OpExtend op)             { return fallback(op); }
     default T rewrite(OpJoin op)               { return fallback(op); }
     default T rewrite(OpLeftJoin op)           { return fallback(op); }
-    default T rewrite(OpDiff op)               { return fallback(op); }
+    // default T rewrite(OpDiff op)               { return fallback(op); }
+    default T rewrite(OpSemiJoin op)           { return fallback(op); }
+    default T rewrite(OpAntiJoin op)           { return fallback(op); }
     default T rewrite(OpMinus op)              { return fallback(op); }
     default T rewrite(OpUnion op)              { return fallback(op); }
     default T rewrite(OpLateral op)            { return fallback(op); }
@@ -123,7 +126,9 @@ public interface OpRewriter<T> {
         @Override public void visit(OpExtend op)                 { result = rewriter.rewrite(op); }
         @Override public void visit(OpJoin op)                   { result = rewriter.rewrite(op); }
         @Override public void visit(OpLeftJoin op)               { result = rewriter.rewrite(op); }
-        @Override public void visit(OpDiff op)                   { result = rewriter.rewrite(op); }
+        // @Override public void visit(OpDiff op)                   { result = rewriter.rewrite(op); }
+        @Override public void visit(OpSemiJoin op)               { result = rewriter.rewrite(op); }
+        @Override public void visit(OpAntiJoin op)               { result = rewriter.rewrite(op); }
         @Override public void visit(OpMinus op)                  { result = rewriter.rewrite(op); }
         @Override public void visit(OpUnion op)                  { result = rewriter.rewrite(op); }
         @Override public void visit(OpLateral op)                { result = rewriter.rewrite(op); }

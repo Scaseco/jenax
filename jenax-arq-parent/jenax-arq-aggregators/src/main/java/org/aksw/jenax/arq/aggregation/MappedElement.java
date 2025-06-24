@@ -1,5 +1,6 @@
 package org.aksw.jenax.arq.aggregation;
 
+import org.aksw.jenax.arq.util.binding.BindingMapper;
 import org.apache.jena.sparql.syntax.Element;
 
 /**

@@ -15,14 +15,12 @@ import org.aksw.facete.v3.api.FacetValue;
 import org.aksw.jena_sparql_api.pathlet.Path;
 import org.aksw.jenax.arq.util.expr.ExprListUtils;
 import org.aksw.jenax.arq.util.var.Vars;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
-
-import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
@@ -39,6 +37,8 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.NodeUtils;
+
+import com.google.common.collect.Iterables;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -172,19 +172,19 @@ public interface DataQuery<T extends RDFNode> {
     // Filter injection without renaming variables
     DataQuery<T> filterDirect(Element element);
 
-    DataQuery<T> dataSource(RdfDataSource dataSource);
-    RdfDataSource dataSource();
+    DataQuery<T> dataSource(RDFDataSource dataSource);
+    RDFDataSource dataSource();
 
     @Deprecated
     default SparqlQueryConnection connection() {
-        RdfDataSource dataSource = dataSource();
-        SparqlQueryConnection result = Optional.ofNullable(dataSource).map(RdfDataSource::getConnection).orElse(null);
+        RDFDataSource dataSource = dataSource();
+        SparqlQueryConnection result = Optional.ofNullable(dataSource).map(RDFDataSource::getConnection).orElse(null);
         return result;
     }
 
     @Deprecated
     default DataQuery<T> connection(SparqlQueryConnection connection) {
-        return dataSource(RdfDataEngines.ofQueryConnection(connection));
+        return dataSource(RDFDataSources.ofQueryConnection(connection));
     }
 
     default DataQuery<T> only(Iterable<Node> nodes) {

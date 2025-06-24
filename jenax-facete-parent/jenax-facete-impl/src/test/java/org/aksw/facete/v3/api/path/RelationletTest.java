@@ -28,6 +28,7 @@ import org.junit.Test;
 public class RelationletTest {
 
     @Test
+    // @Ignore
     public void testJoins() {
         RelationletJoinerImpl<Relationlet> joiner = new RelationletJoinerImpl<>();
 

@@ -721,11 +721,8 @@ public class OpUtils {
     }
 
     public static boolean isUnitTable(Op op) {
-        boolean result = false;
-        if (op instanceof OpTable) {
-            if (((OpTable) op).isJoinIdentity())
-                result = true;
-        }
+        boolean result = op instanceof OpTable opTable && opTable.isJoinIdentity();
         return result;
     }
+
 }

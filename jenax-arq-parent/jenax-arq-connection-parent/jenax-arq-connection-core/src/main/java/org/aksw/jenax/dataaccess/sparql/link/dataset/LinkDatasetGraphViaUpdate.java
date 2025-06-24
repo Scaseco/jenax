@@ -1,14 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.link.dataset;
 
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
-import org.apache.jena.query.ReadWrite;
-import org.apache.jena.query.TxnType;
-import org.apache.jena.rdflink.LinkDatasetGraph;
-import org.apache.jena.rdflink.LinkSparqlUpdate;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.sparql.core.DatasetGraph;
-
 // RdfSource loadFile(X)
 //
 //public class LinkDatasetGraphViaUpdate

@@ -123,6 +123,6 @@ public class ServiceExecutorFactoryRegistratorVfs {
 
         int maxTaskCount = Runtime.getRuntime().availableProcessors();
         // maxTaskCount = 1;
-        bulkChain.add(idx + 1, new ChainingServiceExecutorConcurrentSimple(executorService, maxTaskCount));
+        // bulkChain.add(idx + 1, new ChainingServiceExecutorConcurrentSimple(executorService, maxTaskCount));
     }
 }

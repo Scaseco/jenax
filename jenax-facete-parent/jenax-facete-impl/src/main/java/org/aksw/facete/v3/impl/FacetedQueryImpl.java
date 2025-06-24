@@ -10,8 +10,8 @@ import org.aksw.facete.v3.api.FacetedQuery;
 import org.aksw.facete.v3.api.FacetedQueryResource;
 import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.facete.v3.bgp.api.XFacetedQuery;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSource;
-import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RdfDataEngines;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.sparql.fragment.api.Fragment1;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
@@ -28,7 +28,7 @@ public class FacetedQueryImpl
 {
     // The actual state is stored in a model rooted in a certain resource
     // protected SparqlQueryConnection conn;
-    protected RdfDataSource dataSource;
+    protected RDFDataSource dataSource;
     protected Supplier<? extends Fragment1> conceptSupplier;
 
 //	protected Function<? super Resource, ? extends UnaryRelation> conceptParser;
@@ -69,7 +69,7 @@ public class FacetedQueryImpl
         }
     }
 
-    public static FacetedQueryImpl create(XFacetedQuery modelRoot, RdfDataSource rdfDataSource) {
+    public static FacetedQueryImpl create(XFacetedQuery modelRoot, RDFDataSource rdfDataSource) {
         initResource(modelRoot);
 
         return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, rdfDataSource);
@@ -77,10 +77,10 @@ public class FacetedQueryImpl
 
     public static FacetedQueryImpl create(XFacetedQuery modelRoot, SparqlQueryConnection conn) {
         initResource(modelRoot);
-        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, RdfDataEngines.ofQueryConnection(conn));
+        return new FacetedQueryImpl(modelRoot, () -> ConceptUtils.subjectConcept, RDFDataSources.ofQueryConnection(conn));
     }
 
-    public FacetedQueryImpl(XFacetedQuery modelRoot, Supplier<? extends Fragment1> conceptSupplier, RdfDataSource rdfDataSource) {
+    public FacetedQueryImpl(XFacetedQuery modelRoot, Supplier<? extends Fragment1> conceptSupplier, RDFDataSource rdfDataSource) {
         this.modelRoot = modelRoot;
         this.conceptSupplier = conceptSupplier;
         this.dataSource = rdfDataSource;
@@ -141,13 +141,13 @@ public class FacetedQueryImpl
     }
 
     @Override
-    public FacetedQuery dataSource(RdfDataSource dataSource) {
+    public FacetedQuery dataSource(RDFDataSource dataSource) {
         this.dataSource = dataSource;
         return this;
     }
 
     @Override
-    public RdfDataSource dataSource() {
+    public RDFDataSource dataSource() {
         return this.dataSource;
     }
 

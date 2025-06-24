@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -35,7 +36,6 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 
@@ -113,7 +113,6 @@ public class SparqlStmtMgr {
      * @return
      * @throws FileNotFoundException
      * @throws IOException
-     * @throws ParseException
      */
     public static Query loadQuery(String filenameOrURI) {
         return loadQuery(filenameOrURI, DefaultPrefixes.get());
@@ -137,7 +136,7 @@ public class SparqlStmtMgr {
 //		return result;
 //	}
 
-    public static List<Query> loadQueries(InputStream in, PrefixMapping pm) throws FileNotFoundException, IOException, ParseException {
+    public static List<Query> loadQueries(InputStream in, PrefixMapping pm) throws FileNotFoundException, IOException {
         List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processInputStream(pm, null, in))
                 .collect(Collectors.toList());
 
@@ -163,13 +162,16 @@ public class SparqlStmtMgr {
         return result;
     }
 
-    public static List<Query> loadQueries(String filenameOrURI, PrefixMapping pm) throws FileNotFoundException, IOException, ParseException {
+    public static List<Query> loadQueries(String filenameOrURI, PrefixMapping pm) throws FileNotFoundException, IOException {
         List<SparqlStmt> stmts = Streams.stream(SparqlStmtUtils.processFile(pm, filenameOrURI))
                 .collect(Collectors.toList());
 
         List<Query> result = new ArrayList<>();
         for(SparqlStmt stmt : stmts) {
-            Query query = stmt.getQuery();
+            if (!stmt.isParsed()) {
+                throw new RuntimeException(stmt.getParseException());
+            }
+            Query query = Objects.requireNonNull(stmt.getQuery());
             query.setBaseURI((String)null);
             QueryUtils.optimizePrefixes(query);
             result.add(query);
@@ -226,7 +228,7 @@ public class SparqlStmtMgr {
                 SparqlStmtUtils.process(conn, stmt2, null, new SPARQLResultSinkQuads(quadConsumer));
             }
 
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -308,13 +310,12 @@ public class SparqlStmtMgr {
      * @param baseIri
      * @param filenameOrStr
      * @return
-     * @throws ParseException
      * @throws IOException
      */
     public static Iterator<SparqlStmt> createIteratorSparqlStmts(
             String filenameOrStr,
             // PrefixMapping globalPrefixes,
-            SparqlStmtParser sparqlParser) throws ParseException, IOException {
+            SparqlStmtParser sparqlParser) throws IOException {
 
         // Check whether the argument is an inline sparql statement
         Iterator<SparqlStmt> it = null;
@@ -352,7 +353,7 @@ public class SparqlStmtMgr {
      * Load a query of which one variable acts as a placeholder as a function.
      * This method may be refactored to use a {@link ParameterizedSparqlString} as a base.
      */
-    public static Function<String, Query> loadTemplate(String fileOrURI, String templateArgName) throws FileNotFoundException, IOException, ParseException {
+    public static Function<String, Query> loadTemplate(String fileOrURI, String templateArgName) throws FileNotFoundException, IOException {
         Query templateQuery = SparqlStmtMgr.loadQuery(fileOrURI);
 
         Function<String, Query> result = value -> {
@@ -361,7 +362,7 @@ public class SparqlStmtMgr {
             return r;
         };
         return result;
-    };
+    }
 
 //	public static Model execConstruct(RDFConnection conn, String queryStr) {
 //		Model result = ModelFactory.createDefaultModel();

@@ -28,23 +28,15 @@ import com.google.common.collect.Iterables;
 public class PF_CollectionUnnest
     extends PropertyFunctionBase {
     @Override
-    public QueryIterator exec(Binding binding, PropFuncArg argSubject, Node predicate, PropFuncArg argObject,
-            ExecutionContext execCxt) {
-
+    public QueryIterator exec(Binding binding, PropFuncArg argSubject, Node predicate, PropFuncArg argObject, ExecutionContext execCxt) {
         // Get the subject's value
         Node node = BindingUtils.getValue(binding, argSubject.getArg());
 
         List<Node> objects = PropFuncArgUtils.getAsList(argObject);
         Node object = objects.get(0);
 
-//                if(!object.isVariable()) {
-//                    throw new RuntimeException("Object position of array unnesting must be a variable");
-//                }
-        // Var outputVar = (Var)object;
-
         Node indexKey = objects.size() > 1 ? objects.get(1) : null;
         Node index = BindingUtils.getValue(binding, indexKey, indexKey);
-
 
         Var indexVarTmp = null;
         Integer indexVal = null;
