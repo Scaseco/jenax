@@ -8,6 +8,7 @@ import org.aksw.shellgebra.algebra.common.Transcoding;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -46,6 +47,18 @@ public class StreamOpVisitorFileName
         transcodings.add(op.getTranscoding());
         return new FileName(base.baseName(), List.copyOf(transcodings));
     }
+
+    // FIXME Should also collect content type to build file extension! E.g.
+    // encode(bz2 convert(from:nt to:ttl (file myfile))) should result in myfile.ttl.bz2
+    @Override
+    public FileName visit(StreamOpContentConvert op) {
+        FileName base = op.getSubOp().accept(this);
+        return base;
+        //List<Transcoding> transcodings = new ArrayList<>(base.transcodings());
+        // transcodings.add(op.getTranscoding());
+        //return new FileName(base.baseName(), List.copyOf(transcodings));
+    }
+
 
     @Override
     public FileName visit(StreamOpConcat op) {

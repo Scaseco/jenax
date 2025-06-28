@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.algebra.cmd.op.CmdOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -23,6 +25,7 @@ import org.aksw.shellgebra.exec.SysRuntime;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.jena.riot.Lang;
 
 public class StreamOpVisitorStream
     implements StreamOpVisitor<InputStream>
@@ -118,6 +121,26 @@ public class StreamOpVisitorStream
     @Override
     public InputStream visit(StreamOpVar op) {
         throw new UnsupportedOperationException("Variable not supported: " + op);
+    }
+
+    @Override
+    public InputStream visit(StreamOpContentConvert op) {
+        InputStream base = op.getSubOp().accept(this);
+        String sourceFormat = op.getSourceFormat();
+        String targetFormat = op.getTargetFormat();
+        String baseIri = op.getBaseIri();
+
+        Lang inLang = RDFLanguagesEx.findLang(sourceFormat);
+        Lang outLang = RDFLanguagesEx.findLang(targetFormat);
+
+        InputStream result;
+        try {
+            result = StreamingRDFConverter.convert(base, inLang, outLang, baseIri);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
 //    @Override

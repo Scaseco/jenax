@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-connection-qlever</artifactId>
-        <name>jenax-arq-connection-qlever</name>
+	<name>jenax-arq-connection-qlever</name>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -22,10 +22,15 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>commons-beanutils</groupId>
-		    <artifactId>commons-beanutils</artifactId>
-		    <version>1.9.3</version>
-			<exclusions><exclusion><groupId>commons-logging</groupId><artifactId>commons-logging</artifactId></exclusion></exclusions>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -37,6 +42,11 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-connection-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -67,7 +77,8 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>compile</scope> <!-- compile due to test container dependency on junit -->
+			<scope>compile</scope> <!-- compile due to test container dependency
+			on junit -->
 		</dependency>
 
 		<dependency>

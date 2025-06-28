@@ -2,6 +2,7 @@ package org.aksw.shellgebra.algebra.stream.transform;
 
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -19,6 +20,11 @@ public interface StreamOpVisitorWrapper<T>
 
     @Override
     default T visit(StreamOpTranscode op) {
+        return getDelegate().visit(op);
+    }
+
+    @Override
+    default T visit(StreamOpContentConvert op) {
         return getDelegate().visit(op);
     }
 

@@ -1,0 +1,27 @@
+
+# Operating System Runtime Environment Ontology
+PREFIX o: <https://w3id.org/osreo/ontology#>
+PREFIX r: <https://w3id.org/osreo/resource#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Note: Probe locations have no specific order.
+#       Implementations my sort them e.g. by length + lex.
+
+r:bash
+  a o:Shell ;
+  rdfs:label "bash" ;
+  o:locatorCommand "which" ;
+  o:probeLocation "/bin/bash" , "/usr/bin/bash" ;
+  .
+
+r:sh
+  a o:Shell ;
+  rdfs:label "sh" ;
+  o:probeLocation "/bin/sh", "/usr/bin/sh" ;
+  .
+
+r:which
+  a o:LocatorCommand ;
+  rdfs:label "which" ;
+  o:probeLocation "/usr/bin/which" ;
+  .

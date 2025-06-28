@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
+import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
@@ -39,6 +40,7 @@ import org.aksw.shellgebra.algebra.stream.op.CodecSysEnv;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.transform.StreamOpTransformExecutionPartitioner;
@@ -82,11 +84,17 @@ import jenax.engine.qlever.docker.QleverConstants;
 public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     implements RDFDatabaseBuilder<X>
 {
-    public static final List<Lang> supportedLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS));
+    /** Langs supported by this database builder. The builder may convert e.g. rdf/xml to ntriples for the backend. */
+    public static final List<Lang> supportedInputLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS, Lang.RDFXML));
+
+    // N-quads listed first because non-supported formats are converted to this by default.
+    // Order matters here: N-triples and n-quads are the first conversion targets for triple/quad based languages.
+    public static final List<Lang> supportedBackendLangs = Collections.unmodifiableList(Arrays.asList(Lang.NTRIPLES, Lang.NQUADS, Lang.TURTLE, Lang.NQUADS));
 
     private static final Logger logger = LoggerFactory.getLogger(RDFDatabaseBuilderQlever.class);
 
     /** Record to capture arguments passed to this builder */
+    // XXX Perhaps replace lang with a format string for a more general API.
     public record FileArg(Path path, Lang lang, List<String> encodings, Node graph) {}
 
     /** Record to capture a set of files that make up a Qlever database. */
@@ -183,9 +191,12 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     @Override
     public X addPath(String source, Node g) throws IOException {
         Path path = Path.of(source);
-        RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedLangs);
+        RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedInputLangs);
         String contentType = entityInfo.getContentType();
         Lang lang = RDFLanguages.contentTypeToLang(contentType);
+        if (lang == null) {
+            throw new RuntimeException("Could not detect lang for path: " + path + " - contentType: " + contentType);
+        }
         addPath(path, g, entityInfo.getContentEncodings(), lang);
         return self();
     }
@@ -195,12 +206,33 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         args.add(arg);
     }
 
+    // If the encodings and types are directly supported then just pass on the file.
+    // Otherwise, make a logical plan to appropriately convert the input.
     public StreamOp convertArgToOp(FileArg arg) {
         Path path = arg.path();
         StreamOp result = new StreamOpFile(path.toString());
         for (String encoding : arg.encodings()) {
             result = new StreamOpTranscode(encoding, TranscodeMode.DECODE, result);
         }
+
+        // Check if content type conversion is needed.
+        Lang argLang = arg.lang();
+        if (!supportedBackendLangs.contains(arg.lang())) {
+            // RDFLanguages.isTriples(arg.lang())
+            Lang targetLang = RDFLanguagesEx.findBestLang(argLang, supportedBackendLangs);
+            if (targetLang == null) {
+                throw new RuntimeException("Could not find a conversion from " + argLang + " to a lang supported by the backend. Registered supported langs: " + supportedBackendLangs);
+            }
+
+            logger.info("File " + arg.path() + ": Injecting content conversion " + argLang + " -> " + targetLang);
+            String baseUri = arg.path().toUri().toString();
+            result = new StreamOpContentConvert(
+                argLang.getContentType().toString(),
+                targetLang.getContentType().toString(),
+                baseUri,
+                result);
+        }
+
         return result;
     }
 
@@ -327,7 +359,9 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
 //                String[] cmd = runtime.compileCommand(cmdOp);
                 // SysRuntimeImpl.forCurrentOs().
             } else {
-                throw new IllegalStateException("Op unexpectedly did not compile to a command.");
+                // TODO A riot-based content type conversion would have to be handled as a
+                // named pipe
+                throw new IllegalStateException("Op unexpectedly did not compile to a command. Got: " + sysOp);
             }
         }
 

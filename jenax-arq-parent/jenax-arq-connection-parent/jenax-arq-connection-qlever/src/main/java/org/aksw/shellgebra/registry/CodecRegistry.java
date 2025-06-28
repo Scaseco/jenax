@@ -10,6 +10,9 @@ import org.aksw.shellgebra.algebra.stream.op.CodecSpec;
 // - The 'source' view: Supplier<InputStream> Here we take an op and build an input stream from it.
 // - The 'transformer' view: Function<InputStream, InputStream> Here we build a transformation to a byte stream from form A to form B.
 
+/**
+ * Currently, the CodecVariants accept a file argument (may be bash process substitution) and are assumed to stream to stdout.
+ */
 public class CodecRegistry {
     private Map<String, CodecSpec> registry = new HashMap<>();
 

@@ -7,6 +7,7 @@ import org.aksw.shellgebra.algebra.stream.op.HasStreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -30,6 +31,14 @@ public class StreamOpVisitorApplyTransform<T extends HasStreamOp>
 
     @Override
     public T visit(StreamOpTranscode op) {
+        StreamOp subOp = op.getSubOp().getStreamOp();
+        T newSubOp = subOp.accept(this);
+        T result = transform.transform(op, newSubOp);
+        return result;
+    }
+
+    @Override
+    public T visit(StreamOpContentConvert op) {
         StreamOp subOp = op.getSubOp().getStreamOp();
         T newSubOp = subOp.accept(this);
         T result = transform.transform(op, newSubOp);

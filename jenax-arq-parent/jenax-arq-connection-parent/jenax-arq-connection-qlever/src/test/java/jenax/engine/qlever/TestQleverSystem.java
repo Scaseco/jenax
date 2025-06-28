@@ -34,16 +34,38 @@ public class TestQleverSystem {
             Path tmpDbFolder = Files.createTempDirectory("qlever-dbs");
             closer.register(() -> Files.delete(tmpDbFolder));
 
-            Path tmpFile = Files.createTempFile("qlever-test-", ".nt");
-            closer.register(() -> Files.delete(tmpFile));
+            Path ntFile = Files.createTempFile("qlever-test-", ".nt");
+            closer.register(() -> Files.delete(ntFile));
+            Files.writeString(ntFile, "<urn:s> <urn:p> <urn:o> .\n");
 
-            Files.writeString(tmpFile, "<urn:s> <urn:p> <urn:o> .\n");
+            Path rdfXmlFile = Files.createTempFile("qlever-test-", ".rdf");
+            closer.register(() -> Files.delete(rdfXmlFile));
+            Files.writeString(rdfXmlFile, """
+                <?xml version="1.0"?>
+                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                            xmlns:dc="http://purl.org/dc/elements/1.1/"
+                            xmlns:ex="http://example.org/stuff/1.0/">
+
+                  <rdf:Description rdf:about="http://www.w3.org/TR/rdf-syntax-grammar"
+                             dc:title="RDF1.1 XML Syntax">
+                    <ex:editor>
+                      <rdf:Description ex:fullName="Dave Beckett">
+                        <ex:homePage rdf:resource="http://purl.org/net/dajobe/" />
+                      </rdf:Description>
+                    </ex:editor>
+                  </rdf:Description>
+
+                </rdf:RDF>
+                """);
+
+
 
             // Get the database loader and create a database.
             RDFDatabaseFactory loader = registry.getDatabaseFactory(systemName);
             RDFDatabase database = loader.newBuilder()
                 .setOutputFolder(tmpDbFolder)
-                .addPath(tmpFile.toString())
+                .addPath(ntFile.toString())
+                .addPath(rdfXmlFile.toString())
                 .build();
 
             // Make sure to delete the database's file set on exit.

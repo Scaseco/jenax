@@ -5,6 +5,7 @@ import java.util.List;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -22,6 +23,11 @@ public class StreamOpTransformBase
     @Override
     public StreamOp transform(StreamOpTranscode op, StreamOp subOp) {
         return new StreamOpTranscode(op.getName(), op.getTranscodeMode(), subOp);
+    }
+
+    @Override
+    public StreamOp transform(StreamOpContentConvert op, StreamOp subOp) {
+        return new StreamOpContentConvert(op.getSourceFormat(), op.getTargetFormat(), op.getBaseIri(), subOp);
     }
 
     @Override

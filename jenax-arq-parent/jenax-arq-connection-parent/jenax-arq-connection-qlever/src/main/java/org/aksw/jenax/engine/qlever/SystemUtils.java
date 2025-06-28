@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -165,11 +166,11 @@ public class SystemUtils {
         return getCommandOutput("which", commandName);
     }
 
-    public static int getUID() throws IOException, NumberFormatException, InterruptedException {
+    public static int getUID() throws IOException {
         return Integer.parseInt(getCommandOutput("id", "-u"));
     }
 
-    public static int getGID() throws IOException, NumberFormatException, InterruptedException {
+    public static int getGID() throws IOException {
         return Integer.parseInt(getCommandOutput("id", "-g"));
     }
 }

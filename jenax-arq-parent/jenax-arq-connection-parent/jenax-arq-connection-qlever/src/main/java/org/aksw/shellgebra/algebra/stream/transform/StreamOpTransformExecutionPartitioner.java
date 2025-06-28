@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpCommand;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpConcat;
+import org.aksw.shellgebra.algebra.stream.op.StreamOpContentConvert;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpFile;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpTranscode;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
@@ -75,18 +76,14 @@ public class StreamOpTransformExecutionPartitioner
 
     @Override
     public StreamOpEntry<Location> transform(StreamOpTranscode op, StreamOpEntry<Location> subOp) {
-
         StreamOpEntry<Location> result = null;
         // Location newOpLocation;
         // StreamOp newOp = subOp.getStreamOp();
         if (subOp.getValue() == Location.HANDLED) {
             boolean isSupported = isSupported(op);
             if (!isSupported) {
-                String varName = "v" + (nextVar++);
                 StreamOp thisOp = new StreamOpTranscode(op.getTranscoding(), subOp.getStreamOp());
-                varToOp.put(varName, thisOp);
-                StreamOpVar v = new StreamOpVar(varName);
-                result = new StreamOpEntry<>(v, Location.NOT_HANDLED);
+                result = injectVar(thisOp);
             }
         }
 
@@ -95,6 +92,35 @@ public class StreamOpTransformExecutionPartitioner
             StreamOpTranscode newOp = new StreamOpTranscode(op.getTranscoding(), subOp.getStreamOp());
             result = new StreamOpEntry<>(newOp, subOp.getValue());
         }
+        return result;
+    }
+
+    @Override
+    public StreamOpEntry<Location> transform(StreamOpContentConvert op, StreamOpEntry<Location> subOp) {
+        StreamOpEntry<Location> result = null;
+
+        if (subOp.getValue() == Location.HANDLED) {
+            boolean isSupported = false;
+            if (!isSupported) {
+                StreamOp thisOp = new StreamOpContentConvert(op.getSourceFormat(), op.getTargetFormat(), op.getBaseIri(), subOp.getStreamOp());
+                result = injectVar(thisOp);
+            }
+        }
+
+        if (result == null) {
+            // StreamOp newOp = super.transform(op, subOp.getStreamOp());
+            // StreamOpTranscode newOp = new StreamOpTranscode(op.getTranscoding(), subOp.getStreamOp());
+            StreamOpContentConvert newOp = new StreamOpContentConvert(op.getSourceFormat(), op.getTargetFormat(), op.getBaseIri(), subOp.getStreamOp());
+            result = new StreamOpEntry<>(newOp, subOp.getValue());
+        }
+        return result;    }
+
+    protected StreamOpEntry<Location> injectVar(StreamOp thisOp) {
+        StreamOpEntry<Location> result;
+        String varName = "v" + (nextVar++);
+        varToOp.put(varName, thisOp);
+        StreamOpVar v = new StreamOpVar(varName);
+        result = new StreamOpEntry<>(v, Location.NOT_HANDLED);
         return result;
     }
 

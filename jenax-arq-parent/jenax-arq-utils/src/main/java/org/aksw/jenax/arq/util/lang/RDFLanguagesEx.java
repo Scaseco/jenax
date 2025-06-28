@@ -1,6 +1,17 @@
 package org.aksw.jenax.arq.util.lang;
 
-import java.util.*;
+import static org.apache.jena.atlas.iterator.Iter.findFirst;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +33,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
-import static org.apache.jena.atlas.iterator.Iter.findFirst;
 
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
@@ -331,6 +341,39 @@ public class RDFLanguagesEx {
         return s.toString();
     }
 
+
+    /**
+     * If the prototype language is in the set of candidates then the former is returned.
+     * Otherwise, returns the first candidate language that matches the given prototype language.
+     * If the prototype is triples-based than the candidates are first searched for triples langs.
+     * Returns null if no suitable language found.
+     */
+    public static Lang findBestLang(Lang prototypeLang, Collection<Lang> candidates) {
+        Objects.requireNonNull(prototypeLang);
+        Objects.requireNonNull(candidates);
+
+        Lang result = null;
+        if (candidates.contains(prototypeLang)) {
+            result = prototypeLang;
+        } else {
+
+            boolean isTriples = RDFLanguages.isTriples(prototypeLang);
+            boolean isQuads = RDFLanguages.isQuads(prototypeLang);
+
+            if (!isTriples && !isQuads) {
+                throw new IllegalStateException("Neither a triples nor quads lang: " + prototypeLang);
+            }
+
+            if (isTriples) {
+                result = candidates.stream().filter(RDFLanguages::isTriples).findFirst().orElse(null);
+            }
+
+            if (result == null) {
+                result = candidates.stream().filter(RDFLanguages::isQuads).findFirst().orElse(null);
+            }
+        }
+        return result;
+    }
 
 //	public static RDFFormat findLang(String label) {
 //		RDFFormat outFormat = RDFLanguages.fi.registered().stream()
