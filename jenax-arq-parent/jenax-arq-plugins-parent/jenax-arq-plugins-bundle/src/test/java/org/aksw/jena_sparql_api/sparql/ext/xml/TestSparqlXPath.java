@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.io.Resources;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.NodeFactory;
@@ -15,7 +20,6 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -23,10 +27,6 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.util.QueryExecUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.google.common.io.Resources;
 
 
 public class TestSparqlXPath {
@@ -40,7 +40,7 @@ public class TestSparqlXPath {
 //		System.out.println(op);
 
         List<String> actual = new ArrayList<>();
-        try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.create())) {
+        try(RDFConnection conn = RDFConnection.connect(DatasetFactory.create())) {
             conn.querySelect(query, b -> actual.add(b.get("str").toString()));
 //			try(QueryExecution qe = conn.query(query)) {
 //				System.out.println(ResultSetFormatter.asText(qe.execSelect()));
@@ -72,7 +72,7 @@ public class TestSparqlXPath {
                 "  BIND(xml:path(?member, '//gaul:status/text()') AS ?status)",
                 "}"));
         try (QueryExec qe = QueryExec.newBuilder()
-                .initialBinding(b)
+                .substitution(b)
                 .dataset(DatasetGraphFactory.create())
                 .query(query)
                 .build()) {

@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Sets;
+
 import org.aksw.commons.tuple.bridge.TupleBridge3;
 import org.aksw.commons.tuple.finder.TupleFinder3;
 import org.aksw.commons.tuple.finder.TupleFinder3Wrapper;
@@ -23,10 +27,6 @@ import org.apache.jena.rdfs.engine.CxtInf;
 import org.apache.jena.rdfs.engine.MapperX;
 import org.apache.jena.rdfs.engine.MatchRDFS;
 import org.apache.jena.rdfs.setup.ConfigRDFS;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Sets;
 
 /**
  * RDFS stream reasoner engine that builds upon Jena's {@link MatchRDFS} but handles
@@ -433,6 +433,15 @@ public class MatchRDFSReduced<D, C>
         @Override
         public TupleBridge3<D, C> getTupleBridge() {
             return base.getTupleBridge();
+        }
+
+        // @Override
+        public boolean contains(C s, C p, C o) {
+            boolean result;
+            try (Stream<D> tuples = match(s, p, o)) {
+                result = tuples.anyMatch(x -> true);
+            }
+            return result;
         }
     }
 }

@@ -1,0 +1,61 @@
+
+# Operating System Runtime Environment Ontology
+PREFIX o: <https://w3id.org/osreo/ontology#>
+PREFIX r: <https://w3id.org/osreo/resource#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+# Note: Probe locations have no specific order.
+#       Implementations my sort them e.g. by length + lex.
+
+# XXX Prefixes /bin and /usr/bin could be configured in a central place.
+
+r:zsh
+  a o:Shell ;
+  rdfs:label "zsh" ;
+  o:locatorCommand r:which ; # XXX Link to resource or just reference via name ("which")?
+  o:commandOption "-c" ;
+  o:probeLocation "/bin/zsh" , "/usr/bin/zsh" ;
+  .
+
+r:bash
+  a o:Shell ;
+  rdfs:label "bash" ;
+  o:commandOption "-c" ;
+  o:probeLocation "/bin/bash" , "/usr/bin/bash" ;
+  .
+
+r:sh
+  a o:Shell ;
+  rdfs:label "sh" ;
+  o:commandOption "-c" ; # Could be a CDT/json list literal (but avoid rdf list!)
+  o:probeLocation "/bin/sh", "/usr/bin/sh" ;
+  .
+
+r:which
+  a o:LocatorCommand ;
+  rdfs:label "which" ;
+  o:probeLocation "/bin/which", "/usr/bin/which" ;
+  .
+
+r:docker-image-nestio-lbzip2
+  o:imageName "nestio/lbzip2" ;
+  o:suppliesTool r:tool-lbzip2 ; # docker supplication of tool X (in version V) at location Y in image Z.
+  .
+
+# or
+#r:tool-provisioning-docker-nestio-lbzip2 ;
+#  o:imageName "nestio/lbzip2" ;
+#  o:suppliesTool r:tool-lbzip2 ;
+#  .
+
+r:tool-lbzip2
+  o:commandName "lbzip2" ;
+  .
+
+r:encoding-bzip2
+  o:encodingName "bzip2" ;
+  o:prefFileExtension ".bz2" ;
+  o:altFileExtension ".bzip2" ;
+  .
+
+

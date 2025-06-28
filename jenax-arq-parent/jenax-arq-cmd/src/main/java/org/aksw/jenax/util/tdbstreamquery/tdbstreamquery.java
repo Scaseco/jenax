@@ -54,23 +54,23 @@ class tdbstreamquery extends query {
 
     static Map<ResultsFormat, Lang> resultsFormatToLangMap;
 
-    static {
-        resultsFormatToLangMap = new HashMap<>();
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_XML, Lang.RDFXML);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_N3, Lang.N3);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_TTL, Lang.TURTLE);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_NT, Lang.NTRIPLES);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_JSONLD, Lang.JSONLD);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_NQ, Lang.NQUADS);
-        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_TRIG, Lang.TRIG);
-    }
-
-    protected static Lang convert(ResultsFormat fmt) {
-        Lang lang = ResultsFormat.convert(fmt);
-        if (lang != null)
-            return lang;
-        return resultsFormatToLangMap.get(fmt);
-    }
+//    static {
+//        resultsFormatToLangMap = new HashMap<>();
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_XML, Lang.RDFXML);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_N3, Lang.N3);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_TTL, Lang.TURTLE);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_NT, Lang.NTRIPLES);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_JSONLD, Lang.JSONLD);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_NQ, Lang.NQUADS);
+//        resultsFormatToLangMap.put(ResultsFormat.FMT_RDF_TRIG, Lang.TRIG);
+//    }
+//
+//    protected static Lang convert(ResultsFormat fmt) {
+//        Lang lang = ResultsFormat.convert(fmt);
+//        if (lang != null)
+//            return lang;
+//        return resultsFormatToLangMap.get(fmt);
+//    }
 
     @Override
     protected void queryExec(boolean timed, ResultsFormat fmt, PrintStream resultsDest) {
@@ -80,7 +80,7 @@ class tdbstreamquery extends query {
 
         try {
             Query query = getQuery();
-            Lang lang = defaultLang(convert(fmt), query);
+            Lang lang = defaultLang(fmt.resultSetLang(), query);
 
             if (isVerbose()) {
                 IndentedWriter out = new IndentedWriter(resultsDest, true);

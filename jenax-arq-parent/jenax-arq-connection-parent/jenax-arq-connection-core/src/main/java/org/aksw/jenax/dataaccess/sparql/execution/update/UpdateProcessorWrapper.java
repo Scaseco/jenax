@@ -2,7 +2,6 @@ package org.aksw.jenax.dataaccess.sparql.execution.update;
 
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
 
 public interface UpdateProcessorWrapper<T extends UpdateProcessor>
     extends UpdateProcessor

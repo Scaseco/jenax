@@ -5,14 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.engine.qlever.RDFDatabaseBuilderQlever;
-import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.SysRuntime;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
 import org.aksw.shellgebra.exec.SysRuntimeWrapperBase;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.aksw.shellgebra.util.SystemUtils;
 
 
 public class TestRdfDatabaseLoaderQlever {

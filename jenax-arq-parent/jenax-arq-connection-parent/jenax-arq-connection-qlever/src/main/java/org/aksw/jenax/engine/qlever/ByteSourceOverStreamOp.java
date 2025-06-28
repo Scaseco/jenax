@@ -5,15 +5,14 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.io.ByteSource;
+
 import org.aksw.shellgebra.algebra.stream.op.StreamOp;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVar;
 import org.aksw.shellgebra.algebra.stream.op.StreamOpVisitor;
-import org.aksw.shellgebra.algebra.stream.transform.StreamOpVisitorStream;
 import org.aksw.shellgebra.algebra.stream.transform.StreamOpVisitorWrapperBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.ByteSource;
 
 /**
  * Byte source over a logical plan.

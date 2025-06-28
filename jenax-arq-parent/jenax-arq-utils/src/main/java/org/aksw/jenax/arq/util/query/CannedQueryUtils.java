@@ -123,7 +123,7 @@ public class CannedQueryUtils {
         }
 
         Expr or = ExprUtils.orifyBalanced(exprs);
-        group.addElementFilter(new ElementFilter(or));
+        group.addElement(new ElementFilter(or));
 
         BasicPattern bgp = new BasicPattern();
         bgp.add(triple);
@@ -198,8 +198,8 @@ public class CannedQueryUtils {
 
         // Avoid non-uris as objects
         if(o.isVariable()) {
-            group.addElementFilter(new ElementFilter(new E_IsURI(new ExprVar(o))));
-            group.addElementFilter(new ElementFilter(new E_LogicalNot(new E_IsBlank(new ExprVar(o)))));
+            group.addElement(new ElementFilter(new E_IsURI(new ExprVar(o))));
+            group.addElement(new ElementFilter(new E_LogicalNot(new E_IsBlank(new ExprVar(o)))));
         }
 
         BasicPattern bgp = new BasicPattern();

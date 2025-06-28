@@ -99,7 +99,7 @@ public class ConstraintDerivations {
                 // Folding consecutive string args into one is a separate task that should be run first
                 if (args.isEmpty()) {
                     // Empty string
-                    result = VSpaceImpl.create(NodeRanges.createClosed().addValue(NodeFactory.createLiteral("")));
+                    result = VSpaceImpl.create(NodeRanges.createClosed().addValue(NodeFactory.createLiteralString("")));
                 } else {
                     // Only look at the first arg
                       Expr arg = args.get(0);

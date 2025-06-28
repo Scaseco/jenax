@@ -103,7 +103,7 @@ public class TestMapperMultiProperty {
         Node label = NodeFactory.createURI("http://ex.org/label");
         Node population = NodeFactory.createURI("http://ex.org/population");
 
-        graph.add(Triple.create(aut, label, NodeFactory.createLiteral("Austria")));
+        graph.add(Triple.create(aut, label, NodeFactory.createLiteralString("Austria")));
         graph.add(Triple.create(aut, population, NodeFactory.createLiteralByValue(7, intType)));
         graph.add(Triple.create(aut, population, NodeFactory.createLiteralByValue(8, intType)));
 

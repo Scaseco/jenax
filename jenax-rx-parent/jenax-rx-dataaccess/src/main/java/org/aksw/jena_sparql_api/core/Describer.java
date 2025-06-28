@@ -13,7 +13,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.ResultSetCloseable;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 
@@ -32,14 +32,14 @@ public class Describer
     //private QueryExe
     // TODO Keep track of the involved resources so we can close them properly
 
-    private ResultSetCloseable rs;
+    private ResultSet rs;
     private Binding currentBinding = null;
     private Iterator<Var> currentVar = null;
     private QueryExecutionFactory qef;
 
     private QueryExecution currentQe = null;
 
-    public Describer(Iterator<Node> openNodes, ResultSetCloseable rs, Collection<Var> resultVars, QueryExecutionFactory qef)
+    public Describer(Iterator<Node> openNodes, ResultSet rs, Collection<Var> resultVars, QueryExecutionFactory qef)
     {
         this.openNodes = openNodes;
         this.resultVars = resultVars;
@@ -47,7 +47,7 @@ public class Describer
         this.qef = qef;
     }
 
-    public static Describer create(List<Node> resultUris, List<String> resultVars, ResultSetCloseable rs, QueryExecutionFactory qef) {
+    public static Describer create(List<Node> resultUris, List<String> resultVars, ResultSet rs, QueryExecutionFactory qef) {
 
         Set<Var> vars = null;
         if(rs != null) {

@@ -33,19 +33,19 @@ public class EdgeBasedAccumulator {
          * }
          */
 
-        AggJsonProperty actorEdge = AggJsonProperty.of(NodeFactory.createLiteral("actor"), NodeFactory.createURI("urn:actor"), true);
+        AggJsonProperty actorEdge = AggJsonProperty.of(NodeFactory.createLiteralString("actor"), NodeFactory.createURI("urn:actor"), true);
         movieObject.addPropertyAggregator(actorEdge);
 
         AggJsonObject actorObject = new AggJsonObject();
         actorEdge.setTargetAgg(actorObject);
 
-        AggJsonProperty actorLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:actorLabel"), true);
+        AggJsonProperty actorLabelEdge = AggJsonProperty.of(NodeFactory.createLiteralString("label"), NodeFactory.createURI("urn:actorLabel"), true);
         actorLabelEdge.setSingle(true);
         AggJsonLiteral actorLabelValue = new AggJsonLiteral();
         actorLabelEdge.setTargetAgg(actorLabelValue);
         actorObject.addPropertyAggregator(actorLabelEdge);
 
-        AggJsonProperty moveLabelEdge = AggJsonProperty.of(NodeFactory.createLiteral("label"), NodeFactory.createURI("urn:movieLabel"), true);
+        AggJsonProperty moveLabelEdge = AggJsonProperty.of(NodeFactory.createLiteralString("label"), NodeFactory.createURI("urn:movieLabel"), true);
         movieObject.addPropertyAggregator(moveLabelEdge);
 
         AggJsonLiteral movieLabelValue = new AggJsonLiteral();

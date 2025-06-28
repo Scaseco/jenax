@@ -137,7 +137,7 @@ public class MyOpAsQuery
         query.setQueryPattern(eg) ;
         query.setQuerySelectType() ;
 
-        query.setResultVars() ;
+        query.resetResultVars() ;
         return query ;
     }
 

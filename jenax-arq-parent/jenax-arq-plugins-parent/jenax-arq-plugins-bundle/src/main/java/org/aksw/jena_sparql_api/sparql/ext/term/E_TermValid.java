@@ -1,8 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.term;
 
 import org.apache.jena.graph.Node;
-import org.apache.jena.iri.IRI;
-import org.apache.jena.irix.SetupJenaIRI;
+import org.apache.jena.riot.system.Checker;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.FunctionBase1;
 
@@ -40,11 +39,11 @@ public class E_TermValid
         if(node.isURI()) {
             String str = node.getURI();
             //boolean verdict = urlValidator.isValid(iri);
-            IRI iri = SetupJenaIRI.iriCheckerFactory().create(str);
+//            IRI iri = SetupJenaIRI.iriCheckerFactory().create(str);
             // TODO Allow 'include warnings' flag as argument to the sparql function
-            boolean isValid = !iri.hasViolation(false);
+//            boolean isValid = !iri.hasViolation(false);
             // boolean isValid = !SetupJenaIRI.iriCheckerFactory().cr.checkIRI(iri);
-
+            boolean isValid = Checker.checkIRI(node);
             result = isValid ? NodeValue.TRUE : NodeValue.FALSE;
         } else {
             result = NodeValue.TRUE;

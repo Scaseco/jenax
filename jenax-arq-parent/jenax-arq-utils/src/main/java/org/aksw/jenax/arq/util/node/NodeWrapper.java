@@ -45,7 +45,7 @@ public abstract class NodeWrapper<T>
     public boolean isVariable() { return getDelegate().isVariable(); }
 
     @Override
-    public boolean isNodeTriple() { return getDelegate().isNodeTriple(); }
+    public boolean isTripleTerm() { return getDelegate().isTripleTerm(); }
 
     @Override
     public boolean isNodeGraph() { return getDelegate().isNodeGraph(); }
@@ -105,10 +105,10 @@ public abstract class NodeWrapper<T>
     public boolean equals(Object o) { return getDelegate().equals(o); }
 
     @Override
-    public boolean sameTermAs(Object o) { return getDelegate().equals(o); }
+    public boolean sameTermAs(Node o) { return getDelegate().sameTermAs(o); }
 
     @Override
-    public boolean sameValueAs(Object o) { return getDelegate().equals(o); }
+    public boolean sameValueAs(Node o) { return getDelegate().sameValueAs(o); }
 
     @Override
     public String toString() { return getDelegate().toString(); }
@@ -119,8 +119,8 @@ public abstract class NodeWrapper<T>
     @Override
     public int hashCode() { return getDelegate().hashCode(); }
 
-    @Override
-    public boolean matches(Node other) { return getDelegate().equals(other); }
+//    @Override
+//    public boolean equals(Node other) { return getDelegate().equals(other); }
 
     // ---- Serializable
     // Must be "protected", not "private".

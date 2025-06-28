@@ -30,7 +30,6 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.NodeUtils;
 
 public class QuadUtils {
@@ -44,7 +43,7 @@ public class QuadUtils {
 
 
     public static boolean isValidAsStatement(Quad quad) {
-        return quad.getGraph().isURI() && ModelUtils.isValidAsStatement(quad.getSubject(), quad.getPredicate(), quad.getObject());
+        return quad.getGraph().isURI() && NodeUtils.isValidAsRDF(quad.getSubject(), quad.getPredicate(), quad.getObject());
     }
 
     /** Create o stream of a quad's four nodes */

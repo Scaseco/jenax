@@ -11,8 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonElement;
+
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
-import org.aksw.jena_sparql_api.sparql.ext.json.RDFDatatypeJson;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -30,8 +31,6 @@ import org.apache.jena.sparql.pfunction.PropertyFunctionFactory;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonElement;
 
 /**
  * Function for parsing a given CSV resource as a stream of JSON objects
@@ -67,7 +66,7 @@ public class PropertyFunctionFactoryCsvParse
                         : rawSubject;
 
                 Node object;
-                Node options = NodeFactory.createLiteral("");
+                Node options = NodeFactory.createLiteralString("");
 
                 if(argObject.isList()) {
                     List<Node> argList = argObject.getArgList();

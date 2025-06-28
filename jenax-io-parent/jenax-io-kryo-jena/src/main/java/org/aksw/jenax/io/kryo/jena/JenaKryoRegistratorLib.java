@@ -2,6 +2,9 @@ package org.aksw.jenax.io.kryo.jena;
 
 import java.util.List;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.atlas.lib.tuple.Tuple0;
 import org.apache.jena.atlas.lib.tuple.Tuple1;
@@ -22,8 +25,8 @@ import org.apache.jena.graph.Node_Triple;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Node_Variable;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.graph.impl.GraphPlain;
 import org.apache.jena.mem.GraphMem;
+import org.apache.jena.mem.GraphMemFast;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.SortCondition;
@@ -59,7 +62,6 @@ import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Call;
 import org.apache.jena.sparql.expr.E_Cast;
 import org.apache.jena.sparql.expr.E_Coalesce;
-import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_Datatype;
 import org.apache.jena.sparql.expr.E_DateTimeDay;
 import org.apache.jena.sparql.expr.E_DateTimeHours;
@@ -77,6 +79,7 @@ import org.apache.jena.sparql.expr.E_GreaterThan;
 import org.apache.jena.sparql.expr.E_GreaterThanOrEqual;
 import org.apache.jena.sparql.expr.E_IRI;
 import org.apache.jena.sparql.expr.E_IRI2;
+import org.apache.jena.sparql.expr.E_If;
 import org.apache.jena.sparql.expr.E_IsBlank;
 import org.apache.jena.sparql.expr.E_IsIRI;
 import org.apache.jena.sparql.expr.E_IsLiteral;
@@ -154,9 +157,6 @@ import org.apache.jena.sparql.expr.nodevalue.NodeValueSortKey;
 import org.apache.jena.sparql.expr.nodevalue.NodeValueString;
 import org.apache.jena.sparql.graph.GraphFactory;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-
 /**
  * Note: KryoRegistrator is an interface introduced by spark; hence we cannot use it
  * in this common package.
@@ -192,7 +192,7 @@ public class JenaKryoRegistratorLib {
         kryo.register(E_Call.class, fallbackExprSerializer);
         kryo.register(E_Cast.class, fallbackExprSerializer);
         kryo.register(E_Coalesce.class, new ExprFunctionNSerializer<>(args -> new E_Coalesce(new ExprList(args))));
-        kryo.register(E_Conditional.class, new ExprFunction3Serializer<>(E_Conditional::new));
+        kryo.register(E_If.class, new ExprFunction3Serializer<>(E_If::new));
         kryo.register(E_Datatype.class, new ExprFunction1Serializer<>(E_Datatype::new));
         kryo.register(E_DateTimeDay.class, new ExprFunction1Serializer<>(E_DateTimeDay::new));
         kryo.register(E_DateTimeHours.class, new ExprFunction1Serializer<>(E_DateTimeHours::new));
@@ -307,11 +307,11 @@ public class JenaKryoRegistratorLib {
         kryo.register(ModelCom.class, GenericCollectionSerializer.create(ModelCom.class, Triple.class,
                 m -> m.getGraph().stream(), () -> (ModelCom)ModelFactory.createDefaultModel(), (m, t) -> m.getGraph().add(t)));
 
-        kryo.register(GraphPlain.class, GenericCollectionSerializer.create(GraphPlain.class, Triple.class,
-                Graph::stream, () -> (GraphPlain)GraphFactory.createPlainGraph(), Graph::add));
+//        kryo.register(GraphPlain.class, GenericCollectionSerializer.create(GraphPlain.class, Triple.class,
+//                Graph::stream, () -> (GraphPlain)GraphFactory.createPlainGraph(), Graph::add));
 
-        kryo.register(GraphMem.class, GenericCollectionSerializer.create(GraphMem.class, Triple.class,
-                Graph::stream, () -> (GraphMem)GraphFactory.createGraphMem(), Graph::add));
+        kryo.register(GraphMemFast.class, GenericCollectionSerializer.create(GraphMem.class, Triple.class,
+                Graph::stream, () -> (GraphMemFast)GraphFactory.createGraphMem(), Graph::add));
 
         // kryo.register(ModelCom.class, new ModelSerializerViaRiot(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));
         // kryo.register(DatasetImpl.class, new DatasetSerializer(Lang.RDFTHRIFT, RDFFormat.RDF_THRIFT_VALUES));

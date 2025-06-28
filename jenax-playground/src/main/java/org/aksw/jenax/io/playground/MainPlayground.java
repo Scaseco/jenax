@@ -13,20 +13,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.apache.jena.dboe.base.file.Location;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.ReadWrite;
 import org.apache.jena.riot.lang.LabelToNode;
 import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.riot.tokens.Token;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.system.AutoTxn;
-import org.apache.jena.system.Txn;
-import org.apache.jena.tdb2.TDB2Factory;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -200,6 +194,17 @@ public class MainPlayground {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
 
+//        StreamRDF writer = StreamRDFWriter.getWriterStream(System.out, RDFFormat.NTRIPLES);
+//        Node s = NodeFactory.createURI(null);
+//        Triple t = Triple.create(s, s, s);
+//RDFS.label;
+//RDF.type;
+//Instant.ofEpochMilli(start);
+//Long.parseLong(null);
+//Instant x;
+//NodeFactoryExtra.dateTimeToNode(null)
+//Calendar myCalendar = GregorianCalendar.from(ZonedDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
+//
         Table table = new Table();
 
         // Dataset ds = TDB2Factory.connectDataset(Location.create(Path.of("/tmp/testtdb")));

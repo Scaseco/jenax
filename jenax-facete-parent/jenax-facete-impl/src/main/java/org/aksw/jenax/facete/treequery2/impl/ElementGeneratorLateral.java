@@ -486,7 +486,7 @@ public class ElementGeneratorLateral {
             boolean useRelationId = true;
             Node y;
             if (useRelationId) {
-                y = NodeFactory.createLiteral(current.getScopeBaseName());
+                y = NodeFactory.createLiteralString(current.getScopeBaseName());
             } else { // use the property
                 y = p;
             }

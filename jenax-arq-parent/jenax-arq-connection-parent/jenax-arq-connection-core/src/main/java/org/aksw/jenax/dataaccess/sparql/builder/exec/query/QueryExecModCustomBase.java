@@ -68,7 +68,7 @@ public abstract class QueryExecModCustomBase<T extends QueryExecMod>
     }
 
     @Override
-    public QueryExecMod timeout(long timeout) {
+    public T timeout(long timeout) {
         overallTimeout(timeout, TimeUnit.MILLISECONDS);
         return self();
     }

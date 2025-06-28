@@ -36,10 +36,10 @@ public class QueryStreamOps {
         Op op = Algebra.compile(query);
 
         return upstream ->
-	    	StreamFunction.identity(Binding.class)
-	    		.andThen(createMapperBindings(op))
-	    		.andThenFlatMap(createMapperTriples(template)::apply)
-	    		.apply(upstream);
+            StreamFunction.identity(Binding.class)
+                .andThen(createMapperBindings(op))
+                .andThenFlatMap(createMapperTriples(template)::apply)
+                .apply(upstream);
     }
 
     /** Create a mapper for a construct query yielding quads (similar to tarql) */
@@ -50,10 +50,10 @@ public class QueryStreamOps {
         Op op = Algebra.compile(query);
 
         return upstream ->
-        	StreamFunction.identity(Binding.class)
-        		.andThen(createMapperBindings(op))
-        		.andThenFlatMap(createMapperQuads(template)::apply)
-        		.apply(upstream);
+            StreamFunction.identity(Binding.class)
+                .andThen(createMapperBindings(op))
+                .andThenFlatMap(createMapperQuads(template)::apply)
+                .apply(upstream);
     }
 
 
@@ -61,7 +61,7 @@ public class QueryStreamOps {
         return upstream -> {
             DatasetGraph ds = DatasetGraphFactory.empty();
             Context cxt = ARQ.getContext().copy();
-            ExecutionContext execCxt = new ExecutionContext(cxt, ds.getDefaultGraph(), ds, QC.getFactory(cxt));
+            ExecutionContext execCxt = ExecutionContext.create(ds, cxt); // new ExecutionContext(cxt, ds.getDefaultGraph(), ds, QC.getFactory(cxt));
             return upstream.flatMap(binding -> Iter.asStream(QC.execute(op, binding, execCxt)));
         };
     }
@@ -92,9 +92,7 @@ public class QueryStreamOps {
     public static ExecutionContext createExecutionContextDefault() {
         Context context = ARQ.getContext().copy();
         context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime());
-        ExecutionContext result = new ExecutionContext(context, null, null, null);
+        ExecutionContext result = ExecutionContext.create(context);
         return result;
     }
-
-
 }

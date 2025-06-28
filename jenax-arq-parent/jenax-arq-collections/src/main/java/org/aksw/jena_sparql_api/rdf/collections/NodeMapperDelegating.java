@@ -33,6 +33,7 @@ public class NodeMapperDelegating<T>
         this.toJava = toJava;
     }
 
+    @Override
     public Class<?> getJavaClass() {
         return javaClass;
     }

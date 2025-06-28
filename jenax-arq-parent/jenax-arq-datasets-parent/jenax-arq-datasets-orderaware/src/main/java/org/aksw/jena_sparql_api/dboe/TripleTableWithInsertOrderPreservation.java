@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
@@ -51,7 +52,7 @@ public class TripleTableWithInsertOrderPreservation
 
     @Override
     public Stream<Triple> find(Node s, Node p, Node o) {
-        boolean matchesAny = Node.ANY.matches(s) && Node.ANY.matches(p) && Node.ANY.matches(o);
+        boolean matchesAny = NodeUtils.isNullOrAny(s) && NodeUtils.isNullOrAny(p) && NodeUtils.isNullOrAny(o);
         Stream<Triple> result = matchesAny
                 ? triples.stream()
                 : delegate.find(s, p, o);

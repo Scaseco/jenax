@@ -20,6 +20,7 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIterRoot;
 import org.apache.jena.sparql.engine.main.OpExecutor;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
+import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 
@@ -58,9 +59,9 @@ public class TransformEvalTable
     public static ExecutionContext createExecCxt(OpExecutorFactory opExecutorFactory) {
         Context cxt = ARQ.getContext().copy() ;
         cxt.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime()) ;
+        QC.setFactory(cxt, opExecutorFactory);
         DatasetGraph dataset = DatasetGraphFactory.create();
-        ExecutionContext execCxt = new ExecutionContext(cxt, dataset.getDefaultGraph(), dataset, opExecutorFactory);
-
+        ExecutionContext execCxt = ExecutionContext.create(dataset, cxt); // new ExecutionContext(cxt, dataset.getDefaultGraph(), dataset, opExecutorFactory);
         return execCxt;
     }
 

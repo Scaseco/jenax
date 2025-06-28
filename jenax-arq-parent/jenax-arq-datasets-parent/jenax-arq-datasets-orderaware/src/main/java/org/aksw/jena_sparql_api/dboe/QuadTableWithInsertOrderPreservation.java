@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Quad;
 
@@ -50,7 +51,7 @@ public class QuadTableWithInsertOrderPreservation
 
     @Override
     public Stream<Quad> find(Node g, Node s, Node p, Node o) {
-        boolean matchesAny = Node.ANY.matches(g) && Node.ANY.matches(s) && Node.ANY.matches(p) && Node.ANY.matches(o);
+        boolean matchesAny = NodeUtils.isNullOrAny(g) && NodeUtils.isNullOrAny(s) && NodeUtils.isNullOrAny(p) && NodeUtils.isNullOrAny(o);
         Stream<Quad> result = matchesAny
                 ? set.stream()
                 : delegate.find(g, s, p, o);

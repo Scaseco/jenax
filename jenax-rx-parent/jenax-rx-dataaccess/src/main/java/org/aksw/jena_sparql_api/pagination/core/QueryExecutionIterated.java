@@ -8,6 +8,8 @@ import org.aksw.commons.util.closeable.AutoCloseables;
 import org.aksw.jenax.arq.util.exec.query.QueryExecutionAdapter;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
 import org.apache.jena.atlas.io.IndentedWriter;
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -16,12 +18,13 @@ import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.impl.IteratorFactory;
+import org.apache.jena.rdf.model.impl.ModelCom;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorBase;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorCloseable;
 import org.apache.jena.sparql.serializer.SerializationContext;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,11 +237,13 @@ public class QueryExecutionIterated
 
     @Override
     public Model execConstruct(Model result) {
-
         Iterator<Triple> it = execConstructTriples();
-        StmtIterator iter = ModelUtils.triplesToStatements(it, result);
-        result.add(iter);
-
+        try {
+            Graph g = result.getGraph();
+            it.forEachRemaining(g::add);
+        } finally {
+            Iter.close(it);
+        }
         return result;
 
         //PaginationQueryIterator state = new PaginationQueryIterator(query, pageSize);
@@ -267,7 +272,7 @@ public class QueryExecutionIterated
 
     @Override
     public void close() {
-    	AutoCloseables.close(currentCloseAction);
+        AutoCloseables.close(currentCloseAction);
         /*
         if(current != null) {
             current.close();

@@ -224,7 +224,7 @@ public class ElementTransformTripleRewrite
 
     public static Query transform(Query query, GenericLayer conceptLayer, boolean cloneOnChange) {
         // Set the project vars
-        query.setResultVars();
+        query.resetResultVars();
         //List<Var> vars = query.getProjectVars();
 
         VarExprList velCopy = VarExprListUtils.copy(new VarExprList(), query.getProject());

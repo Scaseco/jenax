@@ -67,8 +67,8 @@ public class LabelUtils {
 
         ElementGroup els = new ElementGroup();
         els.addTriplePattern(Triple.create(s, p, o));
-        els.addElementFilter(new ElementFilter(propFilter));
-        els.addElementFilter(new ElementFilter(langConstraint));
+        els.addElement(new ElementFilter(propFilter));
+        els.addElement(new ElementFilter(langConstraint));
 
         //var result = new Concept(langElement, s);
         Fragment3 result = new Fragment3Impl(els, s, p, o);
@@ -122,7 +122,7 @@ public class LabelUtils {
             int i = 0;
             for (String lang : config.getLangs()) {
                 langTable.addBinding(BindingFactory.binding(
-                    langVar, NodeFactory.createLiteral(lang),
+                    langVar, NodeFactory.createLiteralString(lang),
                     langScoreVar, NodeFactoryExtra.intToNode(i)));
                 ++i;
             }

@@ -66,7 +66,7 @@ public class TestDatatypes {
         // assert equality of the deserialized java objects with the original ones
         String modelStr = RDFWriter.create().source(model).format(RDFFormat.TURTLE_PRETTY).asString();
         // System.out.println(modelStr);
-        Resource x = RDFParser.fromString(modelStr).lang(Lang.TURTLE).toModel().createResource(s);
+        Resource x = RDFParser.fromString(modelStr, Lang.TURTLE).toModel().createResource(s);
 
         Assert.assertEquals(query, x.getProperty(hasQuery).getObject().asLiteral().getValue());
         Assert.assertEquals(expr, x.getProperty(hasExpr).getObject().asLiteral().getValue());

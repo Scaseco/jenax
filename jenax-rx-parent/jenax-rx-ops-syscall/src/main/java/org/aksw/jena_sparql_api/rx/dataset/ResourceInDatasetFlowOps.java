@@ -3,6 +3,8 @@ package org.aksw.jena_sparql_api.rx.dataset;
 import java.util.List;
 import java.util.function.Function;
 
+import com.google.common.base.Strings;
+
 import org.aksw.commons.io.syscall.SysCalls;
 import org.aksw.commons.io.syscall.sort.SysSort;
 import org.aksw.jenax.arq.util.query.CannedQueryUtils;
@@ -11,7 +13,6 @@ import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDatasetImpl;
 import org.aksw.jenax.sparql.rx.op.ResultSetMappers;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
-import com.google.common.base.Strings;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
@@ -71,7 +72,7 @@ public class ResourceInDatasetFlowOps {
             effectiveKeyQuery = fallback;
         }
 
-        Function<? super SparqlQueryConnection, Node> result = ResultSetMappers.createNodeMapper(effectiveKeyQuery, NodeFactory.createLiteral(""));
+        Function<? super SparqlQueryConnection, Node> result = ResultSetMappers.createNodeMapper(effectiveKeyQuery, NodeFactory.createLiteralString(""));
         return result;
     }
 

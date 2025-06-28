@@ -15,7 +15,6 @@ import org.aksw.jena_sparql_api.core.service.SparqlBasedSystemService;
 import org.aksw.jena_sparql_api.io.utils.AbstractSystemService;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
 import org.ini4j.Ini;
 import org.ini4j.IniPreferences;
@@ -135,7 +134,7 @@ public class VirtuosoSystemService
 
 //        SparqlQueryConnection queryConn = new SparqlQueryConnectionJsa(httpSparqlService.getQueryExecutionFactory());
 //        SparqlUpdateConnection updateConn = new SparqlUpdateConnectionJsa(httpSparqlService.getUpdateExecutionFactory());
-        RDFConnection httpConn = RDFConnectionFactory.connect(endpointUrl);
+        RDFConnection httpConn = RDFConnection.connect(endpointUrl);
 
         RDFDatasetConnection datasetConn = new RDFDatasetConnectionVirtuoso(httpConn, sqlConn);
 

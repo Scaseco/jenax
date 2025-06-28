@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.jena_sparql_api.collection.observable.ObservableGraph;
 import org.aksw.jena_sparql_api.collection.observable.ObservableGraphImpl;
@@ -37,18 +42,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.DCAT;
-import org.topbraid.shacl.model.SHFactory;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -117,7 +115,7 @@ public class MainPlaygroundResourceMetamodel {
 
     public static void init() {
         JenaSystem.init();
-        SHFactory.ensureInited();
+        // SHFactory.ensureInited();
 
         JenaPluginUtils.registerResourceClasses(
                 NodeSchemaFromNodeShape.class,
@@ -292,7 +290,7 @@ public class MainPlaygroundResourceMetamodel {
 
 
         Dataset ds = RDFDataMgr.loadDataset("linkedgeodata-2018-04-04.dcat.ttl");
-        RDFConnection conn = RDFConnectionFactory.connect(ds);
+        RDFConnection conn = RDFConnection.connect(ds);
 
         ObservableGraph shapeGraph = ObservableGraphImpl.decorate(RDFDataMgr.loadGraph("dcat-ap_2.0.0_shacl_shapes.ttl"));
         shapeGraph.addPropertyChangeListener(ev -> System.out.println("Event: " + ev));

@@ -86,7 +86,7 @@ public class FacetPathOps
 
         String alias = step.getAlias();
         if (alias != null && !alias.isEmpty()) {
-            result.add(NodeFactory.createLiteral(alias));
+            result.add(NodeFactory.createLiteralString(alias));
         }
 
         Node targetComponent = step.getTargetComponent();

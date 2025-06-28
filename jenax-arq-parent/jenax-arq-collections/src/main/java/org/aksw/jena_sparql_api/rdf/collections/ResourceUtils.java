@@ -1282,7 +1282,7 @@ public class ResourceUtils {
 
         Context context = ARQ.getContext().copy() ;
         context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime()) ;
-        ExecutionContext execCxt = new ExecutionContext(context, dsg.getDefaultGraph(), dsg, QC.getFactory(context)) ;
+        ExecutionContext execCxt = ExecutionContext.create(dsg, context); // .getDefaultGraph(), dsg, QC.getFactory(context)) ;
 
         QueryIterator it = PathLib.execTriplePath(BindingFactory.root(), tp, execCxt);
         Stream<RDFNode> result = Streams.stream(it)

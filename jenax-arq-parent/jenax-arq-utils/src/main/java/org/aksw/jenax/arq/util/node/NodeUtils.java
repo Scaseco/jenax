@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
+
 import org.apache.jena.atlas.io.IndentedLineBuffer;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.datatypes.RDFDatatype;
@@ -32,9 +35,6 @@ import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.NodeCmp;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
-
 public class NodeUtils {
 
     public static final NodeFormatter ntFormatter = new NodeFormatterNT();
@@ -55,6 +55,14 @@ public class NodeUtils {
     public static final String R2RML_IRI 					= R2RML_NS + "IRI";
     public static final String R2RML_BlankNode 				= R2RML_NS + "BlankNode";
 
+    /** Match with possible wildcards (Node.ANY) in either argument. */
+    public static boolean matches(Node patternNode, Node node) {
+        if ( isNullOrAny(patternNode) )
+            return true;
+        if ( isNullOrAny(node) )
+            return true;
+        return patternNode.sameTermAs(node);
+    }
 
     /** Util method for use a sparql function - <pre>{@code<java:org.aksw.jenax.arq.util.node#hashCode>(?x)}</pre> */
     public static int hashCode(Node node) {
@@ -193,7 +201,7 @@ public class NodeUtils {
         Class<?> clazz = o.getClass();
         RDFDatatype dtype = typeMapper.getTypeByClass(clazz);
         String lex = dtype.unparse(o);
-        Node result = NodeFactory.createLiteral(lex, dtype);
+        Node result = NodeFactory.createLiteralDT(lex, dtype);
         return result;
     }
 
@@ -212,7 +220,7 @@ public class NodeUtils {
     }
 
     public static List<Node> createLiteralNodes(Iterable<String> strings) {
-        return Streams.stream(strings).map(NodeFactory::createLiteral).collect(Collectors.toList());
+        return Streams.stream(strings).map(NodeFactory::createLiteralString).collect(Collectors.toList());
     }
 
     public static Number getNumberNullable(Node node) {

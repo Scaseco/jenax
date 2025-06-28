@@ -10,29 +10,32 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.jena.atlas.web.AcceptList;
-import org.apache.jena.atlas.web.ContentType;
-import org.apache.jena.atlas.web.MediaType;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.riot.RDFWriterRegistry;
-import org.apache.jena.riot.resultset.ResultSetLang;
-import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
-import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
-import org.apache.jena.sys.JenaSystem;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
+
+import org.apache.jena.atlas.web.AcceptList;
+import org.apache.jena.atlas.web.ContentType;
+import org.apache.jena.atlas.web.MediaType;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFFormatVariant;
+import org.apache.jena.riot.RDFLanguages;
+import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
+import org.apache.jena.riot.resultset.ResultSetWriterRegistry;
+import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.sys.JenaSystem;
 
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
@@ -258,14 +261,47 @@ public class RDFLanguagesEx {
         return outFormat;
     }
 
+    private static int streamingScore(RDFFormat fmt) {
+        return StreamRDFWriter.registered(fmt) ? -1 : 0;
+    }
+
+    private static int variantScore(RDFFormat fmt) {
+        RDFFormatVariant variant = fmt.getVariant();
+        int result;
+        if (RDFFormat.BLOCKS.equals(variant)) {
+            result = 1;
+        } else if (RDFFormat.FLAT.equals(variant)) {
+            result = 2;
+        } else if (RDFFormat.PLAIN.equals(variant)) {
+            result = 3;
+        } else {
+            result = 10;
+        }
+        return result;
+    }
+
+    // XXX Perhaps we need findRdfFormat(label, probeLangs, variantPreferences)
 
     public static RDFFormat findRdfFormat(String label, Collection<RDFFormat> probeFormats) {
-        RDFFormat outFormat = probeFormats.stream()
-                .filter(fmt -> matchFormat(fmt.toString(), label)
-                        || matchesLang(fmt.getLang(), label)
+        // Order of matching: formats first, then lang and content types. Try streaming variants always first.
+        Comparator<RDFFormat> comparator = Comparator.comparing(RDFLanguagesEx::streamingScore)
+            .thenComparingInt(RDFLanguagesEx::variantScore);
+
+        List<RDFFormat> prioritizedFormats = probeFormats.stream()
+            .sorted(comparator)
+            .toList();
+
+        RDFFormat outFormat = prioritizedFormats.stream()
+            .filter(fmt -> matchFormat(fmt.toString(), label))
+            .findFirst().orElse(null);
+
+        if (outFormat == null) {
+            outFormat = prioritizedFormats.stream()
+                .filter(fmt -> matchesLang(fmt.getLang(), label)
                         || matchesContentType(fmt.getLang(), label))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No RDF format found for label " + label));
+        }
 
         return outFormat;
     }
@@ -282,7 +318,7 @@ public class RDFLanguagesEx {
                         || matchesFileExtension(lang, label)
                         || matchesContentType(lang, label))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No lang found for label " + label));
+                .orElseThrow(() -> new NoSuchElementException("No lang found for label " + label));
 
         return result;
     }
@@ -350,6 +386,39 @@ public class RDFLanguagesEx {
         return s.toString();
     }
 
+
+    /**
+     * If the prototype language is in the set of candidates then the former is returned.
+     * Otherwise, returns the first candidate language that matches the given prototype language.
+     * If the prototype is triples-based than the candidates are first searched for triples langs.
+     * Returns null if no suitable language found.
+     */
+    public static Lang findBestLang(Lang prototypeLang, Collection<Lang> candidates) {
+        Objects.requireNonNull(prototypeLang);
+        Objects.requireNonNull(candidates);
+
+        Lang result = null;
+        if (candidates.contains(prototypeLang)) {
+            result = prototypeLang;
+        } else {
+
+            boolean isTriples = RDFLanguages.isTriples(prototypeLang);
+            boolean isQuads = RDFLanguages.isQuads(prototypeLang);
+
+            if (!isTriples && !isQuads) {
+                throw new IllegalStateException("Neither a triples nor quads lang: " + prototypeLang);
+            }
+
+            if (isTriples) {
+                result = candidates.stream().filter(RDFLanguages::isTriples).findFirst().orElse(null);
+            }
+
+            if (result == null) {
+                result = candidates.stream().filter(RDFLanguages::isQuads).findFirst().orElse(null);
+            }
+        }
+        return result;
+    }
 
 //	public static RDFFormat findLang(String label) {
 //		RDFFormat outFormat = RDFLanguages.fi.registered().stream()

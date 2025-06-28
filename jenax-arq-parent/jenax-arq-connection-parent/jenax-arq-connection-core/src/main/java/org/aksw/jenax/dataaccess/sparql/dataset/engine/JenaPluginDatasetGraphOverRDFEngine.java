@@ -24,7 +24,7 @@ public class JenaPluginDatasetGraphOverRDFEngine
     }
 
     public static void init(QueryEngineRegistry reg) {
-        reg.add(new QueryEngineFactoryOverRDFDataSource());
+        reg.add(new QueryEngineFactoryOverRDFEngine());
     }
 
     public static void init(UpdateEngineRegistry reg) {

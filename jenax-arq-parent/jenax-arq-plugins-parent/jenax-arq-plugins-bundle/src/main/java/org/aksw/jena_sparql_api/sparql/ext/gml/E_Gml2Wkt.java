@@ -47,12 +47,12 @@ public class E_Gml2Wkt extends FunctionBase1 {
 //                            org.geotools.referencing.crs.DefaultGeographicCRS.WGS84;
 //                    MathTransform transform = CRS.findMathTransform(crsSource, crsTarget, false);
 //                    geometry = JTS.transform(geometry, transform);
-                    
+
                 }
                 RDFDatatype datatype = TypeMapper.getInstance()
                         .getSafeTypeByName("http://www.opengis.net/ont/geosparql#wktLiteral");
                 String wktString = wktWriter.write(geometry);
-                result = NodeValue.makeNode(NodeFactory.createLiteral(wktString, datatype));
+                result = NodeValue.makeNode(NodeFactory.createLiteralDT(wktString, datatype));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

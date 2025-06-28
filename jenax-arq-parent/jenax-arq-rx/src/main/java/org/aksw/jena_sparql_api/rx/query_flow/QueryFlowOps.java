@@ -90,7 +90,7 @@ public class QueryFlowOps
         return upstream -> {
             DatasetGraph ds = DatasetGraphFactory.create();
             Context cxt = ARQ.getContext().copy();
-            ExecutionContext execCxt = new ExecutionContext(cxt, ds.getDefaultGraph(), ds, QC.getFactory(cxt));
+            ExecutionContext execCxt = ExecutionContext.create(ds, cxt); // new ExecutionContext(cxt, ds.getDefaultGraph(), ds, QC.getFactory(cxt));
 
             return upstream.flatMap(binding -> FlowableEx.fromIteratorSupplier(
                     () -> QC.execute(op, binding, execCxt), QueryIterator::close));
@@ -125,7 +125,7 @@ public class QueryFlowOps
     public static ExecutionContext createExecutionContextDefault() {
         Context context = ARQ.getContext().copy();
         context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime());
-        ExecutionContext result = new ExecutionContext(context, null, null, null);
+        ExecutionContext result = ExecutionContext.create(context);
         return result;
     }
 

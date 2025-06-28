@@ -3,9 +3,7 @@ package org.aksw.jenax.web.filter;
 import static org.apache.jena.riot.WebContent.contentTypeJSON;
 import static org.apache.jena.riot.WebContent.contentTypeJSONLD;
 import static org.apache.jena.riot.WebContent.contentTypeNQuads;
-import static org.apache.jena.riot.WebContent.contentTypeNQuadsAlt1;
 import static org.apache.jena.riot.WebContent.contentTypeNTriples;
-import static org.apache.jena.riot.WebContent.contentTypeNTriplesAlt;
 import static org.apache.jena.riot.WebContent.contentTypeRDFJSON;
 import static org.apache.jena.riot.WebContent.contentTypeRDFThrift;
 import static org.apache.jena.riot.WebContent.contentTypeRDFXML;
@@ -16,11 +14,9 @@ import static org.apache.jena.riot.WebContent.contentTypeTextCSV;
 import static org.apache.jena.riot.WebContent.contentTypeTextPlain;
 import static org.apache.jena.riot.WebContent.contentTypeTextTSV;
 import static org.apache.jena.riot.WebContent.contentTypeTriG;
-import static org.apache.jena.riot.WebContent.contentTypeTriGAlt1;
 import static org.apache.jena.riot.WebContent.contentTypeTriX;
 import static org.apache.jena.riot.WebContent.contentTypeTriXxml;
 import static org.apache.jena.riot.WebContent.contentTypeTurtle;
-import static org.apache.jena.riot.WebContent.contentTypeTurtleAlt1;
 import static org.apache.jena.riot.WebContent.contentTypeXML;
 
 /*
@@ -58,9 +54,7 @@ public class DEF
     public static final AcceptList jsonOffer          = AcceptList.create(contentTypeJSON);
 
     public static final AcceptList constructOffer     = AcceptList.create(contentTypeTurtle,
-                                                                          contentTypeTurtleAlt1,
                                                                           contentTypeNTriples,
-                                                                          contentTypeNTriplesAlt,
                                                                           contentTypeRDFXML,
                                                                           contentTypeTriX,
                                                                           contentTypeTriXxml,
@@ -69,15 +63,11 @@ public class DEF
                                                                           contentTypeRDFThrift,
 
                                                                           contentTypeTriG,
-                                                                          contentTypeTriGAlt1,
-                                                                          contentTypeNQuads,
-                                                                          contentTypeNQuadsAlt1
+                                                                          contentTypeNQuads
                                                                           );
 
     public static final AcceptList rdfOffer           = AcceptList.create(contentTypeTurtle,
-                                                                          contentTypeTurtleAlt1,
                                                                           contentTypeNTriples,
-                                                                          contentTypeNTriplesAlt,
                                                                           contentTypeRDFXML,
                                                                           contentTypeTriX,
                                                                           contentTypeTriXxml,
@@ -87,10 +77,8 @@ public class DEF
                                                                           );
 
     public static final AcceptList quadsOffer         = AcceptList.create(contentTypeTriG,
-                                                                          contentTypeTriGAlt1,
                                                                           contentTypeJSONLD,
                                                                           contentTypeNQuads,
-                                                                          contentTypeNQuadsAlt1,
                                                                           contentTypeTriX,
                                                                           contentTypeTriXxml
                                                                           );

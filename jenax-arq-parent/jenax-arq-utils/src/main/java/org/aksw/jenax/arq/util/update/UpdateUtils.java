@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.base.Preconditions;
+
 import org.aksw.jenax.arq.util.syntax.ElementTransformSubst2;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.apache.jena.graph.Graph;
@@ -37,8 +39,6 @@ import org.apache.jena.sparql.syntax.syntaxtransform.UpdateTransformOps;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
-
-import com.google.common.base.Preconditions;
 
 public class UpdateUtils {
 
@@ -72,8 +72,8 @@ public class UpdateUtils {
     }
 
     public static void renameNamespace(Graph graph, String from, String to) {
-        Node fromNode = NodeFactory.createLiteral(from);
-        Node toNode = NodeFactory.createLiteral(to);
+        Node fromNode = NodeFactory.createLiteralString(from);
+        Node toNode = NodeFactory.createLiteralString(to);
         execRename(graph, RENAME_NAMESPACE_RU, fromNode, toNode);
     }
 

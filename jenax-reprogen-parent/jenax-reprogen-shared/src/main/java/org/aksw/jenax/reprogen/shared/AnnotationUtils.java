@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriNs;
-import org.aksw.jenax.annotation.reprogen.IriNss;
-import org.aksw.jenax.annotation.reprogen.Iris;
 import org.aksw.jenax.annotation.reprogen.ToString;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;

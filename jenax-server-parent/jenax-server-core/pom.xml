@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-server-parent</artifactId>
-		<version>5.6.0-1-SNAPSHOT</version>
+		<version>6.1.0-1-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -141,15 +141,23 @@
 			<artifactId>jena-arq</artifactId>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-graphql-v1</artifactId>
 		</dependency>
+-->
+                <dependency>
+                        <groupId>org.aksw.graphql-over-sparql</groupId>
+                        <artifactId>graphql-over-sparql-engine</artifactId>
+                </dependency>
 
+<!--
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-graphql-v2-engine</artifactId>
 		</dependency>
+-->
 
 		<dependency>
 			<groupId>org.slf4j</groupId>

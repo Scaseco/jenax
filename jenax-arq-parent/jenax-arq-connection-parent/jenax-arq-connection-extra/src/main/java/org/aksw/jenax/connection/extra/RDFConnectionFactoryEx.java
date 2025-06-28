@@ -1,17 +1,10 @@
 package org.aksw.jenax.connection.extra;
 
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionModular;
-import org.aksw.jenax.dataaccess.sparql.connection.query.SparqlQueryConnectionJsa;
-import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactoryOverSparqlQueryConnection;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.apache.jena.riot.WebContent;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.exec.http.QueryExecutionHTTP;
 
 public class RDFConnectionFactoryEx {
 
@@ -23,7 +16,7 @@ public class RDFConnectionFactoryEx {
     }
 
     public static RDFConnectionEx connect(String serviceUrl, DatasetDescription datasetDescription) {
-        RDFConnection rawConn = RDFConnectionFactory.connect(serviceUrl);
+        RDFConnection rawConn = RDFConnection.connect(serviceUrl);
         RDFConnection core = wrapWithDatasetAndXmlContentType(rawConn, datasetDescription);
 
         RDFConnectionMetaData metadata = ModelFactory.createDefaultModel()

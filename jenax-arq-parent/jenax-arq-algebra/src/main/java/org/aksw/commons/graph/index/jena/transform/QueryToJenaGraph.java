@@ -136,7 +136,7 @@ public class QueryToJenaGraph {
             ExprFunction ef = expr.getFunction();
             String fnId = ExprUtils.getFunctionId(ef);
 
-            graph.add(Triple.create(result, RDFS.label.asNode(), NodeFactory.createLiteral(fnId)));
+            graph.add(Triple.create(result, RDFS.label.asNode(), NodeFactory.createLiteralString(fnId)));
 
 
             List<Expr> args = ef.getArgs();

@@ -20,6 +20,16 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Splitter; // due to spark conflict
+import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.hash.HashCode; // due to spark conflict
+import com.google.common.hash.Hashing;  // due to spark conflict
+import com.google.common.io.ByteSource; // due to spark conflict
+import com.google.common.net.MediaType;
+
 import org.aksw.dcat.ap.domain.api.Checksum;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.conjure.entity.algebra.Op;
@@ -47,22 +57,12 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
-import com.google.common.base.Splitter; // due to spark conflict
-import com.google.common.hash.HashCode; // due to spark conflict
-import com.google.common.hash.Hashing;  // due to spark conflict
-import com.google.common.io.ByteSource; // due to spark conflict
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.WebContent;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.StandardSystemProperty;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.net.MediaType;
 
 public class HttpResourceRepositoryFromFileSystemImpl
     implements HttpResourceRepositoryFromFileSystem
@@ -766,7 +766,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
         JenaSystem.init();
 
 
-        Header[] expansionTest = new Header[] { new BasicHeader(HttpHeaders.ACCEPT, WebContent.contentTypeTurtleAlt1 + ";q=0.3")};
+        Header[] expansionTest = new Header[] { new BasicHeader(HttpHeaders.ACCEPT, WebContent.contentTypeTurtle + ";q=0.3")};
 //		Header[] expansionTest = new Header[] { new BasicHeader(HttpHeaders.ACCEPT, WebContent.contentTypeTurtleAlt2 + ",text/plain;q=0.5")};
         expansionTest = ContentTypeUtils.expandAccept(expansionTest);
         System.out.println("Expanded: " + Arrays.asList(expansionTest));
@@ -815,7 +815,7 @@ public class HttpResourceRepositoryFromFileSystemImpl
 
 
         BasicHttpRequest r = new BasicHttpRequest("GET", url);
-        r.setHeader(HttpHeaders.ACCEPT, WebContent.contentTypeTurtleAlt1);
+        r.setHeader(HttpHeaders.ACCEPT, WebContent.contentTypeTurtle);
         r.setHeader(HttpHeaders.ACCEPT_ENCODING, "gzip,identity;q=0");
 
         manager.get(r, HttpResourceRepositoryFromFileSystemImpl::resolveRequest);

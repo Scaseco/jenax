@@ -147,7 +147,7 @@ public class ObservableSetFromGraph
         }
 
         if (true) {
-            ObservableSet<Triple> a = ObservableSetFromGraph.decorate(GraphFactory.createPlainGraph());
+            ObservableSet<Triple> a = ObservableSetFromGraph.decorate(GraphFactory.createDefaultGraph());
             ObservableMap<Triple, Triple> map =  ObservableMapImpl.decorate(new LinkedHashMap<Triple, Triple>());
             ObservableSet<Triple> b = map.keySet();
 

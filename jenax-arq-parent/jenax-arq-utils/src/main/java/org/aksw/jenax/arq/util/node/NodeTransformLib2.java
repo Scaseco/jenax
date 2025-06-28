@@ -25,9 +25,9 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_Function;
 import org.apache.jena.sparql.expr.E_IRI;
+import org.apache.jena.sparql.expr.E_If;
 import org.apache.jena.sparql.expr.E_IsBlank;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
@@ -318,7 +318,7 @@ public class NodeTransformLib2 {
         ExprVar ev = new ExprVar(v);
         Expr bnodeLabelOf = new E_Function("http://jena.apache.org/ARQ/function#bnode", new ExprList(ev));
         Expr e2 = ExprTransformer.transform(new ExprTransformSubstitute(v, bnodeLabelOf), bnodeLabelTransform);
-        Expr result = new E_Conditional(new E_IsBlank(ev), new E_IRI(e2), ev);
+        Expr result = new E_If(new E_IsBlank(ev), new E_IRI(e2), ev);
         return result;
     }
 

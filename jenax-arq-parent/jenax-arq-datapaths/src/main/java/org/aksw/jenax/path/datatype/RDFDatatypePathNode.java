@@ -19,7 +19,7 @@ public class RDFDatatypePathNode
 
 
     public static Node createNode(Path<Node> path) {
-        return NodeFactory.createLiteral(path.toString(), INSTANCE);
+        return NodeFactory.createLiteralDT(path.toString(), INSTANCE);
     }
 
     public static PathNode extractPath(Node node) {

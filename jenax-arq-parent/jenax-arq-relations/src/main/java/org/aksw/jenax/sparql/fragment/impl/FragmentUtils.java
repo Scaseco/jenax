@@ -13,6 +13,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
+
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.expr.NodeValueUtils;
@@ -26,8 +29,6 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.sparql.fragment.api.Fragment;
 import org.aksw.jenax.sparql.fragment.api.Fragment2;
 import org.aksw.jenax.sparql.fragment.api.Fragment3;
-
-import com.google.common.collect.Streams;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -41,8 +42,8 @@ import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.E_Bound;
-import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_Equals;
+import org.apache.jena.sparql.expr.E_If;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
@@ -55,8 +56,6 @@ import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
-
-import com.google.common.collect.Sets;
 
 public class FragmentUtils {
     public static final Fragment3 SPO = new Fragment3Impl(
@@ -217,7 +216,7 @@ public class FragmentUtils {
         ExprVar ev = new ExprVar(aggVar);
 
         Expr e = includeAbsent
-                ? new E_Conditional(new E_Bound(ev), ev, NodeValueUtils.NV_ABSENT)
+                ? new E_If(new E_Bound(ev), ev, NodeValueUtils.NV_ABSENT)
                 : ev;
         Expr tmp = query.allocAggregate(new AggCountVarDistinct(e));
 
@@ -279,12 +278,16 @@ public class FragmentUtils {
         Fragment result;
         if(query.isSelectType()) {
             List<Var> vars = query.getProjectVars();
-
             boolean needsWrapping = QueryGenerationUtils.needsWrappingByFeatures(query);
-            Element element = needsWrapping
-                    ? new ElementSubQuery(query)
-                    : query.getQueryPattern();
-
+            Element element;
+            if (needsWrapping) {
+                Query q = query.cloneQuery();
+                // Remove prefixes from a subquery - otherwise Jena will create invalid syntax.
+                q.getPrefixMapping().clearNsPrefixMap();
+                element = new ElementSubQuery(q);
+            } else {
+                element = query.getQueryPattern();
+            }
             result = new FragmentImpl(element, vars);
         } else if(query.isConstructType()) {
             Template template = query.getConstructTemplate();
@@ -292,10 +295,8 @@ public class FragmentUtils {
             Element element = query.getQueryPattern();
             result = new FragmentImpl(element, vars);
         } else {
-
             throw new RuntimeException("SELECT or CONSTRUCT query form expected, instead got " + query);
         }
-
         return result;
     }
 

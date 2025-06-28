@@ -2,12 +2,19 @@ package org.aksw.jena_sparql_api.langtag.validator.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import org.aksw.jena_sparql_api.langtag.validator.api.LangTagValidationException;
 import org.aksw.jena_sparql_api.langtag.validator.api.LangTagValidator;
+import org.apache.jena.langtag.LangTag;
+import org.apache.jena.langtag.LangTagRE;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -15,16 +22,28 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.web.LangTag;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 
 public class LangTagValidatorImpl
     implements LangTagValidator
 {
     public static final Property IANA_TYPE = ResourceFactory.createProperty("urn:x-key:Type");
     public static final Property IANA_SUBTAG = ResourceFactory.createProperty("urn:x-key:Subtag");
+
+    /*package*/ static final int  idxLanguage  = 0;
+    /*package*/ static final int  idxScript    = 1;
+    /*package*/ static final int  idxRegion    = 2;
+    /*package*/ static final int  idxVariant   = 3;
+    /*package*/ static final int  idxExtension = 4;
+    /*package*/ static final int  idxPrivateUse = 5;
+
+    private static List<Function<LangTag, String>> langTagFieldAccessors = List.of(
+        LangTag::getLanguage,
+        LangTag::getScript,
+        LangTag::getRegion,
+        LangTag::getVariant,
+        LangTag::getExtension,
+        LangTag::getPrivateUse
+    );
 
     /** Index of valid known values per component of a language tag */
     protected Multimap<Integer, String> index;
@@ -38,11 +57,11 @@ public class LangTagValidatorImpl
         Multimap<Integer, String> result = HashMultimap.create();
 
         Map<String, Integer> idxToType = new HashMap<>();
-        idxToType.put("language", LangTag.idxLanguage);
-        idxToType.put("script", LangTag.idxScript);
-        idxToType.put("region", LangTag.idxRegion);
-        idxToType.put("variant", LangTag.idxVariant);
-        idxToType.put("extlang", LangTag.idxExtension);
+        idxToType.put("language", idxLanguage);
+        idxToType.put("script", idxScript);
+        idxToType.put("region", idxRegion);
+        idxToType.put("variant", idxVariant);
+        idxToType.put("extlang", idxExtension);
 
         Set<Resource> set = langRegistryModel.listSubjectsWithProperty(IANA_TYPE)
                 .mapWith(RDFNode::asResource).toSet();
@@ -104,10 +123,11 @@ public class LangTagValidatorImpl
             String langTag,
             Multimap<Integer, String> index,
             boolean raiseException) throws LangTagValidationException {
-        String[] parts = LangTag.parse(langTag);
+        // String[] parts = LangTagRE.parse(langTag);
+        LangTag parts = LangTagRE.create(langTag);
         // System.out.println(Arrays.toString(parts));
 
-        int[] knownIdxs = new int[] {LangTag.idxLanguage, LangTag.idxScript, LangTag.idxRegion, LangTag.idxVariant, LangTag.idxExtension };
+        // int[] knownIdxs = new int[] {idxLanguage, idxScript, idxRegion, idxVariant, idxExtension };
 
         // Valid unless proven otherwise
         boolean result = true;
@@ -118,15 +138,16 @@ public class LangTagValidatorImpl
                 throw new LangTagValidationException("Failed to parse: " + langTag);
             }
         } else {
-            for (int i = 0; i < knownIdxs.length; ++i) {
-                int partId = knownIdxs[i];
-                String givenValue = parts[partId];
+            for (int i = 0; i < langTagFieldAccessors.size(); ++i) {
+                Function<LangTag, String> accessor = langTagFieldAccessors.get(i);
+                // int partId = knownIdxs[i];
+                String givenValue = accessor.apply(parts); //  parts[partId];
 
                 if (givenValue == null) {
                     continue;
                 }
 
-                Collection<String> knownValidValues = index.get(partId);
+                Collection<String> knownValidValues = index.get(i);
 
                 boolean isValidValue = knownValidValues.contains(givenValue);
 
@@ -137,7 +158,7 @@ public class LangTagValidatorImpl
                     // for levenshtein distance
 
                     if (raiseException) {
-                        throw new LangTagValidationException("Value '" + givenValue + "' is not known to be valid for part #" + partId); // + " valid values: " + new TreeSet<>(knownValidValues));
+                        throw new LangTagValidationException("Value '" + givenValue + "' is not known to be valid for part #" + i); // + " valid values: " + new TreeSet<>(knownValidValues));
                     }
 
                     break;

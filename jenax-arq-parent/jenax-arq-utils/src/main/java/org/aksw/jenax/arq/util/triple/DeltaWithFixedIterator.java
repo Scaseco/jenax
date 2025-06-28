@@ -5,7 +5,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.compose.Delta;
 import org.apache.jena.graph.impl.SimpleEventManager;
-import org.apache.jena.mem.TrackingTripleIterator;
+import org.apache.jena.memvalue.TrackingTripleIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 

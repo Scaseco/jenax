@@ -171,7 +171,7 @@ public class GenericNodeSerializerCustom
         } else if (node.isVariable()) {
             output.writeByte(TYPE_VAR);
             output.writeString(node.getName());
-        } else if (node.isNodeTriple()) {
+        } else if (node.isTripleTerm()) {
             output.writeByte(TYPE_TRIPLE);
             kryo.writeObject(output, node.getTriple());
         } else {
@@ -201,12 +201,12 @@ public class GenericNodeSerializerCustom
                 switch (subTypeVal) {
                     case 0:
                         v1 = input.readString();
-                        result = NodeFactory.createLiteral(v1);
+                        result = NodeFactory.createLiteralString(v1);
                         break;
                     case LITERAL_HAS_LANG:
                         v1 = input.readString();
                         v2 = input.readString();
-                        result = NodeFactory.createLiteral(v1, v2);
+                        result = NodeFactory.createLiteralLang(v1, v2);
                         break;
                     case LITERAL_HAS_DTYPE:
                         v1 = input.readString();
@@ -215,7 +215,7 @@ public class GenericNodeSerializerCustom
                             v2 = decode(prefixToIri, v2);
                         }
                         RDFDatatype dtype = typeMapper.getSafeTypeByName(v2);
-                        result = NodeFactory.createLiteral(v1, dtype);
+                        result = NodeFactory.createLiteralDT(v1, dtype);
                         break;
                     default:
                         throw new RuntimeException("Unknown literal sub-type: " + subTypeVal);
@@ -231,7 +231,7 @@ public class GenericNodeSerializerCustom
                 break;
             case TYPE_TRIPLE:
                 t = kryo.readObject(input, Triple.class);
-                result = NodeFactory.createTripleNode(t);
+                result = NodeFactory.createTripleTerm(t);
                 break;
             default:
                 throw new RuntimeException("Unknown node type: " + typeVal);

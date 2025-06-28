@@ -5,8 +5,20 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-import com.google.gson.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.LazilyParsedNumber;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ParseContext;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+
 import org.aksw.jena_sparql_api.rdf.collections.NodeMapperFromRdfDatatype;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.graph.Node;
@@ -24,13 +36,6 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.scripting.NV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ParseContext;
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 
 public class JenaJsonUtils {
 
@@ -447,7 +452,7 @@ public class JenaJsonUtils {
 //    }
 
     public static NodeValue fromString(String jsonStr) {
-        Node node = NodeFactory.createLiteral(jsonStr, RDFDatatypeJson.get());
+        Node node = NodeFactory.createLiteralDT(jsonStr, RDFDatatypeJson.get());
         NodeValue result = NodeValue.makeNode(node);
         return result;
     }

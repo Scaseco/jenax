@@ -1,23 +1,5 @@
 package org.aksw.jena_sparql_api.sparql.ext.json;
 
-import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
-import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.core.Prologue;
-import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.resultset.ResultSetCompare;
-import org.apache.jena.sparql.sse.SSE;
-import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
-import org.apache.jena.sparql.util.ExprUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,6 +7,26 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
+import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.sse.builders.SSE_ExprBuildException;
+import org.apache.jena.sparql.util.ExprUtils;
 
 public class TestSparqlExtJson {
     protected static final PrefixMapping pm = new PrefixMappingImpl();

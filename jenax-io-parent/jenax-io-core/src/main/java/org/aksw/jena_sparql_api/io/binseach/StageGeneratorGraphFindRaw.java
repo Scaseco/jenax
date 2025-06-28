@@ -22,6 +22,7 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterConvert;
+import org.apache.jena.sparql.engine.iterator.QueryIterFailed;
 import org.apache.jena.sparql.engine.iterator.QueryIterFilterExpr;
 import org.apache.jena.sparql.engine.iterator.QueryIterPeek;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
@@ -50,29 +51,33 @@ public class StageGeneratorGraphFindRaw
     @Override
     protected QueryIterator execute(BasicPattern pattern, ReorderTransformation reorder,
                                     QueryIterator input, ExecutionContext execCxt) {
-        Explain.explain(pattern, execCxt.getContext()) ;
+        try {
+            Explain.explain(pattern, execCxt.getContext()) ;
 
-        if ( ! input.hasNext() )
-            return input ;
+            if ( ! input.hasNext() )
+                return input ;
 
-        if ( reorder != null && pattern.size() >= 2 ) {
-            // If pattern size is 0 or 1, nothing to do.
-            BasicPattern bgp2 = pattern ;
+            if ( reorder != null && pattern.size() >= 2 ) {
+                // If pattern size is 0 or 1, nothing to do.
+                BasicPattern bgp2 = pattern ;
 
-            // Try to ground the pattern
-            if ( ! input.isJoinIdentity() ) {
-                QueryIterPeek peek = QueryIterPeek.create(input, execCxt) ;
-                // And now use this one
-                input = peek ;
-                Binding b = peek.peek() ;
-                bgp2 = Substitute.substitute(pattern, b) ;
+                // Try to ground the pattern
+                if ( ! input.isJoinIdentity() ) {
+                    QueryIterPeek peek = QueryIterPeek.create(input, execCxt) ;
+                    // And now use this one
+                    input = peek ;
+                    Binding b = peek.peek() ;
+                    bgp2 = Substitute.substitute(pattern, b) ;
+                }
+                ReorderProc reorderProc = reorder.reorderIndexes(bgp2) ;
+                pattern = reorderProc.reorder(pattern) ;
             }
-            ReorderProc reorderProc = reorder.reorderIndexes(bgp2) ;
-            pattern = reorderProc.reorder(pattern) ;
+            Explain.explain("Reorder/generic", pattern, execCxt.getContext()) ;
+            // return PatternMatchData.execute(execCxt.getActiveGraph(), pattern, input, null, execCxt);
+            return execute(execCxt.getActiveGraph(), pattern, input, null, execCxt);
+        } catch (Exception e) {
+            return new QueryIterFailed(input, execCxt, e);
         }
-        Explain.explain("Reorder/generic", pattern, execCxt.getContext()) ;
-        // return PatternMatchData.execute(execCxt.getActiveGraph(), pattern, input, null, execCxt);
-        return execute(execCxt.getActiveGraph(), pattern, input, null, execCxt);
     }
 
     /**
@@ -128,7 +133,7 @@ public class StageGeneratorGraphFindRaw
         Function<Triple, QueryIterator> itFactory = lup -> {
             // The lookup runs in a separate thread so we need to isolate the exec cxt to avoid
             // concurrent modification exceptions
-            ExecutionContext isolatedExecCxt = new ExecutionContext(execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
+            ExecutionContext isolatedExecCxt = ExecutionContext.fromFunctionEnv(execCxt); // (execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
 
             Iterator<Binding> it = gfr.findRaw(lup)
                     .mapWith(TripleUtils::tripleToBinding);

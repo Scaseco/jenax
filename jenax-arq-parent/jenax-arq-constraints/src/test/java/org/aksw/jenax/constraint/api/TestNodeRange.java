@@ -19,12 +19,12 @@ public class TestNodeRange {
         NodeRanges nr = NodeRanges.createClosed();
 
         nr.add(Range.closedOpen(
-                ComparableNodeValue.wrap(NodeFactory.createLiteral("a")),
-                ComparableNodeValue.wrap(NodeFactory.createLiteral("b"))));
+                ComparableNodeValue.wrap(NodeFactory.createLiteralString("a")),
+                ComparableNodeValue.wrap(NodeFactory.createLiteralString("b"))));
 
-        Assert.assertTrue(nr.contains(NodeFactory.createLiteral("a")));
-        Assert.assertTrue(nr.contains(NodeFactory.createLiteral("ab")));
-        Assert.assertFalse(nr.contains(NodeFactory.createLiteral("b")));
+        Assert.assertTrue(nr.contains(NodeFactory.createLiteralString("a")));
+        Assert.assertTrue(nr.contains(NodeFactory.createLiteralString("ab")));
+        Assert.assertFalse(nr.contains(NodeFactory.createLiteralString("b")));
         Assert.assertFalse(nr.contains(NodeValue.makeInteger(1).asNode()));
     }
 
@@ -33,14 +33,14 @@ public class TestNodeRange {
     public void testPrefixRanges2() {
         NodeRanges nr = NodeRanges.createClosed();
         nr.add(Range.closedOpen(
-                ComparableNodeValue.wrap(NodeFactory.createLiteral(RDF.uri)),
-                ComparableNodeValue.wrap(NodeFactory.createLiteral(NodeRanges.incrementLastCharacter(RDF.uri)))));
+                ComparableNodeValue.wrap(NodeFactory.createLiteralString(RDF.uri)),
+                ComparableNodeValue.wrap(NodeFactory.createLiteralString(NodeRanges.incrementLastCharacter(RDF.uri)))));
 
 //        NodeRanges nr2 = NodeRanges.create();
 //        nr2.add(Range.singleton(NodeWrapper.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
 //        System.out.println(nr2);
 //        nr.stateIntersection(nr2);
-        nr.substract(Range.singleton(ComparableNodeValue.wrap(NodeFactory.createLiteral(RDF.type.getURI()))));
+        nr.substract(Range.singleton(ComparableNodeValue.wrap(NodeFactory.createLiteralString(RDF.type.getURI()))));
 
 
         System.out.println(nr);
@@ -51,8 +51,8 @@ public class TestNodeRange {
         NodeRanges notFive = NodeRanges.createOpen();
         notFive.substractValue(NodeValue.makeInteger(5).asNode());
 
-        Assert.assertTrue(notFive.contains(NodeFactory.createLiteral("a")));
-        Assert.assertTrue(notFive.contains(NodeFactory.createLiteral("ab")));
+        Assert.assertTrue(notFive.contains(NodeFactory.createLiteralString("a")));
+        Assert.assertTrue(notFive.contains(NodeFactory.createLiteralString("ab")));
         Assert.assertFalse(notFive.contains(NodeValue.makeInteger(5).asNode()));
 
 

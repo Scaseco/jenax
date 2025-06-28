@@ -27,18 +27,18 @@ public class UpdateEngineWorkerQuadForm
 {
     protected QueryEngineFactory queryEngineFactory;
 
-    public UpdateEngineWorkerQuadForm(DatasetGraph datasetGraph, Binding inputBinding, Context context) {
-        this(datasetGraph, inputBinding, context, QueryEngineMainQuadForm.FACTORY);
+    public UpdateEngineWorkerQuadForm(DatasetGraph datasetGraph, Context context) {
+        this(datasetGraph, context, QueryEngineMainQuadForm.FACTORY);
     }
 
-    public UpdateEngineWorkerQuadForm(DatasetGraph datasetGraph, Binding inputBinding, Context context, QueryEngineFactory queryEngineFactory) {
-        super(datasetGraph, inputBinding, context);
+    public UpdateEngineWorkerQuadForm(DatasetGraph datasetGraph, Context context, QueryEngineFactory queryEngineFactory) {
+        super(datasetGraph, context);
         this.queryEngineFactory = queryEngineFactory;
     }
 
     protected Iterator<Binding> evalBindings(Element pattern) {
         Query query = elementToQuery(pattern);
-        return evalBindings2(query, datasetGraph, inputBinding, context);
+        return evalBindings2(query, datasetGraph, null, context);
     }
 
     protected Iterator<Binding> evalBindings2(Query query, DatasetGraph dataset, Binding inputBinding, Context context) {
@@ -51,7 +51,7 @@ public class UpdateEngineWorkerQuadForm
             Plan plan = queryEngineFactory.create(query, datasetGraph, inputBinding, context);
             toReturn = plan.iterator();
         } else {
-            toReturn = Iter.singleton((null != inputBinding) ? inputBinding : BindingRoot.create());
+            toReturn = Iter.singletonIterator((null != inputBinding) ? inputBinding : BindingRoot.create());
         }
 
         return toReturn;
@@ -97,7 +97,7 @@ public class UpdateEngineWorkerQuadForm
         ThresholdPolicy<Binding> policy = ThresholdPolicyFactory.policyFromContext(datasetGraph.getContext());
         DataBag<Binding> db = BagFactory.newDefaultBag(policy, SerializationFactoryFinder.bindingSerializationFactory()) ;
         try {
-            Iterator<Binding> bindings = evalBindings2(query, dsg, inputBinding, context);
+            Iterator<Binding> bindings = evalBindings2(query, dsg, null, context);
 
             if ( false ) {
                 List<Binding> x = Iter.toList(bindings);

@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.aksw.commons.util.list.ListUtils;
 import org.aksw.commons.util.obj.ObjectUtils;
-import org.apache.jena.sparql.expr.E_Conditional;
 import org.apache.jena.sparql.expr.E_GreaterThan;
+import org.apache.jena.sparql.expr.E_If;
 import org.apache.jena.sparql.expr.E_StrLength;
 import org.apache.jena.sparql.expr.E_StrSubstring;
 import org.apache.jena.sparql.expr.E_Subtract;
@@ -49,7 +49,7 @@ public class ExprTransformVirtuosoSubstr
                 // if (?start > strlen(?str), "",
                 //     substr(?str, ?start, ?remaining)))
 
-                result = new E_Conditional(new E_GreaterThan(start, strLen), NodeValue.makeString(""),
+                result = new E_If(new E_GreaterThan(start, strLen), NodeValue.makeString(""),
                         new E_StrSubstring(str, start, remainingLen));
 
             } else {
@@ -57,8 +57,8 @@ public class ExprTransformVirtuosoSubstr
                 //     substr(?str, ?start,
                 //         if (?len > ?remaining, ?remaining, ?len)))
 
-                result = new E_Conditional(new E_GreaterThan(start, strLen), NodeValue.makeString(""),
-                        new E_StrSubstring(str, start, new E_Conditional(new E_GreaterThan(len, remainingLen),
+                result = new E_If(new E_GreaterThan(start, strLen), NodeValue.makeString(""),
+                        new E_StrSubstring(str, start, new E_If(new E_GreaterThan(len, remainingLen),
                                 remainingLen, len)));
             }
 

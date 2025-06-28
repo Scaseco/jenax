@@ -5,7 +5,10 @@ import java.util.Objects;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.graph.NodeTransform;
+import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 
+/** Use {@link NodeTransformSubst} instead. */
+@Deprecated
 public class NodeTransformRenameMap
     implements NodeTransform {
 

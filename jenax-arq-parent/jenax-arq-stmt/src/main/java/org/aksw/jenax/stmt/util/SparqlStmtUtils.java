@@ -22,6 +22,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+
 import org.aksw.jenax.arq.util.exception.HttpExceptionUtils;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
@@ -50,7 +53,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.WebContent;
-import org.apache.jena.riot.system.stream.StreamManager;
+import org.apache.jena.riot.system.streammgr.StreamManager;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
@@ -73,9 +76,6 @@ import org.apache.jena.sparql.util.Symbol;
 import org.apache.jena.update.Update;
 import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateRequest;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 
 /**
  * Utility methods for processing sources of SparqlStmts

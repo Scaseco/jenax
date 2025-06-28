@@ -20,17 +20,17 @@ public class UpdateEngineMainQuadForm
         }
 
         @Override
-        public UpdateEngine create(DatasetGraph dataset, Binding inputBinding, Context context) {
-            return new UpdateEngineMainQuadForm(dataset, inputBinding, context);
+        public UpdateEngine create(DatasetGraph dataset, Context context) {
+            return new UpdateEngineMainQuadForm(dataset, context);
         }
     };
 
 
-    public UpdateEngineMainQuadForm(DatasetGraph datasetGraph, Binding inputBinding, Context context) {
-        super(datasetGraph, inputBinding, context);
+    public UpdateEngineMainQuadForm(DatasetGraph datasetGraph, Context context) {
+        super(datasetGraph, context);
     }
 
     protected UpdateVisitor prepareWorker() {
-        return new UpdateEngineWorkerQuadForm(datasetGraph, inputBinding, context) ;
+        return new UpdateEngineWorkerQuadForm(datasetGraph, context) ;
     }
 }
