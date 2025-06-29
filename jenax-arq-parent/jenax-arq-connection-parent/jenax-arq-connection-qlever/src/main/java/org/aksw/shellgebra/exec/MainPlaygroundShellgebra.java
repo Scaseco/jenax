@@ -3,13 +3,12 @@ package org.aksw.shellgebra.exec;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import org.aksw.jenax.engine.docker.common.ContainerUtils;
 import org.aksw.jenax.engine.docker.common.HostNameUtils;
-import org.aksw.jenax.model.osreo.LocatorCommand;
-import org.aksw.jenax.model.osreo.OsreoUtils;
-import org.aksw.jenax.model.osreo.Shell;
+import org.aksw.jenax.engine.docker.common.ImageIntrospector;
+import org.aksw.jenax.engine.docker.common.ImageIntrospectorImpl;
+import org.aksw.jenax.model.osreo.ImageIntrospection;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.testcontainers.containers.GenericContainer;
@@ -21,17 +20,26 @@ import jenax.engine.qlever.docker.QleverConstants;
 public class MainPlaygroundShellgebra {
     public static void main(String[] args) throws IOException, InterruptedException {
         Model model = RDFDataMgr.loadModel("shell-ontology.ttl");
-        List<Shell> shells = OsreoUtils.listShells(model);
-        for (Shell shell : shells) {
-            System.out.println(shell);
+        ImageIntrospector imageIntrospector = ImageIntrospectorImpl.of(model);
+        ImageIntrospection inspection = imageIntrospector.inspect("ubuntu:latest", true);
+
+        System.out.println(inspection);
+
+        if (true) {
+            return;
         }
 
-        List<LocatorCommand> locatorCommands = OsreoUtils.listLocatorCommands(model);
-        for (LocatorCommand locatorCommand : locatorCommands) {
-            System.out.println(locatorCommand);
-        }
-
-
+//        List<Shell> shells = OsreoUtils.listShells(model);
+//        for (Shell shell : shells) {
+//            System.out.println(shell);
+//        }
+//
+//        List<LocatorCommand> locatorCommands = OsreoUtils.listLocatorCommands(model);
+//        for (LocatorCommand locatorCommand : locatorCommands) {
+//            System.out.println(locatorCommand);
+//        }
+//
+//
 
         System.out.println("Hostname: " + HostNameUtils.getHostName());
 

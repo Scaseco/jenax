@@ -1,12 +1,12 @@
 package org.aksw.jenax.model.osreo;
 
-import org.aksw.jenax.annotation.reprogen.Base;
 import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.Namespace;
 import org.aksw.jenax.model.rdfs.domain.api.HasRdfsLabel;
 
-@Base("https://w3id.org/osreo#")
+@Namespace(OsreoTerms.O)
 public interface Shell
-    extends HasRdfsLabel, HasProbeLocation
+    extends HasRdfsLabel, HasProbeLocation, HasCommandPrefix
 {
     /**
      * Some shells have a built-in command locator.

@@ -218,17 +218,42 @@ public class ContainerUtils {
         }
         return null;
     }
+//
+//    public static boolean canRunCommand(String imageName, String entrypoint, String command) {
+//        try (GenericContainer<?> container = new GenericContainer<>(imageName)
+//                .withCreateContainerCmdModifier(cmd -> cmd.withEntrypoint(entrypoint))
+//                .withCommand("-c", "exit 0")) {
+//
+//            container.start();
+//            int exitCode = container.getCurrentContainerInfo().getState().getExitCodeLong().intValue();
+//            return exitCode == 0;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
-    private static boolean canRunEntrypoint(String imageName, String entrypoint) {
+
+    public static boolean canRunEntrypoint(String imageName, String entrypoint, String commandPrefix) {
+        int exitCode = runCommand(imageName, entrypoint, commandPrefix, "exit 0");
+        return exitCode == 0;
+    }
+
+    public static boolean hasCommand(String imageName, String entrypoint, String commandPrefix, String command) {
+        int exitCode = runCommand(imageName, entrypoint, commandPrefix, command);
+        return exitCode != 127;
+    }
+
+    // "exit 0"
+    public static int runCommand(String imageName, String entrypoint, String commandPrefix, String command) {
         try (GenericContainer<?> container = new GenericContainer<>(imageName)
                 .withCreateContainerCmdModifier(cmd -> cmd.withEntrypoint(entrypoint))
-                .withCommand("-c", "exit 0")) {
+                .withCommand(commandPrefix, command)) {
 
             container.start();
             int exitCode = container.getCurrentContainerInfo().getState().getExitCodeLong().intValue();
-            return exitCode == 0;
+            return exitCode;
         } catch (Exception e) {
-            return false;
+            return -1;
         }
     }
     /* Alternative probing strategies:
@@ -240,5 +265,4 @@ public class ContainerUtils {
 
     /usr/bin/lbzip2
     */
-
 }
