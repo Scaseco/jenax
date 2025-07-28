@@ -37,7 +37,8 @@ public class TokenizerWrapperRecovering
         while (true) {
             try {
                 return super.hasNext();
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                onException(e);
                 tryRecovery();
             }
         }
@@ -48,11 +49,14 @@ public class TokenizerWrapperRecovering
         while (true) {
             try {
                 return super.next();
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                onException(e);
                 tryRecovery();
             }
         }
     }
+
+    protected void onException(Throwable t) { }
 
     protected void tryRecovery() {
         tryRecovery(peekReader);
