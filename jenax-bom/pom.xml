@@ -239,6 +239,11 @@
 				<artifactId>jenax-graphql-v2-engine</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+            <dependency>
+    			<groupId>org.aksw.jenax</groupId>
+    			<artifactId>jenax-graphql-v2-ui</artifactId>
+				<version>${project.version}</version>
+    		</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-graphql-v2-fmod</artifactId>
@@ -841,6 +846,12 @@
 				<artifactId>jena-fuseki-main</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
+			<dependency>
+			    <groupId>org.apache.jena</groupId>
+			    <artifactId>jena-fuseki-server</artifactId>
+				<version>${jena.version}</version>
+		    </dependency>
+
 			<dependency>
 				<groupId>org.rdfhdt</groupId>
 				<artifactId>hdt-jena</artifactId>
