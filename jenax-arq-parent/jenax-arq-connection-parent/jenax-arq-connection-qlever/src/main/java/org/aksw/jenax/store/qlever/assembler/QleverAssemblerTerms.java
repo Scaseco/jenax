@@ -3,6 +3,9 @@ package org.aksw.jenax.store.qlever.assembler;
 public class QleverAssemblerTerms {
     public static final String NS = "http://jena.apache.org/qlever#"; // DatasetAssemblerVocab.NS;
 
+    public static final String dockerImage = NS + "dockerImage";
+    public static final String dockerTag = NS + "dockerTag";
+
     public static final String Dataset = NS + "Dataset";
 
     public static final String location = NS + "location";

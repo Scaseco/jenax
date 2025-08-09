@@ -56,6 +56,7 @@ import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
+import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 // import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
@@ -306,7 +307,7 @@ public class RdfDataSourceWithLocalLateral
     public static Dataset createProxyDataset(RDFDataSource delegate) {
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
-        // registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
+        registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
         registry.getBulkChain().add(new ChainingServiceExecutorBulkServiceEnhancer());
         ServiceEnhancerInit.registerServiceExecutorSelf(registry);
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {
@@ -350,8 +351,10 @@ public class RdfDataSourceWithLocalLateral
         RDFLink originalLink = RDFLinkAdapter.adapt(originalConn);
 
         // FIXME The current implementation does not support LATERAL polyfill for update requests
-        // Update requests are currently just sent to the original link without
-        // any lateral processing.
+        //   Update requests are currently just sent to the original link without
+        //   any lateral processing.
+        //   Also: Concurrent lateral would require materialization of the bindings contributed by each thread,
+        //   because the update creates a write transaction so all threads with their own read txn must finish first.
         RDFLink hybridLink = new RDFLinkModular(
             RDFLinkAdapter.adapt(proxyConn),
             originalLink,

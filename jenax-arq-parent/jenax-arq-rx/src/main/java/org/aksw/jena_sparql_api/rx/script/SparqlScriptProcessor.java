@@ -558,77 +558,77 @@ public class SparqlScriptProcessor {
         return result;
     }
 
-    public static UpdateRequest tryLoadFileAsUpdateRequestOld(String filename, PrefixMapping globalPrefixes) throws IOException {
-        UpdateRequest result = null;
-
-        // Try as RDF file
-        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS))) {
-//            if(tmpIn == null) {
-//                throw new FileNotFoundException(filename);
+//    public static UpdateRequest tryLoadFileAsUpdateRequestOld(String filename, PrefixMapping globalPrefixes) throws IOException {
+//        UpdateRequest result = null;
+//
+//        // Try as RDF file
+//        try(TypedInputStream tmpIn = RDFDataMgrEx.open(filename, Arrays.asList(Lang.TRIG, Lang.NQUADS))) {
+////            if(tmpIn == null) {
+////                throw new FileNotFoundException(filename);
+////            }
+//
+//            InputStream in = tmpIn.getInputStream();
+//
+//
+//            String contentType = tmpIn.getContentType();
+//            if (logger.isInfoEnabled()) {
+//                logger.info("Detected format: " + contentType);
 //            }
-
-            InputStream in = tmpIn.getInputStream();
-
-
-            String contentType = tmpIn.getContentType();
-            if (logger.isInfoEnabled()) {
-                logger.info("Detected format: " + contentType);
-            }
-            Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
-
-            //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
-            if(rdfLang != null) {
-
-                if(RDFLanguages.isTriples(rdfLang)) {
-
-                    Model tmp = ModelFactory.createDefaultModel();
-                    //InputStream in = SparqlStmtUtils.openInputStream(filename);
-                    // FIXME Validate we are really using turtle here
-                    RDFDataMgrEx.parseTurtleAgainstModel(tmp, globalPrefixes, in);
-                    // Copy any prefixes from the parse back to our global prefix mapping
-                    globalPrefixes.setNsPrefixes(tmp);
-
-                    // Convert the model to a SPARQL insert statement
-                    result = UpdateRequestUtils.createUpdateRequest(tmp, null);
-
-                } else if(RDFLanguages.isQuads(rdfLang)) {
-                    Dataset tmp = DatasetFactory.create();
-                    // InputStream in = SparqlStmtUtils.openInputStream(filename);
-
-                    // FIXME Validate we are really using turtle here
-                    RDFDataMgrEx.parseTrigAgainstDataset(tmp, globalPrefixes, in);
-                    // Copy any prefixes from the parse back to our global prefix mapping
-
-                    Model m = tmp.getDefaultModel();
-                    if(m != null) {
-                        globalPrefixes.setNsPrefixes(m);
-                    }
-
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Gathering prefixes from named graphs...");
-                    }
-                    int i = 0;
-                    Iterator<String> it = tmp.listNames();
-                    while(it.hasNext()) {
-                        String name = it.next();
-                        m = tmp.getNamedModel(name);
-                        if(m != null) {
-                            ++i;
-                            globalPrefixes.setNsPrefixes(m);
-                        }
-                    }
-                    if (logger.isInfoEnabled()) {
-                        logger.info("Gathered prefixes from " + i + " named graphs");
-                    }
-
-                    result = UpdateRequestUtils.createUpdateRequest(tmp, null);
-
-                } else {
-                    throw new RuntimeException("Unknown lang: " + rdfLang);
-                }
-
-            }
-        }
-        return result;
-    }
+//            Lang rdfLang = contentType == null ? null : RDFLanguages.contentTypeToLang(contentType);
+//
+//            //Lang rdfLang = RDFDataMgr.determineLang(filename, null, null);
+//            if(rdfLang != null) {
+//
+//                if(RDFLanguages.isTriples(rdfLang)) {
+//
+//                    Model tmp = ModelFactory.createDefaultModel();
+//                    //InputStream in = SparqlStmtUtils.openInputStream(filename);
+//                    // FIXME Validate we are really using turtle here
+//                    RDFDataMgrEx.parseTurtleAgainstModel(tmp, globalPrefixes, in);
+//                    // Copy any prefixes from the parse back to our global prefix mapping
+//                    globalPrefixes.setNsPrefixes(tmp);
+//
+//                    // Convert the model to a SPARQL insert statement
+//                    result = UpdateRequestUtils.createUpdateRequest(tmp, null);
+//
+//                } else if(RDFLanguages.isQuads(rdfLang)) {
+//                    Dataset tmp = DatasetFactory.create();
+//                    // InputStream in = SparqlStmtUtils.openInputStream(filename);
+//
+//                    // FIXME Validate we are really using turtle here
+//                    RDFDataMgrEx.parseTrigAgainstDataset(tmp, globalPrefixes, in);
+//                    // Copy any prefixes from the parse back to our global prefix mapping
+//
+//                    Model m = tmp.getDefaultModel();
+//                    if(m != null) {
+//                        globalPrefixes.setNsPrefixes(m);
+//                    }
+//
+//                    if (logger.isInfoEnabled()) {
+//                        logger.info("Gathering prefixes from named graphs...");
+//                    }
+//                    int i = 0;
+//                    Iterator<String> it = tmp.listNames();
+//                    while(it.hasNext()) {
+//                        String name = it.next();
+//                        m = tmp.getNamedModel(name);
+//                        if(m != null) {
+//                            ++i;
+//                            globalPrefixes.setNsPrefixes(m);
+//                        }
+//                    }
+//                    if (logger.isInfoEnabled()) {
+//                        logger.info("Gathered prefixes from " + i + " named graphs");
+//                    }
+//
+//                    result = UpdateRequestUtils.createUpdateRequest(tmp, null);
+//
+//                } else {
+//                    throw new RuntimeException("Unknown lang: " + rdfLang);
+//                }
+//
+//            }
+//        }
+//        return result;
+//    }
 }

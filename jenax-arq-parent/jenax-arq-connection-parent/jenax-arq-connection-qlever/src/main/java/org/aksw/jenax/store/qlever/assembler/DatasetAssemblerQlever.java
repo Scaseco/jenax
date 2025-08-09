@@ -14,6 +14,7 @@ import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.assembler.DatasetAssembler;
+import org.apache.jena.sparql.util.graph.GraphUtils;
 
 import jenax.engine.qlever.docker.QleverServerConfigPojo;
 import jenax.engine.qlever.docker.RDFEngineBuilderQlever;
@@ -25,6 +26,9 @@ public class DatasetAssemblerQlever
     @Override
     protected DatasetGraph createDataset(Assembler a, Resource root) {
         QleverServerConfigRdf res = new QleverServerConfigRdf(root.asNode(), (EnhGraph)root.getModel());
+
+        String dockerImage = GraphUtils.getAsStringValue(root, QleverAssemblerVocab.dockerImage);
+        String dockerTag   = GraphUtils.getAsStringValue(root, QleverAssemblerVocab.dockerTag);
 
         QleverServerConfigPojo confRun = new QleverServerConfigPojo();
         res.copyInto(confRun, false);
@@ -52,6 +56,10 @@ public class DatasetAssemblerQlever
             } else {
                 // Create the database if it does not exist yet
                 RDFDatabaseBuilderQlever dbBuilder = new RDFDatabaseBuilderQlever();
+
+                dbBuilder.setDockerImageName(dockerImage);
+                dbBuilder.setDockerImageTag(dockerTag);
+
                 dbBuilder.setIndexName(indexName);
                 dbBuilder.setOutputFolder(path);
                 // XXX Should we add support for loading initial data?
@@ -68,6 +76,8 @@ public class DatasetAssemblerQlever
         RDFEngine engine;
         try {
             engine = engineBuilder
+                .setImageName(dockerImage)
+                .setImageTag(dockerTag)
                 // .setLocation(location)
                 // .setDatabase(database)
                 // .setLocation(systemName)

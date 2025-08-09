@@ -239,11 +239,11 @@
 				<artifactId>jenax-graphql-v2-engine</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-    			<groupId>org.aksw.jenax</groupId>
-    			<artifactId>jenax-graphql-v2-ui</artifactId>
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-graphql-v2-ui</artifactId>
 				<version>${project.version}</version>
-    		</dependency>
+			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-graphql-v2-fmod</artifactId>
@@ -847,10 +847,10 @@
 				<version>${jena.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.jena</groupId>
-			    <artifactId>jena-fuseki-server</artifactId>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-fuseki-server</artifactId>
 				<version>${jena.version}</version>
-		    </dependency>
+			</dependency>
 
 			<dependency>
 				<groupId>org.rdfhdt</groupId>
@@ -995,6 +995,14 @@
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy</artifactId>
 				<version>1.12.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.github.classgraph</groupId>
+				<artifactId>classgraph</artifactId>
+				<version>4.8.129</version>
+				<!-- <version>4.8.181</version>-->
+				<!-- Double-asterisks glob pattern such as in "foo/**/*.rq" seems broken in at least 4.8.181 -->
 			</dependency>
 
 			<!-- <dependency> <groupId>org.eclipse.jetty</groupId>
@@ -1607,7 +1615,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
-	    <!--
+		<!--
 		<repository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
@@ -1897,15 +1905,15 @@
 						</configuration>
 					</plugin>
 					-->
-					        <plugin>
-          <groupId>org.sonatype.central</groupId>
-          <artifactId>central-publishing-maven-plugin</artifactId>
-          <version>0.7.0</version>
-          <extensions>true</extensions>
-          <configuration>
-            <publishingServerId>central</publishingServerId>
-          </configuration>
-        </plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.7.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+						</configuration>
+					</plugin>
 
 				</plugins>
 			</build>
