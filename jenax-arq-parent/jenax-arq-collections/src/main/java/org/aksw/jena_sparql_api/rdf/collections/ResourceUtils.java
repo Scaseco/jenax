@@ -97,7 +97,8 @@ public class ResourceUtils {
                 seen.add( r );
 
                 // add the statements to the output model, and queue any new resources
-                for (StmtIterator i = r.listProperties(); i.hasNext(); ) {
+
+                for (StmtIterator i = ResourceUtils.listProperties(r); i.hasNext(); ) {
                     Statement s = i.nextStatement();
 
                     // don't do the occurs check now in case of reflexive statements
