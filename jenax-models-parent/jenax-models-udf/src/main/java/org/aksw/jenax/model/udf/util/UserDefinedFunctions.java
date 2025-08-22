@@ -98,7 +98,7 @@ public class UserDefinedFunctions {
                 Set<String> requiredProfileIris = requiredProfiles.stream()
                         .filter(RDFNode::isURIResource)
                         .map(Resource::getURI)
-                        .collect(Collectors.toSet());;
+                        .collect(Collectors.toSet());
 
                 Set<String> overlap = Sets.intersection(requiredProfileIris, activeProfiles);
                 if(requiredProfiles.isEmpty() || !overlap.isEmpty()) {

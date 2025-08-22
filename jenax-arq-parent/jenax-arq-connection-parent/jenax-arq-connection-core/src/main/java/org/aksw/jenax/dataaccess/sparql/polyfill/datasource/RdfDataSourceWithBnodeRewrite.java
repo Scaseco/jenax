@@ -1,7 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.polyfill.datasource;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -49,7 +47,8 @@ public class RdfDataSourceWithBnodeRewrite
         Model model = RDFDataMgr.loadModel("bnode-rewrites.ttl");
         SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
 
-        Set<String> activeProfiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/" + profile));
+        // Set<String> activeProfiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/" + profile));
+        Set<String> activeProfiles = Set.of(profile);
         ExprTransformVirtualBnodeUris result = ExprTransformVirtualBnodeUris.createTransformFromUdfModel(model, activeProfiles);
         return result;
     }
@@ -88,5 +87,4 @@ public class RdfDataSourceWithBnodeRewrite
     public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
         return new RdfDataSourceWithBnodeRewrite(delegate, AUTO);
     }
-
 }
