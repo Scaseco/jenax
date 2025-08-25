@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ import org.apache.jena.sparql.expr.E_NotEquals;
 import org.apache.jena.sparql.expr.E_NotOneOf;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.E_OneOfBase;
+import org.apache.jena.sparql.expr.E_URI;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.ExprFunction1;
@@ -53,6 +55,7 @@ import org.apache.jena.sparql.expr.ExprTransformSubstitute;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
+import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.ExprUtils;
@@ -268,20 +271,48 @@ public class ExprTransformVirtualBnodeUris
 
     private static final Logger logger = LoggerFactory.getLogger(ExprTransformVirtualBnodeUris.class);
 
+    public static class ExprTransformConstantFoldWithIris extends ExprTransformConstantFold {
+
+        private FunctionEnv functionEnv;
+
+        public ExprTransformConstantFoldWithIris() {
+            this(ExecutionContext.create(ARQ.getContext().copy()));
+        }
+
+        public ExprTransformConstantFoldWithIris(FunctionEnv functionEnv) {
+            super();
+            this.functionEnv = Objects.requireNonNull(functionEnv);
+        }
+
+        public FunctionEnv getFunctionEnv() {
+            return functionEnv;
+        }
+
+        @Override
+        public Expr transform(ExprFunction1 func, Expr expr1) {
+            Expr r = null;
+            if (expr1.isConstant()) {
+                NodeValue nv = expr1.getConstant();
+                r = func instanceof E_IRI e_iri
+                    ? e_iri.eval(nv, getFunctionEnv())
+                    : func instanceof E_URI e_uri
+                        ? e_uri.eval(nv, getFunctionEnv())
+                        : null;
+            }
+
+            if (r == null) {
+                r = super.transform(func, expr1);
+            }
+            return r;
+        }
+    }
+
     public Query rewrite(Query query) {
         Query result = QueryUtils.rewrite(query, op -> {
-            Op foo = Transformer.transform(null, new ExprTransformConstantFold() {
-                @Override
-                public Expr transform(ExprFunction1 func, Expr expr1) {
-                    Expr r = func instanceof E_IRI iri && expr1.isConstant()
-                        ? iri.eval(expr1.getConstant(), ExecutionContext.create(ARQ.getContext().copy()))
-                        : super.transform(func, expr1);
-                    return r;
-                }
-            }, op);
+            // Fold constants to capture FILTER(?x = "bnode://" + "my_bnode_id")
+            Op constantFoldedOp = Transformer.transform(null, new ExprTransformConstantFoldWithIris(), op);
 
-            Op a = TransformReplaceConstants.transform(foo, x -> x.isURI() ? UserDefinedFunctions.eval(macros, isBnodeIriFnIri, NodeValue.makeNode(x)).getBoolean() : false);
-            // new ExprTransformVirtualBnodeUris()
+            Op a = TransformReplaceConstants.transform(constantFoldedOp, x -> x.isURI() ? UserDefinedFunctions.eval(macros, isBnodeIriFnIri, NodeValue.makeNode(x)).getBoolean() : false);
             Op b = Transformer.transform(null, this, a);
 
             Op c = switch (rewriteMode) {
@@ -380,7 +411,7 @@ public class ExprTransformVirtualBnodeUris
         //System.out.println(actual);
 
 //		Query query = QueryFactory.create("SELECT * { ?s a ?t . ?s ?p ?o }");
-        Query query = QueryFactory.create("SELECT * { ?s ?p ?o . FILTER(?s = IRI('bnode://' + 'foo')) }");
+        Query query = QueryFactory.create("SELECT * { ?s ?p ?o . FILTER(?o = IRI('bnode://' + 'foo')) }");
         // Query query = QueryFactory.create("SELECT * {BIND( IRI('bnode://' + 'foo') AS ?s) }");
         // Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://foo> ?t . ?s ?p ?o . FILTER(?p = <bnode://bar>)}");
         // Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://666> ?t } ORDER BY ?s");
