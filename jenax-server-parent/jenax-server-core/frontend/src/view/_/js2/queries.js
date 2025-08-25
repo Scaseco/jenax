@@ -3,17 +3,17 @@
   const ldvQueries = {
     askQuery: (iri, reverseEnabled) => `ASK {` +
  [`{
-    bind(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?s) .
     ?s ?p ?o
- }`, `{
-    bind(<${iri}> as ?s) .
+    filter(?s = iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29'))) .
+}`, `{
     ?s ?p ?o
+    filter(?s = <${iri}>) .
  }`, ... reverseEnabled === 'yes' ? [`{
-    bind(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?o) .
     ?s ?p ?o
+    filter(?o = iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29'))) .
  }`, `{
-    bind(<${iri}> as ?o) .
     ?s ?p ?o
+    filter(?o = <${iri}>) .
  }`] : [] ].join(` UNION `) + `
 }
 `,
@@ -22,13 +22,10 @@
 } {
   ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
   {
-    SELECT ?x {
-      {
-        bind(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?x)
-      } UNION {
-        bind(<${iri}> AS ?x)
-      }
-    }
+    { SELECT ?x {
+      ?x ?y ?z
+      filter(?x IN(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')), <${iri}>))
+    } LIMIT 1 }
   } LATERAL {` +
     [`{
       bind(?x AS ?s_) .

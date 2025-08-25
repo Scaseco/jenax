@@ -17,12 +17,11 @@ import org.aksw.jena_sparql_api.algebra.transform.TransformPullFiltersIfCanMerge
 import org.aksw.jena_sparql_api.algebra.transform.TransformReplaceConstants;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.var.VarGeneratorBlacklist;
-import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.model.udf.util.UserDefinedFunctions;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
-import com.google.common.collect.Maps;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -32,16 +31,20 @@ import org.apache.jena.sparql.algebra.OpVars;
 import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpExtend;
 import org.apache.jena.sparql.algebra.op.OpProject;
+import org.apache.jena.sparql.algebra.optimize.ExprTransformConstantFold;
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.expr.E_Equals;
+import org.apache.jena.sparql.expr.E_IRI;
 import org.apache.jena.sparql.expr.E_NotEquals;
 import org.apache.jena.sparql.expr.E_NotOneOf;
 import org.apache.jena.sparql.expr.E_OneOf;
 import org.apache.jena.sparql.expr.E_OneOfBase;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprEvalException;
+import org.apache.jena.sparql.expr.ExprFunction1;
 import org.apache.jena.sparql.expr.ExprFunction2;
 import org.apache.jena.sparql.expr.ExprFunctionN;
 import org.apache.jena.sparql.expr.ExprList;
@@ -55,6 +58,9 @@ import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Decode "blanknode URIs" - i.e. URIs that represent blank nodes, such as bnode://{blank-node-label}
@@ -108,13 +114,22 @@ public class ExprTransformVirtualBnodeUris
     protected Map<String, UserDefinedFunctionDefinition> macros;
     protected Map<String, Boolean> propertyFunctions;
 
+    protected BnodeRewriteMode rewriteMode;
+
+    public enum BnodeRewriteMode {
+        /* NONE */
+        LOOKUP_ONLY,
+        FULL /* */
+    }
 
     public ExprTransformVirtualBnodeUris(
             Map<String, UserDefinedFunctionDefinition> macros,
-            Map<String, Boolean> propertyFunctions) {
+            Map<String, Boolean> propertyFunctions,
+            BnodeRewriteMode rewriteMode) {
         super();
         this.macros = macros;
         this.propertyFunctions = propertyFunctions;
+        this.rewriteMode = rewriteMode;
     }
 
     @Override
@@ -236,10 +251,13 @@ public class ExprTransformVirtualBnodeUris
 //                bnodeLabel = NodeValue.FALSE;
 //            }
 
-            Expr x = macros.get(bidOfFnIri).getBaseExpr();
+            UserDefinedFunctionDefinition udfd = macros.get(bidOfFnIri);
 
+            Expr macroExpr = udfd.getBaseExpr();
+            List<Var> args = udfd.getArgList();
+            Var macroVar = Iterables.getOnlyElement(args);
 
-            Expr labelCondition = ExprTransformer.transform(new ExprTransformSubstitute(Vars.x, lhs), x);
+            Expr labelCondition = ExprTransformer.transform(new ExprTransformSubstitute(macroVar, lhs), macroExpr);
             result = copy(func, labelCondition, bnodeLabel, swapped);
         } else {
             result = copy(func, lhs, b, swapped);
@@ -252,10 +270,25 @@ public class ExprTransformVirtualBnodeUris
 
     public Query rewrite(Query query) {
         Query result = QueryUtils.rewrite(query, op -> {
-            Op a = TransformReplaceConstants.transform(op, x -> x.isURI() ? UserDefinedFunctions.eval(macros, isBnodeIriFnIri, NodeValue.makeNode(x)).getBoolean() : false);
+            Op foo = Transformer.transform(null, new ExprTransformConstantFold() {
+                @Override
+                public Expr transform(ExprFunction1 func, Expr expr1) {
+                    Expr r = func instanceof E_IRI iri && expr1.isConstant()
+                        ? iri.eval(expr1.getConstant(), ExecutionContext.create(ARQ.getContext().copy()))
+                        : super.transform(func, expr1);
+                    return r;
+                }
+            }, op);
+
+            Op a = TransformReplaceConstants.transform(foo, x -> x.isURI() ? UserDefinedFunctions.eval(macros, isBnodeIriFnIri, NodeValue.makeNode(x)).getBoolean() : false);
             // new ExprTransformVirtualBnodeUris()
             Op b = Transformer.transform(null, this, a);
-            Op c = forceBnodeUris(b);//ExprTransformVirtualBnodeUris.forceBnodeUris(b);
+
+            Op c = switch (rewriteMode) {
+            case LOOKUP_ONLY -> b;
+            case FULL -> forceBnodeUris(b);
+            default -> throw new IllegalStateException("Unknown rewrite mode: " + rewriteMode);
+            };
 
             Op d = TransformExprToBasicPattern.transform(c, fn -> {
                 String id = org.aksw.jenax.arq.util.expr.ExprUtils.getFunctionId(fn.getFunction());
@@ -287,13 +320,14 @@ public class ExprTransformVirtualBnodeUris
         return result;
     }
 
-    public static ExprTransformVirtualBnodeUris createTransformFromUdfModel(Model model, Collection<String> activeProfiles) {
+    public static ExprTransformVirtualBnodeUris createTransformFromUdfModel(Model model, Collection<String> activeProfiles, BnodeRewriteMode rewriteMode) {
         Set<String> profiles = new HashSet<>(activeProfiles);
         Map<String, UserDefinedFunctionDefinition> map = UserDefinedFunctions.load(model, profiles);
 
         // FIXME Load property functions from model
         Map<String, Boolean> propertyFunctions = Collections.singletonMap("http://www.ontotext.com/owlim/entity#id", false);
-        ExprTransformVirtualBnodeUris result = new ExprTransformVirtualBnodeUris(map, propertyFunctions);
+
+        ExprTransformVirtualBnodeUris result = new ExprTransformVirtualBnodeUris(map, propertyFunctions, rewriteMode);
 
         return result;
     }
@@ -329,8 +363,8 @@ public class ExprTransformVirtualBnodeUris
         SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
 
 //        Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/jena"));
-      Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/graphdb"));
-        ExprTransformVirtualBnodeUris xform = createTransformFromUdfModel(model, profiles);
+        Set<String> profiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/graphdb"));
+        ExprTransformVirtualBnodeUris xform = createTransformFromUdfModel(model, profiles, BnodeRewriteMode.LOOKUP_ONLY);
 
         Expr output = ExprTransformer.transform(xform, input);
         System.out.println(output);
@@ -346,8 +380,11 @@ public class ExprTransformVirtualBnodeUris
         //System.out.println(actual);
 
 //		Query query = QueryFactory.create("SELECT * { ?s a ?t . ?s ?p ?o }");
-//		Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://foo> ?t . ?s ?p ?o . FILTER(?p = <bnode://bar>)}");
-        Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://foo> ?t . ?s ?p ?o . FILTER(?p = <bnode://bar>)} ORDER BY ?s");
+        Query query = QueryFactory.create("SELECT * { ?s ?p ?o . FILTER(?s = IRI('bnode://' + 'foo')) }");
+        // Query query = QueryFactory.create("SELECT * {BIND( IRI('bnode://' + 'foo') AS ?s) }");
+        // Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://foo> ?t . ?s ?p ?o . FILTER(?p = <bnode://bar>)}");
+        // Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://666> ?t } ORDER BY ?s");
+        // Query query = QueryFactory.create("CONSTRUCT { ?s ?p ?o } { ?s <bnode://666> ?t . ?s ?p ?o . FILTER(?p = <bnode://bar>)} ORDER BY ?s");
         Query actual = xform.rewrite(query);
 
         //		Op op = Algebra.compile(query);

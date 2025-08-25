@@ -1,9 +1,11 @@
 package org.aksw.jenax.dataaccess.sparql.polyfill.datasource;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
+import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris.BnodeRewriteMode;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
@@ -25,14 +27,16 @@ public class RdfDataSourceWithBnodeRewrite
 
     protected String givenProfileName;
     protected String derivedProfileName;
+    protected BnodeRewriteMode rewriteMode;
 
     // null = not yet initialized, empty = no suitable transformer found
     protected Optional<ExprTransformVirtualBnodeUris> transformer = null;
 
-    public RdfDataSourceWithBnodeRewrite(RDFDataSource delegate, String givenProfileName) {
+    public RdfDataSourceWithBnodeRewrite(RDFDataSource delegate, String givenProfileName, BnodeRewriteMode rewriteMode) {
         super(delegate);
         this.givenProfileName = givenProfileName;
         this.derivedProfileName = null;
+        this.rewriteMode = Objects.requireNonNull(rewriteMode);
     }
 
     public String getGivenProfileName() {
@@ -43,13 +47,17 @@ public class RdfDataSourceWithBnodeRewrite
         return derivedProfileName;
     }
 
-    public static ExprTransformVirtualBnodeUris getTransform(String profile) {
+    public BnodeRewriteMode getRewriteMode() {
+        return rewriteMode;
+    }
+
+    public static ExprTransformVirtualBnodeUris getTransform(String profile, BnodeRewriteMode rewriteMode) {
         Model model = RDFDataMgr.loadModel("bnode-rewrites.ttl");
         SparqlStmtMgr.execSparql(model, "udf-inferences.rq");
 
         // Set<String> activeProfiles = new HashSet<>(Arrays.asList("http://ns.aksw.org/profile/" + profile));
         Set<String> activeProfiles = Set.of(profile);
-        ExprTransformVirtualBnodeUris result = ExprTransformVirtualBnodeUris.createTransformFromUdfModel(model, activeProfiles);
+        ExprTransformVirtualBnodeUris result = ExprTransformVirtualBnodeUris.createTransformFromUdfModel(model, activeProfiles, rewriteMode);
         return result;
     }
 
@@ -67,7 +75,7 @@ public class RdfDataSourceWithBnodeRewrite
             }
 
             if(derivedProfileName != null) {
-                ExprTransformVirtualBnodeUris tmp = getTransform(derivedProfileName);
+                ExprTransformVirtualBnodeUris tmp = getTransform(derivedProfileName, rewriteMode);
                 transformer = Optional.ofNullable(tmp);
             } else {
                 transformer = Optional.empty();
@@ -84,7 +92,7 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
-    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
-        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO);
+    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate, BnodeRewriteMode rewriteMode) {
+        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO, rewriteMode);
     }
 }
