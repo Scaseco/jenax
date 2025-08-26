@@ -14,7 +14,6 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Node_Ext;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.lang.LabelToNode;
 import org.apache.jena.riot.out.NodeFmtLib;
@@ -27,12 +26,9 @@ import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
-import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprEvalException;
-import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.ExprTypeException;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.expr.nodevalue.NodeValueNode;
 import org.apache.jena.sparql.util.NodeCmp;
 
 import com.google.common.collect.Iterables;
@@ -427,14 +423,6 @@ public class NodeUtils {
                             : node.isVariable()
                                 ? node.getName()
                                 : NodeFmtLib.displayStr(node);
-        return result;
-    }
-
-    /** Wraps custom nodes with NodeValueNode. ExprLib.nodeToExpr broke with jena 4.6.0. */
-    public static Expr nodeToExpr(Node node) {
-        Expr result = node instanceof Node_Ext
-            ? new NodeValueNode(node)
-            : ExprLib.nodeToExpr(node);
         return result;
     }
 }

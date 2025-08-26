@@ -17,12 +17,10 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestFacetedQuery3 {
     @Test
-    @Ignore
     public void test_01() {
         // RelationQuery is for building tree-like (graphql-like) projections
         // FacetedRelationQuery is to build faceted queries over a relation

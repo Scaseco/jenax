@@ -12,6 +12,7 @@ import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_Regex;
 import org.apache.jena.sparql.expr.E_Str;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.expr.NodeValue;
 
 /**
@@ -27,7 +28,7 @@ public class ConstraintApi2Impl<T>
         super();
         this.model = model;
         // this.node = node;
-        this.exprVar = NodeUtils.nodeToExpr(NodeCustom.of(node));
+        this.exprVar = ExprLib.nodeToExpr(NodeCustom.of(node));
     }
 
     public FacetConstraintControl createConstraint(Expr expr) {

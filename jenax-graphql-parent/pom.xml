@@ -15,7 +15,7 @@
 	</parent>
 
 	<modules>
-		<!-- <module>jenax-graphql-v1</module> -->
+		<module>jenax-graphql-v1</module>
 		<module>jenax-graphql-v2-parent</module>
 	</modules>
 </project>
