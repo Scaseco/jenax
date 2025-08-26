@@ -747,6 +747,20 @@ public class QueryHash {
         return Character.toString(queryType.name().charAt(0)).toLowerCase();
     }
 
+    protected String getQueryTypePrefix(Query query) {
+        QueryType queryType = query.queryType();
+        String result = getQueryTypePrefix(queryType);
+        if (QueryType.SELECT.equals(queryType)) {
+            String suffix = query.isDistinct()
+                ? "d"
+                : query.isReduced()
+                    ? "r"
+                    : "_";
+            result += "/" + suffix;
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         Query query = getHarmonizedQuery();
@@ -756,7 +770,7 @@ public class QueryHash {
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
             str(getHavingHash().getHash()) + "/" +
-            getQueryTypePrefix(harmonizedQuery.queryType()) + "/" +
+            getQueryTypePrefix(harmonizedQuery) + "/" +
             str(getProjecHash().getHash()) + "/" +
             str(getOrderByHash().getHash()) + "/" +
             str(getGroupByHash().getLehmer()) + "/" +
