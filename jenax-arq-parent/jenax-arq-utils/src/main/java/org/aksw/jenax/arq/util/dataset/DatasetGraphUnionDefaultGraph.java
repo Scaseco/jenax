@@ -50,11 +50,10 @@ public class DatasetGraphUnionDefaultGraph
         return result;
     }
 
+    /* Match triples in all named graphs and expose them as if they originated from the default graph. */
     private Iterator<Quad> findInUdf(Node s, Node p, Node o) {
-        return Iter.iter(getR().findNG(Quad.unionGraph, s, p, o))
-                .map(q -> Quad.defaultGraphIRI.equals(q.getGraph())
-                        ? q
-                        : Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
+        return Iter.iter(getR().findNG(Node.ANY, s, p, o))
+            .map(q -> Quad.create(Quad.defaultGraphIRI, q.getSubject(), q.getPredicate(), q.getObject()));
     }
 
     /** Wrap a given dataset if it is not already wrapped by this class */
@@ -92,6 +91,8 @@ public class DatasetGraphUnionDefaultGraph
         return knownUnionDefaultGraphCheckers;
     }
 
+    // The symbols are defined in the class TDB2 of the jena-tdb2 module
+    // but we don't want to depend on the module just for the constants.
     private static final Symbol tdbSymbol1 = Symbol.create("http://jena.hpl.hp.com/TDB#unionDefaultGraph");
     private static final Symbol tdbSymbol2 = Symbol.create("http://jena.apache.org/TDB#unionDefaultGraph");
 

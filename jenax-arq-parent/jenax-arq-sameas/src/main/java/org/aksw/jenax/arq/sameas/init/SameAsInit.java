@@ -44,7 +44,7 @@ public class SameAsInit
 
     public static void init() {
         JenaPluginUtils.registerResourceClasses(SameAsConfig.class);
-        registerWith(Assembler.general);
+        registerWith(Assembler.general());
 
         registerServiceWrapper("sameAs", execCxt ->
             DatasetGraphSameAs.wrap(DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset())));

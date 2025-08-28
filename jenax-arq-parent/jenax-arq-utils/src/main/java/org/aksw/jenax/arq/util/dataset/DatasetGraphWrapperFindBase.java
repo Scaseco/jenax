@@ -11,7 +11,7 @@ import org.apache.jena.sparql.core.GraphView;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.util.NodeUtils;
 
-/** A DatasetGraphWrapper that delegates all find calls to {@link #actionFind(Node, Node, Node, Node)} */
+/** A DatasetGraphWrapper that delegates all find calls to {@link #actionFind(boolean, Node, Node, Node, Node)} */
 public abstract class DatasetGraphWrapperFindBase
     extends DatasetGraphWrapper
 {
