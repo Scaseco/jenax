@@ -9,7 +9,7 @@ public interface RdfCxt<C> {
     boolean isBlank(C node);
     boolean isConcrete(C node);
     boolean isVar(C node);
-    boolean isNodeTriple(C node);
+    boolean isTripleTerm(C node);
 
     /** The comparator for instances of C */
     Comparator<C> comparator();

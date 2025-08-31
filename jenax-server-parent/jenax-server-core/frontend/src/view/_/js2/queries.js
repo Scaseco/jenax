@@ -3,17 +3,17 @@
   const ldvQueries = {
     askQuery: (iri, reverseEnabled) => `ASK {` +
  [`{
+    BIND(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?s)
     ?s ?p ?o
-    filter(?s = iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29'))) .
-}`, `{
-    ?s ?p ?o
-    filter(?s = <${iri}>) .
- }`, ... reverseEnabled === 'yes' ? [`{
-    ?s ?p ?o
-    filter(?o = iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29'))) .
  }`, `{
+    BIND(<${iri}> AS ?s)
     ?s ?p ?o
-    filter(?o = <${iri}>) .
+ }`, ... reverseEnabled === 'yes' ? [`{
+    BIND(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')) AS ?o)
+    ?s ?p ?o
+ }`, `{
+    BIND(<${iri}> AS ?o)
+    ?s ?p ?o
  }`] : [] ].join(` UNION `) + `
 }
 `,
@@ -21,83 +21,65 @@
   ?s ?p ?o .
 } {
   ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
-  {
-    { SELECT ?x {
-      ?x ?y ?z
-      filter(?x IN(iri(replace(replace("${iri}", '\\\\(', '%28'), '\\\\)', '%29')), <${iri}>))
-    } LIMIT 1 }
-  } LATERAL {` +
+    BIND(<${iri}> AS ?x_)
+    LATERAL {
+        { BIND(?x_ AS ?x) }
+      UNION
+        { BIND(iri(replace(replace(str(?x_), '\\\\(', '%28'), '\\\\)', '%29')) AS ?x) }
+    }
+    LATERAL {` +
     [`{
-      bind(?x AS ?s_) .
-      LATERAL {
-        {
-          OPTIONAL {
-            bind(<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> as ?p)
-            ?s_ ?p ?o_ .
-            bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
-          }
-        } UNION {
-          {
-            SELECT ?s_ ?p {
-              ?s_ ?p []
-              filter(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
-            } GROUP BY ?s_ ?p LIMIT 1000
-          } LATERAL {
-            {
-              SELECT ?s_ ?p ?o {
-                ?s_ ?p ?o_ .
-                bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
-              } LIMIT 10
-            } UNION {
+        BIND(?x AS ?s_) .
+        LATERAL {
+            { # Forward, types
+              { SELECT DISTINCT ?s_ ?p ?o_ { BIND(rdf:type AS ?p) ?s_ ?p ?o_ } }
+            }
+          UNION
+            { # Forward, non-types
+              { SELECT DISTINCT ?s_ ?p { ?s_ ?p ?o_ FILTER(?p != rdf:type) } LIMIT 1000 }
               LATERAL {
-                SELECT ?s_ ?p (count(?ox) AS ?oCnt) {
                   {
-                    SELECT ?s_ ?p ?ox {
-                      ?s_ ?p ?ox
-                    } LIMIT 11
+                    { SELECT * { ?s_ ?p ?o_ } LIMIT 10 }
                   }
-                }  GROUP BY ?s_ ?p
-              } bind(if(?oCnt>10,strdt('...',<${ldvDef.moreResultsObjId}>),coalesce()) AS ?o)
+                UNION
+                  {
+                    { SELECT ?s_ ?p (COUNT(*) AS ?oCnt) { ?s_ ?p ?o_ } GROUP BY ?s_ ?p LIMIT 11 }
+                    FILTER(?oCnt > 10)
+                    BIND(strdt("...", <${ldvDef.moreResultsObjId}>) AS ?o_)
+                  }
+              }
             }
-          }
-        } UNION {
-          OPTIONAL {
-            GRAPH ?o {
-              ?s_ a ?ox
-            }
-          } bind(if(bound(?o),<${ldvDef.sourceGraphPropId}>,coalesce()) AS ?p)
+          UNION
+           { # Forward, graphs that contain the resource as subject
+             BIND(<${ldvDef.sourceGraphPropId}> AS ?p)
+             { SELECT DISTINCT ?o_ ?s_ { GRAPH ?o_ { ?s_ a ?z } } }
+           }
         }
-      }
-      bind(<http://ns.aksw.org/function/forceBnodeIri>(?s_) as ?s)
-    }`, ... reverseEnabled === 'yes' ? [`{
-      bind(?x AS ?s_) .
-      LATERAL {
-        {
-          SELECT ?s_ ?rp {
-            [] ?rp ?s_
-          } GROUP BY ?s_ ?rp LIMIT 100
-        } LATERAL {
-          {
-            SELECT ?s_ ?rp ?o {
-              ?o_ ?rp ?s_ .
-              bind(<http://ns.aksw.org/function/forceBnodeIri>(?o_) as ?o)
-            } LIMIT 10
-          } UNION {
+        BIND(<http://ns.aksw.org/function/forceBnodeIri>(?s_) AS ?s)
+        BIND(<http://ns.aksw.org/function/forceBnodeIri>(?o_) AS ?o)
+      }`, ... reverseEnabled === 'yes' ?
+    [`{
+        BIND(?x AS ?s_)
+        LATERAL {
+          { # Reverse
+            { SELECT DISTINCT ?s_ ?rp { SELECT ?s_ ?rp { ?o ?rp ?s_  } LIMIT 10000 } LIMIT 1000 }
             LATERAL {
-              SELECT ?s_ ?rp (count(?ox) AS ?oCnt) {
                 {
-                  SELECT ?s_ ?rp ?ox {
-                    ?ox ?rp ?s_
-                  } LIMIT 11
+                  { SELECT * { ?o_ ?rp ?s_ } LIMIT 10 }
                 }
-              } GROUP BY ?s_ ?rp
-            } bind(if(?oCnt>10,strdt('...',<${ldvDef.moreResultsObjId}>),coalesce()) AS ?o)
+              UNION
+                {
+                  { SELECT ?s_ ?rp (COUNT(*) AS ?oCnt) { SELECT * { ?o_ ?rp ?s_ } LIMIT 11 } GROUP BY ?s_ ?rp }
+                  FILTER(?oCnt > 10)
+                  BIND(strdt("...", <${ldvDef.moreResultsObjId}>) AS ?o_)
+                }
+            }
           }
         }
-      }
-      bind(uri(concat('${ldvDef.reversePropPrefix}:',str(?rp))) AS ?p)
-      bind(<http://ns.aksw.org/function/forceBnodeIri>(?s_) as ?s)
-    }`] : [] ].join(` UNION `) + `
+        BIND(URI(concat("urn:x-ldv:reverse:", str(?rp))) AS ?p)
+        BIND(<http://ns.aksw.org/function/forceBnodeIri>(?s_) AS ?s)
+        BIND(<http://ns.aksw.org/function/forceBnodeIri>(?o_) AS ?o)
+      }`] : [] ].join(` UNION `) + `
   }
   ${ infer ? '}' : '' }
 }
@@ -195,9 +177,8 @@ JSON {
 CONSTRUCT {
   ?id <${ldvDef.sourceGraphPropId}> ?graph .
 } WHERE {
-  BIND(<${lookupId}> as ?id) .
-  VALUES (?s ?p ?o) { ( ${pattern} ) }
-  GRAPH ?graph { ?s ?p ?o }
+  BIND(<${lookupId}> as ?id)
+  GRAPH ?graph { ${pattern} }
 }`,
   }
 

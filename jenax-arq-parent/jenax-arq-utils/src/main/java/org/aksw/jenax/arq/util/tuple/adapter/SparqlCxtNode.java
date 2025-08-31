@@ -43,8 +43,8 @@ public class SparqlCxtNode
     }
 
     @Override
-    public boolean isNodeTriple(Node node) {
-        return node.isNodeTriple();
+    public boolean isTripleTerm(Node node) {
+        return node.isTripleTerm();
     }
 
     @Override

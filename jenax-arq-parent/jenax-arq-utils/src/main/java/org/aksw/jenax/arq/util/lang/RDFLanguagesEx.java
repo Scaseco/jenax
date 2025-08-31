@@ -1,6 +1,17 @@
 package org.aksw.jenax.arq.util.lang;
 
-import java.util.*;
+import static org.apache.jena.atlas.iterator.Iter.findFirst;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +33,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
-import static org.apache.jena.atlas.iterator.Iter.findFirst;
 
 /**
  * Convenience methods related to Jena's {@link RDFLanguages} class.
@@ -202,6 +212,14 @@ public class RDFLanguagesEx {
         return result;
     }
 
+    public static String legacyLabel(String legacyLabel) {
+        return legacyLabel.replace('/', '_');
+    }
+
+    public static boolean matchFormat(String langOrFormat, String label) {
+        return langOrFormat.equalsIgnoreCase(label)
+            || langOrFormat.equalsIgnoreCase(legacyLabel(label));
+    }
 
     /**
      * Simple helper to check whether any of a lang's labels match a given one.
@@ -242,7 +260,7 @@ public class RDFLanguagesEx {
 
     public static RDFFormat findRdfFormat(String label, Collection<RDFFormat> probeFormats) {
         RDFFormat outFormat = probeFormats.stream()
-                .filter(fmt -> fmt.toString().equalsIgnoreCase(label)
+                .filter(fmt -> matchFormat(fmt.toString(), label)
                         || matchesLang(fmt.getLang(), label)
                         || matchesContentType(fmt.getLang(), label))
                 .findFirst()

@@ -169,7 +169,6 @@ public class TupleFinderSameAs<D, C>
             return result;
         }
 
-
         private List<C> resolveSameAsSortedCached(C g, C start) {
             List<C> result;
             if (!sparqlCxt.isConcrete(g) || !sparqlCxt.isConcrete(start) || sparqlCxt.isLiteral(start)) {

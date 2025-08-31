@@ -1,6 +1,5 @@
 package org.aksw.jenax.arq.sameas.init;
 
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,13 +49,26 @@ public class SameAsInit
             DatasetGraphSameAs.wrap(DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset())));
 
         registerServiceWrapper("sameAs+rdfs", execCxt -> {
-            SetupRDFS setup = Objects.requireNonNull(execCxt.getContext().get(DatasetAssemblerRdfsReduced.symSetupRdfsNode), "No RDFS setup found in the active dataset context");
-            return DatasetGraphRDFSReduced.wrap(DatasetGraphSameAs.wrap(DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset())), setup);
+            DatasetGraph r = execCxt.getDataset();
+            r = DatasetGraphUnionDefaultGraph.wrapIfNeeded(r);
+            r = DatasetGraphSameAs.wrap(r);
+            // Objects.requireNonNull(setup, "No RDFS setup found in the active dataset context");
+            SetupRDFS setup = execCxt.getContext().get(DatasetAssemblerRdfsReduced.symSetupRdfsNode);
+            if (setup != null) {
+                r  = DatasetGraphRDFSReduced.wrap(r, setup);
+            }
+            return r;
         });
 
         registerServiceWrapper("rdfs", execCxt -> {
-            SetupRDFS setup = Objects.requireNonNull(execCxt.getContext().get(DatasetAssemblerRdfsReduced.symSetupRdfsNode), "No RDFS setup found in the active dataset context");
-            return DatasetGraphRDFSReduced.wrap(DatasetGraphUnionDefaultGraph.wrapIfNeeded(execCxt.getDataset()), setup);
+            SetupRDFS setup = execCxt.getContext().get(DatasetAssemblerRdfsReduced.symSetupRdfsNode);
+            // Objects.requireNonNull(setup, "No RDFS setup found in the active dataset context");
+            DatasetGraph r = execCxt.getDataset();
+            r = DatasetGraphUnionDefaultGraph.wrapIfNeeded(r);
+            if (setup != null) {
+                r = DatasetGraphRDFSReduced.wrap(r, setup);
+            }
+            return r;
         });
     }
 
