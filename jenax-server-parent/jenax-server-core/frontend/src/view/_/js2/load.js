@@ -57,6 +57,13 @@
       .then((json) => findMap(iri, json))
   }
 
+  const findFeatAllGeo = (iri) => {
+    const infer = ldvConfig.infer
+    const geoQuery = ldvQueries.featAllGeoQuery(iri, infer)
+    fetchJsonLd(geoQuery)
+      .then((json) => findMap(`${iri}#featAllGeo`, json))
+  }
+
   const findMap = (base, json) => {
     jsonld.promises.expand(json)
       .then((expanded) => {
@@ -66,7 +73,9 @@
 	}
 	if (root[pGeoHasGeometry]) {
 	  const geomId = root[pGeoHasGeometry][0]["@id"]
-	  if (geomId) {
+	  if (root[pGeoHasGeometry].length > 1) {
+	    findFeatAllGeo(base)
+	  } else if (geomId) {
 	    findGeo(geomId)
 	  }
 	} else if (root[pGeoAsWKT]) {

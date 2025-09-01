@@ -173,6 +173,17 @@ JSON {
   ${ infer ? '}' : '' }
 }
 `,
+    featAllGeoQuery: (iri, infer) => `CONSTRUCT {
+  <${iri}#featAllGeo> <http://www.opengis.net/ont/geosparql#asWKT> ?wktLiteral
+} WHERE {
+  SELECT (<http://www.opengis.net/def/function/geosparql/collect>(?wktLiteral_) as ?wktLiteral) WHERE {
+    ${ infer ? 'SERVICE <sameAs+rdfs:> {' : '' }
+    <${iri}> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .
+    ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wktLiteral_ .
+    ${ infer ? '}' : '' }
+  }
+}
+`,
     graphLookupQuery: (lookupId, pattern) => `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 CONSTRUCT {
   ?id <${ldvDef.sourceGraphPropId}> ?graph .
