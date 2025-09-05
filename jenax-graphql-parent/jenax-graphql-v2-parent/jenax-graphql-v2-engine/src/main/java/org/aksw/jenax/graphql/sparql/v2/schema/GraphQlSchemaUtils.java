@@ -18,7 +18,6 @@ import graphql.language.ListType;
 import graphql.language.NonNullType;
 import graphql.language.Type;
 import graphql.language.TypeName;
-import graphql.parser.Parser;
 
 public class GraphQlSchemaUtils {
 
@@ -84,9 +83,8 @@ public class GraphQlSchemaUtils {
 
     public static Document loadDocument(String resource) throws IOException {
         StreamManager streamMgr = StreamManager.get();
-        Parser parser = new Parser();
         String metaSchemaRawStr = toStringUtf8(streamMgr, resource);
-        Document metaDoc = parser.parseDocument(metaSchemaRawStr);
+        Document metaDoc = GraphQlUtils.parseUnrestricted(metaSchemaRawStr);
         return metaDoc;
     }
 

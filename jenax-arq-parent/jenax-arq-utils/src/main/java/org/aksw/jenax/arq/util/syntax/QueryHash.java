@@ -330,6 +330,8 @@ public class QueryHash {
                 VarExprList newProject = transform(query.getProject(), relabel, projectVarGen, projectHashFn);
                 newQuery.getProject().addAll(newProject);
             }
+            newQuery.setDistinct(query.isDistinct());
+            newQuery.setReduced(query.isReduced());
             break;
         case CONSTRUCT:
             Template newTemplate = transform(query.getConstructTemplate(), relabel, projectVarGen);
@@ -802,6 +804,7 @@ public class QueryHash {
             System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
             System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
             System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
+            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT DISTINCT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
 
             System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
             System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));

@@ -14,8 +14,12 @@ import org.apache.jena.dboe.storage.simple.StoragePrefixesSimpleMem;
 import org.apache.jena.dboe.storage.system.DatasetGraphStorage;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.TransactionalLock;
+import org.apache.jena.sys.JenaSystem;
 
-public interface DatasetGraphFactoryEx {
+public class DatasetGraphFactoryEx {
+
+    static { JenaSystem.init(); }
+
     public static DatasetGraph createInsertOrderPreservingDatasetGraph() {
         return createInsertOrderPreservingDatasetGraph(false, false);
     }

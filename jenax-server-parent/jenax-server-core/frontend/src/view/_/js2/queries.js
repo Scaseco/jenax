@@ -43,7 +43,7 @@
                   }
                 UNION
                   {
-                    { SELECT ?s_ ?p (COUNT(*) AS ?oCnt) { ?s_ ?p ?o_ } GROUP BY ?s_ ?p LIMIT 11 }
+                    { SELECT ?s_ ?p (COUNT(*) AS ?oCnt) { SELECT * { ?s_ ?p ?o_ } LIMIT 11 } GROUP BY ?s_ ?p }
                     FILTER(?oCnt > 10)
                     BIND(strdt("...", <${ldvDef.moreResultsObjId}>) AS ?o_)
                   }
