@@ -70,11 +70,18 @@ public class GraphQlUtils {
     /** Whether the char is valid at the given index. */
     public static boolean isValidNameChar(char c, int index) {
         boolean result = index == 0
-            ? c == '_' || Character.isLetter(c)
-            : c == '_' || Character.isLetterOrDigit(c);
+            ? c == '_' || isAsciiLetter(c)
+            : c == '_' || isAsciiLetterOrDigit(c);
         return result;
     }
 
+    public static boolean isAsciiLetter(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    public static boolean isAsciiLetterOrDigit(char c) {
+        return isAsciiLetter(c) || Character.isDigit(c);
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(GraphQlUtils.class);
 
