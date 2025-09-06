@@ -210,6 +210,7 @@ public class GraphQlSchemaGenerator {
             String label = iriToLabel == null ? null : iriToLabel.apply(iri);
             result = shortNameMgr.allocate(iri, label).shortName();
         } else if (node.isLiteral()) {
+            // shortNameMgr.allocate(result)
             result = node.getLiteralLexicalForm();
         } else {
             throw new RuntimeException("Unexpected node name: " + node);

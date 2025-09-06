@@ -52,6 +52,10 @@ public class ShortNameMgr {
 
             ns = iri.substring(0, splitPoint);
             localName = iri.substring(splitPoint);
+
+            // There was no prefix so allocate one.
+            prefix = allocPrefix(ns);
+            prefixMap.add(prefix, ns);
         }
 
         // XXX Hacky - shouldn't conflate label and localName.
@@ -73,18 +77,18 @@ public class ShortNameMgr {
             baseName = "_";
         }
 
-        String shortName = shortNameSanitizer == null
-            ? baseName
-            : shortNameSanitizer.apply(baseName);
+        if (shortNameSanitizer != null) {
+            baseName = shortNameSanitizer.apply(baseName);
+        }
 
         Name result = null;
-        for (int i = 0; (result = shortToFull.get(shortName)) != null && !result.ns().equals(ns); ++i) {
+        String shortName = baseName;
+        for (int i = 0; (result = shortToFull.get(shortName)) != null &&
+                !(result.ns().equals(ns) && result.localName().equals(localName)); ++i) {
             shortName = baseName + i;
         }
 
         if (result == null) {
-            prefix = allocPrefix(ns);
-            prefixMap.add(prefix, ns);
             result = new Name(shortName, prefix, ns, localName);
             shortToFull.put(shortName, result);
         }
