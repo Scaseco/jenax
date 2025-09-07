@@ -37,7 +37,6 @@ import graphql.language.FieldDefinition;
 import graphql.language.InterfaceTypeDefinition;
 import graphql.language.ListType;
 import graphql.language.ObjectTypeDefinition;
-import graphql.language.ObjectTypeDefinition.Builder;
 import graphql.language.StringValue;
 import graphql.language.Type;
 import graphql.language.TypeName;
@@ -356,6 +355,7 @@ public class GraphQlSchemaGenerator {
             .collect(Collectors.toCollection(ArrayList::new));
 
         // Add the uri field
+        // XXX This should become a decoupled transformation.
         String FieldName_URI = "uri";
         FieldDefinition uriField = FieldDefinition.newFieldDefinition()
             .name(FieldName_URI)
@@ -379,28 +379,28 @@ public class GraphQlSchemaGenerator {
         Definition result;
         boolean generateObjectTypeDefinitions = true;
         if (generateObjectTypeDefinitions) {
-            Builder resultBuilder = ObjectTypeDefinition.newObjectTypeDefinition()
+            ObjectTypeDefinition.Builder otdBuilder = ObjectTypeDefinition.newObjectTypeDefinition()
                 .name(name)
-                .implementz(implementz)
+                // .implementz(implementz) // In Java terms, ODTs only support 'implements' but not 'extends'.
                 .fieldDefinitions(fieldDefs);
 
             if (dir != null) {
-                resultBuilder = resultBuilder.directive(dir);
+                otdBuilder = otdBuilder.directive(dir);
             }
 
-            result = resultBuilder.build();
+            result = otdBuilder.build();
         } else {
             // Debug code for displaying super types via Interface type definitions
-            graphql.language.InterfaceTypeDefinition.Builder bu = InterfaceTypeDefinition.newInterfaceTypeDefinition()
+            InterfaceTypeDefinition.Builder itdBuilder = InterfaceTypeDefinition.newInterfaceTypeDefinition()
                 .name(name)
                 .implementz(implementz)
                 .definitions(fieldDefs);
 
             if (dir != null) {
-                bu = bu.directive(dir);
+                itdBuilder = itdBuilder.directive(dir);
             }
 
-            result = bu.build();
+            result = itdBuilder.build();
         }
         return result;
     }

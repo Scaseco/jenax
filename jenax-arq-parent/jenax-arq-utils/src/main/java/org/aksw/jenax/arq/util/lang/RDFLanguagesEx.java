@@ -42,6 +42,7 @@ import com.google.common.graph.Traverser;
  */
 public class RDFLanguagesEx {
 
+    /** Map of sub-language (e.g. nt) to parent language (e.g. ttl). */
     // TODO Make this configurable via an RDF dataset?
     private static Map<Lang, Lang> subLangMap = new HashMap<>();
 
