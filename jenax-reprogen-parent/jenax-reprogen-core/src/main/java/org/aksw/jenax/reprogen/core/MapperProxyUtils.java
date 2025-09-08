@@ -2119,7 +2119,8 @@ public class MapperProxyUtils {
             for(Entry<Method, BiFunction<Object, Object[], Object>> e : methodImplMap.entrySet()) {
                 builder = builder.method(ElementMatchers.anyOf(e.getKey()))
                         .intercept(InvocationHandlerAdapter.of((obj, method, args) -> {
-                            Object r = e.getValue().apply(obj, args);
+                            BiFunction<Object, Object[], Object> getter = e.getValue();
+                            Object r = getter.apply(obj, args);
                             return r;
                         }));
             }
