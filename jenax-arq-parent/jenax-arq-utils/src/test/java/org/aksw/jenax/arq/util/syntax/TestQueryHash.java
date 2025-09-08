@@ -29,10 +29,11 @@ public class TestQueryHash {
 
         assertPairWiseDifferent(entries, e -> e.getValue().toString());
 
-        String expectedPrefix = "Tjny8TXJKFa7hYkh6VBRiv_6S_tZn3Fm_vyP-JtwPFM/cm60CQ/AA/s/";
+        String expectedPrefix = "Tjny8TXJKFa7hYkh6VBRiv_6S_tZn3Fm_vyP-JtwPFM/cm60CQ/AA/MusTnQ/s/";
         for (Entry<String, QueryHash> entry : entries) {
             String hashStr = entry.getValue().toString();
             String actualPrefix = hashStr.substring(0, expectedPrefix.length());
+            // System.err.println(hashStr);
             Assert.assertEquals(expectedPrefix, actualPrefix);
         }
     }

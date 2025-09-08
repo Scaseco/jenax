@@ -776,9 +776,9 @@ public class QueryHash {
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
             str(getHavingHash().getHash()) + "/" +
+            str(getOrderByHash().getHash()) + "/" +
             getQueryTypePrefix(harmonizedQuery) + "/" +
             str(getProjecHash().getHash()) + "/" +
-            str(getOrderByHash().getHash()) + "/" +
             str(getGroupByHash().getLehmer()) + "/" +
             str(getHavingHash().getLehmer()) + "/" +
             // Omit projection hash on ask queries

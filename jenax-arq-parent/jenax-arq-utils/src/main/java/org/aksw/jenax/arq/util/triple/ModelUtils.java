@@ -6,11 +6,9 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
