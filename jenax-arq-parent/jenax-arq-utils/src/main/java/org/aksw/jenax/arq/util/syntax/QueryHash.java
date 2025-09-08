@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.util.math.Lehmer;
-import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
@@ -234,6 +233,12 @@ public class QueryHash {
 //        System.out.println(result);
     }
 
+    public static QueryHash createHash(String queryStr) {
+        Query query = QueryFactory.create(queryStr);
+        QueryHash result = createHash(query);
+        return result;
+    }
+
     public static QueryHash createHash(Query query) {
         HashFunction queryPatternHashFn = Hashing.sha256();
         HashFunction aggHashFn = Hashing.murmur3_32_fixed();
@@ -249,7 +254,6 @@ public class QueryHash {
         Set<Var> allVars = new LinkedHashSet<>();
 
         Query newQuery = new Query();
-
         newQuery.setQuerySelectType();
 
         // Query Pattern
@@ -794,36 +798,4 @@ public class QueryHash {
         // return "QueryStringHashCode [Original Query:\n" + query + "BodyQuery:\n" + bodyQuery + ", bodyHash=" + getBodyHashStr() + ", projHash=" + getProjHashStr()
         //        + ", projLehmerValue=" + projLehmerValue + "]";
     }
-
-    public static void main(String[] args) {
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s ?p { ?s ?p ?o } LIMIT 10 OFFSET 100")));
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
-
-        if (true) {
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT DISTINCT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-        }
-
-        if (false) {
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-        }
-
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (?x AS ?y) { ?s ?p ?o } LIMIT 10 OFFSET 2")));
-        // Collection<String> items = Arrays.asList("d", "c", "b", "a");
-        // BigInteger value = Lehmer.lehmerValue(items, Comparator.naturalOrder());
-    }
-
 }

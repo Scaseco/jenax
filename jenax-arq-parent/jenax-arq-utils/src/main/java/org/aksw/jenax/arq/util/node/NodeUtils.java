@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.util.node;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -93,7 +94,7 @@ public class NodeUtils {
                 .filter(Objects::nonNull)
                 .filter(Node::isVariable)
                 .map(node -> (Var)node)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return result;
     }

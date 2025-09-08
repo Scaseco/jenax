@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.util.triple;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -34,6 +35,14 @@ public class TripleUtils {
     private static final TupleSlot[] SLOTS = new TupleSlot[] {
             TupleSlot.SUBJECT, TupleSlot.PREDICATE, TupleSlot.OBJECT };
 
+
+    public static Node[] tripleToArray(Triple t) {
+        return new Node[] { t.getSubject(), t.getPredicate(), t.getObject() };
+    }
+
+    public static Set<Var> getVarsMentioned(Triple t) {
+        return org.aksw.jenax.arq.util.node.NodeUtils.getVarsMentioned(Arrays.asList(tripleToArray(t)));
+    }
 
     public static Stream<Node> streamNodes(Triple t) {
         return Stream.of(t.getSubject(), t.getPredicate(), t.getObject());
