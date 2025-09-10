@@ -19,7 +19,7 @@ function baseUrl(urlStr) {
   const url = new URL(urlStr);
   url.search = "";
   url.hash = "";
-  return url;
+  return url.toString();
 }
 
 const graphQlEndpoint = baseUrl(document.location.href);
