@@ -15,7 +15,14 @@ const sendBtn = document.getElementById('sendBtn');
 const abortBtn = document.getElementById('abortBtn');
 const sparqlBtn = document.getElementById('sparqlBtn');
 
-const endpoint = document.location.href
+function baseUrl(urlStr) {
+  const url = new URL(urlStr);
+  url.search = "";
+  url.hash = "";
+  return url;
+}
+
+const endpoint = baseUrl(document.location.href);
 const saveKey = "savedRequest";
 
 const queryParamName = "qtxt";
