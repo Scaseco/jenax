@@ -7,12 +7,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.expr.ExprEvalException;
 
-/**
- * A datatype for storing SPARQL property paths in RDF literals.
- *
- * @author Claus Stadler
- *
- */
+/** Datatype for storing SPARQL queries in RDF literals. */
 public class RDFDatatypeQuery
     extends BaseDatatype
 {
