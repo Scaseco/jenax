@@ -143,7 +143,6 @@ public class GraphQlQueryService extends BaseActionREST {
         Gson gson = new Gson();
         JsonObject queryJson = gson.fromJson(queryJsonStr, JsonObject.class);
 
-        GraphQlExec<String> exec;
         GraphQlExecFactory qef = GraphQlExecFactory.of(() -> QueryExec.newBuilder().dataset(dsg));
         GraphQlExecBuilder builder = qef.newBuilder();
         if (schemaNavigator != null) {
@@ -151,15 +150,15 @@ public class GraphQlQueryService extends BaseActionREST {
         }
         // builder = GraphQlJsonUtils.configureFromJson(builder, query);
         GraphQlJsonUtils.configureFromJson(builder, queryJson);
-        exec = builder.buildForJson();
-
         action.beginRead();
         try {
-            action.setResponseStatus(HttpSC.OK_200);
-            action.setResponseContentType(WebContent.contentTypeJSON);
-            try (OutputStream out = action.getResponseOutputStream()) {
-                GraphQlExecUtils.write(out, exec);
-                // GraphQlExecUtils.writePretty(out, exec);
+            try (GraphQlExec<String> exec = builder.buildForJson()) {
+                action.setResponseStatus(HttpSC.OK_200);
+                action.setResponseContentType(WebContent.contentTypeJSON);
+                try (OutputStream out = action.getResponseOutputStream()) {
+                    GraphQlExecUtils.write(out, exec);
+                    // GraphQlExecUtils.writePretty(out, exec);
+                }
             }
             // action.log.info(format("[%d] graphql: execution finished", action.id));
         } catch (IOException e) {
