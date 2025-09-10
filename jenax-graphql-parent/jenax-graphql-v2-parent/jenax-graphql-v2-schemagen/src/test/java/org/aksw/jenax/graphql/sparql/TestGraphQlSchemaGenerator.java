@@ -3,9 +3,12 @@ package org.aksw.jenax.graphql.sparql;
 import java.util.List;
 import java.util.Objects;
 
+import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
+import org.aksw.jenax.arq.util.prefix.ShortNameMgr.Name;
 import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSources;
 import org.aksw.jenax.graphql.schema.generator.GraphQlSchemaGenerator;
 import org.aksw.jenax.graphql.schema.generator.GraphQlSchemaGenerator.TypeInfo;
+import org.aksw.jenax.graphql.util.GraphQlUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParserBuilder;
@@ -81,7 +84,16 @@ public class TestGraphQlSchemaGenerator {
         test(dataStr);
     }
 
-
+    @Test
+    public void testNaming01() {
+        ShortNameMgr nameMgr = new ShortNameMgr(GraphQlUtils::safeName);
+        Name n1 = nameMgr.allocate("https://www.openstreetmap.org/wiki/Key:old:uic_ref");
+        Name n2 = nameMgr.allocate("https://www.openstreetmap.org/wiki/Key:old_uic_ref");
+        Assert.assertNotEquals(n1.shortName(), n2.shortName());
+        Assert.assertNotEquals(n1.localName(), n2.localName());
+        Assert.assertEquals(n1.prefix(), n2.prefix());
+        Assert.assertEquals(n1.ns(), n2.ns());
+    }
 
     private static void test(String dataStr) {
         Graph graph = RDFParserBuilder.create().fromString(dataStr).lang(Lang.TURTLE).toGraph();

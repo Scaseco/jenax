@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -44,6 +45,8 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -887,4 +890,14 @@ public class RDFDataMgrEx {
         return result;
     }
 
+    /** Attempt to load a resource as an RDF model and locate the single resource with a given property. */
+    public static <T extends RDFNode> Optional<T> tryLoadResourceWithProperty(String src, Property p, Class<T> clazz) {
+        Model configModel = RDFDataMgr.loadModel(src);
+
+        Optional<T> result = configModel.listResourcesWithProperty(p)
+                .nextOptional()
+                .map(x -> x.as(clazz));
+
+        return result;
+    }
 }

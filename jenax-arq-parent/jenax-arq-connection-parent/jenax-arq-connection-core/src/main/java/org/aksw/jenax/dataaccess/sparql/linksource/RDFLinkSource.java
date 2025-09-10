@@ -22,7 +22,7 @@ public interface RDFLinkSource {
     RDFLinkBuilder<?> newLinkBuilder();
 
     /**
-     * A link source may optionally associated with a dataset graph.
+     * A link source may optionally have an associated dataset graph.
      */
     default DatasetGraph getDatasetGraph() {
         return null;

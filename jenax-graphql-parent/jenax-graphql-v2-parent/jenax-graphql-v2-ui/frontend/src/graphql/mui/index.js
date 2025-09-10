@@ -15,7 +15,14 @@ const sendBtn = document.getElementById('sendBtn');
 const abortBtn = document.getElementById('abortBtn');
 const sparqlBtn = document.getElementById('sparqlBtn');
 
-const graphQlEndpoint = document.location.href;
+function baseUrl(urlStr) {
+  const url = new URL(urlStr);
+  url.search = "";
+  url.hash = "";
+  return url;
+}
+
+const graphQlEndpoint = baseUrl(document.location.href);
 const apiEndpoint = graphQlEndpoint;
 
 var config = null;

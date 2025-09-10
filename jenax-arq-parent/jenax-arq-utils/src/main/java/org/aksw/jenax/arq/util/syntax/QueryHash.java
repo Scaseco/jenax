@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.util.math.Lehmer;
-import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
 import org.aksw.jenax.arq.util.var.VarGeneratorImpl2;
 import org.aksw.jenax.arq.util.var.VarUtils;
@@ -76,11 +75,6 @@ public class QueryHash {
      * For non-group-by queries: The projection gets replaced with SELECT *
      * For group-by-queries:
      */
-//    protected Query bodyQuery;
-//    protected HashCode bodyHash;
-//    protected HashCode projHash;
-//    protected BigInteger projLehmerValue;
-
     protected Query originalQuery;
     protected Query harmonizedQuery;
 
@@ -164,14 +158,6 @@ public class QueryHash {
         return prologueHash;
     }
 
-//    public String getBodyHashStr() {
-//        return BaseEncoding.base64Url().omitPadding().encode(bodyHashCode.asBytes());
-//    }
-//
-//    public String getProjHashStr() {
-//        return BaseEncoding.base64Url().omitPadding().encode(projectHash.asBytes());
-//    }
-
     /** Return the set of result variables that DO NOT map to an expression making use of an aggregator */
     public static Set<Var> getNonAggregateVars(Query query) {
         Set<Var> result = new HashSet<>();
@@ -192,46 +178,10 @@ public class QueryHash {
         return result;
     }
 
-    public static void relabelVariables(Query query) {
-        Set<Var> patternVars = (Set<Var>)PatternVars.vars(new LinkedHashSet<>(), query.getQueryPattern());
-        Set<Var> groupByVars = new LinkedHashSet<>();
-        Set<Var> orderByVars = new LinkedHashSet<>();
-        Set<Var> havingVars = new LinkedHashSet<>();
-        Set<Var> projVars = new LinkedHashSet<>();
-        if (query.hasGroupBy()) {
-            groupByVars = VarExprListUtils.getVarsMentioned(query.getGroupBy());
-            if (query.hasHaving()) {
-                query.getHavingExprs().forEach(e -> ExprVars.varsMentioned(havingVars, e));
-            }
-        }
-
-        if (query.hasOrderBy()) {
-            ExprVars.varsMentioned(orderByVars, query.getOrderBy());
-        }
-
-        VarExprListUtils.varsMentioned(projVars, query.getProject());
-
-        Set<Var> allVars = new LinkedHashSet<>();
-        allVars.addAll(patternVars);
-        allVars.addAll(groupByVars);
-        allVars.addAll(orderByVars);
-        allVars.addAll(havingVars);
-        allVars.addAll(projVars);
-
-        Map<Var, Var> relabel = new LinkedHashMap<>();
-        Generator<Var> vargen = VarGeneratorImpl2.create("v");
-        for (Var v : allVars) {
-            relabel.put(v, vargen.next());
-        }
-
-
-        // BigInteger projLehmerValue = Lehmer.lehmerValue(projStrs, Comparator.naturalOrder());
-
-
-
-        // NodeTransform xform = new NodeTransform
-        Query result = org.aksw.jenax.util.backport.syntaxtransform.QueryTransformOps.transform(query, relabel);
-//        System.out.println(result);
+    public static QueryHash createHash(String queryStr) {
+        Query query = QueryFactory.create(queryStr);
+        QueryHash result = createHash(query);
+        return result;
     }
 
     public static QueryHash createHash(Query query) {
@@ -249,7 +199,6 @@ public class QueryHash {
         Set<Var> allVars = new LinkedHashSet<>();
 
         Query newQuery = new Query();
-
         newQuery.setQuerySelectType();
 
         // Query Pattern
@@ -356,21 +305,15 @@ public class QueryHash {
 
         HashCode bodyHashCode = queryPatternHashFn.hashString(newQuery.getQueryPattern().toString(), StandardCharsets.UTF_8);
 
-//        System.out.println(bodyHashCode);
-
         LehmerHash aggHash = hash(aggHashFn, newQuery.getAggregators(), ExprUtils::fmtSPARQL);
-
         LehmerHash groupByHash = toHashCode(newQuery.getGroupBy());
-//        System.out.println(groupByHash);
-
+        //System.out.println(groupByHash);
 
         LehmerHash havingHash = hash(havingHashFn, newQuery.getHavingExprs(), ExprUtils::fmtSPARQL);
-
-
         LehmerHash orderByHash = hash(orderByHashFn, newQuery.getOrderBy(), QueryHash::fmt);
 
-//        System.out.println(orderByHash);
-//        System.out.println(projecHash);
+        // System.out.println(orderByHash);
+        // System.out.println(projecHash);
 
         LehmerHash projectHash;
         switch (query.queryType()) {
@@ -449,7 +392,6 @@ public class QueryHash {
         return result;
     }
 
-
     public static List<ExprAggregator> transform(List<ExprAggregator> eas, Map<Var, Var> relabel, Generator<Var> varGen, HashFunction hashFn) {
         VarExprList vel = new VarExprList();
         for (ExprAggregator ea : eas) {
@@ -474,8 +416,6 @@ public class QueryHash {
         }
         return result;
     }
-
-    // SortCondition, VarExprList
 
     public static List<Expr> transform(List<Expr> es, Map<Var, Var> relabel, Generator<Var> varGen) {
         return es.stream().map(e -> transform(e, relabel, varGen)).collect(Collectors.toList());
@@ -602,9 +542,6 @@ public class QueryHash {
         return hash(hashFn, elements, Objects::toString);
     }
 
-//    public static <S, T extends Comparable<T>> Entry<HashCode, BigInteger> hashIndirect(HashFunction hashFn, Collection<S> elements, Function<S, T> mapper) {
-//    }
-
     public static <T> LehmerHash hash(HashFunction hashFn, Collection<T> elements, Function<T, String> toString) {
         List<String> strs = elements == null ? List.of() : elements.stream().map(toString::apply).collect(Collectors.toList());
         List<HashCode> hashCodes = strs.stream().map(str -> {
@@ -615,99 +552,6 @@ public class QueryHash {
         BigInteger lehmerValue = Lehmer.lehmerValue(strs, Comparator.naturalOrder());
         return LehmerHash.of(hashCode, lehmerValue);
     }
-
-//    public static QueryHash createHashOld(Query query) {
-//
-//        HashFunction bodyHashFn = Hashing.sha256();
-//        HashFunction projHashFn = Hashing.murmur3_32_fixed();
-//
-//        // Clone the query because we need a copy of the aggregator registration
-//        // Query bodyQuery = query.cloneQuery();
-//        Query bodyQuery = QueryTransformOps.shallowCopy(query);
-//        VarExprList proj = bodyQuery.getProject();
-//
-//        Comparator<Var> cmp = Comparator.comparing(Object::toString);
-//        if (bodyQuery.isConstructType()) {
-//            // XXX Use visible vars via algebra rather than mentioned vars of the query pattern?
-//            Set<Var> pvars = SetUtils.asSet(PatternVars.vars(bodyQuery.getQueryPattern()));
-//
-//            Template template = bodyQuery.getConstructTemplate();
-//            List<Quad> quads = template.getQuads();
-//            Set<Var> vars = new TreeSet<>(cmp);
-//            vars.addAll(QuadPatternUtils.getVarsMentioned(quads));
-//            Set<Var> effProj = Sets.intersection(vars, pvars);
-//
-//            bodyQuery.setQuerySelectType();
-//            proj.clear();
-//            effProj.forEach(proj::add);
-//        }
-//
-//        bodyQuery.setLimit(Query.NOLIMIT);
-//        bodyQuery.setOffset(Query.NOLIMIT);
-//        bodyQuery.setQuerySelectType();
-//
-//        // VarExprList baseProj = new VarExprList(proj);
-//        // Add the aggregator expressions to the projection:
-//        // Queries that only differ by projection of the group by expressions
-//        // only differ by the lehmer code
-//        if (bodyQuery.hasGroupBy()) {
-//            VarExprList vel = bodyQuery.getGroupBy();
-//            proj.addAll(vel);
-//        } else {
-//            bodyQuery.setQueryResultStar(true);
-//        }
-//
-//        // Ensure result variables are properly set
-//        bodyQuery.resetResultVars();
-//
-//        // Get the visible vars as a base for computing the lehmer value
-//        Op op = Algebra.compile(bodyQuery);
-//        Set<Var> visibleVars = OpVars.visibleVars(op);
-//
-//        Set<Var> nonAggVars = new TreeSet<>(cmp);
-//        Set<Var> aggVars = new TreeSet<>(cmp);
-//
-//        nonAggVars.addAll(getNonAggregateVars(bodyQuery));
-//        aggVars.addAll(proj.getVars());
-//        aggVars.removeAll(nonAggVars);
-//
-//        VarExprList newVel = new VarExprList();
-//        for (Var var : nonAggVars) {
-//            VarExprListUtils.add(newVel, var, proj.getExpr(var));
-//        }
-//        for (Var var : aggVars) {
-//            VarExprListUtils.add(newVel, var, proj.getExpr(var));
-//        }
-//        proj.clear();
-//        proj.addAll(newVel);
-//
-//        List<String> projStrs = new ArrayList<>();
-//        for (Var var : bodyQuery.getProjectVars()) {
-//            ExprVar ev = new ExprVar(var);
-//            Expr expr = proj.getExpr(var);
-//            Expr e = expr == null ? ev : new E_Equals(ev, expr);
-//
-//            String str = ExprUtils.fmtSPARQL(e);
-//            projStrs.add(str);
-//        }
-//
-//        Set<String> projSet = new TreeSet<>(projStrs);
-//        Hasher projHasher = projHashFn.newHasher();
-//        for(String item : projSet) {
-//            projHasher.putString(item, StandardCharsets.UTF_8);
-//        }
-//        HashCode projHashCode = projHasher.hash();
-//
-//        bodyQuery.resetResultVars();
-//
-//        String bodyStr = bodyQuery.toString();
-//
-//        HashCode bodyHashCode = bodyHashFn.hashString(bodyStr, StandardCharsets.UTF_8);
-//
-//        BigInteger projLehmerValue = Lehmer.lehmerValue(projStrs, Comparator.naturalOrder());
-//
-//        return new QueryHash(query, bodyQuery, bodyHashCode, projHashCode, projLehmerValue);
-//    }
 
     public static String str(HashCode hashCode) {
         return str(hashCode.asBytes());
@@ -767,14 +611,16 @@ public class QueryHash {
     public String toString() {
         Query query = getHarmonizedQuery();
         String sliceHash = query.hasOffset() ? "" + query.getOffset() : "";
-        sliceHash += query.hasLimit() ? "+" + query.getLimit() : "";
+
+        // Note: Originally sliceHash used '+' but this prevents shortening of URIs
+        sliceHash += query.hasLimit() ? "_" + query.getLimit() : "";
         String baseHash =
             str(getBodyHashCode()) + "/" +
             str(getGroupByHash().getHash()) + "/" +
             str(getHavingHash().getHash()) + "/" +
+            str(getOrderByHash().getHash()) + "/" +
             getQueryTypePrefix(harmonizedQuery) + "/" +
             str(getProjecHash().getHash()) + "/" +
-            str(getOrderByHash().getHash()) + "/" +
             str(getGroupByHash().getLehmer()) + "/" +
             str(getHavingHash().getLehmer()) + "/" +
             // Omit projection hash on ask queries
@@ -791,39 +637,8 @@ public class QueryHash {
             ;
         return baseHash + (sliceHash.isEmpty() ? "" : "/" + sliceHash);
 
+        // XXX Add a JSON representation with hashes for the individual parts.
         // return "QueryStringHashCode [Original Query:\n" + query + "BodyQuery:\n" + bodyQuery + ", bodyHash=" + getBodyHashStr() + ", projHash=" + getProjHashStr()
         //        + ", projLehmerValue=" + projLehmerValue + "]";
     }
-
-    public static void main(String[] args) {
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s ?p { ?s ?p ?o } LIMIT 10 OFFSET 100")));
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?s { ?s ?p ?o } LIMIT 10 OFFSET 100")));
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } LIMIT 10")));
-
-        if (true) {
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT DISTINCT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(QueryHash.createHash(QueryFactory.create("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-        }
-
-        if (false) {
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2")));
-            System.out.println(StringUtils.md5Hash("" + QueryFactory.create("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2")));
-        }
-
-        // System.out.println(QueryHash.createHash(QueryFactory.create("SELECT (?x AS ?y) { ?s ?p ?o } LIMIT 10 OFFSET 2")));
-        // Collection<String> items = Arrays.asList("d", "c", "b", "a");
-        // BigInteger value = Lehmer.lehmerValue(items, Comparator.naturalOrder());
-    }
-
 }
