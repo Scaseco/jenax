@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.util.exec.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -24,10 +25,12 @@ import org.slf4j.LoggerFactory;
 public class QueryExecutionUtils {
     private static final Logger logger = LoggerFactory.getLogger(QueryExecutionUtils.class);
 
+    @Deprecated
     public static Integer fetchInteger(QueryExecution qe, Var v) {
         return Optional.ofNullable(fetchNumber(qe, v)).map(Number::intValue).orElse(null);
     }
 
+    @Deprecated
     public static Long fetchLong(QueryExecution qe, Var v) {
         return Optional.ofNullable(fetchNumber(qe, v)).map(Number::longValue).orElse(null);
     }
@@ -41,6 +44,7 @@ public class QueryExecutionUtils {
      * @param v
      * @return
      */
+    @Deprecated
     public static Number fetchNumber(QueryExecution qe, Var v) {
         Number result;
 
@@ -61,6 +65,16 @@ public class QueryExecutionUtils {
         }
 
         return result;
+    }
+
+    /** Fetch a number, must not be null. */
+    public static Number fetchNumber(Function<? super Query, ? extends QueryExecution> qef, Query query, String v) {
+        Number r;
+        try (QueryExecution qe = qef.apply(query)) {
+            r = fetchNumber(qe, Var.alloc(v));
+            Objects.requireNonNull(r, "Number required.");
+        }
+        return r;
     }
 
     public static Optional<Node> fetchNode(Function<? super Query, ? extends QueryExecution> qef, Query query) {
