@@ -92,6 +92,10 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
+    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
+        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO, BnodeRewriteMode.FULL);
+    }
+
     public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate, BnodeRewriteMode rewriteMode) {
         return new RdfDataSourceWithBnodeRewrite(delegate, AUTO, rewriteMode);
     }

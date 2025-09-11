@@ -121,8 +121,12 @@ public class ExprTransformVirtualBnodeUris
 
     public enum BnodeRewriteMode {
         /* NONE */
+        /** Process bnode IRIs in the query but return conventional result sets. */
         LOOKUP_ONLY,
-        FULL /* */
+
+        /** Apply the processing of LOOKUP_ONLY. In addition,
+         * rewrite queries such that blank nodes in result sets are exposed as bnode IRIs. */
+        FULL
     }
 
     public ExprTransformVirtualBnodeUris(
