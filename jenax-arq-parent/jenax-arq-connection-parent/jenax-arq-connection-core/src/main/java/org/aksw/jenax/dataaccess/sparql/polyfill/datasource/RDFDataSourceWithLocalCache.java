@@ -57,10 +57,10 @@ import org.slf4j.LoggerFactory;
  *
  * SERVICE <cache:> { SERVICE <env:REMOTE> { GROUP-BY } }
  */
-public class RdfDataSourceWithLocalCache
+public class RDFDataSourceWithLocalCache
     extends RDFDataSourceWrapperBase<RDFDataSource>
 {
-    private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithLocalCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDFDataSourceWithLocalCache.class);
 
     public static final String REMOTE_IRI = "env://REMOTE";
     public static final Node REMOTE_NODE = NodeFactory.createURI(REMOTE_IRI);
@@ -85,12 +85,12 @@ public class RdfDataSourceWithLocalCache
         Query query = QueryFactory.create(queryStr);
 
         // RdfDataSourceWithLocalCache.createProxyDataset(RdfDataEngines.of(DatasetFactory.create()))
-        RdfDataSourceWithLocalCache dataSource = new RdfDataSourceWithLocalCache(RDFDataSources.of(DatasetFactory.create()));
+        RDFDataSourceWithLocalCache dataSource = new RDFDataSourceWithLocalCache(RDFDataSources.of(DatasetFactory.create()));
         Query rewritten = OpRewriteInjectCacheOps.rewriteQuery(query);
         System.out.println(rewritten);
     }
 
-    public RdfDataSourceWithLocalCache(RDFDataSource delegate) {
+    public RDFDataSourceWithLocalCache(RDFDataSource delegate) {
         super(delegate);
         proxyDataset = createProxyDataset(delegate);
     }

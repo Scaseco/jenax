@@ -5,7 +5,7 @@ import org.aksw.jenax.arq.util.query.QueryTransform;
 import org.aksw.jenax.arq.util.update.UpdateRequestTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceAdapter;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.link.query.LinkSparqlQueryTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
@@ -15,7 +15,7 @@ public class RDFLinkSourceTransforms {
 //    public static RDFLinkSourceTransform of(RDFLinkTransform transform) {
 //        return new RDFLinksourceT
 //    }
-    public static RDFLinkSourceTransform of(RdfDataSourceTransform transform) {
+    public static RDFLinkSourceTransform of(RDFDataSourceTransform transform) {
         return linkSource -> {
             RDFDataSource before = RDFDataSourceAdapter.adapt(linkSource);
             RDFDataSource after = transform.apply(before);

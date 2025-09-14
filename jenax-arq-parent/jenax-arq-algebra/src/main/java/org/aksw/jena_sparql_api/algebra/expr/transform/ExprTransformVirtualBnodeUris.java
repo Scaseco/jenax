@@ -355,6 +355,10 @@ public class ExprTransformVirtualBnodeUris
         return result;
     }
 
+    public static ExprTransformVirtualBnodeUris createTransformFromUdfModel(Model model, Collection<String> activeProfiles) {
+        return createTransformFromUdfModel(model, activeProfiles, BnodeRewriteMode.FULL);
+    }
+
     public static ExprTransformVirtualBnodeUris createTransformFromUdfModel(Model model, Collection<String> activeProfiles, BnodeRewriteMode rewriteMode) {
         Set<String> profiles = new HashSet<>(activeProfiles);
         Map<String, UserDefinedFunctionDefinition> map = UserDefinedFunctions.load(model, profiles);

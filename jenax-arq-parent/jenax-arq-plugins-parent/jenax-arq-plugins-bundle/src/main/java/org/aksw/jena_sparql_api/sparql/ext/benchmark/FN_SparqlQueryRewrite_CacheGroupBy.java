@@ -2,7 +2,7 @@ package org.aksw.jena_sparql_api.sparql.ext.benchmark;
 
 import java.util.List;
 
-import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalCache;
+import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RDFDataSourceWithLocalCache;
 import org.apache.jena.atlas.lib.Lib;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
@@ -53,7 +53,7 @@ public class FN_SparqlQueryRewrite_CacheGroupBy
         String queryStr = queryNode.getLiteralLexicalForm();
         Query query = QueryFactory.create(queryStr);
 
-        Query rewrittenQuery = RdfDataSourceWithLocalCache.TransformInjectCacheSyntax.rewriteQuery(query);
+        Query rewrittenQuery = RDFDataSourceWithLocalCache.TransformInjectCacheSyntax.rewriteQuery(query);
         String str = rewrittenQuery.toString();
         NodeValue result = NodeValue.makeString(str);
         return result;

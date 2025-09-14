@@ -22,45 +22,45 @@ public class RdfDataSourceTransforms {
         return result;
     }
 
-    public static RdfDataSourceTransform of(RDFLinkSourceTransform transform) {
+    public static RDFDataSourceTransform of(RDFLinkSourceTransform transform) {
         return dataSource -> applyLinkSourceTransform(dataSource, transform);
     }
 
-    public static RdfDataSourceTransform of(RDFLinkTransform transform) {
+    public static RDFDataSourceTransform of(RDFLinkTransform transform) {
         return of(new RDFLinkSourceTransformFromLinkTransform(transform));
     }
 
-    public static RdfDataSourceTransform of(LinkSparqlQueryTransform transform) {
+    public static RDFDataSourceTransform of(LinkSparqlQueryTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(QueryTransform transform) {
+    public static RDFDataSourceTransform of(QueryTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(QueryExecTransform transform) {
+    public static RDFDataSourceTransform of(QueryExecTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(UpdateRequestTransform transform) {
+    public static RDFDataSourceTransform of(UpdateRequestTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(Rewrite transform) {
+    public static RDFDataSourceTransform of(Rewrite transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(SparqlStmtTransform transform) {
+    public static RDFDataSourceTransform of(SparqlStmtTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }
 
-    public static RdfDataSourceTransform of(ExprTransform transform) {
+    public static RDFDataSourceTransform of(ExprTransform transform) {
         RDFLinkSourceTransform xform = RDFLinkSourceTransforms.of(transform);
         return of(xform);
     }

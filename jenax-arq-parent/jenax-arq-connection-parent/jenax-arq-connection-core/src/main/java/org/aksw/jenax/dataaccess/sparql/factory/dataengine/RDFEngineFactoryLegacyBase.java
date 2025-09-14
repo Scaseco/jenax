@@ -28,7 +28,7 @@ public abstract class RDFEngineFactoryLegacyBase
     private static final Logger logger = LoggerFactory.getLogger(RDFEngineFactoryLegacyBase.class);
 
     @Override
-    public RDFEngineBuilder<?> newEngineBuilder() {
+    public RDFEngineBuilder<?> newBuilder() {
         return new RdfDataEngineBuilderBase() {
             @Override
             public RDFEngine build() throws Exception {

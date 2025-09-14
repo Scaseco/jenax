@@ -17,6 +17,7 @@
 	<modules>
 		<module>jenax-arq-connection-core</module>
 		<module>jenax-arq-connection-extra</module>
+		<module>jenax-arq-connection-tdb2</module>
 		<module>jenax-arq-connection-virtuoso</module>
 		<!-- <module>jenax-arq-connection-mods</module> -->
 		<module>jenax-arq-connection-qlever</module>

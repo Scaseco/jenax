@@ -44,7 +44,7 @@ public class TestRDFEngineAPI {
         RDFEngineFactory engineFactory = registry.getEngineFactory("test-mem");
 
         // Build a concrete instance of the engine and start it.
-        RDFEngine engine = engineFactory.newEngineBuilder()
+        RDFEngine engine = engineFactory.newBuilder()
             // Delete all generated database files upon closing the engine
             // This is a no-op for in-memory engines
             // In is the responsibility of the engine's driver to implement this feature.

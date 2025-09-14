@@ -20,7 +20,7 @@ public class DecoratedRDFDataSource
         // return result;
     }
 
-    public DecoratedRDFDataSource decorate(RdfDataSourceTransform transform) {
+    public DecoratedRDFDataSource decorate(RDFDataSourceTransform transform) {
         RDFDataSource oldDelegate = delegate;
         RDFDataSource newDelegate = transform.apply(oldDelegate);
         this.delegate = newDelegate;
@@ -28,22 +28,22 @@ public class DecoratedRDFDataSource
     }
 
     public DecoratedRDFDataSource decorate(RDFLinkTransform transform) {
-        RdfDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
+        RDFDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
         return decorate(tmp);
     }
 
     public DecoratedRDFDataSource decorate(SparqlStmtTransform transform) {
-        RdfDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
+        RDFDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
         return decorate(tmp);
     }
 
     public DecoratedRDFDataSource decorate(Rewrite transform) {
-        RdfDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
+        RDFDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
         return decorate(tmp);
     }
 
     public DecoratedRDFDataSource decorate(ExprTransform transform) {
-        RdfDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
+        RDFDataSourceTransform tmp = RdfDataSourceTransforms.of(transform);
         return decorate(tmp);
     }
 }

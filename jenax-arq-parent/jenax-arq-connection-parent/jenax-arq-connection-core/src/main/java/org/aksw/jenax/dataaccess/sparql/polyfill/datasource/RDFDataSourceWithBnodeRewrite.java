@@ -8,6 +8,7 @@ import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnode
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris.BnodeRewriteMode;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
 import org.aksw.jenax.stmt.core.SparqlStmtMgr;
 import org.apache.jena.rdf.model.Model;
@@ -18,10 +19,10 @@ import org.slf4j.LoggerFactory;
 
 
 /** Blank node profile probing is only activated with if the given profile name is set to "auto". */
-public class RdfDataSourceWithBnodeRewrite
+public class RDFDataSourceWithBnodeRewrite
     extends RDFDataSourceWrapperBase<RDFDataSource>
 {
-    private static final Logger logger = LoggerFactory.getLogger(RdfDataSourceWithBnodeRewrite.class);
+    private static final Logger logger = LoggerFactory.getLogger(RDFDataSourceWithBnodeRewrite.class);
 
     public static final String AUTO = "auto";
 
@@ -32,7 +33,7 @@ public class RdfDataSourceWithBnodeRewrite
     // null = not yet initialized, empty = no suitable transformer found
     protected Optional<ExprTransformVirtualBnodeUris> transformer = null;
 
-    public RdfDataSourceWithBnodeRewrite(RDFDataSource delegate, String givenProfileName, BnodeRewriteMode rewriteMode) {
+    public RDFDataSourceWithBnodeRewrite(RDFDataSource delegate, String givenProfileName, BnodeRewriteMode rewriteMode) {
         super(delegate);
         this.givenProfileName = givenProfileName;
         this.derivedProfileName = null;
@@ -92,11 +93,15 @@ public class RdfDataSourceWithBnodeRewrite
         return result;
     }
 
-    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
-        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO, BnodeRewriteMode.FULL);
+    public static RDFDataSourceTransform asTransform() {
+        return ds -> wrapWithAutoBnodeProfileDetection(ds);
     }
 
-    public static RdfDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate, BnodeRewriteMode rewriteMode) {
-        return new RdfDataSourceWithBnodeRewrite(delegate, AUTO, rewriteMode);
+    public static RDFDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate) {
+        return new RDFDataSourceWithBnodeRewrite(delegate, AUTO, BnodeRewriteMode.FULL);
+    }
+
+    public static RDFDataSourceWithBnodeRewrite wrapWithAutoBnodeProfileDetection(RDFDataSource delegate, BnodeRewriteMode rewriteMode) {
+        return new RDFDataSourceWithBnodeRewrite(delegate, AUTO, rewriteMode);
     }
 }

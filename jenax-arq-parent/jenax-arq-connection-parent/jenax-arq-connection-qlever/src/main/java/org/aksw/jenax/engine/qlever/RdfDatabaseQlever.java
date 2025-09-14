@@ -71,7 +71,7 @@ public class RdfDatabaseQlever
         List<Path> result = new ArrayList<>();
         FileSets.accumulateIfExists(result, path.resolve(".stxxl"));
         // TODO Add .stxxl file
-        FileSets.accumulate(result, path, indexName + ".*");
+        FileSets.accumulateFlat(result, path, indexName + ".*");
         return result;
     }
 }

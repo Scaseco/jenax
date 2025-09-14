@@ -8,7 +8,7 @@ import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderTra
 import org.aksw.jenax.dataaccess.sparql.builder.exec.update.UpdateExecBuilderWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapperBase;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.exec.query.QueryExecWrapperBase;
 import org.aksw.jenax.dataaccess.sparql.exec.update.UpdateExecWrapperBase;
@@ -29,7 +29,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  */
 public class RdfDataSourceTransforms {
 
-    public static RdfDataSourceTransform decorateWithBuilderTransform(QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
+    public static RDFDataSourceTransform decorateWithBuilderTransform(QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
         return rdfDataSource -> new RDFDataSourceWrapperBase<>(rdfDataSource) {
             @Override
             public RDFConnection getConnection() {
@@ -43,7 +43,7 @@ public class RdfDataSourceTransforms {
     }
 
     /** Decorate a data source such that execution will fail. */
-    public static RdfDataSourceTransform alwaysFail() {
+    public static RDFDataSourceTransform alwaysFail() {
         // XXX Perhaps also wrap the LinkDatasetGraph
         return base -> RDFDataSources.decorate(base, decorateWithBuilderTransform(
             qeb -> new QueryExecBuilderWrapperBase(qeb) {
@@ -70,17 +70,17 @@ public class RdfDataSourceTransforms {
     }
 
     /** Cache with unlimited size */
-    public static RdfDataSourceTransform simpleCache() {
+    public static RDFDataSourceTransform simpleCache() {
         Cache<Object, Object> cache = Caffeine.newBuilder().recordStats().build();
         return ds -> new RdfDataSourceWithSimpleCache(ds, cache);
     }
 
-    public static RdfDataSourceTransform simpleCache(long maxSize) {
+    public static RDFDataSourceTransform simpleCache(long maxSize) {
         Cache<Object, Object> cache = Caffeine.newBuilder().maximumSize(maxSize).recordStats().build();
         return ds -> new RdfDataSourceWithSimpleCache(ds, cache);
     }
 
-    public static RdfDataSourceTransform macros(Map<String, UserDefinedFunctionDefinition> udfRegistry) {
+    public static RDFDataSourceTransform macros(Map<String, UserDefinedFunctionDefinition> udfRegistry) {
         return org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms.of(
             (RDFLinkSource linkSource) -> RDFLinkSources.wrapWithMacros(linkSource, udfRegistry));
         // return dataSource -> RdfDataSources.wrapWithMacros(dataSource, udfRegistry);

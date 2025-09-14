@@ -53,7 +53,7 @@ public class TestQleverSystem {
             // pre-created database. An access token is needed for updates.
             // XXX Perhaps generate a random token if none specified to make updates work out of the box?
             RDFEngineFactory engineFactory = registry.getEngineFactory(systemName);
-            try (RDFEngine engine = engineFactory.newEngineBuilder()
+            try (RDFEngine engine = engineFactory.newBuilder()
                 .setDatabase(database)
                 .setProperty("accessToken", "abcde")
                 .setAutoDeleteIfCreated(true)

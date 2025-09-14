@@ -68,7 +68,7 @@ import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionBuilder;
 import org.aksw.jenax.dataaccess.sparql.connection.common.RDFConnectionUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceWrapper;
-import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransform;
+import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSourceTransform;
 import org.aksw.jenax.dataaccess.sparql.datasource.RdfDataSourceTransforms;
 import org.aksw.jenax.dataaccess.sparql.pod.RDFDataPod;
 import org.aksw.jenax.dataaccess.sparql.pod.RDFDataPods;
@@ -780,7 +780,7 @@ public class OpExecutorDefault
 
         for (Rewrite rewrite : op.getRewrites()) {
             String javaClass = rewrite.getJavaClass();
-            RdfDataSourceTransform dataSourceTransform;
+            RDFDataSourceTransform dataSourceTransform;
             try {
                 dataSourceTransform = createTransformRdfDataSource(javaClass);
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
@@ -810,13 +810,13 @@ public class OpExecutorDefault
         return result;
     }
 
-    public RdfDataSourceTransform createTransformRdfDataSource(String className) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+    public RDFDataSourceTransform createTransformRdfDataSource(String className) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
         Class<?> cls = Class.forName(className);
         return createTransformRdfDataSource(cls);
     }
 
-    public RdfDataSourceTransform createTransformRdfDataSource(Class<?> cls) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        RdfDataSourceTransform result;
+    public RDFDataSourceTransform createTransformRdfDataSource(Class<?> cls) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        RDFDataSourceTransform result;
 
         if (Transform.class.isAssignableFrom(cls)) {
             Supplier<Transform> opTransformSupplier = ClassUtils.supplierFromCtor(cls, true);
@@ -848,10 +848,10 @@ public class OpExecutorDefault
                 RDFDataSource r = (RDFDataSource)inst;
                 return r;
             };
-        } else if (RdfDataSourceTransform.class.isAssignableFrom(cls)) {
+        } else if (RDFDataSourceTransform.class.isAssignableFrom(cls)) {
             Constructor<?> ctor = cls.getConstructor();
             Object inst = ctor.newInstance();
-            result = (RdfDataSourceTransform)inst;
+            result = (RDFDataSourceTransform)inst;
         } else {
             throw new RuntimeException("Unsupported transformation type: " + cls);
         }

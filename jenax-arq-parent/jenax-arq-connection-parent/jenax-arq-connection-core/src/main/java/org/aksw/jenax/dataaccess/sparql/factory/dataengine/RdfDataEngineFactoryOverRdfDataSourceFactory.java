@@ -19,7 +19,7 @@ public class RdfDataEngineFactoryOverRdfDataSourceFactory
     }
 
     @Override
-    public RDFEngineBuilder<?> newEngineBuilder() {
+    public RDFEngineBuilder<?> newBuilder() {
         return new RdfDataEngineBuilderBase() {
             @Override
             public RDFEngine build() throws Exception {

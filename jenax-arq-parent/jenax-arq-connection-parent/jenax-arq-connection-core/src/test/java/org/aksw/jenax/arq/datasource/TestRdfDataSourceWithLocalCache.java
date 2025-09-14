@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 
 import org.aksw.commons.util.benchmark.BenchmarkUtils;
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
-import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithLocalCache;
+import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RDFDataSourceWithLocalCache;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -21,7 +21,7 @@ public class TestRdfDataSourceWithLocalCache {
                 .destination("http://localhost:8642/sparql")
                 .build();
 
-        RDFDataSource ds = new RdfDataSourceWithLocalCache(base);
+        RDFDataSource ds = new RDFDataSourceWithLocalCache(base);
 
         // String str = "SELECT (COUNT(*) AS ?c) { SELECT * { ?s ?p ?o } LIMIT 5000000 }";
         String queryStr = "SELECT  DISTINCT ?v_1\n"
