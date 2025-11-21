@@ -5,7 +5,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: {
-    graphql: './src/graphql/mui/index.js'
+    graphql: './src/graphql/mui/index.js',
+    yasgui: './src/yasgui/index.js'
   },
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -36,7 +37,12 @@ module.exports = {
             presets: ['@babel/preset-env'], // Use preset-env for ES6+ features
           },
         },
-      }
+      },
+      {
+        test: /\.scss$/,
+        exclude: /node_modules/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
     ]
   },
   plugins: [
@@ -48,13 +54,17 @@ module.exports = {
         { from: './src/snorql', to: 'snorql' },
         { from: './src/view', to: 'view' },
         { from: './src/graph-explorer', to: 'graph-explorer' },
-        { from: './src/yasgui', to: 'yasgui' },
       ]
     }),
     new HtmlWebpackPlugin({
       template: './src/graphql/mui/index.html',
       filename: 'graphql/mui/index.html',
       chunks: ['graphql']
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/yasgui/index.html',
+      filename: 'yasgui/index.html',
+      chunks: ['yasgui']
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',

@@ -1,0 +1,9 @@
+@use '@zazuko/yasgui/build/yasgui.min.css';
+@use 'leaflet/dist/leaflet.css';
+.yasgui .autocompleteWrapper {
+    display: none !important;
+}
+
+.yasguiclass {
+    color: pink;
+}

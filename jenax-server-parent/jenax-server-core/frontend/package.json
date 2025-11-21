@@ -4,9 +4,13 @@
   },
   "dependencies": {
     "@codemirror/lang-json": "^6.0.1",
+    "@zazuko/yasgui": "^4.6.0",
     "cm6-graphql": "^0.1.1",
     "codemirror": "^6.0.1",
-    "graphql": "^16.9.0"
+    "graphql": "^16.9.0",
+    "sass": "^1.94.2",
+    "sass-loader": "^16.0.6",
+    "yasgui-geo-tg": "Thib-G/yasgui-geo-tg#49091f8"
   },
   "resolutions": {
     "@codemirror/state": "6.2.0",
