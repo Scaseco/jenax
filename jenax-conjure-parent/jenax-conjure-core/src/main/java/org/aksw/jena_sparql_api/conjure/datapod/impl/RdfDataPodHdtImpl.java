@@ -4,13 +4,11 @@ import org.aksw.commons.util.ref.Ref;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.io.hdt.HDTHeaderGraph;
 import org.aksw.jenax.arq.util.triple.GraphUtils;
-import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdtjena.HDTGraph;
 
@@ -66,7 +64,7 @@ public class RdfDataPodHdtImpl
 
         Model model = ModelFactory.createModelForGraph(graph);
 
-        RDFConnection result = RDFConnectionFactory.connect(DatasetFactory.wrap(model));
+        RDFConnection result = RDFConnection.connect(DatasetFactory.wrap(model));
         return result;
 
     }

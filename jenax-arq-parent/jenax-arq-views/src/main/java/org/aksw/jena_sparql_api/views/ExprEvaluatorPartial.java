@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.expr.E_Conditional;
+import org.apache.jena.sparql.expr.E_If;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.expr.ExprNotComparableException;
@@ -80,8 +80,8 @@ public class ExprEvaluatorPartial
 
         Expr newExpr;
 
-        if(fn instanceof E_Conditional) {
-            E_Conditional cond = (E_Conditional)fn;
+        if(fn instanceof E_If) {
+            E_If cond = (E_If)fn;
 
             Expr a = eval(cond.getArg1(), binding);
             if(a.equals(SparqlifyConstants.nvTypeError)) {
@@ -91,7 +91,7 @@ public class ExprEvaluatorPartial
                 Expr b = eval(cond.getArg2(), binding);
                 Expr c = eval(cond.getArg3(), binding);
 
-                newExpr = new E_Conditional(a, b, c);
+                newExpr = new E_If(a, b, c);
             }
         } else {
             List<Expr> evaledArgs = new ArrayList<Expr>();

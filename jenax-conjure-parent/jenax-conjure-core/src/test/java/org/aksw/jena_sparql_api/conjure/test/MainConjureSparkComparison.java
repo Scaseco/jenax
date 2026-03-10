@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.google.common.base.Stopwatch;
+
 import org.aksw.dcat.jena.domain.api.DcatUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
@@ -32,14 +34,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
 
 public class MainConjureSparkComparison {
     private static final Logger logger = LoggerFactory.getLogger(MainConjureSparkComparison.class);
@@ -72,12 +71,11 @@ public class MainConjureSparkComparison {
 
 
         List<Resource> dcatRecords;
-        try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.create(catalog))) {
+        try(RDFConnection conn = RDFConnection.connect(DatasetFactory.create(catalog))) {
             dcatRecords = SparqlRx.execConstructGrouped(conn::query, dcatQuery, Vars.a)
                 .map(RDFNode::asResource)
                 .toList().blockingGet();
         }
-
 
         Model model = ModelFactory.createDefaultModel();
 

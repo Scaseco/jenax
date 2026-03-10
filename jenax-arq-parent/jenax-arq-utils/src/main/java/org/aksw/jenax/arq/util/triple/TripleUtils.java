@@ -27,7 +27,6 @@ import org.apache.jena.sparql.core.mem.TupleSlot;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.path.P_Path0;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.NodeCmp;
 
 public class TripleUtils {
@@ -53,7 +52,7 @@ public class TripleUtils {
     }
 
     public static boolean isValidAsStatement(Triple t) {
-        return ModelUtils.isValidAsStatement(t.getSubject(), t.getPredicate(), t.getObject());
+        return org.apache.jena.sparql.util.NodeUtils.isValidAsRDF(t.getSubject(), t.getPredicate(), t.getObject());
     }
 
     /** Access a triple's component by a zero-based index in order s, p, o.

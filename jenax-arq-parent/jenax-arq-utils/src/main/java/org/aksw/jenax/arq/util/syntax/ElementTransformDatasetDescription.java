@@ -189,7 +189,7 @@ public class ElementTransformDatasetDescription
                             } else {
                                 // condition semantics
                                 NodeValue value = evaled.getConstant();
-                                boolean isTrue = XSDFuncOp.booleanEffectiveValue(value);
+                                boolean isTrue = XSDFuncOp.effectiveBooleanValue(value);
                                 if (isTrue) {
                                     result = NodeValue.TRUE;
                                     break;

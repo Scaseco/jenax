@@ -179,10 +179,10 @@ public class JenaXmlUtils {
 
         if (xmlNode instanceof Attr) {
             Attr attr = (Attr)xmlNode;
-            result = NodeFactory.createLiteral(attr.getValue());
+            result = NodeFactory.createLiteralString(attr.getValue());
         } else if (xmlNode instanceof Text) {
             Text text = (Text)xmlNode;
-            result = NodeFactory.createLiteral(text.getData());
+            result = NodeFactory.createLiteralString(text.getData());
         } else {
             result = NodeFactory.createLiteralByValue(xmlNode, RDFDatatypeXml.get());
         }

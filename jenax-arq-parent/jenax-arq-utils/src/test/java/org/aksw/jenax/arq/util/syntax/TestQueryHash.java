@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.syntax;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,17 +13,17 @@ import org.junit.Test;
 public class TestQueryHash {
     @Test
     public void test01() {
-        Map<String, QueryHash> hashes = Map.of(
-            "h1", QueryHash.createHash("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"),
-            "h2", QueryHash.createHash("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2"),
-            "h3", QueryHash.createHash("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"),
-            "h4", QueryHash.createHash("SELECT DISTINCT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"),
+        Map<String, QueryHash> hashes = new LinkedHashMap<>();
+        hashes.put("h1", QueryHash.createHash("SELECT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"));
+        hashes.put("h2", QueryHash.createHash("SELECT COUNT(?y) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2"));
+        hashes.put("h3", QueryHash.createHash("SELECT ?a COUNT(?b) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"));
+        hashes.put("h4", QueryHash.createHash("SELECT DISTINCT ?s COUNT(?p) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"));
 
-            "h5", QueryHash.createHash("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"),
-            "h6", QueryHash.createHash("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2"),
-            "h7", QueryHash.createHash("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"),
+        hashes.put("h5", QueryHash.createHash("SELECT ?s (COUNT(?p) AS ?count) FROM <http://dbpedia.org/sparql> { ?s ?p ?o } GROUP BY ?s STR(?o) ORDER BY DESC(?s) DESC(STR(?o)) LIMIT 10 OFFSET 2"));
+        hashes.put("h6", QueryHash.createHash("SELECT (COUNT(?y) AS ?count) ?x FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?x ?y ?z } GROUP BY ?x STR(?z) ORDER BY DESC(STR(?z)) DESC(?x) LIMIT 10 OFFSET 2"));
+        hashes.put("h7", QueryHash.createHash("SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"));
 
-            "h8", QueryHash.createHash("PREFIX eg: <http://www.example.org> SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"));
+        hashes.put("h8", QueryHash.createHash("PREFIX eg: <http://www.example.org> SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"));
 
         List<Entry<String, QueryHash>> entries = new ArrayList<>(hashes.entrySet());
         Assert.assertEquals(8, entries.size());
@@ -33,7 +34,7 @@ public class TestQueryHash {
         for (Entry<String, QueryHash> entry : entries) {
             String hashStr = entry.getValue().toString();
             String actualPrefix = hashStr.substring(0, expectedPrefix.length());
-            // System.err.println(hashStr);
+            System.err.println(hashStr);
             Assert.assertEquals(expectedPrefix, actualPrefix);
         }
     }

@@ -102,7 +102,7 @@ public class FN_Benchmark
 
         String queryStr = queryNode.getLiteralLexicalForm();
         Query query = QueryFactory.create(queryStr);
-        query.setResultVars();
+        query.resetResultVars();
         Op op = Algebra.compile(query);
         OpService opService = new OpService(serviceNode, op, true);
         List<String> vars = query.getResultVars();

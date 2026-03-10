@@ -21,6 +21,7 @@ import org.aksw.jenax.stmt.core.SparqlStmtUpdate;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.apache.jena.atlas.web.AcceptList;
 import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.impl.GraphPlain;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryExecution;
@@ -312,13 +313,13 @@ public abstract class SparqlEndpointBase {
                                 qe.execConstructQuads().forEachRemaining(dsg::add);
                                 writerBuilder.source(dsg);
                             } else { // if (sr.isTriples()) {
-                                Graph graph = GraphFactory.createPlainGraph();
+                                Graph graph = GraphFactory.createDefaultGraph();
                                 // sr.getTriples().forEachRemaining(graph::add);
                                 qe.execConstructTriples().forEachRemaining(graph::add);
                                 writerBuilder.source(graph);
                             }
                         } else if (parsedQuery.isDescribeType()) {
-                            Graph graph = GraphFactory.createPlainGraph();
+                            Graph graph = GraphFactory.createDefaultGraph();
                             // sr.getTriples().forEachRemaining(graph::add);
                             qe.execDescribeTriples().forEachRemaining(graph::add);
                             writerBuilder.source(graph);

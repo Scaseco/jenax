@@ -54,7 +54,7 @@ public class QueryExecutionFactoryDataset
     @Override
     public QueryExecution createQueryExecution(Query query) {
         // Copied from internals of jena's QueryExecutionFactory.create(query, dataset);
-        query.setResultVars() ;
+        query.resetResultVars() ;
         if ( context == null )
             context = ARQ.getContext();  // .copy done in QueryExecutionBase -> Context.setupContext.
         DatasetGraph dsg = null ;

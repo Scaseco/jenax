@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
+
 import org.aksw.commons.rx.util.FlowableEx;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowAssign;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowGroupBy;
@@ -51,8 +53,6 @@ import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
-import com.google.common.base.Preconditions;
-
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
 import io.reactivex.rxjava3.core.Maybe;
@@ -87,14 +87,14 @@ public class QueryFlowOps
 
 
     public static FlowableTransformer<Binding, Binding> createMapperBindings(Query query) {
-    	Op op = Algebra.compile(query);
-    	return createMapperBindings(op);
+        Op op = Algebra.compile(query);
+        return createMapperBindings(op);
     }
 
     /**
      * Evaluates the given algebra for each input binding individually.
      * Note that this does not allow for aggregation over the input bindings!
-     * 
+     *
      * @param op
      * @return
      */
@@ -102,7 +102,7 @@ public class QueryFlowOps
         return upstream -> {
             DatasetGraph ds = DatasetGraphFactory.create();
             Context cxt = ARQ.getContext().copy();
-            ExecutionContext execCxt = new ExecutionContext(cxt, ds.getDefaultGraph(), ds, QC.getFactory(cxt));
+            ExecutionContext execCxt = ExecutionContext.create(ds, cxt); // .getDefaultGraph(), ds, QC.getFactory(cxt));
 
             return upstream.flatMap(binding -> FlowableEx.fromIteratorSupplier(
                     () -> QC.execute(op, binding, execCxt), QueryIterator::close));
@@ -137,7 +137,7 @@ public class QueryFlowOps
     public static ExecutionContext createExecutionContextDefault() {
         Context context = ARQ.getContext().copy();
         context.set(ARQConstants.sysCurrentTime, NodeFactoryExtra.nowAsDateTime());
-        ExecutionContext result = new ExecutionContext(context, null, null, null);
+        ExecutionContext result = ExecutionContext.create(context);
         return result;
     }
 

@@ -15,7 +15,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ResultSetMgr;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.resultset.ResultSetCompare;
+import org.apache.jena.sparql.resultset.ResultsCompare;
 
 // TODO Move this class to a better place - e.g. jena-sparql-api-utils
 public class DatasetCmp {
@@ -50,8 +50,8 @@ public class DatasetCmp {
             ResultSetRewindable rsb = ResultSetFactory.copyResults(qeb.execSelect());
 
             result = compareByValue
-                    ? ResultSetCompare.equalsByValue(rsa, rsb)
-                    : ResultSetCompare.equalsByTerm(rsa, rsb);
+                    ? ResultsCompare.equalsByValue(rsa, rsb)
+                    : ResultsCompare.equalsByTerm(rsa, rsb);
 
             if (!result) {
                 rsa.reset();

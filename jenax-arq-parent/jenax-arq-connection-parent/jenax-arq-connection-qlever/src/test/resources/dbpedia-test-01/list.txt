@@ -1,0 +1,12 @@
+commons.wikimedia.org.ttl.gz
+dbpedia-io-dbproperty.ttl.gz
+dbpedia-io-ontology-description+alias.ttl.gz
+dbpedia-io-ontology.ttl.gz
+dbpedia-io-ontology-wikipageUsesTemplate.ttl.gz
+dbpedia-io-rdfslabel.ttl.gz
+dbpedia-io-rdftype.ttl.gz
+dbpedia-io-remaining.ttl.gz
+dbpedia-io-sameAs.ttl.gz
+dbpedia-io-wdproperty.ttl.gz
+other-domains-in-subject.ttl.gz
+

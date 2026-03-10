@@ -14,7 +14,7 @@ public class RdfTermUtils {
             result = RdfTermType.LITERAL;
         } else if (node.isBlank()) {
             result = RdfTermType.BNODE;
-        } else if (node.isNodeTriple()) {
+        } else if (node.isTripleTerm()) {
             result = RdfTermType.TRIPLE;
         } else if (node.isVariable()) {
             result = RdfTermType.VARIABLE;

@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Strings;
+
 import org.aksw.commons.rx.op.FlowableOperatorCollapseRuns;
 import org.aksw.commons.util.stream.CollapseRunsSpec;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
@@ -20,10 +22,8 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
-
-import com.google.common.base.Strings;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -62,7 +62,7 @@ public class FlowOfRdfNodesInDatasetsOps {
         Function<? super SparqlQueryConnection, Collection<List<Node>>> mapper = ResultSetMappers.createTupleMapper(nodeSelector);
 
         return dataset -> {
-            try(SparqlQueryConnection conn = RDFConnectionFactory.connect(dataset)) {
+            try(SparqlQueryConnection conn = RDFConnection.connect(dataset)) {
                 Collection<List<Node>> tuples = mapper.apply(conn);
 
                 Set<GraphNameAndNode> gan = tuples.stream()
@@ -155,7 +155,7 @@ public class FlowOfRdfNodesInDatasetsOps {
             effectiveKeyQuery = fallback;
         }
 
-        Function<? super SparqlQueryConnection, Node> result = ResultSetMappers.createNodeMapper(effectiveKeyQuery, NodeFactory.createLiteral(""));
+        Function<? super SparqlQueryConnection, Node> result = ResultSetMappers.createNodeMapper(effectiveKeyQuery, NodeFactory.createLiteralString(""));
         return result;
     }
 

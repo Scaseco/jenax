@@ -9,9 +9,15 @@ public abstract class ProviderDockerBase<T>
 {
     protected String prefix;
 
+    public static record ImageAndTag(String imageName, String tag) {}
+
     public ProviderDockerBase(String prefix) {
         super();
         this.prefix = Objects.requireNonNull(prefix);
+    }
+
+    public static void main(String[] args) {
+
     }
 
     @Override
@@ -29,10 +35,14 @@ public abstract class ProviderDockerBase<T>
                 // nothing to do.
             } else if (suffix.startsWith(":")) {
                 suffix = suffix.substring(1);
-                String[] tagAndImage = suffix.split(":", 2);
-                tag = tagAndImage[0];
-                image = tagAndImage.length >= 2 ? tagAndImage[1] : null;
-                // TODO WARN if more than 2 components.
+                String[] parts = suffix.split(":", 2);
+                if (parts.length == 1) {
+                    tag = parts[0];
+                } else {
+                    image = parts[0];
+                    tag = parts[1];
+                }
+                // XXX Could warn on invalid chars in image or tag name.
                 isAccepted = true;
             } else {
                 // rejected.
@@ -45,7 +55,6 @@ public abstract class ProviderDockerBase<T>
 
         return result;
     }
-
 
     protected abstract T provide(String imageName, String tag);
 }

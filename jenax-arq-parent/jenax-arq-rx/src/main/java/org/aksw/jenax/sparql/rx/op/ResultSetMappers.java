@@ -5,14 +5,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import com.google.common.collect.Iterables;
+
 import org.aksw.jenax.arq.util.binding.CollectionFromTable;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
-import com.google.common.collect.Iterables;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.TransformUnionQuery;
@@ -32,7 +33,7 @@ public class ResultSetMappers {
     public static <T> Function<Dataset, T> wrapForDataset(Function<? super SparqlQueryConnection, T> fn) {
         return dataset -> {
             T result;
-            try(SparqlQueryConnection conn = RDFConnectionFactory.connect(dataset)) {
+            try(SparqlQueryConnection conn = RDFConnection.connect(dataset)) {
                 result = fn.apply(conn);
             }
             return result;

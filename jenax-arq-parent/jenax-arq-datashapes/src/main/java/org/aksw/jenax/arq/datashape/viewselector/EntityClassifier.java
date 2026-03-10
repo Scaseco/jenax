@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
+
 import org.aksw.jena_sparql_api.algebra.expr.transform.ExprTransformVirtualBnodeUris;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.rx.entity.engine.EntityQueryRx;
@@ -51,7 +53,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.ARQConstants;
@@ -74,8 +76,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.shacl.model.SHFactory;
 import org.topbraid.shacl.vocabulary.SH;
-
-import com.google.common.collect.Lists;
 
 
 
@@ -367,7 +367,7 @@ public class EntityClassifier {
 
 
         Model model = ModelFactory.createModelForGraph(graph);
-        SparqlQueryConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model));
+        SparqlQueryConnection conn = RDFConnection.connect(DatasetFactory.wrap(model));
 
         Query concept = QueryFactory.create("SELECT DISTINCT ?s { ?s ?p ?o }");
 

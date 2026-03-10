@@ -1,17 +1,27 @@
 package org.aksw.jenax.arq.fromasfilter;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import org.aksw.commons.util.exception.FinallyRunAll;
+import com.google.common.collect.Iterators;
 import com.google.common.io.MoreFiles;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import org.aksw.commons.util.exception.FinallyRunAll;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
@@ -19,14 +29,10 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.system.AutoTxn;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.collect.Iterators;
+import org.apache.jena.update.UpdateExecution;
 
 public class TestDatasetAssemblerFromAsFilter {
 
@@ -42,6 +48,19 @@ public class TestDatasetAssemblerFromAsFilter {
     @Test
     public void test02() {
         runTest("CONSTRUCT { GRAPH ?g { ?s ?p ?o } } WHERE { { SELECT * { GRAPH ?g { ?s ?p ?o } } LIMIT 10 } }", 4);
+    }
+
+    @Test
+    public void testUpdate01() {
+        long beforeSize, afterSize;
+        try (AutoTxn txn = Txn.autoTxn(dataset, ReadWrite.WRITE)) {
+            beforeSize = dataset.getDefaultModel().size();
+            UpdateExecution.dataset(dataset)
+                .update("WITH <urn:example:g1> DELETE { ?s ?p ?o } INSERT { ?s ?p ?o } WHERE { ?s ?p ?o . OPTIONAL { GRAPH <urn:foo> { ?s <urn:bar> ?x } } }")
+                .execute();
+            afterSize = dataset.getDefaultModel().size();
+        }
+        assertEquals(beforeSize, afterSize);
     }
 
     public void runTest(String queryStr, int expectedResult) {

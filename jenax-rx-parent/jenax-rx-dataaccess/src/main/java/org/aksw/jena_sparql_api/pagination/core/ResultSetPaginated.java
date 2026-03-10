@@ -1,7 +1,6 @@
 package org.aksw.jena_sparql_api.pagination.core;
 
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,7 +10,7 @@ import org.apache.jena.atlas.lib.Closeable;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetCloseable;
+import org.apache.jena.riot.resultset.ResultSetOnClose;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
 import org.slf4j.Logger;
@@ -137,7 +136,7 @@ public class ResultSetPaginated
                 currentResultVars = currentResultSet.getResultVars();
 
 
-                currentResultSet = new ResultSetCloseable(currentResultSet, qe) {
+                currentResultSet = new ResultSetOnClose(currentResultSet, qe::close) {
                     @Override
                     public void close() {
                         // Save the value of getRowNumber;

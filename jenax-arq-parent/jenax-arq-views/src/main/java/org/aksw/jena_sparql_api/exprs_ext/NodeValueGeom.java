@@ -30,7 +30,7 @@ public class NodeValueGeom
         RDFDatatype datatype = TypeMapper.getInstance().getSafeTypeByName(OgcVocab.wktLiteral);
 
         Geometry g = geometry.getGeometry();
-        Node result = NodeFactory.createLiteral(g.getTypeString() + g.getValue(), datatype);
+        Node result = NodeFactory.createLiteralDT(g.getTypeString() + g.getValue(), datatype);
 
         return result;
     }

@@ -5,6 +5,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Stopwatch;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import org.aksw.jena_sparql_api.sparql.ext.json.JenaJsonUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.apache.jena.graph.Node;
@@ -16,7 +21,6 @@ import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.ResultSetRewindable;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.expr.ExprTypeException;
@@ -26,11 +30,6 @@ import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 /**
  * Function for benchmarking a sparql query on a given endpoint and obtain
@@ -87,7 +86,7 @@ public class FN_BenchmarkOld
             DatasetGraph dsg = env.getDataset();
             if(dsg != null) {
                 Dataset ds = DatasetFactory.wrap(dsg);
-                conn = RDFConnectionFactory.connect(ds);
+                conn = RDFConnection.connect(ds);
             }
         }
 
@@ -109,7 +108,7 @@ public class FN_BenchmarkOld
             DatasetGraph dsg = env.getDataset();
             if(dsg != null) {
                 Dataset ds = DatasetFactory.wrap(dsg);
-                conn = RDFConnectionFactory.connect(ds);
+                conn = RDFConnection.connect(ds);
             }
         }
 

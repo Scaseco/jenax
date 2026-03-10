@@ -122,7 +122,7 @@ public class SparqlEntityManagerFactory
 
             @Override
             public Node toRdf(Object o) {
-                Node node = NodeFactory.createLiteral("" + o, XSDDatatype.XSDgYear);
+                Node node = NodeFactory.createLiteralDT("" + o, XSDDatatype.XSDgYear);
                 return node;
             }
         });

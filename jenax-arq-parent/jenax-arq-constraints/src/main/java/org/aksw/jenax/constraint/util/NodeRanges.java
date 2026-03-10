@@ -339,8 +339,8 @@ public class NodeRanges
     /** Result is a string range (not IRI) */
     public static Range<ComparableNodeValue> rangeForStringPrefix(String prefix) {
         return Range.closedOpen(
-            ComparableNodeValue.wrap(NodeFactory.createLiteral(prefix)),
-            ComparableNodeValue.wrap(NodeFactory.createLiteral(incrementLastCharacter(prefix))));
+            ComparableNodeValue.wrap(NodeFactory.createLiteralString(prefix)),
+            ComparableNodeValue.wrap(NodeFactory.createLiteralString(incrementLastCharacter(prefix))));
     }
 
     /**

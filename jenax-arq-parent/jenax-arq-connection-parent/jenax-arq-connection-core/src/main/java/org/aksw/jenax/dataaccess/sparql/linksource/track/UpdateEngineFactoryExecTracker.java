@@ -24,12 +24,12 @@ public class UpdateEngineFactoryExecTracker
     }
 
     @Override
-    public UpdateEngine create(DatasetGraph datasetGraph, Binding inputBinding, Context context) {
+    public UpdateEngine create(DatasetGraph datasetGraph, Context context) {
         DatasetGraphWithExecTracker tracker = (DatasetGraphWithExecTracker)datasetGraph;
         ExecTracker execTracker = ExecTracker.requireTracker(tracker.getContext());
         DatasetGraph backend = tracker.getWrapped();
         UpdateEngineFactory f = UpdateEngineRegistry.findFactory(backend, context);
-        UpdateEngine base = f.create(backend, inputBinding, context);
+        UpdateEngine base = f.create(backend, context);
 
         long[] idRef = {-1};
 

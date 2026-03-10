@@ -68,7 +68,7 @@ public class Skolemize {
         Map<Node, Node> nodeToLocalHash = blankNodes.stream()
             .collect(Collectors.toMap(
                     x -> x,
-                    x -> NodeFactory.createLiteral(createSignature(g, x, unifyBlankNodes))
+                    x -> NodeFactory.createLiteralString(createSignature(g, x, unifyBlankNodes))
             ));
 
         Map<Node, String> nodeToGlobalHash = blankNodes.stream()

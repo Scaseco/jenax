@@ -80,7 +80,7 @@ public class LcaAccumulationTest {
 
 
         Function<Node, Object> fn = createNodeToJavaConverter(XSDDatatype.XSDlong, XSDDatatype.XSDbyte);
-        Object r = fn.apply(NodeFactory.createLiteral("1", XSDDatatype.XSDlong));
+        Object r = fn.apply(NodeFactory.createLiteralDT("1", XSDDatatype.XSDlong));
         System.out.println(r + " - " + r.getClass());
 //		System.out.println("Failed to map: " + failedToMap);
 //		System.out.println(mapping);

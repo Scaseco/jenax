@@ -13,9 +13,9 @@ public class JenaExtensionHttp {
         FunctionRegistry.get().put(ns + "get", new FunctionFactoryE_Http(httpClientSupplier));
         FunctionRegistry.get().put(ns + "encode_for_qsa", E_EncodeForQsa.class);
     }
-    
+
     public static void addPrefixes(PrefixMapping pm) {
-		// Note Use of http prefix might be dangerous with jena or rdf in general!
-    	pm.setNsPrefix("http", ns);
+        // Note Use of http prefix might be dangerous with jena or rdf in general!
+        pm.setNsPrefix("http", ns);
     }
 }

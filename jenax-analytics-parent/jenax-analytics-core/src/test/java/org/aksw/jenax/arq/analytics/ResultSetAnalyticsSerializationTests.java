@@ -47,7 +47,7 @@ public class ResultSetAnalyticsSerializationTests {
 
         Binding b = BindingFactory.builder()
                 .add(Vars.s, NodeFactory.createURI("http://www.example.org/Foo"))
-                .add(Vars.p, NodeFactory.createLiteral("bar"))
+                .add(Vars.p, NodeFactory.createLiteralString("bar"))
                 .build();
 
         Accumulator<Binding, ?, Map<Var, Entry<Multiset<String>, Long>>> actualAcc = actualAgg.createAccumulator();

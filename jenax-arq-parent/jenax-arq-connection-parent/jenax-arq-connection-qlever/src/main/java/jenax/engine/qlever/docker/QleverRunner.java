@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.aksw.jenax.engine.qlever.SystemUtils;
 import org.aksw.shellgebra.exec.CmdStrOps;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
+import org.aksw.shellgebra.util.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;

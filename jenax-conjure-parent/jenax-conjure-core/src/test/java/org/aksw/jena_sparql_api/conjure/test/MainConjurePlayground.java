@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
@@ -68,10 +72,6 @@ import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class MainConjurePlayground {
     private static final Logger logger = LoggerFactory.getLogger(MainConjurePlayground.class);
 
@@ -120,8 +120,8 @@ public class MainConjurePlayground {
         Job job = JobUtils.fromSparqlFile("replacens.sparql");
 
         Map<String, Node> env = ImmutableMap.<String, Node>builder()
-                .put("SOURCE_NS", NodeFactory.createLiteral("https://portal.limbo-project.org"))
-                .put("TARGET_NS", NodeFactory.createLiteral("https://data.limbo-project.org"))
+                .put("SOURCE_NS", NodeFactory.createLiteralString("https://portal.limbo-project.org"))
+                .put("TARGET_NS", NodeFactory.createLiteralString("https://data.limbo-project.org"))
                 .build();
 
         Op op = ConjureBuilderImpl.start().fromUrl("file:///home/raven/Projects/limbo/git/train_2-dataset/train_2-dataset.ttl").getOp();

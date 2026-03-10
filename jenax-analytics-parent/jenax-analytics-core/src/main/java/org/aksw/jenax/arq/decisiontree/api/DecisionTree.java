@@ -95,16 +95,16 @@ public class DecisionTree {// <I, C, T, N extends DtNode<C, T>> {
         otherwise.setValue(ExprUtils.parse("'fail'"));
 
 
-        Node result1 = dt.eval(BindingFactory.binding(Vars.p, NodeFactory.createLiteral("test")));
+        Node result1 = dt.eval(BindingFactory.binding(Vars.p, NodeFactory.createLiteralString("test")));
         System.out.println(result1);
 
-        Node result2 = dt.eval(BindingFactory.binding(Vars.o, NodeFactory.createLiteral("test")));
+        Node result2 = dt.eval(BindingFactory.binding(Vars.o, NodeFactory.createLiteralString("test")));
         System.out.println(result2);
 
 
         Binding bm = BindingFactory.builder()
-                .add(Vars.p, NodeFactory.createLiteral("test"))
-                .add(Vars.o, NodeFactory.createLiteral("hello"))
+                .add(Vars.p, NodeFactory.createLiteralString("test"))
+                .add(Vars.o, NodeFactory.createLiteralString("hello"))
                 .build();
         Node result3 = dt.eval(bm);
         System.out.println(result3);

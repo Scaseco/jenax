@@ -3,6 +3,9 @@ package org.aksw.jena_sparql_api.sparql.ext.http;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
+import com.google.common.net.MediaType;
+import com.google.gson.JsonElement;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -21,9 +24,6 @@ import org.apache.jena.sparql.function.FunctionBase1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.net.MediaType;
-import com.google.gson.JsonElement;
-
 /**
  * jsonLiteral jsonp(jsonLiteral, queryString)
  *
@@ -39,8 +39,8 @@ import com.google.gson.JsonElement;
 public class E_Http
     extends FunctionBase1
 {
-	private static final Logger logger = LoggerFactory.getLogger(E_Http.class);
-	
+    private static final Logger logger = LoggerFactory.getLogger(E_Http.class);
+
     //public static final MimeType mtJson = new MimeType("application/json");
 
     private Supplier<HttpClient> httpClientSupplier;
@@ -82,7 +82,7 @@ public class E_Http
             Node node = nv.asNode();
             url = node.getURI();
         } else {
-        	throw new ExprEvalException("Neither IRI nor string");
+            throw new ExprEvalException("Neither IRI nor string");
         }
 
         NodeValue result = null;
@@ -112,16 +112,16 @@ public class E_Http
 
                     boolean isJson = MediaType.parse(contentTypeValue).is(MediaType.JSON_UTF_8);
                     if(isJson) {
-                    	RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
-                        Node jsonNode = NodeFactory.createLiteral(str, jsonDatatype);
-                    	result = NodeValue.makeNode(jsonNode);
+                        RDFDatatype jsonDatatype = TypeMapper.getInstance().getTypeByClass(JsonElement.class);
+                        Node jsonNode = NodeFactory.createLiteralDT(str, jsonDatatype);
+                        result = NodeValue.makeNode(jsonNode);
                     } else {
                         result = NodeValue.makeString(str);
                     }
                 }
                 EntityUtils.consume(entity);
-            } catch(Exception e) {         
-            	logger.warn("Http request failed", e);
+            } catch(Exception e) {
+                logger.warn("Http request failed", e);
                 throw new ExprEvalException(e);
             } finally {
                 if(request != null) {
@@ -132,10 +132,10 @@ public class E_Http
             //entity.
 
         }
-        
+
         if (result == null) {
-        	// TODO Redirects should be followed automatically - is this actually the case?
-        	throw new ExprEvalException("Http request returned non 200 status code");
+            // TODO Redirects should be followed automatically - is this actually the case?
+            throw new ExprEvalException("Http request returned non 200 status code");
         }
 
         return result;

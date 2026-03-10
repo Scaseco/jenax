@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.google.gson.JsonElement;
+
 import org.aksw.commons.collector.domain.ParallelAggregator;
 import org.aksw.commons.rx.op.RxOps;
 import org.aksw.jenax.arq.json.RdfJsonUtils;
@@ -26,15 +28,12 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.Context;
-
-import com.google.gson.JsonElement;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -77,7 +76,7 @@ public class SparqlMappers {
 
         return dataset -> {
             O r;
-            try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+            try(RDFConnection conn = RDFConnection.connect(dataset)) {
                 r = mapper.apply(conn);
             }
             return r;

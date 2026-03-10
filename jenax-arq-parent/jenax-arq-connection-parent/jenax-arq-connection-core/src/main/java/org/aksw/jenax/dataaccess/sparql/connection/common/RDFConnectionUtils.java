@@ -20,10 +20,8 @@ import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkUtils;
 import org.aksw.jenax.dataaccess.sparql.link.common.RDFLinkWrapperWithCloseShield;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransform;
 import org.aksw.jenax.stmt.core.SparqlStmtTransform;
-import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionLocal;
 import org.apache.jena.rdfconnection.RDFDatasetConnection;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.rdfconnection.SparqlUpdateConnection;
@@ -152,6 +150,7 @@ public class RDFConnectionUtils {
     }
 
     /** Reflective access to an {@link RDFConnectionModular}'s dataset. */
+    /*
     public static Dataset getDataset(RDFConnectionLocal conn) {
         Dataset result;
         try {
@@ -163,6 +162,7 @@ public class RDFConnectionUtils {
         }
         return result;
     }
+    */
 
     public static RDFConnection wrapWithBuilderTransform(RDFConnection rawConn, QueryExecBuilderTransform queryBuilderTransform, UpdateExecBuilderTransform updateBuilderTransform) {
         return wrapWithLinkTransform(rawConn, link -> RDFLinkUtils.wrapWithBuilderTransform(link, queryBuilderTransform, updateBuilderTransform));

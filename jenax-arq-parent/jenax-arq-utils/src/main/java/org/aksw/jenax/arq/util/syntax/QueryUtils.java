@@ -13,6 +13,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
+
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.util.range.LongRanges;
 import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
@@ -67,11 +72,6 @@ import org.apache.jena.sparql.syntax.syntaxtransform.QueryShallowCopyWithPresetP
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
-import com.google.common.collect.Sets;
 
 public class QueryUtils {
 
@@ -243,7 +243,7 @@ public class QueryUtils {
 
                 VarExprListUtils.replace(result.getProject(), replacement);
                 result.setQueryResultStar(false);
-                result.setResultVars();
+                result.resetResultVars();
             }
             break;
         case CONSTRUCT:
@@ -929,7 +929,7 @@ public class QueryUtils {
             query.setQueryResultStar(true);
         }
 
-        query.setResultVars();
+        query.resetResultVars();
 
         if (resultVar != null) {
             query.getResultVars().add(resultVar);

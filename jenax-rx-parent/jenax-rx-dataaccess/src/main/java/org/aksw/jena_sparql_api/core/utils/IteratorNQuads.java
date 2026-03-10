@@ -2,16 +2,16 @@ package org.aksw.jena_sparql_api.core.utils;
 
 import org.aksw.commons.collections.SinglePrefetchIterator;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.ResultSetCloseable;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.engine.binding.Binding;
 
 public class IteratorNQuads
     extends SinglePrefetchIterator<Quad>
 {
-    private ResultSetCloseable rs;
+    private ResultSet rs;
 
-    public IteratorNQuads(ResultSetCloseable rs) {
+    public IteratorNQuads(ResultSet rs) {
         this.rs = rs;
     }
 

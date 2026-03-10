@@ -1,7 +1,5 @@
 package org.aksw.jena_sparql_api.collection.observable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,17 +11,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Streams;
+
 import org.aksw.commons.collection.observable.ObservableCollection;
 import org.aksw.commons.collection.observable.ObservableMap;
 import org.aksw.commons.collection.observable.ObservableMapImpl;
 import org.aksw.commons.collection.observable.ObservableValue;
 import org.aksw.commons.collection.observable.ObservableValueFromObservableCollection;
-import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.aksw.jenax.arq.util.triple.SetFromGraph;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Streams;
+import org.aksw.jenax.arq.util.triple.TripleFilter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -40,7 +39,7 @@ public class GraphChangeWithBaseGraph
     protected ObservableGraph baseGraph;
 
     public GraphChangeWithBaseGraph() {
-        this(ObservableMapImpl.decorate(new HashMap<>()), ObservableMapImpl.decorate(new HashMap<>()), ObservableGraphImpl.decorate(GraphFactory.createPlainGraph()));
+        this(ObservableMapImpl.decorate(new HashMap<>()), ObservableMapImpl.decorate(new HashMap<>()), ObservableGraphImpl.decorate(GraphFactory.createDefaultGraph()));
         //new Delta(GraphFactory.createPlainGraph()));
     }
 

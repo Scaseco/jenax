@@ -47,7 +47,7 @@ public class QueryExecDatasetBuilderEx<T extends QueryExecDatasetBuilderEx<T>>
 
         // finalCxt = ObjectUtils.mergeNonNull(ARQ.getContext(), finalCxt, Context::mergeCopy);
 
-        query.setResultVars();
+        query.resetResultVars();
         QueryEngineFactory f = queryEngineFactoryProvider.find(query, dataset, finalCxt);
         if (f == null) {
             Log.warn(QueryExecutionFactory.class, "Failed to find a QueryEngineFactory for query: " + query);

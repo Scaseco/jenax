@@ -5,6 +5,8 @@ nav_order: 20
 
 Unofficial extensions for jena - refactoring of https://github.com/SmartDataAnalytics/jena-sparql-api
 
+![JenaX Overview](docs/images/20260122_jenax-overview.png)
+
 ## Maven Dependencies
 
 We recommend to import the jenax `bom` file in order to ensure consistent versions among the dependencies:

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Function;
+
 import org.aksw.commons.collections.diff.Diff;
 import org.aksw.commons.rx.lookup.LookupService;
 import org.aksw.commons.rx.lookup.LookupServiceTransformValue;
@@ -50,8 +52,6 @@ import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
-
-import com.google.common.base.Function;
 
 // TODO A vocubulary class, name it properly
 class V {
@@ -225,7 +225,7 @@ public class ChangeSetUtils {
     public static void writeReifiedTriple(Model model, Node s, Triple triple) {
         RDFNode tmp = ModelUtils.convertGraphNodeToRDFNode(s, model);
         Resource n = tmp.asResource();
-        Statement stmt = ModelUtils.tripleToStatement(model, triple);
+        Statement stmt = model.asStatement(triple);
         writeReifiedStatement(model, n, stmt);
     }
 
@@ -277,7 +277,7 @@ public class ChangeSetUtils {
         for(Triple triple : SetFromGraph.wrap(cs.getAddition())) {
             String uri = prefix + FN_TripleToMd5.fn.apply(triple);
             Resource o = ResourceFactory.createResource(uri);
-            Statement stmt = ModelUtils.tripleToStatement(model, triple);
+            Statement stmt = model.asStatement(triple);
             writeReifiedStatement(model, o, stmt);
             model.add(s, CS.addition, o);
             model.add(s, CS.statement, o);
@@ -286,7 +286,7 @@ public class ChangeSetUtils {
         for(Triple triple : SetFromGraph.wrap(cs.getRemoval())) {
             String uri = prefix + FN_TripleToMd5.fn.apply(triple);
             Resource o = ResourceFactory.createResource(uri);
-            Statement stmt = ModelUtils.tripleToStatement(model, triple);
+            Statement stmt = model.asStatement(triple);
             writeReifiedStatement(model, o, stmt);
             model.add(s, CS.removal, o);
             model.add(s, CS.statement, o);

@@ -148,7 +148,7 @@ public interface ConstraintFacade<B> {
     HLFacetConstraint<? extends ConstraintFacade<B>> regex(String pattern, String flags);
 
     default HLFacetConstraint<? extends ConstraintFacade<B>> eqStr(String stringLiteral) {
-        return eq(NodeFactory.createLiteral(stringLiteral));
+        return eq(NodeFactory.createLiteralString(stringLiteral));
     }
 
     default HLFacetConstraint<? extends ConstraintFacade<B>> eq(RDFNode rdfNode) {

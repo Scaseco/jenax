@@ -35,7 +35,7 @@ public interface QueryExecBuilderWrapper<T extends QueryExecBuilder>
     }
 
     @Override
-    default QueryExecBuilder parseCheck(boolean parseCheck) {
+    default T parseCheck(boolean parseCheck) {
         getDelegate().parseCheck(parseCheck);
         return self();
     }
@@ -92,10 +92,28 @@ public interface QueryExecBuilderWrapper<T extends QueryExecBuilder>
         return self();
     }
 
+    @Override
+    default T timeout(long value) {
+        getDelegate().timeout(value);
+        return self();
+    }
+
     /** Set the overall query execution timeout. */
     @Override
     default T timeout(long value, TimeUnit timeUnit) {
         getDelegate().timeout(value, timeUnit);
+        return self();
+    }
+
+    @Override
+    default T initialTimeout(long value, TimeUnit timeUnit) {
+        getDelegate().overallTimeout(value, timeUnit);
+        return self();
+    }
+
+    @Override
+    default T overallTimeout(long value, TimeUnit timeUnit) {
+        getDelegate().overallTimeout(value, timeUnit);
         return self();
     }
 

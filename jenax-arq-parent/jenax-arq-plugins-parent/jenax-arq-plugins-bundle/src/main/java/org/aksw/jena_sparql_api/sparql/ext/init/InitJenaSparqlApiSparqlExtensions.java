@@ -36,8 +36,6 @@ public class InitJenaSparqlApiSparqlExtensions
 {
     private static final Logger logger = LoggerFactory.getLogger(InitJenaSparqlApiSparqlExtensions.class);
 
-    public InitJenaSparqlApiSparqlExtensions() {}
-
     @Override
     public void start() {
         logger.debug("Initializing JenaX SPARQL extensions");

@@ -36,7 +36,7 @@ public class TestResourceUtils {
         }
 
         {
-            boolean canMap = m.canMap(NodeFactory.createLiteral("http://example.org/foo"));
+            boolean canMap = m.canMap(NodeFactory.createLiteralString("http://example.org/foo"));
             Assert.assertFalse(canMap);
         }
     }
@@ -96,10 +96,10 @@ public class TestResourceUtils {
         NodeMapper<String> m = NodeMappers.DEFAULT_URI_OR_STRING;
 
         Assert.assertTrue(m.canMap(NodeFactory.createURI("http://example.org")));
-        Assert.assertTrue(m.canMap(NodeFactory.createLiteral("hi")));
-        Assert.assertTrue(m.canMap(NodeFactory.createLiteral("there")));
+        Assert.assertTrue(m.canMap(NodeFactory.createLiteralString("hi")));
+        Assert.assertTrue(m.canMap(NodeFactory.createLiteralString("there")));
 
-        Assert.assertFalse(m.canMap(NodeFactory.createLiteral("there", "en")));
+        Assert.assertFalse(m.canMap(NodeFactory.createLiteralLang("there", "en")));
 
 
         Assert.assertFalse(m.toNode("hi").isURI());
@@ -126,7 +126,7 @@ public class TestResourceUtils {
         }
 
         {
-            Node node = NodeFactory.createLiteral("-3", TypeMapper.getInstance().getTypeByClass(Integer.class));
+            Node node = NodeFactory.createLiteralDT("-3", TypeMapper.getInstance().getTypeByClass(Integer.class));
             boolean canMap = m.canMap(node);
             Assert.assertEquals(true, canMap);
             Long value = m.toJava(node);

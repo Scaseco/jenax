@@ -16,6 +16,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Streams;
+
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jenax.arq.util.node.NodeEnvsubst;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -32,20 +34,16 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
-
-import com.google.common.collect.Streams;
 
 public class SparqlStmtMgr {
     // private static final Logger logger = LoggerFactory.getLogger(SparqlStmtMgr.class);
 
     public static void readDataset(Dataset dataset, String filenameOrURI, Consumer<Quad> quadConsumer) {
-        RDFConnection conn = RDFConnectionFactory.connect(dataset);
+        RDFConnection conn = RDFConnection.connect(dataset);
         readConnection(conn, filenameOrURI, quadConsumer);
     }
 
@@ -242,7 +240,7 @@ public class SparqlStmtMgr {
     public static Model execConstruct(RDFConnection conn, String filenameOrURI) {
         Model result = ModelFactory.createDefaultModel();
         readConnection(conn, filenameOrURI,
-                q -> result.add(ModelUtils.tripleToStatement(result, q.asTriple())));
+                q -> result.add(result.asStatement(q.asTriple())));
         return result;
     }
 

@@ -1,5 +1,7 @@
 package org.aksw.jena_sparql_api.sparql.ext.fs;
 
+import org.junit.Test;
+
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.query.Dataset;
@@ -8,8 +10,6 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
-import org.junit.Test;
 
 public class TestSparqlFs {
     String queryStr1 = "SELECT * \n" +
@@ -65,7 +65,7 @@ public class TestSparqlFs {
 
         Dataset dataset = DatasetFactory.wrap(ModelFactory.createDefaultModel());//DatasetFactory.create();
         dataset.getContext().setTrue(ArqSecurity.symAllowFileAccess);
-        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+        try(RDFConnection conn = RDFConnection.connect(dataset)) {
 
 
             //try(QueryExecution qe = QueryExecutionFactory.create(queryStr, (Dataset)null)) {
@@ -79,7 +79,7 @@ public class TestSparqlFs {
     public void testSparqlLang() {
 
         Dataset dataset = DatasetFactory.wrap(ModelFactory.createDefaultModel());//DatasetFactory.create();
-        try(RDFConnection conn = RDFConnectionFactory.connect(dataset)) {
+        try(RDFConnection conn = RDFConnection.connect(dataset)) {
             //try(QueryExecution qe = QueryExecutionFactory.create(queryStr, (Dataset)null)) {
             try(QueryExecution qe = conn.query(queryStr7)) {
                 System.out.println(ResultSetFormatter.asText(qe.execSelect()));

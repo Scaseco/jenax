@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Streams;
+
 import org.aksw.jenax.arq.util.node.NodeUtils;
 import org.aksw.jenax.arq.util.node.NodeWrapper;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
@@ -32,8 +34,6 @@ import org.apache.jena.util.iterator.WrappedIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-
-import com.google.common.collect.Streams;
 
 //class Node_RdfArrayItem
 //    extends NodeWrapper<Entry<RdfArray, Integer>>
@@ -439,7 +439,7 @@ class GraphOverRdfObjectOld
         if (NodeUtils.isNullOrAny(mp)) {
             emitPs = schemaPs;
         } else {
-            emitPs = schemaPs.stream().filter(item -> mp.matches(item)).toList();
+            emitPs = schemaPs.stream().filter(item -> NodeUtils.matches(mp, item)).toList();
         }
 
         int start = 0;

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>jenax-locator-maven</artifactId>
+	<description>Jena Locator implementation for Maven Artifact resolution.</description>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.jenax</groupId>
+		<artifactId>jenax-parent</artifactId>
+		<version>6.1.0-1-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<mima.version>2.4.40</mima.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>eu.maveniverse.maven.mima</groupId>
+			<artifactId>context</artifactId>
+			<version>${mima.version}</version>
+		</dependency>
+		<!-- runtime: runtime scope -->
+		<dependency>
+			<groupId>eu.maveniverse.maven.mima.runtime</groupId>
+			<artifactId>standalone-static</artifactId>
+			<version>${mima.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+</project>

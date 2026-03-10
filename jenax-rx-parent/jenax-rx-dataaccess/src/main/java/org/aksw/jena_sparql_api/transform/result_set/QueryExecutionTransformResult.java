@@ -15,11 +15,11 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFactory;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.resultset.ResultSetOnClose;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
@@ -135,7 +135,7 @@ public class QueryExecutionTransformResult
         QueryIterator queryIter = QueryIterPlainWrapper.create(it);
         ResultSet core = ResultSetFactory.create(queryIter, vars);
 
-        ResultSet result = new ResultSetCloseable(core, qe);
+        ResultSet result = new ResultSetOnClose(core, qe::close);
         return result;
     }
 

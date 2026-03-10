@@ -177,7 +177,7 @@ public class HLFacetConstraintImpl<P>
             Node r;
             FacetNode fn = map.get(n);
             if(fn != null) {
-                r = NodeFactory.createLiteral("[" + fn + "]");
+                r = NodeFactory.createLiteralString("[" + fn + "]");
             } else {
                 r = n;
             }

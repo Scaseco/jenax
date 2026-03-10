@@ -1,7 +1,6 @@
 package org.aksw.jenax.arq.util.irixresolver;
 
 import org.apache.jena.irix.IRIProviderJDK;
-import org.apache.jena.irix.IRIProviderJenaIRI.IRIxJena;
 import org.apache.jena.irix.IRIx;
 import org.apache.jena.irix.IRIxResolver;
 
@@ -22,9 +21,8 @@ public class IRIxResolverUtils {
      * For this purpose {@link IRIxJena#create(String)} is used.
      */
     public static IRIxResolver newIRIxResolverAsGiven(String baseIri) {
-        
-    	IRIxResolver result = baseIri == null
-    			// Note: resolve(true) is intended to allow resolution against future base IRIs should they be set - such as by encountering BASE during a parse of turtle
+        IRIxResolver result = baseIri == null
+                // Note: resolve(true) is intended to allow resolution against future base IRIs should they be set - such as by encountering BASE during a parse of turtle
                 ? IRIxResolver.create().noBase().resolve(true).allowRelative(true).build()
                 : IRIxResolver.create().base(baseIri).resolve(true).allowRelative(true).build();
 

@@ -38,7 +38,7 @@ public class RdfValueMapperSimple
             }
 
             String lex = dtype.unparse(value);
-            o = NodeFactory.createLiteral(lex, dtype);
+            o = NodeFactory.createLiteralDT(lex, dtype);
         } else {
             o = nullValue;
         }

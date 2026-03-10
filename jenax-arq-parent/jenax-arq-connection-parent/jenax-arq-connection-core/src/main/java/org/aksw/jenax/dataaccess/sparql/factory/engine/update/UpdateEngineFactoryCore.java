@@ -3,7 +3,6 @@ package org.aksw.jenax.dataaccess.sparql.factory.engine.update;
 import java.util.function.BiPredicate;
 
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.modify.UpdateEngine;
 import org.apache.jena.sparql.modify.UpdateEngineFactory;
 import org.apache.jena.sparql.util.Context;
@@ -14,7 +13,7 @@ import org.apache.jena.sparql.util.Context;
  */
 @FunctionalInterface
 public interface UpdateEngineFactoryCore {
-    UpdateEngine create(DatasetGraph datasetGraph, Binding inputBinding, Context context);
+    UpdateEngine create(DatasetGraph datasetGraph, Context context);
 
     default UpdateEngineFactory asFactory() {
         return asFactory((datasetGraph, context) -> true);
@@ -23,8 +22,8 @@ public interface UpdateEngineFactoryCore {
     default UpdateEngineFactory asFactory(BiPredicate<DatasetGraph, Context> condition) {
         return new UpdateEngineFactory() {
             @Override
-            public UpdateEngine create(DatasetGraph datasetGraph, Binding inputBinding, Context context) {
-                UpdateEngine result = UpdateEngineFactoryCore.this.create(datasetGraph, inputBinding, context);
+            public UpdateEngine create(DatasetGraph datasetGraph, Context context) {
+                UpdateEngine result = UpdateEngineFactoryCore.this.create(datasetGraph, context);
                 return result;
             }
 

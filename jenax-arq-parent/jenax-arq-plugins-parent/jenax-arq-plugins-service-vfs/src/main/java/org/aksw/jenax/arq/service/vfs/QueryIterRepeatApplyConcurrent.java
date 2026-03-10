@@ -225,7 +225,7 @@ public abstract class QueryIterRepeatApplyConcurrent
                 Binding binding = input.next();
                 // System.err.println(String.format("Thread %s: Starting task for: %s", Thread.currentThread().getName(), binding));
                 ExecutionContext execCxt = getExecContext();
-                ExecutionContext isolatedExecCxt = new ExecutionContext(execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
+                ExecutionContext isolatedExecCxt = ExecutionContext.fromFunctionEnv(execCxt); //(execCxt.getContext(), execCxt.getActiveGraph(), execCxt.getDataset(), execCxt.getExecutor());
                 Prefetch task = new Prefetch(binding, nextStage(binding, isolatedExecCxt));
 
                 Future<?> future = executorService.submit(task::run);

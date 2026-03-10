@@ -42,7 +42,7 @@ public class RdfTypeLiteralTyped
     @Override
     public Node getRootNode(Object entity) {
         String lex = rdfDatatype.unparse(entity);
-        Node result = NodeFactory.createLiteral(lex, rdfDatatype);
+        Node result = NodeFactory.createLiteralDT(lex, rdfDatatype);
 
         return result;
     }

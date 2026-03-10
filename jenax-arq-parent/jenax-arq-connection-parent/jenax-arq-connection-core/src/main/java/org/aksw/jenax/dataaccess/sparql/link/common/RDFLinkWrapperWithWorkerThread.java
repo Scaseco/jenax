@@ -266,18 +266,18 @@ public class RDFLinkWrapperWithWorkerThread
         }
 
         @Override
-        public QueryExecMod timeout(long timeout) {
+        public QueryExecBuilder timeout(long timeout) {
             return timeout(timeout, TimeUnit.MILLISECONDS);
         }
 
         @Override
-        public QueryExecMod initialTimeout(long timeout, TimeUnit timeUnit) {
+        public QueryExecBuilder initialTimeout(long timeout, TimeUnit timeUnit) {
             submit(() -> delegate.initialTimeout(timeout, timeUnit));
             return this;
         }
 
         @Override
-        public QueryExecMod overallTimeout(long timeout, TimeUnit timeUnit) {
+        public QueryExecBuilder overallTimeout(long timeout, TimeUnit timeUnit) {
             submit(() -> delegate.overallTimeout(timeout, timeUnit));
             return this;
         }

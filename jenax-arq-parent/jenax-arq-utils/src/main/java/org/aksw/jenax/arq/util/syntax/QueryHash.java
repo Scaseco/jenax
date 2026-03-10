@@ -18,6 +18,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
+
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.commons.util.math.Lehmer;
 import org.aksw.jenax.arq.util.node.NodeTransformLib2;
@@ -50,25 +55,32 @@ import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sparql.util.FmtUtils;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
-
 /**
  * A hasher for SPARQL queries that keeps track of separate hash codes for the
  * body, the subset of the projection (w.r.t. visible variables), the permutation of the projection and
  *
- * The hash for
+ * See the accompanying test class "TestQueryHash" for more examples.
+ * Example: The hash for
  * <pre>
- * SELECT COUNT(?p) { ?s ?p ?o } GROUP BY STR(?o) LIMIT 10 OFFSET 2
+ * PREFIX eg: <http://www.example.org>
+ * SELECT ?a (COUNT(?b) AS ?count)
+ * FROM <http://dbpedia.org/sparql>
+ * FROM NAMED <urn:foo>
+ * WHERE { ?a ?b ?c }
+ * GROUP BY STR(?c) ?a
+ * ORDER BY DESC(?a) DESC(STR(?c))
+ * LIMIT 10
+ * OFFSET 2
  * </pre>
  * is
  * <pre>
- * ftiGBh8SJSZ89mbO9FOsCtHSSD1t3nqqTox3JNisfvI/MD9wyw/1/2+10
+ * Tjny8TXJKFa7hYkh6VBRiv_6S_tZn3Fm_vyP-JtwPFM/cm60CQ/AA/MusTnQ/s/d/
+ * _-uN2w/AA/AA/AQ/AA/kxPvcg3tcVCB7ffhA/AA/GrxMCookg6M/AA/dmlNGA/2_10
  * </pre>
  *
- * @author raven
+ * FIXME: Variables that are assigned from an expressions are renamed to name derived from the expression.
+ *        But this can cause clashes. Example ("a" AS ?x) ("a" AS ?y) in both cases the variable is
+ *        substituted with varOf("a").
  */
 public class QueryHash {
     /** The body query is essentially a version of the query with an altered projection:
@@ -77,6 +89,8 @@ public class QueryHash {
      */
     protected Query originalQuery;
     protected Query harmonizedQuery;
+    protected Map<Var, Var> varMapOriginalToCanonical;
+    protected Map<Var, Var> varMapCanonicalToOriginal;
 
     protected HashCode bodyHashCode;
     protected LehmerHash aggHash;
@@ -89,7 +103,8 @@ public class QueryHash {
     protected HashCode relabelHash;
     protected HashCode prologueHash;
 
-    public QueryHash(Query originalQuery, Query harmonizedQuery, HashCode bodyHashCode, LehmerHash aggHash,
+    public QueryHash(Query originalQuery, Query harmonizedQuery,
+            Map<Var, Var> varMapOriginalToCanonical, Map<Var, Var> varMapCanonicalToOriginal, HashCode bodyHashCode, LehmerHash aggHash,
             LehmerHash groupByHash, LehmerHash havingHash, LehmerHash orderByHash, LehmerHash projecHash,
             HashCode relabelHash,
             LehmerHash defaultGraphHash,
@@ -98,6 +113,8 @@ public class QueryHash {
         super();
         this.originalQuery = originalQuery;
         this.harmonizedQuery = harmonizedQuery;
+        this.varMapOriginalToCanonical = varMapOriginalToCanonical;
+        this.varMapCanonicalToOriginal = varMapCanonicalToOriginal;
         this.bodyHashCode = bodyHashCode;
         this.aggHash = aggHash;
         this.groupByHash = groupByHash;
@@ -116,6 +133,14 @@ public class QueryHash {
 
     public Query getHarmonizedQuery() {
         return harmonizedQuery;
+    }
+
+    public Map<Var, Var> getVarMapOriginalToCanonical() {
+        return varMapOriginalToCanonical;
+    }
+
+    public Map<Var, Var> getVarMapCanonicalToOriginal() {
+        return varMapCanonicalToOriginal;
     }
 
     public HashCode getBodyHashCode() {
@@ -366,7 +391,19 @@ public class QueryHash {
                 : HashCode.fromInt(0);
         HashCode prologueHash = Hashing.combineOrdered(Arrays.asList(baseHash, prefixesHash));
 
-        QueryHash result = new QueryHash(query, newQuery, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash, defaultGraphHash, namedGraphHash, prologueHash);
+        Map<Var, Var> canonicalToOriginal = null;
+        // FIXME We need a better way to hash varExprList entries - or we must canonicalize queries
+        //       such that no two variables are assigned from the same expression.
+        /*
+        try {
+            canonicalToOriginal = relabel.entrySet().stream()
+                    .collect(Collectors.toMap(Entry::getValue, Entry::getKey));
+        } catch (Exception e) {
+            throw new RuntimeException("Could not invert map: " + relabel, e);
+        }
+        */
+
+        QueryHash result = new QueryHash(query, newQuery, relabel, canonicalToOriginal, bodyHashCode, aggHash, groupByHash, havingHash, orderByHash, projectHash, relabelHash, defaultGraphHash, namedGraphHash, prologueHash);
 
 //        System.out.println("Original Query:\n" + query);
 //        System.out.println("Harmonized Query:\n" + newQuery);
@@ -421,6 +458,13 @@ public class QueryHash {
         return es.stream().map(e -> transform(e, relabel, varGen)).collect(Collectors.toList());
     }
 
+    /**
+     *
+     * @param e
+     * @param relabel These mappings are consulted first.
+     * @param varGen
+     * @return
+     */
     public static Expr transform(Expr e, Map<Var, Var> relabel, Generator<Var> varGen) {
         Set<Var> mentionedVars = new LinkedHashSet<>();
         ExprVars.varsMentioned(mentionedVars, e);
@@ -584,16 +628,16 @@ public class QueryHash {
         return result;
     }
 
-    public String str(BigInteger value) {
+    public static String str(BigInteger value) {
         return str(value.toByteArray());
     }
 
-    protected String getQueryTypePrefix(QueryType queryType) {
+    protected static String getQueryTypePrefix(QueryType queryType) {
         // (a)sk, (c)onstruct, (d)escribe, (j)son, (s)elect
         return Character.toString(queryType.name().charAt(0)).toLowerCase();
     }
 
-    protected String getQueryTypePrefix(Query query) {
+    protected static String getQueryTypePrefix(Query query) {
         QueryType queryType = query.queryType();
         String result = getQueryTypePrefix(queryType);
         if (QueryType.SELECT.equals(queryType)) {
@@ -607,12 +651,29 @@ public class QueryHash {
         return result;
     }
 
+    public static String getIdentityHash(QueryHash h) {
+        String result =
+            str(h.getBodyHashCode()) + "/" +
+            str(h.getGroupByHash().getHash()) + "/" +
+            str(h.getHavingHash().getHash()) + "/" +
+            str(h.getOrderByHash().getHash()) + "/" +
+            getQueryTypePrefix(h.getHarmonizedQuery()) + "/" +
+            str(h.getProjecHash().getHash()) + "/" +
+            str(h.getDefaultGraphHash().getHash()) + "/" +
+            str(h.getDefaultGraphHash().getLehmer()) + "/" +
+            str(h.getNamedGraphHash().getHash()) + "/" +
+            str(h.getNamedGraphHash().getLehmer()) + "/";
+        return result;
+    }
+
     @Override
     public String toString() {
         Query query = getHarmonizedQuery();
         String sliceHash = query.hasOffset() ? "" + query.getOffset() : "";
 
         // Note: Originally sliceHash used '+' but this prevents shortening of URIs
+        // XXX Is there a reason I put default/named graphs hash so late? Upon revisiting, all hashes should be at front
+        //     and the permutations/lehmer values afterwards.
         sliceHash += query.hasLimit() ? "_" + query.getLimit() : "";
         String baseHash =
             str(getBodyHashCode()) + "/" +

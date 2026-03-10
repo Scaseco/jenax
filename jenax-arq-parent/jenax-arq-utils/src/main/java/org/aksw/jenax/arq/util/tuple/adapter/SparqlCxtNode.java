@@ -84,6 +84,6 @@ public class SparqlCxtNode
 
     @Override
     public boolean isUnionGraph(Node node) {
-        return Quad.unionGraph.matches(node);
+        return Quad.isUnionGraph(node);
     }
 }

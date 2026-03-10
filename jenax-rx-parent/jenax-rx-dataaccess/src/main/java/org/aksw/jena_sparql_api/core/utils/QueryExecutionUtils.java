@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.google.common.collect.Iterators;
+
 import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
@@ -19,9 +21,9 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryType;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
+import org.apache.jena.riot.resultset.ResultSetOnClose;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Quad;
@@ -38,8 +40,6 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterators;
 
 
 public class QueryExecutionUtils {
@@ -183,7 +183,7 @@ public class QueryExecutionUtils {
         final QueryExecution qe = qef.createQueryExecution(queryStr);
         ResultSet tmp = qe.execSelect();
 
-        ResultSetCloseable rs = new ResultSetCloseable(tmp, qe);
+        ResultSet rs = new ResultSetOnClose(tmp, qe::close);
 
         Iterator<Quad> result = new IteratorNQuads(rs);
         return result;

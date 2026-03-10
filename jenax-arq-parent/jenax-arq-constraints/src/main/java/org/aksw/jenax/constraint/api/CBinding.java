@@ -13,8 +13,8 @@ import org.apache.jena.sparql.engine.binding.Binding;
 public interface CBinding
     extends Contradictable
 {
-    CBinding stateIntersection(CBinding that);
-    CBinding stateUnion(CBinding that);
+    CBinding stateIntersection(CBinding other);
+    CBinding stateUnion(CBinding other);
 
     CBinding stateIntersection(Var var, VSpace space);
     CBinding stateUnion(Var var, VSpace space);
@@ -23,6 +23,8 @@ public interface CBinding
 
     CBinding cloneObject();
 
+    // XXX Should be Set
+    // XXX Add entries() method.
     Collection<Var> getVars();
     VSpace get(Var var);
 }

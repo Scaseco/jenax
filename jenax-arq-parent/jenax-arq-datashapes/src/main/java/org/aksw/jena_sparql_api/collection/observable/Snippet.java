@@ -6,10 +6,10 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.vocabulary.RDF;
 
 public class Snippet {
-	public static void main(String[] args) {
-		Node n = NodeFactory.createLiteral("test", TypeMapper.getInstance().getSafeTypeByName(RDF.langString.getURI()));
-		System.out.println("Node: " + n.getLiteralDatatypeURI());
-		System.out.println("Value: " + n);
-	}
+    public static void main(String[] args) {
+        Node n = NodeFactory.createLiteralDT("test", TypeMapper.getInstance().getSafeTypeByName(RDF.langString.getURI()));
+        System.out.println("Node: " + n.getLiteralDatatypeURI());
+        System.out.println("Value: " + n);
+    }
 }
 

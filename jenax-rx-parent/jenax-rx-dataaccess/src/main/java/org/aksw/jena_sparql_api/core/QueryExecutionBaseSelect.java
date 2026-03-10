@@ -17,10 +17,10 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetCloseable;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.resultset.ResultSetOnClose;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.Template;
@@ -118,7 +118,7 @@ public abstract class QueryExecutionBaseSelect
 
         while(it.hasNext()) {
             Triple t = it.next();
-            Statement stmt = org.apache.jena.sparql.util.ModelUtils.tripleToStatement(result, t);
+            Statement stmt = t == null ? null : result.asStatement(t);
             if (stmt != null) {
                 result.add(stmt);
             }
@@ -139,7 +139,7 @@ public abstract class QueryExecutionBaseSelect
 
     abstract protected QueryExecution executeCoreSelectX(Query query);
 
-    protected ResultSetCloseable executeCoreSelect(Query query) {
+    protected ResultSet executeCoreSelect(Query query) {
         if(this.decoratee != null) {
             throw new RuntimeException("A query is already running");
         }
@@ -154,11 +154,9 @@ public abstract class QueryExecutionBaseSelect
 
         ResultSet tmp = decoratee.execSelect();
         final QueryExecution self = this;
-        ResultSetCloseable result = new ResultSetCloseable(tmp, self);
+        ResultSet result = new ResultSetOnClose(tmp, self::close);
 
         return result;
-
-
     }
 
 // Note: The super class already closes the decoratee
@@ -230,11 +228,11 @@ public abstract class QueryExecutionBaseSelect
     public Iterator<Triple> execDescribeTriples() {
 
 
-        ResultSetCloseable rs = null;
+        ResultSet rs = null;
         if ( query.getQueryPattern() != null ) {
             Query q = new Query();
             q.setQuerySelectType();
-            q.setResultVars();
+            q.resetResultVars();
             for(String v : query.getResultVars()) {
                 q.addResultVar(v);
             }
@@ -366,7 +364,7 @@ public abstract class QueryExecutionBaseSelect
             clone.addProjectVars(projectVars);
         }
 
-        ResultSetCloseable rs = executeCoreSelect(clone);
+        ResultSet rs = executeCoreSelect(clone);
 
         //System.out.println("Executing query as: " + clone);
 

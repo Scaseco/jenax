@@ -10,6 +10,7 @@ import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFa
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.syntax.syntaxtransform.NodeTransformSubst;
 import org.apache.jena.sparql.syntax.syntaxtransform.QueryTransformOps;
 
 
@@ -28,7 +29,7 @@ public class QueryExecutionFactoryRenameVars
         String baseRename = "v" + (baseRenameId++) + "_";
         Map<Var, Var> varMap = QueryUtils.createRandomVarMap(baseQuery, baseRename);
 
-        Query query = QueryTransformOps.transform(baseQuery, varMap);
+        Query query = QueryTransformOps.transform(baseQuery, new NodeTransformSubst(varMap));
 
         System.out.println("Remapped: " + query);
 

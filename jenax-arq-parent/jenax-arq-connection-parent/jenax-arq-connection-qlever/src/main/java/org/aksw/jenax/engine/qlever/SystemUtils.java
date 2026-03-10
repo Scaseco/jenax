@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,16 @@ public class SystemUtils {
 
     public static Process run(Consumer<String> logger, String ...cmd) throws IOException, InterruptedException {
         return run(new ProcessBuilder(cmd), logger);
+    }
+
+    public static int runCmd(String ...cmd) throws IOException, InterruptedException {
+        Process p = run(new ProcessBuilder(cmd), logger::info);
+        try (OutputStream out = OutputStream.nullOutputStream()) {
+            p.getInputStream().transferTo(out);
+        }
+        p.waitFor();
+        int result = p.exitValue();
+        return result;
     }
 
     // FIXME If the process exists fast then the reader thread still doesn't get all messages
@@ -90,19 +102,27 @@ public class SystemUtils {
         }
     }
 
-    public static void failIfNonZero(Process process) {
+    public static void failIfNonZero(Process process) throws ExecuteException {
         int exitValue = process.exitValue();
         failIfNonZero(exitValue);
     }
 
-    public static void failIfNonZero(int exitValue) {
+    public static void failIfNonZero(int exitValue) throws ExecuteException {
         if (exitValue != 0) {
             // TODO Check for non-zero exit value should also be made before read!
-            throw new RuntimeException("Process exited with non-zero code: " + exitValue);
+            throw new ExecuteException("Process exited with non-zero code: " + exitValue, exitValue);
         }
     }
 
     public static InputStream exec(ProcessBuilder processBuilder) throws IOException, InterruptedException {
+        return execx(processBuilder);
+        // return exec(new ProcessBuilderNative(processBuilder));
+    }
+
+//    public static InputStream exec(IProcessBuilder<?> processBuilder) throws IOException, InterruptedException {
+//        Process process = processBuilder.start(null); // TODO Should pass a proper context instead of null.
+
+    public static InputStream execx(ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
 
         AtomicBoolean isTerminating = new AtomicBoolean(false);
@@ -165,11 +185,11 @@ public class SystemUtils {
         return getCommandOutput("which", commandName);
     }
 
-    public static int getUID() throws IOException, NumberFormatException, InterruptedException {
+    public static int getUID() throws IOException {
         return Integer.parseInt(getCommandOutput("id", "-u"));
     }
 
-    public static int getGID() throws IOException, NumberFormatException, InterruptedException {
+    public static int getGID() throws IOException {
         return Integer.parseInt(getCommandOutput("id", "-g"));
     }
 }
