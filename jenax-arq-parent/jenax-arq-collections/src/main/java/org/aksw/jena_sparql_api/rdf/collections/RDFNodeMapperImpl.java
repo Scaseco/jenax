@@ -80,7 +80,7 @@ public class RDFNodeMapperImpl<T>
             boolean polymorphicOnly,
             boolean enableCanAsCheck) {
         Class<?> effectiveType;
-        if(rdfNode.isResource()) {
+        if(rdfNode.isResource() && (rdfNode.asResource().getModel() != null)) {
             Resource r = rdfNode.asResource();
             effectiveType = getEffectiveType(r, viewClass, typeDecider, polymorphicOnly);
         } else {
@@ -138,7 +138,7 @@ public class RDFNodeMapperImpl<T>
             RDFNode r = (RDFNode)obj;
 
             // For the TypeDecider to work a Resource must have a non-null model
-            Class<?> effectiveViewClass = r.isResource()
+            Class<?> effectiveViewClass = r.isResource() && (r.asResource().getModel() != null)
                     ? ResourceUtils.getMostSpecificSubclass(r.asResource(), viewClass, typeDecider)
                     : viewClass;
 
