@@ -7,8 +7,8 @@ kramdown:
   parse_block_html: true
 
 exclude:
-  - frontend
-  - src
+  - "**/frontend"
+  - "**/src"
 
 #include:
 #  - docs
