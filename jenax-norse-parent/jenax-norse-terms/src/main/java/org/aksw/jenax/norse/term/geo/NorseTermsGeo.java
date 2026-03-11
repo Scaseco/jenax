@@ -10,4 +10,6 @@ public class NorseTermsGeo {
     public static final String collect = NS + "collect"; // norse:geo.fn.collect?
     public static final String asCollection = NS + "asCollection"; // Convert a node collection to a geometry collection
     public static final String unwrapSingle = NS + "unwrapSingle"; // If the argument is a geometry collection with a single element then return that element
+
+    public static final String scale = NS + "scale"; // Resize a polygon by a factor - center of mass as the origin.
 }

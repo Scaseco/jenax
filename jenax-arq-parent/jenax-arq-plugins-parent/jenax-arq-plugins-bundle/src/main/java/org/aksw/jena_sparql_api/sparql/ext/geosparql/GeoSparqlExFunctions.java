@@ -36,6 +36,7 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.util.AffineTransformation;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
@@ -73,6 +74,27 @@ public class GeoSparqlExFunctions {
         Optional<GeometryWrapper> r = agg.accumulateAll(nodeCollection.stream()
                 .map(node -> BindingFactory.binding(Vars.x, node)), null);
         return r.orElse(null);
+    }
+
+    @Iri(NorseTermsGeo.scale)
+    public static GeometryWrapper scale(GeometryWrapper geometryWrapper, double scaleFactor) {
+        return scale(geometryWrapper, scaleFactor, scaleFactor);
+    }
+
+    // Unfortunately we don't have multi-method support yet.
+    // @Iri(NorseTermsGeo.scale)
+    public static GeometryWrapper scale(GeometryWrapper geometryWrapper, double scaleFactorX, double scaleFactorY) {
+        Geometry geometry = geometryWrapper.getParsingGeometry();
+        Point centroid = geometry.getCentroid();
+        AffineTransformation at = AffineTransformation.scaleInstance(
+            scaleFactorX,
+            scaleFactorY,
+            centroid.getX(),
+            centroid.getY()
+        );
+        Geometry scaledGeometry = at.transform(geometry);
+        GeometryWrapper result = GeometryWrapperUtils.createFromPrototype(geometryWrapper, scaledGeometry);
+        return result;
     }
 
     @Iri(NorseTermsGeo.unwrapSingle)

@@ -212,7 +212,11 @@ public class TestGeoSparqlEx {
         Assert.assertEquals("1", actual);
     }
 
-
+    @Test
+    public void testScale() {
+        String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("norse:geo.scale('POLYGON((-2 -2, 2 -2, 2 2, -2 2, -2 -2))'^^geo:wktLiteral, 0.5)");
+        Assert.assertEquals("POLYGON((-1 -1, 1 -1, 1 1, -1 1, -1 -1))", actual);
+    }
 
 //	@Test
 //	public void testNearestPoints() {

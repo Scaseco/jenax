@@ -138,6 +138,7 @@ public class FunctionBinder {
      * @param clz
      * @param invocationTarget
      */
+    // XXX Add multimethod support!
     public void registerAll(boolean lazy, Class<?> clz, Object invocationTarget) {
         for (Method method : clz.getMethods()) {
             List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
@@ -186,7 +187,7 @@ public class FunctionBinder {
         List<String> iris = AnnotationUtils.deriveIrisFromMethod(method, DefaultPrefixes.get());
         Function result = null;
         for (String iri : iris) {
-            FunctionFactory factory = registry.get(iri);
+            FunctionFactory factory = registry.getFunctionFactory(iri);
             if (factory != null) {
                 result = factory.create(iri);
                 break;
@@ -194,5 +195,4 @@ public class FunctionBinder {
         }
         return result;
     }
-
 }
