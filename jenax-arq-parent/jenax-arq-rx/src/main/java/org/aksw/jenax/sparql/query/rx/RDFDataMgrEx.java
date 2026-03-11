@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,6 +25,9 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jena_sparql_api.rx.ModelFactoryEx;
@@ -35,7 +39,7 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.atlas.web.TypedInputStream;
 import org.apache.jena.graph.Graph;
@@ -55,6 +59,7 @@ import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.RIOT;
 import org.apache.jena.riot.resultset.ResultSetReaderRegistry;
+import org.apache.jena.riot.rowset.RowSetReader;
 import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.riot.system.AsyncParserBuilder;
 import org.apache.jena.riot.system.ErrorHandlerFactory;
@@ -62,13 +67,12 @@ import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 /**
  * Extensions to help open an InputStream of unknown content using probing against languages registered to the Jena riot system.
@@ -90,7 +94,6 @@ public class RDFDataMgrEx {
             // RDFLanguages.TRIX
     ));
 
-
     public static String toString(Model model, RDFFormat rdfFormat) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         RDFDataMgr.write(out, model, rdfFormat);
@@ -102,8 +105,6 @@ public class RDFDataMgrEx {
         RDFDataMgr.write(out, dataset, rdfFormat);
         return out.toString(StandardCharsets.UTF_8);
     }
-
-
 
     public static boolean isStdIn(String filenameOrIri) {
         return "-".equals(filenameOrIri);
@@ -348,6 +349,19 @@ public class RDFDataMgrEx {
         in.mark(1 * 1024 * 1024 * 1024);
     }
 
+    public static Stream<Binding> createStreamBindings(Callable<? extends InputStream> inSupp, Lang lang) {
+        return Stream.of(inSupp).flatMap(is -> {
+            InputStream in;
+            try {
+                in = is.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            RowSet rs = RowSetReader.createReader(lang).read(in, null);
+            return Iter.asStream(rs);
+        });
+    }
+
     /**
      * Probe the content of the input stream against a given set of candidate languages.
      * Wraps the input stream as a BufferedInputStream and can thus also probe on STDIN.
@@ -396,7 +410,7 @@ public class RDFDataMgrEx {
             } else if (RDFLanguages.isTriples(cand)) {
                 flow = builder.streamTriples();
             } else if (ResultSetReaderRegistry.isRegistered(cand)) {
-                flow = RDFDataMgrRx.createFlowableBindings(() -> wbin, cand).blockingStream();
+                flow = createStreamBindings(() -> wbin, cand);
             } else {
                 logger.warn("Skipping probing of unknown Lang: " + cand);
                 continue;
@@ -421,7 +435,7 @@ public class RDFDataMgrEx {
             } catch(Exception e) {
                 logger.debug("Failed to probe with format " + cand, e);
                 if (errorCollector != null) {
-                    errorCollector.add(Pair.of(cand, e));
+                    errorCollector.add(Map.entry(cand, e));
                 }
                 continue;
             } finally {
@@ -456,84 +470,6 @@ public class RDFDataMgrEx {
             boolean tryAllCandidates) {
         return probeLang(in, candidates, tryAllCandidates, new ArrayList<>());
     }
-//    public static TypedInputStream probeLang(
-//            InputStream in,
-//            Iterable<Lang> candidates,
-//            boolean tryAllCandidates) {
-//        if (!in.markSupported()) {
-//            throw new IllegalArgumentException("Language probing requires an input stream with mark support");
-//        }
-//
-////        BufferedInputStream bin = new BufferedInputStream(in);
-//
-//        // Here we rely on the VM/JDK not allocating the buffer right away but only
-//        // using this as the max buffer size
-//        // 1GB should be safe enough even for cases with huge literals such as for
-//        // large spatial geometries (I encountered some around ~50MB)
-//        in.mark(1 * 1024 * 1024 * 1024);
-//
-//        Multimap<Long, Lang> successCountToLang = ArrayListMultimap.create();
-//        for(Lang cand : candidates) {
-//            @SuppressWarnings("resource")
-//            CloseShieldInputStream wbin = new CloseShieldInputStream(in);
-//
-//            //bin.mark(Integer.MAX_VALUE >> 1);
-//            Flowable<?> flow;
-//            if (RDFLanguages.isQuads(cand)) {
-//                flow = RDFDataMgrRx.createFlowableQuads(() -> wbin, cand, null);
-//            } else if (RDFLanguages.isTriples(cand)) {
-//                flow = RDFDataMgrRx.createFlowableTriples(() -> wbin, cand, null);
-//            } else if (ResultSetReaderRegistry.isRegistered(cand)) {
-//                flow = RDFDataMgrRx.createFlowableBindings(() -> wbin, cand);
-//            } else {
-//                logger.warn("Skipping probing of unknown Lang: " + cand);
-//                continue;
-//            }
-//
-//            // Stopwatch sw = Stopwatch.createStarted();
-//
-//            // TODO If there is a syntax error within the first n items
-//            // then the format won't be recognized at all
-//            // We should add an indirection layer that allows to configure the prober
-//            // and query its result before allowing the client to obtain the input stream
-//            int n = 100;
-//            try {
-//                long count = flow.take(n)
-//                        .count()
-//                        .blockingGet();
-//
-//                successCountToLang.put(count, cand);
-//
-//                logger.debug("Number of items parsed by content type probing for " + cand + ": " + count);
-//            } catch(Exception e) {
-//                logger.debug("Failed to probe with format " + cand, e);
-//                continue;
-//            } finally {
-//                // logger.debug("Probing format " + cand + " took " + sw.elapsed(TimeUnit.MILLISECONDS));
-//
-//                try {
-//                    in.reset();
-//                } catch (IOException x) {
-//                    throw new RuntimeException(x);
-//                }
-//            }
-//
-//            if (!tryAllCandidates) {
-//                break;
-//            }
-//        }
-//
-//        Entry<Long, Lang> bestCand = successCountToLang.entries().stream()
-//            .sorted((a, b) -> b.getKey().compareTo(a.getKey()))
-//            .findFirst()
-//            .orElse(null);
-//
-//        ContentType bestContentType = bestCand == null ? null : bestCand.getValue().getContentType();
-//        TypedInputStream result = new TypedInputStream(in, bestContentType);
-//
-//        return result;
-//    }
-
 
     public static void peek(InputStream in) {
         setDefaultMark(in);
@@ -622,19 +558,6 @@ public class RDFDataMgrEx {
         return result;
     }
 
-//    public static RDFIterator<Triple> createIteratorTriples(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-//        InputStream combined = prependWithPrefixes(in, prefixMapping);
-//        RDFIterator<Triple> it = RDFDataMgrRx.createIteratorTriples(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-//        return it;
-//    }
-//
-//
-//    public static RDFIterator<Quad> createIteratorQuads(PrefixMapping prefixMapping, InputStream in, Lang lang) {
-//        InputStream combined = prependWithPrefixes(in, prefixMapping);
-//        RDFIterator<Quad> it = RDFDataMgrRx.createIteratorQuads(combined, lang, null, (thread, throwable) -> {}, thread -> {});
-//        return it;
-//    }
-
     public static Dataset parseTrigAgainstDataset(Dataset dataset, PrefixMapping prefixMapping, InputStream in) {
         // Add namespaces from the spec
         // Apparently Jena does not support parsing against
@@ -655,7 +578,6 @@ public class RDFDataMgrEx {
 
         return dataset;
     }
-
 
     /**
      * Parse the input stream as turtle, thereby prepending a serialization of the given prefix mapping.
