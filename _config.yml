@@ -6,9 +6,9 @@ markdown: kramdown
 kramdown:
   parse_block_html: true
 
-
-# exclude:
-#  - linkedgeodata*
+exclude:
+  - frontend
+  - src
 
 #include:
 #  - docs
