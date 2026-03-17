@@ -37,6 +37,7 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.algebra.OpVars;
+import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.algebra.TransformCopy;
 import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.op.OpGraph;
@@ -943,6 +944,12 @@ public class QueryUtils {
         return elementToQuery(pattern, null);
     }
 
+    /** Create a query whose result set is the given table. */
+    public static Query tableToQuery(Table table) {
+        Element elt = ElementUtils.create(table);
+        Query result = elementToQuery(elt);
+        return result;
+    }
 
     /**
      * This method does basically the same as

@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-utils</artifactId>
-        <name>jenax-arq-utils</name>
+	<name>jenax-arq-utils</name>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -21,7 +21,8 @@
 			<artifactId>jena-arq</artifactId>
 		</dependency>
 
-		<!-- Used for ClassUtils.setField - can be removed once jena opens up certain parts of the AP -->
+		<!-- Used for ClassUtils.setField - can be removed once jena opens up
+		certain parts of the AP -->
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-utils</artifactId>
@@ -31,7 +32,7 @@
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-io-buffers</artifactId>
-<!--			<version>0.9.11-SNAPSHOT</version>-->
+			<!--			<version>0.9.11-SNAPSHOT</version>-->
 		</dependency>
 
 		<dependency>

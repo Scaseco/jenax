@@ -12,10 +12,9 @@ import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSetOps;
-import org.junit.Test;
 
 public class TestDatasetGraphOverRDFEngine {
-    @Test
+    // @Test
     public void test() {
         RDFLinkSourceHTTP linkSource = RDFLinkSourceHTTPSimple.of(builder -> builder.destination("http://linkedgeodata.org/sparql"));
         RDFEngine engine = RDFEngines.of(linkSource);

@@ -25,6 +25,16 @@ public class FileSets {
         }
     }
 
+    public static long countFlat(Path root, String globPattern) {
+        long result[] = {0};
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, globPattern)) {
+            stream.forEach(x -> ++result[0]);
+        } catch (IOException | DirectoryIteratorException e) {
+            throw new RuntimeException(e);
+        }
+        return result[0];
+    }
+
     public static void accumulateFlat(Collection<Path> acc, Path root, String globPattern) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, globPattern)) {
             stream.forEach(acc::add);

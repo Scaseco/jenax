@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import com.google.common.collect.Sets;
 
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
@@ -16,20 +19,20 @@ import org.aksw.jenax.arq.util.var.VarUtils;
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.aksw.jenax.sparql.fragment.impl.Fragment3Impl;
+import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.aksw.jenax.sparql.fragment.impl.FragmentJoiner;
 import org.aksw.jenax.sparql.fragment.impl.FragmentUtils;
-import org.aksw.jenax.sparql.fragment.impl.FragmentImpl;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
+import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementFilter;
-
-import com.google.common.collect.Sets;
 
 /**
  * A (SPARQL) fragment is a unifying abstraction for queries and graph patterns which allows treating both as tables.
@@ -96,6 +99,14 @@ public interface Fragment
      */
     default Fragment rename(List<Var> targetVars) {
         return FragmentUtils.rename(this, targetVars);
+    }
+
+    default Fragment rename(Var... targetVars) {
+        return rename(List.of(targetVars));
+    }
+
+    default Fragment rename(String... targetVarNames) {
+        return rename(Var.varList(List.of(targetVarNames)));
     }
 
     default Fragment1 toFragment1() {
@@ -224,6 +235,21 @@ public interface Fragment
         return project(Arrays.asList(vars));
     }
 
+    default Fragment projectVarNames(String ... vars) {
+        return projectVarNames(Arrays.asList(vars));
+    }
+
+    default Fragment projectVarNames(Collection<String> varNames) {
+        return project(Var.varList(varNames));
+    }
+
+    // Project variables by ordinal. Each variable must only be mentioned once.
+    default Fragment project(int ... ordinals) {
+        List<Var> vars = getVars();
+        List<Var> projVars = IntStream.of(ordinals).mapToObj(vars::get).toList();
+        return project(projVars);
+    }
+
     default Fragment filter(Var var, Node node) {
         return filter(new E_Equals(ExprLib.nodeToExpr(var), ExprLib.nodeToExpr(node)));
     }
@@ -274,7 +300,19 @@ public interface Fragment
     }
 
 
+    public static Fragment of(Element element, Var ... vars) {
+        return new FragmentImpl(element, List.of(vars));
+    }
 
+    public static Fragment of(Element element, List<Var> vars) {
+        return new FragmentImpl(element, vars);
+    }
+
+    public static Fragment of(Table table) {
+        List<Var> vars = table.getVars();
+        ElementData elt = ElementUtils.create(table);
+        return new FragmentImpl(elt, vars);
+    }
 //	public static TernaryRelation from(Triple t) {
 //		new TernaryRelationImpl(ElementUtils.createElement(t), t.getSubject(), t.getPredicate(), t.getObject())
 //	}

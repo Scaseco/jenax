@@ -1,6 +1,5 @@
 package org.aksw.jenax.sparql.fragment.impl;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.aksw.jenax.sparql.fragment.api.Fragment;
@@ -71,8 +70,10 @@ public class FragmentImpl
         return "RelationImpl [element=" + element + ", vars=" + vars + "]";
     }
 
+    @Deprecated // Use of
     public static Fragment create(Element element, Var ... vars) {
-        return new FragmentImpl(element, Arrays.asList(vars));
+        return Fragment.of(element, vars);
     }
 
+    // public static Fragment of(Element )
 }

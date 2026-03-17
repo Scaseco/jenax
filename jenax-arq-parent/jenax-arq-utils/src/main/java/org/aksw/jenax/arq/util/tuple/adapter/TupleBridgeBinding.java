@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.tuple.adapter;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.aksw.commons.tuple.accessor.TupleAccessor;
 import org.aksw.commons.tuple.bridge.TupleBridge;
@@ -31,6 +32,14 @@ public class TupleBridgeBinding
 
     public static TupleBridgeBinding of(Collection<Var> vars) {
         return of(vars.toArray(new Var[0]));
+    }
+
+    public static TupleBridgeBinding ofVarNames(String... varNames) {
+        return ofVarNames(List.of(varNames));
+    }
+
+    public static TupleBridgeBinding ofVarNames(Collection<String> varNames) {
+        return of(Var.varList(varNames));
     }
 
     @Override

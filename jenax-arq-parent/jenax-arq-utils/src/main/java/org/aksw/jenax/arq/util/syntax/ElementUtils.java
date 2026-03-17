@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Iterables;
+
 import org.aksw.commons.collections.MapUtils;
 import org.aksw.commons.collections.generator.Generator;
 import org.aksw.jenax.arq.util.expr.CnfUtils;
@@ -53,8 +55,6 @@ import org.apache.jena.sparql.syntax.ElementWalker;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;
-
-import com.google.common.collect.Iterables;
 //import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 //import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 //import org.apache.jena.sparql.syntax.syntaxtransform.ExprTransformNodeElement;

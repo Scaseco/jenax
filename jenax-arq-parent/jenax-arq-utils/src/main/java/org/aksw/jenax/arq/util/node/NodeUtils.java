@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -221,6 +222,10 @@ public class NodeUtils {
 
     public static List<Node> createLiteralNodes(Iterable<String> strings) {
         return Streams.stream(strings).map(NodeFactory::createLiteralString).collect(Collectors.toList());
+    }
+
+    public static Optional<Number> tryGetNumber(Node node) {
+        return Optional.ofNullable(getNumberNullable(node));
     }
 
     public static Number getNumberNullable(Node node) {

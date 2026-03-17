@@ -98,6 +98,13 @@ public class BindingUtils {
 //    public static Binding clone(Binding binding) {
 //        Binding result = new BindingHashMap();
 //    }
+    public static Binding project(Binding binding, String... varNames) {
+        return projectVarNames(binding, List.of(varNames));
+    }
+
+    public static Binding projectVarNames(Binding binding, Collection<String> varNames) {
+        return project(binding, Var.varList(varNames));
+    }
 
     public static Binding project(Binding binding, Iterable<Var> vars) {
         return project(binding, vars.iterator());
@@ -189,6 +196,11 @@ public class BindingUtils {
         return new NodeTransformSubst(new MapFromBinding(binding));
     }
 
+    public static Number getNumberNullable(Binding binding, String varName) {
+        Var var = Var.alloc(varName);
+        return getNumberNullable(binding, var);
+    }
+
     public static Number getNumberNullable(Binding binding, Node key) {
         Node node = BindingUtils.getValue(binding, key);
         Number result = NodeUtils.getNumberNullable(node);
@@ -197,6 +209,16 @@ public class BindingUtils {
 
     public static Optional<Number> tryGetNumber(Binding binding, Node key) {
         return Optional.ofNullable(getNumberNullable(binding, key));
+    }
+
+    public static Optional<Number> tryGetNumber(Binding binding, String varName) {
+        Var key = Var.alloc(varName);
+        return tryGetNumber(binding, key);
+    }
+
+    public static Number getNumber(Binding binding, String key) {
+        Var var = Var.alloc(key);
+        return getNumber(binding, var);
     }
 
     /** Get a binding's values for var as a number. Raises an NPE if no number can be obtained */
