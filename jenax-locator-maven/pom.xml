@@ -15,7 +15,7 @@
 	</parent>
 
 	<properties>
-		<mima.version>2.4.40</mima.version>
+		<mima.version>2.4.42</mima.version>
 	</properties>
 
 	<dependencies>
