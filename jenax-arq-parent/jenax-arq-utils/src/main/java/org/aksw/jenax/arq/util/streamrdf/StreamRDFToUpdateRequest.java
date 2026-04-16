@@ -149,5 +149,9 @@ public class StreamRDFToUpdateRequest
     public void abort() {
         // executorService.shutdownNow();
     }
+
+    @Override
+    public void version(String version) {
+    }
 }
 

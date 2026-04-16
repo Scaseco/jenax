@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
+
 import org.aksw.jena_sparql_api.algebra.transform.TransformAssignToExtend;
 import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
@@ -56,6 +59,7 @@ import org.apache.jena.sparql.expr.ExprFunctionOp;
 import org.apache.jena.sparql.expr.ExprList;
 import org.apache.jena.sparql.expr.ExprTransformCopy;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
+import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 // import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkConcurrent;
 import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.enhancer.init.ServiceEnhancerInit;
@@ -66,9 +70,6 @@ import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
 import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformCopyBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Stopwatch;
 
 /**
  * A rewrite that attempts to inject cache operations around group by computations.
@@ -110,7 +111,13 @@ public class RdfDataSourceWithLocalLateral
     }
 
     public static Node createServiceIri(int bulkSize, int concurrentSlots) {
-        return NodeFactory.createURI(String.format("loop+scoped:concurrent+%d-%d:bulk+%d:", concurrentSlots, bulkSize, bulkSize));
+        // Omit "concurrent" if concurrentSlots is zero.
+        String serviceStr = (concurrentSlots == 0)
+            ? (bulkSize == 1)
+                ? "loop+scoped:"
+                : String.format("loop+scoped:bulk+%d:", bulkSize)
+            : String.format("loop+scoped:concurrent+%d-%d:bulk+%d:", concurrentSlots, bulkSize, bulkSize);
+        return NodeFactory.createURI(serviceStr);
     }
 
     public static class TransformLateralToBulk

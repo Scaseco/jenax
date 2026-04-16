@@ -69,4 +69,9 @@ public class SinkStreamingStreamRDF
     public void prefix(String prefix, String iri) {
         streamRDF.prefix(prefix, iri);
     }
+
+    @Override
+    public void version(String version) {
+        streamRDF.version(version);
+    }
 }

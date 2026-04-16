@@ -183,4 +183,8 @@ public class StreamRDFDeferred
         delegate.finish();
     }
 
+    @Override
+    public void version(String version) {
+        delegate.version(version);
+    }
 }

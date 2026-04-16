@@ -1,6 +1,6 @@
 package org.aksw.jenax.sparql.fragment.api;
 
-import java.util.Set;
+import java.util.List;
 
 import org.apache.jena.sparql.core.Var;
 
@@ -10,8 +10,8 @@ import org.apache.jena.sparql.core.Var;
  *
  */
 public interface GeneralizedFragment2
-	extends Fragment
+    extends Fragment
 {
-	Set<Var> getSourceVars();
-	Set<Var> getTargetVars();
+    List<Var> getSourceVars();
+    List<Var> getTargetVars();
 }

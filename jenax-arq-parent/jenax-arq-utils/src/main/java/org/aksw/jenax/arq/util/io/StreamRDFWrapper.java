@@ -6,9 +6,10 @@ import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.sparql.core.Quad;
 
 /**
- * A wrapper around another {@link StreamRDF}. Differs from Jena's {@link StreamRDFWriter} that its an interface and
- * all methods use delegate to getDelegate().
- *
+ * A wrapper around another {@link StreamRDF}.
+ * Differs from Jena's {@link StreamRDFWriter} that its an interface
+ * (with default methods − aka a "mixin")
+ * and all methods use delegate to getDelegate().
  */
 public interface StreamRDFWrapper extends StreamRDF
 {
@@ -37,4 +38,8 @@ public interface StreamRDFWrapper extends StreamRDF
     @Override
     default void finish()
     { getDelegate().finish() ; }
+
+    @Override
+    default void version(String version)
+    { getDelegate().version(version) ; }
 }

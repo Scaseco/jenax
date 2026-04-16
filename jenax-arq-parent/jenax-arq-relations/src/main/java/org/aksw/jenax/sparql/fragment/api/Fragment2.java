@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+
 import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.jenax.sparql.fragment.impl.Fragment2Impl;
 import org.apache.jena.graph.Triple;
@@ -19,8 +21,6 @@ import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 
-import com.google.common.collect.Sets;
-
 public interface Fragment2
     extends GeneralizedFragment2
 {
@@ -28,13 +28,13 @@ public interface Fragment2
     Var getTargetVar();
 
     @Override
-    default Set<Var> getSourceVars() {
-        return Collections.singleton(getSourceVar());
+    default List<Var> getSourceVars() {
+        return Collections.singletonList(getSourceVar());
     }
 
     @Override
-    default Set<Var> getTargetVars() {
-        return Collections.singleton(getTargetVar());
+    default List<Var> getTargetVars() {
+        return Collections.singletonList(getTargetVar());
     }
 
     default Set<Var> getMarkedVars() {
