@@ -1,0 +1,47 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT DISTINCT ?class ?parent (?l AS ?label) {
+    {
+      { SELECT DISTINCT ?class {
+          { ?class a owl:Class }
+        UNION
+          { ?class a rdfs:Class }
+        UNION
+          { ?class rdfs:subClassOf ?x }
+        UNION
+          { ?x rdfs:subClassOf ?class }
+      } }
+      OPTIONAL { ?class rdfs:subClassOf ?p . FILTER(!isblank(?p)) . } .
+      BIND(coalesce(?p, if(contains(str(?class),"/meta"), owl:MetaThing, owl:Thing)) AS ?parent) .
+      OPTIONAL { ?class rdfs:label ?l } .
+    }
+  UNION
+    {
+      { SELECT DISTINCT ?class {
+          { ?class a skos:Concept }
+        UNION
+          { ?class skos:broader ?x }
+        UNION
+          { ?x skos:broader ?class }
+        UNION
+          { ?class skos:narrower ?x }
+        UNION
+          { ?x skos:narrower ?class }
+      } }
+      OPTIONAL { ?class skos:broader ?p . FILTER(!isblank(?p)) . } .
+      OPTIONAL { ?class skos:inScheme ?scheme . FILTER(!isblank(?schema))}
+      BIND(coalesce(?p, ?scheme) AS ?parent) .
+      OPTIONAL { ?class skos:prefLabel ?l1 } .
+      OPTIONAL { ?class rdfs:label ?l2 }
+      BIND(coalesce(?l1, ?l2) AS ?l)
+    }
+  UNION
+    {
+       ?x skos:inScheme ?class .
+       BIND(skos:ConceptScheme AS ?parent) .
+       BIND("ConceptScheme" AS ?l)
+    }
+}
