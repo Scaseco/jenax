@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -25,9 +26,11 @@ import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
+import org.aksw.jenax.engine.qlever.QleverCliProberIndexBuilder.CliType;
 import org.aksw.jenax.shellgebra.cmd.ArgsBuilderJena;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.aksw.shellgebra.algebra.cmd.arg.CmdArg;
+import org.aksw.shellgebra.algebra.cmd.arg.CmdArgVisitorRenderAsBashString;
 import org.aksw.shellgebra.algebra.cmd.op.CmdOp;
 import org.aksw.shellgebra.algebra.cmd.op.CmdOps;
 import org.aksw.shellgebra.algebra.cmd.transform.CmdOpVisitorToCmdString;
@@ -49,6 +52,9 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.sparql.core.Quad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ArrayNode;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jenax.engine.qlever.docker.QleverConstants;
 
@@ -65,7 +71,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
     private static final Logger logger = LoggerFactory.getLogger(RDFDatabaseBuilderQlever.class);
 
     /** Record to capture arguments passed to this builder */
-    public record FileLoadEntry(Path path, Lang lang, List<String> encodings, Node graph) {}
+    public record FileLoadEntry(Path path, Lang lang, List<String> encodings, Node graph, Boolean splittable) {}
 
     /** Record to capture a set of files that make up a Qlever database. */
     public record QleverDbFileSet(List<Path> paths) implements FileSet {
@@ -152,22 +158,46 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         return config.getStxxlMemory();
     }
 
-    @Override
-    public X addPath(String source, Node g) throws IOException {
-        Path path = Path.of(source);
-        RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedInputLangs);
-        String contentType = entityInfo.getContentType();
-        Lang lang = RDFLanguages.contentTypeToLang(contentType);
-        // TODO Make sure that any needed conversion exists!
-        if (lang == null) {
-            throw new RuntimeException("Could not detect lang for path: " + path + " - contentType: " + contentType);
-        }
-        addPath(path, g, entityInfo.getContentEncodings(), lang);
+    public X setParserBufferSize(String bufferSize) {
+        config.setParserBufferSize(bufferSize);
         return self();
     }
 
-    protected void addPath(Path source, Node graph, List<String> encodings, Lang lang) {
-        FileLoadEntry arg = new FileLoadEntry(source, lang, encodings, graph);
+    public String getParserBufferSize() {
+        return config.getParserBufferSize();
+    }
+
+    @Override
+    public X addPath(String source, Lang lang, Node g, Boolean splittable) throws IOException {
+        Objects.requireNonNull(source);
+        Path path = Path.of(source);
+        String contentTypeStr = null;
+        if  (lang != null) {
+            contentTypeStr = Optional.ofNullable(lang.getContentType()).map(ContentType::getContentTypeStr).orElse(null);
+        } else {
+            ContentType contentType = RDFLanguages.guessContentType(source);
+            if (contentType != null) {
+                lang = RDFLanguages.contentTypeToLang(contentType);
+                contentTypeStr = contentType.getContentTypeStr();
+            }
+        }
+        // Need to probe for (compression) encodings
+        RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedInputLangs);
+        if (lang == null) {
+            contentTypeStr = entityInfo.getContentType();
+            lang = RDFLanguages.contentTypeToLang(contentTypeStr);
+        }
+
+        // TODO Make sure that any needed conversion exists!
+        if (lang == null) {
+            throw new RuntimeException("Could not detect lang for path: " + path + " - contentType: " + contentTypeStr);
+        }
+        addPath(path, g, entityInfo.getContentEncodings(), lang, null);
+        return self();
+    }
+
+    protected void addPath(Path source, Node graph, List<String> encodings, Lang lang, Boolean splittable) {
+        FileLoadEntry arg = new FileLoadEntry(source, lang, encodings, graph, splittable);
         args.add(arg);
     }
 
@@ -276,6 +306,22 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
      */
     @Override
     public RdfDatabaseQlever build() throws IOException, InterruptedException {
+        String imageName = config.getDockerImageName();
+        String imageTag = config.getDockerImageTag();
+        String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
+
+        Optional<CliType> cliVersion = QleverCliProberIndexBuilder.probe(finalImageName);
+
+        if (cliVersion.isEmpty()) {
+            throw new RuntimeException("Could not detect index builder command in " + finalImageName + " - known types: " + Arrays.asList(QleverCliProberIndexBuilder.CliType.values()));
+        }
+
+        String indexBuilderCommand = cliVersion.get().getCommandName();
+        return build(finalImageName, indexBuilderCommand);
+    }
+
+    /** Build for 'v1' command line using IndexBuilderMain */
+    public RdfDatabaseQlever build(String finalImageName, String indexBuilderCommand) throws IOException, InterruptedException {
         // The parent directory must exist
         Path outputFolder = config.getOutputFolder();
         Path parentFolder = outputFolder.getParent();
@@ -345,14 +391,14 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
                 args.add(CmdArg.ofLiteral(stxxlMemory));
             }
 
+            String parserBufferSize = config.getParserBufferSize();
+            if (parserBufferSize != null && !parserBufferSize.isBlank()) {
+                args.add(CmdArg.ofLiteral("--parser-buffer-size"));
+                args.add(CmdArg.ofLiteral(parserBufferSize));
+            }
+
             args.addAll(spec);
 
-            String imageName = config.getDockerImageName();
-            String imageTag = config.getDockerImageTag();
-//          Path outputFolder = config.getOutputFolder();
-//          // Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
-      //
-            String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
             ExecSite execSite = ExecSites.docker(finalImageName);
 
             //Path sharedPath = Path.of("/tmp/shared");
@@ -377,7 +423,7 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
 
                 List<String> containerArgv = CmdArg.toPlainArgs(containerArgs);
 
-                String rawCmd = "IndexBuilderMain " + CmdOpVisitorToCmdString.toArg(containerArgv);
+                String rawCmd = indexBuilderCommand + " " + CmdOpVisitorToCmdString.toArg(containerArgv);
                 // String cmd = "'" + CmdStrOpsBash.get().escapeTokenSingleQuote(rawCmd) + "'";
                 // String cmd = CmdStrOpsBash.get().escapeTokenSingleQuote(rawCmd);
 
@@ -424,760 +470,213 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         }
         return (T)r;
     }
-}
 
-// container.addFileSystemBind(outputFolder.toAbsolutePath().toString(), "/data", BindMode.READ_WRITE);
-/**
- * hostFileWriterTask:
- *               The name of a regular file or a named pipe on the host.
- *               The writer may be a noop or a generator for that file's content.
- * bind:         Docker bind specification of the hostFile into a container path
- * cmdContrib:   Contribution to the docker invocation. Contains the container file path and any post-processing.
- */
-// public record FileUnit(List<CmdArg> cmdContrib) {}
-// FileWriterTask hostFileWriterTask, Bind bind,
-
-// public record InputSpec(List<FileUnit> dataBridges) {}
-
-
-
-//  /** Record to hold either a command for a ProcessBuilder that produces output or a ByteSource. */
-//  public static record ByteSourceSpec(CmdOp cmdOp, ByteSource byteSource, Lang lang) {
-//  /* cmd arg should be copied
-//  public ByteSourceCmd(String[] cmd, ByteSource byteSource) {
-//      this(Arrays.copy(cmd, cmd,length), byteSource);
-//  }
-//  */
-//  }
-//protected StreamOpTransformToCmdOp sysCallTransform() {
-//    CodecRegistry reg = CodecRegistry.get();
-//    SysRuntime runtime = getRuntime();
-//    CodecSysEnv env = new CodecSysEnv(runtime);
-//    StreamOpTransformToCmdOp sysCallTransform = new StreamOpTransformToCmdOp(reg, env); // , Mode.COMMAND_GROUP);
-//    return sysCallTransform;
-//}
-
-/**
- * On the host side: create a FileWriter for a file that can be mounted into the container
- * bridge: create a bind of the host file to a container path.
- *   (the host file is not required to exist at this stage)
- * On the container side: create a StreamOp that reads the container file.
- *
- *
- * @return
- */
-//public StreamOpTransformExecutionPartitioner execPartitionTransform() {
-//    StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//    StreamOpTransformExecutionPartitioner execPartitioner = new StreamOpTransformExecutionPartitioner(sysCallTransform);
-//
-//
-//}
-//
-//protected ByteSourceSpec buildByteSourceCmd(List<StreamOp> args, Lang lang) {
-//    // Inject a dummy codec 'cat' to cat immediate file arguments
-//    // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile
-//    args = args.stream()
-//        .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode(TranscodeMode.DECODE, "cat", f) : x)
-//        .toList();
-//
-//    StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//
-//    StreamOp javaOp = StreamOpConcat.of(args);
-//    SysRuntime sysRuntime = SysRuntimeImpl.forCurrentOs();
-//
-//    ByteSource javaByteSource = new ByteSourceOverStreamOp(javaOp); // TODO Supply sysRuntime
-//
-//    // Try to compile the codec op to a system call.
-//    StreamOp sysOp = StreamOpTransformer.transform(javaOp, sysCallTransform);
-//
-//    ByteSourceSpec result;
-//    if (sysOp instanceof StreamOpCommand codecOp) {
-//        CmdOp cmdOp = codecOp.getCmdOp();
-//        // String[] cmd = SysRuntimeImpl.forBash().compileCommand(cmdOp);
-//        result = new ByteSourceSpec(cmdOp, javaByteSource, lang);
-//    } else {
-//        result = new ByteSourceSpec(null, javaByteSource, lang);
-//    }
-//    return result;
-//}
-
-/** A list of binds for file arguments or a byte source with the input data - mutually exclusive. */
-// public record BindsOrStream(List<Bind> binds, ByteSourceCmd byteSource) {}
-
-
-/** Record to capture whether to pass input data as files or as an input stream. */
-// XXX The lang argument is not ideal here - a mime type would be more generic.
-/*
-public record InputSpecOld(FileSpec fileSpec, ByteSourceSpec byteSourceSpec, Lang byteSourceSpecLang) {}
-
-protected InputSpecOld buildInputSpecOld() {
-    Set<Lang> usedLangs = args.stream().map(FileArg::lang).collect(Collectors.toSet());
-    // TODO Remove subsumed languages
-    // Check whether any arguments require decoding.
-    // RDFLanguagesEx.streamSubLangs(null)
-    List<StreamOp> ops = args.stream().map(this::convertArgToOp).toList();
-
-    boolean isAllFiles = ops.stream().allMatch(op -> op instanceof StreamOpFile);
-
-    InputSpecOld result;
-    if (isAllFiles) {
-        FileSpec fileSpec = buildFileSpec();
-        result = new InputSpecOld(fileSpec, null, null);
-    } else {
-        if (usedLangs.contains(Lang.NQUADS) && usedLangs.contains(Lang.TURTLE)) {
-            throw new RuntimeException("Unsupported mix of languages: nq + ttl");
-        }
-
-        Lang finalLang = usedLangs.iterator().next();
-        ByteSourceSpec byteSourceCmd = buildByteSourceCmd(ops, finalLang);
-        result = new InputSpecOld(null, byteSourceCmd, finalLang);
-    }
-    return result;
-}
-
-public RdfDatabaseQlever buildOld() throws IOException, InterruptedException {
-    InputSpecOld inputSpec = null ;// buildInputSpec();
-
-    FileSpec fileSpec = inputSpec.fileSpec();
-    if (fileSpec != null) {
-        runContainerWithFileArgs(fileSpec);
-    } else {
-        ByteSourceSpec byteSourceSpec = inputSpec.byteSourceSpec();
-        CmdOp cmdOp = byteSourceSpec.cmdOp();
-        // String[] cmd = byteSourceSpec.cmd();
-        ByteSource byteSource = byteSourceSpec.byteSource();
-        Lang lang = byteSourceSpec.lang();
-        if (cmdOp != null) {
-            runContainerViaSysCall(cmdOp, lang);
-        } else if (byteSource != null) {
-            // runContainerWithInputStream(byteSource, lang);
-            runContainerViaSysCallWithInputStream(byteSource, lang);
-        } else {
-            throw new IllegalStateException("Unexpected error: Failed to determine a strategy to process the input data");
-        }
-    }
-
-    RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, indexName);
-    return result;
-}
-
-    protected FileSpec buildFileSpec() {
-    List<String> cmdParts = new ArrayList<>();
-    Map<String, String> fsBinds = new LinkedHashMap<>();
-    for (FileArg arg : args) {
-
-        Path path = arg.path();
-        if (containerPathResolver != null) {
-            if (path != null) {
-                path = path.toAbsolutePath();
-                Path resolvedPath = containerPathResolver.resolve(path);
-                logger.info("Resolved path: " + path + " -> " + resolvedPath);
-                path = resolvedPath;
+    /**
+     * Build for using directly qlever index (not {@code qlever-index} with a dash)
+     * TODO UNFINISHED and subject to removal - because relying on the index builder is sufficient as long
+     * as this api does not get removed.
+     *
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private RdfDatabaseQlever buildV2() throws IOException, InterruptedException {
+        // The parent directory must exist
+        Path outputFolder = config.getOutputFolder();
+        Path parentFolder = outputFolder.getParent();
+        if (parentFolder != null) {
+            if (!Files.exists(parentFolder)) {
+                throw new NoSuchFileException("Folder does not exist: " + parentFolder);
             }
         }
+        Files.createDirectories(outputFolder);
 
-        String fileArg = Optional.ofNullable(path)
-            .map(Path::toString)
-            .orElse("-");
+        String finalIndexName = getFinalIndexName();
 
-        String uriStr = arg.path().toUri().toString();
-        String shortName = shortNameMgr.allocate(uriStr).localName();
+        // Resource manager to close all task at the end
+        FinallyRunAll closer = FinallyRunAll.create();
 
-        String graphArg = Optional.ofNullable(arg.graph())
-            .filter(g -> Quad.isDefaultGraph(g))
-            .map(Node::getURI).orElse("-");
+        // tempPath is only created on demand.
+        Path[] tempPath = new Path[]{null};
 
-        String fmtArg = Optional.ofNullable(arg.lang())
-            .map(l -> l.getFileExtensions())
-            .map(l -> l.isEmpty() ? null : l.get(0))
-            .orElse("");
+        try {
+            Supplier<Path> getHostTempPath = () -> {
+                // In a DooD or DinD setup, its easiest if the folder for the named pipes (fifo)
+                // resides within the database location.
+                // A check must be made that the database location is mounted from the host so that
+                // it can be shared with the secondary container.
 
-        String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
-        cmdParts.add(cmdPart);
+                try {
+                    Path r = tempPath[0];
+                    if (r == null) {
+                        r = Files.createTempDirectory(outputFolder, "qlever-loader");
+                        // r = ContainerPathResolver.expectResolvePath(containerPathResolver, r);
+                        tempPath[0] = r;
+                    }
+//                    = tempPath[0] != null
+//                        ? tempPath[0]
+//                        : (tempPath[0] = ContainerPathResolver.resolvePath(containerPathResolver,
+//                                Files.createTempDirectory("qlever-loader")));
 
-        fsBinds.put(fileArg, "/data/" + shortName);
-    }
+                    logger.info("Created fifo folder: " + r);
+                    return r;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
 
-    List<Bind> binds = fsBinds.entrySet().stream()
-        .map(e -> new Bind(e.getKey(), new Volume(e.getValue()), AccessMode.ro))
-        .toList();
+            closer.add(() -> {
+                Path p = tempPath[0];
+                if (p != null) {
+                    try {
+                        Files.deleteIfExists(p);
+                    } catch (IOException e) {
+                        // FIXME Usually if we get here it means that the loading failed
+                        //       and some files were not cleaned up.
+                        logger.warn("Could not delete fifo folder on host: " + p, e);
+                    }
+                }
+            });
 
-    String[] argParts = cmdParts.toArray(String[]::new);
+            String imageName = config.getDockerImageName();
+            String imageTag = config.getDockerImageTag();
+//          Path outputFolder = config.getOutputFolder();
+//          // Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
+      //
+            String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
+            ExecSite execSite = ExecSites.docker(finalImageName);
 
-    return new FileSpec(argParts, binds);
-}
-*/
-/**
- * hostFileWriterTask:
- *               The name of a regular file or a named pipe on the host.
- *               The writer may be a noop or a generator for that file's content.
- * bind:         Docker bind specification of the hostFile into a container path
- * cmdContrib:   Contribution to the docker invocation. Contains the container file path and any post-processing.
- */
-// public record FileUnit(List<CmdArg> cmdContrib) {}
-// FileWriterTask hostFileWriterTask, Bind bind,
+            //Path sharedPath = Path.of("/tmp/shared");
+            FileMapper fileMapper = FileMapper.of(containerFifoPath);
+            // fileMapper.getBinds().add(null)
+            CmdExecSystem cmdExecSystem = CmdExecSystem.newBuilder().build();
+            try (ProcessRunner processCxt = ProcessRunnerPosix.create()) {
+                // CmdOpVisitorToCmdString.toArg(containerArgv);
 
-// public record InputSpec(List<FileUnit> dataBridges) {}
+                ObjectMapper mapper = new ObjectMapper();
+                ArrayNode rootArray = mapper.createArrayNode();
 
+                // For each file, check whether any operations need to be performed on the host
+                for (FileLoadEntry fileArg : args) {
+                    Lang lang = fileArg.lang();
+                    Node graph = fileArg.graph();
+                    CmdArg cmdArg = convertArgToOp(fileArg);
 
+                    CmdArgActiveProcessSubstitution activeArg = cmdExecSystem.exec(processCxt, fileMapper, cmdArg, execSite);
+                    CmdArg hostArg = activeArg.cmdArg();
+                    CmdArg containerArg = CmdOpRewriter.rewriteForContainer(hostArg, fileMapper);
 
-///** Record to hold either a command for a ProcessBuilder that produces output or a ByteSource. */
-//public static record ByteSourceSpec(CmdOp cmdOp, ByteSource byteSource, Lang lang) {
-//  /* cmd arg should be copied
-//  public ByteSourceCmd(String[] cmd, ByteSource byteSource) {
-//      this(Arrays.copy(cmd, cmd,length), byteSource);
-//  }
-//  */
-//}
-//protected StreamOpTransformToCmdOp sysCallTransform() {
-//    CodecRegistry reg = CodecRegistry.get();
-//    SysRuntime runtime = getRuntime();
-//    CodecSysEnv env = new CodecSysEnv(runtime);
-//    StreamOpTransformToCmdOp sysCallTransform = new StreamOpTransformToCmdOp(reg, env); // , Mode.COMMAND_GROUP);
-//    return sysCallTransform;
-//}
+                    String containerArgStr = CmdArgVisitorRenderAsBashString.render(containerArg);
 
-/**
- * On the host side: create a FileWriter for a file that can be mounted into the container
- * bridge: create a bind of the host file to a container path.
- *   (the host file is not required to exist at this stage)
- * On the container side: create a StreamOp that reads the container file.
- *
- *
- * @return
- */
-//public StreamOpTransformExecutionPartitioner execPartitionTransform() {
-//    StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//    StreamOpTransformExecutionPartitioner execPartitioner = new StreamOpTransformExecutionPartitioner(sysCallTransform);
-//
-//
-//}
-//
-//protected ByteSourceSpec buildByteSourceCmd(List<StreamOp> args, Lang lang) {
-//    // Inject a dummy codec 'cat' to cat immediate file arguments
-//    // FIXME HACK 'cat' is certainly not a transcoding operation! Its something like StreamOpFile
-//    args = args.stream()
-//        .map(x -> x instanceof StreamOpFile f ? new StreamOpTranscode(TranscodeMode.DECODE, "cat", f) : x)
-//        .toList();
-//
-//    StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//
-//    StreamOp javaOp = StreamOpConcat.of(args);
-//    SysRuntime sysRuntime = SysRuntimeImpl.forCurrentOs();
-//
-//    ByteSource javaByteSource = new ByteSourceOverStreamOp(javaOp); // TODO Supply sysRuntime
-//
-//    // Try to compile the codec op to a system call.
-//    StreamOp sysOp = StreamOpTransformer.transform(javaOp, sysCallTransform);
-//
-//    ByteSourceSpec result;
-//    if (sysOp instanceof StreamOpCommand codecOp) {
-//        CmdOp cmdOp = codecOp.getCmdOp();
-//        // String[] cmd = SysRuntimeImpl.forBash().compileCommand(cmdOp);
-//        result = new ByteSourceSpec(cmdOp, javaByteSource, lang);
-//    } else {
-//        result = new ByteSourceSpec(null, javaByteSource, lang);
-//    }
-//    return result;
-//}
+                    ObjectNode file = mapper.createObjectNode();
+                    file.put("cmd", "cat " + containerArgStr);
 
-/** A list of binds for file arguments or a byte source with the input data - mutually exclusive. */
-// public record BindsOrStream(List<Bind> binds, ByteSourceCmd byteSource) {}
+                    Lang l = fileArg.lang;
+                    if (l != null) {
+                        String fmt;
+                        if (Lang.NTRIPLES.equals(l)) {
+                            fmt = "nt";
+                        } else if (Lang.NQUADS.equals(l)) {
+                            fmt = "nq";
+                        } else if (Lang.TURTLE.equals(l)) {
+                            fmt = "ttl";
+                        } else {
+                            throw new RuntimeException("Unsupported format: " + l);
+                        }
+                        file.put("format", fmt);
+                    }
 
+                    if (fileArg.graph != null) {
+                        file.put("graph", fileArg.graph.getURI());
+                    }
+                    if (fileArg.splittable != null) {
+                        file.put("parallel", fileArg.splittable);
+                    }
 
-//protected FileWriterTask createHostFileWriter(Supplier<Path> tempPathSupp, CmdOp sysCallOp) throws NoSuchFileException {
-//}
-//
-//protected FileWriterTask createHostFileWriter(Supplier<Path> tempPathSupp, StreamOp sysCallOp) throws NoSuchFileException {
-//  StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//  FileWriterTask hostFileWriter;
-//  if (sysCallOp instanceof StreamOpFile opFile) {
-//      // Case 1: Direct filename
-//      String hostFileName = opFile.getPath();
-//      Path hostPath = Path.of(hostFileName).toAbsolutePath();
-//      if (!Files.exists(hostPath)) {
-//          throw new NoSuchFileException("" + hostPath);
-//      }
-//      hostFileWriter = new FileWriterTaskNoop(hostPath);
-//  } else {
-//      // Case 2: Stream to named pipe - we need to allocate a file on the host
-//      Path tempPath = tempPathSupp.get();
-//      String hostFileName = StreamOpPlanner.streamOpToFileName(sysCallOp);
-//
-//      String plainFileName = Path.of(hostFileName).getFileName().toString();
-//      Path hostPath = tempPath.resolve(plainFileName);
-//      // Path hostPath = Path.of(hostFileName).toAbsolutePath();
-//
-//      StreamOp sysOp = StreamOpTransformer.transform(sysCallOp, sysCallTransform);
-//
-//      if (sysOp instanceof StreamOpCommand streamOpCmd) {
-//          CmdOp cmdOp = streamOpCmd.getCmdOp();
-//          String hostPathStr = hostPath.toString();
-//          CmdRedirect redirect = CmdRedirect.out(hostPathStr);
-//          // CmdOpRedirectRight redirectOp = new CmdOpRedirectRight(hostPathStr, cmdOp);
-//          CmdOp redirectOp = CmdOps.appendRedirect(cmdOp, redirect);
-//
-//          SysRuntime runtime = getRuntime();
-//          String[] cmd = runtime.compileCommand(redirectOp);
-//          hostFileWriter = new FileWriterTaskFromProcess(hostPath, PathLifeCycles.deleteAfterExec(PathLifeCycles.namedPipe()), cmd);
-//      } else {
-//          throw new IllegalStateException("Execution partitioner suggested that operation could be executed via sys call - but sys call generation failed.");
-//      }
-//  }
-//  return hostFileWriter;
-//}
+                    rootArray.add(file);
+                }
 
-//protected String toFlatPath(Path folderPat, Path filePath) {
-//
-//}
+                Path outputPath = outputFolder.resolve("qlever_inputs.json");
 
+                // Generate string in memory
+                String qleverJson = mapper.writeValueAsString(rootArray);
 
+                // Write the string instantly via NIO
+                Files.writeString(outputPath, qleverJson);
+//            [
+//             {
+//               "cmd": "cat file1.nt",
+//               "format": "nt",
+//               "graph": "http://my.graph"
+//               "parallel": true
+//             },
+//             {
+//               "cmd": "cat file2.nq",
+//               "format": "nq",
+//               "graph": "http://my.other"
+//             }
+//            ]
 
-//StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-//StreamOpTransformExecutionPartitioner execPartitioner = new StreamOpTransformExecutionPartitioner(sysCallTransform);
+                List<CmdArg> as = new ArrayList<>();
+                as.add(CmdArg.ofLiteral("qlever"));
+                as.add(CmdArg.ofLiteral("index"));
 
-// The operation that could not be handled by system calls
-//StreamOpEntry<Location> nonSysCallOpEntry = StreamOpTransformer.transform(op, execPartitioner);
-//StreamOp nonSysCallOp = nonSysCallOpEntry.getKey();
-//Location location = nonSysCallOpEntry.getValue();
-//
-//// The operation(s) executable on the host - there should typically be at most one.
-//Map<String, StreamOp> hostOps = execPartitioner.getVarToOp();
-//
-//// Process the host side
-//FileWriterTask hostFileWriter;
-//String plainFileName;
-//if (location == Location.HANDLED) {
-//hostFileWriter = createHostFileWriter(hostTempPathSupp, nonSysCallOp);
-//plainFileName = hostFileWriter.getOutputPath().getFileName().toString();
-////if (nonSysCallOp instanceof StreamOpFile) {
-////    // We can use the file directly
-////    hostFileWriter = createHostFileWriter(hostTempPathSupp, nonSysCallOp);
-////} else if (nonSysCallOp instanceof StreamOpVar opVar) {
-////    // Here everything can be handled by a sys call.
-////    // We either have a direct file or a stream.
-////    String varName = opVar.getVarName();
-////    StreamOp sysCallOp = hostOps.get(varName);
-////    hostFileWriter = createHostFileWriter(hostTempPathSupp, sysCallOp);
-////} else {
-////    throw new IllegalStateException("Support for other ops not implemented yet.");
-////}
-//} else {
-//// We need to handle some parts in java - expand variables with their definitions again.
-//Path hostTempPath = hostTempPathSupp.get();
-//String hostFileName = StreamOpPlanner.streamOpToFileName(nonSysCallOp, hostOps::get);
-//plainFileName = Path.of(hostFileName).getFileName().toString();
-//Path hostPath = hostTempPath.resolve(plainFileName); // Path.of(hostFileName).toAbsolutePath();
-//// StreamOp sysOp = StreamOpTransformer.transform(sysCallOp, sysCallTransform);
-//
-//StreamOp finalOp = StreamOpTransformSubst.subst(nonSysCallOp, hostOps);
-//ByteSource javaByteSource = new ByteSourceOverStreamOp(finalOp, hostOps); // TODO Supply sysRuntime
-//logger.info("Transformed: " + hostPath + " -> " + finalOp);
-//logger.info("Host Ops: " + hostOps);
-//hostFileWriter = new FileWriterTaskFromByteSource(hostPath, PathLifeCycles.deleteAfterExec(PathLifeCycles.namedPipe()), javaByteSource);
-//}
-//
-//FileAndCmd containerFileAndCmd = buildCmdPart(containerFifoPath, plainFileName, graph, lang);
-//
-//// Path finalHostFileWriterPath = ContainerPathResolver.resolvePath(containerPathResolver, hostFileWriter.getOutputPath());
-//Path finalHostFileWriterPath = hostFileWriter.getOutputPath();
-//
-//Bind bind = new Bind(finalHostFileWriterPath.toString(), new Volume(containerFileAndCmd.fileName()), AccessMode.ro);
-//
-//FileUnit result = new FileUnit(hostFileWriter, bind, containerFileAndCmd.cmd());
-//return result;
+                as.add(CmdArg.ofLiteral("-i"));
+                as.add(CmdArg.ofLiteral(finalIndexName));
 
-//class LangConverterToolRegistry {
-//  protected List<Lang> supportedInputLangs;
-//  protected List<Lang> supportedOutputLangs;
-//
-//  public boolean supports(Lang from, Lang to) {
-//      boolean isInputSupported = supportedInputLangs.contains(from);
-//      boolean isOutputSupported = supportedOutputLangs.contains(to);
-//      boolean result = isInputSupported && isOutputSupported;
-//      return result;
-//  }
-//
-////  public LangConverterToolRegistry forRapper() {
-////      RdfContent
-////      return  = Collections.unmodifiableList(Arrays.asList(Lang.NTRIPLES, Lang.TURTLE, Lang.NQUADS, Lang.RDFXML));
-////      Collections.unmodifiableList(Arrays.asList(Lang.NTRIPLES, Lang.NQUADS, Lang.TURTLE, Lang.NQUADS));
-////  }
-//}
-//
-//class LangConverter {
-//  /** Langs supported by this database builder. The builder may convert e.g. rdf/xml to ntriples for the backend. */
-//  public static final List<Lang> supportedInputLangs = Collections.unmodifiableList(Arrays.asList(Lang.TURTLE, Lang.NQUADS, Lang.RDFXML));
-//
-//  // N-quads listed first because non-supported formats are converted to this by default.
-//  // Order matters here: N-triples and n-quads are the first conversion targets for triple/quad based languages.
-//  public static final List<Lang> supportedBackendLangs = Collections.unmodifiableList(Arrays.asList(Lang.NTRIPLES, Lang.NQUADS, Lang.TURTLE, Lang.NQUADS));
-//
-//  // TODO We need a converter registry so that we know which tool supports which arguments.
-//  // ContentConvertRegistry
-//  public Lang getTargetLang(Lang inputLang) {
-//      if (!supportedInputLangs.contains(inputLang)) {
-//          for (Lang backendLang : supportedBackendLangs) {
-//
-//          }
-//      }
-//  }
-//}
-/**
- * Command contribution to process a given file.
- * The fileName is the container-relative path of the input file.
- * The input file will be bind-mounted to that fileName.
- */
-// public static record FileAndCmd(String fileName, String[] cmd) {}
+                String stxxlMemory = config.getStxxlMemory();
+                if (stxxlMemory != null && !stxxlMemory.isBlank()) {
+                    as.add(CmdArg.ofLiteral("--stxxl-memory"));
+                    as.add(CmdArg.ofLiteral(stxxlMemory));
+                }
 
-//protected FileAndCmd buildCmdPart(String containerBasePath, String fileArg, Node graph, Lang lang) {
-////    CmdOp cmdOp;
-////    if (containerOp instanceof StreamOpFile opFile) {
-////        cmdOp = new CmdOpFile(opFile.getPath());
-////    } else {
-////        // String fileArg = StreamOpPlanner.streamOpToFileName(containerOp);
-////        StreamOpTransformToCmdOp sysCallTransform = sysCallTransform();
-////        StreamOp sysOp = StreamOpTransformer.transform(containerOp, sysCallTransform);
-////
-////        if (sysOp instanceof StreamOpCommand streamOpCmd) {
-////            cmdOp = streamOpCmd.getCmdOp();
-////            cmdOp = new CmdOpSubst(cmdOp);
-////
-//////            SysRuntime runtime = getRuntime();
-//////            String[] cmd = runtime.compileCommand(cmdOp);
-////            // SysRuntimeImpl.forCurrentOs().
-////        } else {
-////            // TODO A riot-based content type conversion would have to be handled as a
-////            // named pipe
-////            throw new IllegalStateException("Op unexpectedly did not compile to a command. Got: " + sysOp);
-////        }
-////    }
-//
-//    SysRuntime sysRuntime = getRuntime();
-//    // CmdOpVisitorToProcessSubstString stringifier = new CmdOpVisitorToProcessSubstString(sysRuntime.getStrOps());
-//
-//
-//    // String fileArg = cmdOp.accept(stringifier);
-//
-////    String fileArg = Optional.ofNullable(arg)
-////            .map(Path::toAbsolutePath)
-////            .map(Path::toString)
-////            .orElse("-");
-//
-//    String uriStr = fileArg;
-//    String shortName = shortNameMgr.allocate(uriStr).localName();
-//    String filePath = containerBasePath + shortName;
-//
-//    String graphArg = Optional.ofNullable(graph)
-//        .filter(Node::isURI)
-//        .filter(g -> !Quad.isDefaultGraph(g))
-//        .map(Node::getURI).orElse("-");
-//
-//    String fmtArg = Optional.ofNullable(lang)
-//        .map(l -> l.getFileExtensions())
-//        .map(l -> l.isEmpty() ? null : l.get(0))
-//        .orElse("");
-//
-//    String[] cmdContrib = new String[] { "-f", filePath, "-F", fmtArg, "-g", graphArg };
-//    // String cmdPart = "-f " + shortName + " -F " + fmtArg + " -g " + graphArg;
-//    // cmdParts.add(cmdPart);
-//    return new FileAndCmd(filePath, cmdContrib);
-//}
-//protected String dockerImageName;
-//protected String dockerImageTag;
+                String parserBufferSize = config.getParserBufferSize();
+                if (parserBufferSize != null && !parserBufferSize.isBlank()) {
+                    as.add(CmdArg.ofLiteral("--parser-buffer-size"));
+                    as.add(CmdArg.ofLiteral(parserBufferSize));
+                }
 
-/** */
+                as.add(CmdArg.ofLiteral("--multi-input-json"));
+                as.add(CmdArg.ofPathString(outputPath.toString()));
 
-//protected Path outputFolder = null;
-//protected String indexName;
-
-//protected String stxxlMemory = null;
-
-// tmp.exec(new AttachContainerResultCallback()).awaitCompletion();
-
-// x.exec(new AttachContainerResultCallback()).awaitCompletion();
-
-// ResultCallbackTemplate<?, Frame> foo = x.start();
-
-// x.getStdin()
-    //.exec(new AttachContainerResultCallback());
-    // .awaitCompletion();f
-// container.waitingFor(WaitStrategy)
-//
-//
-//protected GenericContainer<?> setupContainerSysCall(String fileName, Lang lang) throws NumberFormatException, IOException, InterruptedException {
-//    int uid = SystemUtils.getUID();
-//    int gid = SystemUtils.getGID();
-//    logger.info("Attempting to launch container via syscall. UID: " + uid + ", GID: " + gid);
-//
-//    String indexName = config.getIndexName();
-//    String imageName = config.getDockerImageName();
-//    String imageTag = config.getDockerImageTag();
-//    Path outputFolder = config.getOutputFolder();
-//    // Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
-//
-//    String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
-//    String fmt = langToFormat(lang);
-//
-//    GenericContainer<?> result = new GenericContainer<>(finalImageName)
-//        .withWorkingDirectory("/data")
-//        .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
-//        .withFileSystemBind(outputFolder.toString(), "/data", BindMode.READ_WRITE)
-//        .withCommand(new String[]{"IndexBuilderMain -i " + indexName + " -f " + fileName + " -F " + fmt})
-//        //.withCommand(new String[]{SysRuntimeImpl.quoteArg("IndexBuilderMain -i " + indexName + " -f " + fileName + " -F " + fmt)})
-//        ;
-//
-//    return result;
-//}
-//
-//protected void runContainerViaSysCallWithInputStream(ByteSource byteSource, Lang lang) throws InterruptedException, IOException {
-//    GenericContainer<?> container = setupContainerSysCall("-", lang);
-//    CmdOp cmdOp = CmdOpExec.ofLiteralArgv(container.buildCmdLine());
-//
-//    SysRuntime runtime = getRuntime();
-//    String[] cmd = runtime.compileCommand(cmdOp);
-//    cmd = runtime.resolveCommand(cmd);
-//
-//    logger.info("CmdOp:" + cmdOp);
-//    logger.info("EffectiveCommand: " + Arrays.asList(cmd));
-//
-//    Process process = SystemUtils.run(logger::info, cmd);
-//    try (OutputStream out = process.getOutputStream()) {
-//        try (InputStream in = byteSource.openStream()) {
-//            in.transferTo(out);
-//        }
-//        out.flush();
-//    }
-//    process.waitFor();
-//    int exitValue = process.exitValue();
-//
-//    if (exitValue != 0) {
-//        throw new RuntimeException("Process failed, exit value: " + exitValue);
-//    }
-//}
-//
-//protected void runContainerViaSysCall(CmdOp generatorCmd, Lang lang) throws NumberFormatException, IOException, InterruptedException {
-//    GenericContainer<?> container = setupContainerSysCall("-", lang);
-//    String[] cmdLine = container.buildCmdLine();
-//    CmdOp pipe = CmdOpPipeline.of(generatorCmd, CmdOpExec.ofLiteralArgv(cmdLine));
-//
-//    SysRuntime runtime = getRuntime();
-//    String[] cmd = runtime.compileCommand(pipe);
-//
-//    logger.info("CmdOp:" + pipe);
-//    logger.info("EffectiveCommand: " + Arrays.asList(cmd));
-//
-//    Process process = SystemUtils.run(logger::info, cmd);
-//    process.waitFor();
-//    int exitValue = process.exitValue();
-//
-//    if (exitValue != 0) {
-//        throw new RuntimeException("Process failed, exit value: " + exitValue);
-//    }
-//}
-//
-//protected void runContainerWithInputStream(ByteSource byteSource, Lang lang) throws InterruptedException, IOException {
-//    String finalIndexName = getFinalIndexName();
-//
-//    String fmt = langToFormat(lang);
-//    // Read from stdin, data in fmt, parallel parsing (true/false)
-//    String optsStr = "-f - -F " + fmt + " -p true";
-//
-//    logger.info("Attempting to launch container with a JVM-based input stream.");
-//    org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, optsStr)
-//        .withCreateContainerCmdModifier(cmd -> cmd
-//            // .withTty(true)         // Required to keep input open
-//            .withTty(false)
-//            // .withStdInOnce(true)
-//            .withStdinOpen(true)
-//            .withAttachStdin(true) // Allow attaching input stream
-//            // .withAttachStdout(true)
-//            // .withAttachStderr(true)
-//        );
-//
-//        container.start();
-////        container.followOutput(outputFrame -> {
-////            String msg = outputFrame.getUtf8String();
-////            logger.info(msg);
-////        });
-//
-//        System.out.println("Waiting");
-//        Thread.sleep(2000);
-//        System.out.println("Attaching data");
-//
-//    // Get input stream (e.g., file or command output)
-//    try (InputStream in = byteSource.openStream()) {
-//        String str = IOUtils.toString(in, StandardCharsets.UTF_8);
-//        System.out.println(str);
-//        InputStream is = new ByteArrayInputStream(str.getBytes());
-//
-//        // BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharset.UTF_8));
-//        // br.lines().forEach(System.out::println);
-//
-//        // Attach input stream to the container
-//        // Adapter<Frame> xxx =
-//            AttachContainerCmd tmp = container.getDockerClient()
-//            .attachContainerCmd(container.getContainerId())
-//            .withStdIn(is)
-//            // .withStdErr(true)
-//            // .withStdOut(true)
-//            // .withFollowStream(true)
-//            ;
-//            // .withLogs(true);
-//
-//
-//           Adapter<Frame> callback = new ResultCallback.Adapter<Frame>() {
-//                @Override
-//                public void onNext(Frame frame) {
-//                    String msg = new String(frame.getPayload(), StandardCharset.UTF_8);
-//                    logger.info(msg);
-//                    super.onNext(frame);
+            // cmdExecSystem.exec(null, fileMapper, cmdArg, execSite)
+                List<CmdArg> containerArgs = new ArrayList<>(args.size());
+                // This resolves process substitutions by creating named pipes on the shared host folder.
+//                for (CmdArg cmdArg : args) {
+//                    CmdArgActiveProcessSubstitution activeArg = cmdExecSystem.exec(processCxt, fileMapper, cmdArg, execSite);
+//                    // hostArgs.add(activeArg.cmdArg());
+//                    CmdArg hostArg = activeArg.cmdArg();
+//                    CmdArg containerArg = CmdOpRewriter.rewriteForContainer(hostArg, fileMapper);
+//                    containerArgs.add(containerArg);
 //                }
-//           };
-//           System.out.println("Waiting");
-//           Thread.sleep(5000);
-//           System.out.println("Awaiting completion");
-//           tmp.exec(callback).awaitCompletion();
-//        System.out.println("Done");
-//    }
-//
-//    container.getDockerClient()
-//        .waitContainerCmd(container.getContainerId())
-//        .exec(new WaitContainerResultCallback())
-//        .awaitCompletion();
-//
-//    container.stop();
-//}
-//
-//protected void runContainerWithFileArgs(FileSpec fileSpec) throws NumberFormatException, IOException, InterruptedException {
-//    String finalIndexName = getFinalIndexName();
-//
-//    logger.info("Attempting to launch container with binds and file arg");
-//    String cmdStr = Arrays.asList(fileSpec.fileArgs).stream().collect(Collectors.joining(" "));
-//
-//    org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdStr);
-//
-//    for (Bind bind : fileSpec.binds()) {
-//        BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
-//            ? BindMode.READ_ONLY
-//            : null;
-//        container.withFileSystemBind(bind.getPath(), bind.getVolume().getPath(), bindMode);
-//    }
-//
-//    container.start();
-////    container.followOutput(outputFrame -> {
-////        String msg = outputFrame.getUtf8String();
-////        logger.info(msg);
-////    });
-//    container.getDockerClient()
-//        .waitContainerCmd(container.getContainerId())
-//        .exec(new WaitContainerResultCallback())
-//        .awaitCompletion();
-//}
 
+                // Rewrite file arguments to container paths.
+                List<String> containerArgv = CmdArg.toPlainArgs(containerArgs);
 
-// TODO Rewrite the CmdArgs.
+                String rawCmd = "IndexBuilderMain " + CmdOpVisitorToCmdString.toArg(containerArgv);
+                // String cmd = "'" + CmdStrOpsBash.get().escapeTokenSingleQuote(rawCmd) + "'";
+                // String cmd = CmdStrOpsBash.get().escapeTokenSingleQuote(rawCmd);
 
-//logger.info("Attempting to launch container with binds and file arg");
-//SysRuntime runtime = SysRuntimeImpl.forCurrentOs();
-//
-//String cmdSuffix = spec.dataBridges().stream()
-//    .map(FileUnit::cmdContrib)
-//    .flatMap(Stream::of)
-//    .map(arg -> {
-//        String str = runtime.quoteFileArgument(arg);
-//        return str;
-//    })
-//    .collect(Collectors.joining(" "));
-//
-//CmdOps.exec("IndexBuilderMain", null);
-//
-//List<CmdArg> args = new ArrayList<>();
-//
-//
-//List<String> cmdParts = new ArrayList<>();
-//cmdParts.add("IndexBuilderMain -i " + indexName);
-//
-//String stxxlMemory = config.getStxxlMemory();
-//if (stxxlMemory != null && !stxxlMemory.isBlank()) {
-//    cmdParts.add("-m " + stxxlMemory); // XXX Not escaped!
-//}
-//
-//if (cmdStr != null) {
-//    cmdParts.add(cmdStr);
-//}
-//
-//String str = cmdParts.stream().collect(Collectors.joining(" "));
-//logger.info("Start command: " + str);
-//
-//String imageName = config.getDockerImageName();
-//String imageTag = config.getDockerImageTag();
-//Path outputFolder = config.getOutputFolder();
-//String finalImageName = QleverConstants.buildDockerImageName(imageName, imageTag);
-//Path finalOutputFolder = ContainerPathResolver.resolvePath(containerPathResolver, outputFolder);
-//
-//org.testcontainers.containers.GenericContainer<?> result = new org.testcontainers.containers.GenericContainer<>(finalImageName)
-//    .withWorkingDirectory("/data/")
-//    // .withExposedPorts(containerPort)
-//    // Setting UID does not work with latest image due to
-//    // error "UID 1000 already exists" ~ 2025-01-31
-//    // .withEnv("UID", Integer.toString(uid))
-//    // .withEnv("GID", Integer.toString(gid))
-//    .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
-//    .withFileSystemBind(finalOutputFolder.toString(), "/data/", BindMode.READ_WRITE)
-//    .withCommand(new String[]{str})
-//    .withLogConsumer(frame -> logger.info(frame.getUtf8StringWithoutLineEnding()))
-//    // .withCommand(new String[]{"ServerMain -h"})
-//    ;
-//
-//return result;
-//
-////for (DockerDataArgumentBridge dataBridge : spec.dataBridges()) {
-////    String[] contrib = dataBridge.cmdContrib();
-////}
-//
-//
-//
-//try (org.testcontainers.containers.GenericContainer<?> container = setupContainer(finalIndexName, cmdSuffix)) {
-//
-//    // Declare binds on the container
-//    if (true) {
-//        for (FileUnit dataBridge : spec.dataBridges()) {
-//            Bind bind = dataBridge.bind();
-//            BindMode bindMode = AccessMode.ro.equals(bind.getAccessMode())
-//                ? BindMode.READ_ONLY
-//                : null;
-//
-//            String finalHostPathStr = ContainerPathResolver.resolvePathString(containerPathResolver, bind.getPath());
-//
-//            logger.info("Adding binding: " + finalHostPathStr + " -> " + bind.getVolume().getPath());
-//            container.withFileSystemBind(finalHostPathStr, bind.getVolume().getPath(), bindMode);
-//        }
-//    } else {
-//        Path p = tempPath[0];
-//        if (p != null) {
-//
-//            container.withFileSystemBind(p.toString(), containerFifoPath, BindMode.READ_WRITE);
-//        }
-//    }
-//    // Add the output folder
-//
-//    // Start writing host files
-//    for (FileUnit dataBridge : spec.dataBridges()) {
-//        FileWriterTask task = dataBridge.hostFileWriterTask();
-//        closer.addThrowing(task::close);
-//        task.start();
-//    }
-//
-//    container.start();
-////        container.followOutput(outputFrame -> {
-////            String msg = outputFrame.getUtf8String();
-////            logger.info(msg);
-////        });
-//    container.getDockerClient()
-//        .waitContainerCmd(container.getContainerId())
-//        .exec(new WaitContainerResultCallback())
-//        .awaitCompletion();
-//}
+                String workDir = "/data";
+                fileMapper.getBinds().add(new Bind(outputFolder.toAbsolutePath().toString(), new Volume("/data"), AccessMode.rw));
 
+                Process p = ProcessBuilderDockerRun.of(rawCmd).imageRef(finalImageName)
+                        .fileMapper(fileMapper)
+                        .workingDirectory(workDir)
+                        .start(processCxt);
+
+                // Process p = cmdExecSystem.exec(processCxt, fileMapper, execSite);
+                p.waitFor();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } finally {
+            closer.run();
+        }
+
+        RdfDatabaseQlever result = new RdfDatabaseQlever(outputFolder, finalIndexName);
+        return result;
+    }
+}
 

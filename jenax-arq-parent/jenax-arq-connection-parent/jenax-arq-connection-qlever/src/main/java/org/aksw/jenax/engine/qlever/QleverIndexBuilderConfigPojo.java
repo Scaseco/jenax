@@ -12,6 +12,7 @@ public class QleverIndexBuilderConfigPojo
     protected String indexName;
 
     protected String stxxlMemory;
+    protected String parserBufferSize;
 
     @Override
     public String getDockerImageName() {
@@ -67,5 +68,15 @@ public class QleverIndexBuilderConfigPojo
     @Override
     public void setStxxlMemory(String stxxlMemory) {
         this.stxxlMemory = stxxlMemory;
+    }
+
+    @Override
+    public String getParserBufferSize() {
+        return parserBufferSize;
+    }
+
+    @Override
+    public void setParserBufferSize(String parserBufferSize) {
+        this.parserBufferSize = parserBufferSize;
     }
 }

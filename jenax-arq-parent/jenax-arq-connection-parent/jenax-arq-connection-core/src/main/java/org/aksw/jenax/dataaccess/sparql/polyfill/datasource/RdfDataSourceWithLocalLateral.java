@@ -314,7 +314,7 @@ public class RdfDataSourceWithLocalLateral
         Dataset result = DatasetFactory.create();
         ServiceExecutorRegistry registry = new ServiceExecutorRegistry();
         // FIXME Uncomment the line below once bulk concurrent is part of the service enhancer
-        // registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
+        registry.getBulkChain().add(new ChainingServiceExecutorBulkConcurrent());
         registry.getBulkChain().add(new ChainingServiceExecutorBulkServiceEnhancer());
         ServiceEnhancerInit.registerServiceExecutorSelf(registry);
         registry.addSingleLink((opExec, opOrig, binding, execCxt, chain) -> {

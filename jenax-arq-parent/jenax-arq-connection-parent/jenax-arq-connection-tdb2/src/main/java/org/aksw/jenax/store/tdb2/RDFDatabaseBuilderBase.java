@@ -22,7 +22,7 @@ public abstract class RDFDatabaseBuilderBase<X extends RDFDatabaseBuilderBase<X>
 {
     // XXX Could add check for whether a file is repeatedly loaded into the same graph.
     // private Map<Path, Node> fileToGraph = new LinkedHashMap<>();
-    public record FileArg(Path path, Lang lang, List<String> encodings, Node graph) {}
+    public record FileArg(Path path, Lang lang, List<String> encodings, Node graph, Boolean splittable) {}
 
     protected List<FileArg> args = new ArrayList<>();
 
@@ -33,18 +33,20 @@ public abstract class RDFDatabaseBuilderBase<X extends RDFDatabaseBuilderBase<X>
     protected abstract Collection<Lang> getSupportedLangs();
 
     @Override
-    public X addPath(String source, Node g) throws IOException {
+    public X addPath(String source, Lang lang, Node graph, Boolean splittable) throws IOException {
         Collection<Lang> supportedLangs = getSupportedLangs();
         Path path = Path.of(source);
         RdfEntityInfo entityInfo = RDFDataMgrEx.probeEntityInfo(() -> Files.newInputStream(path, StandardOpenOption.READ), supportedLangs);
-        String contentType = entityInfo.getContentType();
-        Lang lang = RDFLanguages.contentTypeToLang(contentType);
-        addPath(path, g, entityInfo.getContentEncodings(), lang);
+        if (lang == null) {
+            String contentType = entityInfo.getContentType();
+            lang = RDFLanguages.contentTypeToLang(contentType);
+        }
+        addPath(path, graph, entityInfo.getContentEncodings(), lang, splittable);
         return self();
     }
 
-    protected void addPath(Path source, Node graph, List<String> encodings, Lang lang) {
-        FileArg arg = new FileArg(source, lang, encodings, graph);
+    protected void addPath(Path source, Node graph, List<String> encodings, Lang lang, Boolean splittable) {
+        FileArg arg = new FileArg(source, lang, encodings, graph, splittable);
         args.add(arg);
     }
 

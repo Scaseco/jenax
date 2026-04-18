@@ -18,4 +18,7 @@ public interface QleverIndexBuilderConfig {
 
     String getStxxlMemory();
     void setStxxlMemory(String memory);
+
+    String getParserBufferSize();
+    void setParserBufferSize(String bufferSize);
 }

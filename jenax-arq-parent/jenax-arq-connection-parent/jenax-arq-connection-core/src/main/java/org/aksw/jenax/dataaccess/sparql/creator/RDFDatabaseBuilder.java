@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdflink.RDFLinkDataset;
+import org.apache.jena.riot.Lang;
 
 /** Essentially a batching version of the {@link RDFLinkDataset} API. */
 public interface RDFDatabaseBuilder<X extends RDFDatabaseBuilder<X>>
@@ -25,15 +26,23 @@ public interface RDFDatabaseBuilder<X extends RDFDatabaseBuilder<X>>
 
     /** Prepare an RDF file for loading. If the data is triple-based it will be added to the
      *  currently set graph. Builder implementations may eagerly validate the added path. */
-    X addPath(String source, Node graph) throws IOException;
+    X addPath(String source, Lang lang, Node graph, Boolean splittable) throws IOException;
 
     default X addPath(String source) throws IOException {
-        return addPath(source, (Node)null);
+        return addPath(source, null, (Node)null, null);
     }
 
     default X addPath(String source, String graph) throws IOException {
         Node graphNode = graph == null ? null : NodeFactory.createURI(graph);
-        return addPath(source, graphNode);
+        return addPath(source, null, graphNode, null);
+    }
+
+    default X addPath(String source,  Node graphNode) throws IOException {
+        return addPath(source, null, graphNode, null);
+    }
+
+    default X addPath(String source, Lang lang, Node graph) throws IOException {
+        return addPath(source, lang, graph, null);
     }
 
 //    default X addPath(String source, String graph, String sourceFormat) throws IOException {
