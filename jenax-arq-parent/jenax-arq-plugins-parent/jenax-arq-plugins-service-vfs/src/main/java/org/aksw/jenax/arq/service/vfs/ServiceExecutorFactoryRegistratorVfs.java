@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.IntStream;
 
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
+import org.aksw.jenax.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.algebra.Op;
@@ -24,7 +25,6 @@ import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.service.ServiceExecutorRegistry;
 import org.apache.jena.sparql.service.bulk.ChainingServiceExecutorBulk;
 import org.apache.jena.sparql.service.bulk.ServiceExecutorBulk;
-import org.apache.jena.sparql.service.enhancer.impl.ChainingServiceExecutorBulkServiceEnhancer;
 import org.apache.jena.sparql.service.single.ChainingServiceExecutor;
 import org.apache.jena.sparql.service.single.ServiceExecutor;
 import org.apache.jena.sparql.util.Context;

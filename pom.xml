@@ -44,6 +44,7 @@
 		<module>jenax-bom</module>
 		<module>jenax-resources-parent</module>
 		<module>jenax-annotations-parent</module>
+		<module>jenax-serviceenhancer-preview</module>
 		<module>jenax-jgrapht-parent</module>
 		<module>jenax-norse-parent</module>
 		<module>jenax-arq-parent</module>
@@ -115,7 +116,7 @@
 		<hadoop.version>3.5.0</hadoop.version>
 		<commons-text.version>1.15.0</commons-text.version>
 		<commons-exec.version>1.6.0</commons-exec.version>
-		<junit.version>4.13.2</junit.version>
+		<junit.version>6.0.3</junit.version>
 		<tika.version>2.9.4</tika.version>
 		<aksw-commons.version>0.9.12</aksw-commons.version>
 		<jts.version>1.20.0</jts.version>
@@ -151,10 +152,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<gpg.keyname>AKSW</gpg.keyname>
+
+		<maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- jena-geosparql might need to be updated to declare these derby deps -->
+			<!-- jena-geosparql might need to be updated to declare these derby
+			deps -->
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
@@ -180,6 +184,13 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<!-- Jetty -->
@@ -309,6 +320,11 @@
 				<version>${project.version}</version>
 			</dependency>
 -->
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-serviceenhancer-preview</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-resources-servicedescription</artifactId>
@@ -872,11 +888,13 @@
 				<artifactId>jena-shacl</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-serviceenhancer</artifactId>
 				<version>${jena.version}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>jena-dboe-storage</artifactId>
@@ -1617,11 +1635,13 @@
 				<artifactId>urlrewritefilter</artifactId>
 				<version>4.0.4</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
 			</dependency>
+-->
 			<dependency>
 				<groupId>com.googlecode.combinatoricslib</groupId>
 				<artifactId>combinatoricslib</artifactId>
@@ -1819,7 +1839,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M1</version>
+				<version>${maven-surefire-plugin.version}</version>
 				<!-- <configuration> <skipTests>false</skipTests>
 				</configuration> -->
 			</plugin>
