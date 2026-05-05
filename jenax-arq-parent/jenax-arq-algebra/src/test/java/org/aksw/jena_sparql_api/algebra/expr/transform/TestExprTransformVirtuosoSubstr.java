@@ -4,8 +4,8 @@ import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class TestExprTransformVirtuosoSubstr {
@@ -14,7 +14,7 @@ public class TestExprTransformVirtuosoSubstr {
         Expr actualExpr = ExprTransformer.transform(new ExprTransformVirtuosoSubstr(),
                 ExprUtils.parse("substr('hello', 3, 10)"));
         NodeValue actualValue = ExprUtils.eval(actualExpr);
-        Assert.assertEquals("llo", actualValue.getString());
+        Assertions.assertEquals("llo", actualValue.getString());
         // System.err.println(ExprUtils.fmtSPARQL(actual));
     }
 }

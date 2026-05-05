@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.benchmark;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestBenchmark {
 

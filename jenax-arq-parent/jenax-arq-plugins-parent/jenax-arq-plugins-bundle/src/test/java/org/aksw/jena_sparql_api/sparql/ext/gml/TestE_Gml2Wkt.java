@@ -2,8 +2,8 @@ package org.aksw.jena_sparql_api.sparql.ext.gml;
 
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
@@ -28,6 +28,6 @@ public class TestE_Gml2Wkt {
         WKTReader reader = new WKTReader(geometryFactory);
         LineString expectedGeo = (LineString) reader.read(expected);
         LineString actualGeo = (LineString) reader.read(tmpActual[0]);
-        Assert.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
+        Assertions.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
     }
 }

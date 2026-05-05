@@ -39,8 +39,8 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sys.JenaSystem;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +110,7 @@ public class TestBinSearchBz2 {
 //                System.out.println("Line: " + i);
                 if(!Objects.equals(lineExpected, lineActual)) {
                     logger.warn("Mismatch in line " + i);
-                    Assert.assertEquals(lineExpected, lineActual);
+                    Assertions.assertEquals(lineExpected, lineActual);
                 }
 
                 if(lineActual == null && lineExpected == null) {
@@ -162,7 +162,7 @@ public class TestBinSearchBz2 {
                     RDFDataMgr.read(actual, in, Lang.NTRIPLES);
 
 
-                    // Assert.assertEquals(expected, actual);
+                    // Assertions.assertEquals(expected, actual);
                     boolean isOk = expected.isIsomorphicWith(actual);
                     if(!isOk) {
                         System.err.println("Expected:");
@@ -172,7 +172,7 @@ public class TestBinSearchBz2 {
                     }
 
                     // System.out.println("Iteration #" + i + ": ok? " + isOk);
-                    Assert.assertTrue(isOk);
+                    Assertions.assertTrue(isOk);
                 }
 
             }
@@ -212,7 +212,7 @@ public class TestBinSearchBz2 {
                     // Check reading of a single byte
                     Byte expectedByte = Iterators.getNext(ReadableChannels.newBoxedIterator(raw, 1), null);
                     Byte actualByte = seekable.get();
-                    Assert.assertEquals(expectedByte, actualByte);
+                    Assertions.assertEquals(expectedByte, actualByte);
 
                     seekable.nextPos(1);
 
@@ -220,7 +220,7 @@ public class TestBinSearchBz2 {
                     byte[] expecteds = IOUtils.toByteArray(Channels.newInputStream(ReadableChannels.newChannel(raw)));
                     byte[] actuals = IOUtils.toByteArray(Channels.newInputStream(seekable));
 
-                    Assert.assertArrayEquals(expecteds, actuals);
+                    Assertions.assertArrayEquals(expecteds, actuals);
                 }
             }
         }
@@ -264,7 +264,7 @@ public class TestBinSearchBz2 {
                 RDFDataMgr.read(actual, in, Lang.NTRIPLES);
 
 
-                // Assert.assertEquals(expected, actual);
+                // Assertions.assertEquals(expected, actual);
                 boolean isOk = expected.isIsomorphicWith(actual);
                 if(!isOk) {
                     System.err.println("Expected:");
@@ -274,7 +274,7 @@ public class TestBinSearchBz2 {
                 }
 
                 // System.out.println("Iteration #" + i + ": ok? " + isOk);
-                Assert.assertTrue(isOk);
+                Assertions.assertTrue(isOk);
             }
 
         }
@@ -300,7 +300,7 @@ public class TestBinSearchBz2 {
 //                .lines().collect(Collectors.toList());
 //        //MainPlaygroundScanFile.printLines(in, 5);
 //        int actual = lines.size();
-//        Assert.assertEquals(expectedLines, actual);
+//        Assertions.assertEquals(expectedLines, actual);
 //    }
 //}
 //

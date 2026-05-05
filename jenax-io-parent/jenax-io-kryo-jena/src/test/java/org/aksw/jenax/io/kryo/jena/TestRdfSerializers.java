@@ -9,9 +9,9 @@ import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.system.G;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 
@@ -30,7 +30,7 @@ public class TestRdfSerializers {
         return result;
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         kryo = new Kryo();
         JenaKryoRegistratorLib.registerClasses(kryo);
@@ -40,7 +40,7 @@ public class TestRdfSerializers {
     public void testDefaultGraph() {
         Graph graph = createTestGraph();
         KryoUtils.testRoundtrip(kryo, graph, (e, a) -> {
-            Assert.assertTrue(e.isIsomorphicWith(a));
+            Assertions.assertTrue(e.isIsomorphicWith(a));
         });
     }
 
@@ -49,7 +49,7 @@ public class TestRdfSerializers {
         Model model = ModelFactory.createDefaultModel();
         G.addInto(model.getGraph(), createTestGraph());
         KryoUtils.testRoundtrip(kryo, model, (e, a) -> {
-            Assert.assertTrue(e.isIsomorphicWith(a));
+            Assertions.assertTrue(e.isIsomorphicWith(a));
         });
     }
 }

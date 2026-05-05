@@ -15,7 +15,7 @@ import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.vocabulary.FOAF;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public class TestMapperBase {
     protected String graphName;
@@ -25,7 +25,7 @@ public class TestMapperBase {
     protected Prologue prologue;
     protected EntityManager entityManager;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         //String graphName = "http://ex.org/graph/";
         graphName = "http://ex.org/graph/";

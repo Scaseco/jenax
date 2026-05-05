@@ -30,8 +30,8 @@ import org.apache.jena.sparql.engine.main.QueryEngineMainQuad;
 import org.apache.jena.sparql.engine.main.solver.OpExecutorQuads;
 import org.apache.jena.sparql.exec.RowSet;
 import org.apache.jena.sparql.util.Context;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestDatasetAssemblerQuads {
 
@@ -50,17 +50,17 @@ public class TestDatasetAssemblerQuads {
         Context context = dataset.getContext();
 
         OpExecutorFactory opExecutorFactory = QC.getFactory(context);
-        Assert.assertNotNull(opExecutorFactory);
+        Assertions.assertNotNull(opExecutorFactory);
 
         Op op = OpTable.unit();
         DatasetGraph dsg = DatasetGraphFactory.empty();
         ExecutionContext execCxt = ExecutionContextUtils.createExecCxt(dsg);
 
         OpExecutor opExecutor = opExecutorFactory.create(execCxt);
-        Assert.assertTrue(opExecutor instanceof OpExecutorQuads);
+        Assertions.assertTrue(opExecutor instanceof OpExecutorQuads);
 
         QueryEngineFactory qeFactory = QueryEngineRegistry.findFactory(op, dsg, context);
-        Assert.assertTrue(QueryEngineMainQuad.getFactory() == qeFactory);
+        Assertions.assertTrue(QueryEngineMainQuad.getFactory() == qeFactory);
     }
 
     /**
@@ -98,6 +98,6 @@ public class TestDatasetAssemblerQuads {
                 rs.close();
             }
         }
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 }

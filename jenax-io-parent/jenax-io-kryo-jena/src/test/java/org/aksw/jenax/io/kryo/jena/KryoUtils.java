@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -14,7 +14,7 @@ import com.esotericsoftware.kryo.io.Output;
 public class KryoUtils {
     public static <T> void testRoundtrip(Kryo kryo, T expected) {
         testRoundtrip(kryo, expected, (_expected, actual) -> {
-            Assert.assertEquals(_expected, actual);
+            Assertions.assertEquals(_expected, actual);
         });
     }
 

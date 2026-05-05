@@ -14,8 +14,8 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.util.PrefixMapping2;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class TestConjureQueryOverViews {
@@ -36,7 +36,7 @@ public class TestConjureQueryOverViews {
                 Model actual = conn.queryConstruct("CONSTRUCT WHERE { ?s ?p ?o }");
 //				RDFDataMgr.write(System.out, actual, RDFFormat.TURTLE_PRETTY);
                 boolean isIsomorphic = actual.isIsomorphicWith(expected);
-                Assert.assertTrue(isIsomorphic);
+                Assertions.assertTrue(isIsomorphic);
             }
         }
     }

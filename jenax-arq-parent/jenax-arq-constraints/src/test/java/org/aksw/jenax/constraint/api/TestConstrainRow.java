@@ -5,7 +5,7 @@ import org.aksw.jenax.constraint.api.CBinding;
 import org.aksw.jenax.constraint.impl.CBindingMap;
 import org.aksw.jenax.constraint.util.ConstraintDerivations;
 import org.apache.jena.sparql.core.Quad;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestConstrainRow {
 

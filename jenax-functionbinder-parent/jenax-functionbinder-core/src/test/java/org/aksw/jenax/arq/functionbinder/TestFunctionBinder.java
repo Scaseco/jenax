@@ -5,8 +5,8 @@ import org.aksw.jenax.annotation.reprogen.Iri;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sys.JenaSystem;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestFunctionBinder {
 
@@ -21,7 +21,7 @@ public class TestFunctionBinder {
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("<urn:test>('world', 2)"));
         String str = nv.asUnquotedString();
 
-        Assert.assertEquals("hello world - 2 - 3.14", str);
+        Assertions.assertEquals("hello world - 2 - 3.14", str);
     }
 
     // @Test
@@ -33,7 +33,7 @@ public class TestFunctionBinder {
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("<urn:test>('world', 'invalid type')"));
 //		String str = nv.asUnquotedString();
 //
-//		Assert.assertEquals("hello world - 2 - 3.14", str);
+//		Assertions.assertEquals("hello world - 2 - 3.14", str);
     }
 
     @Iri("urn:test")

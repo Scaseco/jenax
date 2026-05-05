@@ -1,6 +1,6 @@
 package org.aksw.jenax.arq.fromasfilter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -10,10 +10,10 @@ import java.util.Optional;
 import com.google.common.collect.Iterators;
 import com.google.common.io.MoreFiles;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.commons.util.exception.FinallyRunAll;
 import org.apache.jena.query.Dataset;
@@ -66,7 +66,7 @@ public class TestDatasetAssemblerFromAsFilter {
     public void runTest(String queryStr, int expectedResult) {
         Query query = QueryFactory.create(queryStr);
         int actualResult = exec(query);
-        Assert.assertEquals(expectedResult, actualResult);
+        Assertions.assertEquals(expectedResult, actualResult);
     }
 
     public int exec(Query query) {
@@ -87,7 +87,7 @@ public class TestDatasetAssemblerFromAsFilter {
         return result;
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         tdb2TmpFolder = Files.createTempDirectory("jena_from-enhancer_tdb2").toAbsolutePath();
         String assemblerStr = String.join("\n",
@@ -115,7 +115,7 @@ public class TestDatasetAssemblerFromAsFilter {
         Txn.executeWrite(dataset, () -> RDFDataMgr.read(dataset, new StringReader(dataStr), null, Lang.TRIG));
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         FinallyRunAll.run(
                 () -> Optional.ofNullable(dataset).ifPresent(Dataset::close),

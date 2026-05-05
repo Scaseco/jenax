@@ -21,9 +21,11 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sys.JenaSystem;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Range;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -53,7 +55,7 @@ public class TestReactiveSparql {
         flowable.subscribe(item -> System.out.println("Item: " + item));
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test
     public void testSelectListSimple() {
         Dataset dataset = RDFDataMgr.loadDataset("virtual-predicates-example.ttl");
 
@@ -67,10 +69,12 @@ public class TestReactiveSparql {
 
         Flowable<Entry<Node, Table>> flowable = ms.createPaginator(ConceptUtils.createSubjectConcept()).apply(Range.all());
 
-        flowable
-            .timeout(1, TimeUnit.SECONDS)
-            .subscribeOn(Schedulers.io())
-            .toList().blockingGet();
+        assertThrows(RuntimeException.class, () -> {
+            flowable
+                .timeout(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .toList().blockingGet();
+        });
         //flowable.take(1).subscribe(item -> System.out.println("Item: " + item));
     }
 

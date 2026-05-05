@@ -11,11 +11,11 @@ import org.apache.jena.sparql.algebra.Transformer;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.algebra.optimize.TransformFilterPlacement;
 import org.apache.jena.sparql.algebra.optimize.TransformMergeBGPs;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class OpTransformTests {
 //
 //    @Parameters(name = "Transformation {index}: {0}")
@@ -56,7 +56,7 @@ public class OpTransformTests {
         System.out.println(expected);
         System.out.println(actual);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
 
     }
 
@@ -94,7 +94,7 @@ public class OpTransformTests {
         Query actual = OpAsQuery.asQuery(op);
         System.out.println("f: " + actual);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class OpTransformTests {
         // TODO: Filter order is non deterministic; use LinkedHashSets
         // For new assert using our query equivalence algo
         boolean isMatch = SparqlQueryContainmentUtils.tryMatchOld(query, actual, VarMapper::createVarMapCandidates);
-        Assert.assertEquals(true, isMatch);
+        Assertions.assertEquals(true, isMatch);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class OpTransformTests {
         actual.setPrefix("skos", "http://www.w3.org/2004/02/skos/core#");
 
         boolean isMatch = SparqlQueryContainmentUtils.tryMatchOld(query, actual, VarMapper::createVarMapCandidates);
-        Assert.assertEquals(true, isMatch);
+        Assertions.assertEquals(true, isMatch);
     }
 
 }

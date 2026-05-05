@@ -25,8 +25,8 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.function.CastXSD;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class LcaAccumulationTest {
@@ -67,7 +67,7 @@ public class LcaAccumulationTest {
         expected.put(XSD.xstring.asNode(), XSD.xstring.asNode());
         expected.put(anyType, anyType);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
 
         System.out.println(actual);
 

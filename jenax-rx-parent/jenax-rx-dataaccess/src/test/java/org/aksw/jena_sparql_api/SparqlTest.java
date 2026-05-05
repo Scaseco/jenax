@@ -1,7 +1,7 @@
 package org.aksw.jena_sparql_api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -33,7 +33,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public class SparqlTest {
     static { JenaSystem.init(); }
 
 
-//    @BeforeClass
+//    @BeforeAll
 //    public static void setUp() {
 //        PropertyConfigurator.configure("log4j.properties");
 //    }

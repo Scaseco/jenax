@@ -12,8 +12,9 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.system.AsyncParser;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestIteratorParsersLenient {
 
@@ -53,6 +54,6 @@ public class TestIteratorParsersLenient {
             actual = Iter.toList(IteratorParsersLenient.createIteratorNTriples(in));
         }
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 }

@@ -5,7 +5,7 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UpdateRequestUtilsTest {
 

@@ -11,8 +11,8 @@ import org.aksw.jena_sparql_api.views.index.CandidateViewSelectorImpl;
 import org.aksw.jena_sparql_api.views.index.QuadPrefixes;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.util.ExprUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestCandidateViewSelector {
 
@@ -36,14 +36,14 @@ public class TestCandidateViewSelector {
             Expr expr = ExprUtils.parse("?s = <http://dbpedia.org/resource/Leipzig>");
             Collection<Entry<QuadPrefixes, String>> rs = cvs.apply(expr);
 
-            Assert.assertEquals(rs.size(), 2);
+            Assertions.assertEquals(rs.size(), 2);
         }
 
         {
             Expr expr = ExprUtils.parse("?p = <http://dbpedia.org/resource/Leipzig>");
             Collection<Entry<QuadPrefixes, String>> rs = cvs.apply(expr);
 
-            Assert.assertEquals(rs.size(), 1);
+            Assertions.assertEquals(rs.size(), 1);
         }
 
     }
@@ -92,7 +92,7 @@ public class TestCandidateViewSelector {
             Expr expr = ExprUtils.parse("?p = <http://foobar.org/pred-50>");
             Collection<Entry<QuadPrefixes, String>> rs = cvs.apply(expr);
             System.out.println("GOT: " + rs);
-            Assert.assertEquals(rs.size(), 2);
+            Assertions.assertEquals(rs.size(), 2);
         }
 
     }

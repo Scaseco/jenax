@@ -7,8 +7,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.gson.JsonObject;
 
@@ -35,9 +35,9 @@ public class TestResultSetCompare {
 		try(QueryExecution qe = QueryExecutionFactory.create(str, m)) {
 			JsonObject json = (JsonObject)qe.execSelect().next().get("cmp").asLiteral().getValue();
 			System.out.println("ResultSet comparison: " + json);
-			Assert.assertEquals(0.33333333, json.get("precision").getAsDouble(), 0.00001f);
-			Assert.assertEquals(0.5, json.get("recall").getAsDouble(), 0.00001f);
-			Assert.assertEquals(0.4, json.get("fmeasure").getAsDouble(), 0.00001f);
+			Assertions.assertEquals(0.33333333, json.get("precision").getAsDouble(), 0.00001f);
+			Assertions.assertEquals(0.5, json.get("recall").getAsDouble(), 0.00001f);
+			Assertions.assertEquals(0.4, json.get("fmeasure").getAsDouble(), 0.00001f);
 			//System.out.println("ResultSet comparison: " + ResultSetFormatter.asText(qe.execSelect()));
 		}
 	}

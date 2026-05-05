@@ -1,6 +1,6 @@
 package org.aksw.jena_sparql_api.sparql.ext.fs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jena_sparql_api.sparql.ext.url.JenaExtensionUrl;
 import org.aksw.jenax.arq.util.security.ArqSecurity;

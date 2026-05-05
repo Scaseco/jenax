@@ -4,14 +4,16 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceRequiredException;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestAnyResource {
     /** Test that demonstrates/ensures that usually literals cannot be cast as resources */
-    @Test(expected = ResourceRequiredException.class)
+    @Test
     public void test01() {
-        ModelFactory.createDefaultModel().createLiteral("test").as(Resource.class);
+        Assertions.assertThrows(ResourceRequiredException.class, () -> {
+            ModelFactory.createDefaultModel().createLiteral("test").as(Resource.class);
+        });
     }
 
     /** Test that demonstrates/ensures that literals can be cast to AnyResource. */
@@ -19,7 +21,7 @@ public class TestAnyResource {
     public void test02() {
         Resource s = ModelFactory.createDefaultModel().createLiteral("test").as(AnyResource.class);
         s.addProperty(RDFS.comment, "A literal wrapped as a resource");
-        Assert.assertEquals(1, s.getModel().size());
+        Assertions.assertEquals(1, s.getModel().size());
         // s.getModel().getGraph().find().forEach(System.out::println);
     }
 }

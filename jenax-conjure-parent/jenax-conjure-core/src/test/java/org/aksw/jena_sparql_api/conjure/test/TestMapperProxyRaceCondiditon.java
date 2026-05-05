@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.impl.ResourceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestMapperProxyRaceCondiditon {
 	

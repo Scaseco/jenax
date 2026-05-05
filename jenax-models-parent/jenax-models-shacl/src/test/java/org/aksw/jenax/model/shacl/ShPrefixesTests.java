@@ -7,8 +7,8 @@ import org.aksw.jenax.model.shacl.domain.ShPrefixDeclaration;
 import org.aksw.jenax.model.shacl.domain.ShPrefixMapping;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ShPrefixesTests {
 
@@ -35,7 +35,7 @@ public class ShPrefixesTests {
 
         Map<String, String> map = ps.getMap();
 
-        Assert.assertEquals(1, map.size());
-        Assert.assertEquals(1, defs.size());
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals(1, defs.size());
     }
 }

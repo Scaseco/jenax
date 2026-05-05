@@ -5,8 +5,8 @@ import org.aksw.jenax.constraint.util.NodeRanges;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Range;
 
@@ -22,10 +22,10 @@ public class TestNodeRange {
                 ComparableNodeValue.wrap(NodeFactory.createLiteralString("a")),
                 ComparableNodeValue.wrap(NodeFactory.createLiteralString("b"))));
 
-        Assert.assertTrue(nr.contains(NodeFactory.createLiteralString("a")));
-        Assert.assertTrue(nr.contains(NodeFactory.createLiteralString("ab")));
-        Assert.assertFalse(nr.contains(NodeFactory.createLiteralString("b")));
-        Assert.assertFalse(nr.contains(NodeValue.makeInteger(1).asNode()));
+        Assertions.assertTrue(nr.contains(NodeFactory.createLiteralString("a")));
+        Assertions.assertTrue(nr.contains(NodeFactory.createLiteralString("ab")));
+        Assertions.assertFalse(nr.contains(NodeFactory.createLiteralString("b")));
+        Assertions.assertFalse(nr.contains(NodeValue.makeInteger(1).asNode()));
     }
 
 
@@ -51,15 +51,15 @@ public class TestNodeRange {
         NodeRanges notFive = NodeRanges.createOpen();
         notFive.substractValue(NodeValue.makeInteger(5).asNode());
 
-        Assert.assertTrue(notFive.contains(NodeFactory.createLiteralString("a")));
-        Assert.assertTrue(notFive.contains(NodeFactory.createLiteralString("ab")));
-        Assert.assertFalse(notFive.contains(NodeValue.makeInteger(5).asNode()));
+        Assertions.assertTrue(notFive.contains(NodeFactory.createLiteralString("a")));
+        Assertions.assertTrue(notFive.contains(NodeFactory.createLiteralString("ab")));
+        Assertions.assertFalse(notFive.contains(NodeValue.makeInteger(5).asNode()));
 
 
         NodeRanges five = NodeRanges.createOpen();
         five.stateValue(NodeValue.makeDouble(5).asNode());
 
-        Assert.assertTrue(notFive.stateIntersection(five).isConflicting());
+        Assertions.assertTrue(notFive.stateIntersection(five).isConflicting());
 
     }
 

@@ -13,11 +13,11 @@ import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.Algebra;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class TestConjunctiveQueryMatcher {
 
     public static ConjunctiveQuery asConjunctiveQuery(Query query) {
@@ -42,8 +42,8 @@ public class TestConjunctiveQueryMatcher {
     @Test
     public void testConjunctiveQueryExtraction() {
         //System.out.println(cq);
-        Assert.assertNotNull(cqS);
-        Assert.assertNotNull(cqST);
+        Assertions.assertNotNull(cqS);
+        Assertions.assertNotNull(cqST);
         // TODO Validate correctness thoroughly
 
         //System.out.println(cq);
@@ -58,7 +58,7 @@ public class TestConjunctiveQueryMatcher {
 
 
         Map<String, QfpcMatch> map = matcher.lookup(lookupCqS);
-        Assert.assertEquals(map.size(), 1);
+        Assertions.assertEquals(map.size(), 1);
         System.out.println(map);
     }
 
@@ -70,7 +70,7 @@ public class TestConjunctiveQueryMatcher {
         ConjunctiveQuery lookupCqS = asConjunctiveQuery(QueryUtils.randomizeVars(qS));
 
         Map<String, QfpcMatch> map = matcher.lookup(lookupCqS);
-        Assert.assertEquals(map.size(), 1);
+        Assertions.assertEquals(map.size(), 1);
         System.out.println(map);
     }
 
@@ -82,7 +82,7 @@ public class TestConjunctiveQueryMatcher {
         ConjunctiveQuery lookupCqST = asConjunctiveQuery(QueryUtils.randomizeVars(qST));
 
         Map<String, QfpcMatch> map = matcher.lookup(lookupCqST);
-        Assert.assertEquals(map.size(), 0);
+        Assertions.assertEquals(map.size(), 0);
         System.out.println(map);
     }
 

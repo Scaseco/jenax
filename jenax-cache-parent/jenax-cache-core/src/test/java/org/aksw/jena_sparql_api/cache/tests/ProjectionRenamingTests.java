@@ -20,8 +20,8 @@ import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingHashMap;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ProjectionRenamingTests {
 	public static final Node s = NodeFactory.createURI("http://ex.org/s");
@@ -92,7 +92,7 @@ public class ProjectionRenamingTests {
 		expected.add(Vars.o, o);
 		expected.add(Vars.z, p);
 
-		Assert.assertEquals(expected, actual);
+		Assertions.assertEquals(expected, actual);
 	}
 
 	@Test
@@ -111,6 +111,6 @@ public class ProjectionRenamingTests {
 		expected.add(Vars.s, o);
 		expected.add(Vars.p, p);
 
-		Assert.assertEquals(expected, actual);
+		Assertions.assertEquals(expected, actual);
 	}
 }

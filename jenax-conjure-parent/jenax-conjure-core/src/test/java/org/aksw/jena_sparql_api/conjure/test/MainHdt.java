@@ -20,8 +20,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.rdfhdt.hdt.hdt.HDT;
 import org.rdfhdt.hdt.hdt.HDTManager;
 import org.rdfhdt.hdtjena.HDTGraph;
@@ -58,7 +58,7 @@ public class MainHdt {
 //		RDFDataMgr.write(System.out, expected, RDFFormat.NTRIPLES);
 //		RDFDataMgr.write(System.out, actual, RDFFormat.NTRIPLES);
 
-        Assert.assertTrue(isIsomorphic);
+        Assertions.assertTrue(isIsomorphic);
     }
 
     public static void main(String[] args) throws IOException {

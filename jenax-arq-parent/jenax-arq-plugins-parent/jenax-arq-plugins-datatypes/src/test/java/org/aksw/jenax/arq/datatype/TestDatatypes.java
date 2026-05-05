@@ -26,8 +26,8 @@ import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestDatatypes {
     @Test
@@ -68,10 +68,10 @@ public class TestDatatypes {
         // System.out.println(modelStr);
         Resource x = RDFParser.fromString(modelStr, Lang.TURTLE).toModel().createResource(s);
 
-        Assert.assertEquals(query, x.getProperty(hasQuery).getObject().asLiteral().getValue());
-        Assert.assertEquals(expr, x.getProperty(hasExpr).getObject().asLiteral().getValue());
-        Assert.assertEquals(binding, x.getProperty(hasBinding).getObject().asLiteral().getValue());
-        Assert.assertEquals(array, x.getProperty(hasArray).getObject().asLiteral().getValue());
-        Assert.assertEquals(set, x.getProperty(hasSet).getObject().asLiteral().getValue());
+        Assertions.assertEquals(query, x.getProperty(hasQuery).getObject().asLiteral().getValue());
+        Assertions.assertEquals(expr, x.getProperty(hasExpr).getObject().asLiteral().getValue());
+        Assertions.assertEquals(binding, x.getProperty(hasBinding).getObject().asLiteral().getValue());
+        Assertions.assertEquals(array, x.getProperty(hasArray).getObject().asLiteral().getValue());
+        Assertions.assertEquals(set, x.getProperty(hasSet).getObject().asLiteral().getValue());
     }
 }

@@ -4,8 +4,12 @@ import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
 import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.exec.QueryExec;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestSparqlAutoProxyFunction {
 
@@ -16,15 +20,17 @@ public class TestSparqlAutoProxyFunction {
             .set(ArqSecurity.symAllowFileAccess, true)
             .query("SELECT (<java:" + TestSparqlAutoProxyFunction.class.getName() + "#testFunction>('hello') AS ?x) {}")
             .build());
-        Assert.assertEquals("success-hello", actualValue);
+        Assertions.assertEquals("success-hello", actualValue);
     }
 
-    @Test(expected = SecurityException.class)
+    @Test
     public void testAutoProxyFunctionSecurity() {
-        MoreQueryExecUtils.evalToLexicalForm(QueryExec
-            .dataset(DatasetGraphFactory.empty())
-            .query("SELECT (<java:" + TestSparqlAutoProxyFunction.class.getName() + "#testFunction>('hello') AS ?x) {}")
-            .build());
+        assertThrows(SecurityException.class, () -> {
+            MoreQueryExecUtils.evalToLexicalForm(QueryExec
+                .dataset(DatasetGraphFactory.empty())
+                .query("SELECT (<java:" + TestSparqlAutoProxyFunction.class.getName() + "#testFunction>('hello') AS ?x) {}")
+                .build());
+        });
     }
 
     public static String testFunction(String arg) {

@@ -16,8 +16,8 @@ import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.system.AutoTxn;
 import org.apache.jena.system.Txn;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestRDFDatabaseBuilderTDB2 {
     @Test
@@ -46,7 +46,7 @@ public class TestRDFDatabaseBuilderTDB2 {
                 DatasetGraph dsg = engine.getLinkSource().getDatasetGraph();
                 try (AutoTxn txn = Txn.autoTxn(dsg, TxnType.READ)) {
                     Table table = engine.getLinkSource().newQuery().query("SELECT * { ?s ?p ?o }").table();
-                    Assert.assertEquals(1, table.size());
+                    Assertions.assertEquals(1, table.size());
                     txn.commit();
                 }
             }

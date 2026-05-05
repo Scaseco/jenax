@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.aksw.jenax.constraint.index.RangeMultimaps;
 import com.google.common.collect.Sets;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
@@ -30,7 +30,7 @@ public class TestRangeMultimap {
         expected.put(Range.closedOpen(10, 15), Sets.newHashSet("b", "d"));
         expected.put(Range.closedOpen(15, 20), Sets.newHashSet("d"));
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class TestRangeMultimap {
         RangeMap<Integer, Set<String>> expected = TreeRangeMap.create();
         expected.put(Range.closedOpen(0, 20), Sets.newHashSet("a"));
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
 }

@@ -10,7 +10,7 @@ import org.aksw.shellgebra.exec.stage.FileWriterTaskFromProcess;
 import org.aksw.shellgebra.util.PathLifeCycle;
 import org.aksw.shellgebra.util.PathLifeCycles;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestWriterTask {
     //@Test

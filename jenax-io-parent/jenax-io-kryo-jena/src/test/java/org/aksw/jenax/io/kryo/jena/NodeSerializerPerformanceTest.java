@@ -16,16 +16,16 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.riot.system.RiotLib;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 /* The benchmark shouldn't be a unit test but it is simple doing it that way */
-@Ignore
+@Disabled
 public class NodeSerializerPerformanceTest {
 
     private static final Kryo kryo = new Kryo();
@@ -51,19 +51,19 @@ public class NodeSerializerPerformanceTest {
         output.close();
         byte[] bytes = out.toByteArray();
         Node actual = (Node)kryo.readClassAndObject(new Input(new ByteArrayInputStream(bytes)));
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     public static void roundTripWithThrift(Node expected) {
         byte[] bytes = ThriftUtils.writeNode(expected, false);
         Node actual = ThriftUtils.readNode(bytes);
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     public static void roundTripWithRiot(Node expected) {
         byte[] bytes = NodeFmtLib.strNT(expected).getBytes();
         Node actual = RiotLib.parse(new String(bytes, StandardCharsets.UTF_8));
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     /** Test the little benchmark framework itself for whether the obtained results are sane */

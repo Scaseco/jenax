@@ -15,8 +15,8 @@ import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 class MyRdfDataEngineFactoryMem
@@ -73,7 +73,7 @@ public class TestRDFEngineAPI {
 
             // Test 2: The "limit 1" decorator is expected to work.
             Table table = dataSource.asLinkSource().newQuery().query("SELECT * { ?s ?p ?o }").table();
-            Assert.assertEquals(table.size(), 1);
+            Assertions.assertEquals(table.size(), 1);
         }
     }
 }

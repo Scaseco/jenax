@@ -13,8 +13,8 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.eclipse.jetty.server.Server;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestSparqlServer {
     @Test
@@ -47,7 +47,7 @@ public class TestSparqlServer {
             System.out.println("Incorrect actual data:");
             RDFDataMgr.write(System.out, actualModel, RDFFormat.TURTLE_PRETTY);
 
-            Assert.assertTrue(isOk);
+            Assertions.assertTrue(isOk);
         }
 
         // FIXME Create a separate test as Jena 3.9.0 fails with this query because it picks the wrong content type

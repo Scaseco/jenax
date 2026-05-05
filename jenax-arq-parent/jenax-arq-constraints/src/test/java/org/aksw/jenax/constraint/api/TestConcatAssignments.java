@@ -8,7 +8,7 @@ import org.aksw.jenax.sparql.expr.optimize.util.StringAlignments;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprVar;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestConcatAssignments {
 

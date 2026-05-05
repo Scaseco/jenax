@@ -17,8 +17,8 @@ import org.apache.jena.query.ReadWrite;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.vocabulary.RDF;
 import org.jgrapht.GraphPath;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TxnMgrTests {
 
@@ -58,7 +58,7 @@ public class TxnMgrTests {
     //		r1b.getTxnResourceLock().writeLock().lock();
 
             Set<GraphPath<Node, Triple>> cycles = TxnUtils.detectDeadLocksRaw(txnMgr);
-            Assert.assertEquals(1, cycles.size());
+            Assertions.assertEquals(1, cycles.size());
         } finally {
             txnMgr.deleteResources();
         }
@@ -104,7 +104,7 @@ public class TxnMgrTests {
             Thread.sleep(10);
 
             boolean isStale = txn.isStale();
-            Assert.assertTrue(isStale);
+            Assertions.assertTrue(isStale);
         } finally {
             txnMgr.deleteResources();
         }

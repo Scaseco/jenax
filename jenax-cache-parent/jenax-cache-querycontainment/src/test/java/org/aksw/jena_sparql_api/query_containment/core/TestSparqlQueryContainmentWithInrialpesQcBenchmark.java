@@ -3,48 +3,43 @@ package org.aksw.jena_sparql_api.query_containment.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.resources.sparqlqc.SparqlQcReader;
 import org.aksw.jena_sparql_api.resources.sparqlqc.SparqlQcVocab;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 //@FixMethodOrder
-//@Ignore
-@RunWith(Parameterized.class)
+//@Disabled
 public class TestSparqlQueryContainmentWithInrialpesQcBenchmark {
 
     private static final Logger logger = LoggerFactory.getLogger(TestSparqlQueryContainmentWithInrialpesQcBenchmark.class);
 
 
-    @Parameters(name = "Query Containment {index}: {0}")
-    public static Collection<Object[]> data()
-            throws Exception
-    {
+    static Stream<Object[]> data() throws Exception {
         List<Object[]> params = new ArrayList<>();
         params.addAll(createTestParams("sparqlqc/1.4/benchmark/cqnoproj.rdf"));
         params.addAll(createTestParams("sparqlqc/1.4/benchmark/ucqproj.rdf"));
-        return params;
+        return params.stream();
     }
 
 
-    public static Collection<Object[]> createTestParams(String testCases) throws IOException {
+    public static List<Object[]> createTestParams(String testCases) throws IOException {
         List<Resource> ts = SparqlQcReader.loadTasks(testCases);
 
-        Collection<Object[]> result = new ArrayList<>();
+        List<Object[]> result = new ArrayList<>();
         for(int i = 0; i < ts.size(); ++i) {
             Resource t = ts.get(i);
             Object[] data = new Object[3];
@@ -55,9 +50,9 @@ public class TestSparqlQueryContainmentWithInrialpesQcBenchmark {
 
             boolean hackToTestOnlyASingleTask = false;
             if(hackToTestOnlyASingleTask) {
-	            if(!t.getURI().equals("http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop16")) {
-	            	continue;
-	            }
+                if(!t.getURI().equals("http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop16")) {
+                    continue;
+                }
             }
 
             result.add(data);
@@ -66,29 +61,19 @@ public class TestSparqlQueryContainmentWithInrialpesQcBenchmark {
         return result;
     }
 
-    protected String name;
-    protected Model model;
-    protected Resource t;
+    @ParameterizedTest
+    @MethodSource("data")
+    void runTest(String name, Model model, Resource t) {
 
-    
-    // Main method for profiling the test cases with visualvm ; the junit stuff is distracting...
+   // Main method for profiling the test cases with visualvm ; the junit stuff is distracting...
     public static void main(String[] args) throws Exception {
-    	Collection<Object[]> data = data();
-    	for(Object[] o : data) {
-    		TestSparqlQueryContainmentWithInrialpesQcBenchmark tmp = new TestSparqlQueryContainmentWithInrialpesQcBenchmark((String)o[0], (Model)o[1], (Resource)o[2]);
-    		tmp.runTest();
-    	}
-    }
-    
-    public TestSparqlQueryContainmentWithInrialpesQcBenchmark(String name, Model model, Resource resource) {
-        this.name = name;
-        this.model = model;
-        this.t = resource;
+        List<Object[]> data = data().collect(java.util.stream.Collectors.toList());
+        for(Object[] o : data) {
+            runTest((String)o[0], (Model)o[1], (Resource)o[2]);
+        }
     }
 
-    @Test
-    public void runTest() {
-        String srcQueryStr = t.getRequiredProperty(SparqlQcVocab.sourceQuery).getObject().asResource().getRequiredProperty(SparqlQcVocab.sparqlQueryString).getObject().asLiteral().getString();
+          String srcQueryStr = t.getRequiredProperty(SparqlQcVocab.sourceQuery).getObject().asResource().getRequiredProperty(SparqlQcVocab.sparqlQueryString).getObject().asLiteral().getString();
         String tgtQueryStr = t.getRequiredProperty(SparqlQcVocab.targetQuery).getObject().asResource().getRequiredProperty(SparqlQcVocab.sparqlQueryString).getObject().asLiteral().getString();
         boolean expectedVerdict = Boolean.parseBoolean(t.getRequiredProperty(SparqlQcVocab.result).getObject().asLiteral().getString());
 
@@ -121,7 +106,7 @@ public class TestSparqlQueryContainmentWithInrialpesQcBenchmark {
 
         logger.debug("Expected: " + expectedVerdict + " " + (overridden ? "(overridden)" : "") + " - Actual: " + actualVerdict + " Mismatch: " + (expectedVerdict != actualVerdict));
 
-        Assert.assertEquals(expectedVerdict, actualVerdict);
+        Assertions.assertEquals(expectedVerdict, actualVerdict);
     }
 }
 

@@ -7,8 +7,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -24,7 +24,7 @@ public class TestDockerAttach {
     Logger log = LoggerFactory.getLogger("MyLogger");
 
     @Test
-    @Ignore
+    @Disabled
     public void test() throws IOException, InterruptedException {
         GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse("ubuntu:24.04"))
             .withCommand("gzip", "-cd")

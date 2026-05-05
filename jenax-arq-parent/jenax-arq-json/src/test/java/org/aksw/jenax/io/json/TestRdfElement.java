@@ -10,8 +10,8 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.path.P_Link;
 import org.apache.jena.sparql.path.P_Path0;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestRdfElement {
 
@@ -23,12 +23,12 @@ public class TestRdfElement {
         obj.add(p, v);
 
         ParentLink parentLink = v.getParent();
-        Assert.assertTrue(parentLink.isObjectLink());
+        Assertions.assertTrue(parentLink.isObjectLink());
 
         ParentLinkObject objLink = parentLink.asObjectLink();
 
-        Assert.assertEquals(obj, objLink.getParent());
-        Assert.assertEquals(p, objLink.getKey());
+        Assertions.assertEquals(obj, objLink.getParent());
+        Assertions.assertEquals(p, objLink.getKey());
 
 
 

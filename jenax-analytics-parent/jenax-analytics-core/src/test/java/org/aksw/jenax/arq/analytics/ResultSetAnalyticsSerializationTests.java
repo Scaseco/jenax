@@ -16,8 +16,8 @@ import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
@@ -58,6 +58,6 @@ public class ResultSetAnalyticsSerializationTests {
         expectedAcc.accumulate(b);
         Map<Var, Entry<Multiset<String>, Long>> expectedValue = actualAcc.getValue();
 
-        Assert.assertEquals(expectedValue, actualValue);
+        Assertions.assertEquals(expectedValue, actualValue);
     }
 }

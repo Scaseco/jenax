@@ -7,7 +7,7 @@ import org.aksw.jena_sparql_api.algebra.utils.OpUtils;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class VarUsageAnalyzerTests {
 

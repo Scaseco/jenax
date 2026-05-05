@@ -5,7 +5,7 @@ import org.aksw.jenax.dataaccess.sparql.engine.RDFEngines;
 import org.aksw.jenax.dataaccess.sparql.link.transform.RDFLinkTransforms;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestAutoTxn {
     @Test

@@ -14,9 +14,9 @@ import org.apache.jena.sparql.expr.ExprEvalException;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
 import org.apache.jena.sys.JenaSystem;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
@@ -37,7 +37,7 @@ public class TestGeoSparqlEx {
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("geof:simplifyDp('POINT (0 0)'^^geo:wktLiteral, 0.1)", pm));
         // System.out.println(nv);
-        Assert.assertNotNull(nv);
+        Assertions.assertNotNull(nv);
     }
 
     @Test
@@ -46,10 +46,10 @@ public class TestGeoSparqlEx {
         pm.setNsPrefixes(GeoSPARQL_URI.getPrefixes());
 
         double lon = ExprUtils.eval(ExprUtils.parse("geof:lon('POINT (89 179)'^^geo:wktLiteral)", pm)).getDouble();
-        Assert.assertTrue(DoubleMath.fuzzyEquals(89, lon, TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(89, lon, TOLERANCE));
 
         double lat = ExprUtils.eval(ExprUtils.parse("geof:lat('POINT (89 179)'^^geo:wktLiteral)", pm)).getDouble();
-        Assert.assertTrue(DoubleMath.fuzzyEquals(179, lat, TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(179, lat, TOLERANCE));
     }
 
     @Test
@@ -58,10 +58,10 @@ public class TestGeoSparqlEx {
         GeometryWrapper gw = GeometryWrapper.fromPoint(179, 89, SRS_URI.WGS84_CRS);
 
         double lon = GeoSparqlExFunctions.lon(gw);
-        Assert.assertTrue(DoubleMath.fuzzyEquals(89, lon, TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(89, lon, TOLERANCE));
 
         double lat = GeoSparqlExFunctions.lat(gw);
-        Assert.assertTrue(DoubleMath.fuzzyEquals(179, lat, TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(179, lat, TOLERANCE));
     }
 
     @Test
@@ -73,14 +73,14 @@ public class TestGeoSparqlEx {
         // rectangle with width 4 and height 2 - centroid expected at (2, 1)
         GeometryWrapper gw = GeometryWrapper.extract(
                 ExprUtils.eval(ExprUtils.parse("geof:centroid('POLYGON((0 0, 4 0, 4 2, 0 2, 0 0))'^^geo:wktLiteral)", pm)));
-        Assert.assertTrue(DoubleMath.fuzzyEquals(2, GeoSparqlExFunctions.x(gw.getParsingGeometry()), TOLERANCE));
-        Assert.assertTrue(DoubleMath.fuzzyEquals(1, GeoSparqlExFunctions.y(gw.getParsingGeometry()), TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(2, GeoSparqlExFunctions.x(gw.getParsingGeometry()), TOLERANCE));
+        Assertions.assertTrue(DoubleMath.fuzzyEquals(1, GeoSparqlExFunctions.y(gw.getParsingGeometry()), TOLERANCE));
 
 //		System.out.println(gw);
     }
 
     @Test
-    @Ignore // Something is broken
+    @Disabled // Something is broken
     public void testAsGeoJSON() throws ParseException {
         new InitGeoSPARQL().start();
 
@@ -106,30 +106,30 @@ public class TestGeoSparqlEx {
         GeoJsonReader reader = new GeoJsonReader(geometryFactory);
         LineString expectedGeo = (LineString) reader.read(expected);
         LineString actualGeo = (LineString) reader.read(tmpActual[0]);
-        Assert.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
+        Assertions.assertEquals(true, expectedGeo.equalsExact(actualGeo, TOLERANCE));
     }
 
     @Test
     public void testLineMerge01() {
         String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 5 5), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
-        Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
+        Assertions.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge02() {
         String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(5 5, 10 10), LINESTRING(0 0, 5 5))'^^geo:wktLiteral)");
-        Assert.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
+        Assertions.assertEquals("LINESTRING(0 0, 5 5, 10 10)", actual);
     }
 
     @Test
     public void testLineMerge03() {
         String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('GEOMETRYCOLLECTION(LINESTRING(0 0, 4 4), LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
-        Assert.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
+        Assertions.assertEquals("MULTILINESTRING((0 0, 4 4), (5 5, 10 10))", actual);
     }
 
     @Test
     public void testLineMerge04() {
-        Exception exception = Assert.assertThrows(ExprEvalException.class, () -> {
+        Exception exception = Assertions.assertThrows(ExprEvalException.class, () -> {
             MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("geof:lineMerge('POINT(0.0 0.0)'^^geo:wktLiteral)");
         });
 
@@ -140,62 +140,62 @@ public class TestGeoSparqlEx {
     @Test
     public void testUnion01() {
         String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("spatial-f:union('GEOMETRYCOLLECTION(POLYGON((-7 4.2,-7.1 4.2,-7.1 4.3, -7 4.2)),POINT(5 5),POINT(-2 3),LINESTRING(5 5, 10 10))'^^geo:wktLiteral)");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(-2 3), LINESTRING(5 5, 10 10), POLYGON((-7 4.2, -7.1 4.2, -7.1 4.3, -7 4.2)))", actual);
     }
 
 
     @Test
     public void testCollectSuccess01() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)'^^geo:wktLiteral AS ?geom) }");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectError01() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { BIND('POINT(0 0)' AS ?geom) }");
-        Assert.assertNull(actual);
+        Assertions.assertNull(actual);
     }
 
     @Test
     public void testCollectUnbound() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> 'POINT(0 0)'^^geo:wktLiteral ) (<s1> UNDEF) }  } group by ?s");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollectEmpty() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(?geom) AS ?c) { VALUES (?s ?geom) {(<s1> UNDEF) }  } group by ?s");
-        Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
     }
 
     @Test
     public void testCollect_empty() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect() AS ?c) { }");
-        Assert.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION EMPTY", actual);
     }
 
     @Test
     public void testCollect_single() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect('POINT(0 0)'^^geo:wktLiteral) AS ?c) { }");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     @Test
     public void testCollect_single_unwrap() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.unwrapSingle(norse:geo.collect('POINT(0 0)'^^geo:wktLiteral), true) AS ?c) { }");
-        Assert.assertEquals("POINT(0 0)", actual);
+        Assertions.assertEquals("POINT(0 0)", actual);
     }
 
     @Test
     public void testCollect() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (norse:geo.collect('POINT(0 0)'^^geo:wktLiteral, 'POINT(1 1)'^^geo:wktLiteral) AS ?c) { }");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0), POINT(1 1))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(0 0), POINT(1 1))", actual);
     }
 
     @Test
     public void testCollectExprEmpty() {
         String actual = MoreQueryExecUtils.INSTANCE.evalQueryToLexicalForm("SELECT (geof:collect(geof:centroid(?geom)) AS ?c) { VALUES (?s ?geom) { (<urn:s> 'POINT(0 0)'^^geo:wktLiteral) }  } group by ?s");
-        Assert.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
+        Assertions.assertEquals("GEOMETRYCOLLECTION(POINT(0 0))", actual);
     }
 
     // @Test FIXME: Re-enable once the new spatial index PR to jena is accepted.
@@ -209,13 +209,13 @@ public class TestGeoSparqlEx {
                 // "  (?arr 1 1000000 1) spatial:dbscan (?clusterId ?members)",
                 "  BIND(spatial-f:dbscan(?arr, 1, 1000000, 1) AS ?clusters)",
                 "}"));
-        Assert.assertEquals("1", actual);
+        Assertions.assertEquals("1", actual);
     }
 
     @Test
     public void testScale() {
         String actual = MoreQueryExecUtils.INSTANCE.evalExprToLexicalForm("norse:geo.scale('POLYGON((-2 -2, 2 -2, 2 2, -2 2, -2 -2))'^^geo:wktLiteral, 0.5)");
-        Assert.assertEquals("POLYGON((-1 -1, 1 -1, 1 1, -1 1, -1 -1))", actual);
+        Assertions.assertEquals("POLYGON((-1 -1, 1 -1, 1 1, -1 1, -1 -1))", actual);
     }
 
 //	@Test
@@ -227,7 +227,7 @@ public class TestGeoSparqlEx {
 //		String actual = tmpActual[0];
 //		// TODO Compare the geometry objects
 //		String expected = "LINESTRING (0 0, 1 1)";
-//		Assert.assertEquals(expected, actual);
+//		Assertions.assertEquals(expected, actual);
 //	}
 
 }
