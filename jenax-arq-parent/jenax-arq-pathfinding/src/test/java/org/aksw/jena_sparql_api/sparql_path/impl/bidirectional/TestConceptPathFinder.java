@@ -18,8 +18,8 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.path.PathParser;
 import org.apache.jena.sparql.util.PrefixMapping2;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class TestConceptPathFinder {
             Concept.parse("?s { ?s eg:ab ?o }", pm),
             3);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -65,7 +65,7 @@ public class TestConceptPathFinder {
             Concept.parse("?x { ?x wgs:lat ?o }", pm),
             3);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
 
 //        for (SimplePath path : actual) {
 //            System.out.println(path);

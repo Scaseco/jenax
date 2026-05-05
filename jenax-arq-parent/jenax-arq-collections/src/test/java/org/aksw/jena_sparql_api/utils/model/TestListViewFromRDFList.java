@@ -18,8 +18,8 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Converter;
 
@@ -30,7 +30,7 @@ public class TestListViewFromRDFList {
         List<T> reference = new ArrayList<>(items);
         mutator.accept(reference);
         mutator.accept(items);
-        Assert.assertEquals(reference, items);
+        Assertions.assertEquals(reference, items);
     }
 
     public static <T> ListIterator<T> iterator(List<T> list, boolean isForward) {
@@ -60,7 +60,7 @@ public class TestListViewFromRDFList {
 //
 //        // Test add method (in contrast to addAll)
 //        javaList.addAll(items);
-//        Assert.assertEquals(items, javaList);
+//        Assertions.assertEquals(items, javaList);
 //    }
 
     /**
@@ -88,7 +88,7 @@ public class TestListViewFromRDFList {
                 javaList.add(item);
             }
 
-            Assert.assertEquals(items, javaList);
+            Assertions.assertEquals(items, javaList);
 
             debugPrint(javaList);
 
@@ -194,9 +194,9 @@ public class TestListViewFromRDFList {
         debugPrint(javaList);
 
         int actualSize = javaList.size();
-        Assert.assertEquals(n + 2, actualSize);
-        Assert.assertEquals(first, javaList.get(0));
-        Assert.assertEquals(last, javaList.get(javaList.size() - 1));
+        Assertions.assertEquals(n + 2, actualSize);
+        Assertions.assertEquals(first, javaList.get(0));
+        Assertions.assertEquals(last, javaList.get(javaList.size() - 1));
     }
 
     @Test
@@ -217,14 +217,14 @@ public class TestListViewFromRDFList {
         assertListMutation(intView, list -> {
             ListIterator<Integer> it = ReverseListIterator.of(list.listIterator(list.size()));
             it.add(6);
-            Assert.assertEquals(6, (int)it.previous());
+            Assertions.assertEquals(6, (int)it.previous());
             it.add(7);
-            Assert.assertEquals(7, (int)it.previous());
+            Assertions.assertEquals(7, (int)it.previous());
             it.remove();
-            Assert.assertEquals(6, (int)it.next());
-            Assert.assertEquals(5, (int)it.next());
-            Assert.assertEquals(5, (int)it.previous());
-            Assert.assertEquals(6, (int)it.previous());
+            Assertions.assertEquals(6, (int)it.next());
+            Assertions.assertEquals(5, (int)it.next());
+            Assertions.assertEquals(5, (int)it.previous());
+            Assertions.assertEquals(6, (int)it.previous());
             // it.remove();
 
             debugPrint(list);
@@ -236,7 +236,7 @@ public class TestListViewFromRDFList {
         List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
         ListIterator<Integer> it = ReverseListIterator.of(list.listIterator(list.size()));
         it.add(6);
-        Assert.assertEquals(6, (int)it.previous());
+        Assertions.assertEquals(6, (int)it.previous());
     }
 
     @Test
@@ -244,6 +244,6 @@ public class TestListViewFromRDFList {
         List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
         ListIterator<Integer> it = ReverseListIterator.of(list.listIterator(list.size()));
         it.add(6);
-        Assert.assertEquals(5, (int)it.next());
+        Assertions.assertEquals(5, (int)it.next());
     }
 }

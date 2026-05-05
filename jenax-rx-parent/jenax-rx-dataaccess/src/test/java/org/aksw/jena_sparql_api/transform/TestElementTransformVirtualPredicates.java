@@ -29,7 +29,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestElementTransformVirtualPredicates {
 

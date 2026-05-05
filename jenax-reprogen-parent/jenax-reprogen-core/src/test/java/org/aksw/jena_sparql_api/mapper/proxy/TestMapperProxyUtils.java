@@ -32,8 +32,8 @@ import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
 
@@ -222,7 +222,7 @@ public class TestMapperProxyUtils {
 //        RDFDataMgr.write(System.out, m, RDFFormat.TURTLE_PRETTY);
 //        System.out.println(x.getEmployees());
 
-        Assert.assertEquals(3, x.getEmployees().size());
+        Assertions.assertEquals(3, x.getEmployees().size());
     }
 
 
@@ -234,7 +234,7 @@ public class TestMapperProxyUtils {
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
         String iri = ResourceUtils.getPropertyValue(sb, RDF.type, NodeMappers.uriString);
 //		System.out.println("Iri is " + iri);
-        Assert.assertEquals(iri, "java://" + TestResourceDefault.class.getCanonicalName());
+        Assertions.assertEquals(iri, "java://" + TestResourceDefault.class.getCanonicalName());
     }
 
 
@@ -249,8 +249,8 @@ public class TestMapperProxyUtils {
 
         String randomItem = sb.getRandomItem();
 //		System.out.println(randomItem + " " + sb.getItems());
-        Assert.assertEquals(sb.getItems(), items);
-        Assert.assertTrue(items.contains(randomItem));
+        Assertions.assertEquals(sb.getItems(), items);
+        Assertions.assertTrue(items.contains(randomItem));
 
     }
 
@@ -261,9 +261,9 @@ public class TestMapperProxyUtils {
         JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
 
-        Assert.assertNull(sb.getString());
-        Assert.assertEquals(sb, sb.setString("Hello World"));
-        Assert.assertEquals("Hello World", sb.getString());
+        Assertions.assertNull(sb.getString());
+        Assertions.assertEquals(sb, sb.setString("Hello World"));
+        Assertions.assertEquals("Hello World", sb.getString());
 
 //		RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_PRETTY);
     }
@@ -274,9 +274,9 @@ public class TestMapperProxyUtils {
         JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
 
-        Assert.assertNull(sb.getInteger());
-        Assert.assertEquals(sb, sb.setInteger(10));
-        Assert.assertEquals(10l, (long)sb.getInteger());
+        Assertions.assertNull(sb.getInteger());
+        Assertions.assertEquals(sb, sb.setInteger(10));
+        Assertions.assertEquals(10l, (long)sb.getInteger());
     }
 
     @Test
@@ -286,16 +286,16 @@ public class TestMapperProxyUtils {
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
 
 
-        Assert.assertNull(sb.getIri());
-        Assert.assertEquals(sb, sb.setIri("http://www.example.org/"));
-        Assert.assertEquals("http://www.example.org/", sb.getIri());
+        Assertions.assertNull(sb.getIri());
+        Assertions.assertEquals(sb, sb.setIri("http://www.example.org/"));
+        Assertions.assertEquals("http://www.example.org/", sb.getIri());
 
 //		System.out.println("<START:");
 //		RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_PRETTY);
 //		System.out.println("END>");
         //sb.getModel().getProperty(sb, RDFS.seeAlso)
         Statement stmt = Objects.requireNonNull(sb.getProperty(RDFS.seeAlso), "Statement expected to exist");
-        Assert.assertTrue(stmt.getObject().isURIResource());
+        Assertions.assertTrue(stmt.getObject().isURIResource());
     }
 
     @Test
@@ -305,17 +305,17 @@ public class TestMapperProxyUtils {
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
 
 
-        Assert.assertEquals(Collections.emptyList(), sb.getList());
+        Assertions.assertEquals(Collections.emptyList(), sb.getList());
         List<String> list = Arrays.asList("hello", "world");
-        Assert.assertEquals(sb, sb.setList(list));
-        Assert.assertEquals(list, sb.getList());
+        Assertions.assertEquals(sb, sb.setList(list));
+        Assertions.assertEquals(list, sb.getList());
 
 //		System.out.println("<START:");
 //		RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_PRETTY);
 //		System.out.println("END>");
         //sb.getModel().getProperty(sb, RDFS.seeAlso)
 //		Statement stmt = Objects.requireNonNull(sb.getProperty(RDFS.seeAlso), "Statement expected to exist");
-//		Assert.assertTrue(stmt.getObject().isURIResource());
+//		Assertions.assertTrue(stmt.getObject().isURIResource());
     }
 
 
@@ -325,17 +325,17 @@ public class TestMapperProxyUtils {
         JenaPluginUtils.registerResourceClasses(TestResourceDefault.class);
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
 
-        Assert.assertEquals(Collections.emptySet(), sb.getDynamicSet(Integer.class));
+        Assertions.assertEquals(Collections.emptySet(), sb.getDynamicSet(Integer.class));
         Set<Integer> set = new HashSet<>(Arrays.asList(1, 2));
         sb.getDynamicSet(Integer.class).addAll(set);
-        //Assert.assertEquals(sb, sb.setList(list));
-        Assert.assertEquals(set, sb.getDynamicSet(Integer.class));
+        //Assertions.assertEquals(sb, sb.setList(list));
+        Assertions.assertEquals(set, sb.getDynamicSet(Integer.class));
     }
 
 
     private static void testMap(Map<String, Object> map) {
 
-        Assert.assertEquals(Collections.emptyMap(), map);
+        Assertions.assertEquals(Collections.emptyMap(), map);
         map.put("hello", "world");
         map.put("value", 123);
 
@@ -343,10 +343,10 @@ public class TestMapperProxyUtils {
 
 //		Set<Integer> set = new HashSet<>(Arrays.asList(1, 2));
 //		sb.getDynamicSet(Integer.class).addAll(set);
-        //Assert.assertEquals(sb, sb.setList(list));
-        //Assert.assertEquals(set, sb.getDynamicSet(Integer.class));
-        Assert.assertEquals(map.get("hello"), "world");
-        Assert.assertEquals(map.get("value"), 123);
+        //Assertions.assertEquals(sb, sb.setList(list));
+        //Assertions.assertEquals(set, sb.getDynamicSet(Integer.class));
+        Assertions.assertEquals(map.get("hello"), "world");
+        Assertions.assertEquals(map.get("value"), 123);
     }
 
     @Test
@@ -380,8 +380,8 @@ public class TestMapperProxyUtils {
         map.put("id2", v2);
         // RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_PRETTY);
 
-        Assert.assertEquals(map.get("id1"), v1);
-        Assert.assertEquals(map.get("id2"), v2);
+        Assertions.assertEquals(map.get("id1"), v1);
+        Assertions.assertEquals(map.get("id2"), v2);
     }
 
     @Test
@@ -396,17 +396,17 @@ public class TestMapperProxyUtils {
 
 //        RDFDataMgr.write(System.out, sb.getModel(), RDFFormat.TURTLE_BLOCKS);
         XSDDateTime tmp;
-        Assert.assertNotNull(tmp = sb.getDateTime());
+        Assertions.assertNotNull(tmp = sb.getDateTime());
 
         sb.setDateTime(null);
-        Assert.assertNull(tmp = sb.getDateTime());
+        Assertions.assertNull(tmp = sb.getDateTime());
 
         sb.getModel().getGraph().add(Triple.create(
                 sb.asNode(),
                 NodeFactory.createURI("http://www.example.org/dateTime"),
                 RiotLib.parse("\"2020-10-07T13:03:58.471+00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>")));
 
-        Assert.assertNotNull(tmp = sb.getDateTime());
+        Assertions.assertNotNull(tmp = sb.getDateTime());
 
         //Calendar expected = tmp.asCalendar();
 
@@ -420,7 +420,7 @@ public class TestMapperProxyUtils {
         TestResource sb = ModelFactory.createDefaultModel().createResource().as(TestResource.class);
         Resource r = sb.asResource();
         Class<?> actual = r.getClass();
-        Assert.assertEquals(ResourceImpl.class, actual);
+        Assertions.assertEquals(ResourceImpl.class, actual);
     }
 }
 

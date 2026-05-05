@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.engine.qlever.RDFDatabaseBuilderQlever;
@@ -24,7 +24,7 @@ public class TestRdfDatabaseLoaderQlever {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testSys() throws Exception {
         String str = SystemUtils.which("lbzip2");
         System.out.println(str);
@@ -33,7 +33,7 @@ public class TestRdfDatabaseLoaderQlever {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testSystemBzip2() throws Exception {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);
@@ -57,7 +57,7 @@ public class TestRdfDatabaseLoaderQlever {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testJavaBzip2() throws Exception {
         Path outputPath = Path.of("/tmp/foobar");
         Files.createDirectories(outputPath);

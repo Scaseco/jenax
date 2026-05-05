@@ -4,8 +4,8 @@ import org.aksw.jena_sparql_api.algebra.transform.ExprTransformVariableOrder;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprTransformer;
 import org.apache.jena.sparql.util.ExprUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class ExprTransformTests {
@@ -18,6 +18,6 @@ public class ExprTransformTests {
 	public static void test(String actualStr, String expectedStr) {
 		Expr actual = ExprTransformer.transform(new ExprTransformVariableOrder(), ExprUtils.parse(actualStr));
 		Expr expected = ExprUtils.parse(expectedStr);
-		Assert.assertEquals(expected, actual);
+		Assertions.assertEquals(expected, actual);
 	}
 }

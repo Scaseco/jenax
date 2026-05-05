@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TestQueryHash {
     @Test
@@ -26,7 +28,7 @@ public class TestQueryHash {
         hashes.put("h8", QueryHash.createHash("PREFIX eg: <http://www.example.org> SELECT ?a (COUNT(?b) AS ?count) FROM <http://dbpedia.org/sparql> FROM NAMED <urn:foo> { ?a ?b ?c } GROUP BY STR(?c) ?a ORDER BY DESC(?a) DESC(STR(?c)) LIMIT 10 OFFSET 2"));
 
         List<Entry<String, QueryHash>> entries = new ArrayList<>(hashes.entrySet());
-        Assert.assertEquals(8, entries.size());
+        assertEquals(8, entries.size());
 
         assertPairWiseDifferent(entries, e -> e.getValue().toString());
 
@@ -35,7 +37,7 @@ public class TestQueryHash {
             String hashStr = entry.getValue().toString();
             String actualPrefix = hashStr.substring(0, expectedPrefix.length());
             System.err.println(hashStr);
-            Assert.assertEquals(expectedPrefix, actualPrefix);
+            assertEquals(expectedPrefix, actualPrefix);
         }
     }
 
@@ -50,7 +52,7 @@ public class TestQueryHash {
                 I b = items.get(j);
                 O av = fn.apply(a);
                 O bv = fn.apply(b);
-                Assert.assertNotEquals(av, bv);
+                assertNotEquals(av, bv);
             }
         }
     }

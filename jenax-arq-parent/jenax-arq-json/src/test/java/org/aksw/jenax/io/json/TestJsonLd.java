@@ -7,8 +7,8 @@ import org.aksw.jenax.ron.RdfObjectImpl;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestJsonLd {
 
@@ -37,6 +37,6 @@ public class TestJsonLd {
 
         String ns = JsonLdContext.getNamespaceIri(o2, "rdf");
 
-        Assert.assertEquals(RDF.uri, ns);
+        Assertions.assertEquals(RDF.uri, ns);
     }
 }

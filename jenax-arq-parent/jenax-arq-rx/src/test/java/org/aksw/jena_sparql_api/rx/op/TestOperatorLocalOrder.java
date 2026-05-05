@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import org.aksw.commons.rx.op.OperatorLocalOrder;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -37,6 +37,6 @@ public class TestOperatorLocalOrder {
             .toList()
             .blockingGet();
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 }

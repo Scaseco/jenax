@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.shellgebra.util.SystemUtils;
 import org.slf4j.Logger;

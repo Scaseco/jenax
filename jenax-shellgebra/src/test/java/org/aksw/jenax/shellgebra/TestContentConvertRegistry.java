@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.shellgebra.cmd.ContentConvertRegistry;
 import org.aksw.jenax.shellgebra.cmd.JvmCommandRapper;
@@ -34,7 +34,7 @@ public class TestContentConvertRegistry {
             actualStr = IOUtils.toString(in, StandardCharsets.UTF_8);
         }
 
-        Assert.assertEquals(expectedStr, actualStr);
+        Assertions.assertEquals(expectedStr, actualStr);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class TestContentConvertRegistry {
 //         Stage stageBuilder = registry.newStage(cmdName, "-i", "ttl", "-o", "nt");
 //        BoundStage stage = stageBuilder.from(ByteSource.wrap(ttlStr.getBytes()));
 //        String actualStr = stage.toByteSource().asCharSource(StandardCharsets.UTF_8).read();
-//        Assert.assertEquals(expectedStr, actualStr);
+//        Assertions.assertEquals(expectedStr, actualStr);
 
 //        Tool tool = ContentConvertRegistry.get().getCmdConverter("ttl", "nt", null).get(0);
 //        System.err.println(tool.name() + ": " + tool.argsBuilder().build());
@@ -69,6 +69,6 @@ public class TestContentConvertRegistry {
 //            actualStr = IOUtils.toString(in, StandardCharsets.UTF_8);
 //        }
 //
-//        Assert.assertEquals(expectedStr, actualStr);
+//        Assertions.assertEquals(expectedStr, actualStr);
     }
 }

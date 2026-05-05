@@ -7,8 +7,8 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.path.PathParser;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestPathEquivalence {
 
@@ -23,9 +23,9 @@ public class TestPathEquivalence {
         Node p2n = NodeFactory.createLiteralByValue(p2p, RDFDatatypePPath.INSTANCE);
         Path<Node> p2 = PathOpsNode.get().newAbsolutePath().resolve(p2n);
 
-        Assert.assertEquals(p1p, p2p);
-        Assert.assertEquals(p1n, p2n);
-        Assert.assertEquals(p1, p2);
+        Assertions.assertEquals(p1p, p2p);
+        Assertions.assertEquals(p1n, p2n);
+        Assertions.assertEquals(p1, p2);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class TestPathEquivalence {
         String str = expected.toString();
         Path<Node> actual = PathOpsNode.get().fromString(str);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
 }

@@ -1,10 +1,10 @@
 package org.aksw.jenax.shellgebra;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.NoSuchElementException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.arq.util.io.RDFConverterMetaDataJena;
 import org.aksw.jenax.shellgebra.cmd.ArgParserProviderRapper;

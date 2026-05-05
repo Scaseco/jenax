@@ -10,8 +10,8 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class TrackingWalkerTests {
@@ -37,7 +37,7 @@ public class TrackingWalkerTests {
 
         Query actual = OpAsQuery.asQuery(afterOp);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
 
 //        System.out.println(actual);
 //

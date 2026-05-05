@@ -12,15 +12,15 @@ import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.exec.RowSetOps;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.io.MoreFiles;
 
 public class TestQleverAssembler {
 
     @Test
-    @Ignore("Qlever fails with empty data - need to revise test to use non-empty data.")
+    @Disabled("Qlever fails with empty data - need to revise test to use non-empty data.")
     public void testQleverAssembler() throws IOException {
         Path tmpFolder = Files.createTempDirectory("qlever-assembler-test-");
         try {

@@ -23,22 +23,22 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class JobExecution {
 }
 
 public class TestTypeDecider extends TestMapperBase {
 
-    @Before
+    @BeforeEach
     public void init() {
         TypeMapper.getInstance().registerDatatype(new RDFDatatypeCalendar());
     }
 
-    @After
+    @AfterEach
     public void reset() {
         TypeMapper.reset();
     }
@@ -47,7 +47,7 @@ public class TestTypeDecider extends TestMapperBase {
     public void test() {
 
         Map<Class<?>, Node> map = TypeDeciderImpl.scan("org.aksw.jena_sparql_api.mapper.test");
-        Assert.assertNotEquals(0, map.size());
+        Assertions.assertNotEquals(0, map.size());
 
         TypeDecider typeDecider = new TypeDeciderImpl();
 

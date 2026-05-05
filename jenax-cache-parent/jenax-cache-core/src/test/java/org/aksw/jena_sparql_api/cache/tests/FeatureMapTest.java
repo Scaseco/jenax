@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import org.aksw.commons.collections.FeatureMap;
 import org.aksw.commons.collections.FeatureMapImpl;
 import com.google.common.collect.Sets;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class FeatureMapTest {
@@ -38,9 +38,9 @@ public class FeatureMapTest {
         //map.remove(Sets.newHashSet(1, 2, 3));
         // System.out.println(map.getAllEntriesThatAreSupersetOf(Sets.newHashSet(1, 2)));
 
-        Assert.assertEquals(map.getIfSupersetOf(Sets.newHashSet(1, 2, 3)).size(), 1);
-        Assert.assertEquals(map.getIfSupersetOf(Sets.newHashSet(1, 2)).size(), 2);
-        Assert.assertEquals(map.getIfSupersetOf(Sets.newHashSet()).size(), 4);
+        Assertions.assertEquals(map.getIfSupersetOf(Sets.newHashSet(1, 2, 3)).size(), 1);
+        Assertions.assertEquals(map.getIfSupersetOf(Sets.newHashSet(1, 2)).size(), 2);
+        Assertions.assertEquals(map.getIfSupersetOf(Sets.newHashSet()).size(), 4);
     }
 }
 

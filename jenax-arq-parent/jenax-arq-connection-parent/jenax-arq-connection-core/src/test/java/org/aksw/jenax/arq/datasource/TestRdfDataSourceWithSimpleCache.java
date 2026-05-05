@@ -6,8 +6,8 @@ import org.aksw.jenax.dataaccess.sparql.factory.datasource.RDFDataSources;
 import org.aksw.jenax.dataaccess.sparql.polyfill.datasource.RdfDataSourceWithSimpleCache;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.ResultSetFormatter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestRdfDataSourceWithSimpleCache {
     @Test
@@ -36,9 +36,9 @@ public class TestRdfDataSourceWithSimpleCache {
             b = e2;
         }
 
-        Assert.assertNotNull(a);
-        Assert.assertNotNull(b);
-        Assert.assertSame(a, b);
+        Assertions.assertNotNull(a);
+        Assertions.assertNotNull(b);
+        Assertions.assertSame(a, b);
 
 //        System.err.println(ds.getCache().stats());
 //        System.err.println(c1 + " - " + c2);

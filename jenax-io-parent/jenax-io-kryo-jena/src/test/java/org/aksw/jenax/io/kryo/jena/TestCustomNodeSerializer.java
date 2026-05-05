@@ -6,8 +6,8 @@ import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.NodeFactoryExtra;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 
@@ -18,7 +18,7 @@ public class TestCustomNodeSerializer {
 
     protected Kryo kryo;
 
-    @Before
+    @BeforeEach
     public void before() {
         kryo = new Kryo();
         JenaKryoRegistratorLib.registerNodeSerializers(kryo, new GenericNodeSerializerCustom());

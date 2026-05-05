@@ -17,7 +17,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestFacetedQuery3 {
     @Test

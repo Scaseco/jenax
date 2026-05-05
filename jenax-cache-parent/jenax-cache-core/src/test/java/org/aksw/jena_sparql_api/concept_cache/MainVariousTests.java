@@ -9,10 +9,10 @@ import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.optimize.Optimize;
 import org.apache.jena.sparql.algebra.optimize.Rewrite;
 import org.apache.jena.sparql.util.Context;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class MainVariousTests {
 
 

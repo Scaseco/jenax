@@ -5,9 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -23,7 +23,7 @@ import org.apache.jena.sparql.resultset.ResultsCompare;
 import org.apache.jena.vocabulary.RDFS;
 
 
-@Ignore // Broken with jena4 due to removal of the interface "GraphStatisticsHandler" - needs update of HDT for Jena4
+@Disabled // Broken with jena4 due to removal of the interface "GraphStatisticsHandler" - needs update of HDT for Jena4
 public class JenaPluginHdtTest {
 
     public static boolean isIsomorphic(Model expected, Model actual) {
@@ -72,7 +72,7 @@ public class JenaPluginHdtTest {
         boolean isIso = isIsomorphic(sourceModel, targetModel);
 
         // System.out.println(Thread.currentThread() + " " + isIso);
-        Assert.assertTrue(isIso);
+        Assertions.assertTrue(isIso);
     }
 
     /** Test whether a write/read round trip with a few triples works as expected */

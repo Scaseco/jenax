@@ -5,8 +5,8 @@ import java.nio.file.Path;
 
 import com.google.common.io.Closer;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
@@ -108,7 +108,7 @@ public class TestQleverSystem {
 
                         // The "limit 1" decorator is expected to work.
                         Table table = dataSource.asLinkSource().newQuery().query("SELECT * { ?s ?p ?o }").table();
-                        Assert.assertEquals(table.size(), 1);
+                        Assertions.assertEquals(table.size(), 1);
                     }
                 }
             } catch (Throwable t) {

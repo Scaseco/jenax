@@ -8,9 +8,11 @@ import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParser;
 import org.aksw.jenax.stmt.parser.query.SparqlQueryParserImpl;
@@ -72,7 +74,7 @@ public class TestSparqlExtJson {
         Model m = ModelFactory.createDefaultModel();
         try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
             String rs = ResultSetFormatter.asText(qe.execSelect());
-            Assert.assertEquals(
+            Assertions.assertEquals(
                     "-------\n" +
                     "| s   |\n" +
                     "=======\n" +
@@ -84,7 +86,7 @@ public class TestSparqlExtJson {
     }
 
     @Test
-    @Ignore // Currently probably requires a system property to make json:je work
+    @Disabled // Currently probably requires a system property to make json:je work
     public void testJsonJs2() {
         Query q = parser.apply("SELECT \n" +
                 "*\n" +
@@ -95,7 +97,7 @@ public class TestSparqlExtJson {
         Model m = ModelFactory.createDefaultModel();
         try(QueryExecution qe = QueryExecutionFactory.create(q, m)) {
             ResultSet qresults = qe.execSelect();
-            Assert.assertEquals("<?xml version=\"1.0\"?>\n" +
+            Assertions.assertEquals("<?xml version=\"1.0\"?>\n" +
                     "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n" +
                     "  <head>\n" +
                     "    <variable name=\"v\"/>\n" +
@@ -124,7 +126,7 @@ public class TestSparqlExtJson {
 
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch', true)", pm));
         JsonElement actual = JenaJsonUtils.extractChecked(nv);
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
 
@@ -138,26 +140,28 @@ public class TestSparqlExtJson {
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:array('hi', <urn:test>, true)", pm));
 
         JsonElement actual = JenaJsonUtils.extractChecked(nv);
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     public void testJsonConversionBoolean() {
         JsonElement expected = new JsonPrimitive(true);
         JsonElement actual = JenaJsonUtils.extractChecked(ExprUtils.eval(ExprUtils.parse("json:convert(true)", pm)));
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     /** Attempting to create a json object with an odd argument count must fail */
-    @Test(expected = SSE_ExprBuildException.class)
+    @Test
     public void testJsonObjectCreationOddArguments() {
-        ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch')", pm));
+        Assertions.assertThrows(SSE_ExprBuildException.class, () -> {
+            ExprUtils.eval(ExprUtils.parse("json:object('uri', <urn:test>, 'binsearch')", pm));
+        });
     }
 
     @Test
     public void testJsonArrayLength() {
         NodeValue nv = ExprUtils.eval(ExprUtils.parse("json:length('[1, 2, 3]'^^xsd:json)", pm));
-        Assert.assertEquals(3, nv.getInteger().intValue());
+        Assertions.assertEquals(3, nv.getInteger().intValue());
     }
 
 
@@ -213,11 +217,13 @@ public class TestSparqlExtJson {
 
 
     /** Accessing non-existent paths should raise the {@link PathNotFoundException} */
-    @Test(expected = PathNotFoundException.class)
+    @Test
     public void testJsonPathNull() {
         Gson gson = new Gson();
         Object tmp = gson.fromJson("{\"foo\": \"bar\"}", Object.class);
-        JsonPath.read(tmp, "$.baz");
+        Assertions.assertThrows(PathNotFoundException.class, () -> {
+            JsonPath.read(tmp, "$.baz");
+        });
     }
 
     @Test

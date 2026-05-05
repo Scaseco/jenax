@@ -19,8 +19,8 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Quad;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestNamedGraphStreamOperators {
 
@@ -114,7 +114,7 @@ public class TestNamedGraphStreamOperators {
         .firstOrError()
         .blockingGet();
 
-        Assert.assertEquals(NodeFactory.createBlankNode("a"), q.getSubject());
+        Assertions.assertEquals(NodeFactory.createBlankNode("a"), q.getSubject());
     }
 
 

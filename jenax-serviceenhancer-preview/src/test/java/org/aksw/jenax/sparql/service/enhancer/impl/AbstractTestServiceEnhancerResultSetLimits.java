@@ -84,7 +84,7 @@ public abstract class AbstractTestServiceEnhancerResultSetLimits {
 
     /** Departments in ascending order */
     @Test
-    // @Ignore
+    // @Disabled
     public void testLoop01_asc_limit1() {
         Model model = createModel(4);
         int rows = test(model, "SELECT * { { SELECT ?d { ?d a <urn:Department> } ORDER BY ASC(?d) } SERVICE <${mode}> { ?d <urn:hasEmployee> ?p }}", 1);
@@ -92,7 +92,7 @@ public abstract class AbstractTestServiceEnhancerResultSetLimits {
     }
 
     @Test
-    // @Ignore
+    // @Disabled
     public void testLoop01_asc_limit2() {
         // System.err.println("testLoop01_asc_limit2");
 
@@ -103,7 +103,7 @@ public abstract class AbstractTestServiceEnhancerResultSetLimits {
 
     /** Departments in descending order */
     @Test
-    // @Ignore
+    // @Disabled
     public void testLoop01_desc_limit1() {
         Model model = createModel(4);
         int rows = test(model, "SELECT * { { SELECT ?d { ?d a <urn:Department> } ORDER BY DESC(?d) } SERVICE <${mode}> { ?d <urn:hasEmployee> ?p }}", 1);
@@ -112,7 +112,7 @@ public abstract class AbstractTestServiceEnhancerResultSetLimits {
     }
 
     @Test
-    // @Ignore
+    // @Disabled
     public void testLoop01_desc_limit2() {
         // System.out.println("testLoop01_desc_limit2");
 
@@ -125,7 +125,7 @@ public abstract class AbstractTestServiceEnhancerResultSetLimits {
     /** There are exactly 10 results with a result set limit of 10 -
      *  so a separate request that only yields the end marker may be needed */
     @Test
-    // @Ignore
+    // @Disabled
     public void testLoop01_asc_limit10() {
         // System.err.println("testLoop01_asc_limit10");
 

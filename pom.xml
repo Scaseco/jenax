@@ -85,7 +85,7 @@
 		<jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
 		<jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
 
-		<spring.version>6.2.17</spring.version>
+		<spring.version>6.2.18</spring.version>
 		<spring.batch.version>4.3.10</spring.batch.version>
 
 		<jakarta.xml.version>4.0.5</jakarta.xml.version>
@@ -109,18 +109,18 @@
 		<jersey.version>3.1.11</jersey.version>
 		<asm.version>8.0.1</asm.version>
 		<guava.version>31.1-jre</guava.version>
-		<commons-io.version>2.21.0</commons-io.version>
+		<commons-io.version>2.22.0</commons-io.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
 		<commons-vfs2.version>2.10.0</commons-vfs2.version>
 		<ver.commons-math>3.6.1</ver.commons-math>
 		<hadoop.version>3.5.0</hadoop.version>
 		<commons-text.version>1.15.0</commons-text.version>
 		<commons-exec.version>1.6.0</commons-exec.version>
-		<junit.version>6.0.3</junit.version>
+		<junit.version>6.1.0-RC1</junit.version>
 		<tika.version>2.9.4</tika.version>
 		<aksw-commons.version>0.9.12</aksw-commons.version>
 		<jts.version>1.20.0</jts.version>
-		<gson.version>2.13.2</gson.version>
+		<gson.version>2.14.0</gson.version>
 		<annotation-api.version>1.3.2</annotation-api.version>
 		<topbraid.shacl.version>1.5.0</topbraid.shacl.version>
 		<!-- <jgit.version>6.7.0.202309050840-r</jgit.version> -->
@@ -154,6 +154,17 @@
 		<gpg.keyname>AKSW</gpg.keyname>
 
 		<maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+
+		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+		<gitflow-maven-plugin.version>1.21.0</gitflow-maven-plugin.version>
+		<maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+		<maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+		<lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
+		<maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
+		<maven-processor-plugin.version>2.2.4</maven-processor-plugin.version>
+		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+		<central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -982,8 +993,8 @@
 				<exclusion> <groupId>com.hp.hpl.jena</groupId> <artifactId>iri</artifactId> 
 				</exclusion> <exclusion> <groupId>com.hp.hpl.jena</groupId>
 			<artifactId>arq</artifactId> 
-				</exclusion> <exclusion> <groupId>junit</groupId>
-			<artifactId>junit</artifactId> 
+				</exclusion> <exclusion> <groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId> 
 				</exclusion> <exclusion> <groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId> 
 				</exclusion> <exclusion> <groupId>log4j</groupId>
@@ -1234,8 +1245,8 @@
 				<version>${jts.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>junit</groupId>
-						<artifactId>junit</artifactId>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1637,8 +1648,8 @@
 			</dependency>
 			<!--
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
 				<version>${junit.version}</version>
 			</dependency>
 -->
@@ -1773,7 +1784,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.3</version>
+				<version>${maven-release-plugin.version}</version>
 				<configuration>
 					<arguments>-P!source-artifacts</arguments>
 					<useReleaseProfile>false</useReleaseProfile>
@@ -1785,7 +1796,7 @@
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
 				<artifactId>gitflow-maven-plugin</artifactId>
-				<version>1.9.0</version>
+				<version>${gitflow-maven-plugin.version}</version>
 				<configuration>
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
@@ -1796,7 +1807,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<!-- <source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target> -->
@@ -1809,7 +1820,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>${maven-source-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -1823,7 +1834,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>${maven-javadoc-plugin.version}</version>
 				<configuration>
 					<failOnError>false</failOnError>
 				</configuration>
@@ -1864,7 +1875,7 @@
 				- therefore its disabled as of now -->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version> <executions> <execution> <phase>package</phase>
+				<version>${maven-shade-plugin.version}</version> <executions> <execution> <phase>package</phase>
 				<goals> <goal>shade</goal> </goals> <configuration>
 			<createDependencyReducedPom>false</createDependencyReducedPom>
 				<shadedArtifactAttached>true</shadedArtifactAttached>
@@ -1885,7 +1896,7 @@
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+					<version>${lifecycle-mapping.version}</version>
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
@@ -1915,12 +1926,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.4</version>
+					<version>${maven-shade-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.bsc.maven</groupId>
 					<artifactId>maven-processor-plugin</artifactId>
-					<version>2.0.5</version>
+					<version>${maven-processor-plugin.version}</version>
 					<executions>
 						<execution>
 							<id>process</id>
@@ -1971,7 +1982,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
+						<version>${maven-gpg-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -2002,7 +2013,7 @@
 					<plugin>
 						<groupId>org.sonatype.central</groupId>
 						<artifactId>central-publishing-maven-plugin</artifactId>
-						<version>0.7.0</version>
+						<version>${central-publishing-maven-plugin.version}</version>
 						<extensions>true</extensions>
 						<configuration>
 							<publishingServerId>central</publishingServerId>

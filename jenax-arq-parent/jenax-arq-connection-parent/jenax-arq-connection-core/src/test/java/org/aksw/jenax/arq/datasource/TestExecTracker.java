@@ -11,7 +11,7 @@ import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.exec.UpdateExec;
 import org.apache.jena.system.Txn;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestExecTracker {
     @Test

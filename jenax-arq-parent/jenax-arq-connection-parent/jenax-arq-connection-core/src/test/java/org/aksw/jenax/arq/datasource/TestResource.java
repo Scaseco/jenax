@@ -12,8 +12,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.vocabulary.RDF;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestResource {
     @Test
@@ -35,7 +35,7 @@ public class TestResource {
                 Resource s = sNode.asResource();
                 Statement stmt = s.getProperty(RDF.type);
                 RDFNode o = stmt.getObject();
-                Assert.assertEquals(RDF.Property, o);
+                Assertions.assertEquals(RDF.Property, o);
             }
         }
     }

@@ -23,8 +23,8 @@ import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.OpAsQuery;
 import org.jgrapht.graph.DefaultGraphType;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 
 
-//@Ignore
+//@Disabled
 public class SubGraphIsomorphismIndexTests {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SubGraphIsomorphismIndexTests.class);
@@ -51,7 +51,7 @@ public class SubGraphIsomorphismIndexTests {
         return result;
     }
     
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws Exception {
         Model model = RDFDataMgr.loadModel("lsq-sparqlqc-synthetic-simple.ttl", Lang.TURTLE);
         SparqlService ss = FluentSparqlService.from(model).create();

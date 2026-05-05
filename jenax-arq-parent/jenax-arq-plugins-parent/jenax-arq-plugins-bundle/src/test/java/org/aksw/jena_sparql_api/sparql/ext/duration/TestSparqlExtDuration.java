@@ -8,7 +8,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.expr.NodeValue;
 import org.apache.jena.sparql.util.ExprUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestSparqlExtDuration {
 	

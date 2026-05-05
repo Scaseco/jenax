@@ -10,8 +10,8 @@ import java.util.List;
 
 import com.google.common.io.Resources;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.datatypes.TypeMapper;
@@ -49,7 +49,7 @@ public class TestSparqlXPath {
             //RDFDataMgr.write();
         }
 
-        Assert.assertEquals(Arrays.asList("1", "2"), actual);
+        Assertions.assertEquals(Arrays.asList("1", "2"), actual);
     }
 
 

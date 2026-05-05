@@ -1,10 +1,10 @@
 package jenax.engine.qlever;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.engine.qlever.QleverCliProberIndexBuilder;
 import org.aksw.jenax.engine.qlever.QleverCliProberIndexBuilder.CliType;

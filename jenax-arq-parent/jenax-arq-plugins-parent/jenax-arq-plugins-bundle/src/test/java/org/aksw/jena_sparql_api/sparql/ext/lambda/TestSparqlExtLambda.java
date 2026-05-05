@@ -1,8 +1,8 @@
 package org.aksw.jena_sparql_api.sparql.ext.lambda;
 
 import org.aksw.jena_sparql_api.sparql.ext.util.MoreQueryExecUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestSparqlExtLambda {
     @Test
@@ -15,6 +15,6 @@ public class TestSparqlExtLambda {
               BIND(norse:lambda.call(?helloFn, 'Lorenz') AS ?msg)
             }
         """);
-        Assert.assertEquals("Hi Lorenz", actual);
+        Assertions.assertEquals("Hi Lorenz", actual);
     }
 }

@@ -45,10 +45,10 @@ import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.assembler.VocabTDB2;
 import org.apache.jena.vocabulary.OWL;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterators;
@@ -93,7 +93,7 @@ public class TestDatasetAssemblerSameAs {
         });
         // dsg.stream(null, null, null, null).forEach(System.out::println);
         long actual = dsg.stream(null, null, null, null).count();
-        Assert.assertEquals(4, actual);
+        Assertions.assertEquals(4, actual);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class TestDatasetAssemblerSameAs {
     public void runTest(String queryStr, int expectedResult) {
         Query query = QueryFactory.create(queryStr);
         int actualResult = exec(query);
-        Assert.assertEquals(expectedResult, actualResult);
+        Assertions.assertEquals(expectedResult, actualResult);
     }
 
     public int exec(Query query) {
@@ -252,7 +252,7 @@ public class TestDatasetAssemblerSameAs {
         return result;
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         tdb2TmpFolder = Files.createTempDirectory("jenax_sameas_tdb2").toAbsolutePath();
 
@@ -292,7 +292,7 @@ public class TestDatasetAssemblerSameAs {
         // Txn.executeRead(dataset, () -> RDFDataMgr.write(System.out, dataset, RDFFormat.TRIG_PRETTY));
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         FinallyRunAll.run(
                 () -> Optional.ofNullable(ds1).ifPresent(Dataset::close),

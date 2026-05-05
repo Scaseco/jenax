@@ -2,8 +2,8 @@ package org.aksw.jenax.constraint.api;
 
 import org.aksw.jenax.constraint.util.PrefixSet;
 import org.aksw.jenax.constraint.util.PrefixSetImpl;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class TestPrefixSetImpl {
@@ -14,12 +14,12 @@ public class TestPrefixSetImpl {
 
         // bb should get shortened to b
         a.intersect(PrefixSetImpl.create("a", "bb"));
-        Assert.assertEquals(PrefixSetImpl.create("a", "b"), a);
+        Assertions.assertEquals(PrefixSetImpl.create("a", "b"), a);
 
 
         // now b should be dropped
         a.intersect(PrefixSetImpl.create("a"));
-        Assert.assertEquals(PrefixSetImpl.create("a"), a);
+        Assertions.assertEquals(PrefixSetImpl.create("a"), a);
     }
 
 }

@@ -3,8 +3,8 @@ package org.aksw.jenax.reprogen.shacl;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jena_sparql_api.schema.NodeSchemaFromNodeShape;
 import org.aksw.jena_sparql_api.schema.PropertySchemaFromPropertyShape;
@@ -62,7 +62,7 @@ public class TestShaclGenerator {
 
 
     @Test
-    @Ignore // SHFactory.ensureInited from shacl 1.4.4 is incompatible with jena 6.0.0
+    @Disabled // SHFactory.ensureInited from shacl 1.4.4 is incompatible with jena 6.0.0
     public void test1() {
         JenaSystem.init();
         SHFactory.ensureInited();

@@ -2,8 +2,8 @@ package org.aksw.jenax.constraint.api;
 
 import org.aksw.commons.algebra.allen.AllenRelation;
 import org.aksw.jenax.constraint.impl.RdfTermProfiles;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestVSpaceRelations {
 
@@ -25,7 +25,7 @@ public class TestVSpaceRelations {
         VSpace x = RdfTermProfiles.forIriPrefix("rdf");
         VSpace y = RdfTermProfiles.forStringPrefix("rdf");
         AllenRelation actual = x.relateTo(y);
-        Assert.assertEquals(actual, AllenRelation.BEFORE);
+        Assertions.assertEquals(actual, AllenRelation.BEFORE);
     }
 
     @Test
@@ -33,6 +33,6 @@ public class TestVSpaceRelations {
         VSpace x = RdfTermProfiles.forStringPrefix("rdf");
         VSpace y = RdfTermProfiles.forStringPrefix("rdg");
         AllenRelation actual = x.relateTo(y);
-        Assert.assertEquals(actual, AllenRelation.MEETS);
+        Assertions.assertEquals(actual, AllenRelation.MEETS);
     }
 }

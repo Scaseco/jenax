@@ -1,6 +1,6 @@
 package jenax.engine.qlever;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
@@ -39,7 +39,7 @@ public class TestJohannes {
             logger.error("Failed to scan directory for datasets to load with qlever.", e);
         }
         int fileCount = filesToLoad.size();
-        assertNotEquals("Unexpectedly did not find any files to load.", 0, fileCount);
+        assertNotEquals(0, fileCount, "Unexpectedly did not find any files to load.");
 
         logger.info("Preparing to load {} files: {}", fileCount, filesToLoad);
         for (Path file : filesToLoad) {

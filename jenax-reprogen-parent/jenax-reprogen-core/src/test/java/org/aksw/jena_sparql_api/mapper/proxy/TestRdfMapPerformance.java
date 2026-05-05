@@ -15,8 +15,8 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDFS;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 
@@ -102,7 +102,7 @@ public class TestRdfMapPerformance {
                 System.err.println("RdfMap Ops/Sec (by iterations): " + BenchmarkUtils.opsPerSecByIterations(numIterations, () -> rdfMap.put(rand.nextInt(MAX_KEY), rand.nextInt(MAX_KEY))));
             }
 
-            Assert.assertEquals(javaMap, rdfMap);
+            Assertions.assertEquals(javaMap, rdfMap);
         }
     }
 

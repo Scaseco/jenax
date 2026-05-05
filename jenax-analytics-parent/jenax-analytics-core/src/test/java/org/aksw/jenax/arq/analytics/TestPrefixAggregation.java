@@ -19,7 +19,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIteratorResultSet;
 import org.apache.jena.sparql.exec.RowSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Streams;
 

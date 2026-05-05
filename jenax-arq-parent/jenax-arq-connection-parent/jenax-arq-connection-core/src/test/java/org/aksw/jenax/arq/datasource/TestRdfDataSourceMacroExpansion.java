@@ -14,8 +14,8 @@ import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.function.user.UserDefinedFunctionDefinition;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestRdfDataSourceMacroExpansion {
 
@@ -35,7 +35,7 @@ public class TestRdfDataSourceMacroExpansion {
             .newQuery()
             .query("PREFIX eg: <http://www.example.org/> SELECT (eg:greet('Anne') AS ?x) { }")
             .table();
-        Assert.assertEquals(expectedTable, actualTable);
+        Assertions.assertEquals(expectedTable, actualTable);
     }
 
     public void testMacrosInUpdate() {
@@ -53,6 +53,6 @@ public class TestRdfDataSourceMacroExpansion {
         Graph expectedGraph = SSE.parseGraph("(graph (eg:s eg:p 'Hello Anne!'))", PrefixMapping.Extended);
         Set<Triple> expectedSet = SetFromGraph.wrap(expectedGraph);
         Set<Triple> actualSet = SetFromGraph.wrap(graph);
-        Assert.assertEquals(expectedSet, actualSet);
+        Assertions.assertEquals(expectedSet, actualSet);
     }
 }

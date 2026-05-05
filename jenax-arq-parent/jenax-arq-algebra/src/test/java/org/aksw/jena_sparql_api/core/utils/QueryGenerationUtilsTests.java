@@ -11,8 +11,8 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.core.Var;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 public class QueryGenerationUtilsTests {
@@ -26,7 +26,7 @@ public class QueryGenerationUtilsTests {
 
         Query actual = transform.apply(input);
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
