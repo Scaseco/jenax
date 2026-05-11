@@ -68,6 +68,7 @@ public class ServiceEnhancerVocab {
 
     /** Adds the following prefix declarations to the given map thereby overrides existing ones:
      * <table style="border: 1px solid;">
+     * <caption>Prefix Mappings</caption>
      *   <tr><th>Prefix</th><th>IRI</th></tr>
      *   <tr><td>ja</td><td>{@value JA#uri}</td></tr>
      *   <tr><td>se</td><td>{@value #NS}</td></tr>
@@ -81,6 +82,7 @@ public class ServiceEnhancerVocab {
 
     /** Adds the following prefix declarations to the given map thereby overrides existing ones:
      * <table style="border: 1px solid;">
+     * <caption>Prefix Mappings</caption>
      *   <tr><th>Prefix</th><th>IRI</th></tr>
      *   <tr><td>ja</td><td>{@value JA#uri}</td></tr>
      *   <tr><td>se</td><td>{@value #NS}</td></tr>
