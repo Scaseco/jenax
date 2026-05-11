@@ -9,6 +9,7 @@ node_modules
 build
 node
 bin
+staging
 
 # Package Files #
 *.jar
