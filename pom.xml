@@ -94,7 +94,7 @@
 		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
 		<!-- <jena.version>5.4.0</jena.version> -->
-		<jena.version>6.1.0-SNAPSHOT</jena.version>
+		<jena.version>6.1.0</jena.version>
 
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
@@ -128,8 +128,9 @@
 		<jsch.version>0.0.9</jsch.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
 
-		<derby.version>10.17.1.0</derby.version>
-		<sis.version>1.6</sis.version>
+		<!-- <derby.version>10.17.1.0</derby.version> -->
+                <derby.version>10.15.2.0</derby.version>
+		<sis.version>1.4</sis.version>
 
 		<velocity-engine.version>2.4.1</velocity-engine.version>
 		<pebble.version>3.2.4</pebble.version>

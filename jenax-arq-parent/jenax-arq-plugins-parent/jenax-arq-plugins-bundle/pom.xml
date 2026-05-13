@@ -297,6 +297,16 @@
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
+					<groupId>org.apache.jena</groupId>
+					<artifactId>jena-geosparql</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-common</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
 					<groupId>org.aksw.jenax</groupId>
 					<artifactId>jenax-serviceenhancer-preview</artifactId>
 					<scope>provided</scope>

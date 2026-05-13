@@ -41,6 +41,8 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 		</dependency>
+		<!-- needed for versions past roughly 10.15.2.0 -->
+		<!--
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbyshared</artifactId>
@@ -49,6 +51,7 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.locationtech.jts.io</groupId>
