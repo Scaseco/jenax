@@ -65,6 +65,7 @@
 		<!-- <module>jenax-cli-core</module> -->
 
 		<!-- <module>jenax-playground</module> -->
+		<module>jenax-tdb2-leapfrogjoin</module>
 	</modules>
 	<properties>
 		<slf4j.version>2.1.0-alpha1</slf4j.version>
