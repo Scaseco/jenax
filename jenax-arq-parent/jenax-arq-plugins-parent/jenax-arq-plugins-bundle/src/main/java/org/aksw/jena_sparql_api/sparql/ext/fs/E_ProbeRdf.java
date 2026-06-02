@@ -2,11 +2,11 @@ package org.aksw.jena_sparql_api.sparql.ext.fs;
 
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils;
+import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils.PathSpec;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -36,10 +36,9 @@ public class E_ProbeRdf
 
                 Lang lang = RDFDataMgr.determineLang(iri, null, null);
                 if(lang != null) {
-                    Path path = ServiceExecutorFactoryVfsUtils.toPath(node);
-
                     // try(InputStream in = new BoundedInputStream(Files.newInputStream(path), probeBytes)) {
-                    try (Stream<?> stream = streamQuads(Files.newInputStream(path), null, iri)) {
+                    try (PathSpec pathSpec = ServiceExecutorFactoryVfsUtils.toPathSpec(node);
+                         Stream<?> stream = streamQuads(Files.newInputStream(pathSpec.path()), null, iri)) {
                         Iterator<?> it = stream.iterator();
                         int i;
                         for(i = 0; i < n && it.hasNext(); ++i) {

@@ -1,14 +1,13 @@
 package org.aksw.jenax.arq.service.vfs;
 
+import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +19,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Supplier;
+
+import com.google.common.base.Strings;
 
 import org.aksw.commons.collections.IterableUtils;
 import org.aksw.commons.io.binseach.BinarySearcher;
@@ -66,14 +67,12 @@ import org.apache.jena.sparql.engine.iterator.QueryIter;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
+import org.apache.jena.sparql.engine.iterator.QueryIteratorCloseable;
 import org.apache.jena.sparql.exec.QueryExec;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.util.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 /**
  * TODO Factory out into a more general class that delegates each bindings to custom processor
@@ -82,6 +81,19 @@ import com.google.common.collect.Maps;
  *
  */
 public class ServiceExecutorFactoryVfsUtils {
+
+    /**
+     * If fs is not null then it must be closed eventually.
+     */
+    public record PathSpec(FileSystem fs, Path path, Map<String, String> options, Runnable closeAction)
+        implements Closeable {
+        @Override
+        public void close() {
+            if (closeAction != null) {
+                closeAction.run();
+            }
+        }
+    }
 
     public static final String XBINSEARCH = "x-binsearch:";
     public static final String XFSRDFSTORE = "x-fsrdfstore:";
@@ -95,14 +107,14 @@ public class ServiceExecutorFactoryVfsUtils {
     protected static Logger logger = LoggerFactory.getLogger(ServiceExecutorFactoryVfsUtils.class);
 
 
-    public static Path toPath(Node node) {
-        Entry<Path, Map<String, String>> tmp = toPathSpec(node);
-        Path result = tmp.getKey();
-        return result;
-    }
+//    public static Path toPath(Node node) {
+//        PathSpec = toPathSpec(node);
+//        Path result = tmp.getKey();
+//        return result;
+//    }
 
-    public static Entry<Path, Map<String, String>> toPathSpec(Node node) {
-        Entry<Path, Map<String, String>> result;
+    public static PathSpec toPathSpec(Node node) {
+        PathSpec result;
         if (node.isURI()) {
             result = toPathSpec(node.getURI());
         } else {
@@ -112,8 +124,8 @@ public class ServiceExecutorFactoryVfsUtils {
         return result;
     }
 
-    public static Entry<Path, Map<String, String>> toPathSpec(String uriStr) {
-        Entry<Path, Map<String, String>> result = null;
+    public static PathSpec toPathSpec(String uriStr) {
+        PathSpec result = null;
         try {
             String tmp = uriStr;
             if (tmp.startsWith(XBINSEARCH)) {
@@ -122,7 +134,7 @@ public class ServiceExecutorFactoryVfsUtils {
                 result = toPathSpecRaw(tmp);
 
                 if (result != null) {
-                    result.getValue().put("binsearch", "true");
+                    result.options().put("binsearch", "true");
                 }
             } else {
                 result = toPathSpecRaw(uriStr);
@@ -134,9 +146,11 @@ public class ServiceExecutorFactoryVfsUtils {
         return result;
     }
 
-    public static Entry<Path, Map<String, String>> toPathSpecRaw(String tmp) throws URISyntaxException, IOException {
+    public static PathSpec toPathSpecRaw(String tmp) throws URISyntaxException, IOException {
+        FileSystem fs = null;
         Path path = null;
         Map<String, String> params = new LinkedHashMap<>();
+        Runnable closeAction = null;
 
         boolean useVfs = false;
         boolean useFile = false;
@@ -168,22 +182,9 @@ public class ServiceExecutorFactoryVfsUtils {
                 String fileSystemUrl = effectiveUri.getScheme() + "://" + effectiveUri.getAuthority();
 
                 URI fileSystemUri = URI.create("vfs:" + fileSystemUrl);
-
-                // Get-or-create file system
-                FileSystem fs;
-                try {
-                    fs = FileSystems.getFileSystem(fileSystemUri);
-                } catch (FileSystemNotFoundException e1) {
-                    try {
-                        Map<String, Object> env = null; // new HashMap<>();
-                        fs = FileSystems.newFileSystem(
-                            fileSystemUri,
-                            env);
-                    } catch (FileSystemAlreadyExistsException e2) {
-                        // There may have been a concurrent registration of the file system
-                        fs = FileSystems.getFileSystem(fileSystemUri);
-                    }
-                }
+                Map<String, Object> env = null; // new HashMap<>();
+                fs = FileSystemMgr.acquire(fileSystemUri, env);
+                closeAction = () -> FileSystemMgr.release(fileSystemUri);
 
                 String pathStr = effectiveUri.getPath();
                 Path root = IterableUtils.expectOneItem(fs.getRootDirectories());
@@ -193,8 +194,7 @@ public class ServiceExecutorFactoryVfsUtils {
             }
         }
 
-        Entry<Path, Map<String, String>> result =
-                path == null ? null : Maps.immutableEntry(path, params);
+        PathSpec result = path == null ? null : new PathSpec(fs, path, params, closeAction);
 
         return result;
     }
@@ -321,7 +321,10 @@ public class ServiceExecutorFactoryVfsUtils {
     }
 
 
-    public static QueryIterator nextStage(OpService opService, Binding outerBinding, ExecutionContext execCxt, Path path, Map<String, String> params) {
+    public static QueryIterator nextStage(OpService opService, Binding outerBinding, ExecutionContext execCxt, PathSpec pathSpec) {
+        Path path = pathSpec.path();
+        Map<String, String> params = pathSpec.options();
+
         Context context = execCxt.getContext();
         // OpService op = (OpService)QC.substitute(opService, outerBinding);
         boolean silent = opService.getSilent() ;
@@ -454,7 +457,7 @@ public class ServiceExecutorFactoryVfsUtils {
 
             if (!specialStreamProcessingApplied) {
                 DatasetGraph dataset = DatasetGraphFactory.create();
-                try (InputStream in = RDFDataMgrEx.probeEncodings(Files.newInputStream(path), null)) {
+                try (InputStream in = RDFDataMgrEx.probeEncodings(new BufferedInputStream(Files.newInputStream(path)), null)) {
                     TypedInputStream tis = RDFDataMgrEx.probeLang(in, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
 
                     // String url = path.toUri().toString();
@@ -479,6 +482,8 @@ public class ServiceExecutorFactoryVfsUtils {
 
                 qIter = new QueryIterOverQueryExec(execCxt, qe);
             }
+
+            qIter = new QueryIteratorCloseable(qIter, pathSpec::close);
 
 
             // In silent mode we consume all data into a data bag
@@ -515,6 +520,8 @@ public class ServiceExecutorFactoryVfsUtils {
             }
 
         } catch (Exception ex) {
+            pathSpec.close();
+
             if ( silent )
             {
                 logger.warn("SERVICE <" + opService.getService().toString() + ">: " + ex.getMessage()) ;

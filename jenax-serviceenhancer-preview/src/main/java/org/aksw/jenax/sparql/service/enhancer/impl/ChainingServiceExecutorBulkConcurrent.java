@@ -65,58 +65,64 @@ public class ChainingServiceExecutorBulkConcurrent
     public QueryIterator createExecution(OpService opService, QueryIterator input, ExecutionContext execCxt, ServiceExecutorBulk chain) {
 //        ServiceOpts opts = ServiceOpts.getEffectiveService(opService, ServiceEnhancerConstants.SELF.getURI(),
 //                key -> key.equals(name));
-        List<Entry<String, String>> list = ServiceOpts.parseEntries(opService.getService());
+        QueryIterator result = null;
 
-        QueryIterator result;
-        Entry<String, String> opt = list.isEmpty() ? null : list.get(0);
-        if (opt != null && opt.getKey().equals(name)) {
-            list = list.subList(1, list.size());
-            // Remove a trailing colon separator
-            // FIXME: This should be handled more elegantly
-            if (!list.isEmpty() && list.get(0).getKey().equals("")) {
+        Node serviceNode = opService.getService();
+        if (serviceNode != null && serviceNode.isURI()) {
+            List<Entry<String, String>> list = ServiceOpts.parseEntries(serviceNode);
+
+            Entry<String, String> opt = list.isEmpty() ? null : list.get(0);
+            if (opt != null && opt.getKey().equals(name)) {
                 list = list.subList(1, list.size());
+                // Remove a trailing colon separator
+                // FIXME: This should be handled more elegantly
+                if (!list.isEmpty() && list.get(0).getKey().equals("")) {
+                    list = list.subList(1, list.size());
+                }
+
+                Context cxt = execCxt.getContext();
+                // String key = opt.getKey();
+                String val = opt.getValue();
+                Config config = parseConfig(val, cxt);
+
+                OpService newOp = ChainingServiceExecutorBulkServiceEnhancer.toOpService(list, opService, ServiceEnhancerConstants.SELF_BULK);
+
+                // OpServiceInfo serviceInfo = new OpServiceInfo(opService);
+                // OpServiceInfo serviceInfo = new OpServiceInfo(newOp);
+                Function<Binding, Node> groupKeyFn = binding -> Var.lookup(binding, serviceNode);
+                // Function<Binding, Node> groupKeyFn = serviceInfo::getSubstServiceNode;
+
+                Batcher<Node, Binding> scheduler = new Batcher<>(groupKeyFn, config.bindingsPerSlot(), 0);
+                AbortableIterator<GroupedBatch<Node, Long, Binding>> inputBatchIterator = scheduler.batch(AbortableIterators.adapt(input));
+
+                RequestExecutorSparqlBase exec = new RequestExecutorSparqlBase(Granularity.BATCH, inputBatchIterator, config.concurrentSlots(), config.readAhead(), execCxt) {
+                    @Override
+                    protected AbortableIterator<Binding> buildIterator(boolean runsOnNewThread, Node groupKey, List<Binding> inputs, List<Long> reverseMap, ExecutionContext batchExecCxt) {
+    //                    Iterator<Binding> indexedBindings = IntStream.range(0, inputs.size()).mapToObj(i ->
+    //                        BindingFactory.binding(inputs.get(i), globalIdxVar, NodeValue.makeInteger(reverseMap.get(i)).asNode()))
+    //                        .iterator();
+
+                        QueryIterator subIter = QueryIterPlainWrapper.create(inputs.iterator(), batchExecCxt);
+
+                        // QueryIterator tmp = chain.createExecution(newOp, QueryIterPlainWrapper.create(indexedBindings, execCxt), execCxt);
+                        // Pass the adapted request through the whole service executor chain again.
+                        QueryIterator tmp = ServiceExec.exec(newOp, subIter, batchExecCxt);
+                        return AbortableIterators.adapt(tmp);
+                    }
+
+                    @Override
+                    protected long extractInputOrdinal(Binding targetItem) {
+                        // This iterator operates on batch granularity
+                        // No need to relate individual bindings to their ordinal.
+                        throw new IllegalStateException("Should never be called.");
+                    }
+                };
+                result = AbortableIterators.asQueryIterator(exec);
             }
+        }
 
-            Context cxt = execCxt.getContext();
-            // String key = opt.getKey();
-            String val = opt.getValue();
-            Config config = parseConfig(val, cxt);
-
-            OpService newOp = ChainingServiceExecutorBulkServiceEnhancer.toOpService(list, opService, ServiceEnhancerConstants.SELF_BULK);
-
-            // OpServiceInfo serviceInfo = new OpServiceInfo(opService);
-            Node serviceNode = opService.getService();
-            // OpServiceInfo serviceInfo = new OpServiceInfo(newOp);
-            Function<Binding, Node> groupKeyFn = binding -> Var.lookup(binding, serviceNode);
-            // Function<Binding, Node> groupKeyFn = serviceInfo::getSubstServiceNode;
-
-            Batcher<Node, Binding> scheduler = new Batcher<>(groupKeyFn, config.bindingsPerSlot(), 0);
-            AbortableIterator<GroupedBatch<Node, Long, Binding>> inputBatchIterator = scheduler.batch(AbortableIterators.adapt(input));
-
-            RequestExecutorSparqlBase exec = new RequestExecutorSparqlBase(Granularity.BATCH, inputBatchIterator, config.concurrentSlots(), config.readAhead(), execCxt) {
-                @Override
-                protected AbortableIterator<Binding> buildIterator(boolean runsOnNewThread, Node groupKey, List<Binding> inputs, List<Long> reverseMap, ExecutionContext batchExecCxt) {
-//                    Iterator<Binding> indexedBindings = IntStream.range(0, inputs.size()).mapToObj(i ->
-//                        BindingFactory.binding(inputs.get(i), globalIdxVar, NodeValue.makeInteger(reverseMap.get(i)).asNode()))
-//                        .iterator();
-
-                    QueryIterator subIter = QueryIterPlainWrapper.create(inputs.iterator(), batchExecCxt);
-
-                    // QueryIterator tmp = chain.createExecution(newOp, QueryIterPlainWrapper.create(indexedBindings, execCxt), execCxt);
-                    // Pass the adapted request through the whole service executor chain again.
-                    QueryIterator tmp = ServiceExec.exec(newOp, subIter, batchExecCxt);
-                    return AbortableIterators.adapt(tmp);
-                }
-
-                @Override
-                protected long extractInputOrdinal(Binding targetItem) {
-                    // This iterator operates on batch granularity
-                    // No need to relate individual bindings to their ordinal.
-                    throw new IllegalStateException("Should never be called.");
-                }
-            };
-            result = AbortableIterators.asQueryIterator(exec);
-        } else {
+        if (result == null) {
+            // Fall-through to default processing
             result = chain.createExecution(opService, input, execCxt);
         }
         return result;
