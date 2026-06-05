@@ -12,12 +12,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import com.google.common.base.Strings;
@@ -36,6 +38,7 @@ import org.aksw.jena_sparql_api.io.binseach.StageGeneratorGraphFindRaw;
 import org.aksw.jenax.arq.util.binding.QueryIterOverQueryExec;
 import org.aksw.jenax.arq.util.exec.query.QueryExecUtils;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
+import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrEx;
 import org.apache.hadoop.io.compress.BZip2Codec;
 import org.apache.hadoop.io.compress.SplittableCompressionCodec;
@@ -75,7 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO Factory out into a more general class that delegates each bindings to custom processor
+ * TODO Factor out into a more general class that delegates each bindings to custom processor
  *
  * @author Claus Stadler, Dec 5, 2018
  *
@@ -95,6 +98,8 @@ public class ServiceExecutorFactoryVfsUtils {
         }
     }
 
+    public record PathSpecFactory(boolean isFile, Callable<PathSpec> supplier) {}
+
     public static final String XBINSEARCH = "x-binsearch:";
     public static final String XFSRDFSTORE = "x-fsrdfstore:";
     public static final String FILE = "file:";
@@ -113,8 +118,20 @@ public class ServiceExecutorFactoryVfsUtils {
 //        return result;
 //    }
 
-    public static PathSpec toPathSpec(Node node) {
-        PathSpec result;
+    public static PathSpec toPathSpec(Node serviceNode, Context cxt) throws Exception {
+        PathSpec result = null;
+        PathSpecFactory pathSpecFactory = ServiceExecutorFactoryVfsUtils.toPathSpecFactory(serviceNode);
+        if (pathSpecFactory != null) {
+            if (pathSpecFactory.isFile()) {
+                ArqSecurity.requireFileAccess(cxt);
+            }
+            result = pathSpecFactory.supplier.call();
+        }
+        return result;
+    }
+
+    public static PathSpecFactory toPathSpecFactory(Node node) {
+        PathSpecFactory result;
         if (node.isURI()) {
             result = toPathSpec(node.getURI());
         } else {
@@ -124,17 +141,21 @@ public class ServiceExecutorFactoryVfsUtils {
         return result;
     }
 
-    public static PathSpec toPathSpec(String uriStr) {
-        PathSpec result = null;
+    public static PathSpecFactory toPathSpec(String uriStr) {
+        PathSpecFactory result = null;
         try {
             String tmp = uriStr;
             if (tmp.startsWith(XBINSEARCH)) {
                 tmp = tmp.substring(XBINSEARCH.length());
 
-                result = toPathSpecRaw(tmp);
+                PathSpecFactory baseFactory = toPathSpecRaw(tmp);
 
-                if (result != null) {
-                    result.options().put("binsearch", "true");
+                if (baseFactory != null) {
+                    result = new PathSpecFactory(baseFactory.isFile(), () -> {
+                        PathSpec r = baseFactory.supplier().call();
+                        r.options().put("binsearch", "true");
+                        return r;
+                    });
                 }
             } else {
                 result = toPathSpecRaw(uriStr);
@@ -146,11 +167,10 @@ public class ServiceExecutorFactoryVfsUtils {
         return result;
     }
 
-    public static PathSpec toPathSpecRaw(String tmp) throws URISyntaxException, IOException {
-        FileSystem fs = null;
-        Path path = null;
-        Map<String, String> params = new LinkedHashMap<>();
-        Runnable closeAction = null;
+    // TODO Parse the request so that we can decide whether it must be rejected before creating a file system.
+
+    public static PathSpecFactory toPathSpecRaw(String tmp) throws URISyntaxException, IOException {
+        PathSpecFactory result = null;
 
         boolean useVfs = false;
         boolean useFile = false;
@@ -173,7 +193,7 @@ public class ServiceExecutorFactoryVfsUtils {
 
         if (tmp != null) {
             URI uri = new URI(tmp);
-            params = createMapFromUriQueryString(uri);
+            Map<String, String> params = createMapFromUriQueryString(uri);
 
             // Cut off any query string
             URI effectiveUri = new URI(tmp.replaceAll("\\?.*", ""));
@@ -183,18 +203,21 @@ public class ServiceExecutorFactoryVfsUtils {
 
                 URI fileSystemUri = URI.create("vfs:" + fileSystemUrl);
                 Map<String, Object> env = null; // new HashMap<>();
-                fs = FileSystemMgr.acquire(fileSystemUri, env);
-                closeAction = () -> FileSystemMgr.release(fileSystemUri);
 
-                String pathStr = effectiveUri.getPath();
-                Path root = IterableUtils.expectOneItem(fs.getRootDirectories());
-                path = root.resolve(pathStr);
+                result = new PathSpecFactory(false, () -> {
+                    FileSystem fs = FileSystemMgr.acquire(fileSystemUri, env);
+                    Runnable closeAction = () -> FileSystemMgr.release(fileSystemUri);
+
+                    String pathStr = effectiveUri.getPath();
+                    Path root = IterableUtils.expectOneItem(fs.getRootDirectories());
+                    Path path = root.resolve(pathStr);
+                    return new PathSpec(fs, path, params, closeAction);
+                });
             } else if (useFile) {
-                path = Paths.get(uri);
+                Path p = Paths.get(uri);
+                result = new PathSpecFactory(true, () -> new PathSpec(null, p, new HashMap<>(), null));
             }
         }
-
-        PathSpec result = path == null ? null : new PathSpec(fs, path, params, closeAction);
 
         return result;
     }

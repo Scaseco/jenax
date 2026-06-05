@@ -7,16 +7,18 @@ import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils;
 import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils.PathSpec;
+import org.aksw.jenax.arq.util.expr.FunctionBase1WithEnv;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.system.AsyncParser;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.expr.NodeValue;
-import org.apache.jena.sparql.function.FunctionBase1;
+import org.apache.jena.sparql.function.FunctionEnv;
+import org.apache.jena.sparql.util.Context;
 
 public class E_ProbeRdf
-    extends FunctionBase1
+    extends FunctionBase1WithEnv
 {
     // File is considered RDF if it is non-empty and at least 'n' triples could be parsed
     protected int n = 100;
@@ -27,7 +29,8 @@ public class E_ProbeRdf
     // protected int probeBytes = 4096;
 
     @Override
-    public NodeValue exec(NodeValue nv) {
+    public NodeValue exec(NodeValue nv, FunctionEnv env) {
+        Context cxt = env.getContext();
         NodeValue result = NodeValue.FALSE;
         try {
             if(nv.isIRI()) {
@@ -37,7 +40,7 @@ public class E_ProbeRdf
                 Lang lang = RDFDataMgr.determineLang(iri, null, null);
                 if(lang != null) {
                     // try(InputStream in = new BoundedInputStream(Files.newInputStream(path), probeBytes)) {
-                    try (PathSpec pathSpec = ServiceExecutorFactoryVfsUtils.toPathSpec(node);
+                    try (PathSpec pathSpec = ServiceExecutorFactoryVfsUtils.toPathSpec(node, cxt);
                          Stream<?> stream = streamQuads(Files.newInputStream(pathSpec.path()), null, iri)) {
                         Iterator<?> it = stream.iterator();
                         int i;

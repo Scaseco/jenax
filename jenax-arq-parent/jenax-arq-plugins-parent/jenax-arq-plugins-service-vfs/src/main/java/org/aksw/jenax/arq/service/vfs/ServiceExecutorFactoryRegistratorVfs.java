@@ -1,8 +1,8 @@
 package org.aksw.jenax.arq.service.vfs;
 
 import org.aksw.jenax.arq.service.vfs.ServiceExecutorFactoryVfsUtils.PathSpec;
-import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.QueryExecException;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.algebra.op.OpService;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -20,16 +20,20 @@ public class ServiceExecutorFactoryRegistratorVfs {
         @Override
         public QueryIterator createExecution(OpService opExecute, OpService original, Binding binding,
                 ExecutionContext execCxt, ServiceExecutor chain) {
+            QueryIterator result;
             Node serviceNode = opExecute.getService();
-
             Context cxt = execCxt.getContext();
-            ArqSecurity.requireFileAccess(cxt);
 
-            PathSpec pathSpec = ServiceExecutorFactoryVfsUtils.toPathSpec(serviceNode);
-
-            QueryIterator result = pathSpec == null
-                    ? chain.createExecution(opExecute, original, binding, execCxt)
-                    : ServiceExecutorFactoryVfsUtils.nextStage(opExecute, binding, execCxt, pathSpec);
+            try {
+                PathSpec pathSpec = ServiceExecutorFactoryVfsUtils.toPathSpec(serviceNode, cxt);
+                if (pathSpec != null) {
+                    result = ServiceExecutorFactoryVfsUtils.nextStage(opExecute, binding, execCxt, pathSpec);
+                } else {
+                    result = chain.createExecution(opExecute, original, binding, execCxt);
+                }
+            } catch (Exception e) {
+                throw new QueryExecException(e);
+            }
 
             return result;
         }
