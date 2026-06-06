@@ -254,8 +254,8 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
                 continue;
             }
 
-              // Check if all iterators are at or past the minimum
-            boolean allAligned = allAtOrPastMinimum(minBinding);
+            // Check if all iterators are at the EXACT same binding (min == max)
+            boolean allAligned = allAtSameBinding();
 
             if (allAligned) {
                   // All iterators match or are past the minimum - attempt to merge
@@ -721,6 +721,32 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
                 return false;
             }
             if (compareBindings(state.getCurrentBinding(), minBinding) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if all iterators are at the EXACT same binding value (min == max).
+     * This is the correct alignment check for leap frog join - all iterators must
+     * be at the same value to attempt a merge.
+     */
+    private boolean allAtSameBinding() {
+        if (iteratorStates.isEmpty()) {
+            return false;
+        }
+        IteratorState firstState = iteratorStates.get(0);
+        if (!firstState.hasCurrent()) {
+            return false;
+        }
+        BindingNodeId firstBinding = firstState.getCurrentBinding();
+        
+        for (IteratorState state : iteratorStates) {
+            if (!state.hasCurrent()) {
+                return false;
+            }
+            if (compareBindings(state.getCurrentBinding(), firstBinding) != 0) {
                 return false;
             }
         }
