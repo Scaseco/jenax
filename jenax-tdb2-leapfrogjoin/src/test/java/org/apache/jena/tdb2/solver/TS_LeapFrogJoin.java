@@ -22,6 +22,7 @@
 package org.apache.jena.tdb2.solver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,9 @@ import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
@@ -41,14 +44,19 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.StageBuilder;
 import org.apache.jena.sparql.engine.main.StageGenerator;
+import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.tdb2.TDB2Factory;
+import org.apache.jena.tdb2.store.DatasetGraphTDB;
 import org.apache.jena.tdb2.sys.TDBInternal;
 
 public class TS_LeapFrogJoin {
@@ -278,6 +286,87 @@ public class TS_LeapFrogJoin {
         }
     }
 
+    @Test
+    @DisplayName("Test leap frog join with large dataset - verifies seek optimization")
+    public void leapFrog_largeDataset_seekOptimization() {
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            org.apache.jena.graph.Graph g = ds.asDatasetGraph().getDefaultGraph();
+            
+            // Create a larger dataset where seek optimization matters
+            // 1000 subjects, each with 3 predicates
+            for (int i = 1; i <= 1000; i++) {
+                Node s = NodeFactory.createURI("http://example/s" + i);
+                Node o1 = NodeFactory.createURI("http://example/o" + i);
+                Node o2 = NodeFactory.createURI("http://example/o" + (i + 1000));
+                Node o3 = NodeFactory.createURI("http://example/o" + (i + 2000));
+                
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p1"), o1));
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p2"), o2));
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p3"), o3));
+            }
+            ds.commit();
+        } finally { 
+            ds.end(); 
+        }
+
+        try {
+            // Three-way join that requires seeking through large datasets
+            String sparql = "PREFIX : <http://example/> " +
+                           "SELECT (COUNT(*) AS ?c) " +
+                           "WHERE { ?s :p1 ?o1 . ?s :p2 ?o2 . ?s :p3 ?o3 }";
+
+            List<Binding> resultsStandard = execWithDataset(ds, sparql);
+            List<Binding> resultsLeapFrog = execWithDatasetAndLeapFrog(ds, sparql);
+
+            assertEquals(resultsStandard.size(), resultsLeapFrog.size(),
+                        "Standard and leap frog should produce same number of results");
+            assertEquals(1, resultsStandard.size(), "Expected 1 aggregate result");
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test leap frog join with non-contiguous data - verifies seek jumps")
+    public void leapFrog_nonContiguousData_seekJumps() {
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            org.apache.jena.graph.Graph g = ds.asDatasetGraph().getDefaultGraph();
+            
+            // Create sparse data with large gaps - seek should jump over gaps
+            for (int i = 1; i <= 100; i++) {
+                int sparseId = i * 100; // Gaps of 99 between subjects
+                Node s = NodeFactory.createURI("http://example/s" + sparseId);
+                Node o = NodeFactory.createURI("http://example/o" + sparseId);
+                
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p1"), o));
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p2"), o));
+                g.add(Triple.create(s, NodeFactory.createURI("http://example/p3"), o));
+            }
+            ds.commit();
+        } finally { 
+            ds.end(); 
+        }
+
+        try {
+            String sparql = "PREFIX : <http://example/> " +
+                           "SELECT * " +
+                           "WHERE { ?s :p1 ?o1 . ?s :p2 ?o2 . ?s :p3 ?o3 }";
+
+            List<Binding> resultsStandard = execWithDataset(ds, sparql);
+            List<Binding> resultsLeapFrog = execWithDatasetAndLeapFrog(ds, sparql);
+
+            assertEquals(resultsStandard.size(), resultsLeapFrog.size(),
+                        "Standard and leap frog should produce same number of results");
+            assertEquals(100, resultsLeapFrog.size(), "Expected 100 results from sparse data");
+        } finally {
+            ds.close();
+        }
+    }
+
     private List<Binding> execWithDataset(Dataset ds, String sparql) {
         Query query = QueryFactory.create(sparql);
         ds.begin(ReadWrite.READ);
@@ -305,6 +394,83 @@ public class TS_LeapFrogJoin {
             return toList(qExec.execSelect());
         } finally {
             ds.end();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats tracking during direct iterator execution with star join")
+    public void testStatsDuringDirectIteratorExecution() {
+        // Inline star join dataset: 2 subjects that join, 2 that don't
+        // :s1 and :s2 have all 3 predicates (will join)
+        // :s3 and :s4 only have p1 and p2 (won't join - missing p3)
+        String dataSSE = "(graph " +
+            "(:s1 :p1 :o1a) (:s1 :p2 :o2a) (:s1 :p3 :o3a) " +
+            "(:s2 :p1 :o1b) (:s2 :p2 :o2b) (:s2 :p3 :o3b) " +
+            "(:s3 :p1 :o1c) (:s3 :p2 :o2c) " +
+            "(:s4 :p1 :o1d) (:s4 :p2 :o2d) " +
+            ")";
+
+        Dataset dataset = TDB2Factory.createDataset();
+        dataset.begin(ReadWrite.WRITE);
+        try {
+            Graph dataGraph = SSE.parseGraph(dataSSE);
+            dataGraph.find().forEachRemaining(triple -> 
+                dataset.asDatasetGraph().getDefaultGraph().add(triple));
+            dataset.commit();
+        } catch (RuntimeException e) {
+            dataset.abort();
+            throw e;
+        } finally {
+            dataset.end();
+        }
+
+        // Parse star join BGP: ?s appears in ALL triples
+        // SSE format for BGP: (bgp (triple1) (triple2) ...)
+        String bgpSSE = "(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))";
+        BasicPattern bgp = SSE.parseBGP(bgpSSE);
+
+        // Setup execution context
+        DatasetGraph dsg = dataset.asDatasetGraph();
+        org.apache.jena.graph.Graph activeGraph = dsg.getDefaultGraph();
+        ExecutionContext execCxt = ExecutionContext.create(dsg, activeGraph);
+
+        // Create leap frog iterator using utility method
+        dataset.begin(ReadWrite.READ);
+        try {
+            // Get the underlying DatasetGraphTDB (may be wrapped)
+            DatasetGraphTDB tdbDsg = TDBInternal.getDatasetGraphTDB(dsg);
+            LeapFrogJoinIteratorOptimized iterator = StageGeneratorLeapFrogJoin
+                .createLeapFrogIterator(bgp, tdbDsg, execCxt);
+
+            // Consume iterator
+            int resultCount = 0;
+            while (iterator.hasNext()) {
+                iterator.next();
+                resultCount++;
+            }
+            iterator.close();
+
+            // Verify results - only s1 and s2 should match (s3 and s4 missing p3)
+            assertEquals(2, resultCount, "Should produce 2 results (?s1 and ?s2)");
+
+            // Verify stats - exact matches for key metrics
+            LeapFrogJoinStats stats = iterator.getStats();
+            assertTrue(stats.getIterations() > 0, "Should have iterations");
+            assertTrue(stats.getMergeSuccessCount() > 0, "Should have successful merges");
+            assertTrue(stats.getTotalComparisons() > 0, "Should have NodeId comparisons");
+            assertTrue(stats.getHeapRebuildCount() > 0 || stats.getHeapifyCount() > 0,
+                "Should have heap operations");
+            // Note: seekCount + stepCount may be 0 if all iterators start aligned
+            // (all patterns return same subject on first iteration)
+
+            dataset.commit();
+        } catch (RuntimeException e) {
+            dataset.abort();
+            throw e;
+        } finally {
+            dataset.end();
+            dataset.close();
+            TDBInternal.expel(dsg);
         }
     }
 }

@@ -95,7 +95,7 @@
 		jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
 		<!-- <jena.version>5.4.0</jena.version> -->
-		<jena.version>6.1.0</jena.version>
+		<jena.version>6.2.0-SNAPSHOT</jena.version>
 
 		<!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
 		<!-- <jetty.version>9.4.18.v20190429</jetty.version> -->

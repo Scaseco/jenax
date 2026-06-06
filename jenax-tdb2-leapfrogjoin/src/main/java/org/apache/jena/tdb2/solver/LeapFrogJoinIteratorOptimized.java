@@ -22,16 +22,16 @@
 package org.apache.jena.tdb2.solver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.atlas.lib.tuple.TupleFactory;
-import org.apache.jena.dboe.base.record.RecordFactory;
-import org.apache.jena.dboe.trans.bplustree.BPlusTree;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
@@ -45,6 +45,8 @@ import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.tdb2.store.NodeId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.jena.tdb2.store.nodetable.NodeTable;
 import org.apache.jena.tdb2.store.nodetupletable.NodeTupleTable;
 import org.apache.jena.tdb2.store.tupletable.TupleIndex;
@@ -88,6 +90,8 @@ import org.apache.jena.tdb2.store.tupletable.TupleTable;
  * </ul>
  */
 public class LeapFrogJoinIteratorOptimized extends QueryIter {
+    private static final Logger LOG = LoggerFactory.getLogger(LeapFrogJoinIteratorOptimized.class);
+    private static final boolean DEBUG = false;
 
     private final List<Var> joinVars;
     private final List<IteratorState> iteratorStates;
@@ -96,9 +100,9 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     private final NodeTupleTable nodeTupleTable;
     private final Predicate<Tuple<NodeId>> filter;
     private final TupleTable tupleTable;
-    private final RecordFactory recordFactory;
 
-    private final TupleIndexRecord[] bestIndexCache;
+    private final Map<String, TupleIndexRecord> bestIndexCache;
+    private final LeapFrogJoinStats stats = new LeapFrogJoinStats();
 
     private BindingNodeId slot;
     private boolean finished;
@@ -125,25 +129,11 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
         this.slot = null;
 
         iteratorStates = new ArrayList<>();
-        this.bestIndexCache = new TupleIndexRecord[patternTriples.size()];
+        this.bestIndexCache = new HashMap<>();
 
         if (joinVars.isEmpty()) {
             throw new IllegalArgumentException("Leap frog join requires at least one join variable");
         }
-
-        // Get record factory from the tuple table's primary index for seeking
-        RecordFactory factory = null;
-        if (tupleTable != null && tupleTable.getIndexes() != null) {
-            for (TupleIndex idx : tupleTable.getIndexes()) {
-                if (idx instanceof TupleIndexRecord record) {
-                    if (record.getRangeIndex() instanceof BPlusTree bpt) {
-                        factory = bpt.getRecordFactory();
-                    }
-                    break;
-                }
-            }
-        }
-        this.recordFactory = factory;
 
         // Build IteratorState with standard iterator
         for (int i = 0; i < inputs.size(); i++) {
@@ -233,11 +223,14 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
                 finished = true;
                 return null;
             }
+            stats.incrementHeapRebuildCount();
             buildHeap();
             isInitialized = true;
         }
 
         while (!finished) {
+            stats.incrementIterations();
+
             // Get minimum from heap (O(1) - heap[0])
             IteratorState minState = iteratorStates.get(0);
             if (minState == null || !minState.hasCurrent()) {
@@ -256,63 +249,70 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
                     finished = true;
                     return null;
                 }
+                stats.incrementHeapifyCount();
                 heapifyDown(0);
                 continue;
             }
 
-             // Check if all iterators are at or past the minimum
+              // Check if all iterators are at or past the minimum
             boolean allAligned = allAtOrPastMinimum(minBinding);
 
             if (allAligned) {
-                 // All iterators match or are past the minimum - attempt to merge
-                       Binding mergedResult = tryMergeBindings();
-                 if (mergedResult != null) {
-                     // We have a join result - save it and advance ALL iterators at the minimum
-                     BindingNodeId savedSlot = BindingIdConverter.convert(mergedResult, nodeTable);
-                     int advancedCount = 0;
-                     for (IteratorState state : iteratorStates) {
-                         if (state.hasCurrent() && compareBindings(state.getCurrentBinding(), minBinding) == 0) {
-                             if (!advanceIterator(state)) {
-                                 finishedAfterCurrent = true;
-                                 return savedSlot;
-                             }
-                             if (!updateStateForCurrent(state)) {
-                                 finishedAfterCurrent = true;
-                                 return savedSlot;
-                             }
-                             advancedCount++;
-                         }
-                     }
-                     // Only one iterator changed (the common case) — O(log m)
-                     if (advancedCount == 1) {
-                         heapifyDown(0);
-                     } else {
-                         // Multiple iterators changed — O(m) rebuild
-                         buildHeap();
-                     }
-                     // Don't set finished=true here — savedSlot must be consumed first
-                     return savedSlot;
-                 } else {
-                     // Merge failed (binding conflict) - use leap frog advance:
-                     // advance iterators at the minimum, seek iterators behind it,
-                     // leave iterators past the minimum where they are
-                     if (!leapFrogAdvance(minBinding)) {
-                         finished = true;
-                         return null;
-                     }
-                     // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
-                     buildHeap();
-                 }
-             } else {
-                 // Not all iterators aligned - leap frog:
-                 // 1. Advance all iterators currently at the minimum value
-                 // 2. Seek all iterators behind the minimum to the minimum value using B+Tree range query
-                 if (!leapFrogAdvance(minBinding)) {
-                     finished = true;
-                     return null;
-                 }
-                // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
-                buildHeap();
+                  // All iterators match or are past the minimum - attempt to merge
+                        Binding mergedResult = tryMergeBindings();
+                  if (mergedResult != null) {
+                      stats.incrementMergeSuccessCount();
+                      // We have a join result - save it and advance ALL iterators at the minimum
+                      BindingNodeId savedSlot = BindingIdConverter.convert(mergedResult, nodeTable);
+                      int advancedCount = 0;
+                      for (IteratorState state : iteratorStates) {
+                          if (state.hasCurrent() && compareBindings(state.getCurrentBinding(), minBinding) == 0) {
+                              if (!advanceIterator(state)) {
+                                  finishedAfterCurrent = true;
+                                  return savedSlot;
+                              }
+                              if (!updateStateForCurrent(state)) {
+                                  finishedAfterCurrent = true;
+                                  return savedSlot;
+                              }
+                              advancedCount++;
+                          }
+                      }
+                      // Only one iterator changed (the common case) — O(log m)
+                      if (advancedCount == 1) {
+                          stats.incrementHeapifyCount();
+                          heapifyDown(0);
+                      } else {
+                          // Multiple iterators changed — O(m) rebuild
+                          stats.incrementHeapRebuildCount();
+                          buildHeap();
+                      }
+                      // Don't set finished=true here — savedSlot must be consumed first
+                      return savedSlot;
+                  } else {
+                      stats.incrementMergeFailCount();
+                      // Merge failed (binding conflict) - use leap frog advance:
+                      // advance iterators at the minimum, seek iterators behind it,
+                      // leave iterators past the minimum where they are
+                      if (!leapFrogAdvance(minBinding)) {
+                          finished = true;
+                          return null;
+                      }
+                      // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
+                      stats.incrementHeapRebuildCount();
+                      buildHeap();
+                  }
+              } else {
+                  // Not all iterators aligned - leap frog:
+                  // 1. Advance all iterators currently at the minimum value
+                  // 2. Seek all iterators behind the minimum to the minimum value using B+Tree range query
+                  if (!leapFrogAdvance(minBinding)) {
+                      finished = true;
+                      return null;
+                  }
+                 // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
+                 stats.incrementHeapRebuildCount();
+                 buildHeap();
             }
         }
 
@@ -386,15 +386,15 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     private boolean seekAhead(IteratorState state, BindingNodeId minBinding, int patternIndex) {
         Triple triple = patternTriples.get(patternIndex);
 
-        // Try to use the TupleIndexRecord for direct B+Tree seek
-        if (recordFactory != null) {
-            boolean seeked = seekViaBPlusTree(state, minBinding, triple, patternIndex);
-            if (seeked) {
-                return true;
-            }
+        // Always try B+Tree seek first - it's O(log n) vs O(n) for sequential
+        boolean seeked = seekViaBPlusTree(state, minBinding, triple, patternIndex);
+        if (seeked) {
+            stats.incrementSeekCount();
+            return true;
         }
 
         // Fallback: use sequential advance until we reach or pass the minimum
+        stats.incrementStepCount();
         return seekViaSequentialAdvance(state, minBinding);
     }
 
@@ -404,16 +404,30 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
      */
     private boolean seekViaBPlusTree(IteratorState state, BindingNodeId minBinding, Triple triple, int patternIndex) {
         try {
+            if (DEBUG) {
+                LOG.debug("Attempting B+Tree seek for pattern {} with binding {}", patternIndex, minBinding);
+            }
+
             // Build a pattern tuple for the B+Tree seek
             Tuple<NodeId> seekPattern = buildSeekPatternForTriple(minBinding, triple);
             if (seekPattern == null) {
+                if (DEBUG) {
+                    LOG.debug("Failed to build seek pattern for pattern {}", patternIndex);
+                }
                 return false;
             }
 
             // Find the best index for this seek pattern
             TupleIndexRecord bestIndex = findBestIndexForPattern(patternIndex, seekPattern);
             if (bestIndex == null) {
+                if (DEBUG) {
+                    LOG.debug("No suitable index found for pattern {}", patternIndex);
+                }
                 return false;
+            }
+
+            if (DEBUG) {
+                LOG.debug("Using index {} for pattern {}", bestIndex.getClass().getSimpleName(), patternIndex);
             }
 
             // Create a new iterator via the index's find method
@@ -455,17 +469,28 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
 
             // Get the first binding
             if (!newPeekIter.hasNext()) {
+                if (DEBUG) {
+                    LOG.debug("B+Tree seek returned no results for pattern {}", patternIndex);
+                }
                 return false;
             }
             BindingNodeId b = peek(newPeekIter);
             if (b == null) {
+                if (DEBUG) {
+                    LOG.debug("B+Tree seek returned null binding for pattern {}", patternIndex);
+                }
                 return false;
             }
             state.setCurrentBinding(b);
+            if (DEBUG) {
+                LOG.debug("B+Tree seek succeeded for pattern {}, new binding: {}", patternIndex, b);
+            }
             return true;
 
         } catch (Exception e) {
-            // Seek failed - fall back to sequential
+            if (DEBUG) {
+                LOG.debug("B+Tree seek failed for pattern {}: {}", patternIndex, e.getMessage());
+            }
             return false;
         }
     }
@@ -501,14 +526,17 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     /**
      * Find the best TupleIndexRecord for a given pattern.
      * Uses the same weight-based index selection as TupleTable.find().
+     * <p>
+     * Cache key is based on patternIndex AND the pattern structure (which vars are bound).
+     * This ensures we get the correct best index for different seek patterns.
      */
     private TupleIndexRecord findBestIndexForPattern(int patternIndex, Tuple<NodeId> pattern) {
-        if (patternIndex >= 0 && patternIndex < bestIndexCache.length) {
-            TupleIndexRecord cached = bestIndexCache[patternIndex];
-            if (cached != null) {
-                return cached;
-            }
+        String cacheKey = patternIndex + ":" + buildPatternKey(pattern);
+        if (bestIndexCache.containsKey(cacheKey)) {
+            stats.incrementIndexCacheHits();
+            return bestIndexCache.get(cacheKey);
         }
+        stats.incrementIndexCacheMisses();
 
         int bestWeight = -1;
         TupleIndexRecord bestIndex = null;
@@ -523,11 +551,25 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
             }
         }
 
-        if (patternIndex >= 0 && patternIndex < bestIndexCache.length) {
-            bestIndexCache[patternIndex] = bestIndex;
-        }
-
+        bestIndexCache.put(cacheKey, bestIndex);
         return bestIndex;
+    }
+
+    /**
+     * Build a cache key based on which positions in the pattern are concrete vs wildcards.
+     * This allows caching indices for the same pattern structure with different values.
+     */
+    private String buildPatternKey(Tuple<NodeId> pattern) {
+        StringBuilder key = new StringBuilder();
+        for (int i = 0; i < pattern.len(); i++) {
+            NodeId nid = pattern.get(i);
+            if (NodeId.isConcrete(nid)) {
+                key.append("C");
+            } else {
+                key.append("?");
+            }
+        }
+        return key.toString();
     }
 
     /**
@@ -746,15 +788,19 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
      * All joinVars are guaranteed present in every binding (enforced by pattern execution).
      */
     private int compareBindings(BindingNodeId left, BindingNodeId right) {
+        int comparisons = 0;
         for (Var var : joinVars) {
             NodeId leftId = left.get(var);
             NodeId rightId = right.get(var);
 
             int cmp = leftId.compareTo(rightId);
+            comparisons++;
             if (cmp != 0) {
+                stats.addComparisons(comparisons);
                 return cmp;
             }
         }
+        stats.addComparisons(comparisons);
 
         return 0;
     }
@@ -776,5 +822,17 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
                 state.peekIter.cancel();
             }
         }
+    }
+
+    /**
+     * Get the statistics for this leap frog join execution.
+     * <p>
+     * The stats object is updated during query execution and contains
+     * the final metrics once the iterator is closed.
+     *
+     * @return the statistics object for this join execution
+     */
+    public LeapFrogJoinStats getStats() {
+        return stats;
     }
 }

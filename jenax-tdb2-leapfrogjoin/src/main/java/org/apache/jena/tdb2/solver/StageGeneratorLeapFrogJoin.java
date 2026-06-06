@@ -38,7 +38,11 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
+import org.apache.jena.tdb2.sys.TDBInternal;
+import org.apache.jena.tdb2.store.DatasetGraphTDB;
+import org.apache.jena.tdb2.store.GraphTDB;
 import org.apache.jena.sparql.engine.iterator.QueryIterRoot;
+import org.apache.jena.sparql.engine.main.StageBuilder;
 import org.apache.jena.sparql.engine.main.StageGenerator;
 import org.apache.jena.sparql.engine.optimizer.reorder.ReorderLib;
 import org.apache.jena.sparql.engine.optimizer.reorder.ReorderProc;
@@ -190,7 +194,82 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
                                                   orderedPatterns, graphNode, filter, nodeTupleTable);
     }
 
-    private List<Var> findJoinVariables(List<Triple> component) {
+    /**
+     * Create a LeapFrogJoinIteratorOptimized for a given BGP.
+     * <p>
+     * This is a utility method for testing and direct iterator construction.
+     * It creates individual iterators for each triple pattern and combines them
+     * into a leap frog join iterator that tracks execution statistics.
+     *
+     * @param bgp the basic graph pattern to execute (must have at least 2 triples)
+     * @param dsg the dataset graph containing the data
+     * @param execCxt the execution context
+     * @return a LeapFrogJoinIteratorOptimized with stats tracking enabled
+     * @throws IllegalArgumentException if the BGP has fewer than 2 triples or no join variables
+     */
+    public static LeapFrogJoinIteratorOptimized createLeapFrogIterator(
+            BasicPattern bgp, 
+            DatasetGraphTDB dsg, 
+            ExecutionContext execCxt) {
+        
+        List<Triple> triples = bgp.getList();
+        if (triples.size() < 2) {
+            throw new IllegalArgumentException("BGP must have at least 2 triples for leap frog join");
+        }
+        
+        // Get join variables
+        List<Var> joinVars = findJoinVariables(triples);
+        if (joinVars.isEmpty()) {
+            throw new IllegalArgumentException("No common join variables found in BGP");
+        }
+        
+        // Get TDB2 infrastructure
+        GraphTDB graphTDB = (GraphTDB) dsg.getDefaultGraph();
+        NodeTable nodeTable = graphTDB.getNodeTupleTable().getNodeTable();
+        NodeTupleTable nodeTupleTable = graphTDB.getNodeTupleTable();
+        
+        // Get standard stage generator for executing individual patterns
+        StageGenerator standardSG = StageBuilder.chooseStageGenerator(execCxt.getContext());
+        
+        // Create iterators for each triple pattern
+        List<QueryIterator> patternIterators = new ArrayList<>();
+        for (Triple triple : triples) {
+            BasicPattern single = new BasicPattern();
+            single.add(triple);
+            QueryIterator iter = standardSG.execute(single, QueryIterRoot.create(execCxt), execCxt);
+            patternIterators.add(iter);
+        }
+        
+        // Determine graph node (for quad support)
+        Node graphNode = null;
+        if (nodeTupleTable.getTupleTable().getTupleLen() == 4) {
+            graphNode = graphTDB.getGraphName();
+        }
+        
+        // Get filter predicate
+        Predicate<Tuple<NodeId>> filter = QC2.getFilter(execCxt.getContext());
+        
+        // Create and return the leap frog iterator
+        return new LeapFrogJoinIteratorOptimized(
+            patternIterators, 
+            joinVars, 
+            execCxt, 
+            nodeTable, 
+            triples, 
+            graphNode, 
+            filter, 
+            nodeTupleTable
+        );
+    }
+
+    /**
+     * Find variables that appear in ALL triples of a component.
+     * These are the join variables used by the leap frog join algorithm.
+     *
+     * @param component list of triples to analyze
+     * @return list of variables common to all triples
+     */
+    public static List<Var> findJoinVariables(List<Triple> component) {
         if (component.size() < 2) {
             return new ArrayList<>();
         }
@@ -212,7 +291,10 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
         return new ArrayList<>(commonVars);
     }
 
-    private Set<Var> tripleVars(Triple triple) {
+    /**
+     * Get all variables mentioned in a triple.
+     */
+    public static Set<Var> tripleVars(Triple triple) {
         Set<Var> result = new java.util.HashSet<>();
         if (triple.getSubject().isVariable()) {
             result.add(Var.alloc(triple.getSubject()));
