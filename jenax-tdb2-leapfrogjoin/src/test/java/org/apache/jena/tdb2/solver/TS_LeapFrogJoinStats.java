@@ -36,8 +36,6 @@ public class TS_LeapFrogJoinStats {
         assertEquals(0, stats.getStepCount());
         assertEquals(0, stats.getMergeSuccessCount());
         assertEquals(0, stats.getMergeFailCount());
-        assertEquals(0, stats.getHeapRebuildCount());
-        assertEquals(0, stats.getHeapifyCount());
         assertEquals(0, stats.getIndexCacheHits());
         assertEquals(0, stats.getIndexCacheMisses());
         assertEquals(0, stats.getIterations());
@@ -54,8 +52,6 @@ public class TS_LeapFrogJoinStats {
             stats.getClass().getDeclaredMethod("incrementStepCount").invoke(stats);
             stats.getClass().getDeclaredMethod("incrementMergeSuccessCount").invoke(stats);
             stats.getClass().getDeclaredMethod("incrementMergeFailCount").invoke(stats);
-            stats.getClass().getDeclaredMethod("incrementHeapRebuildCount").invoke(stats);
-            stats.getClass().getDeclaredMethod("incrementHeapifyCount").invoke(stats);
             stats.getClass().getDeclaredMethod("incrementIndexCacheHits").invoke(stats);
             stats.getClass().getDeclaredMethod("incrementIndexCacheMisses").invoke(stats);
             stats.getClass().getDeclaredMethod("incrementIterations").invoke(stats);
@@ -64,8 +60,6 @@ public class TS_LeapFrogJoinStats {
             assertEquals(1, stats.getStepCount());
             assertEquals(1, stats.getMergeSuccessCount());
             assertEquals(1, stats.getMergeFailCount());
-            assertEquals(1, stats.getHeapRebuildCount());
-            assertEquals(1, stats.getHeapifyCount());
             assertEquals(1, stats.getIndexCacheHits());
             assertEquals(1, stats.getIndexCacheMisses());
             assertEquals(1, stats.getIterations());

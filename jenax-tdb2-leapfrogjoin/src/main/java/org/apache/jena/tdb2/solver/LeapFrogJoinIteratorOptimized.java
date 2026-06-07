@@ -22,12 +22,15 @@
 package org.apache.jena.tdb2.solver;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import com.google.common.collect.MinMaxPriorityQueue;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.tuple.Tuple;
@@ -94,7 +97,6 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     private static final boolean DEBUG = false;
 
     private final List<Var> joinVars;
-    private final List<IteratorState> iteratorStates;
     private final List<Triple> patternTriples;
     private final Node graphNode;
     private final NodeTupleTable nodeTupleTable;
@@ -103,6 +105,7 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
 
     private final Map<String, TupleIndexRecord> bestIndexCache;
     private final LeapFrogJoinStats stats = new LeapFrogJoinStats();
+    private final MinMaxPriorityQueue<IteratorState> queue;
 
     private BindingNodeId slot;
     private boolean finished;
@@ -127,29 +130,44 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
         this.tupleTable = (nodeTupleTable != null) ? nodeTupleTable.getTupleTable() : null;
         this.finished = false;
         this.slot = null;
+        this.isInitialized = false;
 
-        iteratorStates = new ArrayList<>();
         this.bestIndexCache = new HashMap<>();
 
         if (joinVars.isEmpty()) {
             throw new IllegalArgumentException("Leap frog join requires at least one join variable");
         }
 
-        // Build IteratorState with standard iterator
+        // Create comparator for ordering iterators by their current binding
+        Comparator<IteratorState> byBinding = (s1, s2) -> {
+            if (!s1.hasCurrent() && !s2.hasCurrent()) return 0;
+            if (!s1.hasCurrent()) return 1;  // Exhausted iterators at end
+            if (!s2.hasCurrent()) return -1;
+            return compareBindings(s1.getCurrentBinding(), s2.getCurrentBinding());
+        };
+
+        // Create MinMaxPriorityQueue for O(1) min/max access and O(log n) operations
+        this.queue = MinMaxPriorityQueue
+            .orderedBy(byBinding)
+            .maximumSize(inputs.size() + 1)
+            .expectedSize(inputs.size())
+            .create();
+
+        // Build IteratorState with patternIndex
         for (int i = 0; i < inputs.size(); i++) {
             QueryIterator input = inputs.get(i);
             QueryIterPeek peekIter = (input != null) ? QueryIterPeek.create(input, execCxt) : null;
-            iteratorStates.add(new IteratorState(peekIter));
+            queue.add(new IteratorState(peekIter, i));
         }
     }
 
    @Override
     protected boolean hasNextBinding() {
-        if (finished) {
-            return false;
-        }
         if (slot != null) {
             return true;
+        }
+        if (finished) {
+            return false;
         }
         if (finishedAfterCurrent) {
             finished = true;
@@ -157,13 +175,14 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
         }
         slot = moveToNextBindingOrNull();
         if (slot == null) {
+            finished = true;
             close();
             return false;
         }
         return true;
     }
 
-     @Override
+    @Override
     protected Binding moveToNextBinding() {
         Binding result = BindingIdConverter.convToBinding(slot, nodeTable);
         slot = null;
@@ -174,17 +193,17 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     }
 
     /**
-     * State of an iterator in the leap frog join, with heap index for priority queue operations.
+     * State of an iterator in the leap frog join.
      */
     private static class IteratorState {
         private QueryIterPeek peekIter;
         private BindingNodeId currentBinding;
-        private int heapIndex;
+        private final int patternIndex;
 
-        IteratorState(QueryIterPeek peekIter) {
+        IteratorState(QueryIterPeek peekIter, int patternIndex) {
             this.peekIter = peekIter;
             this.currentBinding = null;
-            this.heapIndex = -1;
+            this.patternIndex = patternIndex;
         }
 
         QueryIterPeek getPeekIter() {
@@ -203,12 +222,8 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
             this.currentBinding = binding;
         }
 
-        int getHeapIndex() {
-            return heapIndex;
-        }
-
-        void setHeapIndex(int index) {
-            this.heapIndex = index;
+        int getPatternIndex() {
+            return patternIndex;
         }
 
         boolean hasCurrent() {
@@ -217,102 +232,70 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     }
 
     private BindingNodeId moveToNextBindingOrNull() {
-        // Lazy initialization: only once per iterator lifecycle
+        // Lazy initialization
         if (!isInitialized) {
-            if (!initializeState()) {
-                finished = true;
-                return null;
+            // Initialize all iterators
+            for (IteratorState state : queue) {
+                if (!updateStateForCurrent(state)) {
+                    finished = true;
+                    return null;
+                }
             }
-            stats.incrementHeapRebuildCount();
-            buildHeap();
             isInitialized = true;
         }
 
         while (!finished) {
             stats.incrementIterations();
 
-            // Get minimum from heap (O(1) - heap[0])
-            IteratorState minState = iteratorStates.get(0);
-            if (minState == null || !minState.hasCurrent()) {
+            // Check if queue is empty
+            if (queue.isEmpty()) {
+                finished = true;
+                return null;
+            }
+
+            // Peek at min/max - O(1)
+            IteratorState minState = queue.peekFirst();
+            IteratorState maxState = queue.peekLast();
+            
+            if (minState == null || maxState == null) {
+                finished = true;
+                return null;
+            }
+
+            // Check for exhaustion
+            if (!minState.hasCurrent()) {
                 finished = true;
                 return null;
             }
 
             BindingNodeId minBinding = minState.getCurrentBinding();
-            if (minBinding == null) {
-                // Current min has no binding - advance it and rebuild
-                if (!advanceIterator(minState)) {
-                    finished = true;
-                    return null;
-                }
-                if (!updateStateForIndex(0)) {
-                    finished = true;
-                    return null;
-                }
-                stats.incrementHeapifyCount();
-                heapifyDown(0);
-                continue;
-            }
+            BindingNodeId maxBinding = maxState.getCurrentBinding();
 
-            // Check if all iterators are at the EXACT same binding (min == max)
-            boolean allAligned = allAtSameBinding();
-
-            if (allAligned) {
-                  // All iterators match or are past the minimum - attempt to merge
-                        Binding mergedResult = tryMergeBindings();
-                  if (mergedResult != null) {
-                      stats.incrementMergeSuccessCount();
-                      // We have a join result - save it and advance ALL iterators at the minimum
-                      BindingNodeId savedSlot = BindingIdConverter.convert(mergedResult, nodeTable);
-                      int advancedCount = 0;
-                      for (IteratorState state : iteratorStates) {
-                          if (state.hasCurrent() && compareBindings(state.getCurrentBinding(), minBinding) == 0) {
-                              if (!advanceIterator(state)) {
-                                  finishedAfterCurrent = true;
-                                  return savedSlot;
-                              }
-                              if (!updateStateForCurrent(state)) {
-                                  finishedAfterCurrent = true;
-                                  return savedSlot;
-                              }
-                              advancedCount++;
-                          }
-                      }
-                      // Only one iterator changed (the common case) — O(log m)
-                      if (advancedCount == 1) {
-                          stats.incrementHeapifyCount();
-                          heapifyDown(0);
-                      } else {
-                          // Multiple iterators changed — O(m) rebuild
-                          stats.incrementHeapRebuildCount();
-                          buildHeap();
-                      }
-                      // Don't set finished=true here — savedSlot must be consumed first
-                      return savedSlot;
-                  } else {
-                      stats.incrementMergeFailCount();
-                      // Merge failed (binding conflict) - use leap frog advance:
-                      // advance iterators at the minimum, seek iterators behind it,
-                      // leave iterators past the minimum where they are
-                      if (!leapFrogAdvance(minBinding)) {
-                          finished = true;
-                          return null;
-                      }
-                      // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
-                      stats.incrementHeapRebuildCount();
-                      buildHeap();
-                  }
-              } else {
-                  // Not all iterators aligned - leap frog:
-                  // 1. Advance all iterators currently at the minimum value
-                  // 2. Seek all iterators behind the minimum to the minimum value using B+Tree range query
-                  if (!leapFrogAdvance(minBinding)) {
-                      finished = true;
-                      return null;
-                  }
-                 // leapFrogAdvance may modify multiple iterators — O(m) rebuild needed
-                 stats.incrementHeapRebuildCount();
-                 buildHeap();
+            // Check alignment: min == max means all iterators at same value
+            if (compareBindings(minBinding, maxBinding) == 0) {
+                // All aligned - attempt merge
+                Binding mergedResult = tryMergeBindings();
+                if (mergedResult != null) {
+                    stats.incrementMergeSuccessCount();
+                    BindingNodeId savedSlot = BindingIdConverter.convert(mergedResult, nodeTable);
+                    
+                    // Advance all iterators at minimum
+                    advanceAllAtMinimum();
+                    
+                    // Return the result (even if finished was set during advance)
+                    // The next call to hasNextBinding() will return false
+                    return savedSlot;
+                } else {
+                    stats.incrementMergeFailCount();
+                    // Merge failed - advance all at minimum
+                    advanceAllAtMinimum();
+                }
+            } else {
+                // Not aligned - seek min toward max
+                // Use pollFirst() to remove min - O(log n)
+                IteratorState toSeek = queue.pollFirst();
+                seekMinTowardMax(toSeek, maxBinding);
+                queue.offer(toSeek);  // Re-insert - O(log n)
             }
         }
 
@@ -321,13 +304,63 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     }
 
     /**
+     * Advance all iterators that are at the minimum binding value.
+     * Uses pollFirst/offer for O(log n) operations.
+     */
+    private void advanceAllAtMinimum() {
+        if (queue.isEmpty()) {
+            finished = true;
+            return;
+        }
+        
+        BindingNodeId minBinding = queue.peekFirst().getCurrentBinding();
+        
+        // Collect all iterators at minimum (drain and re-insert)
+        List<IteratorState> temp = new ArrayList<>();
+        while (!queue.isEmpty() && queue.peekFirst() != null && 
+               compareBindings(queue.peekFirst().getCurrentBinding(), minBinding) == 0) {
+            IteratorState state = queue.pollFirst();  // O(log n)
+            temp.add(state);
+        }
+        
+        // Advance each and re-insert
+        for (IteratorState state : temp) {
+            if (advanceIterator(state)) {
+                updateStateForCurrent(state);
+                queue.offer(state);  // O(log n)
+            } else {
+                // Iterator exhausted - stop immediately
+                finished = true;
+                return;
+            }
+        }
+    }
+
+    /**
+     * Seek the minimum iterator toward the maximum binding value.
+     */
+    private void seekMinTowardMax(IteratorState minState, BindingNodeId targetBinding) {
+        int patternIndex = minState.getPatternIndex();
+        
+        if (seekAhead(minState, targetBinding, patternIndex)) {
+            stats.incrementSeekCount();
+            // Already re-inserted by caller
+        } else {
+            // Seek failed or exhausted
+            finished = true;
+        }
+    }
+
+    /**
      * Perform a leap frog advance: advance minimum iterators and seek ahead others.
      * This is the core "leap frog" optimization - instead of stepping iterators
      * one by one, we seek them directly to the target position using B+Tree range queries.
+     * @deprecated No longer used with MinMaxPriorityQueue implementation
      */
+    @Deprecated
     private boolean leapFrogAdvance(BindingNodeId minBinding) {
         // First, advance all iterators that are AT the minimum value (one step each)
-        for (IteratorState state : iteratorStates) {
+        for (IteratorState state : queue) {
             if (state.hasCurrent() && compareBindings(state.getCurrentBinding(), minBinding) == 0) {
                 if (!advanceIterator(state)) {
                     return false;
@@ -341,12 +374,17 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
         // Then, seek ahead all iterators that are BEHIND the minimum.
         // Instead of calling .next() one by one (which could be O(n)),
         // we create a new B+Tree range iterator starting at minBinding - O(log n).
-        for (int i = 0; i < iteratorStates.size(); i++) {
-            IteratorState state = iteratorStates.get(i);
+        List<IteratorState> toSeek = new ArrayList<>();
+        for (IteratorState state : queue) {
             if (state.hasCurrent() && compareBindings(state.getCurrentBinding(), minBinding) < 0) {
-                if (!seekAhead(state, minBinding, i)) {
-                    return false;
-                }
+                toSeek.add(state);
+            }
+        }
+        
+        for (IteratorState state : toSeek) {
+            int patternIndex = state.getPatternIndex();
+            if (!seekAhead(state, minBinding, patternIndex)) {
+                return false;
             }
         }
 
@@ -637,132 +675,15 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
     }
 
     /**
-     * Update the binding for a specific index in the iterator states list.
-     */
-    private boolean updateStateForIndex(int index) {
-        IteratorState state = iteratorStates.get(index);
-        return updateStateForCurrent(state);
-    }
-
-    /**
-     * Initialize iterator state with first bindings from all iterators.
-     */
-    private boolean initializeState() {
-        for (IteratorState state : iteratorStates) {
-            QueryIterPeek peekIter = state.getPeekIter();
-            if (peekIter == null || !peekIter.hasNext()) {
-                return false;
-            }
-            BindingNodeId b = peek(peekIter);
-            if (b == null) {
-                return false;
-            }
-            state.setCurrentBinding(b);
-            state.setHeapIndex(iteratorStates.indexOf(state));
-        }
-        return true;
-    }
-
-    /**
-     * Build a min-heap from the current iterator states.
-     */
-    private void buildHeap() {
-        int n = iteratorStates.size();
-        for (int i = n / 2 - 1; i >= 0; i--) {
-            heapifyDown(i);
-        }
-    }
-
-    /**
-     * Heapify down from given index to maintain min-heap property.
-     */
-    private void heapifyDown(int i) {
-        int n = iteratorStates.size();
-        int smallest = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
-
-        if (left < n && iteratorStates.get(left).hasCurrent() && iteratorStates.get(smallest).hasCurrent()
-                && compareBindings(iteratorStates.get(left).getCurrentBinding(),
-                        iteratorStates.get(smallest).getCurrentBinding()) < 0) {
-            smallest = left;
-        }
-
-        if (right < n && iteratorStates.get(right).hasCurrent() && iteratorStates.get(smallest).hasCurrent()
-                && compareBindings(iteratorStates.get(right).getCurrentBinding(),
-                        iteratorStates.get(smallest).getCurrentBinding()) < 0) {
-            smallest = right;
-        }
-
-        if (smallest != i) {
-            swap(i, smallest);
-            heapifyDown(smallest);
-        }
-    }
-
-    /**
-     * Swap two elements in the heap and update their heap indices.
-     */
-    private void swap(int i, int j) {
-        IteratorState temp = iteratorStates.get(i);
-        iteratorStates.set(i, iteratorStates.get(j));
-        iteratorStates.set(j, temp);
-
-        iteratorStates.get(i).setHeapIndex(i);
-        iteratorStates.get(j).setHeapIndex(j);
-    }
-
-    /**
-     * Check if all iterators are at or past the minimum binding.
-     */
-    private boolean allAtOrPastMinimum(BindingNodeId minBinding) {
-        for (IteratorState state : iteratorStates) {
-            if (!state.hasCurrent()) {
-                return false;
-            }
-            if (compareBindings(state.getCurrentBinding(), minBinding) < 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if all iterators are at the EXACT same binding value (min == max).
-     * This is the correct alignment check for leap frog join - all iterators must
-     * be at the same value to attempt a merge.
-     */
-    private boolean allAtSameBinding() {
-        if (iteratorStates.isEmpty()) {
-            return false;
-        }
-        IteratorState firstState = iteratorStates.get(0);
-        if (!firstState.hasCurrent()) {
-            return false;
-        }
-        BindingNodeId firstBinding = firstState.getCurrentBinding();
-        
-        for (IteratorState state : iteratorStates) {
-            if (!state.hasCurrent()) {
-                return false;
-            }
-            if (compareBindings(state.getCurrentBinding(), firstBinding) != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * Try to merge all current bindings into a single result.
      * Returns null if merge fails (binding conflict).
      */
     private Binding tryMergeBindings() {
-        if (iteratorStates.isEmpty()) {
+        if (queue.isEmpty()) {
             return null;
         }
 
-        IteratorState firstState = iteratorStates.get(0);
+        IteratorState firstState = queue.peekFirst();
         BindingNodeId firstBinding = firstState.getCurrentBinding();
         if (firstBinding == null) {
             return null;
@@ -770,8 +691,7 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
 
         Binding result = BindingIdConverter.convToBinding(firstBinding, nodeTable);
 
-        for (int i = 1; i < iteratorStates.size(); i++) {
-            IteratorState state = iteratorStates.get(i);
+        for (IteratorState state : queue) {
             BindingNodeId current = state.getCurrentBinding();
             if (current == null) {
                 return null;
@@ -833,17 +753,17 @@ public class LeapFrogJoinIteratorOptimized extends QueryIter {
 
     @Override
     protected void closeIterator() {
-        for (IteratorState state : iteratorStates) {
+        for (IteratorState state : queue) {
             if (state.peekIter != null) {
                 state.peekIter.close();
             }
         }
-        iteratorStates.clear();
+        queue.clear();
     }
 
     @Override
     protected void requestCancel() {
-        for (IteratorState state : iteratorStates) {
+        for (IteratorState state : queue) {
             if (state.peekIter != null) {
                 state.peekIter.cancel();
             }

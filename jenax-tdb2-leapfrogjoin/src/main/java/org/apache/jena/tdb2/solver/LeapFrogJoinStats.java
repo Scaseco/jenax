@@ -25,7 +25,7 @@ package org.apache.jena.tdb2.solver;
  * Statistics for leap frog join execution, following the Guava Cache Stats pattern.
  * <p>
  * This class tracks performance metrics for a single leap frog join execution,
- * including seek operations, heap operations, and index cache usage.
+ * including seek operations, merge operations, and index cache usage.
  * <p>
  * The stats object is mutable and is updated by the {@link LeapFrogJoinIteratorOptimized}
  * during query execution. Once the iterator is closed, the stats reflect the final
@@ -40,10 +40,6 @@ public class LeapFrogJoinStats {
     // Merge operations: successful joins vs. conflicts
     private long mergeSuccessCount = 0;
     private long mergeFailCount = 0;
-    
-    // Heap operations: full rebuilds vs. incremental adjustments
-    private long heapRebuildCount = 0;
-    private long heapifyCount = 0;
     
     // Index cache performance
     private long indexCacheHits = 0;
@@ -79,20 +75,6 @@ public class LeapFrogJoinStats {
      */
     void incrementMergeFailCount() {
         mergeFailCount++;
-    }
-
-    /**
-     * Increment the heap rebuild count (full heap rebuilds).
-     */
-    void incrementHeapRebuildCount() {
-        heapRebuildCount++;
-    }
-
-    /**
-     * Increment the heapify count (incremental heap adjustments).
-     */
-    void incrementHeapifyCount() {
-        heapifyCount++;
     }
 
     /**
@@ -149,20 +131,6 @@ public class LeapFrogJoinStats {
      */
     public long getMergeFailCount() {
         return mergeFailCount;
-    }
-
-    /**
-     * Get the number of full heap rebuilds.
-     */
-    public long getHeapRebuildCount() {
-        return heapRebuildCount;
-    }
-
-    /**
-     * Get the number of incremental heap adjustments.
-     */
-    public long getHeapifyCount() {
-        return heapifyCount;
     }
 
     /**
@@ -250,8 +218,6 @@ public class LeapFrogJoinStats {
                 ", seekRatio=" + String.format("%.3f", getSeekRatio()) +
                 ", mergeSuccess=" + mergeSuccessCount +
                 ", mergeFail=" + mergeFailCount +
-                ", heapRebuilds=" + heapRebuildCount +
-                ", heapify=" + heapifyCount +
                 ", cacheHits=" + indexCacheHits +
                 ", cacheMisses=" + indexCacheMisses +
                 ", cacheHitRatio=" + String.format("%.3f", getCacheHitRatio()) +

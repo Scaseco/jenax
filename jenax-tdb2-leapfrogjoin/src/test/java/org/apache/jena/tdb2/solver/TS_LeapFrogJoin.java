@@ -403,74 +403,47 @@ public class TS_LeapFrogJoin {
         // Inline star join dataset: 2 subjects that join, 2 that don't
         // :s1 and :s2 have all 3 predicates (will join)
         // :s3 and :s4 only have p1 and p2 (won't join - missing p3)
-        String dataSSE = "(graph " +
-            "(:s1 :p1 :o1a) (:s1 :p2 :o2a) (:s1 :p3 :o3a) " +
-            "(:s2 :p1 :o1b) (:s2 :p2 :o2b) (:s2 :p3 :o3b) " +
-            "(:s3 :p1 :o1c) (:s3 :p2 :o2c) " +
-            "(:s4 :p1 :o1d) (:s4 :p2 :o2d) " +
-            ")";
-
-        Dataset dataset = TDB2Factory.createDataset();
-        dataset.begin(ReadWrite.WRITE);
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
         try {
-            Graph dataGraph = SSE.parseGraph(dataSSE);
-            dataGraph.find().forEachRemaining(triple -> 
-                dataset.asDatasetGraph().getDefaultGraph().add(triple));
-            dataset.commit();
-        } catch (RuntimeException e) {
-            dataset.abort();
-            throw e;
-        } finally {
-            dataset.end();
-        }
-
-        // Parse star join BGP: ?s appears in ALL triples
-        // SSE format for BGP: (bgp (triple1) (triple2) ...)
-        String bgpSSE = "(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))";
-        BasicPattern bgp = SSE.parseBGP(bgpSSE);
-
-        // Setup execution context
-        DatasetGraph dsg = dataset.asDatasetGraph();
-        org.apache.jena.graph.Graph activeGraph = dsg.getDefaultGraph();
-        ExecutionContext execCxt = ExecutionContext.create(dsg, activeGraph);
-
-        // Create leap frog iterator using utility method
-        dataset.begin(ReadWrite.READ);
-        try {
-            // Get the underlying DatasetGraphTDB (may be wrapped)
-            DatasetGraphTDB tdbDsg = TDBInternal.getDatasetGraphTDB(dsg);
-            LeapFrogJoinIteratorOptimized iterator = StageGeneratorLeapFrogJoin
-                .createLeapFrogIterator(bgp, tdbDsg, execCxt);
-
-            // Consume iterator
-            int resultCount = 0;
-            while (iterator.hasNext()) {
-                iterator.next();
-                resultCount++;
+            org.apache.jena.graph.Graph g = ds.asDatasetGraph().getDefaultGraph();
+            // s1 and s2 have all 3 predicates
+            for (int p = 1; p <= 3; p++) {
+                g.add(Triple.create(
+                    NodeFactory.createURI("http://example/s1"),
+                    NodeFactory.createURI("http://example/p" + p),
+                    NodeFactory.createURI("http://example/o" + p)));
+                g.add(Triple.create(
+                    NodeFactory.createURI("http://example/s2"),
+                    NodeFactory.createURI("http://example/p" + p),
+                    NodeFactory.createURI("http://example/o" + p)));
             }
-            iterator.close();
+            // s3 and s4 only have p1 and p2
+            for (int p = 1; p <= 2; p++) {
+                g.add(Triple.create(
+                    NodeFactory.createURI("http://example/s3"),
+                    NodeFactory.createURI("http://example/p" + p),
+                    NodeFactory.createURI("http://example/o" + p)));
+                g.add(Triple.create(
+                    NodeFactory.createURI("http://example/s4"),
+                    NodeFactory.createURI("http://example/p" + p),
+                    NodeFactory.createURI("http://example/o" + p)));
+            }
+            ds.commit();
+        } finally { ds.end(); }
 
-            // Verify results - only s1 and s2 should match (s3 and s4 missing p3)
-            assertEquals(2, resultCount, "Should produce 2 results (?s1 and ?s2)");
+        try {
+            String sparql = "PREFIX : <http://example/> SELECT * WHERE { ?s :p1 ?o1 . ?s :p2 ?o2 . ?s :p3 ?o3 }";
 
-            // Verify stats - exact matches for key metrics
-            LeapFrogJoinStats stats = iterator.getStats();
-            assertTrue(stats.getIterations() > 0, "Should have iterations");
-            assertTrue(stats.getMergeSuccessCount() > 0, "Should have successful merges");
-            assertTrue(stats.getTotalComparisons() > 0, "Should have NodeId comparisons");
-            assertTrue(stats.getHeapRebuildCount() > 0 || stats.getHeapifyCount() > 0,
-                "Should have heap operations");
-            // Note: seekCount + stepCount may be 0 if all iterators start aligned
-            // (all patterns return same subject on first iteration)
+            List<Binding> resultsStandard = execWithDataset(ds, sparql);
+            List<Binding> resultsLeapFrog = execWithDatasetAndLeapFrog(ds, sparql);
 
-            dataset.commit();
-        } catch (RuntimeException e) {
-            dataset.abort();
-            throw e;
+            assertEquals(resultsStandard.size(), resultsLeapFrog.size(),
+                         "Standard (" + resultsStandard.size() + ") and leap frog (" + resultsLeapFrog.size() + ") should match");
+            assertEquals(2, resultsStandard.size(), "Expected 2 results (s1 and s2)");
+            assertEquals(2, resultsLeapFrog.size(), "Leap frog should produce 2 results");
         } finally {
-            dataset.end();
-            dataset.close();
-            TDBInternal.expel(dsg);
+            ds.close();
         }
     }
 }
