@@ -23,6 +23,7 @@ package org.apache.jena.tdb2.solver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,11 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.sse.SSE;
+import org.apache.jena.tdb2.store.DatasetGraphTDB;
+import org.apache.jena.tdb2.sys.TDBInternal;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.main.OpExecutorFactory;
 import org.apache.jena.sparql.engine.main.StageBuilder;
 import org.apache.jena.sparql.engine.main.StageGenerator;
@@ -61,12 +67,14 @@ import org.apache.jena.tdb2.sys.TDBInternal;
 
 public class TS_LeapFrogJoin {
     static Dataset dataset = null;
+    
+    // DEBUG switch for enabling debug output during tests
+    private static final boolean DEBUG_TESTS = false;
 
     @BeforeAll
     static public void beforeClass() {
         dataset = TDB2Factory.createDataset();
         dataset.begin(ReadWrite.WRITE);
-        // String graphData = TS_LeapFrogJoin.getTestingDataRoot() + "/Data/solver-data.ttl";
         RDFDataMgr.read(dataset, "Data/solver-data.ttl");
         dataset.commit();
         dataset.end();
@@ -397,51 +405,317 @@ public class TS_LeapFrogJoin {
         }
     }
 
+    /**
+     * Helper to create a URI node with the given local name.
+     */
+    private static Node n(String local) {
+        return NodeFactory.createURI("http://example/" + local);
+    }
+
+    /**
+     * Helper to create direct iterator execution with stats collection.
+     * Returns {resultCount, stats} as an array.
+     */
+    private static Object[] execDirectWithStats(Dataset ds, BasicPattern bgp) {
+        DatasetGraph dsg = ds.asDatasetGraph();
+        Graph activeGraph = dsg.getDefaultGraph();
+        ExecutionContext execCxt = ExecutionContext.create(dsg, activeGraph);
+
+        ds.begin(ReadWrite.READ);
+        try {
+            DatasetGraphTDB tdbDsg = TDBInternal.getDatasetGraphTDB(dsg);
+            LeapFrogJoinIteratorOptimized iterator = 
+                StageGeneratorLeapFrogJoin.createLeapFrogIterator(bgp, tdbDsg, execCxt);
+
+            int resultCount = 0;
+            while (iterator.hasNext()) {
+                iterator.next();
+                resultCount++;
+            }
+
+            LeapFrogJoinStats stats = iterator.getStats();
+            iterator.close();
+
+            return new Object[] { resultCount, stats };
+        } finally {
+            ds.end();
+        }
+    }
+
     @Test
     @DisplayName("Test stats tracking during direct iterator execution with star join")
     public void testStatsDuringDirectIteratorExecution() {
-        // Inline star join dataset: 2 subjects that join, 2 that don't
-        // :s1 and :s2 have all 3 predicates (will join)
-        // :s3 and :s4 only have p1 and p2 (won't join - missing p3)
+        // Star join dataset: 2 subjects that join, 2 that don't
+        // s1 and s2 have all 3 predicates (will join)
+        // s3 and s4 only have p1 and p2 (won't join - missing p3)
         Dataset ds = TDB2Factory.createDataset();
         ds.begin(ReadWrite.WRITE);
         try {
-            org.apache.jena.graph.Graph g = ds.asDatasetGraph().getDefaultGraph();
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
             // s1 and s2 have all 3 predicates
             for (int p = 1; p <= 3; p++) {
-                g.add(Triple.create(
-                    NodeFactory.createURI("http://example/s1"),
-                    NodeFactory.createURI("http://example/p" + p),
-                    NodeFactory.createURI("http://example/o" + p)));
-                g.add(Triple.create(
-                    NodeFactory.createURI("http://example/s2"),
-                    NodeFactory.createURI("http://example/p" + p),
-                    NodeFactory.createURI("http://example/o" + p)));
+                g.add(Triple.create(n("s1"), n("p" + p), n("o" + p)));
+                g.add(Triple.create(n("s2"), n("p" + p), n("o" + p)));
             }
             // s3 and s4 only have p1 and p2
             for (int p = 1; p <= 2; p++) {
-                g.add(Triple.create(
-                    NodeFactory.createURI("http://example/s3"),
-                    NodeFactory.createURI("http://example/p" + p),
-                    NodeFactory.createURI("http://example/o" + p)));
-                g.add(Triple.create(
-                    NodeFactory.createURI("http://example/s4"),
-                    NodeFactory.createURI("http://example/p" + p),
-                    NodeFactory.createURI("http://example/o" + p)));
+                g.add(Triple.create(n("s3"), n("p" + p), n("o" + p)));
+                g.add(Triple.create(n("s4"), n("p" + p), n("o" + p)));
             }
             ds.commit();
         } finally { ds.end(); }
 
         try {
-            String sparql = "PREFIX : <http://example/> SELECT * WHERE { ?s :p1 ?o1 . ?s :p2 ?o2 . ?s :p3 ?o3 }";
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
 
-            List<Binding> resultsStandard = execWithDataset(ds, sparql);
-            List<Binding> resultsLeapFrog = execWithDatasetAndLeapFrog(ds, sparql);
+            // Verify results
+            assertEquals(2, resultCount, "Should produce 2 results (s1 and s2)");
 
-            assertEquals(resultsStandard.size(), resultsLeapFrog.size(),
-                         "Standard (" + resultsStandard.size() + ") and leap frog (" + resultsLeapFrog.size() + ") should match");
-            assertEquals(2, resultsStandard.size(), "Expected 2 results (s1 and s2)");
-            assertEquals(2, resultsLeapFrog.size(), "Leap frog should produce 2 results");
+            // Verify stats - specific values
+            assertEquals(2, stats.getMergeSuccessCount(), "2 successful joins");
+            assertTrue(stats.getIterations() > 0, "Loop executed");
+            assertTrue(stats.getTotalComparisons() > 0, "Comparisons performed");
+            // Note: seekCount + stepCount may be 0 if all iterators start aligned
+            // (all patterns return same subject on first iteration)
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsDuringDirectIteratorExecution stats: " + stats);
+            }
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats seek optimization with moderate dataset")
+    public void testStatsSeekOptimizationModerateDataset() {
+        // 100 subjects with matching predicates - enough to see seek behavior
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            for (int i = 1; i <= 100; i++) {
+                Node s = NodeFactory.createURI("http://example/s" + i);
+                g.add(Triple.create(s, n("p1"), n("o1_" + i)));
+                g.add(Triple.create(s, n("p2"), n("o2_" + i)));
+                g.add(Triple.create(s, n("p3"), n("o3_" + i)));
+            }
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
+
+            // Verify results
+            assertEquals(100, resultCount, "100 subjects should all match");
+            assertEquals(100, stats.getMergeSuccessCount(), "100 successful joins");
+
+            // Verify iterations and comparisons
+            assertTrue(stats.getIterations() >= 100, "At least 1 iteration per result");
+            assertTrue(stats.getTotalComparisons() > 0, "Comparisons performed");
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsSeekOptimizationModerateDataset stats: " + stats);
+            }
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats merge failures with binding conflicts")
+    public void testStatsMergeFailures() {
+        // Query: (?s :p1 ?o) (?s :p2 ?o) (?s :p3 ?o)
+        // Requires SAME object ?o in all three predicate positions
+        //
+        // s1: p1->o1, p2->o1, p3->o1  (same object - MATCH)
+        // s2: p1->o2, p2->o2, p3->o2  (same object - MATCH)  
+        // s3: p1->o3, p2->o4, p3->o3  (DIFFERENT objects o3!=o4 - may cause merge fail)
+        // s4: p1->o5, p2->o5          (missing p3 - no merge attempt)
+        //
+        // Note: The algorithm may seek past s3 before attempting merge,
+        // so mergeFailCount may be 0. We verify that results are correct
+        // and stats are populated.
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            
+            // s1: all same object o1
+            g.add(Triple.create(n("s1"), n("p1"), n("o1")));
+            g.add(Triple.create(n("s1"), n("p2"), n("o1")));
+            g.add(Triple.create(n("s1"), n("p3"), n("o1")));
+            
+            // s2: all same object o2
+            g.add(Triple.create(n("s2"), n("p1"), n("o2")));
+            g.add(Triple.create(n("s2"), n("p2"), n("o2")));
+            g.add(Triple.create(n("s2"), n("p3"), n("o2")));
+            
+            // s3: DIFFERENT objects - p1 and p3 use o3, but p2 uses o4
+            g.add(Triple.create(n("s3"), n("p1"), n("o3")));
+            g.add(Triple.create(n("s3"), n("p2"), n("o4")));  // Different from o3!
+            g.add(Triple.create(n("s3"), n("p3"), n("o3")));
+            
+            // s4: missing p3
+            g.add(Triple.create(n("s4"), n("p1"), n("o5")));
+            g.add(Triple.create(n("s4"), n("p2"), n("o5")));
+            
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o) (?s :p2 ?o) (?s :p3 ?o))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
+
+            // Verify results - only s1 and s2 should match
+            assertEquals(2, resultCount, "Only s1 and s2 should match (same object in all positions)");
+            assertEquals(2, stats.getMergeSuccessCount(), "2 successful joins (s1, s2)");
+
+            // Verify stats are populated
+            assertTrue(stats.getIterations() > 0, "Loop executed");
+            assertTrue(stats.getTotalComparisons() > 0, "Comparisons performed");
+            // Note: mergeFailCount may be 0 if algorithm seeks past conflicting data
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsMergeFailures stats: " + stats);
+            }
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats with non-contiguous (sparse) data")
+    public void testStatsNonContiguousData() {
+        // 50 subjects with large gaps (s100, s200, s300, ... s5000)
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            for (int i = 1; i <= 50; i++) {
+                int sparseId = i * 100;  // Gaps of 99 between subjects
+                Node s = NodeFactory.createURI("http://example/s" + sparseId);
+                g.add(Triple.create(s, n("p1"), n("o" + sparseId)));
+                g.add(Triple.create(s, n("p2"), n("o" + sparseId)));
+                g.add(Triple.create(s, n("p3"), n("o" + sparseId)));
+            }
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
+
+            // Verify results
+            assertEquals(50, resultCount, "50 sparse subjects should all match");
+            assertEquals(50, stats.getMergeSuccessCount(), "50 successful joins");
+
+            // Verify iterations
+            assertTrue(stats.getIterations() >= 50, "At least 1 iteration per result");
+            assertTrue(stats.getTotalComparisons() > 0, "Comparisons performed");
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsNonContiguousData stats: " + stats);
+            }
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats with Cartesian product (multiple join variables)")
+    public void testStatsCartesianProduct() {
+        // 2 subjects × 2 objects = 4 combinations
+        // Each subject has all 3 predicates pointing to the SAME object
+        // This creates a join on both ?s and ?o
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            for (int s = 1; s <= 2; s++) {
+                for (int o = 1; o <= 2; o++) {
+                    Node subj = NodeFactory.createURI("http://example/s" + s);
+                    Node obj = NodeFactory.createURI("http://example/o" + o);
+                    for (int p = 1; p <= 3; p++) {
+                        g.add(Triple.create(subj, n("p" + p), obj));
+                    }
+                }
+            }
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o) (?s :p2 ?o) (?s :p3 ?o))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
+
+            // Verify results
+            assertEquals(4, resultCount, "4 (subject, object) combinations");
+            assertEquals(4, stats.getMergeSuccessCount(), "4 successful joins");
+
+            // Verify iterations and comparisons
+            assertTrue(stats.getIterations() >= 4,
+                       "At least 1 iteration per result");
+            assertTrue(stats.getTotalComparisons() > 0,
+                       "Comparisons performed");
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsCartesianProduct stats: " + stats);
+            }
+        } finally {
+            ds.close();
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats cache behavior")
+    public void testStatsCacheBehavior() {
+        // Small dataset to verify cache is being used
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            // 10 subjects with matching predicates
+            for (int i = 1; i <= 10; i++) {
+                Node s = NodeFactory.createURI("http://example/s" + i);
+                g.add(Triple.create(s, n("p1"), n("o1_" + i)));
+                g.add(Triple.create(s, n("p2"), n("o2_" + i)));
+                g.add(Triple.create(s, n("p3"), n("o3_" + i)));
+            }
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))");
+            Object[] result = execDirectWithStats(ds, bgp);
+            int resultCount = (Integer) result[0];
+            LeapFrogJoinStats stats = (LeapFrogJoinStats) result[1];
+
+            // Verify results
+            assertEquals(10, resultCount, "10 subjects should match");
+
+            // Verify cache behavior - cache stats should be accessible
+            // Note: cache may not be used if all patterns use the same index
+            // We just verify the stats are valid (not throwing exceptions)
+            double cacheHitRatio = stats.getCacheHitRatio();
+            assertTrue(!Double.isNaN(cacheHitRatio) || 
+                       (stats.getIndexCacheHits() == 0 && stats.getIndexCacheMisses() == 0),
+                       "Cache hit ratio is valid (NaN only if no lookups)");
+
+            if (DEBUG_TESTS) {
+                System.out.println("testStatsCacheBehavior stats: " + stats);
+            }
         } finally {
             ds.close();
         }

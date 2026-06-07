@@ -67,6 +67,12 @@
       <artifactId>log4j-slf4j2-impl</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.aksw.jenax</groupId>
+      <artifactId>jenax-resources-test-config</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

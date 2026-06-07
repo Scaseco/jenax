@@ -23,8 +23,23 @@ package org.apache.jena.tdb2.solver;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.sse.SSE;
+import org.apache.jena.tdb2.TDB2Factory;
+import org.apache.jena.tdb2.store.DatasetGraphTDB;
+import org.apache.jena.tdb2.sys.TDBInternal;
+import org.apache.jena.sparql.engine.ExecutionContext;
+import org.apache.jena.sparql.core.DatasetGraph;
 
 public class TS_LeapFrogJoinStats {
 
@@ -176,6 +191,73 @@ public class TS_LeapFrogJoinStats {
             assertTrue(str.contains("LeapFrogJoinStats"));
         } catch (Exception e) {
             throw new RuntimeException("Failed to test toString", e);
+        }
+    }
+
+    @Test
+    @DisplayName("Test stats during real iterator execution - integration test")
+    public void testStatsDuringRealExecution() {
+        // Create a simple star join dataset
+        Dataset ds = TDB2Factory.createDataset();
+        ds.begin(ReadWrite.WRITE);
+        try {
+            Graph g = ds.asDatasetGraph().getDefaultGraph();
+            // 3 subjects with 3 predicates each
+            for (int i = 1; i <= 3; i++) {
+                var s = NodeFactory.createURI("http://example/s" + i);
+                for (int p = 1; p <= 3; p++) {
+                    g.add(Triple.create(s, 
+                        NodeFactory.createURI("http://example/p" + p),
+                        NodeFactory.createURI("http://example/o" + p)));
+                }
+            }
+            ds.commit();
+        } finally { ds.end(); }
+
+        try {
+            BasicPattern bgp = SSE.parseBGP("(bgp (?s :p1 ?o1) (?s :p2 ?o2) (?s :p3 ?o3))");
+            
+            DatasetGraph dsg = ds.asDatasetGraph();
+            Graph activeGraph = dsg.getDefaultGraph();
+            ExecutionContext execCxt = ExecutionContext.create(dsg, activeGraph);
+
+            ds.begin(ReadWrite.READ);
+            try {
+                DatasetGraphTDB tdbDsg = TDBInternal.getDatasetGraphTDB(dsg);
+                LeapFrogJoinIteratorOptimized iterator = 
+                    StageGeneratorLeapFrogJoin.createLeapFrogIterator(bgp, tdbDsg, execCxt);
+
+                // Consume iterator
+                int resultCount = 0;
+                while (iterator.hasNext()) {
+                    iterator.next();
+                    resultCount++;
+                }
+
+                LeapFrogJoinStats stats = iterator.getStats();
+
+                // Verify results
+                assertEquals(3, resultCount, "3 subjects should match");
+
+                // Verify stats are populated after execution
+                assertTrue(stats.getIterations() > 0, "Stats should have iterations");
+                assertTrue(stats.getTotalComparisons() > 0, "Stats should have comparisons");
+                assertTrue(stats.getMergeSuccessCount() == 3, "3 successful joins");
+
+                // Verify stats remain accessible after close
+                iterator.close();
+                assertTrue(stats.getMergeSuccessCount() >= 0, 
+                           "Stats accessible after close");
+                assertTrue(stats.getIterations() > 0, 
+                           "Iterations preserved after close");
+
+            } finally {
+                ds.end();
+                ds.close();
+                TDBInternal.expel(dsg);
+            }
+        } finally {
+            ds.close();
         }
     }
 }
