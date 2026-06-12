@@ -2,6 +2,7 @@ package org.aksw.jenax.arq.dataset.impl;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.arq.dataset.api.DatasetGraphOneNg;
 import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
@@ -258,5 +259,20 @@ public class DatasetGraphOneNgImpl
     public void close() {
         graph.close();
         super.close();
+    }
+
+    @Override
+    protected Stream<Quad> streamInDftGraph(Node s, Node p, Node o) {
+        return Iter.asStream(findInDftGraph(s, p, o));
+    }
+
+    @Override
+    protected Stream<Quad> streamInSpecificNamedGraph(Node g, Node s, Node p, Node o) {
+        return Iter.asStream(findInSpecificNamedGraph(g, s, p, o));
+    }
+
+    @Override
+    protected Stream<Quad> streamInAnyNamedGraphs(Node s, Node p, Node o) {
+        return Iter.asStream(findInAnyNamedGraphs(s, p, o));
     }
 }

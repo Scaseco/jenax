@@ -1,6 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.dataset.engine;
 
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.aksw.jenax.dataaccess.sparql.exec.query.FragmentExec;
@@ -136,5 +137,20 @@ public class DatasetGraphOverRDFEngine
     @Override
     public PrefixMap prefixes() {
         return prefixes;
+    }
+
+    @Override
+    protected Stream<Quad> streamInDftGraph(Node s, Node p, Node o) {
+        return Iter.asStream(findInDftGraph(s, p, o));
+    }
+
+    @Override
+    protected Stream<Quad> streamInSpecificNamedGraph(Node g, Node s, Node p, Node o) {
+        return Iter.asStream(findInSpecificNamedGraph(g, s, p, o));
+    }
+
+    @Override
+    protected Stream<Quad> streamInAnyNamedGraphs(Node s, Node p, Node o) {
+        return Iter.asStream(findInAnyNamedGraphs(s, p, o));
     }
 }

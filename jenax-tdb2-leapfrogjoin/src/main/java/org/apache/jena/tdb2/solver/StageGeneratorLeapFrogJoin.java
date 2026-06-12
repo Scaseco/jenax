@@ -22,6 +22,7 @@
 package org.apache.jena.tdb2.solver;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -33,15 +34,14 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Substitute;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.core.Vars;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.QueryIterCommonParent;
 import org.apache.jena.sparql.engine.iterator.QueryIterRepeatApply;
-import org.apache.jena.tdb2.sys.TDBInternal;
-import org.apache.jena.tdb2.store.DatasetGraphTDB;
-import org.apache.jena.tdb2.store.GraphTDB;
 import org.apache.jena.sparql.engine.iterator.QueryIterRoot;
+import org.apache.jena.sparql.engine.join.JoinKey;
 import org.apache.jena.sparql.engine.main.StageBuilder;
 import org.apache.jena.sparql.engine.main.StageGenerator;
 import org.apache.jena.sparql.engine.optimizer.reorder.ReorderLib;
@@ -51,9 +51,6 @@ import org.apache.jena.tdb2.store.GraphTDB;
 import org.apache.jena.tdb2.store.NodeId;
 import org.apache.jena.tdb2.store.nodetable.NodeTable;
 import org.apache.jena.tdb2.store.nodetupletable.NodeTupleTable;
-import org.apache.jena.tdb2.store.tupletable.TupleIndex;
-import org.apache.jena.tdb2.store.tupletable.TupleIndexRecord;
-import org.apache.jena.tdb2.store.tupletable.TupleTable;
 
 /**
  * Stage generator for leap frog joins in TDB2.
@@ -163,16 +160,16 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
         List<Triple> orderedPatterns = reorderProc.reorder(componentPattern).getList();
 
         // Check if ordered patterns have shared variables
-        List<Var> joinVars = findJoinVariables(orderedPatterns);
+        JoinKey joinKey = findJoinVariables(orderedPatterns);
 
-        if (joinVars.isEmpty()) {
+        if (joinKey.isEmpty()) {
             // No shared variables - use standard execution
             return above.execute(componentPattern, QueryIterRoot.create(execCxt), execCxt);
         }
 
         // Create the standard query iterators
-        List<QueryIterator> patternIterators = new ArrayList<>();
-        
+        // List<QueryIterator> patternIterators = new ArrayList<>();
+
         // Get the filter predicate from context
         Predicate<Tuple<NodeId>> filter = QC2.getFilter(execCxt.getContext());
 
@@ -182,15 +179,15 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
             graphNode = graph.getGraphName();
         }
 
-        for (Triple triple : orderedPatterns) {
-            BasicPattern singlePattern = new BasicPattern();
-            singlePattern.add(triple);
-            QueryIterator iter = above.execute(singlePattern, QueryIterRoot.create(execCxt), execCxt);
-            patternIterators.add(iter);
-        }
+//        for (Triple triple : orderedPatterns) {
+//            BasicPattern singlePattern = new BasicPattern();
+//            singlePattern.add(triple);
+//            QueryIterator iter = above.execute(singlePattern, QueryIterRoot.create(execCxt), execCxt);
+//            patternIterators.add(iter);
+//        }
 
         // Create the leap frog join iterator with seek capability
-        return new LeapFrogJoinIteratorOptimized(patternIterators, joinVars, execCxt, nodeTable, 
+        return new QueryIterLeapFrogJoin(joinKey, execCxt, nodeTable,
                                                   orderedPatterns, graphNode, filter, nodeTupleTable);
     }
 
@@ -207,57 +204,57 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
      * @return a LeapFrogJoinIteratorOptimized with stats tracking enabled
      * @throws IllegalArgumentException if the BGP has fewer than 2 triples or no join variables
      */
-    public static LeapFrogJoinIteratorOptimized createLeapFrogIterator(
-            BasicPattern bgp, 
-            DatasetGraphTDB dsg, 
+    public static QueryIterLeapFrogJoin createLeapFrogIterator(
+            BasicPattern bgp,
+            DatasetGraphTDB dsg,
             ExecutionContext execCxt) {
-        
+
         List<Triple> triples = bgp.getList();
         if (triples.size() < 2) {
             throw new IllegalArgumentException("BGP must have at least 2 triples for leap frog join");
         }
-        
+
         // Get join variables
-        List<Var> joinVars = findJoinVariables(triples);
-        if (joinVars.isEmpty()) {
+        JoinKey joinKey = findJoinVariables(triples);
+        if (joinKey.isEmpty()) {
             throw new IllegalArgumentException("No common join variables found in BGP");
         }
-        
+
         // Get TDB2 infrastructure
         GraphTDB graphTDB = (GraphTDB) dsg.getDefaultGraph();
         NodeTable nodeTable = graphTDB.getNodeTupleTable().getNodeTable();
         NodeTupleTable nodeTupleTable = graphTDB.getNodeTupleTable();
-        
+
         // Get standard stage generator for executing individual patterns
-        StageGenerator standardSG = StageBuilder.chooseStageGenerator(execCxt.getContext());
-        
+//        StageGenerator standardSG = StageBuilder.chooseStageGenerator(execCxt.getContext());
+
         // Create iterators for each triple pattern
-        List<QueryIterator> patternIterators = new ArrayList<>();
-        for (Triple triple : triples) {
-            BasicPattern single = new BasicPattern();
-            single.add(triple);
-            QueryIterator iter = standardSG.execute(single, QueryIterRoot.create(execCxt), execCxt);
-            patternIterators.add(iter);
-        }
-        
+//        List<QueryIterator> patternIterators = new ArrayList<>();
+//        for (Triple triple : triples) {
+//            BasicPattern single = new BasicPattern();
+//            single.add(triple);
+//            QueryIterator iter = standardSG.execute(single, QueryIterRoot.create(execCxt), execCxt);
+//            patternIterators.add(iter);
+//        }
+
         // Determine graph node (for quad support)
         Node graphNode = null;
         if (nodeTupleTable.getTupleTable().getTupleLen() == 4) {
             graphNode = graphTDB.getGraphName();
         }
-        
+
         // Get filter predicate
         Predicate<Tuple<NodeId>> filter = QC2.getFilter(execCxt.getContext());
-        
+
         // Create and return the leap frog iterator
-        return new LeapFrogJoinIteratorOptimized(
-            patternIterators, 
-            joinVars, 
-            execCxt, 
-            nodeTable, 
-            triples, 
-            graphNode, 
-            filter, 
+        return new QueryIterLeapFrogJoin(
+            // patternIterators,
+            joinKey,
+            execCxt,
+            nodeTable,
+            triples,
+            graphNode,
+            filter,
             nodeTupleTable
         );
     }
@@ -269,9 +266,9 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
      * @param component list of triples to analyze
      * @return list of variables common to all triples
      */
-    public static List<Var> findJoinVariables(List<Triple> component) {
+    public static JoinKey findJoinVariables(List<Triple> component) {
         if (component.size() < 2) {
-            return new ArrayList<>();
+            return JoinKey.empty();
         }
 
         Set<Var> commonVars = null;
@@ -285,26 +282,18 @@ public class StageGeneratorLeapFrogJoin implements StageGenerator {
         }
 
         if (commonVars == null || commonVars.isEmpty()) {
-            return new ArrayList<>();
+            return JoinKey.empty();
         }
 
-        return new ArrayList<>(commonVars);
+        return JoinKey.create(commonVars);
     }
 
     /**
      * Get all variables mentioned in a triple.
      */
     public static Set<Var> tripleVars(Triple triple) {
-        Set<Var> result = new java.util.HashSet<>();
-        if (triple.getSubject().isVariable()) {
-            result.add(Var.alloc(triple.getSubject()));
-        }
-        if (triple.getPredicate().isVariable()) {
-            result.add(Var.alloc(triple.getPredicate()));
-        }
-        if (triple.getObject().isVariable()) {
-            result.add(Var.alloc(triple.getObject()));
-        }
+        Set<Var> result = new HashSet<>();
+        Vars.addVarsFromTriple(result, triple);
         return result;
     }
 }

@@ -1,6 +1,7 @@
 package org.aksw.jenax.arq.util.dataset;
 
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
@@ -64,6 +65,16 @@ public abstract class DatasetGraphWrapperFindBase
     @Override
     public Iterator<Quad> findNG(Node g, Node s, Node p, Node o) {
         return find(true, g, s, p, o);
+    }
+
+    @Override
+    public Stream<Quad> stream() {
+        return Iter.asStream(find());
+    }
+
+    @Override
+    public Stream<Quad> stream(Node g, Node s, Node p, Node o) {
+        return Iter.asStream(find(g, s, p, o));
     }
 
     @Override

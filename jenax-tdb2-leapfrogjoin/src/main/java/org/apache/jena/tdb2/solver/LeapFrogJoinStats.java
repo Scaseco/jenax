@@ -27,7 +27,7 @@ package org.apache.jena.tdb2.solver;
  * This class tracks performance metrics for a single leap frog join execution,
  * including seek operations, merge operations, and index cache usage.
  * <p>
- * The stats object is mutable and is updated by the {@link LeapFrogJoinIteratorOptimized}
+ * The stats object is mutable and is updated by the {@link QueryIterLeapFrogJoin}
  * during query execution. Once the iterator is closed, the stats reflect the final
  * execution metrics and are no longer updated.
  */
@@ -36,18 +36,17 @@ public class LeapFrogJoinStats {
     // Core metrics: seek vs. step operations
     private long seekCount = 0;
     private long stepCount = 0;
-    
+
     // Merge operations: successful joins vs. conflicts
     private long mergeSuccessCount = 0;
     private long mergeFailCount = 0;
-    
+
     // Index cache performance
     private long indexCacheHits = 0;
     private long indexCacheMisses = 0;
-    
+
     // Loop and comparison metrics
     private long iterations = 0;
-    private long totalComparisons = 0;
 
     /**
      * Increment the seek count (B+Tree seek operations).
@@ -96,13 +95,6 @@ public class LeapFrogJoinStats {
      */
     void incrementIterations() {
         iterations++;
-    }
-
-    /**
-     * Add to the total comparison count.
-     */
-    void addComparisons(long count) {
-        totalComparisons += count;
     }
 
     /**
@@ -157,9 +149,9 @@ public class LeapFrogJoinStats {
     /**
      * Get the total number of binding comparisons performed.
      */
-    public long getTotalComparisons() {
-        return totalComparisons;
-    }
+//    public long getTotalComparisons() {
+//        return totalComparisons;
+//    }
 
     /**
      * Get the seek ratio (seeks / total advances).
@@ -222,7 +214,7 @@ public class LeapFrogJoinStats {
                 ", cacheMisses=" + indexCacheMisses +
                 ", cacheHitRatio=" + String.format("%.3f", getCacheHitRatio()) +
                 ", iterations=" + iterations +
-                ", comparisons=" + totalComparisons +
+                // ", comparisons=" + totalComparisons +
                 '}';
     }
 }
