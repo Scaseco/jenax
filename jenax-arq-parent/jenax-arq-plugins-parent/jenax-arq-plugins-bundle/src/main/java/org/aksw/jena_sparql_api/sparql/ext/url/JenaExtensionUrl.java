@@ -13,11 +13,15 @@ public class JenaExtensionUrl {
     public static String ns2 = "http://jsa.aksw.org/fn/iri/";
 
     public static void registerUrlFunctions(String ns) {
-        FunctionRegistry.get().put(ns + "text", E_UrlText.class);
-        FunctionRegistry.get().put(ns + "normalize", E_UrlNormalize.class);
+        FunctionRegistry fnReg = FunctionRegistry.get();
 
-        FunctionRegistry.get().put(ns + "fetch", E_UrlFetch.class);
-        FunctionRegistry.get().put(ns + "fetchSpec", E_UrlFetchSpec.class);
+        fnReg.put(ns + "text", E_UrlText.class);
+        fnReg.put(ns + "normalize", E_UrlNormalize.class);
+
+        fnReg.put(ns + "fetch", E_UrlFetch.class);
+        fnReg.put(ns + "fetchSpec", E_UrlFetchSpec.class);
+
+        fnReg.put(ns + "decode", F_UrlDecode.class);
 
         PropertyFunctionRegistry.get().put(ns + "text", new PropertyFunctionFactoryUrlText());
         PropertyFunctionRegistry.get().put(ns + "textLines", new PropertyFunctionFactoryUrlTextAsLines());
