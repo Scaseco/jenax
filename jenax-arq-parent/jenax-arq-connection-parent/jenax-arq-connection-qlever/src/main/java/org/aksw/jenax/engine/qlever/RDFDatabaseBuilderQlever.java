@@ -37,6 +37,7 @@ import org.aksw.shellgebra.algebra.cmd.transform.CmdOpVisitorToCmdString;
 import org.aksw.shellgebra.algebra.cmd.transform.FileMapper;
 import org.aksw.shellgebra.exec.CmdOpRewriter;
 import org.aksw.shellgebra.exec.SysRuntime;
+import org.aksw.shellgebra.exec.graph.ProcessIoWrapper;
 import org.aksw.shellgebra.exec.graph.ProcessRunner;
 import org.aksw.shellgebra.exec.graph.ProcessRunnerPosix;
 import org.aksw.shellgebra.exec.model.ExecSite;
@@ -45,6 +46,7 @@ import org.aksw.shellgebra.processbuilder.ProcessBuilderDockerRun;
 import org.aksw.vshell.registry.CmdExecSystem;
 import org.aksw.vshell.registry.CmdExecSystem.CmdArgActiveProcessSubstitution;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.jena.atlas.web.ContentType;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.Lang;
@@ -430,13 +432,20 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
                 String workDir = "/data";
                 fileMapper.getBinds().add(new Bind(outputFolder.toAbsolutePath().toString(), new Volume("/data"), AccessMode.rw));
 
-                Process p = ProcessBuilderDockerRun.of(rawCmd).imageRef(finalImageName)
-                        .fileMapper(fileMapper)
-                        .workingDirectory(workDir)
-                        .start(processCxt);
+                Process p = ProcessBuilderDockerRun.of(rawCmd)
+                    .imageRef(finalImageName)
+                    .fileMapper(fileMapper)
+                    .workingDirectory(workDir)
+                    .start(processCxt);
 
-                // Process p = cmdExecSystem.exec(processCxt, fileMapper, execSite);
-                p.waitFor();
+                ProcessIoWrapper.Builder wrapper = ProcessIoWrapper.builder(p);
+                    wrapper.setOutputLineReaderUtf8(logger::info);
+                    wrapper.setErrorLineReaderUtf8(logger::info);
+                    wrapper.setInputGenerator(IOUtils::closeQuietly);
+                    ProcessIoWrapper wrappedP = wrapper.exec();
+
+                processCxt.shutdown();
+                wrappedP.waitFor();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

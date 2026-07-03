@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.util.docker.ContainerPathResolver;
@@ -19,6 +21,8 @@ import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegac
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineFactoryLegacyBase.CloseablePath;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasic;
 import org.aksw.jenax.dataaccess.sparql.factory.datasource.RdfDataSourceSpecBasicFromMap;
+import org.aksw.jenax.engine.qlever.QleverCliProberServer.CliType;
+import org.aksw.jenax.engine.qlever.QleverCliProberServer;
 import org.aksw.jenax.engine.qlever.RdfDatabaseQlever;
 import org.aksw.shellgebra.exec.CmdStrOps;
 import org.aksw.shellgebra.exec.SysRuntimeImpl;
@@ -68,7 +72,7 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         // this.conf = new QleverConfRun();
     }
 
-    public static RDFEngine run(String hostDbDir, String qleverImageName, String qleverImageTag, Integer hostPort, QleverServerConfigPojo conf) throws NumberFormatException, IOException, InterruptedException {
+    public static RDFEngine run(String hostDbDir, String dockerImageName, String serverCommand, Integer hostPort, QleverServerConfigPojo conf) throws NumberFormatException, IOException, InterruptedException {
 
         ContainerPathResolver cpr = ContainerPathResolver.create();
         if (cpr != null) {
@@ -90,13 +94,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         QleverCliUtils.accumulateCliOptions(cmdArgs, conf);
         CmdStrOps strOps = SysRuntimeImpl.forCurrentOs().getStrOps();
         String cmdArgStr = cmdArgs.stream().map(strOps::quoteArg).collect(Collectors.joining(" "));
-        String cmdStr = "ServerMain";
+        String cmdStr = serverCommand;
         if (!cmdArgStr.isEmpty()) {
             cmdStr += " " + cmdArgStr;
         }
 
         logger.info("Generated command line: " + cmdStr);
-        String dockerImageName = QleverConstants.buildDockerImageName(qleverImageName, qleverImageTag);
+        //String dockerImageName = QleverConstants.buildDockerImageName(qleverImageName, qleverImageTag);
 
         // https://hub.docker.com/r/adfreiburg/qlever/tags
         org.testcontainers.containers.GenericContainer<?> container = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
@@ -143,6 +147,9 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             String location = finalDbPath.toString(); // getLocation();
             String qleverImageName = getImageName();
             String qleverImageTag = getImageTag();
+            String finalImageName = QleverConstants.buildDockerImageName(qleverImageName, qleverImageTag);
+
+
             // Integer hostPort = getPort();
             QleverServerConfig conf = getConfig();
 
@@ -177,7 +184,13 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
                 }
             }
 
-            result = run(location, qleverImageName, qleverImageTag, hostPort, finalConf);
+            Optional<CliType> cliVersion = QleverCliProberServer.probe(finalImageName);
+            if (cliVersion.isEmpty()) {
+                throw new RuntimeException("Could not detect index builder command in " + finalImageName + " - known types: " + Arrays.asList(QleverCliProberServer.CliType.values()));
+            }
+            String serverCommand = cliVersion.get().getCommandName();
+
+            result = run(location, finalImageName, serverCommand, hostPort, finalConf);
             result = RDFEngines.decorate(result).addCloseAction(partialCloseAction).build();
             // result = RdfDataEngines.wrapWithCloseAction(result, partialCloseAction);
         } catch (Throwable e) {

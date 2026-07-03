@@ -32,13 +32,15 @@ public class QleverCliProberIndexBuilder {
     /** Probe for the index builder cli */
     public static Optional<CliType> probe(String imageName) {
         Objects.requireNonNull(imageName);
+        Optional<CliType> result;
         if (isVersion2(imageName)) {
-            return Optional.of(CliType.QleverIndex);
+            result = Optional.of(CliType.QleverIndex);
         } else if (isVersion1(imageName)) {
-            return Optional.of(CliType.IndexBuilderMain);
+            result = Optional.of(CliType.IndexBuilderMain);
         } else {
-            return Optional.empty();
+            result = Optional.empty();
         }
+        return result;
     }
 
     private static boolean isVersion2(String imageName) {
@@ -66,7 +68,7 @@ public class QleverCliProberIndexBuilder {
     }
 
 
-    private static ExecResult exec(String imageName, String... command) throws IOException, InterruptedException {
+    static ExecResult exec(String imageName, String... command) throws IOException, InterruptedException {
         // docker run -it --rm -u $(id -u):$(id -g) -v $(pwd):/data -w /data adfreiburg/qlever:latest "qlever index --help"
         Path path = Files.createTempDirectory("qlever-file-mapper");
         try {

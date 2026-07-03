@@ -23,11 +23,21 @@ import org.apache.jena.sparql.algebra.Table;
 
 public class TestQleverSystem {
     @Test
-    public void test() throws Exception {
+    public void test_qlever_commit_f59763c() throws Exception{
+        testRDFEngineSystem("qlever:commit-f59763c");
+    }
+
+    @Test
+    public void test_qlever_commit_b7486a3() throws Exception{
+        testRDFEngineSystem("qlever:commit-b7486a3");
+    }
+
+    public void testRDFEngineSystem(String systemName) throws Exception {
         RDFEngineFactoryRegistry registry = RDFEngineFactoryRegistry.get();
 
-        // String systemName = "qlever:commit-f59763c";
-        String systemName = "qlever";
+        // String systemName = "qlever:commit-f59763c"; // should work
+        // String systemName = "qlever";
+        // String systemName = "qlever:" + dockerTag;// commit-b7486a3"; // breaks!!!
 
         try (Closer closer = Closer.create()) {
             try {
