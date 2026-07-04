@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.github.dockerjava.api.model.Ulimit;
+
 import org.aksw.commons.util.docker.ContainerPathResolver;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSetOverPathBase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
@@ -102,6 +104,10 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
         logger.info("Generated command line: " + cmdStr);
         //String dockerImageName = QleverConstants.buildDockerImageName(qleverImageName, qleverImageTag);
 
+        // XXX Make configurable
+        long ULIMIT_SOFT = 65535;
+        long ULIMIT_HARD = 65535;
+
         // https://hub.docker.com/r/adfreiburg/qlever/tags
         org.testcontainers.containers.GenericContainer<?> container = new org.testcontainers.containers.GenericContainer<>(dockerImageName)
             .withWorkingDirectory("/data")
@@ -110,7 +116,10 @@ public class RDFEngineBuilderQlever<X extends RDFEngineBuilderQlever<X>>
             // error "UID 1000 already exists" ~ 2025-01-31
             // .withEnv("UID", Integer.toString(uid))
             // .withEnv("GID", Integer.toString(gid))
-            .withCreateContainerCmdModifier(cmd -> cmd.withUser(uid + ":" + gid))
+            .withCreateContainerCmdModifier(cmd -> {
+                cmd.getHostConfig().withUlimits(List.of(new Ulimit("nofile", ULIMIT_SOFT, ULIMIT_HARD)));
+                cmd.withUser(uid + ":" + gid);
+            })
             .withFileSystemBind(hostDbDir, "/data", BindMode.READ_WRITE)
             .withCommand(new String[]{cmdStr})
             ;
