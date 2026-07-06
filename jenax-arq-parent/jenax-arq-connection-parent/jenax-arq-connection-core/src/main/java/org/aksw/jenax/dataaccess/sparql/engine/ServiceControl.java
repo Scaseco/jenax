@@ -3,6 +3,8 @@ package org.aksw.jenax.dataaccess.sparql.engine;
 public interface ServiceControl {
     void start();
     void stop();
+
+    /** Whether the service is running and healthy. */
     boolean isRunning();
 
 

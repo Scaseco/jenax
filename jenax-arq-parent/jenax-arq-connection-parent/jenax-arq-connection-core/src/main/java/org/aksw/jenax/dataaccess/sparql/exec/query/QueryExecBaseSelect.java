@@ -110,7 +110,7 @@ public abstract class QueryExecBaseSelect
                 }
 
                 if (isClosed) {
-                    this.activeQueryExec.close();
+                    activeQueryExec.close();
                 }
             }
         }

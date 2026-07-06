@@ -85,4 +85,9 @@ public class RDFDatabaseBuilderTDB2<X extends RDFDatabaseBuilderTDB2<X>>
         RDFDatabaseTDB2 result = new RDFDatabaseTDB2(outputPath);
         return result;
     }
+
+    @Override
+    public RDFDatabase getDatabaseView() {
+        return new RDFDatabaseTDB2(outputFolder);
+    }
 }

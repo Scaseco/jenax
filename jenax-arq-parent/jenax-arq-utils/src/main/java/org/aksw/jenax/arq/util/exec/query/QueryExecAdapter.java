@@ -102,5 +102,4 @@ public interface QueryExecAdapter
     default boolean isClosed() {
         throw new UnsupportedOperationException("Not Implemented.");
     }
-
 }

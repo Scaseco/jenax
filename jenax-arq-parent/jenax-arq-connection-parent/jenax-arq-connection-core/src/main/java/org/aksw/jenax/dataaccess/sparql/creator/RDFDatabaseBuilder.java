@@ -69,4 +69,11 @@ public interface RDFDatabaseBuilder<X extends RDFDatabaseBuilder<X>>
      */
     // TODO Should probably return a future to allow for concurrent cancel
     RDFDatabase build() throws IOException, InterruptedException;
+
+    /**
+     *
+     * @return An RDFDatabase with a file set based on the builder's configuration.
+     */
+    // TODO Not sure if the builder is the best place for this method. Perhaps it should be pulled up one level.
+    RDFDatabase getDatabaseView();
 }

@@ -56,10 +56,10 @@ public abstract class QueryExecOverRowSet
         return result;
     }
 
-    @Override
-    public boolean isClosed() {
-        return isClosed;
-    }
+//    @Override
+//    public boolean isClosed() {
+//        return isClosed;
+//    }
 
     @Override
     public void abort() {

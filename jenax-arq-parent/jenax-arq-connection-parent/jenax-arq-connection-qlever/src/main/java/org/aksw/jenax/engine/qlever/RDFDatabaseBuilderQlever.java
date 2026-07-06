@@ -25,6 +25,7 @@ import org.aksw.jena_sparql_api.http.domain.api.RdfEntityInfo;
 import org.aksw.jenax.arq.util.lang.RDFLanguagesEx;
 import org.aksw.jenax.arq.util.prefix.ShortNameMgr;
 import org.aksw.jenax.dataaccess.sparql.creator.FileSet;
+import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabase;
 import org.aksw.jenax.dataaccess.sparql.creator.RDFDatabaseBuilder;
 import org.aksw.jenax.engine.qlever.QleverCliProberIndexBuilder.CliType;
 import org.aksw.jenax.shellgebra.cmd.ArgsBuilderJena;
@@ -292,6 +293,15 @@ public class RDFDatabaseBuilderQlever<X extends RDFDatabaseBuilderQlever<X>>
         String indexName = config.getIndexName();
         String finalIndexName = indexName == null ? "default" : indexName;
         return finalIndexName;
+    }
+
+    @Override
+    public RDFDatabase getDatabaseView() {
+        String finalIndexName = getFinalIndexName();
+        Path outputFolder = config.getOutputFolder();
+        Objects.requireNonNull(outputFolder);
+        Objects.requireNonNull(finalIndexName);
+        return new RdfDatabaseQlever(outputFolder, finalIndexName);
     }
 
     /**
