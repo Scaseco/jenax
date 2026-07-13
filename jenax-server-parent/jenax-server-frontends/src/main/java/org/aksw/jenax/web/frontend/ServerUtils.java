@@ -8,14 +8,14 @@ import java.nio.file.Paths;
 import java.security.ProtectionDomain;
 import java.util.Objects;
 
-import org.eclipse.jetty.ee9.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.ee9.nested.ContextHandler.APIContext;
-import org.eclipse.jetty.ee9.plus.webapp.PlusConfiguration;
-import org.eclipse.jetty.ee9.webapp.JettyWebXmlConfiguration;
-import org.eclipse.jetty.ee9.webapp.MetaInfConfiguration;
-import org.eclipse.jetty.ee9.webapp.WebAppContext;
-import org.eclipse.jetty.ee9.webapp.WebInfConfiguration;
-import org.eclipse.jetty.ee9.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.ee11.annotations.AnnotationConfiguration;
+import org.eclipse.jetty.ee11.plus.webapp.PlusConfiguration;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler.ServletContextApi;
+import org.eclipse.jetty.ee11.webapp.JettyWebXmlConfiguration;
+import org.eclipse.jetty.ee11.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.ee11.webapp.WebAppContext;
+import org.eclipse.jetty.ee11.webapp.WebInfConfiguration;
+import org.eclipse.jetty.ee11.webapp.WebXmlConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.slf4j.Logger;
@@ -130,10 +130,10 @@ public class ServerUtils {
 
         ServletContext servletContext = webAppContext.getServletContext();
         // ee9:
-        APIContext api = (APIContext)servletContext;
+        // APIContext api = (APIContext)servletContext;
 
-        // ee10:
-        // ServletContextApi api = (ServletContextApi)servletContext;
+        // ee10+:
+        ServletContextApi api = (ServletContextApi)servletContext;
 
         // Needed to support spring's ContextLoaderListener
         api.setExtendedListenerTypes(true);

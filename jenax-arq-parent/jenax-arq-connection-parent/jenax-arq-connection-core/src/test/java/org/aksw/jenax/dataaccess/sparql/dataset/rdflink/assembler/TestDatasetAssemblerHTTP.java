@@ -52,7 +52,7 @@ public class TestDatasetAssemblerHTTP {
         server.start();
         int port = server.getPort();
 
-        String queryEndpointUrl = "http://localhost:" + port;
+        String queryEndpointUrl = "http://localhost:" + port + "/data";
 
         String assemblerStr= """
             PREFIX jds: <https://w3id.org/aksw/jena/dataset#>
