@@ -1,7 +1,5 @@
 package org.aksw.jenax.dataaccess.sparql.engine;
 
-import java.util.Optional;
-
 import org.aksw.jenax.dataaccess.sparql.datasource.RDFDataSource;
 import org.aksw.jenax.dataaccess.sparql.factory.dataengine.RDFEngineDecorator;
 import org.aksw.jenax.dataaccess.sparql.linksource.HasRDFLinkSource;
@@ -9,8 +7,11 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 
 /**
  * An RDFEngine represents a running database systems.
+ *
  * It features an {@link RDFLinkSource} to build connections
  * and a {@link #close()} method to shut the system down.
+ *
+ * The engine exposes a {@link RDFLinkSource} which is the client API to connect to the engine.
  *
  * Optionally, an engine may support {@link #getServiceControl()} which can be used
  * to start and stop it.
@@ -32,13 +33,4 @@ import org.aksw.jenax.dataaccess.sparql.linksource.RDFLinkSource;
 public interface RDFEngine
     extends HasRDFLinkSource, HasServiceControl, AutoCloseable
 {
-    /**
-     * An engine may optionally expose a way to start and stop
-     * the underlying service. Note that only a call to
-     * {@link RDFEngine#close()} guarantees to stop the service and
-     * free any resources. Only calling {@link ServiceControl#stop()} is generally
-     * NOT sufficient.
-     */
-    @Override
-    Optional<ServiceControl> getServiceControl();
 }
