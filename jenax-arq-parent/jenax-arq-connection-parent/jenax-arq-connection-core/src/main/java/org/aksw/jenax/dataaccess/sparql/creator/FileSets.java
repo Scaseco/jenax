@@ -25,7 +25,16 @@ public class FileSets {
         }
     }
 
+    /**
+     * Count the files matching the globPattern at the specified path.
+     * Returns 0 if the path does not exist.
+     * Raises an exception if an error occurs.
+     */
     public static long countFlat(Path root, String globPattern) {
+        if (!Files.exists(root)) {
+            return 0;
+        }
+
         long result[] = {0};
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(root, globPattern)) {
             stream.forEach(x -> ++result[0]);

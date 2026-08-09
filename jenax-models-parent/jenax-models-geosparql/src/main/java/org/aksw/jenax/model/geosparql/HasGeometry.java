@@ -1,5 +1,6 @@
 package org.aksw.jenax.model.geosparql;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.aksw.jenax.annotation.reprogen.Iri;
@@ -22,6 +23,13 @@ public interface HasGeometry
     default Geometry addNewGeometry() {
         Geometry result = getModel().createResource().as(Geometry.class);
         addGeometry(result);
+        return result;
+    }
+
+    /** Return one geometry among the available ones or null if there is none. */
+    default Optional<Geometry> getOneGeometry() {
+        Set<Geometry> set = getHasGeometry();
+        Optional<Geometry> result = set.stream().findFirst();
         return result;
     }
 }

@@ -1,7 +1,7 @@
 package org.aksw.jenax.dataaccess.sparql.dataset.engine;
 
-import org.aksw.jenax.dataaccess.sparql.dataset.arq.DsgSparqlExecutor;
-import org.aksw.jenax.dataaccess.sparql.dataset.rdflink.DatasetGraphOverRDFLink;
+import org.aksw.jena.rdflink.dataset.DatasetGraphOverRDFLink;
+import org.aksw.jena.sparql.core.remote.DsgSparqlExecutor;
 import org.aksw.jenax.dataaccess.sparql.engine.RDFEngine;
 import org.apache.jena.rdflink.RDFLink;
 import org.apache.jena.riot.system.PrefixMap;

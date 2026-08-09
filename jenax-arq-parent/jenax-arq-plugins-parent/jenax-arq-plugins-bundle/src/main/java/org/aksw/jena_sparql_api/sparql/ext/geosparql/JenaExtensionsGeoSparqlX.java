@@ -39,7 +39,6 @@ public class JenaExtensionsGeoSparqlX {
         AggregateRegistry.register(
                 GeoSPARQL_URI.GEOF_URI + "h3ToGeom",
                 H3ToGeometryAgg.h3CellIdAccumulatorFactory);
-
     }
 
     public static void loadDefs(FunctionRegistry registry) {
@@ -76,6 +75,7 @@ public class JenaExtensionsGeoSparqlX {
         generator.getTypeByClassOverrides().put(GeometryWrapper.class, WKTDatatype.URI);
 
         binder.registerAll(GeoSparqlExFunctions.class);
+        binder.registerAll(GeoSparqlExWktFunctions.class);
 
         PropertyFunctionRegistry ppfRegistry = PropertyFunctionRegistry.get();
 

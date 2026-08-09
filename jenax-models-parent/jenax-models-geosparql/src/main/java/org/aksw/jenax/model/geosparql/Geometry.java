@@ -6,6 +6,7 @@ import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Inverse;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.geosparql.implementation.vocabulary.GeoSPARQL_URI;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Resource;
@@ -30,6 +31,11 @@ public interface Geometry
         return setAsWKT(wkt.asNode());
     }
 
+    default GeometryWrapper getAsGeometryWrapper() {
+        Node wktNode = getAsWKT();
+        GeometryWrapper w = wktNode != null ? GeometryWrapper.extract(wktNode) : null;
+        return w;
+    }
 
     // TODO GeoJSON, ...
 }

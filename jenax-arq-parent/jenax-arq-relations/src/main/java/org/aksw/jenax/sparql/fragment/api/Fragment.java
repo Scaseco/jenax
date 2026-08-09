@@ -26,6 +26,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.sparql.algebra.Table;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ref.Evaluator;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprLib;
@@ -299,6 +300,17 @@ public interface Fragment
         return ElementUtils.toElementList(getElement());
     }
 
+    /**
+     * If this fragment is based on a table, then return it with the proper projection applied.
+     * Note, that {@link #extractTable()} does not apply projection!
+     */
+    default Table toTable() {
+        Table raw = extractTable();
+        List<Var> projVars = getVars();
+        Evaluator evaluator = FragmentUtils.createEvaluator();
+        Table result = evaluator.project(raw, projVars);
+        return result;
+    }
 
     public static Fragment of(Element element, Var ... vars) {
         return new FragmentImpl(element, List.of(vars));

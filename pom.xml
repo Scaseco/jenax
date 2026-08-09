@@ -73,6 +73,7 @@
 
 		<graphql-over-sparql-engine.version>6.1.0-1-SNAPSHOT</graphql-over-sparql-engine.version>
 		<!-- ee9->servlet-api: 9->5.0.0 10->6.0.2 11->6.1.0 (current: ee11) -->
+		<jena-proxy.version>0.7.0-SNAPSHOT</jena-proxy.version>
 
 		<ee.version>11</ee.version>
 		<jetty.version>12.1.8</jetty.version>
@@ -163,6 +164,12 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.aksw.jena.proxy</groupId>
+				<artifactId>jena-proxy-bom</artifactId>
+				<version>${jena-proxy.version}</version>
+			</dependency>		
+		
 			<!-- jena-geosparql might need to be updated to declare these derby
 			deps -->
 			<dependency>

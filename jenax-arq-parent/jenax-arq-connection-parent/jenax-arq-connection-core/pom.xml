@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>jenax-arq-connection-core</artifactId>
-        <name>jenax-arq-connection-core</name>
+    <name>jenax-arq-connection-core</name>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -15,6 +15,12 @@
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.aksw.jena.proxy</groupId>
+			<artifactId>jena-proxy-dataset-rdflink</artifactId>
+			<version>0.7.0-SNAPSHOT</version>
+		</dependency>		
+
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>

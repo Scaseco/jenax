@@ -7,6 +7,8 @@ import org.aksw.jena_sparql_api.sparql.ext.benchmark.FN_BenchmarkOld;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.FN_SparqlQueryRewrite_ToService;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryBenchmark;
 import org.aksw.jena_sparql_api.sparql.ext.benchmark.PropertyFunctionFactoryExecSelect;
+import org.aksw.jena_sparql_api.sparql.ext.sys.SysMapUtils.FN_SysMapGet;
+import org.aksw.jena_sparql_api.sparql.ext.sys.SysMapUtils.FN_SysMapGetStrict;
 import org.aksw.jenax.arq.functionbinder.FunctionBinder;
 import org.aksw.jenax.arq.functionbinder.FunctionBinders;
 import org.aksw.jenax.norse.term.core.NorseTerms;
@@ -24,6 +26,9 @@ public class JenaExtensionSys {
 
         pfRegistry.put(ns + "benchmark", new PropertyFunctionFactoryBenchmark());
         pfRegistry.put(ns + "execSelect", new PropertyFunctionFactoryExecSelect());
+
+        // Introspection functions.
+        // TODO Protected by ARQSecurity.
         pfRegistry.put(ns + "listFunctions", new PropertyFunctionFactoryListFunctions());
         pfRegistry.put(ns + "listPropertyFunctions", new PropertyFunctionFactoryListPropertyFunctions());
         pfRegistry.put(ns + "listAggregateFunctions", new PropertyFunctionFactoryListAggregateFunctions());
@@ -36,23 +41,25 @@ public class JenaExtensionSys {
         registry.put(ns + "nextLong", E_NextLong.class);
         registry.put(ns + "rscmp", E_CompareResultSet.class);
 
-        // Legacy registrations
-        // registry.put(NorseTermsLambda.fnOf, FN_LambdaOf.class);
-        // registry.put(NorseTermsLambda.fnCall, FN_LambdaCall.class);
-        // registry.put(NorseTermsLambda.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
-
+        // Lambda functions.
         registry.put(NorseTermsLambda.of, FN_LambdaOf.class);
         registry.put(NorseTermsLambda.call, FN_LambdaCall.class);
         registry.put(NorseTermsLambda.retry, FN_Retry.class);
 
-        registry.put(NorseTermsSys.mapComputeIfAbsent, FN_MapComputeIfAbsent.class);
+        // System table.
+        registry.put(NorseTermsSys.tableComputeIfAbsent, FN_TableComputeIfAbsent.class);
 
+        // System map for passing RDF terms (similar to env and properties).
+        registry.put(NorseTermsSys.mapGet, FN_SysMapGet.class);
+        registry.put(NorseTermsSys.mapGetStrict, FN_SysMapGetStrict.class);
+
+        // Environment access.
+        // TODO Add protection using ARQSecurity.symAllowEnvAccess.
         FunctionBinder binder = FunctionBinders.getDefaultFunctionBinder();
         binder.register(ns + "getenv", System.class, "getenv", String.class);
         binder.register(ns + "getProperty", System.class, "getProperty", String.class);
 
-        // binder.register(NorseTerms.NS + "sys.sleep", Thread.class, "sleep", Long.TYPE);
-        // binder.register(NorseTerms.NS + "sys.sleep", NorseSysFunctions.class, "sleep", Long.TYPE);
+        // Other sys functions, such as norse:sys.sleep, norse:sys.threadName, ...
         binder.registerAll(NorseSysFunctions.class);
 
         registry.put(NorseTerms.NS + "sparql.rewrite."+ "toService", FN_SparqlQueryRewrite_ToService.class);

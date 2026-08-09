@@ -38,9 +38,14 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Prologue;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.core.VarExprList;
+import org.apache.jena.sparql.engine.ExecutionContext;
+import org.apache.jena.sparql.engine.ref.Evaluator;
+import org.apache.jena.sparql.engine.ref.EvaluatorFactory;
 import org.apache.jena.sparql.expr.E_Bound;
 import org.apache.jena.sparql.expr.E_Equals;
 import org.apache.jena.sparql.expr.E_If;
@@ -451,5 +456,12 @@ public class FragmentUtils {
         }
 
         return result;
+    }
+
+    public static Evaluator createEvaluator() {
+        DatasetGraph dsg = DatasetGraphFactory.empty();
+        ExecutionContext execCxt = ExecutionContext.create(dsg);
+        Evaluator evaluator = EvaluatorFactory.create(execCxt);
+        return evaluator;
     }
 }

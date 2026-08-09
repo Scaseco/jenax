@@ -18,6 +18,8 @@ import org.apache.jena.sparql.graph.NodeTransform;
 
 public class TableUtils {
 
+    // Note: For operations like project, extend, etc. use Jena's Evaluator and SimpleEvaluator.
+
     public static ResultSet toResultSet(Table table) {
         return ResultSet.adapt(table.toRowSet());
     }

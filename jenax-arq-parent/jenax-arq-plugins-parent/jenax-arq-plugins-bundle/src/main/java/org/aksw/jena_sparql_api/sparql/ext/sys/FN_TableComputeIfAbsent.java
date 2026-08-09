@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
+
 import org.aksw.jenax.arq.datatype.lambda.Lambda;
 import org.aksw.jenax.arq.datatype.lambda.Lambdas;
 import org.apache.jena.sparql.SystemARQ;
@@ -13,10 +16,6 @@ import org.apache.jena.sparql.function.FunctionEnv;
 import org.apache.jena.sparql.util.Context;
 import org.apache.jena.sparql.util.Symbol;
 
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
-
-
 /**
  * A function that returns an RDF term that encapsulates a lambda.
  * The last argument of fn.of is the expression, all prior arguments
@@ -25,11 +24,8 @@ import com.google.common.collect.Tables;
  * <pre>
  * BIND(norse:map.computeIfAbsent('mapId', ?key, lambda) AS ?value)
  * </pre>
- *
- * @author raven
- *
  */
-public class FN_MapComputeIfAbsent
+public class FN_TableComputeIfAbsent
     extends FunctionBase3
 {
     // public static final String tagLambdaOf = "lambdaOf";
@@ -40,7 +36,7 @@ public class FN_MapComputeIfAbsent
     public static Table<NodeValue, NodeValue, NodeValue> getOrCreateTable(Context cxt) {
         Table<NodeValue, NodeValue, NodeValue> result;
         if ((result = cxt.get(symTable)) == null) {
-            synchronized (FN_MapComputeIfAbsent.class) {
+            synchronized (FN_TableComputeIfAbsent.class) {
                 if ((result = cxt.get(symTable)) == null) {
                     result = Tables.newCustomTable(new ConcurrentHashMap<>(), ConcurrentHashMap::new);
                     cxt.set(symTable, result);
@@ -49,7 +45,6 @@ public class FN_MapComputeIfAbsent
         }
         return result;
     }
-
 
     @Override
     protected NodeValue exec(List<NodeValue> args, FunctionEnv env) {
