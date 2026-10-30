@@ -18,7 +18,6 @@
 		<dependency>
 			<groupId>org.aksw.jena.proxy</groupId>
 			<artifactId>jena-proxy-dataset-rdflink</artifactId>
-			<version>0.7.0-SNAPSHOT</version>
 		</dependency>		
 
 		<dependency>
