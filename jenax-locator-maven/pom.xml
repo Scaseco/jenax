@@ -11,11 +11,11 @@
 	<parent>
 		<groupId>org.aksw.jenax</groupId>
 		<artifactId>jenax-parent</artifactId>
-		<version>6.1.0-2-SNAPSHOT</version>
+		<version>6.2.0-1-SNAPSHOT</version>
 	</parent>
 
 	<properties>
-		<mima.version>2.4.43</mima.version>
+		<mima.version>2.4.48</mima.version>
 	</properties>
 
 	<dependencies>

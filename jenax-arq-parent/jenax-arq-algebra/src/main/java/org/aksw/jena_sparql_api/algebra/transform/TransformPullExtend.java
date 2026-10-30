@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.syntax.VarExprListUtils;
-import com.google.common.collect.Sets;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.algebra.Algebra;
@@ -35,6 +34,7 @@ import org.apache.jena.sparql.core.VarExprList;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprList;
 
+import com.google.common.collect.Sets;
 
 /**
  * Pulls up Extend over joins and distinct
@@ -62,7 +62,6 @@ public class TransformPullExtend
         return result;
     }
 
-
     @Override
     public Op transform(OpDisjunction opDisjunction, List<Op> elts) {
         Op result = transformDisjunction(elts, list -> OpUnion.create(list.get(0), list.get(1)));
@@ -80,7 +79,6 @@ public class TransformPullExtend
         }
         return result;
     }
-
 
     @Override
     public Op transform(OpProject opProject, Op subOp) {
@@ -152,7 +150,6 @@ public class TransformPullExtend
 
         return result;
     }
-
 
     @Override
     public Op transform(OpLateral op, Op left, Op right) {
@@ -293,8 +290,6 @@ public class TransformPullExtend
 
         return result;
     }
-
-
 
     public static void main(String[] args) {
         String str = "SELECT * WHERE\n"

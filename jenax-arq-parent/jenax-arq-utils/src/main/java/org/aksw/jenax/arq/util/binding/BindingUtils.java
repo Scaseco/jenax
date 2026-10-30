@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.aksw.jenax.arq.util.node.NodeTransformRenameMap;
 import org.aksw.jenax.arq.util.node.NodeUtils;
@@ -190,6 +191,12 @@ public class BindingUtils {
 
     public static Binding renameKeys(Binding binding, Map<Var, Var> varMap) {
         return NodeTransformLib.transform(binding, NodeTransformRenameMap.create(varMap));
+    }
+
+    public static Binding renameKeyNames(Binding binding, Map<String, String> varNameMap) {
+        Map<Var, Var> varMap = varNameMap.entrySet().stream()
+            .collect(Collectors.toMap(e -> Var.alloc(e.getKey()), e -> Var.alloc(e.getValue())));
+        return renameKeys(binding, varMap);
     }
 
     public static NodeTransform asNodeTransform(Binding binding) {

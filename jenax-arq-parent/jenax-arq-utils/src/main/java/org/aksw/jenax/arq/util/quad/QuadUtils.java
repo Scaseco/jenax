@@ -138,11 +138,11 @@ public class QuadUtils {
      * @return
      */
     public static Quad create(Node[] nodes) {
-        return new Quad(nodes[0], nodes[1], nodes[2], nodes[3]);
+        return Quad.create(nodes[0], nodes[1], nodes[2], nodes[3]);
     }
 
     public static Quad createMatch(Node g, Node s, Node p, Node o) {
-        return new Quad(
+        return Quad.create(
                 NodeUtils.nullToAny(g),
                 NodeUtils.nullToAny(s),
                 NodeUtils.nullToAny(p),
