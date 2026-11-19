@@ -174,7 +174,7 @@ public class LocatorMavenArtifact implements Locator {
             String uri = "urn:mvn:org.aksw.data.text2sparql.2025:dbpedia:1.0.0:nt:dbpedia_2015-10";
             // System.out.println("Exists? " + (mgr.open(uri) != null));
 
-            try (TypedInputStream tis = mgr.open(uri)) {
+            try (TypedInputStream tis = mgr.openEx(uri)) {
                 if (tis != null) {
                     System.out.println("Opened: " + tis.available() + " bytes");
                 }
@@ -185,7 +185,7 @@ public class LocatorMavenArtifact implements Locator {
             String uri = "urn:mvn:org.apache.jena:jena-arq:6.0.0";
             // System.out.println("Exists? " + (locator.open(uri) != null));
 
-            try (TypedInputStream tis = mgr.open(uri)) {
+            try (TypedInputStream tis = mgr.openEx(uri)) {
                 if (tis != null) {
                     System.out.println("Opened: " + tis.available() + " bytes");
                 }

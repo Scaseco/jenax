@@ -10,7 +10,7 @@
   <artifactId>jenax-bom</artifactId> -->
   <groupId>org.aksw.jenax</groupId>
   <artifactId>jenax-parent</artifactId>
-  <version>6.2.0-1-SNAPSHOT</version>
+  <version>6.4.0-1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Unofficial Jena eXtension Components</name>
   <description>Unofficial modular extensions for Apache Jena</description>
@@ -89,7 +89,7 @@
     jakarta.xml; used only by a plugin in jenax-facete-impl -->
 
     <!-- <jena.version>5.4.0</jena.version> -->
-    <jena.version>6.2.0</jena.version>
+    <jena.version>6.4.0-SNAPSHOT</jena.version>
 
     <!-- <jetty.version>9.4.8.v20171121</jetty.version> -->
     <!-- <jetty.version>9.4.18.v20190429</jetty.version> -->
@@ -165,9 +165,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.aksw.jena.proxy</groupId>
-        <artifactId>jena-proxy-bom</artifactId>
-        <version>${jena-proxy.version}</version>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -225,11 +225,10 @@
         <type>pom</type>
       </dependency>
 
-
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-framework-bom</artifactId>
-        <version>${spring.version}</version>
+        <groupId>org.aksw.jena.proxy</groupId>
+        <artifactId>jena-proxy-bom</artifactId>
+        <version>${jena-proxy.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

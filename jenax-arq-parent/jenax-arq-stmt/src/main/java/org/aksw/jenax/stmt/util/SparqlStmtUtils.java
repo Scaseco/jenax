@@ -335,7 +335,7 @@ public class SparqlStmtUtils {
                 ( httpClient == null ) ? WebContent.defaultRDFAcceptHeader : null;
             in = HttpOp.httpGet(urlStr, acceptHeader);
         } else {
-            in = streamManager.open(urlStr);
+            in = streamManager.openEx(urlStr);
         }
 
         return in;
